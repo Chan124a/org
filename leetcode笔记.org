@@ -1,0 +1,333 @@
+* 优先队列
+1046题
+#+BEGIN_SRC c++
+#include <queue>
+//升序队列
+priority_queue <int,vector<int>,greater<int> > q;
+//降序队列
+priority_queue <int,vector<int>,less<int> >q;
+#+END_SRC
+* 多维数组的定义
+#+BEGIN_SRC c++
+//二维
+vector<vector<int>> a;
+
+//三维
+vector< vector< vector<int> > > b;
+#+END_SRC
+* 数组的初始化
+#+BEGIN_SRC c++
+//一维
+vector<int> a(5,1)  //定义了5维数组,其中的值都为1
+//二维
+vector<vector<int>> a(5，vector<int>(2,1)) //定义了二维数组，第一个维度为5，第二个维度里的每一个数组的维度都为2，值都为1
+//三维
+vector<vector<vector<int>>> dp(2, vector<vector<int>>(3, vector<int>(4, 5)));
+#+END_SRC
+* multiset
+set和multiset会根据特定的排序准则，自动将元素进行排序。不同的是后者允许元素重复而前者不允许。
+#+BEGIN_SRC c++
+#include <set>
+multiset<int> st;
+#+END_SRC
+和所有关联式容器类似，通常使用平衡二叉树完成。事实上，set和multiset通常以红黑树实作而成。
+
+自动排序的优点是使得搜寻元素时具有良好的性能，具有对数时间复杂度。但是造成的一个缺点就是：
+- 不能直接改变元素值。因为这样会打乱原有的顺序。
+- 改变元素值的方法是：先删除旧元素，再插入新元素。
+- 存取元素只能通过迭代器，从迭代器的角度看，元素值是常数。
+
+* 快速排序
+记得要从右边开始循环
+
+下面这种快速选择的算法也是可以参考的(第215题)：
+#+BEGIN_SRC c++
+int search(vector<int>& nums, int left, int right) {
+        int x = rand() % (right - left + 1) + left; //随机化选择
+        swap(nums[x], nums[left]);
+        int p = nums[left];
+        int j = left;
+        for (int i = left+1; i<=right; i++)
+        {
+            if (nums[i] < p) {
+                j++;
+                swap(nums[j], nums[i]);
+            }
+        }
+        swap(nums[j], nums[left]);
+        return j;
+    }
+#+END_SRC
+
+* 随机化
+srand()是给随机数产生器一个种子，time(NULL)就是把当前的时间值作为种子。
+要取得[a,b)的随机整数，使用 ~(rand() % (b-a))+ a~;
+要取得[a,b]的随机整数，使用 ~(rand() % (b-a+1))+ a~;
+要取得(a,b]的随机整数，使用 ~(rand() % (b-a))+ a + 1~;
+* c++类型转换
+#+BEGIN_SRC c++
+long long z = static_cast<long long>(nums[right]);
+#+END_SRC
+* KMP算法
+第28题
+#+BEGIN_SRC c++
+class Solution {
+public:
+    void create(vector<int>& next, string needle) {
+        next[0] = -1;
+        int j = -1;
+        for (int i = 1; i < needle.size(); i++)
+        {
+            while (j != -1 && needle[i] != needle[j + 1])j = next[j];
+            if (needle[i] == needle[j + 1])j++;
+            next[i] = j;
+        }
+    }
+    int strStr(string haystack, string needle) {
+        if (needle.size() == 0)return 0;
+        if (haystack.size() == 0)return -1;
+        int n = haystack.size(), m = needle.size();
+        vector<int> next(m);
+        create(next, needle);
+        int j = -1;
+        for (int i = 0; i < n; i++) {
+            while (j != -1 && haystack[i] != needle[j + 1])j = next[j];
+            if (haystack[i] == needle[j + 1])j++;
+            if (j == m - 1)return i - m+1;
+        }
+        return -1;
+    }
+};
+#+END_SRC
+
+* reverse
+#+BEGIN_SRC c++
+//给定 matrix = 
+//[
+//  [1,4,7],
+//  [2,5,8],
+//  [3,6,9]
+//]
+//对其以中轴线进行翻转
+for (auto& row : matrix)
+    reverse(row.begin(), row.end());
+//结果为：
+//[
+//  [7,4,1],
+//  [8,5,2],
+//  [9,6,3]
+//]
+#+END_SRC
+* C++ vector 的 begin()、end()、front()、back() 区别
+一、begin函数
+
+函数原型:
+
+iterator begin();
+
+const_iterator begin();
+
+功能：
+
+返回一个当前vector容器中起始元素的迭代器。
+
+ 
+
+二、end函数
+
+函数原型：
+
+iterator end();
+
+const_iterator end();
+
+功能：
+
+返回一个当前vector容器中末尾元素的迭代器。
+
+ 
+
+三、front函数
+
+函数原型：
+
+reference front();
+
+const_reference front();
+
+功能：
+
+返回当前vector容器中起始元素的引用。
+
+ 
+
+四、back函数
+
+函数原型：
+
+reference back();
+
+const_reference back();
+
+功能：
+
+返回当前vector容器中末尾元素的引用。
+
+leetcode 第56题
+#+BEGIN_SRC c++
+class Solution {
+public:
+    vector<vector<int>> merge(vector<vector<int>>& intervals) {
+        if (intervals.size() == 0)return {};
+        sort(intervals.begin(), intervals.end());
+        vector<vector<int>> merged;
+        for (int i = 0; i < intervals.size(); i++) {
+            int l = intervals[i][0], r = intervals[i][1];
+            if (!merged.size() || merged.back()[1] < l) {
+                merged.push_back({ l,r });
+            }
+            else {
+                merged.back()[1] = max(merged.back()[1], r);
+            }
+        }
+        return merged;
+    }
+};
+#+END_SRC
+* 形参传值和传引用运行速度的差异
+C++在做递归回溯算法相关题目时，递归函数形参传值和传引用运行速度有很大的差异。
+
+这是我第79题dfs函数的声明，主要区别是visited和word，一个是传值，一个是传引用。前者执行超时，后者在本题是32ms.
+
+个人理解为传值时每次递归调用都要在内存中新建立一个vector 来保存visit传入的值，但是传引用直接在visited原始位置操作，不需要进行新建变量与赋值，节省了代码运行的空间与时间开销。
+#+BEGIN_SRC c++
+void dfs(vector<vector<char>>& board,vector<vector<int>>visited,int x,int y,int n,string word,bool& flag)
+void dfs(vector<vector<char>>& board,vector<vector<int>>& visited,int x,int y,int n
+#+END_SRC
+
+* map的迭代器用法
+第90题
+#+BEGIN_SRC c++
+class Solution {
+public:
+    vector<vector<int>> subsetsWithDup(vector<int>& nums) {
+        map<int,int> num;
+        for (int i = 0; i < nums.size(); i++)
+        {
+            num[nums[i]]++;
+        }
+        vector<vector<int>> ans = { {} };
+        for (auto t : num) {
+            int n = ans.size();
+            for (int i = 0; i < n; i++) {
+                vector<int> temp = ans[i];
+                for (int j = 0; j < t.second; j++)
+                {
+                    temp.push_back(t.first);
+                    ans.push_back(temp);
+                }
+            }
+        }
+        return ans;
+    }
+};
+#+END_SRC
+* 字符串
+** 字符串连接
+ string res = ""
+ 可以用 res+="V" 表示字符串 "V"
+** 关于insert和erase的用法
+#+BEGIN_SRC c++
+class Solution {
+public:
+    vector<string> ans;
+    vector<string> restoreIpAddresses(string s) {
+        string cur = s;
+        int n = s.size();
+        helper(0, -1, n, s, cur);
+        return ans;
+    }
+    void helper(int point_count,int last_point,int n,string &s,string &cur) {
+        if (point_count == 3) {
+            if (check(last_point + 1, n - 1, s)) {
+                ans.push_back(cur);
+            }
+            return;
+        }
+        for (int i = last_point+1; i < n-1; i++)
+        {
+            if (check(last_point + 1, i, s)) {
+                //注意这里Insert加了cur.being(),而后面的erase()没加
+                cur.insert(cur.begin() + i + point_count + 1, '.');
+                helper(point_count + 1, i,n, s, cur);
+                cur.erase(i + point_count + 1, 1);
+            }
+        }
+        return;
+    }
+    bool check(int left, int right, string& s) {
+        int num = 0;
+        for (int i = left; i <=right; i++)
+        {
+            if (s[left] == '0' && left != right)return false;
+            num = num * 10 + s[i] - '0';
+            if (num > 255)return false;
+        }
+        return true;
+    }
+};
+#+END_SRC
+* 用迭代实现二叉树中序遍历
+第94题
+
+核心思想:
+- 使用颜色标记节点的状态，新节点为白色，已访问的节点为灰色。
+- 如果遇到的节点为白色，则将其标记为灰色，然后将其右子节点、自身、左子节点依次入栈。
+- 如果遇到的节点为灰色，则将节点的值输出。
+
+python版本:
+#+BEGIN_SRC python
+class Solution:
+    def inorderTraversal(self, root: TreeNode) -> List[int]:
+        WHITE, GRAY = 0, 1
+        res = []
+        stack = [(WHITE, root)]
+        while stack:
+            color, node = stack.pop()
+            if node is None: continue
+            if color == WHITE:
+                stack.append((WHITE, node.right))
+                stack.append((GRAY, node))
+                stack.append((WHITE, node.left))
+            else:
+                res.append(node.val)
+        return res
+#+END_SRC
+c++版本
+#+BEGIN_SRC c++
+class Solution {
+	vector<int>ans;
+public:
+	vector<int> inorderTraversal(TreeNode* root) {
+		int white = 0;
+		int gray = 1;
+		stack<pair<int, TreeNode*>>s;
+		s.push(make_pair(white,root));
+		while (!s.empty())
+		{
+			int color = s.top().first;
+			TreeNode* t = s.top().second;
+			s.pop();
+			if (t == NULL) continue;
+			if (color == white)
+			{
+				s.push(make_pair(white, t->right));
+				s.push(make_pair(gray, t));
+				s.push(make_pair(white, t->left));
+			}
+			else ans.push_back(t->val);
+		}
+		return ans;
+	}
+};
+#+END_SRC

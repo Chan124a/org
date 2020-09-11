@@ -1,0 +1,252 @@
+#+options: ^:nil
+* 内置方法
+** enumerate()
+#+BEGIN_SRC python
+enumerate(sequence, [start=0])
+#+END_SRC
+*** 参数
+- sequence -- 一个序列、迭代器或其他支持迭代对象。
+- start -- 下标起始位置。
+*** 返回值
+返回 enumerate(枚举) 对象。
+*** 样例
+#+BEGIN_SRC python
+>>>seasons = ['Spring', 'Summer', 'Fall', 'Winter']
+>>> list(enumerate(seasons))
+[(0, 'Spring'), (1, 'Summer'), (2, 'Fall'), (3, 'Winter')]
+>>> list(enumerate(seasons, start=1))       # 下标从 1 开始
+[(1, 'Spring'), (2, 'Summer'), (3, 'Fall'), (4, 'Winter')]
+
+#+END_SRC
+#+BEGIN_SRC python
+>>>seq = ['one', 'two', 'three']
+>>> for i, element in enumerate(seq):
+...     print i, element
+... 
+0 one
+1 two
+2 three
+
+#+END_SRC
+** open
+python open() 函数用于打开一个文件，创建一个 **file** 对象，相关的方法才可以调用它进行读写。
+#+BEGIN_SRC python
+open(name[, mode[, buffering]])
+
+#+END_SRC
+*** 参数
+- name : 一个包含了你要访问的文件名称的字符串值。
+- mode : mode 决定了打开文件的模式：只读，写入，追加等。所有可取值见如下的完全列表。这个参数是非强制的，默认文件访问模式为只读(r)。
+- buffering : 如果 buffering 的值被设为 0，就不会有寄存。如果 buffering 的值取 1，访问文件时会寄存行。如果将 buffering 的值设为大于 1 的整数，表明了这就是的寄存区的缓冲大小。如果取负值，寄存区的缓冲大小则为系统默认。
+
+**** 参考  
+[[https://www.runoob.com/python/python-func-open.html][菜鸟教程]]
+* 条件语句
+** if
+#+BEGIN_SRC python
+if(...):
+    comment...
+
+#+END_SRC
+* 参数
+** 默认参数
+#+BEGIN_SRC python
+def test_defargs(one, two = 2):
+   print 'Required argument: ', one
+   print 'Optional argument: ', two
+
+test_defargs(1)
+# result:
+# Required argument: 1
+# Optional argument: 2
+
+test_defargs(1, 3)
+# result:
+# Required argument: 1
+# Optional argument: 3
+
+#+END_SRC
+** 可变参数
+使用`*args`和`**kwargs`语法.。其中，*args是可变的positional arguments列表，**kwargs是可变的keyword arguments列表。并且，*args必须位于**kwargs之前，因为positional arguments必须位于keyword arguments之前。
+
+下面一个例子使用*args，同时包含一个必须的参数：
+#+BEGIN_SRC python
+def test_args(first, *args):
+   print 'Required argument: ', first
+   for v in args:
+      print 'Optional argument: ', v
+
+test_args(1, 2, 3, 4)
+# result:
+# Required argument: 1
+# Optional argument:  2
+# Optional argument:  3
+# Optional argument:  4
+
+#+END_SRC
+下面一个例子使用*kwargs, 同时包含一个必须的参数和*args列表：
+#+BEGIN_SRC python
+def test_kwargs(first, *args, **kwargs):
+   print 'Required argument: ', first
+   for v in args:
+      print 'Optional argument (*args): ', v
+   for k, v in kwargs.items():
+      print 'Optional argument %s (*kwargs): %s' % (k, v)
+
+test_kwargs(1, 2, 3, 4, k1=5, k2=6)
+# results:
+# Required argument:  1
+# Optional argument (*args):  2
+# Optional argument (*args):  3
+# Optional argument (*args):  4
+# Optional argument k2 (*kwargs): 6
+# Optional argument k1 (*kwargs): 5
+
+#+END_SRC
+*args和**kwargs语法不仅可以在函数定义中使用，同样可以在函数调用的时候使用。不同的是，如果说在函数定义的位置使用*args和**kwargs是一个将参数pack的过程，那么在函数调用的时候就是一个将参数unpack的过程了。下面使用一个例子来加深理解：
+#+BEGIN_SRC python
+def test_args(first, second, third, fourth, fifth):
+    print 'First argument: ', first
+    print 'Second argument: ', second
+    print 'Third argument: ', third
+    print 'Fourth argument: ', fourth
+    print 'Fifth argument: ', fifth
+
+# Use *args
+args = [1, 2, 3, 4, 5]
+test_args(*args)
+# results:
+# First argument:  1
+# Second argument:  2
+# Third argument:  3
+# Fourth argument:  4
+# Fifth argument:  5
+
+# Use **kwargs
+kwargs = {
+    'first': 1,
+    'second': 2,
+    'third': 3,
+    'fourth': 4,
+    'fifth': 5
+}
+
+test_args(**kwargs)
+# results:
+# First argument:  1
+# Second argument:  2
+# Third argument:  3
+# Fourth argument:  4
+# Fifth argument:  5
+
+#+END_SRC
+
+* 类
+Python的类提供了面向对象编程的所有标准特性：类继承机制允许多个基类，派生类可以覆盖它基类的任何方法，一个方法可以调用基类中相同名称的的方法。对象可以包含任意数量和类型的数据。和模块一样，类也拥有 Python 天然的动态特性：它们在运行时创建，可以在创建后修改。
+** 类的定义
+#+BEGIN_SRC python
+class Student(object):
+	pass
+#+END_SRC
+(object)表示该类从哪个类继承下来的，Object类是所有类都会继承的类。
+#+BEGIN_SRC pyhton
+class MyClass:
+    """A simple example class"""
+	i=12345
+    def f(self):
+        return 'hello world'
+#+END_SRC
+** 类对象
+类对象支持两种操作：属性引用和实例化。
+*** 属性引用
+属性引用的标准语法：obj.name,如：MyClass.i和MyClass.f
+
+MyClass.__doc__这也是有效引用，将返回所属类的文档字符串: "A simple example class"
+*** 实例化
+x=MyClass()
+
+__init__是python中的一个内置方法，可以用来初始化类的状态，实际上就是为了能够给类传入参数。没有__init__，就没办法给类传入参数了。
+#+BEGIN_SRC python
+def __init__(self):
+    self.data=[]
+#+END_SRC
+这个可以用来初始化类的状态，实例化时可以不用传入参数。
+#+BEGIN_SRC python
+class Student(object):
+	def __inin__(self,name,score):
+		self.name=name
+		self.score=score
+#+END_SRC
+
+\under\under{}init\under\under{}方法的第一参数永远为self，表示类 *实例* 本身
+
+定义了\under\under{}init\under\under{}方法，创建实例时就不能传入空的参数，必须传入与\under\under{}init\under\under{}匹配的参数，但是self不需要传，python解释器会自己添加。
+#+BEGIN_SRC python
+student=Student("Hugh",99) #实例化
+#+END_SRC
+
+* numpy库 
+** numpy.fromfile
+由一个text或者binary文件创建数组
+#+BEGIN_SRC python
+numpy.fromfile(file, dtype=float, count=-1, sep='', offset=0)
+#+END_SRC
+
+- **file** : file or str or Path
+  Open file object or filename.
+- **dtype** : data-type   
+  Data type of the returned array. For binary files, it is used to determine the size and byte-order of the items in the file.
+- **count** : int
+  Number of items to read. `-1` means all items (i.e., the complete file).
+- **sep** : str
+  Separator between items if file is a text file. Empty (“”) separator means the file should be treated as binary. Spaces (” “) in the separator match zero or more whitespace characters. A separator consisting only of spaces must match at least one whitespace.
+- **offset** : int
+  The offset (in bytes) from the file’s current position. Defaults to 0. Only permitted for binary files.
+* argparse 库
+** ArgumentParser对象
+创建一个ArgumentParser对象
+#+BEGIN_SRC python
+ArgumentParser(prog=None, usage=None, description=None, epilog=None, parents=[], formatter_class=argparse.HelpFormatter, prefix_chars='-', fromfile_prefix_chars=None, argument_default=None, conflict_handler='error', add_help=True, allow_abbrev=True)
+#+END_SRC
+*** 参数
+- prog - 程序的名称（默认：sys.argv[0]）
+- usage - 描述程序用途的字符串（默认值：从添加到解析器的参数生成）
+- description - 在参数帮助文档之前显示的文本（默认值：无）
+- epilog - 在参数帮助文档之后显示的文本（默认值：无）
+- parents - 一个 ArgumentParser 对象的列表，它们的参数也应包含在内
+- formatter_class - 用于自定义帮助文档输出格式的类
+- prefix_chars - 可选参数的前缀字符集合（默认值：'-'）
+- fromfile_prefix_chars - 当需要从文件中读取其他参数时，用于标识文件名的前缀字符集合（默认值：None）
+- argument_default - 参数的全局默认值（默认值： None）
+- conflict_handler - 解决冲突选项的策略（通常是不必要的）
+- add_help - 为解析器添加一个 -h/--help 选项（默认值： True）
+- allow_abbrev - 如果缩写是无歧义的，则允许缩写长选项 （默认值：True）
+**** 参考
+[https://docs.python.org/zh-cn/3/library/argparse.html#prog]
+** add_argument()
+定义单个的命令行参数应当如何解析。
+#+BEGIN_SRC python
+add_argument(name or flags...[, action][, nargs][, const][, default][, type][, choices][, required][, help][, metavar][, dest])
+
+#+END_SRC
+*** 参数
+- name or flags - 一个命名或者一个选项字符串的列表，例如 foo 或 -f, --foo。
+- action - 当参数在命令行中出现时使用的动作基本类型。
+- nargs - 命令行参数应当消耗的数目。
+- const - 被一些 action 和 nargs 选择所需求的常数。
+- default - 当参数未在命令行中出现时使用的值。
+- type - 命令行参数应当被转换成的类型。
+- choices - 可用的参数的容器。
+- required - 此命令行选项是否可省略 （仅选项可用）。
+- help - 一个此选项作用的简单描述。
+- metavar - 在使用方法消息中使用的参数值示例。
+- dest - 被添加到 parse_args() 所返回对象上的属性名。
+** parse_args()
+将参数字符串转换为对象并分配namespace的属性
+#+BEGIN_SRC python
+parse_args(args=None, namespace=None)
+
+#+END_SRC
+*** 参数
+- args - List of strings to parse. The default is taken from sys.argv.
+- namespace - An object to take the attributes. The default is a new empty Namespace object.

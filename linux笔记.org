@@ -1,0 +1,582 @@
+* pip的用法
+#+BEGIN_SRC bash
+sudo pip3 --no-cache-dir --default-timeout=100 install -i https://pypi.tuna.tsinghua.edu.cn/simple torch
+#+END_SRC
+--no-cache-dir：pip下载库时会占用缓存，当文件过大会导致错误，这个选项可以避免该错误
+#+BEGIN_SRC bash
+pip install -r requirements.txt
+#+END_SRC
+-r表示从requirements.txt读取安装列表
+浙大内部镜像：http://mirrors.aliyun.com/
+** socket.timeout: The read operation timed out解决方案
+解决方法：pip --default-timeout=100 install -U tensorflow
+* 远程主机
+** 互传文件
+scp 本地用户名@IP地址:文件名1 远程用户名@IP地址:文件名2 
+
+#[本地用户名@IP地址:]可以不输入
+
+scp -r file username@ip:filepath #参数-r用于传文件夹
+
+1. 从服务器复制文件到本地：
+
+scp root@×××.×××.×××.×××:/data/test.txt /home/myfile/
+
+root@×××.×××.×××.×××   root是目标服务器（有你需要拷贝文件的服务器）的用户名，×××.×××.×××.×××是IP地址，如192.168.1.100，后面紧跟的：不要忘记，/data/test.txt是目标服务器中你要拷贝文件的地址，接一个空格，后面的/home/myfile/是本地接收文件的地址。
+
+2. 从服务器复制文件夹到本地：
+
+scp -r root@×××.×××.×××.×××:/data/ /home/myfile/
+
+只需在前面加-r即可，就可以拷贝整个文件夹。
+
+3. 从本地复制文件到服务器：
+
+scp /home/myfile/test.txt root@192.168.1.100:/data/
+
+4. 从本地复制文件夹到服务器：
+
+scp -r /home/myfile/ root@192.168.1.100:/data/
+* apt-get
+*** 修改源
+1、原文件备份
+ 
+sudo cp /etc/apt/sources.list /etc/apt/sources.list.bak
+ 
+2、编辑源列表文件
+ 
+sudo vim /etc/apt/sources.list
+ 
+3、将原来的列表删除，添加如下内容
+
+阿里云源
+#+BEGIN_EXAMPLE
+deb http://mirrors.aliyun.com/ubuntu/ bionic main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ bionic-security main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ bionic-updates main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ bionic-proposed main restricted universe multiverse
+deb http://mirrors.aliyun.com/ubuntu/ bionic-backports main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ bionic main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ bionic-security main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ bionic-updates main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ bionic-proposed main restricted universe multiverse
+deb-src http://mirrors.aliyun.com/ubuntu/ bionic-backports main restricted universe multiverse
+
+#+END_EXAMPLE
+清华源
+#+BEGIN_EXAMPLE
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic main restricted universe multiverse
+deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic main restricted universe multiverse
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-updates main restricted universe multiverse
+deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-updates main restricted universe multiverse
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-backports main restricted universe multiverse
+deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-backports main restricted universe multiverse
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-security main restricted universe multiverse
+deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-security main restricted universe multiverse
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-proposed main restricted universe multiverse
+deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-proposed main restricted universe multiverse
+#+END_EXAMPLE
+4、更新源
+ 
+更新软件包列表
+sudo apt-get update
+* 虚拟机
+NAT模式下，多个虚拟机都是连接到同一个网关地址
+** ubuntu终端放大缩小
+<Ctrl> + <->减小字号
+<Ctrl> + <Shift> + <+>增大字号
+终端设置
+1、打开终端；
+2、Edit→Profile Preferences
+3、在General里最后一行设置默认大小
+
+Ubuntu快速安装模式中，root用户默认不设置密码，可执行下面的命令为root设置密码
+#+BEGIN_SRC bash
+sudo passwd
+#+END_SRC
+** 硬盘扩容
+1.扩展虚拟机硬盘大小（关机状态才能扩容）
+
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20171225160128418.png @ 2020-06-02 19:14:00
+[[file:%E8%99%9A%E6%8B%9F%E6%9C%BA/2020-06-02_19-14-00_20171225160128418.png]]
+
+2.安装修改文件大小的软件，此软件和Window上的DiskGenius用法相似。
+#+BEGIN_SRC bash
+sudo apt-get install gparted
+#+END_SRC
+
+打开gparted
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20171225160133078.png @ 2020-06-02 19:15:12
+[[file:%E8%99%9A%E6%8B%9F%E6%9C%BA/2020-06-02_19-15-12_20171225160133078.png]]
+
+3.和DiskGenius相同，只有相邻的空间时没有被分配的才能扩展空间大小，所以我们先删除/dev/sda2，保存修改（点击变成绿色的对号）。
+
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20171225160136902.png @ 2020-06-02 19:17:46
+[[file:%E8%99%9A%E6%8B%9F%E6%9C%BA/2020-06-02_19-17-46_20171225160136902.png]]
+
+4./dev/sda1之后的空间都是未分配的空间，我们可以把鼠标放在/dev/sda1，右键
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20171225160140891.png @ 2020-06-02 19:18:34
+[[file:%E8%99%9A%E6%8B%9F%E6%9C%BA/2020-06-02_19-18-34_20171225160140891.png]]
+
+鼠标拖动改变大小，或者直接在New size对应的文本框输入大小。预留部分空间给我们在第三步删除的交换分区。
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20171225160144569.png @ 2020-06-02 19:27:49
+[[file:%E8%99%9A%E6%8B%9F%E6%9C%BA/2020-06-02_19-27-49_20171225160144569.png]]
+
+5.鼠标放在剩余的未分配的空间，创建交换分区，保存修改。
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20171225160148123.png @ 2020-06-02 19:28:52
+[[file:%E8%99%9A%E6%8B%9F%E6%9C%BA/2020-06-02_19-28-52_20171225160148123.png]]
+
+6.sudo fdisk -l，/dev/sda1空间从40G扩展到了58G
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20171225160152672.png @ 2020-06-02 19:39:22
+[[file:%E8%99%9A%E6%8B%9F%E6%9C%BA/2020-06-02_19-39-22_20171225160152672.png]]
+** 解决VM Workstation安装VMware Tools显示灰色的办法
+解决办法如下：
+1.关闭虚拟机；
+
+2.在虚拟机设置分别设置CD/DVD、CD/DVD2和软盘为自动检测三个步骤；
+
+3.再重启虚拟机，灰色字即点亮。
+
+如果上述步骤不行，就执行方法二：
+1.关闭虚拟机；
+
+2.在虚拟机将CD/DVD设置为VMware安装目录中的linux.iso（如ubuntu-16.04.5-desktop-i386.iso）、CD/DVD2设置和CD/DVD一样也是可以的（这里建议设置为自动检测，因为设置为自动检测也是可以的）和和软盘为自动检测三个步骤；
+
+3.再重启虚拟机，灰色字即点亮。
+* jupyter notebook
+** 使用Anaconda安装
+#+BEGIN_SRC bash
+conda install jupyter notebook
+#+END_SRC
+** 使用pip命令安装
+#+BEGIN_SRC python
+pip3 install jupyter #python3.x
+pip install jupyter	#python2.x
+#+END_SRC
+
+6.sudo fdisk -l，/dev/sda1空间从40G扩展到了58G
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20180117102533147.png @ 2020-06-02 19:29:31
+[[file:jupyter_notebook/2020-06-02_19-29-31_20180117102533147.png]]
+
+* 统计文件个数
+统计当前文件夹下文件的个数，包括子文件夹里的
+#+BEGIN_SRC bash
+ls -lR|grep "^-"|wc -l
+#+END_SRC
+统计文件夹下目录的个数，包括子文件夹里的
+#+BEGIN_SRC bash
+ls -lR|grep "^d"|wc -l
+#+END_SRC
+统计当前文件夹下文件的个数
+#+BEGIN_SRC bash
+ls -l |grep "^-"|wc -l
+#+END_SRC
+统计当前文件夹下目录的个数
+#+BEGIN_SRC bash
+ls -l |grep "^d"|wc -l
+#+END_SRC
+附：
+统计输出信息的行数
+#+BEGIN_SRC bash
+wc -l
+#+END_SRC
+将长列表输出信息过滤一部分，只保留一般文件，如果只保留目录就是 ^d
+#+BEGIN_SRC bash
+grep "^-"
+#+END_SRC
+* Linux任务前后台的切换
+Shell支持作用控制，有以下命令实现前后台切换：
+1. command& 让进程在后台运行
+2. jobs 查看后台运行的进程
+3. fg %n 让后台运行的进程n到前台来
+4. bg %n 让进程n到后台去
+5. kill %n 杀死job
+
+PS:"n"为jobs命令查看到的job编号，不是进程编号.
+
+fg、bg、jobs、&、ctrl + z都是跟系统任务有关的，虽然现在基本上不怎么需要用到这些命令，但学会了也是很实用的.
+
+& 最经常被用到,这个用在一个命令的最后，可以把这个命令放到后台执行
+ 
+ctrl + z,可以将一个正在前台执行的命令放到后台，并且暂停
+
+jobs,查看当前有多少在后台运行的命令
+ 
+fg,将后台中的命令调至前台继续运行,如果后台中有多个命令，可以用 fg %jobnumber将选中的命令调出，%jobnumber是通过jobs命令查到的后台正在执行的命令的序号(不是pid)。
+
+bg,将一个在后台暂停的命令，变成继续执行,如果后台中有多个命令，可以用bg %jobnumber将选中的命令调出，%jobnumber是通过jobs命令查到的后台正在执行的命令的序号(不是pid)。
+ 
+** 实例：
+假设你发现前台运行的一个程序需要很长的时间，但是需要干其他的事情，你就可以用 Ctrl-Z ，终止这个程序，然后可以看到系统提示：
+~[1]+ Stopped /root/bin/rsync.sh~
+
+如果没有此提示，则用 jobs 命令查看任务：
+#+BEGIN_SRC bash
+>>>jobs
+[1]+ suspended /root/bin/rsync.sh &
+#+END_SRC
+然后我们可以把程序调度到后台执行：（bg 后面的数字为作业号）
+#+BEGIN_SRC bash
+>>>bg 1
+[1]+ /root/bin/rsync.sh &
+#+END_SRC
+用 jobs 命令查看正在运行的任务：
+#+BEGIN_SRC bash
+>>>jobs
+[1]+ Running /root/bin/rsync.sh &
+#+END_SRC
+如果想把它调回到前台运行，可以用
+#+BEGIN_SRC bash
+>>>fg 1
+/root/bin/rsync.sh
+#+END_SRC
+这样，你在控制台上就只能等待这个任务完成了。 
+* 显示当前GPU使用情况
+Nvidia自带了一个nvidia-smi的命令行工具，会显示显存使用情况：
+#+BEGIN_SRC bash
+>>>nvidia-smi
+#+END_SRC
+
+* 实时查看GPU状况
+1. 显示当前GPU使用情况
+Nvidia自带了一个nvidia-smi的命令行工具，会显示显存使用情况：
+#+BEGIN_SRC python 
+$ nvidia-smi
+#+END_SRC
+
+* 解压缩命令
+#+BEGIN_SRC bash
+#压缩
+tar -jcv -f filename.tar.bz2 要被压缩的文件或目录名称
+#查询
+tar -jtv -f filename.tar.bz2
+#解压缩
+tar -jxv -f filename.tar.bz2 -C 欲解压缩的目录
+#+END_SRC
+
+* 搭建c语言环境
+** gcc和g++的区别
+gcc 最开始的时候是 GNU C Compiler, 如你所知，就是一个c编译器。但是后来因为这个项目里边集成了更多其他不同语言的编译器，GCC就代表 the GNU Compiler Collection，所以表示一堆编译器的合集。
+
+g++则是GCC的c++编译器。现在你在编译代码时调用的gcc，已经不是当初那个c语言编译器了，更确切的说他是一个驱动程序，根据代码的后缀名来判断调用c编译器还是c++编译器 (g++)。比如你的代码后缀是*.c，他会调用c编译器还有linker去链接c的library。如果你的代码后缀是cpp, 他会调用g++编译器，当然library call也是c++版本的。
+** 安装gcc和g++
+#+BEGIN_SRC bash
+sudo apt-get install gcc
+sudo apt-get install gcc
+#+END_SRC
+
+* ubuntu 设置root默认密码（初始密码）
+ubuntu安装好后，root初始密码（默认密码）不知道，需要设置。
+
+1、先用安装时候的用户登录进入系统
+
+2、输入：sudo passwd  按回车
+
+3、输入新密码，重复输入密码，最后提示passwd：password updated sucessfully
+
+此时已完成root密码的设置
+
+4、输入：su root
+
+切换用户到root
+
+* gcc、make、cmake的关系和区别
+1.gcc是GNU Compiler Collection（就是GNU编译器套件），也可以简单认为是编译器，它可以编译很多种编程语言（括C、C++、Objective-C、Fortran、Java等等）。
+
+2.当你的程序只有一个源文件时，直接就可以用gcc命令编译它。
+
+3.但是当你的程序包含很多个源文件时，用gcc命令逐个去编译时，你就很容易混乱而且工作量大
+
+4.所以出现了make工具
+make工具可以看成是一个智能的批处理工具，它本身并没有编译和链接的功能，而是用类似于批处理的方式—通过调用makefile文件中用户指定的命令来进行编译和链接的。
+
+5.makefile是什么？简单的说就像一首歌的乐谱，make工具就像指挥家，指挥家根据乐谱指挥整个乐团怎么样演奏，make工具就根据makefile中的命令进行编译和链接的。
+
+6.makefile命令中就包含了调用gcc（也可以是别的编译器）去编译某个源文件的命令。
+
+7.makefile在一些简单的工程完全可以人工手下，但是当工程非常大的时候，手写makefile也是非常麻烦的，如果换了个平台makefile又要重新修改。
+
+8.这时候就出现了Cmake这个工具，cmake就可以更加简单的生成makefile文件给上面那个make用。当然cmake还有其他功能，就是可以跨平台生成对应平台能用的makefile，你不用再自己去修改了。
+
+9.可是cmake根据什么生成makefile呢？它又要根据一个叫CMakeLists.txt文件（学名：组态档）去生成makefile。
+
+10.到最后CMakeLists.txt文件谁写啊？亲，是你自己手写的。
+
+11.当然如果你用IDE，类似VS这些一般它都能帮你弄好了，你只需要按一下那个三角形
+12.cmake是make maker，生成各种可以直接控制编译过程的控制器的配置文件，比如makefile、各种IDE的配置文件。
+13.make是一个简单的通过文件时间戳控制自动过程、处理依赖关系的软件，这个自动过程可以是编译一个项目。
+
+
+
+* cuda
+** 如何查看显卡支持的CUDA版本
+1. 在开始中找到并打开NVIDIA控制面板，如下图所示。
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/201702141648462427.jpg @ 2020-08-11 23:06:13
+[[file:cuda/2020-08-11_23-06-13_201702141648462427.jpg]]
+
+
+2. 打开NVIDIA控制面板，如下图所示。选择“系统信息”--“组件”，找到NVCUDA.DLL信息显示即为显卡支持的CUDA最高版本。
+
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20170214164846247.jpg @ 2020-08-11 23:01:36
+[[file:cuda/2020-08-11_23-01-36_20170214164846247.jpg]]
+
+3. 在编译caffe时，若显卡的计算能力比较低的话，需要修改caffe-master\windows下的CommonSettings.props的属性表，现有的gpu计算能力参数：有compute_20,sm_20;compute_30,sm_30;compute_35,sm_35;compute_50,sm_50;compute_52,sm_52
+
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20170214174642686.jpg @ 2020-08-11 23:07:19
+[[file:cuda/2020-08-11_23-07-19_20170214174642686.jpg]]
+
+* TensorFlow
+用pip命令
+#+BEGIN_SRC bash
+pip install tensorflow
+#+END_SRC
+
+* 安装Pytorch
+首先安装Anaconda.
+
+然后进入pytorch官网,根据自己的情况进行选择,之后最下方红线位置就会显示你应该输入的安装命令
+
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-06-02_17-33-39.png @ 2020-06-02 17:33:46
+[[file:%E5%AE%89%E8%A3%85Pytorch/2020-06-02_17-33-46_Snipaste_2020-06-02_17-33-39.png]]
+
+
+将得到的命令粘贴到终端窗口中运行即可.
+
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20180117102533147.png @ 2020-06-02 17:28:16
+[[file:%E5%AE%89%E8%A3%85Pytorch/2020-06-02_17-28-16_20180117102533147.png]]
+
+验证pytorch是否安装成功:
+
+terminal内输入python，进入python环境
+然后输入下面的命令:
+#+BEGIN_SRC bash
+import torch
+import torchvision
+#+END_SRC
+
+不报错的话就说明pytorch安装成功了，如图所示
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-06-02_17-29-56.png @ 2020-06-02 17:30:06
+[[file:%E5%AE%89%E8%A3%85Pytorch/2020-06-02_17-30-06_Snipaste_2020-06-02_17-29-56.png]]
+
+如果下载速度很慢的话，可以选择pip方式下载安装,如下图所示
+
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-06-02_17-26-40.png @ 2020-06-02 17:31:43
+[[file:%E5%AE%89%E8%A3%85Pytorch/2020-06-02_17-31-43_Snipaste_2020-06-02_17-26-40.png]]
+
+一般这个pip方式会比较快吧，但如果很不幸，你的pip方式也遇到网络很差的问题，那就下载文件吧……
+
+在浏览器里新建任务，下载链接就是图中命令位置里的链接: [[https://download.............]]  把这个文件下载下来，实在不行去windows上面用迅雷下载这个文件，下载好了之后copy到你的Linux系统上去，然后找到文件位置，直接pip install 文件名
+
+* OpenCV
+** C++接口
+先安装依赖
+#+BEGIN_SRC bash
+sudo apt-get install build-essential
+sudo apt-get install cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev
+sudo apt-get install python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev
+#+END_SRC
+然后，将压缩包解压，我下载我是opencv3.4.3版本，所以最后解压出来的文件夹就是opencv-3.4.3，接着，先用命令行进入该文件夹，然后执行命令，如下所示：
+#+BEGIN_SRC bash
+cd ~/opencv-3.4.3  # 进入opencv文件夹
+mkdir build # 创建build文件夹
+cd build # 进入build文件夹
+
+#cmake指令，如果没有特殊要求建议就选择默认的就可以
+#注意，后面的两个点千万不能省，代表了上级目录
+cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local ..  
+make -j7 # 多线程执行make任务
+
+# 最后一步，安装库文件
+sudo make install
+
+#安装完成
+#+END_SRC
+** python接口
+方法一：用pip命令即可
+#+BEGIN_SRC bash
+pip install opencv-python #安装opencv
+pip install opencv-contrib-python #安装opencv的contrib扩展包
+#+END_SRC
+
+方法二：用conda安装
+#+BEGIN_SRC bash
+conda search opencv #查询一下conda里面可以安装的opencv
+conda install opencv=3.1.0 #根据你想要安装的opencv版本（以3.1.0为例），输入指令
+#+END_SRC
+* Anaconda
+Anaconda（官方网站）就是可以便捷获取包且对包能够进行管理，同时对环境可以统一管理的发行版本。Anaconda包含了conda、Python在内的超过180个科学包及其依赖项。如果日常工作或学习并不必要使用1,000多个库，那么可以考虑安装Miniconda
+** Anaconda、conda、pip、virtualenv的区别
+*** Anaconda
+Anaconda是一个包含180+的科学包及其依赖项的发行版本。其包含的科学包包括：conda, numpy, scipy, ipython notebook等。
+*** conda
+conda是包及其依赖项和环境的管理工具。
+
+- 适用语言：Python, R, Ruby, Lua, Scala, Java, JavaScript, C/C++, FORTRAN。
+
+- 适用平台：Windows, macOS, Linux
+
+- 用途：
+
+(1)快速安装、运行和升级包及其依赖项。
+
+(2)在计算机中便捷地创建、保存、加载和切换环境。
+
+如果你需要的包要求不同版本的Python，你无需切换到不同的环境，因为conda同样是一个环境管理器。仅需要几条命令，你可以创建一个完全独立的环境来运行不同的Python版本，同时继续在你常规的环境中使用你常用的Python版本。——Conda官方网站
+▪ conda为Python项目而创造，但可适用于上述的多种语言。
+
+▪ conda包和环境管理器包含于Anaconda的所有版本当中。
+
+** conda
+ Python的版本比较多，并且它的库也非常广泛，同时库和库之间存在很多依赖关系，所以在库的安装和版本的管理上很麻烦。Conda是一个管理版本和Python环境的工具.
+
+*** 源（channels）管理
+**** 显示所有channel
+#+BEGIN_SRC bash
+conda config --show #显示出所有conda的config信息。
+conda config --show channels #只看channels的信息
+#+END_SRC
+**** 增加源
+#+BEGIN_SRC bash
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/
+conda config --set show_channel_urls yes  # 设置搜索时显示通道地址，这样就可以知道包的安装来源了。
+#+END_SRC
+添加完后，找到 .condarc 文件，删除里面的 defaults，这样能快点。当第一次执行 ~conda config~ 时，会生成配置文件.condarc
+
+
+1、切换为清华源
+#+BEGIN_SRC python
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge 
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/msys2/
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/pytorch/ 
+# 设置搜索时显示通道地址
+conda config --set show_channel_urls yes
+#+END_SRC
+2、切换为中科大源
+#+BEGIN_SRC python
+conda config --add channels https://mirrors.ustc.edu.cn/anaconda/pkgs/main/
+conda config --add channels https://mirrors.ustc.edu.cn/anaconda/pkgs/free/
+conda config --add channels https://mirrors.ustc.edu.cn/anaconda/cloud/conda-forge/
+conda config --add channels https://mirrors.ustc.edu.cn/anaconda/cloud/msys2/
+conda config --add channels https://mirrors.ustc.edu.cn/anaconda/cloud/bioconda/
+conda config --add channels https://mirrors.ustc.edu.cn/anaconda/cloud/menpo/
+conda config --set show_channel_urls yes
+#+END_SRC
+3、切换回默认源
+#+BEGIN_SRC python
+conda config --remove-key channels
+#+END_SRC
+**** 移除镜像
+#+BEGIN_SRC bash
+conda config --remove channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/  #这个命令是为了移除之前conda config --show channels显示的清华源。
+#+END_SRC
+*** Conda的环境管理
+**** 创建环境
+ #+BEGIN_SRC bash
+ #创建一个名为py35的环境，指定Python版本是3.5（不用管是3.5.x，conda会为我们自动寻找3.５.x中的最新版本）
+ conda create --name py35 python=3.5
+ #+END_SRC
+
+**** 激活环境
+ #+BEGIN_SRC bash
+ # 安装好后，使用activate激活某个环境
+ activate py35 # for Windows
+ source activate py35 # for Linux & Mac
+ (py35) user@user-XPS-8920:~$
+ #激活后，会发现terminal输入的地方多了py35的字样，实际上，此时系统做的事情就是把默认2.7环境从PATH中去除，再把3.4对应的命令加入PATH
+ #+END_SRC
+
+**** 返回主环境
+ #+BEGIN_SRC bash
+ # 如果想返回默认的python 2.7环境，运行
+ deactivate py35 # for Windows
+ source deactivate py35 # for Linux & Mac
+ #+END_SRC
+
+**** 删除环境
+ #+BEGIN_SRC bash
+ # 删除一个已有的环境
+ conda remove --name py35 --all
+ #+END_SRC
+
+**** 查看系统中的所有环境
+ 用户安装的不同Python环境会放在~/anaconda/envs目录下。
+
+ 查看当前系统中已经安装了哪些环境，使用:
+ #+BEGIN_SRC bash
+ conda info -e
+ #+END_SRC
+*** Conda的包管理
+**** 安装库
+ 为当前环境安装库
+ #+BEGIN_SRC bash
+ conda install numpy
+ # conda会从从远程搜索numpy的相关信息和依赖项目
+ #+END_SRC
+**** 查看已经安装的库
+ #+BEGIN_SRC bash
+ # 查看已经安装的packages
+ conda list
+ # 最新版的conda是从site-packages文件夹中搜索已经安装的包，可以显示出通过各种方式安装的包
+ #+END_SRC
+**** 查看某个环境的已安装包
+ #+BEGIN_SRC bash
+ # 查看某个指定环境的已安装包
+ conda list -n py35
+ #+END_SRC
+**** 搜索package的信息
+ #+BEGIN_SRC bash
+ # 查找package信息
+ conda search numpy
+ #+END_SRC
+**** 安装package到指定的环境
+ #+BEGIN_SRC bash
+ # 安装package
+ conda install -n py35 numpy
+ # 如果不用-n指定环境名称，则被安装在当前活跃环境
+ # 也可以通过-c指定通过某个channel安装
+ #+END_SRC
+**** 更新package
+ #+BEGIN_SRC bash
+ # 更新package
+ conda update -n py35 numpy
+ #+END_SRC
+**** 删除package
+#+BEGIN_SRC bash
+# 删除package
+conda uninstall xxx   #卸载xxx文件包
+#+END_SRC
+**** 更新conda
+#+BEGIN_SRC bash
+# 更新conda，保持conda最新
+conda update conda
+#+END_SRC
+**** 更新anaconda
+#+BEGIN_SRC bash
+# 更新anaconda
+conda update anaconda
+#+END_SRC
+**** 更新python
+ #+BEGIN_SRC bash
+ #假设当前环境是python 3.5, conda会将python升级为3.5.x系列的当前最新版本
+ conda update python
+ #+END_SRC
+** 使用国内镜像源安装pytorch
+先设置镜像源，如清华的conda镜像
+#+BEGIN_SRC python
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge 
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/msys2/
+conda config --add channels https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/pytorch/
+conda config --set show_channel_urls yes
+#+END_SRC
+官方安装的命令是(版本1.6 CPU)：
+#+BEGIN_SRC bash
+conda install pytorch torchvision cpuonly -c pytorch
+#+END_SRC
+但要用国内源，我发现不能用-c这一段，直接用
+#+BEGIN_SRC bash
+conda install pytorch torchvision cpuonly
+#+END_SRC
+

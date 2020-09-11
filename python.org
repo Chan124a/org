@@ -1,0 +1,3465 @@
+#+OPTIONS: ^:nil
+
+* 基本数据类型
+** 字符串
+字符创用单引号 =‘ ‘= 、双引号 =“ “= 、三引号 =‘‘‘ ‘‘‘= 表示
+
+单引号可以嵌入到双引号和三引号，双引号可以嵌入到三引号里面
+
+三引号可以用于表示分行的字符串
+#+BEGIN_SRC python :results output :exports both
+str2="a 'b' c"
+print(str2) 
+
+str3='''he said:''hello'' '''
+print(str3)
+#+END_SRC
+
+#+RESULTS:
+: a 'b' c
+: he said:''hello'' 
+*** split()方法
+ Python split() 通过指定分隔符对字符串进行切片，如果参数 num 有指定值，则分隔 num+1 个子字符串
+ #+BEGIN_SRC python
+ str.split(str="", num=string.count(str)).
+ #+END_SRC
+ - str -- 分隔符，默认为所有的空字符，包括空格、换行(\n)、制表符(\t)等。
+ - num -- 分割次数。默认为 -1, 即分隔所有。
+**** 例子
+ #+BEGIN_SRC python
+ #!/usr/bin/python
+ # -*- coding: UTF-8 -*-
+ 
+ str = "Line1-abcdef \nLine2-abc \nLine4-abcd";
+ print(str.split());       # 以空格为分隔符，包含 \n
+ print(str.split(' ', 1 )); # 以空格为分隔符，分隔成两个
+ #+END_SRC
+ 以上实例输出结果如下：
+ #+BEGIN_SRC python
+ ['Line1-abcdef', 'Line2-abc', 'Line4-abcd']
+ ['Line1-abcdef', '\nLine2-abc \nLine4-abcd']
+ #+END_SRC
+ 以下实例以 # 号为分隔符，指定第二个参数为 1，返回两个参数列表。
+ #+BEGIN_SRC python
+ #!/usr/bin/python
+ # -*- coding: UTF-8 -*-
+ 
+ txt = "Google#Runoob#Taobao#Facebook"
+ 
+ # 第二个参数为 1，返回两个参数列表
+ x = txt.split("#", 1)
+ 
+ print(x)
+ #+END_SRC
+ 以上实例输出结果如下：
+ #+BEGIN_SRC python
+ ['Google', 'Runoob#Taobao#Facebook']
+ #+END_SRC
+
+** 布尔值
+python中可以直接用 True、False 表示布尔值（请注意大小写），也可以通过布尔运算计算出来。
+** 空值
+python中用None表示空值
+** 列表
+列表的数据项不需要具有相同的类型
+
+创建一个列表，只要把逗号分隔的不同的数据项使用方括号括起来即可。如下所示：
+#+BEGIN_SRC python
+list1 = ['physics', 'chemistry', 1997, 2000]
+list2 = [1, 2, 3, 4, 5 ]
+list3 = ["a", "b", "c", "d"]
+#+END_SRC
+*** Python列表脚本操作符
+列表对 + 和 * 的操作符与字符串相似。+ 号用于组合列表，* 号用于重复列表。
+
+如下所示：
+| Python 表达式                | 结果                         | 描述                 |
+|------------------------------+------------------------------+----------------------|
+| len([1, 2, 3])               | 3                            | 长度                 |
+| [1, 2, 3] + [4, 5, 6]        | [1, 2, 3, 4, 5, 6]           | 组合                 |
+| ['Hi!'] * 4                  | ['Hi!', 'Hi!', 'Hi!', 'Hi!'] | 重复                 |
+| 3 in [1, 2, 3]               | True                         | 元素是否存在于列表中 |
+| for x in [1, 2, 3]: print x, | 1 2 3                        | 迭代                 |
+*** 列表生成式
+列表生成式即List Comprehensions，是Python内置的非常简单却强大的可以用来创建list的生成式。
+
+举个例子，要生成list [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]可以用list(range(1, 11))：
+#+BEGIN_SRC python
+>>> list(range(1, 11))
+[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+#+END_SRC
+但如果要生成[1x1, 2x2, 3x3, ..., 10x10]怎么做？方法一是循环：
+#+BEGIN_SRC python
+>>> L = []
+>>> for x in range(1, 11):
+...    L.append(x * x)
+...
+>>> L
+[1, 4, 9, 16, 25, 36, 49, 64, 81, 100]
+#+END_SRC
+但是循环太繁琐，而列表生成式则可以用一行语句代替循环生成上面的list：
+#+BEGIN_SRC python
+>>> [x * x for x in range(1, 11)]
+[1, 4, 9, 16, 25, 36, 49, 64, 81, 100]
+#+END_SRC
+写列表生成式时，把要生成的元素x * x放到前面，后面跟for循环，就可以把list创建出来，十分有用，多写几次，很快就可以熟悉这种语法。
+
+for循环后面还可以加上if判断，这样我们就可以筛选出仅偶数的平方：
+#+BEGIN_SRC python
+>>> [x * x for x in range(1, 11) if x % 2 == 0]
+[4, 16, 36, 64, 100]
+#+END_SRC
+for循环后面还可以加上if判断，这样我们就可以筛选出仅偶数的平方：
+#+BEGIN_SRC python
+>>> [x * x for x in range(1, 11) if x % 2 == 0]
+[4, 16, 36, 64, 100]
+#+END_SRC
+还可以使用两层循环，可以生成全排列：
+#+BEGIN_SRC python
+>>> [m + n for m in 'ABC' for n in 'XYZ']
+['AX', 'AY', 'AZ', 'BX', 'BY', 'BZ', 'CX', 'CY', 'CZ']
+#+END_SRC
+三层和三层以上的循环就很少用到了。
+
+运用列表生成式，可以写出非常简洁的代码。例如，列出当前目录下的所有文件和目录名，可以通过一行代码实现：
+#+BEGIN_SRC python
+>>> import os # 导入os模块，模块的概念后面讲到
+>>> [d for d in os.listdir('.')] # os.listdir可以列出文件和目录
+['.emacs.d', '.ssh', '.Trash', 'Adlm', 'Applications', 'Desktop', 'Documents', 'Downloads', 'Library', 'Movies', 'Music', 'Pictures', 'Public', 'VirtualBox VMs', 'Workspace', 'XCode']
+#+END_SRC
+for循环其实可以同时使用两个甚至多个变量，比如dict的items()可以同时迭代key和value：
+#+BEGIN_SRC python
+>>> d = {'x': 'A', 'y': 'B', 'z': 'C' }
+>>> for k, v in d.items():
+...     print(k, '=', v)
+...
+y = B
+x = A
+z = C
+#+END_SRC
+因此，列表生成式也可以使用两个变量来生成list：
+#+BEGIN_SRC python
+>>> d = {'x': 'A', 'y': 'B', 'z': 'C' }
+>>> [k + '=' + v for k, v in d.items()]
+['y=B', 'x=A', 'z=C']
+#+END_SRC
+最后把一个list中所有的字符串变成小写：
+#+BEGIN_SRC python
+>>> L = ['Hello', 'World', 'IBM', 'Apple']
+>>> [s.lower() for s in L]
+['hello', 'world', 'ibm', 'apple']
+#+END_SRC
+**** if ... else
+使用列表生成式的时候，有些童鞋经常搞不清楚if...else的用法。
+
+例如，以下代码正常输出偶数：
+#+BEGIN_SRC python
+>>> [x for x in range(1, 11) if x % 2 == 0]
+[2, 4, 6, 8, 10]
+#+END_SRC
+但是，我们不能在最后的if加上else：
+#+BEGIN_SRC python
+>>> [x for x in range(1, 11) if x % 2 == 0 else 0]
+  File "<stdin>", line 1
+    [x for x in range(1, 11) if x % 2 == 0 else 0]
+                                              ^
+SyntaxError: invalid syntax
+#+END_SRC
+这是因为跟在for后面的if是一个筛选条件，不能带else，否则如何筛选？
+
+另一些童鞋发现把if写在for前面必须加else，否则报错：
+#+BEGIN_SRC python
+>>> [x if x % 2 == 0 for x in range(1, 11)]
+  File "<stdin>", line 1
+    [x if x % 2 == 0 for x in range(1, 11)]
+                       ^
+SyntaxError: invalid syntax
+#+END_SRC
+这是因为for前面的部分是一个表达式，它必须根据x计算出一个结果。因此，考察表达式：x if x % 2 == 0，它无法根据x计算出结果，因为缺少else，必须加上else：
+#+BEGIN_SRC python
+>>> [x if x % 2 == 0 else -x for x in range(1, 11)]
+[-1, 2, -3, 4, -5, 6, -7, 8, -9, 10]
+#+END_SRC
+上述for前面的表达式x if x % 2 == 0 else -x才能根据x计算出确定的结果。
+
+可见，在一个列表生成式中，for前面的if ... else是表达式，而for后面的if是过滤条件，不能带else。
+* 基本数据类型转换
+Python 中基本数据类型转换的方法有下面几个。
+
+| 方法                   | 说明                                                  |
+|------------------------+-------------------------------------------------------|
+| int(x [,base ])        | 将x转换为一个整数                                     |
+| float(x )              | 将x转换到一个浮点数                                   |
+| complex(real [,imag ]) | 创建一个复数                                          |
+| str(x )                | 将对象 x 转换为字符串                                 |
+| repr(x )               | 将对象 x 转换为表达式字符串                           |
+| eval(str )             | 用来计算在字符串中的有效 Python 表达式,并返回一个对象 |
+| tuple(s )              | 将序列 s 转换为一个元组                               |
+| list(s )               | 将序列 s 转换为一个列表                               |
+| chr(x )                | 将一个整数转换为一个字符                              |
+| unichr(x )             | 将一个整数转换为 Unicode 字符                         |
+| ord(x )                | 将一个字符转换为它的整数值                            |
+| hex(x )                | 将一个整数转换为一个十六进制字符串                    |
+| oct(x )                | 将一个整数转换为一个八进制字符串                      |
+
+注：在 Python 3 里，只有一种整数类型 int，表示为长整型，没有 python2 中的 Long。
+* 变量
+Python 是不用声明数据类型的。在 Python 中 = 是赋值语句，跟其他的编程语言也是一样的，因为 Python 定义变量时不需要声明数据类型，因此可以把任意的数据类型赋值给变量，且同一个变量可以反复赋值，而且可以是不同的数据类型。
+
+这种变量本身类型不固定的语言称之为动态语言，与之对应的是静态语言。静态语言在定义变量时必须指定变量类型，如果赋值的时候类型不匹配，就会报错。例如 Java 是静态语言。
+** 变量的指向问题
+这个跟c语言是一样的
+#+BEGIN_SRC python :results output :exports both
+a="hello python"
+b=a
+a=123
+print(b)
+#+END_SRC
+
+#+RESULTS:
+: hello python
+** 多个变量赋值
+Python 允许同时为多个变量赋值。例如：
+#+BEGIN_SRC python :results output :exports both
+a = b = c = 1
+#+END_SRC
+
+当然也可以为多个对象指定多个变量。例如：
+#+BEGIN_SRC python :exports both
+a, b, c = 1, 2, "liangdianshui"
+#+END_SRC
+以上实例，两个整型对象 1 和 2 的分配给变量 a 和 b，字符串对象 "liangdianshui" 分配给变量 c。
+* 内置方法
+** enumerate()
+enumerate 函数用于遍历序列中的元素以及它们的下标
+#+BEGIN_SRC python
+enumerate(sequence, [start=0])
+#+END_SRC
+*** 参数
+- sequence -- 一个序列、迭代器或其他支持迭代对象。
+- start -- 下标起始位置。
+*** 返回值
+返回 enumerate(枚举) 对象。
+*** 样例
+#+BEGIN_SRC python
+>>>seasons = ['Spring', 'Summer', 'Fall', 'Winter']
+>>> list(enumerate(seasons))
+[(0, 'Spring'), (1, 'Summer'), (2, 'Fall'), (3, 'Winter')]
+>>> list(enumerate(seasons, start=1))       # 下标从 1 开始
+[(1, 'Spring'), (2, 'Summer'), (3, 'Fall'), (4, 'Winter')]
+
+#+END_SRC
+#+BEGIN_SRC python
+>>>seq = ['one', 'two', 'three']
+>>> for i, element in enumerate(seq):
+...     print i, element
+... 
+0 one
+1 two
+2 three
+
+#+END_SRC
+** open
+python open() 函数用于打开一个文件，创建一个 **file** 对象，相关的方法才可以调用它进行读写。
+#+BEGIN_SRC python
+open(name[, mode[, buffering]])
+#示例
+open(path, "r")
+#+END_SRC
+*** 参数
+- name : 一个包含了你要访问的文件名称的字符串值。
+- mode : mode 决定了打开文件的模式：只读，写入，追加等。所有可取值见如下的完全列表。这个参数是非强制的，默认文件访问模式为只读(r)。
+- buffering : 如果 buffering 的值被设为 0，就不会有寄存。如果 buffering 的值取 1，访问文件时会寄存行。如果将 buffering 的值设为大于 1 的整数，表明了这就是的寄存区的缓冲大小。如果取负值，寄存区的缓冲大小则为系统默认。
+*** 打开文件的模式
+| 模式 | 描述                                                                                                                                                               |
+| r    | 以只读方式打开文件。文件的指针将会放在文件的开头。这是默认模式。                                                                                                   |
+| rb   | 以二进制格式打开一个文件用于只读。文件指针将会放在文件的开头。这是默认模式。                                                                                       |
+| r+   | 打开一个文件用于读写。文件指针将会放在文件的开头。                                                                                                                 |
+| rb+  | 以二进制格式打开一个文件用于读写。文件指针将会放在文件的开头。                                                                                                     |
+| w    | 打开一个文件只用于写入。如果该文件已存在则打开文件，并从开头开始编辑，即原有内容会被删除。如果该文件不存在，创建新文件。                                           |
+| wb   | 以二进制格式打开一个文件只用于写入。如果该文件已存在则打开文件，并从开头开始编辑，即原有内容会被删除。如果该文件不存在，创建新文件。                               |
+| w+   | 打开一个文件用于读写。如果该文件已存在则打开文件，并从开头开始编辑，即原有内容会被删除。如果该文件不存在，创建新文件。                                             |
+| wb+  | 以二进制格式打开一个文件用于读写。如果该文件已存在则打开文件，并从开头开始编辑，即原有内容会被删除。如果该文件不存在，创建新文件。                                 |
+| a    | 打开一个文件用于追加。如果该文件已存在，文件指针将会放在文件的结尾。也就是说，新的内容将会被写入到已有内容之后。如果该文件不存在，创建新文件进行写入。             |
+| ab   | 以二进制格式打开一个文件用于追加。如果该文件已存在，文件指针将会放在文件的结尾。也就是说，新的内容将会被写入到已有内容之后。如果该文件不存在，创建新文件进行写入。 |
+| a+   | 打开一个文件用于读写。如果该文件已存在，文件指针将会放在文件的结尾。文件打开时会是追加模式。如果该文件不存在，创建新文件用于读写。                                 |
+| ab+  | 以二进制格式打开一个文件用于追加。如果该文件已存在，文件指针将会放在文件的结尾。如果该文件不存在，创建新文件用于读写。                                             |
+**** 参考  
+[[https://www.runoob.com/python/python-func-open.html][菜鸟教程]]
+
+*** file 对象方法
+- file.read([size])：size 未指定则返回整个文件，如果文件大小 >2 倍内存则有问题，f.read()读到文件尾时返回""(空字串)。
+- file.readline()：返回一行。
+- file.readlines([size]) ：返回包含size行的列表, size 未指定则返回全部行。
+- for line in f: print line ：通过迭代器访问。
+- f.write("hello\n")：如果要写入字符串以外的数据,先将他转换为字符串。
+- f.tell()：返回一个整数,表示当前文件指针的位置(就是到文件头的比特数)。
+- f.seek(偏移量,[起始位置])：用来移动文件指针。偏移量: 单位为比特，可正可负. 起始位置: 0 - 文件头, 默认值; 1 - 当前位置; 2 - 文件尾
+- f.close() 关闭文件
+** print
+打印 Hello Python ，注意必须加单引号
+#+BEGIN_SRC python
+print ('hello python')
+#+END_SRC
+
+#+RESULTS:
+: None
+** super()
+super() 函数是用于调用父类(超类)的一个方法。
+#+BEGIN_SRC python
+super(type[, object-or-type])
+#+END_SRC
+- type -- 类。
+- object-or-type -- 类，一般是 self
+
+Python3.x 和 Python2.x 的一个区别是: Python 3 可以使用直接使用 super().xxx 代替 super(Class, self).xxx :
+#+BEGIN_SRC python
+#!/usr/bin/python
+# -*- coding: UTF-8 -*-
+ 
+class FooParent(object):
+    def __init__(self):
+        self.parent = 'I\'m the parent.'
+        print ('Parent')
+    
+    def bar(self,message):
+        print ("%s from Parent" % message)
+ 
+class FooChild(FooParent):
+    def __init__(self):
+        # super(FooChild,self) 首先找到 FooChild 的父类（就是类 FooParent），然后把类 FooChild 的对象转换为类 FooParent 的对象
+        super(FooChild,self).__init__()    
+        print ('Child')
+        
+    def bar(self,message):
+        super(FooChild, self).bar(message)
+        print ('Child bar fuction')
+        print (self.parent)
+ 
+if __name__ == '__main__':
+    fooChild = FooChild()
+    fooChild.bar('HelloWorld')
+#+END_SRC
+执行结果：
+#+BEGIN_SRC bash
+Parent
+Child
+HelloWorld from Parent
+Child bar fuction
+I'm the parent.
+#+END_SRC
+* 条件语句
+** if
+#+BEGIN_SRC python
+if(...):
+    comment...
+
+#+END_SRC
+* 三元表达式
+#+BEGIN_SRC python
+a = 1
+b = 2
+h = ""
+#如果if后面的条件成立,则h=a-b,否则h=a+b
+h = a-b if a>b else a+b
+print(h)
+#+END_SRC
+* 参数
+** 默认参数
+#+BEGIN_SRC python
+def test_defargs(one, two = 2):
+   print 'Required argument: ', one
+   print 'Optional argument: ', two
+
+test_defargs(1)
+# result:
+# Required argument: 1
+# Optional argument: 2
+
+test_defargs(1, 3)
+# result:
+# Required argument: 1
+# Optional argument: 3
+
+#+END_SRC
+** 可变参数
+你可以将不定数量的参数传递给一个函数。不定的意思是：预先并不知道, 函数使用者会传递多少个参数给你, 所以在这个场景下使用这两个关键字。其实并不是必须写成 *args 和 **kwargs。  *(星号) 才是必须的. 你也可以写成 *ar  和 **k 。而写成 *args 和**kwargs 只是一个通俗的命名约定。
+
+其中，*args是可变的positional arguments列表，**kwargs是可变的keyword arguments列表。并且，*args必须位于**kwargs之前，因为positional arguments必须位于keyword arguments之前。
+- ~*args~ 表示任何多个无名参数，它本质是一个 tuple
+- ~**kwargs~ 表示关键字参数，它本质上是一个 dict
+
+下面一个例子使用*args，同时包含一个必须的参数：
+#+BEGIN_SRC python
+def test_args(first, *args):
+   print 'Required argument: ', first
+   for v in args:
+      print 'Optional argument: ', v
+
+test_args(1, 2, 3, 4)
+# result:
+# Required argument: 1
+# Optional argument:  2
+# Optional argument:  3
+# Optional argument:  4
+
+#+END_SRC
+下面一个例子使用 ~**kwargs~, 同时包含一个必须的参数和*args列表：
+#+BEGIN_SRC python
+def test_kwargs(first, *args, **kwargs):
+   print 'Required argument: ', first
+   for v in args:
+      print 'Optional argument (*args): ', v
+   for k, v in kwargs.items():
+      print 'Optional argument %s (*kwargs): %s' % (k, v)
+
+test_kwargs(1, 2, 3, 4, k1=5, k2=6)
+# results:
+# Required argument:  1
+# Optional argument (*args):  2
+# Optional argument (*args):  3
+# Optional argument (*args):  4
+# Optional argument k2 (*kwargs): 6
+# Optional argument k1 (*kwargs): 5
+
+#+END_SRC
+~*args~ 和 ~**kwargs~ 语法不仅可以在函数定义中使用，同样可以在函数调用的时候使用。不同的是，如果说在函数定义的位置使用*args和**kwargs是一个将参数pack的过程，那么在函数调用的时候就是一个将参数unpack的过程了。下面使用一个例子来加深理解：
+#+BEGIN_SRC python
+def test_args(first, second, third, fourth, fifth):
+    print('First argument: ', first)
+    print('Second argument: ', second)
+    print('Third argument: ', third)
+    print('Fourth argument: ', fourth)
+    print('Fifth argument: ', fifth)
+
+# Use *args
+args = [1, 2, 3, 4, 5]
+test_args(*args)
+# results:
+# First argument:  1
+# Second argument:  2
+# Third argument:  3
+# Fourth argument:  4
+# Fifth argument:  5
+
+# Use **kwargs
+kwargs = {
+    'first': 1,   #注意这里的first、second等等都要和函数定义里的参数名一样，否则会报错
+    'second': 2,
+    'third': 3,
+    'fourth': 4,
+    'fifth': 5
+}
+
+test_args(**kwargs)
+# results:
+# First argument:  1
+# Second argument:  2
+# Third argument:  3
+# Fourth argument:  4
+# Fifth argument:  5
+
+#+END_SRC
+** positional argument vs keyword argument
+positional argument位置参数，是指用相对位置指代参数。关键字参数（keyword argument），见名知意使用关键字指代参数。
+
+位置参数或者按顺序传递参数，或者使用名字，使用名字时，对顺序没有要求。
+#+BEGIN_SRC python
+def fn(a, b, c=1):
+    return a*b+c
+print(fn(1, 2))          # 3, positional(a, b) and default(c)
+print(fn(1, 2, 3))       # 5, positional(a, b)
+print(fn(c=5, b=2, a=2)) # 9, named(b=2, a=2)
+print(fn(c=5, 1, 2))     # syntax error
+print(fn(b=2, a=2))      # 5, named(b=2, a=2) and default
+print(fn(5, c=2, b=1))   # 7, positional(a), named(b).
+print(fn(8, b=0))        # 1, positional(a), named(b), default(c=1)
+#+END_SRC
+
+* // 与 / 的含义
+在 Python 2.2  ：要引用： from __future__ import division
+  
+" / "就表示 浮点数除法，返回浮点结果;" // "表示整数除法。
+
+Python 3以后  ：
+
+" / "就表示 浮点数除法，返回浮点结果;" // "表示整数除法。
+* Python3 序列解包
+序列解包是 Python 3.0 之后才有的语法。
+** 序列解包
+那什么是序列解包呢？先看一个例子：
+#+BEGIN_SRC bash
+> a, b, c = 1, 2, 3
+> a
+1
+> b
+2
+> c
+3
+#+END_SRC
+这种方法并不限于列表和元组，而是适用于任意序列类型（甚至包括字符串和字节序列）。只要赋值运算符左边的变量数目与序列中的元素数目相等，你都可以用这种方法将元素序列解包到另一组变量中。
+
+可以利用 ~*~ 表达式获取单个变量中的多个元素，只要它的解释没有歧义即可。
+
+~*~ 获取的值默认为 list
+
+获取剩余部分：
+#+BEGIN_SRC bash
+> a, b, *c = 0, 1, 2, 3
+> a
+0
+> b
+1
+> c       
+[2, 3]
+#+END_SRC
+获取中间部分：
+#+BEGIN_SRC bash
+> a, *b, c = 0, 1, 2, 3
+> a
+0
+> b
+[1, 2]
+> c
+3
+#+END_SRC
+如果左值比右值要多，那么带 * 的变量默认为空
+#+BEGIN_SRC bash
+> a, b, *c = 0, 1
+> a
+0
+> b
+1
+> c
+[]
+
+> a, *b, c = 0, 1
+> a
+0
+> b
+[]
+> c
+1
+#+END_SRC
+嵌套解包:
+#+BEGIN_SRC bash
+> (a, b), (c, d) = (1, 2), (3, 4)
+> a
+1
+> b
+2
+> c
+3
+> d
+4
+> a, b, c, d
+(1, 2, 3, 4)
+#+END_SRC
+** 实战例子
+假如一个字符串 'ABCDEFGH'，要输出下列格式:
+#+BEGIN_SRC bash
+A ['B', 'C', 'D', 'E', 'F', 'G', 'H']
+B ['C', 'D', 'E', 'F', 'G', 'H']
+C ['D', 'E', 'F', 'G', 'H']
+D ['E', 'F', 'G', 'H']
+E ['F', 'G', 'H']
+F ['G', 'H']
+G ['H']
+H []
+#+END_SRC
+一般处理过程：
+#+BEGIN_SRC bash
+> s = 'ABCDEFGH'
+> while s:
+     x, s = s[0], list(s[1:])
+     print(x, s)
+
+A ['B', 'C', 'D', 'E', 'F', 'G', 'H']
+B ['C', 'D', 'E', 'F', 'G', 'H']
+C ['D', 'E', 'F', 'G', 'H']
+D ['E', 'F', 'G', 'H']
+E ['F', 'G', 'H']
+F ['G', 'H']
+G ['H']
+H []
+
+#+END_SRC
+使用序列解包的方法：
+#+BEGIN_SRC bash
+> s = 'ABCDEFGH'
+> while s:
+     x, *s = s
+     print(x, s)
+ 
+A ['B', 'C', 'D', 'E', 'F', 'G', 'H']
+B ['C', 'D', 'E', 'F', 'G', 'H']
+C ['D', 'E', 'F', 'G', 'H']
+D ['E', 'F', 'G', 'H']
+E ['F', 'G', 'H']
+F ['G', 'H']
+G ['H']
+H []
+#+END_SRC
+
+* 类
+Python的类提供了面向对象编程的所有标准特性：类继承机制允许多个基类，派生类可以覆盖它基类的任何方法，一个方法可以调用基类中相同名称的的方法。对象可以包含任意数量和类型的数据。和模块一样，类也拥有 Python 天然的动态特性：它们在运行时创建，可以在创建后修改。
+** 类的定义
+#+BEGIN_SRC python
+class Student(object):
+	pass
+#+END_SRC
+(object)表示该类从哪个类继承下来的，Object类是所有类都会继承的类。
+#+BEGIN_SRC pyhton
+class MyClass:
+    """A simple example class"""
+	i=12345
+    def f(self):
+        return 'hello world'
+#+END_SRC
+** 类对象
+类对象支持两种操作：属性引用和实例化。
+*** 属性引用
+属性引用的标准语法：obj.name,如：MyClass.i和MyClass.f
+
+MyClass.__doc__这也是有效引用，将返回所属类的文档字符串: "A simple example class"
+*** 实例化
+x=MyClass()
+
+~__init__~ 是python中的一个内置方法，可以用来初始化类的状态，实际上就是为了能够给类传入参数。没有 ~__init__~ ，就没办法给类传入参数了。
+#+BEGIN_SRC python
+class Student(object):
+        def __init__(self):  #这个可以用来初始化类的状态，实例化时可以不用传入参数。
+                self.data=[]
+#+END_SRC
+
+#+BEGIN_SRC python
+class Student(object):
+	def __inin__(self,name,score):
+		self.name=name
+		self.score=score
+#+END_SRC
+
+\under\under{}init\under\under{}方法的第一参数永远为self，表示类 *实例* 本身
+
+定义了\under\under{}init\under\under{}方法，创建实例时就不能传入空的参数，必须传入与\under\under{}init\under\under{}匹配的参数，但是self不需要传，python解释器会自己添加。
+#+BEGIN_SRC python
+student=Student("Hugh",99) #实例化
+#+END_SRC
+
+* 模块与包
+** 模块简介
+在 Python 中，一个 =.py= 文件就称之为一个模块（Module）
+
+使用模块还可以避免函数名和变量名冲突。相同名字的函数和变量完全可以分别存在不同的模块中，因此，我们自己在编写模块时，不必考虑名字会与其他模块冲突。但是也要注意，尽量不要与内置函数名字冲突。
+
+Python 本身就内置了很多非常有用的模块，比如我的 Python 安装目录是默认的安装目录，在 C:\Users\Administrator\AppData\Local\Programs\Python\Python36 ，然后找到 Lib 目录，就可以发现里面全部都是 =.py= 文件.这些 =.py= 文件就是模块了。
+
+模块可以分为标准库模块和自定义模块，Lib 目录下的都是标准库模块
+** 模块的使用
+*** import
+导入一个模块的方法我们使用的是 import 关键字，这样做是导入了这个模块.这里需要注意了，这样做只是导入了模块，并没有导入模块中具体的某个属性或方法的。
+
+=import= 的语法基本如下：
+#+BEGIN_SRC python
+import module1[, module2[,... moduleN]
+#+END_SRC
+一个模块只会被导入一次，不管你执行了多少次 import。这样可以防止导入模块被一遍又一遍地执行。
+
+当我们使用 import 语句的时候，Python 解释器会根据 Python 的搜索路径去寻找文件.
+
+搜索路径是在 Python 编译或安装的时候确定的，安装新的库应该也会修改。搜索路径被存储在sys 模块中的 path 变量 。事实上，也可以通过定义环境变量的方式来确定搜索路径。
+
+我们可以查一下路径：
+#+BEGIN_SRC python
+#!/usr/bin/env python
+# -*- coding: UTF-8 -*-
+import sys
+print(sys.path)
+#+END_SRC
+
+
+*** from ... import
+from ... import 可以直接导入某个模块中的属性和方法
+
+语法如下:
+#+BEGIN_SRC python
+直接导入某个模块中的属性和方法
+#+END_SRC
+
+*** *** from ··· import *
+这个语句可以把某个模块中的所有方法属性都导入。
+#+BEGIN_SRC python
+#!/usr/bin/env python3
+# -*- coding: UTF-8 -*-
+from sys import *
+print(version)
+print(executable)
+#+END_SRC
+
+* Python中的with-as用法
+** 介绍
+有一些任务，可能事先需要设置，事后做清理工作。对于这种场景，Python的with语句提供了一种非常方便的处理方式。一个很好的例子是文件处理，你需要获取一个文件句柄，从文件中读取数据，然后关闭文件句柄。
+
+如果不用with语句，代码如下：
+#+BEGIN_SRC python
+file = open("/tmp/foo.txt")
+data = file.read()
+file.close()
+#+END_SRC
+这里有两个问题。一是可能忘记关闭文件句柄；二是文件读取数据发生异常，没有进行任何处理。下面是处理异常的加强版本：
+#+BEGIN_SRC python
+file = open("/tmp/foo.txt")
+try:
+    data = file.read()
+finally:
+    file.close()
+#+END_SRC
+虽然这段代码运行良好，但是太冗长了。这时候就是with一展身手的时候了。除了有更优雅的语法，with还可以很好的处理上下文环境产生的异常。下面是with版本的代码：
+#+BEGIN_SRC python
+with open("/tmp/foo.txt") as file:
+    data = file.read()
+#+END_SRC
+** with如何工作
+这看起来充满魔法，但不仅仅是魔法，Python对with的处理还很聪明。基本思想是with所求值的对象必须有一个enter()方法，一个exit()方法。
+
+紧跟with后面的语句被求值后，返回对象的enter()方法被调用，这个方法的返回值将被赋值给as后面的变量。当with后面的代码块全部被执行完之后，将调用前面返回对象的exit()方法。
+
+下面例子可以具体说明with如何工作：
+#+BEGIN_SRC python
+
+#!/usr/bin/env python
+# with_example01.py
+ 
+class Sample:
+    def __enter__(self):
+        print "In __enter__()"
+        return "Foo"
+ 
+    def __exit__(self, type, value, trace):
+        print "In __exit__()"
+ 
+def get_sample():
+    return Sample()
+ 
+with get_sample() as sample:
+    print "sample:", sample
+
+#+END_SRC
+代码输出结果如下：
+#+BEGIN_SRC python
+In __enter__()
+sample: Foo
+In __exit__()
+#+END_SRC
+正如你看到的，
+1. enter()方法被执行
+2. enter()方法返回的值 - 这个例子中是"Foo"，赋值给变量'sample'
+3. 执行代码块，打印变量"sample"的值为 "Foo"
+4. exit()方法被调用
+
+with真正强大之处是它可以处理异常。可能你已经注意到Sample类的exit方法有三个参数- val, type 和 trace。 这些参数在异常处理中相当有用。我们来改一下代码，看看具体如何工作的
+#+BEGIN_SRC python
+#!/usr/bin/env python
+# with_example02.py
+ 
+class Sample:
+    def __enter__(self):
+        return self
+ 
+    def __exit__(self, type, value, trace):
+        print "type:", type
+        print "value:", value
+        print "trace:", trace
+ 
+    def do_something(self):
+        bar = 1/0
+        return bar + 10
+ 
+with Sample() as sample:
+    sample.do_something()
+#+END_SRC
+代码运行结果如下：
+#+BEGIN_SRC python
+bash-3.2$ ./with_example02.py
+type: <type 'exceptions.ZeroDivisionError'>
+value: integer division or modulo by zero
+trace: <traceback object at 0x1004a8128>
+Traceback (most recent call last):
+  File "./with_example02.py", line 19, in <module>
+    sample.do_something()
+  File "./with_example02.py", line 15, in do_something
+    bar = 1/0
+ZeroDivisionError: integer division or modulo by zero
+#+END_SRC
+这个例子中，with后面的get_sample()变成了Sample()。这没有任何关系，只要紧跟with后面的语句所返回的对象有enter()和exit()方法即可。此例中，Sample()的enter()方法返回新创建的Sample对象，并赋值给变量sample。
+
+实际上，在with后面的代码块抛出任何异常时，exit()方法被执行。正如例子所示，异常抛出时，与之关联的type，value和stack trace传给exit()方法，因此抛出的ZeroDivisionError异常被打印出来了。开发库时，清理资源，关闭文件等等操作，都可以放在exit方法当中。
+
+因此，Python的with语句是提供一个有效的机制，让代码更简练，同时在异常产生时，清理工作更简单。
+
+* py文件的两种执行方式
+一个python文件通常有两种使用方法，第一是作为脚本直接执行，第二是 import 到其他的 python 脚本中被调用（模块重用）执行。
+~if __name__== 'main':~ 的作用就是控制这两种情况执行代码的过程，在 ~if __name__== 'main':~ 下的代码只有在第一种情况下（即文件作为脚本直接执行）才会被执行，而 ~import~ 到其他脚本中是不会被执行的。
+
+- 直接执行
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20190510141202522.png @ 2020-06-03 22:00:47
+[[file:py%E6%96%87%E4%BB%B6%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%89%A7%E8%A1%8C%E6%96%B9%E5%BC%8F/2020-06-03_22-00-47_20190510141202522.png]]
+
+直接执行 test.py，结果如下图，可以成功 print 两行字符串。即， ~if __name__=="__main__":~ 语句之前和之后的代码都被执行。
+
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20190510141303114.png @ 2020-06-03 22:00:59
+[[file:py%E6%96%87%E4%BB%B6%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%89%A7%E8%A1%8C%E6%96%B9%E5%BC%8F/2020-06-03_22-00-59_20190510141303114.png]]
+
+- import 执行
+然后在同一文件夹新建名称为 import_test.py 的脚本，输入如下代码：
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20190510141602268.png @ 2020-06-03 22:01:45
+[[file:py%E6%96%87%E4%BB%B6%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%89%A7%E8%A1%8C%E6%96%B9%E5%BC%8F/2020-06-03_22-01-45_20190510141602268.png]]
+
+执行 import_test.py 脚本，输出结果如下：
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20190510141624918.png @ 2020-06-03 22:02:00
+[[file:py%E6%96%87%E4%BB%B6%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%89%A7%E8%A1%8C%E6%96%B9%E5%BC%8F/2020-06-03_22-02-00_20190510141624918.png]]
+
+只输出了第一行字符串。即， ~if __name__=="__main__":~ 之前的语句被执行，之后的没有被执行。
+
+** ~if __name__ == '__main__':~ 的运行原理
+每个python模块（python文件，也就是此处的 test.py 和 import_test.py）都包含内置的变量 ~__name__~ ，当该模块被直接执行的时候， ~__name__~ 等于文件名（包含后缀 .py ）；如果该模块 import 到其他模块中，则该模块的 ~__name__~ 等于模块名称（不包含后缀.py）。
+
+而 ~__main__~ 始终指当前执行模块的名称（包含后缀.py）。进而当模块被直接执行时， ~__name__ == 'main'~ 结果为真。
+
+为了进一步说明，我们在 test.py 脚本的 if __name__=="__main__": 之前加入 print(__name__)，即将 __name__ 打印出来。文件内容和结果如下：
+
+
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20190510142230219.png @ 2020-06-04 08:41:55
+[[file:py%E6%96%87%E4%BB%B6%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%89%A7%E8%A1%8C%E6%96%B9%E5%BC%8F/2020-06-04_08-41-55_20190510142230219.png]]
+
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20190510142253482.png @ 2020-06-04 08:42:02
+[[file:py%E6%96%87%E4%BB%B6%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%89%A7%E8%A1%8C%E6%96%B9%E5%BC%8F/2020-06-04_08-42-02_20190510142253482.png]]
+
+可以看出，此时变量__name__的值为"__main__"。
+
+再执行 import_test.py，执行结果如下：
+
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20190510142441889.png @ 2020-06-04 08:42:40
+[[file:py%E6%96%87%E4%BB%B6%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%89%A7%E8%A1%8C%E6%96%B9%E5%BC%8F/2020-06-04_08-42-40_20190510142441889.png]]
+
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20190510142452571.png @ 2020-06-04 08:42:47
+[[file:py%E6%96%87%E4%BB%B6%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%89%A7%E8%A1%8C%E6%96%B9%E5%BC%8F/2020-06-04_08-42-47_20190510142452571.png]]
+
+此时，test.py中的__name__变量值为 test，不满足 __name__=="__main__" 的条件，因此，无法执行其后的代码。
+* 切片（splice）操作
+** 基本索引
+负数下标索引，即：index可以取为负数，当其为-n时，对倒数第n个元素进行索引。我们用一张表格值观展示a的索引范围。
+| a中元素  |   0 |  1 |  2 |  3 |  4 |  5 |  6 |  7 |  8 |  9 |
+|----------+-----+----+----+----+----+----+----+----+----+----|
+| 非负下标 |   0 |  1 |  2 |  3 |  4 |  5 |  6 |  7 |  8 |  9 |
+| 负数下标 | -10 | -9 | -8 | -7 | -6 | -5 | -4 | -3 | -2 | -1 |
+非负下标索引和负数下标索引共同构成了Python索引的有效范围：​。有效范围的概念对切片的理解非常重要，在基本索引中，索引超出有效范围时会抛出IndexError异常：
+#+BEGIN_SRC python
+>>> a
+ [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+>>> a[-1]
+9
+>>> a[10]
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+IndexError: list index out of range
+>>> a[-11]
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+IndexError: list index out of range
+#+END_SRC
+
+** 简单切片
+简单切片指的是这样的切片形式：a[start:stop]，其行为是得到下标在这样一个前闭后开区间范围内的元素，其中start和stop为负数时，简单看作是负数下标对应的位置即可：
+#+BEGIN_SRC python
+>>> a
+[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+>>> a[2:3]
+[2]
+>>> a[5:9]
+[5, 6, 7, 8]
+>>> a[5:-1]
+[5, 6, 7, 8]
+>>> a[-5:9]
+[5, 6, 7, 8]
+>>> a[-5:-1]
+[5, 6, 7, 8]
+>>> a[-1:-5]
+[]
+#+END_SRC
+** 超出有效索引范围
+当start或stop超出上文提到的有效索引范围​时，切片操作不会抛出异常，而是进行截断。可以这样去理解截断机制：我们假象把索引范围扩充到全体整数，只不过小于​或大于​的区域对应空元素，在这个扩充后的数轴上进行切片，只需把最终结果中的所有空元素忽略即可。
+
+来看几个具体的例子
+#+BEGIN_SRC python
+ >>> a
+[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+>>> a[-100:5]
+[0, 1, 2, 3, 4]
+>>> a[5:100]
+[5, 6, 7, 8, 9]
+>>> a[-100:100]
+[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+>>> a[100:1000]
+[]
+#+END_SRC
+另外，如果start的位置比stop还靠后怎么办？Python还是不会抛出异常，而是直接返回空序列：
+#+BEGIN_SRC python
+>>> a
+[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+>>> a[6:5]
+[]
+#+END_SRC
+** 缺省
+start和stop都是可以缺省的，在缺省的情况下，Python的行为是尽可能取最大区间，具体来说：
+
+按照扩充索引范围的观点，start的缺省值是无穷小(​)，stop的缺省值是无穷大(​)。
+#+BEGIN_SRC python
+>>> a
+[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+>>> a[:5]
+[0, 1, 2, 3, 4]
+>>> a[5:]
+[5, 6, 7, 8, 9]
+>>> a[100:]
+[]
+#+END_SRC
+** 扩展切片
+早期的Python解释器仅支持上述a[start:stop]形式的基本切片，后来加入了下面要介绍的切片形式，扩展切片的名称也流传下来，实际上不用担心，这早已是Python所支持的标准语法。
+
+扩展切片指的是这样的切片形式：a[start:stop:step]，其中step是一个非零整数，即比简单切片多了调整步长的功能，此时切片的行为可概括为：从start对应的位置出发，以step为步长索引序列，直至越过stop对应的位置，且不包括stop本身。事实上，简单切片就是step=1的扩展切片的特殊情况。需要详细解释的是step分别为正数和负数的两种情况。
+
+step 缺省值为1
+*** step为正数
+当step为正数时，切片行为很容易理解，start和stop的截断和缺省规则也与简单切片完全一致：
+#+BEGIN_SRC python
+>>> a
+[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+>>> a[0:6:2]
+[0, 2, 4]
+>>> a[::2]
+[0, 2, 4, 6, 8]
+>>> a[:-2:2]
+[0, 2, 4, 6]
+>>> a[4::2]
+[4, 6, 8]
+>>> a[4::]
+[4, 5, 6, 7, 8, 9]
+#+END_SRC
+*** step为负数
+当step为负数时，切片将其解释为从start出发以步长 |step| 逆序索引序列，此时，start和stop的截断依然遵循前述规则，但缺省发生一点变化，因为我们说过，在缺省的情况下，Python的行为是尽可能取最大区间，此时访问是逆序的，start应尽量取大，stop应尽量取小，才能保证区间最大，因此：
+
+按照扩充索引范围的观点，start的缺省值是无穷大(​)，stop的缺省值是无穷小(​)
+#+BEGIN_SRC python
+>>> a
+[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+>>> a[5::-1]
+[5, 4, 3, 2, 1, 0]
+>>> a[:4:-2]
+[9, 7, 5]
+>>> a[::-1]
+[9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
+#+END_SRC
+* numpy库 
+** numpy.fromfile
+由一个text或者binary文件创建数组
+#+BEGIN_SRC python
+numpy.fromfile(file, dtype=float, count=-1, sep='', offset=0)
+#+END_SRC
+
+- **file** : file or str or Path
+  Open file object or filename.
+- **dtype** : data-type   
+  Data type of the returned array. For binary files, it is used to determine the size and byte-order of the items in the file.
+- **count** : int
+  Number of items to read. `-1` means all items (i.e., the complete file).
+- **sep** : str
+  Separator between items if file is a text file. Empty (“”) separator means the file should be treated as binary. Spaces (” “) in the separator match zero or more whitespace characters. A separator consisting only of spaces must match at least one whitespace.
+- **offset** : int
+  The offset (in bytes) from the file’s current position. Defaults to 0. Only permitted for binary files.
+* ~__future__~ 模块
+from __future__ import division
+导入python未来支持的语言特征division(精确除法)，当我们没有在程序中导入该特征时，"/"操作符执行的是截断除法(Truncating Division),当我们导入精确除法之后，"/"执行的是精确除法，如下所示：
+
+#+BEGIN_SRC bash
+>>> 3/4
+0
+>>> from __future__ import division
+>>> 3/4
+0.75
+#+END_SRC
+
+导入精确除法后，若要执行截断除法，可以使用"//"操作符：
+#+BEGIN_SRC bash
+>>> 3//4
+0
+>>> 
+#+END_SRC
+
+一些将来特征如下：
+
+| feature          | optional in | mandatory in | effect                                             |
+|------------------+-------------+--------------+----------------------------------------------------|
+| nested_scopes    | 2.1.0b1     |          2.2 | PEP 227: Statically Nested Scopes                  |
+| generators       | 2.2.0a1     |          2.3 | PEP 255: Simple Generators                         |
+| division         | 2.2.0a2     |          3.0 | PEP 238: Changing the Division Operator            |
+| absolute_import  | 2.5.0a1     |          2.7 | PEP 328: Imports: Multi-Line and Absolute/Relative |
+| with_statement   | 2.5.0a1     |          2.6 | PEP 343: The “with” Statement                      |
+| print_function   | 2.6.0a2     |          3.0 | PEP 3105: Make print a function                    |
+| unicode_literals | 2.6.0a2     |          3.0 | PEP 3112: Bytes literals in Python 3000            |
+
+PEP：Python Enhancement Proposals
+
+可以在这个地方找到很多PEP：http://www.python.org/dev/peps/ 里面还能看到许多提议的动机
+* argparse 库
+argparse是python的一个命令行解析包.argparse 模块可以让人轻松编写用户友好的命令行接口。程序定义它需要的参数，然后 argparse 将弄清如何从 sys.argv 解析出那些参数。 argparse 模块还会自动生成帮助和使用手册，并在用户给程序传入无效参数时报出错误信息。
+[[rmail:https://docs.python.org/zh-cn/3.10/library/argparse.html#module-argparse][官方中文文档]]
+** 使用示例1
+我们常常可以把argparse的使用简化成下面四个步骤
+
+1. import argparse
+
+2. parser = argparse.ArgumentParser()
+
+3. parser.add_argument()
+
+4. parser.parse_args()
+
+上面四个步骤解释如下：首先导入该模块；然后创建一个解析对象；然后向该对象中添加你要关注的命令行参数和选项，每一个add_argument方法对应一个你要关注的参数或选项；最后调用parse_args()方法进行解析；解析成功之后即可使用。
+
+以下代码是一个 Python 程序，它获取一个整数列表并计算总和或者最大值：
+#+BEGIN_SRC python
+import argparse
+
+parser = argparse.ArgumentParser(description='Process some integers.')
+parser.add_argument('integers', metavar='N', type=int, nargs='+',
+                    help='an integer for the accumulator')
+parser.add_argument('--sum', dest='accumulate', action='store_const',
+                    const=sum, default=max,
+                    help='sum the integers (default: find the max)')
+
+args = parser.parse_args()
+print(args.accumulate(args.integers))
+#+END_SRC
+假设上面的 Python 代码保存在名为 prog.py 的文件中，它可以在命令行运行并提供有用的帮助消息：
+#+BEGIN_SRC bash
+$ python prog.py -h
+usage: prog.py [-h] [--sum] N [N ...]
+
+Process some integers.
+
+positional arguments:
+ N           an integer for the accumulator
+
+optional arguments:
+ -h, --help  show this help message and exit
+ --sum       sum the integers (default: find the max)
+#+END_SRC
+当使用适当的参数运行时，它会输出命令行传入整数的总和或者最大值：
+#+BEGIN_SRC bash
+$ python prog.py 1 2 3 4
+4
+
+$ python prog.py 1 2 3 4 --sum
+10
+#+END_SRC
+如果传入无效参数，则会报出错误：
+#+BEGIN_SRC bash
+$ python prog.py a b c
+usage: prog.py [-h] [--sum] N [N ...]
+prog.py: error: argument N: invalid int value: 'a'
+#+END_SRC
+** 使用示例2
+下面是采用argparse从命令行获取用户名，该python的文件名为： ~fun_test.py~
+#+BEGIN_SRC python
+import argparse
+
+def main():
+    parser = argparse.ArgumentParser(description="Demo of argparse")
+    parser.add_argument('-n','--name', default=' Li ')
+    parser.add_argument('-y','--year', default='20')
+    args = parser.parse_args()
+    print(args)
+    name = args.name
+    year = args.year
+    print('Hello {}  {}'.format(name,year))
+
+if __name__ == '__main__':
+    main()
+#+END_SRC
+在终端执行命令:
+#+BEGIN_SRC bash
+python fun_test.py
+#+END_SRC
+结果如下：
+#+BEGIN_SRC bash
+Namespace(name=' Li ', year='20')
+Hello  Li   20
+#+END_SRC
+在上面的代码中，我们先导入了 ~argparse~ 这个包，然后包中的 ~ArgumentParser~ 类生成一个 ~parser~ 对象（好多博客中把这个叫做参数解析器），其中的 ~description~ 描述这个参数解析器是干什么的，当我们在命令行显示帮助信息的时候会看到 ~description~ 描述的信息。
+
+接着我们通过对象的 ~add_argument~ 函数来增加参数。这里我们增加了两个参数 ~name~ 和 ~year~ ，其中 ~-n,--name~ 表示同一个参数，~default~ 参数表示我们在运行命令时若没有提供参数，程序会将此值当做参数值。
+
+最后采用对象的 ~parse_args~ 获取解析的参数，由上图可以看到， ~Namespace~ 中有两个属性（也叫成员）这里要注意个问题，当 ~-~ 和 ~--~ 同时出现的时候，系统默认后者为参数名，前者不是，但是在命令行输入的时候没有这个区分接下来就是打印参数信息了。
+
+当执行命令：
+#+BEGIN_SRC bash
+python fun_test.py -n chen --year 25
+#+END_SRC
+结果如下：
+#+BEGIN_SRC bash
+Namespace(name='chen', year='25')
+Hello chen  25
+#+END_SRC
+当执行命令 ~python fun_test.py -h~ 可以查看帮助信息
+#+BEGIN_SRC python
+usage: fun_test.py [-h] [-n NAME] [-y YEAR]
+
+Demo of argparse
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -n NAME, --name NAME
+  -y YEAR, --year YEAR
+#+END_SRC
+** ArgumentParser对象
+创建一个ArgumentParser对象
+#+BEGIN_SRC python
+ArgumentParser(prog=None, usage=None, description=None, epilog=None, parents=[], formatter_class=argparse.HelpFormatter, prefix_chars='-', fromfile_prefix_chars=None, argument_default=None, conflict_handler='error', add_help=True, allow_abbrev=True)
+#+END_SRC
+*** 参数
+- prog - 程序的名称（默认：sys.argv[0]）
+- usage - 描述程序用途的字符串（默认值：从添加到解析器的参数生成）
+- description - 在参数帮助文档之前显示的文本（默认值：无）
+- epilog - 在参数帮助文档之后显示的文本（默认值：无）
+- parents - 一个 ArgumentParser 对象的列表，它们的参数也应包含在内
+- formatter_class - 用于自定义帮助文档输出格式的类
+- prefix_chars - 可选参数的前缀字符集合（默认值：'-'）
+- fromfile_prefix_chars - 当需要从文件中读取其他参数时，用于标识文件名的前缀字符集合（默认值：None）
+- argument_default - 参数的全局默认值（默认值： None）
+- conflict_handler - 解决冲突选项的策略（通常是不必要的）
+- add_help - 为解析器添加一个 -h/--help 选项（默认值： True）
+- allow_abbrev - 如果缩写是无歧义的，则允许缩写长选项 （默认值：True）
+**** 参考
+[https://docs.python.org/zh-cn/3/library/argparse.html#prog]
+** add_argument()
+定义单个的命令行参数应当如何解析。给一个 ArgumentParser 添加程序参数信息是通过调用 add_argument() 方法完成的。
+#+BEGIN_SRC python
+add_argument(name or flags...[, action][, nargs][, const][, default][, type][, choices][, required][, help][, metavar][, dest])
+
+#+END_SRC
+*** 参数
+- name or flags - Either a name or a list of option strings, e.g. foo or -f, --foo.选项字符串的名字或者列表，例如 foo 或者 -f, --foo。
+- action - The basic type of action to be taken when this argument is encountered at the command line.命令行遇到参数时的动作，默认值是 store。
+- nargs - The number of command-line arguments that should be consumed.应该读取的命令行参数个数，可以是具体的数字，或者是?号，当不指定值时对于 Positional argument 使用 default，对于 Optional argument 使用 const；或者是 * 号，表示 0 或多个参数；或者是 + 号表示 1 或多个参数。
+- const - A constant value required by some action and nargs selections.action 和 nargs 所需要的常量值。
+- default - The value produced if the argument is absent from the command line.不指定参数时的默认值。
+- type - The type to which the command-line argument should be converted.命令行参数应该被转换成的类型。
+- choices - A container of the allowable values for the argument.参数可允许的值的一个容器。
+- required - Whether or not the command-line option may be omitted (optionals only).
+- help - A brief description of what the argument does.参数的帮助信息，当指定为 argparse.SUPPRESS 时表示不显示该参数的帮助信息.
+- metavar - A name for the argument in usage messages.在 usage 说明中的参数名称，对于必选参数默认就是参数名称，对于可选参数默认是全大写的参数名称.
+- dest - The name of the attribute to be added to the object returned by parse_args().解析后的参数名称，默认情况下，对于可选参数选取最长的名称，中划线转换为下划线.即执行args = parser.parse_args()后可以用arg.xxx 表示参数
+
+*** metavar的作用
+在--help中的参数名称
+
+用于设定在帮助中显示的内容.如下面所示，设定metavar后，打开帮助时，会显示metavar设定的内容
+#+BEGIN_SRC python
+> import argparse
+> parser = argparse.ArgumentParser()
+> parser.add_argument('--foo',metavar='YYY')
+> parser.add_argument('--o')
+> parser.print_help()
+usage: [-h] [--foo YYY] [--o O]
+
+optional arguments:
+  -h, --help  show this help message and exit
+  --foo YYY
+  --o O
+#+END_SRC
+
+*** choices的作用
+限制参数的取值范围。
+
+Some command-line arguments should be selected from a restricted set of values. These can be handled by passing a container object as the choices keyword argument to ~add_argument()~ . When the command line is parsed, argument values will be checked, and an error message will be displayed if the argument was not one of the acceptable values:
+#+BEGIN_SRC python
+>>> parser = argparse.ArgumentParser(prog='game.py')
+>>> parser.add_argument('move', choices=['rock', 'paper', 'scissors'])
+>>> parser.parse_args(['rock'])
+Namespace(move='rock')
+>>> parser.parse_args(['fire'])
+usage: game.py [-h] {rock,paper,scissors}
+game.py: error: argument move: invalid choice: 'fire' (choose from 'rock',
+'paper', 'scissors')
+#+END_SRC
+检查完 ~type~ 后会检查 ~choices~
+
+Note that inclusion in the choices container is checked after any type conversions have been performed, so the type of the objects in the choices container should match the type specified:
+#+BEGIN_SRC python
+>>> parser = argparse.ArgumentParser(prog='doors.py')
+>>> parser.add_argument('door', type=int, choices=range(1, 4))
+>>> print(parser.parse_args(['3']))
+Namespace(door=3)
+>>> parser.parse_args(['4'])
+usage: doors.py [-h] {1,2,3}
+doors.py: error: argument door: invalid choice: 4 (choose from 1, 2, 3)
+#+END_SRC
+
+** parse_args()
+ArgumentParser 通过 parse_args() 方法解析参数。它将检查命令行，把每个参数转换为适当的类型然后调用相应的操作。将参数字符串转换为对象并分配namespace的属性
+
+Convert argument strings to objects and assign them as attributes of the namespace. Return the populated namespace.
+#+BEGIN_SRC python
+parse_args(args=None, namespace=None)
+#+END_SRC
+下面是 parse_args() 不加任何参数的结果
+#+BEGIN_SRC python
+> parser = argparse.ArgumentParser(description="Demo of argparse")
+> parser.add_argument('-n','--name', default=' Li ')
+> parser.add_argument('-y','--year', default='20')
+> args = parser.parse_args()
+> print(args)
+Namespace(name=' Li ', year='20')
+#+END_SRC
+*** 参数
+- args - List of strings to parse. The default is taken from sys.argv.
+- namespace - An object to take the attributes. The default is a new empty Namespace object.
+*** Option value syntax
+对参数赋值的多种方法
+
+The parse_args() method supports several ways of specifying the value of an option (if it takes one). In the simplest case, the option and its value are passed as two separate arguments:
+#+BEGIN_SRC python
+>>> parser = argparse.ArgumentParser(prog='PROG')
+>>> parser.add_argument('-x')
+>>> parser.add_argument('--foo')
+>>> parser.parse_args(['-x', 'X'])  #这种方法要把参数和值放在括号[ ] 里面
+Namespace(foo=None, x='X')
+>>> parser.parse_args(['--foo', 'FOO'])
+Namespace(foo='FOO', x=None)
+#+END_SRC
+For long options (options with names longer than a single character), the option and value can also be passed as a single command-line argument, using = to separate them:
+#+BEGIN_SRC python
+>>> parser.parse_args(['--foo=FOO'])
+Namespace(foo='FOO', x=None)
+#+END_SRC
+For short options (options only one character long), the option and its value can be concatenated:
+#+BEGIN_SRC python
+>>> parser.parse_args(['-xX'])
+Namespace(foo=None, x='X')
+#+END_SRC
+Several short options can be joined together, using only a single - prefix, as long as only the last option (or none of them) requires a value:
+#+BEGIN_SRC python
+>>> parser = argparse.ArgumentParser(prog='PROG')
+>>> parser.add_argument('-x', action='store_true')
+>>> parser.add_argument('-y', action='store_true')
+>>> parser.add_argument('-z')
+>>> parser.parse_args(['-xyzZ'])    #只有最后的z会赋值为Z
+Namespace(x=True, y=True, z='Z')
+#+END_SRC
+*** Invalid arguments
+While parsing the command line, parse_args() checks for a variety of errors, including ambiguous options, invalid types, invalid options, wrong number of positional arguments, etc. When it encounters such an error, it exits and prints the error along with a usage message:
+#+BEGIN_SRC python
+>>> parser = argparse.ArgumentParser(prog='PROG')
+>>> parser.add_argument('--foo', type=int)
+>>> parser.add_argument('bar', nargs='?')
+
+>>> # invalid type
+>>> parser.parse_args(['--foo', 'spam'])
+usage: PROG [-h] [--foo FOO] [bar]
+PROG: error: argument --foo: invalid int value: 'spam'
+
+>>> # invalid option
+>>> parser.parse_args(['--bar'])
+usage: PROG [-h] [--foo FOO] [bar]
+PROG: error: no such option: --bar
+
+>>> # wrong number of arguments
+>>> parser.parse_args(['spam', 'badger'])
+usage: PROG [-h] [--foo FOO] [bar]
+PROG: error: extra arguments found: badger
+#+END_SRC
+*** Arguments containing -
+参数名称包含-，即-x可以表示可选参数x，也可以表示位置参数-x;
+
+The parse_args() method attempts to give errors whenever the user has clearly made a mistake, but some situations are inherently ambiguous. For example, the command-line argument -1 could either be an attempt to specify an option or an attempt to provide a positional argument. The parse_args() method is cautious here: positional arguments may only begin with - if they look like negative numbers and there are no options in the parser that look like negative numbers:
+#+BEGIN_SRC python
+>>> parser = argparse.ArgumentParser(prog='PROG')
+>>> parser.add_argument('-x')
+>>> parser.add_argument('foo', nargs='?')
+
+>>> # no negative number options, so -1 is a positional argument
+>>> parser.parse_args(['-x', '-1'])
+Namespace(foo=None, x='-1')
+
+>>> # no negative number options, so -1 and -5 are positional arguments
+>>> parser.parse_args(['-x', '-1', '-5'])
+Namespace(foo='-5', x='-1')
+
+>>> parser = argparse.ArgumentParser(prog='PROG')
+>>> parser.add_argument('-1', dest='one')
+>>> parser.add_argument('foo', nargs='?')
+
+>>> # negative number options present, so -1 is an option
+>>> parser.parse_args(['-1', 'X'])
+Namespace(foo=None, one='X')
+
+>>> # negative number options present, so -2 is an option
+>>> parser.parse_args(['-2'])
+usage: PROG [-h] [-1 ONE] [foo]
+PROG: error: no such option: -2
+
+>>> # negative number options present, so both -1s are options
+>>> parser.parse_args(['-1', '-1'])
+usage: PROG [-h] [-1 ONE] [foo]
+PROG: error: argument -1: expected one argument
+#+END_SRC
+If you have positional arguments that must begin with - and don’t look like negative numbers, you can insert the pseudo-argument '--' which tells parse_args() that everything after that is a positional argument:
+#+BEGIN_SRC python
+>>> parser.parse_args(['--', '-f'])
+Namespace(foo='-f', one=None)
+#+END_SRC
+*** Argument abbreviations (prefix matching)¶
+The ~parse_args()~ method by default allows long options to be abbreviated to a prefix, if the abbreviation is unambiguous (the prefix matches a unique option):
+#+BEGIN_SRC python
+>>> parser = argparse.ArgumentParser(prog='PROG')
+>>> parser.add_argument('-bacon')
+>>> parser.add_argument('-badger')
+>>> parser.parse_args('-bac MMM'.split())  #前缀bac可以对应参数bacon
+Namespace(bacon='MMM', badger=None)
+>>> parser.parse_args('-bad WOOD'.split()) #前缀bad对应参数badger
+Namespace(bacon=None, badger='WOOD')
+>>> parser.parse_args('-ba BA'.split())  #发生错误，因为前缀ba可以对应bacon，也可对应badger
+usage: PROG [-h] [-bacon BACON] [-badger BADGER]
+PROG: error: ambiguous option: -ba could match -badger, -bacon
+#+END_SRC
+An error is produced for arguments that could produce more than one options. This feature can be disabled by setting allow_abbrev to False.
+* torch
+** torch.Tensor
+torch.Tensor是一种包含单一数据类型元素的多维矩阵。torch.Tensor是默认的tensor类型（torch.FlaotTensor）的简称。
+
+*** 张量数据类型
+Torch定义了九种CPU tensor类型和九种GPU tensor类型：
+| Data type                | dtype                         | CPU tensor         | GPU tensor              |
+|--------------------------+-------------------------------+--------------------+-------------------------|
+| 32-bit floating point    | torch.float32 or torch.float  | torch.FloatTensor  | torch.cuda.FloatTensor  |
+| 64-bit floating point    | torch.float64 or torch.double | torch.DoubleTensor | torch.cuda.DoubleTensor |
+| 16-bit floating point    | torch.float16 or torch.half   | torch.HalfTensor   | torch.cuda.HalfTensor   |
+| 8-bit integer (unsigned) | torch.uint8                   | torch.ByteTensor   | torch.cuda.ByteTensor   |
+| 8-bit integer (signed)   | torch.int8                    | torch.CharTensor   | torch.cuda.CharTensor   |
+| 16-bit integer (signed)  | torch.int16 or torch.short    | torch.ShortTensor  | torch.cuda.ShortTensor  |
+| 32-bit integer (signed)  | torch.int32 or torch.int      | torch.IntTensor    | torch.cuda.IntTensor    |
+| 64-bit integer (signed)  | torch.int64 or torch.long     | torch.LongTensor   | torch.cuda.LongTensor   |
+| Boolean                  | torch.bool                    | torch.BoolTensor   | torch.cuda.BoolTensor   |
+
+*** 创建张量
+#+BEGIN_QUOTE
+torch.tensor() 始终复制data。 如果您具有张量data，而只想更改其requires_grad标志，请使用 requires_grad_() 或 detach() 以避免复制。 如果您有一个 numpy 数组并且想要避免复制，请使用 torch.as_tensor() 。
+#+END_QUOTE
+
+#+BEGIN_SRC bash
+#可以通过python列表或np数组创建张量
+>>> torch.tensor([[1., -1.], [1., -1.]])
+tensor([[ 1.0000, -1.0000],
+        [ 1.0000, -1.0000]])
+>>> torch.tensor(np.array([[1, 2, 3], [4, 5, 6]]))
+tensor([[ 1,  2,  3],
+        [ 4,  5,  6]])
+#+END_SRC
+
+可以通过将 torch.dtype 和 torch.device 传递给构造函数或张量创建操作来构造特定数据类型的张量：
+#+BEGIN_SRC bash
+>>> torch.zeros([2, 4], dtype=torch.int32)
+tensor([[ 0,  0,  0,  0],
+        [ 0,  0,  0,  0]], dtype=torch.int32)
+>>> cuda0 = torch.device('cuda:0')
+>>> torch.ones([2, 4], dtype=torch.float64, device=cuda0)
+tensor([[ 1.0000,  1.0000,  1.0000,  1.0000],
+        [ 1.0000,  1.0000,  1.0000,  1.0000]], dtype=torch.float64, device='cuda:0')
+#+END_SRC
+*** 访问张量
+张量的内容可以使用 Python 的索引和切片符号来访问和修改：
+#+BEGIN_SRC bash
+>>> x = torch.tensor([[1, 2, 3], [4, 5, 6]])
+>>> print(x[1][2])
+tensor(6)
+>>> x[0][1] = 8
+>>> print(x)
+tensor([[ 1,  8,  3],
+        [ 4,  5,  6]])
+#+END_SRC
+
+使用 torch.Tensor.item() 从张量中获取包含单个值的 Python 数字：
+#+BEGIN_SRC bash
+>>> x = torch.tensor([[1]])
+>>> x
+tensor([[ 1]])
+>>> x.item()
+1
+>>> x = torch.tensor(2.5)
+>>> x
+tensor(2.5000)
+>>> x.item()
+2.5
+#+END_SRC
+** torch.device
+torch.device代表将torch.Tensor分配到的设备的对象。
+
+torch.device包含一个设备类型（'cpu'or'cuda'）和可选的设备的序号。如果设备序号不存在，则为当前设备.
+
+一个 =torch.Tensor=的设备可以通过 =Tensor.device= 访问。
+
+=torch.device= 可以通过字符串或字符串和设备编号构造.
+
+通过字符串：
+#+BEGIN_SRC bash
+>>> torch.device('cuda:0')
+device(type='cuda', index=0)
+ 
+>>> torch.device('cpu')
+device(type='cpu')
+ 
+>>> torch.device('cuda')  # current cuda device
+device(type='cuda')
+#+END_SRC
+
+通过字符串和设备编号构造:
+#+BEGIN_SRC bash
+>>> torch.device('cuda', 0)
+device(type='cuda', index=0)
+ 
+>>> torch.device('cpu', 0)
+device(type='cpu', index=0)
+#+END_SRC
+** torch.utils.data
+*** torch.utils.data.DataLoader
+PyTorch中数据读取的一个重要接口是torch.utils.data.DataLoader，该接口定义在dataloader.py脚本中，只要是用PyTorch来训练模型基本都会用到该接口，该接口主要用来将自定义的数据读取接口的输出或者PyTorch已有的数据读取接口的输入按照batch size封装成Tensor，后续只需要再包装成Variable即可作为模型的输入，因此该接口有点承上启下的作用，比较重要。
+
+#+BEGIN_SRC python
+class torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False, sampler=None, num_workers=0, collate_fn=<function default_collate>, pin_memory=False, drop_last=False)
+#+END_SRC
+**** 参数
+- dataset (Dataset) 加载数据的数据集。这个就是PyTorch已有的数据读取接口（比如torchvision.datasets.ImageFolder）或者自定义的数据接口的输出，该输出要么是torch.utils.data.Dataset类的对象，要么是继承自torch.utils.data.Dataset类的自定义类的对象。
+- batch_size (int, optional) – 每个batch加载多少个样本(默认: 1)。
+- shuffle (bool, optional) – 设置为True时会在每个epoch重新打乱数据(默认: False).
+- sampler (Sampler, optional) – 定义从数据集中提取样本的策略。如果指定，则忽略shuffle参数。
+- num_workers (int, optional) – 用多少个子进程加载数据。0表示数据将在主进程中加载(默认: 0)
+- collate_fn (callable, optional) – 用来处理不同情况下的输入dataset的封装，一般采用默认即可，除非你自定义的数据读取输出非常少见。
+- pin_memory (bool, optional) – If True, the data loader will copy tensors into CUDA pinned memory before returning them
+- drop_last (bool, optional) – 如果数据集大小不能被batch size整除，则设置为True后可删除最后一个不完整的batch。如果设为False并且数据集的大小不能被batch size整除，则最后一个batch将更小。(默认: False)
+*** ImageFolder
+#+BEGIN_SRC python
+ImageFolder(root,transform=None,target_transform=None,loader=default_loader)
+#+END_SRC
+root : 在指定的root路径下面寻找图片
+transform: 对PIL Image进行转换操作,transform 输入是loader读取图片返回的对象
+target_transform :对label进行变换
+loader: 指定加载图片的函数，默认操作是读取PIL image对象
+*** random_split
+#+BEGIN_SRC python
+class torch.utils.data.random_split(dataset, lengths)
+#+END_SRC
+随机不重复分割数据集； dataset：要被分割的数据集 lengths：长度列表，e.g. [7, 3]， 保证7+3=len(dataset),即将dataset划分为长度为7和长度为3的两个数据集
+** torch.optim
+
+~torch.optim~ 是一个实现了各种优化算法的库。大部分常用的方法得到支持，并且接口具备足够的通用性，使得未来能够集成更加复杂的方法。
+
+为了使用torch.optim，你需要构建一个optimizer对象。这个对象能够保持当前参数状态并基于计算得到的梯度进行参数更新。
+*** 构建
+为了构建一个Optimizer，你需要给它一个包含了需要优化的参数（必须都是Variable对象）的iterable。然后，你可以设置optimizer的参 数选项，比如学习率，权重衰减，等等。
+例子：
+#+BEGIN_SRC python 
+optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
+optimizer = optim.Adam([var1, var2], lr=0.0001)
+#+END_SRC
+
+#+BEGIN_QUOTE
+如果您需要通过.cuda（）将模型移至GPU，请在为它构建优化器之前执行此操作。 .cuda（）之后的模型参数将与调用之前的对象不同。 通常，在构造和使用优化器时，应确保优化的参数位于一致的位置
+#+END_QUOTE
+*** 为每个参数单独设置选项
+Optimizer也支持为每个参数单独设置选项。若想这么做，不要直接传入Variable的iterable，而是传入dict的iterable。每一个dict都分别定 义了一组参数，并且包含一个param键，这个键对应参数的列表。其他的键应该optimizer所接受的其他参数的关键字相匹配，并且会被用于对这组参数的 优化。
+
+例如，当我们想指定每一层的学习率时，这是非常有用的：
+#+BEGIN_SRC python 
+optim.SGD([
+                {'params': model.base.parameters()},
+                {'params': model.classifier.parameters(), 'lr': 1e-3}
+            ], lr=1e-2, momentum=0.9)
+#+END_SRC
+这意味着model.base的参数将会使用1e-2的学习率，model.classifier的参数将会使用1e-3的学习率，并且0.9的momentum将会被用于所 有的参数。
+*** 进行单次优化
+所有的optimizer都实现了step()方法，这个方法会更新所有的参数。它能按两种方式来使用： 
+1. ~optimizer.step()~
+
+这是大多数optimizer所支持的简化版本。一旦梯度被如backward()之类的函数计算好后，我们就可以调用这个函数。
+#+BEGIN_SRC python 
+for input, target in dataset:
+    optimizer.zero_grad()
+    output = model(input)
+    loss = loss_fn(output, target)
+    loss.backward()
+    optimizer.step()
+#+END_SRC
+2. ~optimizer.step(closure)~
+
+一些优化算法例如Conjugate Gradient和LBFGS需要重复多次计算函数，因此你需要传入一个闭包(closure)去允许它们重新计算你的模型。这个闭包(closure)应当清空梯度， 计算损失，然后返回。
+#+BEGIN_SRC python 
+for input, target in dataset:
+    def closure():
+        optimizer.zero_grad()
+        output = model(input)
+        loss = loss_fn(output, target)
+        loss.backward()
+        return loss
+    optimizer.step(closure)
+#+END_SRC
+*** 各种优化算法
+*** torch.optim.lr_scheduler，调整学习率，
+~torch.optim.lr_scheduler~ 提供了多种通过迭代次数调整学习率的方法。 ~torch.optim.lr_scheduler.ReduceLROnPlateau~ 允许基于某种衡量方法动态调整学习率。
+
+学习率调整应该在优化更新后使用，例如，你应该用下列的方式写代码：
+#+BEGIN_SRC bash
+>>> scheduler = ...
+>>> for epoch in range(100):
+>>>     train(...)
+>>>     validate(...)
+>>>     scheduler.step()
+#+END_SRC
+**** torch.optim.lr_scheduler.ReduceLROnPlateau
+当网络的评价指标不在提升的时候，可以通过降低网络的学习率来提高网络性能。所使用的类
+#+BEGIN_SRC python
+class torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.1, patience=10,
+ verbose=False, threshold=0.0001, threshold_mode='rel', cooldown=0, min_lr=0, eps=1e-08)
+#+END_SRC
+- optimer指的是网络的优化器
+- mode (str) ，可选择‘min’或者‘max’，min表示当监控量停止下降的时候，学习率将减小，max表示当监控量停止上升的时候，学习率将减小。默认值为‘min’
+- factor 学习率每次降低多少，new_lr = old_lr * factor
+- patience=10，容忍网路的性能不提升的次数，高于这个次数就降低学习率
+- verbose（bool） - 如果为True，则为每次更新向stdout输出一条消息。 默认值：False
+- threshold（float） - 测量新最佳值的阈值，仅关注重大变化。 默认值：1e-4
+- cooldown： 减少lr后恢复正常操作之前要等待的时期数。 默认值：0。
+- min_lr,学习率的下限
+- eps ，适用于lr的最小衰减。 如果新旧lr之间的差异小于eps，则忽略更新。 默认值：1e-8。
+
+使用的时候需要选择网络的度量指标，使用如下类的step方法实现，例子如下：
+#+BEGIN_SRC python
+optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
+scheduler = ReduceLROnPlateau(optimizer, 'min',factor=0.5, patience=4, verbose=True)
+.....
+scheduler.step(train_loss)
+# scheduler.step(val_loss)
+#+END_SRC
+** view的用法
+相当于numpy中resize（）的功能，但是用法可能不太一样。把原先tensor中的数据按照行优先的顺序排成一个一维的数据（这里应该是因为要求地址是连续存储的），然后按照参数组合成其他维度的tensor。比如说是不管你原先的数据是[[[1,2,3],[4,5,6]]]还是[1,2,3,4,5,6]，因为它们排成一维向量都是6个元素，所以只要view后面的参数一致，得到的结果都是一样的。比如，
+#+BEGIN_SRC python
+a=torch.Tensor([[[1,2,3],[4,5,6]]])
+b=torch.Tensor([1,2,3,4,5,6])
+
+print(a.view(1,6))
+print(b.view(1,6))
+#+END_SRC
+得到的结果都是 ~tensor([[1., 2., 3., 4., 5., 6.])~
+
+再看一个例子：
+#+BEGIN_SRC python
+a=torch.Tensor([[[1,2,3],[4,5,6]]])
+print(a.view(3,2))
+#+END_SRC
+将会得到：
+#+BEGIN_SRC python
+tensor([[1., 2.],
+        [3., 4.],
+        [5., 6.]])
+#+END_SRC
+相当于就是从1，2，3，4，5，6顺序的拿数组来填充需要的形状。但是如果您想得到如下的结果：
+#+BEGIN_SRC python
+tensor([[1., 4.],
+        [2., 5.],
+        [3., 6.]])
+#+END_SRC
+就需要使用另一个函数了：permute（）
+** permute的用法
+~permute(dims)~  将tensor的维度换位。
+
+参数：参数是一系列的整数，代表原来张量的维度。比如三维就有0，1，2这些dimension。
+
+** 保存加载模型和参数
+*** 保存加载模型基本用法
+**** 保存加载整个模型
+保存整个网络模型（网络结构+权重参数）。
+#+BEGIN_SRC python
+torch.save(model, 'net.pkl')
+#+END_SRC
+直接加载整个网络模型（可能比较耗时）。
+#+BEGIN_SRC python
+model = torch.load('net.pkl')
+#+END_SRC
+**** 只保存加载模型参数
+只保存模型的权重参数（速度快，占内存少）。
+#+BEGIN_SRC python
+torch.save(model.state_dict(), 'net_params.pkl')
+#+END_SRC
+因为我们只保存了模型的参数，所以需要先定义一个网络对象，然后再加载模型参数。
+#+BEGIN_SRC python
+# 构建一个网络结构
+model = ClassNet()
+# 将模型参数加载到新模型中
+state_dict = torch.load('net_params.pkl')
+model.load_state_dict(state_dict)
+#+END_SRC
+*** 保存加载自定义模型
+上面保存加载的 net.pkl 其实一个字典，通常包含如下内容：
+1. 网络结构：输入尺寸、输出尺寸以及隐藏层信息，以便能够在加载时重建模型。
+2. 模型的权重参数：包含各网络层训练后的可学习参数，可以在模型实例上调用 state_dict() 方法来获取，比如前面介绍只保存模型权重参数时用到的 model.state_dict()。
+3. 优化器参数：有时保存模型的参数需要稍后接着训练，那么就必须保存优化器的状态和所其使用的超参数，也是在优化器实例上调用 state_dict() 方法来获取这些参数。
+4. 其他信息：有时我们需要保存一些其他的信息，比如 epoch，batch_size 等超参数。
+
+知道了这些，那么我们就可以自定义需要保存的内容，比如：
+#+BEGIN_SRC python
+# saving a checkpoint assuming the network class named ClassNet
+checkpoint = {'model': ClassNet(),
+              'model_state_dict': model.state_dict(),
+              'optimizer_state_dict': optimizer.state_dict(),
+              'epoch': epoch}
+​
+torch.save(checkpoint, 'checkpoint.pkl')
+#+END_SRC
+上面的 checkpoint 是个字典，里面有4个键值对，分别表示网络模型的不同信息。
+
+然后我们要加载上面保存的自定义的模型：
+#+BEGIN_SRC python
+def load_checkpoint(filepath):
+    checkpoint = torch.load(filepath)
+    model = checkpoint['model']  # 提取网络结构
+    model.load_state_dict(checkpoint['model_state_dict'])  # 加载网络权重参数
+    optimizer = TheOptimizerClass()
+    optimizer.load_state_dict(checkpoint['optimizer_state_dict'])  # 加载优化器参数
+    
+    for parameter in model.parameters():
+        parameter.requires_grad = False
+    model.eval()
+    
+    return model
+    
+model = load_checkpoint('checkpoint.pkl')
+#+END_SRC
+state_dict() 也是一个Python字典对象，model.state_dict() 将每一层的可学习参数映射为参数矩阵，其中只包含具有可学习参数的层(卷积层、全连接层等)。
+
+比如下面这个例子：
+#+BEGIN_SRC python
+# Define model
+class TheModelClass(nn.Module):
+    def __init__(self):
+        super(TheModelClass, self).__init__()
+        self.conv1 = nn.Conv2d(3, 8, 5)
+        self.bn = nn.BatchNorm2d(8)
+        self.conv2 = nn.Conv2d(8, 16, 5)
+        self.pool = nn.MaxPool2d(2, 2)
+        self.fc1 = nn.Linear(16 * 5 * 5, 120)
+        self.fc2 = nn.Linear(120, 10)
+​
+    def forward(self, x):
+        x = self.pool(F.relu(self.conv1(x)))
+        x = self.bn(x)
+        x = self.pool(F.relu(self.conv2(x)))
+        x = x.view(-1, 16 * 5 * 5)
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)
+        return x
+    
+    # Initialize model
+    model = TheModelClass()
+​
+    # Initialize optimizer
+    optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+​
+    print("Model's state_dict:")
+    for param_tensor in model.state_dict():
+        print(param_tensor, "\t", model.state_dict()[param_tensor].size())
+​
+    print("Optimizer's state_dict:")
+    for var_name in optimizer.state_dict():
+        print(var_name, "\t", optimizer.state_dict()[var_name])
+#+END_SRC
+输出为：
+#+BEGIN_SRC python
+Model's state_dict:
+conv1.weight            torch.Size([8, 3, 5, 5])
+conv1.bias              torch.Size([8])
+bn.weight               torch.Size([8])
+bn.bias                 torch.Size([8])
+bn.running_mean         torch.Size([8])
+bn.running_var          torch.Size([8])
+bn.num_batches_tracked  torch.Size([])
+conv2.weight            torch.Size([16, 8, 5, 5])
+conv2.bias              torch.Size([16])
+fc1.weight              torch.Size([120, 400])
+fc1.bias                torch.Size([120])
+fc2.weight              torch.Size([10, 120])
+fc2.bias                torch.Size([10])
+Optimizer's state_dict:
+state            {}
+param_groups     [{'lr': 0.001, 'momentum': 0.9, 'dampening': 0, 'weight_decay': 0, 'nesterov': False, 'params': [139805696932024, 139805483616008, 139805483616080, 139805483616152, 139805483616440, 139805483616512, 139805483616584, 139805483616656, 139805483616728, 139805483616800]}]
+#+END_SRC
+可以看到 model.state_dict() 保存了卷积层，BatchNorm层和最大池化层的信息；而 optimizer.state_dict() 则保存的优化器的状态和相关的超参数。
+*** 跨设备保存加载模型
+**** 在 CPU 上加载在 GPU 上训练并保存的模型（Save on GPU, Load on CPU）：
+#+BEGIN_SRC python
+device = torch.device('cpu')
+model = TheModelClass()
+# Load all tensors onto the CPU device
+model.load_state_dict(torch.load('net_params.pkl', map_location=device))
+#+END_SRC
+map_location：a function, torch.device, string or a dict specifying how to remap storage locations
+
+令 torch.load() 函数的 map_location 参数等于 torch.device('cpu') 即可。 这里令 map_location 参数等于 'cpu' 也同样可以。
+**** 在 GPU 上加载在 GPU 上训练并保存的模型（Save on GPU, Load on GPU）：
+#+BEGIN_SRC python
+device = torch.device("cuda")
+model = TheModelClass()
+model.load_state_dict(torch.load('net_params.pkl'))
+model.to(device)
+#+END_SRC
+在这里使用 map_location 参数不起作用，要使用 model.to(torch.device("cuda")) 将模型转换为CUDA优化的模型。
+
+还需要对将要输入模型的数据调用 data = data.to(device)，即将数据从CPU转移到GPU。请注意，调用 my_tensor.to(device) 会返回一个 my_tensor 在 GPU 上的副本，它不会覆盖 my_tensor。因此需要手动覆盖张量：my_tensor = my_tensor.to(device)。
+**** 在 GPU 上加载在 GPU 上训练并保存的模型（Save on CPU, Load on GPU）
+#+BEGIN_SRC python
+device = torch.device("cuda")
+model = TheModelClass()
+model.load_state_dict(torch.load('net_params.pkl', map_location="cuda:0"))
+model.to(device)
+#+END_SRC
+当加载包含GPU tensors的模型时，这些tensors 会被默认加载到GPU上，不过是同一个GPU设备。
+
+当有多个GPU设备时，可以通过将 map_location 设定为 cuda:device_id 来指定使用哪一个GPU设备，上面例子是指定编号为0的GPU设备。
+
+其实也可以将 torch.device("cuda") 改为 torch.device("cuda:0") 来指定编号为0的GPU设备。
+
+最后调用 model.to(torch.device('cuda')) 来将模型的tensors转换为 CUDA tensors。
+
+*** pytorch预训练模型
+1）加载预训练模型和参数
+#+BEGIN_SRC python
+resnet18 = models.resnet18(pretrained=True)
+#+END_SRC
+这里是直接调用pytorch中的常用模型
+#+BEGIN_SRC python
+# PyTorch中的torchvision里有很多常用的模型，可以直接调用：
+import torchvision.models as models
+ 
+resnet101 = models.resnet18()
+alexnet = models.alexnet()
+squeezenet = models.squeezenet1_0()
+densenet = models.densenet_161()
+#+END_SRC
+2）只加载模型，不加载预训练参数
+#+BEGIN_SRC python
+# 导入模型结构
+resnet18 = models.resnet18(pretrained=False)
+# 加载预先下载好的预训练参数到resnet18
+resnet18.load_state_dict(torch.load('resnet18-5c106cde.pth'))
+#+END_SRC
+3）加载部分预训练模型
+#+BEGIN_SRC python
+resnet152 = models.resnet152(pretrained=True)
+pretrained_dict = resnet152.state_dict()
+"""加载torchvision中的预训练模型和参数后通过state_dict()方法提取参数
+   也可以直接从官方model_zoo下载：
+   pretrained_dict = model_zoo.load_url(model_urls['resnet152'])"""
+model_dict = model.state_dict()
+# 将pretrained_dict里不属于model_dict的键剔除掉
+pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
+# 更新现有的model_dict
+model_dict.update(pretrained_dict)
+# 加载我们真正需要的state_dict
+model.load_state_dict(model_dict)
+#+END_SRC
+** torch.load
+#+BEGIN_SRC python
+torch.load(f, map_location=None, pickle_module=<module 'pickle' from '/scratch/rzou/pt/v1.6-env/lib/python3.8/pickle.py'>, **pickle_load_args)
+#+END_SRC
+Loads an object saved with torch.save() from a file.
+
+torch.load() uses Python’s unpickling facilities but treats storages, which underlie tensors, specially. They are first deserialized on the CPU and are then moved to the device they were saved from. If this fails (e.g. because the run time system doesn’t have certain devices), an exception is raised. However, storages can be dynamically remapped to an alternative set of devices using the map_location argument.
+
+If map_location is a callable, it will be called once for each serialized storage with two arguments: storage and location. The storage argument will be the initial deserialization of the storage, residing on the CPU. Each serialized storage has a location tag associated with it which identifies the device it was saved from, and this tag is the second argument passed to map_location. The builtin location tags are 'cpu' for CPU tensors and 'cuda:device_id' (e.g. 'cuda:2') for CUDA tensors. map_location should return either None or a storage. If map_location returns a storage, it will be used as the final deserialized object, already moved to the right device. Otherwise, torch.load() will fall back to the default behavior, as if map_location wasn’t specified.
+
+If map_location is a torch.device object or a string containing a device tag, it indicates the location where all tensors should be loaded.
+
+Otherwise, if map_location is a dict, it will be used to remap location tags appearing in the file (keys), to ones that specify where to put the storages (values).
+
+User extensions can register their own location tags and tagging and deserialization methods using torch.serialization.register_package().
+*** 参数
+- f – a file-like object (has to implement read(), :meth`readline`, :meth`tell`, and :meth`seek`), or a string or os.PathLike object containing a file name
+- map_location – a function, torch.device, string or a dict specifying how to remap storage locations
+- pickle_module – module used for unpickling metadata and objects (has to match the pickle_module used to serialize file)
+- pickle_load_args – (Python 3 only) optional keyword arguments passed over to pickle_module.load() and pickle_module.Unpickler(), e.g., errors=....
+
+#+BEGIN_EXAMPLE
+When you call torch.load() on a file which contains GPU tensors, those tensors will be loaded to GPU by default. You can call torch.load(.., map_location='cpu') and then load_state_dict() to avoid GPU RAM surge when loading a model checkpoint.
+#+END_EXAMPLE
+*** 官方例子
+#+BEGIN_SRC python
+>>> torch.load('tensors.pt')
+# Load all tensors onto the CPU
+>>> torch.load('tensors.pt', map_location=torch.device('cpu'))
+# Load all tensors onto the CPU, using a function
+>>> torch.load('tensors.pt', map_location=lambda storage, loc: storage)
+# Load all tensors onto GPU 1
+>>> torch.load('tensors.pt', map_location=lambda storage, loc: storage.cuda(1))
+# Map tensors from GPU 1 to GPU 0
+>>> torch.load('tensors.pt', map_location={'cuda:1':'cuda:0'})
+# Load tensor from io.BytesIO object
+>>> with open('tensor.pt', 'rb') as f:
+        buffer = io.BytesIO(f.read())
+>>> torch.load(buffer)
+# Load a module with 'ascii' encoding for unpickling
+>>> torch.load('module.pt', encoding='ascii')
+#+END_SRC
+
+** torch.nn
+*** torch.nn.L1Loss()
+#+BEGIN_SRC python
+class torch.nn.L1Loss(size_average=None, reduce=None) 
+#+END_SRC
+官方文档中仍有reduction='elementwise_mean'参数，但代码实现中已经删除该参数
+
+功能： 计算output和target之差的绝对值，可选返回同维度的tensor或者是一个标量。
+
+计算公式：
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-08-14_09-18-29.png @ 2020-08-14 09:18:48
+[[file:torch/2020-08-14_09-18-48_Snipaste_2020-08-14_09-18-29.png]]
+
+参数： reduce(bool)- 返回值是否为标量，默认为True
+
+size_average(bool)- 当reduce=True时有效。为True时，返回的loss为平均值；为False时，返回的各样本的loss之和。
+*** torch.nn.MSELoss()
+#+BEGIN_SRC python
+class torch.nn.MSELoss(size_average=None, reduce=None, reduction='elementwise_mean')
+#+END_SRC
+官方文档中仍有reduction='elementwise_mean'参数，但代码实现中已经删除该参数
+
+功能： 计算output和target之差的平方，可选返回同维度的tensor或者是一个标量。
+
+计算公式：
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-08-14_09-19-52.png @ 2020-08-14 09:19:57
+[[file:torch/2020-08-14_09-19-57_Snipaste_2020-08-14_09-19-52.png]]
+参数： reduce(bool)- 返回值是否为标量，默认为True
+
+size_average(bool)- 当reduce=True时有效。为True时，返回的loss为平均值；为False时，返回的各样本的loss之和。
+*** torch.nn.CrossEntropyLoss()
+#+BEGIN_SRC python
+class torch.nn.CrossEntropyLoss(weight=None, size_average=None, ignore_index=-100, reduce=None, reduction='elementwise_mean')
+#+END_SRC
+功能： 将输入经过softmax激活函数之后，再计算其与target的交叉熵损失。即该方法将nn.LogSoftmax()和 nn.NLLLoss()进行了结合。严格意义上的交叉熵损失函数应该是nn.NLLLoss()。
+
+计算公式：
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-08-14_09-20-56.png @ 2020-08-14 09:21:00
+[[file:torch/2020-08-14_09-21-00_Snipaste_2020-08-14_09-20-56.png]]
+参数： weight(Tensor)- 为每个类别的loss设置权值，常用于类别不均衡问题。weight必须是float类型的tensor，其长度要于类别C一致，即每一个类别都要设置有weight。带weight的计算公式：
+
+size_average(bool)- 当reduce=True时有效。为True时，返回的loss为平均值；为False时，返回的各样本的loss之和。 reduce(bool)- 返回值是否为标量，默认为True ignore_index(int)- 忽略某一类别，不计算其loss，其loss会为0，并且，在采用size_average时，不会计算那一类的loss，除的时候的分母也不会统计那一类的样本。
+
+补充： output不仅可以是向量，还可以是图片，即对图像进行像素点的分类
+*** torch.nn.NLLLoss()
+#+BEGIN_SRC python
+class torch.nn.NLLLoss(weight=None, size_average=None, ignore_index=-100, reduce=None, reduction='elementwise_mean')
+#+END_SRC
+功能： 不好用言语描述其功能！请看计算公式：loss(input, class) = -input[class]。举个例，三分类任务，input=[-1.233, 2.657, 0.534]， 真实标签为2（class=2），则loss为-0.534。就是对应类别上的输出，取一个负号！感觉被NLLLoss的名字欺骗了。 实际应用： 常用于多分类任务，但是input在输入NLLLoss()之前，需要对input进行log_softmax函数激活，即将input转换成概率分布的形式，并且取对数。其实这些步骤在CrossEntropyLoss中就有，如果不想让网络的最后一层是log_softmax层的话，就可以采用CrossEntropyLoss完全代替此函数。
+
+参数： weight(Tensor)- 为每个类别的loss设置权值，常用于类别不均衡问题。weight必须是float类型的tensor，其长度要于类别C一致，即每一个类别都要设置有weight。 size_average(bool)- 当reduce=True时有效。为True时，返回的loss为除以权重之和的平均值；为False时，返回的各样本的loss之和。
+
+reduce(bool)- 返回值是否为标量，默认为True。
+
+ignore_index(int)- 忽略某一类别，不计算其loss，其loss会为0，并且，在采用size_average时，不会计算那一类的loss，除的时候的分母也不会统计那一类的样本。
+
+特别注意： 当带上权值，reduce = True, size_average = True, 其计算公式为：
+
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-08-14_09-22-39.png @ 2020-08-14 09:22:45
+[[file:torch/2020-08-14_09-22-45_Snipaste_2020-08-14_09-22-39.png]]
+例如当input为[[0.6, 0.2, 0.2], [0.4, 1.2, 0.4]]，target= [0, 1], weight = [0.6, 0.2, 0.2] l1 = - 0.60.6 = - 0.36 l2 = - 1.20.2 = - 0.24 loss = -0.36/(0.6+0.2) + -0.24/(0.6+0.2) = -0.75
+*** torch.nn.PoissonNLLLoss()
+#+BEGIN_SRC python
+class torch.nn.PoissonNLLLoss(log_input=True, full=False, size_average=None, eps=1e-08, reduce=None, reduction='elementwise_mean')
+#+END_SRC
+功能： 用于target服从泊松分布的分类任务。
+
+计算公式：
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-08-14_09-24-03.png @ 2020-08-14 09:24:07
+[[file:torch/2020-08-14_09-24-07_Snipaste_2020-08-14_09-24-03.png]]
+参数：
+
+log_input(bool)- 为True时，计算公式为：loss(input,target)=exp(input) - target * input; 为False时，loss(input,target)=input - target * log(input+eps)
+
+full(bool)- 是否计算全部的loss。
+
+例如，当采用斯特林公式近似阶乘项时，此为 target*log(target) - target+0.5∗log(2πtarget) eps(float)- 当log_input = False时，用来防止计算log(0)，而增加的一个修正项。即 loss(input,target)=input - target * log(input+eps)
+
+size_average(bool)- 当reduce=True时有效。为True时，返回的loss为平均值；为False时，返回的各样本的loss之和。
+
+reduce(bool)- 返回值是否为标量，默认为True
+*** torch.nn.KLDivLoss()
+#+BEGIN_SRC python
+class torch.nn.KLDivLoss(size_average=None, reduce=None, reduction='elementwise_mean')
+#+END_SRC
+功能： 计算input和target之间的KL散度( Kullback–Leibler divergence) 。
+
+计算公式：
+
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-08-14_09-25-53.png @ 2020-08-14 09:25:58
+[[file:torch/2020-08-14_09-25-58_Snipaste_2020-08-14_09-25-53.png]]
+补充：KL散度 KL散度( Kullback–Leibler divergence) 又称为相对熵(Relative Entropy)，用于描述两个概率分布之间的差异。计算公式(离散时)：
+
+其中p表示真实分布，q表示p的拟合分布， D(P||Q)表示当用概率分布q来拟合真实分布p时，产生的信息损耗。这里的信息损耗，可以理解为损失，损失越低，拟合分布q越接近真实分布p。同时也可以从另外一个角度上观察这个公式，即计算的是 p 与 q 之间的对数差在 p 上的期望值。 特别注意，D(p||q) ≠ D(q||p)， 其不具有对称性，因此不能称为K-L距离。
+
+信息熵 = 交叉熵 - 相对熵 从信息论角度观察三者，其关系为信息熵 = 交叉熵 - 相对熵。在机器学习中，当训练数据固定，最小化相对熵 D(p||q) 等价于最小化交叉熵 H(p,q) 。
+
+参数：
+
+size_average(bool)- 当reduce=True时有效。为True时，返回的loss为平均值，平均值为element-wise的，而不是针对样本的平均；为False时，返回是各样本各维度的loss之和。 reduce(bool)- 返回值是否为标量，默认为True。
+
+使用注意事项： 要想获得真正的KL散度，需要如下操作：
+
+1. reduce = True ；size_average=False
+
+2. 计算得到的loss 要对batch进行求平均
+
+*** torch.nn.BCELoss()
+#+BEGIN_SRC python
+class torch.nn.BCELoss(weight=None, size_average=None, reduce=None, reduction='elementwise_mean')
+#+END_SRC
+功能： 二分类任务时的交叉熵计算函数。此函数可以认为是nn.CrossEntropyLoss函数的特例。其分类限定为二分类，y必须是{0,1}。还需要注意的是，input应该为概率分布的形式，这样才符合交叉熵的应用。所以在BCELoss之前，input一般为sigmoid激活层的输出，官方例子也是这样给的。该损失函数在自编码器中常用。 
+
+计算公式：
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-08-14_09-27-04.png @ 2020-08-14 09:27:08
+[[file:torch/2020-08-14_09-27-08_Snipaste_2020-08-14_09-27-04.png]]
+参数：
+
+weight(Tensor)- 为每个类别的loss设置权值，常用于类别不均衡问题。
+
+size_average(bool)- 当reduce=True时有效。为True时，返回的loss为平均值；为False时，返回的各样本的loss之和。
+
+reduce(bool)- 返回值是否为标量，默认为True
+*** torch.nn.BCEWithLogitsLoss()
+#+BEGIN_SRC python
+class torch.nn.BCEWithLogitsLoss(weight=None, size_average=None, reduce=None, reduction='elementwise_mean', pos_weight=None)
+#+END_SRC
+功能： 将Sigmoid与BCELoss结合，类似于CrossEntropyLoss(将nn.LogSoftmax()和 nn.NLLLoss()进行结合）。即input会经过Sigmoid激活函数，将input变成概率分布的形式。 计算公式：
+
+σ() 表示Sigmoid函数 特别地，当设置weight时：
+
+参数：
+
+weight(Tensor)- : 为batch中单个样本设置权值，If given, has to be a Tensor of size “nbatch”.
+
+pos_weight-: 正样本的权重, 当p>1，提高召回率，当P<1，提高精确度。可达到权衡召回率(Recall)和精确度(Precision)的作用。 Must be a vector with length equal to the number of classes.
+
+size_average(bool)- 当reduce=True时有效。为True时，返回的loss为平均值；为False时，返回的各样本的loss之和。
+
+reduce(bool)- 返回值是否为标量，默认为True
+**** 实例解释
+BCELoss
+
+在图片多标签分类时，如果3张图片分3类，会输出一个3*3的矩阵。
+
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20181223124137625.png @ 2020-08-13 09:40:44
+[[file:torch/2020-08-13_09-40-44_20181223124137625.png]]
+先用Sigmoid给这些值都搞到0~1之间：
+
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20181223124238621.png @ 2020-08-13 09:47:40
+[[file:torch/2020-08-13_09-47-40_20181223124238621.png]]
+
+假设Target是：
+
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20181223132343472.png @ 2020-08-13 09:49:00
+[[file:torch/2020-08-13_09-49-00_20181223132343472.png]]
+
+BCELoss是
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/1811847o8o9gi5oi1igg9gu.png @ 2020-08-13 09:43:21
+[[file:torch/2020-08-13_09-43-21_1811847o8o9gi5oi1igg9gu.png]]
+所以对于第一行：
+#+BEGIN_EXAMPLE
+第一列0×ln0.3992+(1−0)×ln(1−0.3992)=−0.50950×ln0.3992+(1−0)×ln(1−0.3992)=−0.5095
+第二列1×ln0.2232+(1−1)×ln(1−0.2232)=−1.49971×ln0.2232+(1−1)×ln(1−0.2232)=−1.4997
+第三列1×ln0.6435+(1−1)×ln(1−0.6435)=−0.44081×ln0.6435+(1−1)×ln(1−0.6435)=−0.4408
+第二行：
+第一列0×ln0.3800+(1−0)×ln(1−0.3800)=−0.47800×ln0.3800+(1−0)×ln(1−0.3800)=−0.4780
+第二列0×ln0.3044+(1−0)×ln(1−0.3044)=−0.36300×ln0.3044+(1−0)×ln(1−0.3044)=−0.3630
+第三列1×ln0.3241+(1−1)×ln(1−0.3241)=−1.12671×ln0.3241+(1−1)×ln(1−0.3241)=−1.1267
+第三行：
+第一列1×ln0.6281+(1−1)×ln(1−0.6281)=−0.46511×ln0.6281+(1−1)×ln(1−0.6281)=−0.4651
+第二列0×ln0.4689+(1−0)×ln(1−0.4689)=−0.63280×ln0.4689+(1−0)×ln(1−0.4689)=−0.6328
+第三列1×ln0.3834+(1−1)×ln(1−0.3834)=−0.95871×ln0.3834+(1−1)×ln(1−0.3834)=−0.9587
+#+END_EXAMPLE
+去掉负号求个均值：
+#+BEGIN_EXAMPLE
+(0.5095+1.4997+0.4408)/3=0.8167
+(0.4780+0.3630+1.1267)/3=0.6559
+(0.4651+0.6328+0.9587)/3=0.6855
+#+END_EXAMPLE
+再取个平均：
+(0.8167+0.6559+0.6855)/=0.7194
+
+下面我们用BCELoss来验证一下Loss是不是0.7194！
+
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20181223132408533.png @ 2020-08-13 09:49:14
+[[file:torch/2020-08-13_09-49-14_20181223132408533.png]]
+
+BCEWithLogitsLoss就是把Sigmoid-BCELoss合成一步。我们直接用刚刚的input验证一下是不是0.7193：
+
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20181223132922363.png @ 2020-08-13 09:49:28
+[[file:torch/2020-08-13_09-49-28_20181223132922363.png]]
+*** torch.nn.MarginRankingLoss()
+#+BEGIN_SRC python
+class torch.nn.MarginRankingLoss(margin=0, size_average=None, reduce=None, reduction='elementwise_mean')
+#+END_SRC
+功能： 计算两个向量之间的相似度，当两个向量之间的距离大于margin，则loss为正，小于margin，loss为0。
+
+计算公式：
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-08-14_09-28-07.png @ 2020-08-14 09:28:12
+[[file:torch/2020-08-14_09-28-12_Snipaste_2020-08-14_09-28-07.png]]
+y == 1时，x1要比x2大，才不会有loss，反之，y == -1 时，x1要比x2小，才不会有loss。
+
+参数： margin(float)- x1和x2之间的差异。
+
+size_average(bool)- 当reduce=True时有效。为True时，返回的loss为平均值；为False时，返回的各样本的loss之和。
+
+reduce(bool)- 返回值是否为标量，默认为True。
+*** torch.nn.utils
+**** torch.nn.utils.clip_grad_norm_()
+#+BEGIN_SRC python
+# 根据loss计算梯度
+loss.backward()
+
+## 按范数裁剪
+### 这里norm_type可以选择L1范数，L2范数和无穷范数，分别对应`1, 2, 'inf'`
+torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm, norm_type=2)
+
+## 按值裁剪
+### 指定clip_value之后，裁剪的范围就是[-clip_value, clip_value]
+torch.nn.utils.clip_grad_value_(model.parameters(), clip_value)
+#+END_SRC
+*** torch.nn.functional
+**** torch.nn.functional.pad
+#+BEGIN_SRC python
+torch.nn.functional.pad(input, pad, mode='constant', value=0)
+#+END_SRC
+F.pad是pytorch内置的tensor扩充函数，便于对数据集图像或中间层特征进行维度扩充，下面是pytorch官方给出的函数定义。
+
+函数变量说明：
+- input,需要扩充的tensor，可以是图像数据，抑或是特征矩阵数据
+- pad,扩充维度，用于预先定义出某维度上的扩充参数
+- mode,扩充方法，’constant‘, ‘reflect’ or ‘replicate’三种模式，分别表示常量，反射，复制
+- value,扩充时指定补充值，但是value只在mode='constant’有效，即使用value填充在扩充出的新维度位置，而在’reflect’和’replicate’模式下，value不可赋值
+
+***** 实例解释
+为了方便从可视角度上分析F.pad的实际效果，首先给出空值矩阵，并且为了能够让宁能复现效果，实际代码全部给出，并最小化解释复杂度。
+#+BEGIN_SRC python
+import torch
+import torch.nn.functional as F
+
+t4d = torch.empty(1, 3, 5, 3)
+#+END_SRC
+其中t4d中维度分别表示(batchsize, channel, height, width)
+
+为了便于理解，只观察输入矩阵t4d的最后两维，即一个5行3列的矩阵， 如图1
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-08-17_13-48-44.png @ 2020-08-17 13:48:57
+[[file:torch/2020-08-17_13-48-57_Snipaste_2020-08-17_13-48-44.png]]
+如果F.pad中第二个参数pad只定义两个参数，表示只对输入矩阵的最后一个维度进行扩充，不会对前两个维度造成任何影响，所以此处直接忽略前两个维度。
+#+BEGIN_SRC python 
+p1d = (1, 2)
+t1 = F.pad(t4d, p1d, 'constant', 1)
+#+END_SRC
+先输出看一下t1的维度变化：
+#+BEGIN_SRC python
+>>> print('原始矩阵大小为：', t4d.shape)
+'''
+原始矩阵大小为：torch.Size([1, 3, 5, 3])
+'''
+>>> print('t1矩阵大小为：', t1.shape)
+'''
+t1矩阵大小为：torch.Size([1, 3, 5, 6])
+'''
+#+END_SRC
+接下来，从可视化的角度分析一下，原始矩阵全为0值，扩充维度全部用1值填充，这样易于理解。
+
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-08-17_13-49-46.png @ 2020-08-17 13:49:54
+[[file:torch/2020-08-17_13-49-54_Snipaste_2020-08-17_13-49-46.png]]
+从图2可以明显看出，左侧扩充了1列，右侧扩充了2列，即原始矩阵大小从5×3扩充到5×6，则p1d的参数设置意义为
+#+BEGIN_SRC python
+p1d = (1, 2)
+# p1d = (左边填充数, 右边填充数)
+#+END_SRC
+此外，在实际项目中，为了保持代码的可扩展性，按下面定义，也可以获取同样的效果。
+#+BEGIN_SRC python
+p1d_ = (1, 2, 0, 0)
+t1 = F.pad(t4d, p1d_, 'constant', 1)
+#+END_SRC
+
+两维扩充
+#+BEGIN_SRC python
+# p1d = (1, 2)	# 与p1d做对比
+p2d = (1, 2, 3, 4)
+t2 = F.pad(t4d, p2d, 'constant', 2)
+#+END_SRC
+同样的，先分析下原始矩阵的维度变化情况：
+#+BEGIN_SRC python
+>>> print('原始矩阵大小为：', t4d.shape)
+'''
+原始矩阵大小为：torch.Size([1, 3, 5, 3])
+'''
+>>> print('t2矩阵大小为：', t2.shape)
+'''
+t2矩阵大小为：torch.Size([1, 3, 12, 6])
+'''
+#+END_SRC
+这里给出的是两维的扩充代码，为了便于理解，看一下实际的扩充效果，如图3
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-08-17_13-51-23.png @ 2020-08-17 13:51:28
+[[file:torch/2020-08-17_13-51-28_Snipaste_2020-08-17_13-51-23.png]]
+看图实际一目了然，对左侧扩充了1列，右侧扩充了2列，上边扩充了3行，下边扩充了4行。也就是说，前两个参数对最后一个维度有效，后两个参数对倒数第二维有效。接下来就可以看一下p2d参数的实际意义：
+#+BEGIN_SRC python
+p2d = (1, 2, 3, 4)
+# p2d = (左边填充数， 右边填充数， 上边填充数， 下边填充数)
+#+END_SRC
+
+三维扩充
+#+BEGIN_SRC python
+# p1d = (1, 2)			# 与p1d做对比
+# p2d = (1, 2, 3, 4)	# 与p2d做对比
+p3d = (1, 2, 3, 4, 5, 6)
+t3 = F.pad(t4d, p3d, 'constant', 3)
+#+END_SRC
+仍然先分析下原始矩阵的维度变化情况：
+#+BEGIN_SRC python
+>>> print('原始矩阵大小为：', t4d.shape)
+'''
+原始矩阵大小为：torch.Size([1, 3, 5, 3])
+'''
+>>> print('t3矩阵大小为：', t3.shape)
+'''
+t3矩阵大小为：torch.Size([1, 14, 12, 6])
+'''
+#+END_SRC
+从可视化角度分析，如图4所示。
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-08-17_13-52-30.png @ 2020-08-17 13:52:35
+[[file:torch/2020-08-17_13-52-35_Snipaste_2020-08-17_13-52-30.png]]
+
+根据p3d = (1, 2, 3, 4, 5, 6)中，前4个参数完成了在高和宽维度上的扩张，后两个参数则完成了对通道维度上的扩充。接下来就可以看一下p3d参数的实际意义：
+#+BEGIN_SRC python
+p3d = (1, 2, 3, 4, 5, 6)
+# p3d = (左边填充数， 右边填充数， 上边填充数， 下边填充数， 前边填充数，后边填充数)
+#+END_SRC
+
+** 张量类型转换
+*** 使用独立的函数实现张量类型之间的转换
+为了方便测试，我们构建一个新的张量，你要转变成不同的类型只需要根据自己的需求选择即可
+#+BEGIN_SRC python
+tensor = torch.Tensor(3, 5)
+#torch.long() 将tensor投射为long类型
+newtensor = tensor.long()
+#torch.half()将tensor投射为半精度浮点类型
+newtensor = tensor.half()
+#torch.int()将该tensor投射为int类型
+newtensor = tensor.int()
+#torch.double()将该tensor投射为double类型
+newtensor = tensor.double()
+#torch.float()将该tensor投射为float类型
+newtensor = tensor.float()
+#torch.char()将该tensor投射为char类型
+newtensor = tensor.char()
+#torch.byte()将该tensor投射为byte类型
+newtensor = tensor.byte()
+#torch.short()将该tensor投射为short类型
+newtensor = tensor.short()
+#+END_SRC
+*** 使用torch.type()函数
+~type(new_type=None, async=False)~ 如果未提供new_type，则返回类型，否则将此对象转换为指定的类型。 如果已经是正确的类型，则不会执行且返回原对象。
+
+用法如下：
+#+BEGIN_SRC python
+self = torch.LongTensor(3, 5)
+# 转换为其他类型
+print self.type(torch.FloatTensor)
+#+END_SRC
+*** 使用type_as(tesnor)将张量转换为给定类型的张量
+如果张量已经是正确的类型，则不会执行操作。具体操作方法如下：
+#+BEGIN_SRC python
+self = torch.Tensor(3, 5)
+tesnor = torch.IntTensor(2,3)
+print self.type_as(tesnor)
+#+END_SRC
+
+* torchvision
+torchvision包是服务于pytorch深度学习框架的,用来生成图片,视频数据集,和一些流行的模型类和预训练模型.
+[[https://pytorch-cn.readthedocs.io/zh/latest/torchvision/torchvision/][中文文档]]、[[https://pytorch.org/docs/stable/torchvision/index.html][英文文档]]
+
+torchvision由以下四个部分组成:
+1. torchvision.datasets : Data loaders for popular vision datasets
+2. torchvision.models : Definitions for popular model architectures, such as AlexNet, VGG, and ResNet and pre-trained models.
+3. torchvision.transforms : Common image transformations such as random crop, rotations etc.
+4. torchvision.utils : Useful stuff such as saving tensor (3 x H x W) as image to disk, given a mini-batch creating a grid of images, etc.
+** torchvision.datasets
+~torchvision.datasets~ 中包含了以下数据集
+
+- MNIST
+- Fashion-MNIST
+- KMNIST
+- EMNIST
+- QMNIST
+- FakeData
+- COCO
+  - Captions
+  - Detection
+- LSUN
+- ImageFolder
+- DatasetFolder
+- ImageNet
+- CIFAR
+- STL10
+- SVHN
+- PhotoTour
+- SBU
+- Flickr
+- VOC
+- Cityscapes
+- SBD
+- USPS
+- Kinetics-400
+- HMDB51
+- UCF101
+- CelebA
+
+由于以上Datasets都是  ~torch.utils.data.Dataset~ 的子类，所以，他们也可以通过 ~torch.utils.data.DataLoader~ 使用多线程（python的多进程）。例如：
+#+BEGIN_SRC python
+imagenet_data = torchvision.datasets.ImageNet('path/to/imagenet_root/')
+data_loader = torch.utils.data.DataLoader(imagenet_data,
+                                          batch_size=4,
+                                          shuffle=True,
+                                          num_workers=args.nThreads)
+#+END_SRC
+
+所有datasets都有相似的API。它们都有两个相同的参数： ~transform~ 和 ~target_transform~
+
+- transform： 一个函数，原始图片作为输入，返回一个转换后的图片。
+- target_transform - 一个函数，输入为target，输出对其的转换
+*** MNIST
+#+BEGIN_SRC python
+torchvision.datasets.MNIST(root, train=True, transform=None, target_transform=None, download=False)
+#+END_SRC
+- root (string) – Root directory of dataset where MNIST/processed/training.pt and MNIST/processed/test.pt exist.
+- train (bool, optional) – If True, creates dataset from training.pt, otherwise from test.pt.
+- download (bool, optional) – If true, downloads the dataset from the internet and puts it in root directory. If - dataset is already downloaded, it is not downloaded again.
+- transform (callable, optional) – A function/transform that takes in an PIL image and returns a transformed version. E.g, transforms.RandomCrop
+- target_transform (callable, optional) – A function/transform that takes in the target and transforms it.
+* os库
+=os= 是python标准库. =os= 顾名思义，就是与操作系统相关的标准库。如：文件，目录，执行系统命令等。
+
+** path子模块
+涉及与磁盘文件操作，最常使用的当属 path 模块了。path 是 os 的子模块，可以通过 from os import path 使用，也可以直接通过 os.path 属性的方式使用。本文，为了保持一致性，统一采用后者的书写形式。
+
+*** exists(path)
+检测文件或目录是否存在。存在返回 True , 不存在返回 False 。
+#+BEGIN_SRC python
+os.path.exists("dog.jpeg")
+True
+#+END_SRC
+
+*** isfile(path)
+判断是否为文件。是返回 True， 不是返回 False。也可以用来判断文件是否存在。
+#+BEGIN_SRC python
+os.path.isfile("dogs/")
+False
+#+END_SRC
+
+*** isdir(path)
+判断是否为目录。是返回 True， 不是返回 False。也可以用来判断目录是否存在。
+#+BEGIN_SRC python
+os.path.isdir("dogs/")
+True
+#+END_SRC
+
+*** basename(path)
+返回不包含所在目录的文件名（含扩展）。
+#+BEGIN_SRC python
+os.path.basename("dir1/dir2/file.ext")
+'file.ext'
+#+END_SRC
+
+*** dirname(path)
+返回文件所在目录。
+#+BEGIN_SRC python
+os.path.dirname("dir1/dir2/file.ext")
+'dir1/dir2'
+#+END_SRC
+
+*** split(path)
+返回一个元组。元组第一个元素为文件所在目录，第二个元素为文件名（含扩展）。等效于 (dirname(path), basename(path))。
+#+BEGIN_SRC python
+os.path.split("dir1/dir2/file.ext")
+('dir1/dir2', 'file.ext')
+#+END_SRC
+
+*** splitext(path)
+返回一个元组。元组第一个元素为文件所在目录和文件名（不含扩展），第二个元素为扩展名（包含 .）。常用来读取或更改文件扩展名。
+#+BEGIN_SRC python
+os.path.splitext("dir1/dir2/file.ext")
+('dir1/dir2/file', '.ext')
+#+END_SRC
+
+*** join(path, *paths)
+将路径不同部分拼接成一个完整的路径。等效于 os.sep.join([path, *paths]) 。
+#+BEGIN_SRC python
+os.path.join("dir1", "dir2", "file.ext")
+'dir1/dir2/file.ext'
+#+END_SRC
+
+*** getsize(path)
+返回文件大小。单位字节。
+#+BEGIN_SRC python
+os.path.getsize("dog.jpeg")
+18335
+#+END_SRC
+
+** 目录操作
+*** listdir(path='.')
+返回一个列表。列表为给定目录下所有文件和子目录.列表是任意顺序的。它不包括特殊条目’.‘ 和’..‘，即使它们存在于目录中。
+默认为当前目录。
+#+BEGIN_SRC python
+# Open a file
+path = "d:\\tmp\\"
+dirs = os.listdir( path )
+ 
+# This would print all the files and directories
+for file in dirs:
+   print (file)
+
+#+END_SRC
+执行上面代码后，将得到以下结果 ，注意：文件是带有后缀的，而文件夹没有后缀名
+#+BEGIN_SRC python
+Applicationdocs.docx
+test.java
+book.zip
+foo.txt
+Java Multiple Inheritance.html
+Java Multiple Inheritance_files
+java.ppt
+ParallelPortViewer
+#+END_SRC
+
+*** mkdir(path, mode=0o777)
+创建名为 path 的目录。并以数字形式指定目录权限，默认权限为 777 。
+#+BEGIN_SRC python
+os.mkdir("newdir")
+#+END_SRC
+*** makedirs(name, mode=0o777, exist_ok=False)
+递归方式创建路径为 path 的目录。并以数字形式指定目录权限，默认权限为 777 。可以看作功能更强大的 mkdir，它会自动创建叶子节点目录的所有上级目录，而 mkdir 必须在上级目录已经存在情况下，才能创建叶子节点的目录。
+
+=, exist_ok=True= 是py3.2之后才有的写法,如果 exist_ok 为 False (默认值)，则如果目标目录已存在将引发 FileExistsError。
+
+#+BEGIN_SRC python 
+os.makedirs("parent/child/newdir")
+#+END_SRC
+*** rmdir(path)
+删除目录。目录必须存在，并且只能删除空目录。不存在或不为空，都会异常。要想递归删除整个目录树，请使用 shutil.rmtree()。
+#+BEGIN_SRC python
+os.rmdir("newdir")
+#+END_SRC
+*** removedirs(path)
+递归删除目录。目录必须存在，并且只能删除空目录。不存在或不为空，都会异常。与 rmdir 不同的是，在删除了叶子节点目录后，会逐次删除上级目录，直到遇到不为空的目录。
+#+BEGIN_SRC python 
+os.removedirs("parent/child/newdir")
+#+END_SRC
+*** remove(path)
+删除文件。不能删除目录，给定路径必须为文件，否则会异常。
+
+Warm Suggestion: 以下复制文件的操作，推荐使用 shutil.copyfile。
+#+BEGIN_SRC python
+# 复制文件
+with open("dog.jpeg", "rb") as f:
+    content = f.read()
+    with open("dog.copy.jpeg", "wb") as f2:
+        f2.write(content)
+
+# 删除文件
+os.remove("dog.copy.jpeg")
+#+END_SRC
+
+* time库
+time库是Python中处理时间的标准库
+** time()
+time()获取当前时间戳，即计算机内部时间值，浮点数
+#+BEGIN_SRC bash
+>>>time.time()
+1516939876.602228
+#+END_SRC
+** ctime()获取当前时间并以易读方式表示，返回字符串
+#+BEGIN_SRC bash
+>>>time.ctime()
+'Fri Jan 26 12:11:16 2018'
+#+END_SRC
+** gmtime()获取当前时间，表示为计算机可处理的时间格式
+#+BEGIN_SRC bash
+>>>time.gmtime()
+time.struct_time(tm_year=2018, tm_mon=1,
+tm_mday=26, tm_hour=4, tm_min=11, tm_sec=16,
+tm_wday=4, tm_yday=26, tm_isdst=0)
+#+END_SRC
+* 注释
+** 单行注释
+Python中单行注释以 =#= 开头，例如
+#+BEGIN_SRC python
+# 这是一个注释
+print("Hello, World!")
+#+END_SRC
+** 多行注释
+多行注释用三个单引号 ''' 或者三个双引号 """ 将注释括起来，例如:
+#+BEGIN_SRC python
+#!/usr/bin/python3 
+'''
+这是多行注释，用三个单引号
+这是多行注释，用三个单引号 
+这是多行注释，用三个单引号
+'''
+
+"""
+这是多行注释，用三个双引号
+这是多行注释，用三个双引号 
+这是多行注释，用三个双引号
+"""
+
+print("Hello, World!")
+#+END_SRC
+* 编码问题
+最早的Python 只支持 ASCII 编码，普通的字符串 'ABC' 在 Python 内部都是 ASCII 编码的。
+
+Python 在后来添加了对 Unicode 的支持，以 Unicode 表示的字符串用u'...'表示。
+
+不过在最新的 Python 3 版本中，字符串是以 Unicode 编码的，也就是说，Python 的字符串支持多语言。就像上面的例子一样，我的代码中没有加u'...'，也能正常显示。
+
+不过由于 Python 源代码也是一个文本文件，所以，当你的源代码中包含中文的时候，在保存源代码时，就需要务必指定保存为 UTF-8 编码。当Python 解释器读取源代码时，为了让它按 UTF-8 编码读取，我们通常在文件开头写上这两行：
+#+BEGIN_SRC python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+#+END_SRC
+
+第一行注释是为了告诉 Linux/OS X 系统，这是一个 Python 可执行程序，Windows 系统会忽略这个注释；
+
+第二行注释是为了告诉 Python 解释器，按照 UTF-8 编码读取源代码，否则，你在源代码中写的中文输出可能会有乱码。
+
+申明了 UTF-8 编码并不意味着你的 .py 文件就是 UTF-8 编码的，必须并且要确保文本编辑器正在使用 UTF-8 without BOM 编码
+* namedtuple
+namedtuple是继承自tuple的子类。namedtuple创建一个和tuple类似的对象，而且对象拥有可访问的属性。
+#+BEGIN_SRC python
+from collections import namedtuple
+
+# 定义一个namedtuple类型User，并包含name，sex和age属性。
+User = namedtuple('User', ['name', 'sex', 'age'])
+
+# 创建一个User对象
+user = User(name='kongxx', sex='male', age=21)
+
+# 也可以通过一个list来创建一个User对象，这里注意需要使用"_make"方法
+user = User._make(['kongxx', 'male', 21])
+
+print user
+# User(name='user1', sex='male', age=21)
+
+# 获取用户的属性
+print user.name
+print user.sex
+print user.age
+
+# 修改对象属性，注意要使用"_replace"方法
+user = user._replace(age=22)
+print user
+# User(name='user1', sex='male', age=21)
+
+# 将User对象转换成字典，注意要使用"_asdict"
+print user._asdict()
+# OrderedDict([('name', 'kongxx'), ('sex', 'male'), ('age', 22)])
+
+#+END_SRC
+* 字典(Dictionary)
+** items()方法
+~items()~ 函数以列表返回可遍历的(键, 值) 元组数组。
+#+BEGIN_SRC python
+#!/usr/bin/python
+# coding=utf-8
+dict = {'Google': 'www.google.com', 'Runoob': 'www.runoob.com', 'taobao': 'www.taobao.com'}
+
+print "字典值 : %s" %  dict.items()
+ 
+# 遍历字典列表
+for key,values in  dict.items():
+    print key,values
+#+END_SRC
+输出结果为：
+#+BEGIN_SRC bash
+字典值 : [('Google', 'www.google.com'), ('taobao', 'www.taobao.com'), ('Runoob', 'www.runoob.com')]
+Google www.google.com
+taobao www.taobao.com
+Runoob www.runoob.com
+#+END_SRC
+
+* collections库
+** OrderedDict用法
+Python中的字典对象可以以“键：值”的方式存取数据。OrderedDict是它的一个子类，实现了对字典对象中元素的排序。比如下面比较了两种方式的不同：
+#+BEGIN_SRC python
+import collections
+ 
+print 'Regular dictionary:'
+d={}
+d['a']='A'
+d['b']='B'
+d['c']='C'
+for k,v in d.items():
+    print k,v
+ 
+print '\nOrderedDict:'
+d=collections.OrderedDict()
+d['a']='A'
+d['b']='B'
+d['c']='C'
+for k,v in d.items():
+    print k,v
+#+END_SRC
+输出结果如下：
+#+BEGIN_SRC bash
+Regular dictionary:
+a A
+c C
+b B
+ 
+OrderedDict:
+a A
+b B
+c C
+
+#+END_SRC
+可以看到，同样是保存了ABC三个元素，但是使用OrderedDict会根据放入元素的先后顺序进行排序。由于进行了排序，所以OrderedDict对象的字典对象，如果其顺序不同那么Python也会把他们当做是两个不同的对象，比如下面的代码：
+#+BEGIN_SRC python
+import collections
+ 
+print 'Regular dictionary:'
+d1={}
+d1['a']='A'
+d1['b']='B'
+d1['c']='C'
+ 
+d2={}
+d2['c']='C'
+d2['a']='A'
+d2['b']='B'
+ 
+print d1==d2
+ 
+print '\nOrderedDict:'
+d1=collections.OrderedDict()
+d1['a']='A'
+d1['b']='B'
+d1['c']='C'
+ 
+d2=collections.OrderedDict()
+d2['c']='C'
+d2['a']='A'
+d2['b']='B'
+ 
+print  d1==d2
+#+END_SRC
+其输出结果为：
+#+BEGIN_SRC bash
+Regular dictionary:
+True
+ 
+OrderedDict:
+False
+#+END_SRC
+* isinstance() 函数
+isinstance() 函数来判断一个对象是否是一个已知的类型，类似 type()。
+
+isinstance() 与 type() 区别：
+- type() 不会认为子类是一种父类类型，不考虑继承关系。
+- isinstance() 会认为子类是一种父类类型，考虑继承关系。
+
+如果要判断两个类型是否相同推荐使用 isinstance()。
+
+#+BEGIN_SRC python
+>a = 2
+> isinstance (a,int)
+True
+> isinstance (a,str)
+False
+> isinstance (a,(str,int,list))    # 是元组中的一个返回 True
+True
+#+END_SRC
+type() 与 isinstance() 区别：
+#+BEGIN_SRC python
+class A:
+    pass
+ 
+class B(A):
+    pass
+ 
+isinstance(A(), A)    # returns True
+type(A()) == A        # returns True
+isinstance(B(), A)    # returns True
+type(B()) == A        # returns False
+#+END_SRC
+* format()用法
+format():把传统的%替换为{}来实现格式化输出
+
+其实就是format()后面的内容，填入大括号中（可以按位置，或者按变量）
+#+BEGIN_SRC python
+> '数字{1}{2}和{0}'.format("123",456,'789')
+'数字456789和123'
+#这里注意有两层大括号，输出的结果只有一层大括号
+> '数字{{{1}{2}}}和{0}'.format("123",456,'789')
+'数字{456789}和123'
+#允许一个参数用两次
+> '{1}{0}{1}岁'.format('jc',22) 
+'22jc22岁'
+#可以通过添加关键字参数
+> '{name}{age}岁'.format(age=22,name='jc') 
+'jc22岁'
+#+END_SRC
+* pandas库
+pandas是常用的python数据处理包，把csv文件读入成dataframe各式
+** read_csv()
+Read a comma-separated values (csv) file into DataFrame.
+#+BEGIN_SRC python
+pandas.read_csv(filepath_or_buffer: Union[str, pathlib.Path, IO[~ AnyStr]], sep=',', delimiter=None, header='infer', names=None, index_col=None, usecols=None, squeeze=False, prefix=None, mangle_dupe_cols=True, dtype=None, engine=None, converters=None, true_values=None, false_values=None, skipinitialspace=False, skiprows=None, skipfooter=0, nrows=None, na_values=None, keep_default_na=True, na_filter=True, verbose=False, skip_blank_lines=True, parse_dates=False, infer_datetime_format=False, keep_date_col=False, date_parser=None, dayfirst=False, cache_dates=True, iterator=False, chunksize=None, compression='infer', thousands=None, decimal: str = '.', lineterminator=None, quotechar='"', quoting=0, doublequote=True, escapechar=None, comment=None, encoding=None, dialect=None, error_bad_lines=True, warn_bad_lines=True, delim_whitespace=False, low_memory=True, memory_map=False, float_precision=None)
+#+END_SRC
+示例：
+#+BEGIN_SRC python
+data_train=pd.read_csv("./data/train.csv")
+#+END_SRC
+*** 参数
+**** filepath_or_buffer：str, path object or file-like object
+Any valid string path is acceptable. The string could be a URL. Valid URL schemes include http, ftp, s3, and file. For file URLs, a host is expected. A local file could be: file://localhost/path/to/table.csv.
+
+If you want to pass in a path object, pandas accepts any os.PathLike.
+
+By file-like object, we refer to objects with a read() method, such as a file handler (e.g. via builtin open function) or StringIO.
+** pandas.get_dummies
+get_dummies 是利用pandas实现one hot encode的方式。
+#+BEGIN_SRC python
+pandas.get_dummies(data, prefix=None, prefix_sep='_', dummy_na=False, columns=None, sparse=False, drop_first=False, dtype=None) → ’DataFrame’
+#+END_SRC
+Convert categorical variable into dummy/indicator variables.
+
+Returns:DataFrame,Dummy-coded data.
+*** 参数
+- data：array-like, Series, or DataFrame
+Data of which to get dummy indicators.
+- prefix：str, list of str, or dict of str, default None
+String to append DataFrame column names. Pass a list with length equal to the number of columns when calling get_dummies on a DataFrame. Alternatively, prefix can be a dictionary mapping column names to prefixes.
+- prefix_sep：str, default '_'
+If appending prefix, separator/delimiter to use. Or pass a list or dictionary as with prefix.
+- dummy_na:bool, default False
+Add a column to indicate NaNs, if False NaNs are ignored.
+- columns:list-like, default None
+Column names in the DataFrame to be encoded. If columns is None then all the columns with object or category dtype will be converted.
+- sparse:bool, default False
+Whether the dummy-encoded columns should be backed by a SparseArray (True) or a regular NumPy array (False).
+- drop_first:bool, default False
+Whether to get k-1 dummies out of k categorical levels by removing the first level.
+- dtype:dtype, default np.uint8
+Data type for new columns. Only a single dtype is allowed.
+New in version 0.23.0.
+*** 示例
+#+BEGIN_SRC python
+> s = pd.Series(list('abca'))
+> pd.get_dummies(s)
+   a  b  c
+0  1  0  0
+1  0  1  0
+2  0  0  1
+3  1  0  0
+> s1 = ['a', 'b', np.nan]
+> pd.get_dummies(s1)
+   a  b
+0  1  0
+1  0  1
+2  0  0
+> pd.get_dummies(s1, dummy_na=True)
+   a  b  NaN
+0  1  0    0
+1  0  1    0
+2  0  0    1
+> df = pd.DataFrame({'A': ['a', 'b', 'a'], 'B': ['b', 'a', 'c'],
+                   'C': [1, 2, 3]})
+> pd.get_dummies(df, prefix=['col1', 'col2'])
+   C  col1_a  col1_b  col2_a  col2_b  col2_c
+0  1       1       0       0       1       0
+1  2       0       1       1       0       0
+2  3       1       0       0       0       1
+> pd.get_dummies(pd.Series(list('abcaa')))
+   a  b  c
+0  1  0  0
+1  0  1  0
+2  0  0  1
+3  1  0  0
+4  1  0  0
+> pd.get_dummies(pd.Series(list('abcaa')), drop_first=True)
+   b  c
+0  0  0
+1  1  0
+2  0  1
+3  0  0
+4  0  0
+> pd.get_dummies(pd.Series(list('abc')), dtype=float)
+     a    b    c
+0  1.0  0.0  0.0
+1  0.0  1.0  0.0
+2  0.0  0.0  1.0
+#+END_SRC
+*** 示例2
+#+BEGIN_SRC python
+import pandas as pd
+df = pd.DataFrame([  
+            ['green' , 'A'],   
+            ['red'   , 'B'],   
+            ['blue'  , 'A']])  
+
+df.columns = ['color',  'class'] 
+pd.get_dummies(df) 
+#+END_SRC
+get_dummies 前：
+|   | color | class |
+| 0 | grean | A     |
+| 1 | red   | B     |
+| 2 | blue  | A     |
+get_dummied 后：
+|   | color_ble | color_grean | color_red | class_A | class_B |
+| 0 |         0 |           1 |         0 |       1 |       0 |
+| 1 |         0 |           0 |         1 |       0 |       1 |
+| 2 |         1 |           0 |         0 |       1 | 0       |
+可以对指定列进行get_dummies:
+#+BEGIN_SRC python
+pd.get_dummies(df.color)
+#+END_SRC
+|   | color_ble | color_grean | color_red | 
+| 0 |         0 |           1 |         0 |    
+| 1 |         0 |           0 |         1 |    
+| 2 |         1 |           0 |         0 | 
+  
+** pandas.conca
+#+BEGIN_SRC python
+pandas.concat(objs: Union[Iterable[‘DataFrame’], Mapping[Optional[Hashable], ‘DataFrame’]], axis='0', join: str = "'outer'", ignore_index: bool = 'False', keys='None', levels='None', names='None', verify_integrity: bool = 'False', sort: bool = 'False', copy: bool = 'True') → ’DataFrame’
+#+END_SRC
+Concatenate pandas objects along a particular axis with optional set logic along the other axes.
+
+Can also add a layer of hierarchical indexing on the concatenation axis, which may be useful if the labels are the same (or overlapping) on the passed axis number.
+
+Returns:object, type of objs.
+When concatenating all Series along the index (axis=0), a Series is returned. When objs contains at least one DataFrame, a DataFrame is returned. When concatenating along the columns (axis=1), a DataFrame is returned.
+*** 参数
+- objs：a sequence or mapping of Series or DataFrame objects
+If a dict is passed, the sorted keys will be used as the keys argument, unless it is passed, in which case the values will be selected (see below). Any None objects will be dropped silently unless they are all None in which case a ValueError will be raised.
+- axis：{0/’index’, 1/’columns’}, default 0
+The axis to concatenate along.
+- join:{'inner', 'outer'}, default ‘outer’
+How to handle indexes on other axis (or axes).
+- ignore_index:bool, default False
+If True, do not use the index values along the concatenation axis. The resulting axis will be labeled 0, …, n - 1. This is useful if you are concatenating objects where the concatenation axis does not have meaningful indexing information. Note the index values on the other axes are still respected in the join.
+- keys:sequence, default None
+If multiple levels passed, should contain tuples. Construct hierarchical index using the passed keys as the outermost level.
+- levels:list of sequences, default None
+Specific levels (unique values) to use for constructing a MultiIndex. Otherwise they will be inferred from the keys.
+- names:list, default None
+Names for the levels in the resulting hierarchical index.
+- verify_integrity:bool, default False
+Check whether the new concatenated axis contains duplicates. This can be very expensive relative to the actual data concatenation.
+- sort:bool, default False
+Sort non-concatenation axis if it is not already aligned when join is ‘outer’. This has no effect when join='inner', which already preserves the order of the non-concatenation axis.
+New in version 0.23.0.
+Changed in version 1.0.0: Changed to not sort by default.
+- copy:bool, default True
+If False, do not copy data unnecessarily.
+** pandas.DataFrame
+*** pandas.DataFrame.plot
+#+BEGIN_SRC python
+DataFrame.plot(self, *args, **kwargs)
+#+END_SRC
+Make plots of Series or DataFrame.
+
+Uses the backend specified by the option plotting.backend. By default, matplotlib is used.
+
+Returns:matplotlib.axes.Axes or numpy.ndarray of them.
+
+If the backend is not the default matplotlib one, the return value will be the object returned by the backend.
+**** 参数
+- data：Series or DataFrame
+The object for which the method is called.
+
+- x：label or position, default None
+Only used if data is a DataFrame.
+
+- y：label, position or list of label, positions, default None
+Allows plotting of one column versus another. Only used if data is a DataFrame.
+
+- kind：str
+The kind of plot to produce:
+
+'line' : line plot (default)
+
+'bar' : vertical bar plot
+
+'barh' : horizontal bar plot
+
+'hist' : histogram
+
+'box' : boxplot
+
+'kde' : Kernel Density Estimation plot
+
+'density' : same as 'kde'
+
+'area' : area plot
+
+'pie' : pie plot
+
+'scatter' : scatter plot
+
+'hexbin' : hexbin plot.
+
+- figsize:a tuple (width, height) in inches
+
+- use_index:bool, default True
+Use index as ticks for x axis.
+
+- title:str or list
+Title to use for the plot. If a string is passed, print the string at the top of the figure. If a list is passed and subplots is True, print each item in the list above the corresponding subplot.
+
+- grid:bool, default None (matlab style default)
+Axis grid lines.
+
+- legend:bool or {'reverse'}
+Place legend on axis subplots.
+
+- style:list or dict
+The matplotlib line style per column.
+
+- logx:bool or 'sym', default False
+Use log scaling or symlog scaling on x axis. .. versionchanged:: 0.25.0
+
+- logy:bool or 'sym' default False
+Use log scaling or symlog scaling on y axis. .. versionchanged:: 0.25.0
+
+- loglog:bool or 'sym', default False
+Use log scaling or symlog scaling on both x and y axes. .. versionchanged:: 0.25.0
+
+- xticks:sequence
+Values to use for the xticks.
+
+- yticks:sequence
+Values to use for the yticks.
+
+- xlim:2-tuple/list
+
+- ylim:2-tuple/list
+
+- rot:int, default None
+Rotation for ticks (xticks for vertical, yticks for horizontal plots).
+
+- fontsize:int, default None
+Font size for xticks and yticks.
+
+- colormap:str or matplotlib colormap object, default None
+Colormap to select colors from. If string, load colormap with that name from matplotlib.
+
+- colorbar:bool, optional
+If True, plot colorbar (only relevant for 'scatter' and 'hexbin' plots).
+
+- position:float
+Specify relative alignments for bar plot layout. From 0 (left/bottom-end) to 1 (right/top-end). Default is 0.5 (center).
+
+- table:bool, Series or DataFrame, default False
+If True, draw a table using the data in the DataFrame and the data will be transposed to meet matplotlib's default layout. If a Series or DataFrame is passed, use passed data to draw a table.
+
+- yerr:DataFrame, Series, array-like, dict and str
+See Plotting with Error Bars for detail.
+
+- xerr:DataFrame, Series, array-like, dict and str
+Equivalent to yerr.
+
+- mark_right:bool, default True
+When using a secondary_y axis, automatically mark the column labels with “(right)” in the legend.
+
+- include_bool:bool, default is False
+If True, boolean values can be plotted.
+
+- backend:str, default None
+Backend to use instead of the backend specified in the option plotting.backend. For instance, 'matplotlib'. Alternatively, to specify the plotting.backend for the whole session, set pd.options.plotting.backend.
+
+New in version 1.0.0.
+
+- **kwargs
+Options to pass to matplotlib plotting method.
+**** pandas.DataFrame.plot.kde
+#+BEGIN_SRC python
+DataFrame.plot.kde(self, bw_method=None, ind=None, **kwargs)
+#+END_SRC
+Generate Kernel Density Estimate plot using Gaussian kernels.
+
+In statistics, kernel density estimation (KDE) is a non-parametric way to estimate the probability density function (PDF) of a random variable. This function uses Gaussian kernels and includes automatic bandwidth determination.
+
+Returns:matplotlib.axes.Axes or numpy.ndarray of them
+***** 参数
+- bw_method:str, scalar or callable, optional
+The method used to calculate the estimator bandwidth. This can be 'scott', 'silverman', a scalar constant or a callable. If None (default), 'scott' is used. See scipy.stats.gaussian_kde for more information.
+
+- ind:NumPy array or int, optional
+Evaluation points for the estimated PDF. If None (default), 1000 equally spaced points are used. If ind is a NumPy array, the KDE is evaluated at the points passed. If ind is an integer, ind number of equally spaced points are used.
+
+- **kwargs
+Additional keyword arguments are documented in pandas.%(this-datatype)s.plot().
+* Matplotlib
+** 实例
+Matplotlib 是 Python 的绘图库。 它可与 NumPy 一起使用，提供了一种有效的 MatLab 开源替代方案。 它也可以和图形工具包一起使用，如 PyQt 和 wxPython。
+#+BEGIN_SRC python
+import matplotlib.pyplot as plt
+plt.plot([1, 2, 3, 4])
+plt.ylabel('some numbers')
+plt.show()
+#+END_SRC
+图形由 show() 函数显示。
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-07-23_10-23-39.png @ 2020-07-23 10:23:43
+[[file:Matplotlib/2020-07-23_10-23-43_Snipaste_2020-07-23_10-23-39.png]]
+You may be wondering why the x-axis ranges from 0-3 and the y-axis from 1-4. If you provide a single list or array to plot, matplotlib assumes it is a sequence of y values, and automatically generates the x values for you. Since python ranges start with 0, the default x vector has the same length as y but starts with 0. Hence the x data are [0, 1, 2, 3].
+
+以下实例使用 matplotlib 生成折线图。
+#+BEGIN_SRC python 
+plt.plot([1, 2, 3, 4], [1, 4, 9, 16])  #前面的参数作为x，后面的列表作为y的取值
+#+END_SRC
+执行输出结果如下图：
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-07-23_10-26-01.png @ 2020-07-23 10:26:13
+[[file:Matplotlib/2020-07-23_10-26-13_Snipaste_2020-07-23_10-26-01.png]]q
+
+** 格式化字符
+作为线性图的替代，可以通过向 plot() 函数添加格式字符串来显示离散值。
+
+要显示圆来代表点，而不是上面示例中的线，请使用 ob 作为 plot() 函数中的格式字符串。
+#+BEGIN_SRC python
+import numpy as np 
+from matplotlib import pyplot as plt 
+ 
+x = np.arange(1,11) 
+y =  2  * x +  5 
+plt.title("Matplotlib demo") 
+plt.xlabel("x axis caption") 
+plt.ylabel("y axis caption") 
+plt.plot(x,y,"ob")  #这里ob的解释看下面的字符和颜色缩写
+plt.show()
+#+END_SRC
+执行输出结果如下图：
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-07-23_10-11-18.png @ 2020-07-23 10:11:23
+[[file:Matplotlib/2020-07-23_10-11-23_Snipaste_2020-07-23_10-11-18.png]]
+
+*** 字符 
+| 字符     | 描述         |
+|----------+--------------|
+| '-'      | 实线样式     |
+| '--'     | 短横线样式   |
+| '-.'     | 点划线样式   |
+| ':'      | 虚线样式     |
+| '.'      | 点标记       |
+| ','      | 像素标记     |
+| 'o'      | 圆标记       |
+| 'v'      | 倒三角标记   |
+| '^'      | 正三角标记   |
+| '&lt;'   | 左三角标记   |
+| '&gt;'   | 右三角标记   |
+| '1'      | 下箭头标记   |
+| '2'      | 上箭头标记   |
+| '3'      | 左箭头标记   |
+| '4'      | 右箭头标记   |
+| 's'      | 正方形标记   |
+| 'p'      | 五边形标记   |
+| '*'      | 星形标记     |
+| 'h'      | 六边形标记 1 |
+| 'H'      | 六边形标记 2 |
+| '+'      | 加号标记     |
+| 'x'      | X 标记       |
+| 'D'      | 菱形标记     |
+| 'd'      | 窄菱形标记   |
+| '&#124;' | 竖直线标记   |
+| '_'      | 水平线标记   |
+
+*** 颜色
+以下是颜色的缩写：
+| 字符 | 颜色   |
+|------+--------|
+| 'b'  | 蓝色   |
+| 'g'  | 绿色   |
+| 'r'  | 红色   |
+| 'c'  | 青色   |
+| 'm'  | 品红色 |
+| 'y'  | 黄色   |
+| 'k'  | 黑色   |
+| 'w'  | 白色   |
+** 图形中文显示
+Matplotlib 默认情况不支持中文
+#+BEGIN_SRC python
+#解决中文显示问题
+plt.rcParams['font.sans-serif']=['SimHei']
+plt.rcParams['axes.unicode_minus'] = False
+#+END_SRC
+
+** pyplot
+*** pyplot.scatter
+scatter散点图
+#+BEGIN_SRC python
+matplotlib.pyplot.scatter(x, y, s=None, c=None, marker=None, cmap=None, norm=None, vmin=None, vmax=None, alpha=None, linewidths=None, verts=<deprecated parameter>, edgecolors=None, *, plotnonfinite=False, data=None, **kwargs)[source]
+#+END_SRC
+A scatter plot of y vs. x with varying marker size and/or color.
+**** 参数
+- x, y：float or array-like, shape (n, )
+The data positions.
+- sfloat or array-like, shape (n, ), optional
+The marker size in points**2. Default is rcParams['lines.markersize'] ** 2.
+- c:array-like or list of colors or color, optional
+The marker colors. Possible values:
+
+A scalar or sequence of n numbers to be mapped to colors using cmap and norm.
+
+A 2-D array in which the rows are RGB or RGBA.
+
+A sequence of colors of length n.
+
+A single color format string.
+
+Note that c should not be a single numeric RGB or RGBA sequence because that is indistinguishable from an array of values to be colormapped. If you want to specify the same RGB or RGBA value for all points, use a 2-D array with a single row. Otherwise, value- matching will have precedence in case of a size matching with x and y.
+
+If you wish to specify a single color for all points prefer the color keyword argument.
+
+Defaults to None. In that case the marker color is determined by the value of color, facecolor or facecolors. In case those are not specified or None, the marker color is determined by the next color of the Axes' current "shape and fill" color cycle. This cycle defaults to rcParams["axes.prop_cycle"] (default: cycler('color', ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'])).
+- marker:MarkerStyle, default: rcParams["scatter.marker"] (default: 'o')
+The marker style. marker can be either an instance of the class or the text shorthand for a particular marker. See matplotlib.markers for more information about marker styles.
+- cmap:str or Colormap, default: rcParams["image.cmap"] (default: 'viridis')
+A Colormap instance or registered colormap name. cmap is only used if c is an array of floats.
+- norm:Normalize, default: None
+If c is an array of floats, norm is used to scale the color data, c, in the range 0 to 1, in order to map into the colormap cmap. If None, use the default colors.Normalize.
+- vmin, vmax:float, default: None
+nvmin and vmax are used in conjunction with the default norm to map the color array c to the colormap cmap. If None, the respective min and max of the color array is used. It is deprecated to use vmin/vmax when norm is given.
+- alpha:float, default: None
+The alpha blending value, between 0 (transparent) and 1 (opaque).
+- linewidths:float or array-like, default: rcParams["lines.linewidth"] (default: 1.5)
+The linewidth of the marker edges. Note: The default edgecolors is 'face'. You may want to change this as well.
+- edgecolors:{'face', 'none', None} or color or sequence of color, default: rcParams["scatter.edgecolors"] (default: 'face')
+The edge color of the marker. Possible values:
+
+'face': The edge color will always be the same as the face color.
+
+'none': No patch boundary will be drawn.
+
+A color or sequence of colors.
+
+For non-filled markers, the edgecolors kwarg is ignored and forced to 'face' internally.
+- plotnonfinite:bool, default: False
+Set to plot points with nonfinite c, in conjunction with set_bad.
+- Other Parameters:	
+**kwargs:Collection properties
+*** pyplot.subplot()
+ subplot() 函数允许你在同一图中绘制不同的东西。
+*** pyplot.subplot2grid()
+ subplot()这种子区函数只能绘制等分画布形式的图形样式，要想按照绘图区域的不同展示目的，进行非等分画布形式的图形展示，需要向画布多次使用子区函数subplot()完成非等分画布的展示任务，但是这么频繁地操作显得非常麻烦，而且在划分画布时易于出现疏漏和差错。因此，我们需要用高级的方法使用子区，需要定制化的网格区域，这个函数就是subplot2grid()，通过使用subplot2grid()函数的rowspan 和colspan 参数可以让子区跨越固定的网格布局的多个行和列，实现不同的子区布局。
+ #+BEGIN_SRC python
+ plt.subplot2grid(shape, loc, rowspan=1, colspan=1, fig=None, **kwargs)
+ #+END_SRC
+*** pyplot.grid
+#+BEGIN_SRC python
+matplotlib.pyplot.grid(b=None, which='major', axis='both', **kwargs)
+#+END_SRC
+Configure the grid lines.
+**** 参数
+- b:bool or None, optional
+Whether to show the grid lines. If any kwargs are supplied, it is assumed you want the grid on and b will be set to True.
+
+If b is None and there are no kwargs, this toggles the visibility of the lines.
+
+- which{'major', 'minor', 'both'}, optional
+The grid lines to apply the changes on.
+
+- axis{'both', 'x', 'y'}, optional
+The axis to apply the changes on.
+
+- **kwargsLine2D properties
+Define the line properties of the grid, e.g.:
+#+BEGIN_SRC python
+grid(color='r', linestyle='-', linewidth=2)
+#+END_SRC
+Valid keyword arguments are:
+| Property                     | Description                                                                                           |
+|------------------------------+-------------------------------------------------------------------------------------------------------|
+| agg_filter                   | a filter function, which takes a (m, n, 3) float array and a dpi value, and returns a (m, n, 3) array |
+| alpha                        | float or None                                                                                         |
+| animated                     | bool                                                                                                  |
+| antialiased or aa            | bool                                                                                                  |
+| clip_box                     | Bbox                                                                                                  |
+| clip_on                      | bool                                                                                                  |
+| clip_path                    | Patch or (Path, Transform) or None                                                                    |
+| color or c                   | color                                                                                                 |
+| contains                     | unknown                                                                                               |
+| dash_capstyle                | {'butt', 'round', 'projecting'}                                                                       |
+| dash_joinstyle               | {'miter', 'round', 'bevel'}                                                                           |
+| dashes                       | sequence of floats (on/off ink in points) or (None, None)                                             |
+| data                         | (2, N) array or two 1D arrays                                                                         |
+| drawstyle or ds              | {'default', 'steps', 'steps-pre', 'steps-mid', 'steps-post'}, default: 'default'                      |
+| figure                       | Figure                                                                                                |
+| fillstyle                    | {'full', 'left', 'right', 'bottom', 'top', 'none'}                                                    |
+| gid                          | str                                                                                                   |
+| in_layout                    | bool                                                                                                  |
+| label                        | object                                                                                                |
+| linestyle or ls              | {'-', '--', '-.', ':', '', (offset, on-off-seq), ...}                                                 |
+| linewidth or lw              | float                                                                                                 |
+| marker                       | marker style string, Path or MarkerStyle                                                              |
+| markeredgecolor or mec       | color                                                                                                 |
+| markeredgewidth or mew       | float                                                                                                 |
+| markerfacecolor or mfc       | color                                                                                                 |
+| markerfacecoloralt or mfcalt | color                                                                                                 |
+| markersize or ms             | float                                                                                                 |
+| markevery                    | None or int or (int, int) or slice or List[int] or float or (float, float) or List[bool]              |
+| path_effects                 | AbstractPathEffect                                                                                    |
+| picker                       | unknown                                                                                               |
+| pickradius                   | float                                                                                                 |
+| rasterized                   | bool or None                                                                                          |
+| sketch_params                | (scale: float, length: float, randomness: float)                                                      |
+| snap                         | bool or None                                                                                          |
+| solid_capstyle               | {'butt', 'round', 'projecting'}                                                                       |
+| solid_joinstyle              | {'miter', 'round', 'bevel'}                                                                           |
+| transform                    | matplotlib.transforms.Transform                                                                       |
+| url                          | str                                                                                                   |
+| visible                      | bool                                                                                                  |
+| xdata                        | 1D array                                                                                              |
+| ydata                        | 1D array                                                                                              |
+| zorder                       | float                                                                                                 |
+*** add_subplot
+#+BEGIN_SRC python
+add_subplot(self, *args, **kwargs)[source]
+#+END_SRC
+Add an Axes to the figure as part of a subplot arrangement.
+
+Returns:axes.SubplotBase, or another subclass of Axes.
+The axes of the subplot. The returned axes base class depends on the projection used. It is Axes if rectilinear projection is used and projections.polar.PolarAxes if polar projection is used. The returned axes is then a subplot subclass of the base class.
+
+注意，pyplot的方式中plt.subplot()参数和面向对象中的add_subplot()参数和含义都相同。
+
+使用面向对象的方式:
+#+BEGIN_SRC python
+#!/usr/bin/python
+#coding: utf-8
+ 
+import numpy as np
+import matplotlib.pyplot as plt
+ 
+x = np.arange(0, 100)
+ 
+fig = plt.figure()
+ 
+ax1 = fig.add_subplot(221)
+ax1.plot(x, x)
+ 
+ax2 = fig.add_subplot(222)
+ax2.plot(x, -x)
+ 
+ax3 = fig.add_subplot(223)
+ax3.plot(x, x ** 2)
+ 
+ax4 = fig.add_subplot(224)
+ax4.plot(x, np.log(x))
+ 
+plt.show()
+#+END_SRC
+pyplot的方式:
+#+BEGIN_SRC python
+#!/usr/bin/python
+#coding: utf-8
+ 
+import numpy as np
+import matplotlib.pyplot as plt
+ 
+x = np.arange(0, 100)
+ 
+plt.subplot(221)
+plt.plot(x, x)
+ 
+plt.subplot(222)
+plt.plot(x, -x)
+ 
+plt.subplot(223)
+plt.plot(x, x ** 2)
+ 
+plt.subplot(224)
+plt.plot(x, np.log(x))
+ 
+plt.show()
+#+END_SRC
+**** 参数
+- *args:int, (int, int, index), or SubplotSpec, default: (1, 1, 1)
+The position of the subplot described by one of
+
+Three integers (nrows, ncols, index). The subplot will take the index position on a grid with nrows rows and ncols columns. index starts at 1 in the upper left corner and increases to the right. index can also be a two-tuple specifying the (first, last) indices (1-based, and including last) of the subplot, e.g., fig.add_subplot(3, 1, (1, 2)) makes a subplot that spans the upper 2/3 of the figure.
+
+A 3-digit integer. The digits are interpreted as if given separately as three single-digit integers, i.e. fig.add_subplot(235) is the same as fig.add_subplot(2, 3, 5). Note that this can only be used if there are no more than 9 subplots.
+
+A SubplotSpec.
+
+In rare circumstances, add_subplot may be called with a single argument, a subplot axes instance already created in the present figure but not in the figure's list of axes.
+
+- projection:{None, 'aitoff', 'hammer', 'lambert', 'mollweide', 'polar', 'rectilinear', str}, optional
+The projection type of the subplot (Axes). str is the name of a custom projection, see projections. The default None results in a 'rectilinear' projection.
+
+- polar:bool, default: False
+If True, equivalent to projection='polar'.
+
+- sharex, sharey:Axes, optional
+Share the x or y axis with sharex and/or sharey. The axis will have the same limits, ticks, and scale as the axis of the shared axes.
+
+- label:str
+A label for the returned axes.
+*** pyplot.legend
+#+BEGIN_SRC python
+matplotlib.pyplot.legend(*args, **kwargs)
+#+END_SRC
+Place a legend on the axes.该函数可以用以添加图例
+
+* Sklearn 库
+Scikit-learn(sklearn)是机器学习中常用的第三方模块，对常用的机器学习方法进行了封装，包括回归(Regression)、降维(Dimensionality Reduction)、分类(Classfication)、聚类(Clustering)等方法。
+* glob库
+glob是python自己带的一个文件操作相关模块，用它可以查找符合自己目的的文件，类似于Windows下的文件搜索，支持通配符操作，,?,[]这三个通配符，代表0个或多个字符，?代表一个字符，[]匹配指定范围内的字符，如[0-9]匹配数字。两个主要方法如下。
+** glob方法
+glob模块的主要方法就是glob,该方法返回所有匹配的文件路径列表（list）；该方法需要一个参数用来指定匹配的路径字符串（字符串可以为绝对路径也可以为相对路径），其返回的文件名只包括当前目录里的文件名，不包括子文件夹里的文件。
+#+BEGIN_SRC python
+glob(pathname, recursive=False)
+#+END_SRC
+第一个参数pathname为需要匹配的字符串。（该参数应尽量加上r前缀，以免发生不必要的错误）
+
+第二个参数代表递归调用，与特殊通配符“**”一同使用，默认为False。
+
+该函数返回一个符合条件的路径的字符串列表，如果使用的是Windows系统，路径上的“\”符号会自动加上转义符号变为“\\”（方便使用）。
+
+在3.5版本之后，glob函数支持一个特殊的通配符“**”，该通配符可以匹配指定路径里所有文件和目录，包括子目录里的所有文件和目录。相当于递归地调用了这个函数。使用这个通配符必须加上recursive=True参数。（在有复杂目录结构的情况下使用该通配符可能会导致性能下降，拖累整个程序的运行，需谨慎使用！）
+
+比如：
+#+BEGIN_SRC python
+glob.glob(r’c:*.txt’)
+#+END_SRC
+我这里就是获得C盘下的所有txt文件
+#+BEGIN_SRC python
+glob.glob(r’E:\pic**.jpg’)
+#+END_SRC
+获得指定目录下的所有jpg文件
+
+使用相对路径：
+#+BEGIN_SRC python
+glob.glob(r’../*.py’)
+#+END_SRC
+
+需要注意的地方：
+
+glob默认不匹配以点符号（.）开始的文件，如果有这类文件，则需要做特殊处理。
+
+假如当前文件夹包含test.txt和.test.txt两个文件。
+#+BEGIN_SRC python
+>>> import glob
+>>> glob.glob('*.txt')
+['test.txt']
+>>> glob.glob('.*.txt')
+['.test.txt']
+#+END_SRC
+*** glob模块支持的通配符
+| 通配符 | 功能                                                      |
+|--------+-----------------------------------------------------------|
+| *      | 匹配0或多个字符                                           |
+| **     | 匹配所有文件、目录、子目录和子目录里的文件（3.5版本新增） |
+| ?      | 匹配1个字符，与正则表达式里的?不同                        |
+| [exp]  | 匹配指定范围内的字符，如：[1-9]匹配1至9范围内的字符       |
+| [!exp] | 匹配不在指定范围内的字符                                  |
+虽然glob模块可以很轻松地匹配特定文件和文件夹，但是仅仅支持少量的通配符，没办法像正则表达式一样匹配更复杂的字符串。使用的时候应当认真考虑使用场景，根据需求针对性地选择解决方案。
+** iglob方法
+获取一个迭代器（ iterator ）对象，使用它可以逐个获取匹配的文件路径名。与glob.glob()的区别是：glob.glob同时获取所有的匹配路径，而 glob.iglob一次只获取一个匹配路径。
+#+BEGIN_SRC python
+iglob(pathname, recursive=False)
+#+END_SRC
+参数与glob()一致。
+
+返回一个迭代器，该迭代器不会同时保存所有匹配到的路径，遍历该迭代器的结果与使用相同参数调用glob()的返回结果一致。
+
+
+
+下面是一个简单的例子：
+#+BEGIN_SRC python
+#父目录中所有的.py文件
+f = glob.iglob(r'../*.py')
+print f
+<generator object iglob at 0x00B9FF80>
+
+for py in f:
+    print py
+
+#+END_SRC
+f是一个迭代器对象，通过遍历，可以输出所有满足条件的*.py文件
+** escape(pathname)
+
+这个函数是在3.4版本之后才有的，功能是忽略所有通配符。（可以用于测试某文件是否存在）
+（3.5.1版本该函数不能正常运行，升级到3.5.2之后恢复正常）
+* logging模块
+** 日志相关概念
+日志是一种可以追踪某些软件运行时所发生事件的方法。软件开发人员可以向他们的代码中调用日志记录相关的方法来表明发生了某些事情。一个事件可以用一个可包含可选变量数据的消息来描述。此外，事件也有重要性的概念，这个重要性也可以被称为严重性级别（level）。
+*** 日志的作用
+通过log的分析，可以方便用户了解系统或软件、应用的运行情况；如果你的应用log足够丰富，也可以分析以往用户的操作行为、类型喜好、地域分布或其他更多信息；如果一个应用的log同时也分了多个级别，那么可以很轻易地分析得到该应用的健康状况，及时发现问题并快速定位、解决问题，补救损失。
+
+简单来讲就是，我们通过记录和分析日志可以了解一个系统或软件程序运行情况是否正常，也可以在应用程序出现故障时快速定位问题。比如，做运维的同学，在接收到报警或各种问题反馈后，进行问题排查时通常都会先去看各种日志，大部分问题都可以在日志中找到答案。再比如，做开发的同学，可以通过IDE控制台上输出的各种日志进行程序调试。对于运维老司机或者有经验的开发人员，可以快速的通过日志定位到问题的根源。可见，日志的重要性不可小觑。日志的作用可以简单总结为以下3点：
+- 程序调试
+- 了解软件程序运行情况，是否正常
+- 软件程序运行故障分析与问题定位
+
+如果应用的日志信息足够详细和丰富，还可以用来做用户行为分析，如：分析用户的操作行为、类型洗好、地域分布以及其它更多的信息，由此可以实现改进业务、提高商业利益。
+*** 日志的等级
+我们先来思考下下面的两个问题：
+- 作为开发人员，在开发一个应用程序时需要什么日志信息？在应用程序正式上线后需要什么日志信息？
+- 作为应用运维人员，在部署开发环境时需要什么日志信息？在部署生产环境时需要什么日志信息？
+
+在软件开发阶段或部署开发环境时，为了尽可能详细的查看应用程序的运行状态来保证上线后的稳定性，我们可能需要把该应用程序所有的运行日志全部记录下来进行分析，这是非常耗费机器性能的。当应用程序正式发布或在生产环境部署应用程序时，我们通常只需要记录应用程序的异常信息、错误信息等，这样既可以减小服务器的I/O压力，也可以避免我们在排查故障时被淹没在日志的海洋里。那么，怎样才能在不改动应用程序代码的情况下实现在不同的环境记录不同详细程度的日志呢？这就是日志等级的作用了，我们通过配置文件指定我们需要的日志等级就可以了。
+
+不同的应用程序所定义的日志等级可能会有所差别，分的详细点的会包含以下几个等级：
+- DEBUG
+- INFO
+- NOTICE
+- WARNING
+- ERROR
+- CRITICAL
+- ALERT
+- EMERGENCY
+
+| 级别      | 何时使用                                                                           |
+|-----------+------------------------------------------------------------------------------------|
+| DEBUG     | 详细信息，典型地调试问题时会感兴趣。 详细的debug信息。                             |
+| INFO      | 证明事情按预期工作。 关键事件。                                                    |
+| WARNING   | 表明发生了一些意外，或者不久的将来会发生问题（如‘磁盘满了’）。软件还是在正常工作。 |
+| ERROR     | 由于更严重的问题，软件已不能执行一些功能了。 一般错误消息。                        |
+| CRITICAL  | 严重错误，表明软件已不能继续运行了。                                               |
+| NOTICE    | 不是错误，但是可能需要处理。普通但是重要的事件。                                   |
+| ALERT     | 需要立即修复，例如系统数据库损坏。                                                 |
+| EMERGENCY | 紧急情况，系统不可用（例如系统崩溃），一般会通知所有用户。                         |
+*** 日志字段信息与日志格式
+一条日志信息对应的是一个事件的发生，而一个事件通常需要包括以下几个内容：
+- 事件发生时间
+- 事件发生位置
+- 事件的严重程度--日志级别
+- 事件内容
+
+上面这些都是一条日志记录中可能包含的字段信息，当然还可以包括一些其他信息，如进程ID、进程名称、线程ID、线程名称等。日志格式就是用来定义一条日志记录中包含那些字段的，且日志格式通常都是可以自定义的。
+*** 日志功能的实现
+几乎所有开发语言都会内置日志相关功能，或者会有比较优秀的第三方库来提供日志操作功能，比如：log4j，log4php等。它们功能强大、使用简单。Python自身也提供了一个用于记录日志的标准库模块--logging。
+** logging模块
+logging模块是Python内置的标准模块，主要用于输出运行日志，可以设置输出日志的等级、日志保存路径、日志文件回滚等；相比print，具备如下优点：
+- 可以通过设置不同的日志等级，在release版本中只输出重要信息，而不必显示大量的调试信息；
+- print将所有信息都输出到标准输出中，严重影响开发者从标准输出中查看其它数据；logging则可以由开发者决定将信息输出到什么地方，以及怎么输出。
+*** logging模块的日志级别
+logging模块默认定义了以下几个日志等级，它允许开发人员自定义其他日志级别，但是这是不被推荐的，尤其是在开发供别人使用的库时，因为这会导致日志级别的混乱。
+| 日志等级（level） | 描述                                                                                        |
+|-------------------+---------------------------------------------------------------------------------------------|
+| DEBUG             | 最详细的日志信息，典型应用场景是 问题诊断                                                   |
+| INFO              | 信息详细程度仅次于DEBUG，通常只记录关键节点信息，用于确认一切都是按照我们预期的那样进行工作 |
+| WARNING           | 当某些不期望的事情发生时记录的信息（如，磁盘可用空间较低），但是此时应用程序还是正常运行的  |
+| ERROR             | 由于一个更严重的问题导致某些功能不能正常运行时记录的信息                                    |
+| CRITICAL          | 当发生严重错误，导致应用程序不能继续运行时记录的信息                                        |
+开发应用程序或部署开发环境时，可以使用DEBUG或INFO级别的日志获取尽可能详细的日志信息来进行开发或部署调试；
+
+应用上线或部署生产环境时，应该使用WARNING或ERROR或CRITICAL级别的日志来降低机器的I/O压力和提高获取错误日志信息的效率。日志级别的指定通常都是在应用程序的配置文件中进行指定的。
+
+上面列表中的日志等级是从上到下依次升高的，即：DEBUG < INFO < WARNING < ERROR < CRITICAL，而日志的信息量是依次减少的；
+
+当为某个应用程序指定一个日志级别后，应用程序会记录所有日志级别大于或等于指定日志级别的日志信息，而不是仅仅记录指定级别的日志信息，nginx、php等应用程序以及这里的python的logging模块都是这样的。同样，logging模块也可以指定日志记录器的日志级别，只有级别大于或等于该指定日志级别的日志记录才会被输出，小于该等级的日志记录将会被丢弃。
+*** 2、logging模块的使用方式介绍
+logging模块提供了两种记录日志的方式：
+- 第一种方式是使用logging提供的模块级别的函数
+- 第二种方式是使用Logging日志系统的四大组件
+
+其实，logging所提供的模块级别的日志记录函数也是对logging日志系统相关类的封装而已。
+
+logging模块定义的模块级别的常用函数
+| 函数                                   | 说明                                 |
+|----------------------------------------+--------------------------------------|
+| logging.debug(msg, *args, **kwargs)    | 创建一条严重级别为DEBUG的日志记录    |
+| logging.info(msg, *args, **kwargs)     | 创建一条严重级别为INFO的日志记录     |
+| logging.warning(msg, *args, **kwargs)  | 创建一条严重级别为WARNING的日志记录  |
+| logging.error(msg, *args, **kwargs)    | 创建一条严重级别为ERROR的日志记录    |
+| logging.critical(msg, *args, **kwargs) | 创建一条严重级别为CRITICAL的日志记录 |
+| logging.log(level, *args, **kwargs)    | 创建一条严重级别为level的日志记录    |
+| logging.basicConfig(**kwargs)          | 对root logger进行一次性配置          |
+其中logging.basicConfig(**kwargs)函数用于指定“要记录的日志级别”、“日志格式”、“日志输出位置”、“日志文件的打开模式”等信息，
+* PIL（Pillow）库
+PIL：Python Imaging Library，已经是Python平台事实上的图像处理标准库了。PIL功能非常强大，但API却非常简单易用。
+
+由于PIL仅支持到Python 2.7，加上年久失修，于是一群志愿者在PIL的基础上创建了兼容的版本，名字叫Pillow，支持最新Python 3.x，又加入了许多新特性，因此，我们可以直接安装使用Pillow。安装命令： pip3  install pillow
+** PIL.Image
+Image模块是在Python PIL图像处理中常见的模块，对图像进行基础操作的功能基本都包含于此模块内。如open、save、conver、show…等功能。
+*** PIL.Image.open
+#+BEGIN_SRC python
+PIL.Image.open(fp, mode='r')[source]
+#+END_SRC
+Opens and identifies the given image file.This is a lazy operation; this function identifies the file, but the file remains open and the actual image data is not read from the file until you try to process the data (or call the load() method).
+这个是一个懒操作；该函数只会读文件头，而真实的图像数据直到试图处理该数据才会从文件读取（调用load()方法将强行加载图像数据）。
+
+Returns:An Image object.
+
+要从文件加载图像，使用 open() 函数， 在 Image 模块：
+#+BEGIN_SRC python
+from PIL import Image             ##调用库
+im = Image.open("E:\mywife.jpg")  ##文件存在的路径
+im.show()                         
+#+END_SRC
+需要知道的是在win的环境下im.show的方式为win自带的图像显示应用。打开并确认给定的图像文件如果变量mode被设置，那必须是“r”。用户可以使用一个字符串（表示文件名称的字符串）或者文件对象作为变量file的值。文件对象必须实现read()，seek()和tell()方法，并且以二进制模式打开。
+**** 参数
+- fp – A filename (string), pathlib.Path object or a file object. The file object must implement read(), seek(), and tell() methods, and be opened in binary mode.
+- mode – The mode. If given, this argument must be “r”.
+*** PIL.Image.Save
+#+BEGIN_EXAMPLE
+im.save(outfile,options…)
+im.save(outfile, format, options…)
+#+END_EXAMPLE
+* 关于梯度裁剪
+神经网络的训练过程中，有时候会出现梯度爆炸的情况，具体表现为某些参数值变为nan，为了尽可能避免这种情况，需要对梯度进行裁剪，也就是把梯度限定在一定的范围内。
+
+常见的两种clip方法：
+
+按值裁剪：也就是将梯度限定在一定的值范围内，最大值max_value和最小值min_value是需要调节的超参
+#+BEGIN_SRC python
+if grad > max_value:
+    grad = max_value
+elif grad < min_value:
+    grad = min_value
+#+END_SRC
+按范数裁剪：当梯度的范数超过指定值是进行裁剪，需要设置超参max_norm
+#+BEGIN_SRC python 
+if norm(grad) > max_norm:
+    grad = grad * (max_norm / norm(grad))
+#+END_SRC
+* tensoflow
+** 梯度裁剪
+#+BEGIN_SRC python
+[...]
+
+optimizer = tf.train.AdamOptimizer(lr)
+# 根据loss计算梯度
+grads_and_vars = optimizer.compute_gradients(loss)
+
+for idx, (grad, var) in enumerate(grads_and_vars):
+    if grad is not None:
+        ## 按范数裁剪
+        grads_and_vars[idx] = (tf.clip_by_norm(grad, max_norm), var)
+
+train_op = optimizer.apply_gradients(grads_and_vars, global_step)
+
+## 按值裁剪
+tf.clip_by_value(grad, min_value, max_value)
+
+## 其他裁剪方法
+tf.clip_by_average_norm(grad, clip_norm)
+tf.clip_by_global_norm(grad, clip_norm)
+#+END_SRC

@@ -1,0 +1,189 @@
+* evil教程
+任何时候你都可以用下面两个命令在emacs模式和vim模式切换：
+- =M-x evil-emacs-state RET= 使用emacs模式
+- =M-x evil-normal-state RET= 使用evil模式
+
+1. =M-x evil-tutor-start= 打开官方evil教程
+2. =ESC= 返回normal state（命令模式）
+
+** 移动命令 
+- =kjhl= 上下左右移动
+- =$= 移动到行尾
+- =^= 移动到行首
+- =gg= 移动到buffer的开头
+- =G= 移动到buffer的结尾
+- =:[number]= 移动到第[number]行,buffer右下角可以看到光标所在行数
+- =%= 移动到括号匹配的位置,如(,[,{
+- =C-d= 向下翻页
+- =C-u= 向上翻页
+** 编辑命令
+- =x= 向后删除一个字符
+- =X= 向前删除一个字符
+- =u= 撤销操作
+- =CTRL-R= 执行操作,跟 =u= 的作用是相反的
+- =i= 在光标位置进行插入
+- =I= 在光标所在行首进行插入
+- =a= 在光标后进行插入
+- =A= 在光标所在行尾进行插入
+- =o= 在光标所在下一行进行插入
+- =O= 在光标所在上一行进行插入
+- =de= 删除从光标到单词结尾的字符,单词后的空格不会会被删除
+- =dw= 删除从光标到单词结尾的字符,单词后的空格也会被删除
+- =d$= 删除从光标到行尾的字符
+- =dd= 删除光标所在的行
+- =dG= 剪切至档尾
+- =d^= 剪切至行首
+- =3 dd= 删除3行
+- =d [number] object= or =[number] d object= 重复操作，[number]为重复次数,object可以为w,e,$
+- =p= 在光标后粘贴上次删除的内容
+- =P= 在光标上一行粘贴上次删除的内容,注意这个只对删除的内容为行才有用,若删除内容为字符,那么 =p= 和 =P= 的作用是一样的
+- =cw= 删除光标到单词结尾的所有字符,删除后进入插入模式
+- =[number] c object= object可以为w(word),$(end of line) etc...
+- =y= 在使用v模式选定了某一块的时候，复制选定块到缓冲区用；
+- =yy= 复制整行（nyy或者yny ，复制n行，n为数字）；
+- =y^= 复制当前到行头的内容；
+- =y$= 复制当前到行尾的内容；
+- =yw= 复制一个word （nyw或者ynw，复制n个word，n为数字）；
+- =yG= 复制至档尾（nyG或者ynG，复制到第n行，例如1yG或者y1G，复制到档尾）
+
+** 查找替换命令
+- =/= 向前查找字符
+- =?= 向后查找字符
+= =n= 和 =N= 选择前一个/后一个匹配项
+- =r= 替换一个字符
+- =R= 连续替换字符
+- =s/thee/the= 将所在行匹配到的第一个thee替换为the
+- =s/thee/the/g= 将所在行匹配到的所有thee替换为the
+- =#,#s/old/new/g= #,#为查找的行范围
+- =%s/old/new/g= 将整个buffer匹配到的old都替换为new
+** 退出保存命令
+   :PROPERTIES:
+   :ID:       bcd1cb88-2d91-41be-b503-dd767f7bf57f
+   :END:
+- =:qa!= 退出且不保存
+- =:wqa= 退出并保存
+** 特殊命令
+- =![command]= 执行外部命令
+ 
+* 术语
+** States
+=evil-insert-state= 相当于vim的插入模式
+
+=evil-normal-state= 相当于vim的普通模式
+** Layers
+Layers 是为了将相关的packages组合在一起以提供功能。例如 =python= layer提供了自动补全和拼写检查的功能。
+
+layer可以使用户不必考虑要安装哪些软件包，从而有助于使配置井井有条并减少用户的开销。
+
+spacemacs 中相关功能的插件/扩展包以 layer 的形式聚合在一起。有不少 layer 的功能无法使用 Emacs Lisp 脚本实现，它们依赖于其他的软件包才能正常工作。以 Python layer 为例，其文档（位于~/.emacs.d/layers/+lang/python/README.org）明确指出了它的外部依赖。
+
+
+* 基本操作
+** buffer和窗口
+*** buffer
+ 所有buffer快捷键都位于 =SPC b= 字首下.
+
+ | Keybinding                | Function                                             |
+ |---------------------------+------------------------------------------------------|
+ | ~SPC b b <buffer-name>~   | 创建一个名为 =<buffer-name>= 的buffer.                      |
+ | ~SPC b b~                 | 可以选择跳转到buffer或者最近打开的文件
+ | ~SPC b n~ or ~:bnext~     | 跳转到下一个buffer
+ | ~SPC b p~ or ~:bprevious~ | 跳转到上一个buffer
+ | ~SPC b d~ or ~:bdelete~   | 关闭当前buffer                   |
+ | ~SPC b C-d~               | Kill buffers using a regular expression.             |
+ | ~SPC b m~                 | 关闭除了当前buffer之外的其余所有buffer
+ | ~SPC b .~                 | 打开buffer操作菜单
+**** 特殊buffer
+ Emacs默认会创建许多buffer,如 =*Messages*= .当输入上面表格的快捷键时,不会对这些特殊的buffer造成影响.
+*** 窗口
+ 所有窗口快捷键都位于 ~SPC w~ 字首下
+
+ | Keybinding             | Function                             |
+ |------------------------+--------------------------------------|
+ | ~SPC w v~ or ~:vsplit~ | 在右边创建窗口                             |
+ | ~SPC w s~ or ~:split~  | 在水平下方创建窗口                            |
+ | ~SPC w h/j/k/l~        | 跳转到左下上右方向的窗口       |
+ | ~SPC w H/J/K/L~        | 移动当前窗口的位置      |
+ | ~SPC w .~              | 打开窗口操作菜单
+** 文件
+ 所有的文件操作快捷键都位于 ~SPC f~ 字首下
+
+ | Keybinding        | Function                                                     |
+ |-------------------+--------------------------------------------------------------|
+ | ~SPC f f~         | Opens a buffer to search for files in the current directory. |
+ | ~SPC f r~         | Opens a buffer to search through recently opened files.      |
+ | ~SPC f s~ or ~:w~ | Save the current file.                                       |
+ | ~:x~              | Save the current file and quit.                              |
+ | ~:e <file>~       | Open =<file>=                                                |
+** 帮助
+ 帮助系统的快捷将都位于 ~SPC h d~ 字首下
+
+ | Keybinding  | Function                                                                         |
+ |-------------+----------------------------------------------------------------------------------|
+ | ~SPC h d f~ | Prompts for a function and shows its documentation.                              |
+ | ~SPC h d k~ | Prompts for a keybinding and shows what it is bound to.                          |
+ | ~SPC h d v~ | Prompts for a variable and shows its documentation and current value.            |
+ | ~SPC <f1>~  | Searches for a command, function, variable, or face and shows its documentation. |
+** 探索
+ | Keybinding  | Function                                                      |
+ |-------------+---------------------------------------------------------------|
+ | ~SPC h SPC~ | Lists all layers and allows you to view files from the layer. |
+ | ~SPC ?~     | Lists all keybindings.                                        |
+* .spacemacs 文件
+当你首次启动spacemacs时,系统会提示你选择输入模式.选择输入模式后,系统会创建一个名为 =.spacemacs= 的文件.
+这个文件保存了一些简单的配置.
+
+=.spacemacs= 文件主要由四个函数组成:
+1. =dotspacemacs/layers= 决定了哪些layers和packages被启用.dotspacemacs-configuration-layers 是启用的 layer 列表。初始列举的 layer 大多被双引号注释掉了，你可以移除注释使用它们，同时自行添加其他的 layer。
+2. =dotspacemacs/init= 保存了spacemacs的默认配置,这个会在spacemacs启动时最先运行.首次启动spacemacs时选择的编辑风格就是保存在这里面的.
+3. =dotspacemacs/user-init= 这个也会在spacemacs启动时先运行,保存了用户的一些特殊配置.
+4. =dotspacemacs/user-config= 当你对某个package进行设置时,设置内容就会保存在这里.
+** dotspacemacs/init
+dotspacemacs-editing-style 是默认编辑模式。evil mode 对应的值为 'vim。
+
+dotspacemacs-themes 用于设置皮肤。想挑皮肤去[[https://bitmingw.com/2017/03/02/spacemacs-install-configuration/][这个网站]]就好了。
+
+dotspacemacs-maximized-at-startup 在启动时自动最大化窗口。把这个值设置为 t 以获得沉浸式的编辑体验。若想要全屏运行 spacemacs，请改写 dotspacemacs-fullscreen-at-startup。
+
+dotspacemacs-line-numbers 设置是否显示行号。nil隐藏，t则显示出来。
+
+dotspacemacs-whitespace-cleanup 删除多余的空白，推荐设置为'trailing。
+
+** 快捷键
+| Keybinding  | Function                                                                 |
+|-------------+--------------------------------------------------------------------------|
+| ~SPC f e d~ | 打开你的 =.spacemacs=  配置文件                                                  |
+| ~SPC f e D~ | Update your =.spacemacs= manually using a diff with the default template |
+* emacs lisp
+~SPC h i elisp RET~ 可查看emacs lisp 的详细介绍.
+* Layer
+** 激活Layer 
+ 在 =.spacemacs= 文件中的 =dotspacemacs-configuration-layers= 填入layer名并重启emacs(或者输入 ~SPC f e R~)即可激活layer.
+** 创建Layer以及layer的结构
+创建Layer的命令 ~SPC SPC configuration-layer/create-layer~
+
+执行以上命令后，会生成以下形式的文件夹和文件。
+
+#+BEGIN_EXAMPLE
+    [layer-name]
+      |__ [local]*
+      | |__ [example-mode-1]
+      | |     ...
+      | |__ [example-mode-n]
+      |__ config.el*
+      |__ funcs.el*
+      |__ keybindings.el*
+      |__ packages.el
+
+    [] = directory
+    * = not created by the command
+#+END_EXAMPLE
+| File           | Usage                                                                                            |
+|----------------+--------------------------------------------------------------------------------------------------|
+| layers.el      | The place to declare additional layers                                                           |
+| packages.el    | The list of packages and their configuration functions (init, post-init, etc...)                 |
+| funcs.el       | All functions defined in the layer (used in package configuration for instance)                  |
+| config.el      | Layer configuration (defines the layer variables default values and setup some config variables) |
+| keybindings.el | General key bindings no tied to a specific package configuration                                 |
+
+

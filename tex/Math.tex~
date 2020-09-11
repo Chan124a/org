@@ -1,0 +1,204 @@
+\documentclass[UTF8]{ctexart}
+\newtheorem{theorem}{定理}[section]
+\newtheorem{pro}{命题}[section]
+\newtheorem{coro}{推论}[theorem]
+\newtheorem{lemma}{引理}[section]
+\begin{document}
+\section{定义}
+\begin{enumerate}
+\item R中稠密 P4
+\item 数列收敛 P9,13
+\item 上界,下界,有界数列 P13
+\item 子列 P14
+\item 数列极限正负无穷大的定义 P24
+\item 单调数列 P26
+\item 基本类 P36
+\item 上下确界 P40
+\item 开覆盖 P43
+\item 上下极限 P45
+\item 映射,定义域,像,原像 P55
+\item 相等映射,逆映射 P56
+\item 满射,单射,一一对应 P57
+\item 映射的复合 P57
+\item 恒等映射 P58
+\item 集合的等价 P59
+\item 有限集,无限集,可数集,不可数集,至多可数集 P59
+\item 函数,反函数 P63
+\item (严格)单调函数,(严格)递增函数,(严格)递减函数 P66
+\item 函数$f$在点$x_{0}$有极限$l$ P69
+\item 设函数$f$在$(x_0,x_0+r)(r \mbox{是一个确定的正数} )$上有定义.设$l$是一个给定的实数.若对任意给定的$\epsilon >0$,存在一个$\delta \in (0,r)$,使得当$0<x-x_0<\delta$时,有$|f(x)-l|<\epsilon$,则称$l \mbox{为} f \mbox{在}x_0 \mbox{处的右极限,表示成} l=\lim\limits_{x \to x_0^+ }f(x)$.在右极限存在的情形下,这个右极限常记为$f(x_0 +)$或$f(x_0 +0)$.也就是说,$f(x_0+)=\lim\limits_{x \to x_0^+ }f(x)$.类似地,可以定义$f$在$x_0$处的左极限$f(x_0-)$.   
+\end{enumerate}
+
+\section{实数}
+任何分数一定是有尽小数或无尽循环小数。
+	
+每一个实数都可以用有理数去逼近到任意精确的程度。
+	
+有理数集Q在R中是稠密的。
+	
+\section{数列极限}
+\begin{theorem}
+    	如果数列$\{a_n\}$收敛，则它只有一个极限。
+\end{theorem}
+\begin{theorem}
+收敛数列是有界的。
+\end{theorem}
+\begin{theorem}
+设收敛数列$\{a_n\}$的极限是$a$，那么$\{a_n\}$的任何一个子列都收敛于$a$。
+\end{theorem}
+\begin{coro}
+		数列$\{a_n\}$收敛的充分必要条件是它的偶数项子列$\{a_{2n}\}$和奇数项子列$\{a_{2n-1}\}$都收敛，并且有相同的极限。
+\end{coro}
+\begin{theorem}（极限的四则运算）
+	设$\{a_n\}$与$\{b_n\}$都是收敛数列，则${a_n+b_n}$，${a_nb_b}$也是收敛数列。如果$\lim\limits_{n\to\infty}b_n\neq0$,则$\{a_n/b_n\}$也收敛，并且有：
+\begin{enumerate}
+	\item $\lim\limits_{n\to\infty}a_n+b_n=\lim\limits_{n\to\infty}a_n$;
+	\item $\lim\limits_{n\to\infty}a_nb_n=\lim\limits_{n\to\infty}a_n \cdot \lim\limits_{n\to\infty}b_n$，特别的，如果$c$是常数，便有$\lim\limits_{n\to\infty}ca_n=c\lim\limits_{n\to\infty}a_n;$
+	\item $\lim\limits_{n\to\infty} \frac{a_n}{b_n}=\frac{\lim\limits_{n\to\infty}a_n}{\lim\limits_{n\to\infty}b_n}$,其中$\lim\limits_{n\to\infty}b_n\neq0.$	
+\end{enumerate}
+\end{theorem}
+\begin{theorem}
+（夹逼定理）设$a_n\leq b_n \leq c_n (n\in N_*)$,如果$\lim\limits_{n\to\infty}a_n=\lim\limits_{n\to\infty}c_n=a$,那么$\lim\limits_{n\to\infty}b_n=a$
+\end{theorem}
+\begin{theorem}保号性
+\begin{enumerate}
+	\item 设$\lim\limits_{n\to\infty}a_n=a,\alpha,\beta$满足$\alpha<a<\beta$,那么当$n$充分大时,有$a_n>\alpha$;同样,当$n$充分大时,有$a_n<\beta$
+	\item 设$\lim\limits_{n\to\infty}a_n=a,\lim\limits_{n\to\infty}b_n=b$,且$a<b$,那么当$n$充分大时,一定有$a_n<b_n$.
+	\item 设$\lim\limits_{n\to\infty}a_n=a,\lim\limits_{n\to\infty}b_n=b$,并且当$n$充分大时$a_n\leq b_n$,那么有$a \leq b$.
+\end{enumerate}
+\end{theorem}
+\begin{pro}无穷大的性质
+	\begin{enumerate}
+		\item 如果$\{a_n\}$是无穷大,那么$\{a_n\}$必然无界.
+		\item 从无界数列中一定能选出一个子列是无穷大.
+		\item 如果$\lim\limits_{n\to\infty}a_n=+\infty$(或$-\infty,\infty$),那么对$\{a_n\}$的任意子列$\{a_{k_n}\}$,也有\[\lim\limits_{n\to\infty}a_{k_n}=+\infty\mbox{(或}-\infty,\infty)\].
+		\item $\mbox{如果}\lim\limits_{n\to\infty}a_n=+\infty,\lim\limits_{n\to\infty}b_n=+\infty,\mbox{那么}$\[\lim\limits_{n\to\infty}(a_n+b_n)=+\infty,\lim\limits_{n\to\infty}a_nb_n=+\infty\]
+		\item $\{a_n\}$是无穷大的充分必要条件是$\{1/a_n\}$为无穷小.
+	\end{enumerate}
+\end{pro}
+\begin{theorem}
+	单调有界数列一定有极限.
+\end{theorem}
+\begin{theorem}
+	(闭区间套定理)设$I_n=[a_n,b_n](n\in N^*),\mbox{并且}I_1\supset I_2 \supset I_3 \supset \cdots \supset I_n\supset I_{n+1}\supset \cdots.$如果这一列区间的长度$\langle I_n\langle=b_n-a_n\to 0(n\to \infty),$那么交集$\bigcap\limits_{n=1}^\infty I_n$含有唯一的一点.
+\end{theorem}
+\begin{theorem}
+	自然对数的底是无理数.
+\end{theorem}
+\begin{lemma}
+	从任一数列中必可取出一个单调数列.
+\end{lemma}
+\begin{theorem}
+	(列紧性定理)从任何有界数列必可选出一个收敛子列.
+\end{theorem}
+\begin{theorem}(Cauchy收敛定理)
+	一个数列收敛的充分必要条件是,它是基本列.
+\end{theorem}
+\begin{theorem}(确界定理)
+	非空有上界的集合必有上确界.
+	
+	非空有下界的集合必有下确界.
+\end{theorem}
+\begin{pro}
+	$-sup(-E)=inf E\quad \mbox{或}\quad sup(-E)=-infE$ 
+\end{pro}
+\begin{theorem}
+		(紧致性定理,有限覆盖定理,Heine-Borel定理)设$[a,b]$是一个有限闭区间,并且它有一个开覆盖$\{I_\lambda\}$,那么从这个开区间族必可选出有限个成员(开区间)来,这有限个开区间所成的族仍是$[a,b]$的开覆盖.
+\end{theorem}	
+\begin{theorem}
+		设$\{a_n\}$为一数列,$E$为$\{a_n\}$所有极限点组成的集合,$a^*$为上极限.那么:
+	\begin{enumerate}
+		\item $a^*\in E;$
+		\item $\mbox{若} x>a^*,\mbox{则存在}N\in N^*,\mbox{使得当}n\leq N\mbox{时,有}a_n<x; $
+		\item $a^*$是满足前两条性质的唯一数.
+	\end{enumerate}
+	对下极限$a_*$也有类似定理.
+\end{theorem}
+\begin{theorem}
+	设$\{a_n\},\{\b_n\}$是两个数列.
+\begin{enumerate}
+	\item $\liminf\limits_{n\to \infty} a_n\leq \limsup\limits_{n\to \infty} a_n$
+	\item $\lim\limits_{n\to \infty}a_n=a$当且仅当$\liminf\limits_{n\to \infty}a_n=\limsup\limits_{n\to \infty}a_n=a;$
+	\item 若\textup{N}是某个正整数,当$n>N$时,$a_\leq b_n$,那么\[\liminf\limits_{n\to \infty}a_n\leq\liminf\limits_{n\to \infty}b_n,\limsup\limits_{n\to \infty}a_n\leq\limsup\limits_{n\to \infty}b_n\]
+\end{enumerate}
+\end{theorem}
+\begin{theorem}
+	对数列$\{a_n\}$,定义$\alpha_n=\inf\limits_{k\geq n}a_k,\beta_n=\sup\limits_{k\geq n}a_k$,那么:
+	\begin{enumerate}
+		\item $\{\alpha_n\}$是递增数列,$\{\beta_n\}$是递减数列;
+		\item $\lim\limits_{n\to \infty}\alpha_n=a_*,\lim\limits_{n\to \infty}\beta_n=a^*$.
+	\end{enumerate}
+\end{theorem}
+\begin{theorem}
+  (Sotlz定理)$\frac{\infty}{\infty}\mbox{型}$设${b_n}$是严格递增且趋于$+\infty$的数列.如果
+  $$\lim\limits_{n \to \infty} \frac{a_n-a_{n-1}}{b_n-b_{n-1}}=A$$
+  那么
+  $$\lim\limits_{n \to \infty}\frac{a_n}{b_n}=A$$其中A可以是$+\infty \mbox{或} -\infty$.
+\end{theorem}
+
+\section{集合}
+\begin{theorem}
+  可数集A的每一个无限子集是可数集.
+\end{theorem}
+\begin{theorem}
+  设${E_n}(n=1,2,3,\cdots)$是一列至多可数集.令
+  \[S=\bigcup\limits_{n=1}^\infty E_n\]
+  那么$S$是至多可数集.
+\end{theorem}
+\begin{theorem}
+  $R$中的全体有理数是可数的.
+\end{theorem}
+\begin{theorem}
+  $[0,1]$上的全体实数是不可数的
+\end{theorem}
+
+
+
+\section{函数的连续性}
+
+\subsection{函数}
+\begin{theorem}
+  设函数$f$在其定义域$X$上是严格递增(递减)的,那么反函数$f^{-1}$必存在,$f^{-1}$的定义域为$f(X)$,并且$f^{-1}$在这一集合上也是严格递增(递减)的.
+\end{theorem}
+
+\subsection{函数的极限}
+\begin{theorem}
+  函数$f$在$x_{0}$处有极限$l$的充分必要条件是,对任意一个收敛于$x_{0}$的数列$\{x_n \neq x_0:n=1,2,3,\cdots\}$,数列${f(x_n)}$有极限$l$.
+\end{theorem}
+\begin{theorem}
+  (函数极限的唯一性)若$\lim\limits_{x \to x_{0} }f(x)$存在,则它是唯一的. 
+\end{theorem}
+\begin{theorem}
+  若$f$在$x_0$有极限,那么$f$在$x_0$的一个近旁是有界的.也就是说,存在整数$M \mbox{及}\delta$,使得当$0<|x-x_0|<\delta$时,$f(x)<M$.
+\end{theorem}
+\begin{theorem}
+  设$\lim\limits_{x \to x_0 }f(x)\mbox{与}\lim\limits_{x \to x_0 }g(x)$存在,那么有:
+  
+\begin{itemize}
+\item $\lim\limits_{x \to x_0 }(f+g)(x)=\lim\limits_{x \to x_0 }f(x) \pm \lim\limits_{x \to x_0 }g(x)$;
+\item $\lim\limits_{x \to x_0 }fg(x)=\lim\limits_{x \to x_0 }f(x) \cdot \lim\limits_{x \to x_0 }g(x)$;
+\item $\lim\limits_{x \to x_0 }\frac{f}{g}(x)=\frac{\lim\limits_{x \to x_0 }f(x)}{\lim\limits_{x \to x_0 }g(x)}$,其中$\lim\limits_{x \to x_0 }g(x) \neq 0$.
+\end{itemize}
+\end{theorem}
+\begin{theorem}
+  (夹逼定理)设函数$f,g \mbox{与}h$在点$x_0$的近旁(点$x_0$自身可能是例外)满足不等式
+  \[f(x) \leq h(x)\leq g(x)\].
+  如果$f \mbox{与} g$在点$x_0$有相同的极限$l$,那么函数$h$在点$x_0$也有极限$l$.
+\end{theorem}
+\begin{theorem}
+  设存在$r >0$使得当$0<|x-x_0|<r$时,不等式$f(x)\leq g(x)$成立.有设在$x_0$处这两个函数都有极限,那么$\lim\limits_{x \to x_0 }f(x)\leq \lim\limits_{x \to x_0 }g(x)$
+\end{theorem}
+\begin{theorem}
+ 函数$f$在$x_0$处有极限,必须且只需对任意给定的$\epsilon >0$,存在$\delta>0$,使得对任意的$x_1,x_2 \in B_{\delta}(\check x_{0})$,都有$|f(x_1)-f(x_2)|< \epsilon.$
+\end{theorem}
+\begin{theorem}
+ 设$\lim\limits_{x \to x_0 }f(x)=l,\lim\limits_{t \to t_0 }g(t)=x_0$.如果在$t_0$的某个领域$B_{\eta}(t_0)$内$g(t) \neq x_0$,那么$\lim\limits_{t \to t_0 }f(g(t))=l$.
+\end{theorem}
+\begin{theorem}
+
+\end{theorem}
+\end{document}
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

@@ -1,0 +1,874 @@
+* 创建仓库
+什么是版本库呢？版本库又名仓库，英文名repository，你可以简单理解成一个目录，这个目录里面的所有文件都可以被Git管理起来，每个文件的修改、删除，Git都能跟踪，以便任何时刻都可以追踪历史，或者在将来某个时刻可以“还原”。
+
+所以，创建一个版本库非常简单，首先，选择一个合适的地方，创建一个空目录：
+#+BEGIN_SRC bash
+$ mkdir learngit
+$ cd learngit
+$ pwd
+/Users/michael/learngit
+#+END_SRC
+第二步，通过git init命令把这个目录变成Git可以管理的仓库：
+#+BEGIN_SRC bash
+$ git init
+Initialized empty Git repository in /Users/michael/learngit/.git/
+#+END_SRC
+瞬间Git就把仓库建好了，而且告诉你是一个空的仓库（empty Git repository）
+
+可以发现当前目录下多了一个.git的目录，这个目录是Git来跟踪管理版本库的
+
+如果你没有看到.git目录，那是因为这个目录默认是隐藏的，用ls -ah命令就可以看见。
+
+* 把文件gi添加到仓库
+第一步，用命令git add告诉Git，把文件添加到仓库：
+#+BEGIN_SRC bash
+$ git add readme.txt
+#+END_SRC
+执行上面的命令，没有任何显示，这就对了，Unix的哲学是“没有消息就是好消息”，说明添加成功。
+
+第二步，用命令git commit告诉Git，把文件提交到仓库：
+#+BEGIN_SRC bash
+$ git commit -m "wrote a readme file"
+[master (root-commit) eaadf4e] wrote a readme file
+ 1 file changed, 2 insertions(+)
+ create mode 100644 readme.txt
+#+END_SRC
+git commit命令，-m后面输入的是本次提交的说明
+
+commit可以一次提交很多文件，所以你可以多次add不同的文件
+* 版本回退
+- HEAD指向的版本就是当前版本，因此，Git允许我们在版本的历史之间穿梭，使用命令git reset --hard commit_id。
+- 穿梭前，用git log可以查看提交历史，以便确定要回退到哪个版本。
+- 要重返未来，用git reflog查看命令历史，以便确定要回到未来的哪个版本。
+
+
+版本1：wrote a readme file
+#+BEGIN_EXAMPLE
+Git is a version control system.
+Git is free software.
+#+END_EXAMPLE
+版本2：add distributed
+#+BEGIN_EXAMPLE
+Git is a distributed version control system.
+Git is free software.
+#+END_EXAMPLE
+版本3：append GPL
+#+BEGIN_EXAMPLE
+Git is a distributed version control system.
+Git is free software distributed under the GPL.
+#+END_EXAMPLE
+在Git中，我们用git log命令查看历史记录：
+#+BEGIN_SRC bash
+$ git log
+commit 1094adb7b9b3807259d8cb349e7df1d4d6477073 (HEAD -> master)
+Author: Michael Liao <askxuefeng@gmail.com>
+Date:   Fri May 18 21:06:15 2018 +0800
+
+    append GPL
+
+commit e475afc93c209a690c39c13a46716e8fa000c366
+Author: Michael Liao <askxuefeng@gmail.com>
+Date:   Fri May 18 21:03:36 2018 +0800
+
+    add distributed
+
+commit eaadf4e385e865d25c48e7ca9c8395c3f7dfaef0
+Author: Michael Liao <askxuefeng@gmail.com>
+Date:   Fri May 18 20:59:18 2018 +0800
+
+    wrote a readme file
+#+END_SRC
+git log命令显示从最近到最远的提交日志，我们可以看到3次提交，最近的一次是append GPL，上一次是add distributed，最早的一次是wrote a readme file。
+
+如果嫌输出信息太多，看得眼花缭乱的，可以试试加上--pretty=oneline参数：
+#+BEGIN_SRC bash
+$ git log --pretty=oneline
+1094adb7b9b3807259d8cb349e7df1d4d6477073 (HEAD -> master) append GPL
+e475afc93c209a690c39c13a46716e8fa000c366 add distributed
+eaadf4e385e865d25c48e7ca9c8395c3f7dfaef0 wrote a readme file
+#+END_SRC
+这里一大串类似1094adb...的是commit id（版本号）
+
+在Git中，用HEAD表示当前版本，也就是最新的提交1094adb...（注意我的提交ID和你的肯定不一样），上一个版本就是HEAD^，上上一个版本就是HEAD^^，当然往上100个版本写100个^比较容易数不过来，所以写成HEAD~100。
+
+现在，我们要把当前版本append GPL回退到上一个版本add distributed，就可以使用git reset命令：
+#+BEGIN_SRC bash
+$ git reset --hard HEAD^
+HEAD is now at e475afc add distributed
+#+END_SRC
+看看readme.txt的内容是不是版本add distributed：
+#+BEGIN_SRC bash
+$ cat readme.txt
+Git is a distributed version control system.
+Git is free software.
+#+END_SRC
+果然被还原了。
+
+我们用git log再看看现在版本库的状态：
+#+BEGIN_SRC bash
+$ git log
+commit e475afc93c209a690c39c13a46716e8fa000c366 (HEAD -> master)
+Author: Michael Liao <askxuefeng@gmail.com>
+Date:   Fri May 18 21:03:36 2018 +0800
+
+    add distributed
+
+commit eaadf4e385e865d25c48e7ca9c8395c3f7dfaef0
+Author: Michael Liao <askxuefeng@gmail.com>
+Date:   Fri May 18 20:59:18 2018 +0800
+
+    wrote a readme file
+#+END_SRC
+最新的那个版本append GPL已经看不到了！好比你从21世纪坐时光穿梭机来到了19世纪，想再回去已经回不去了，肿么办？
+
+办法其实还是有的，只要上面的命令行窗口还没有被关掉，你就可以顺着往上找啊找啊，找到那个append GPL的commit id是1094adb...，于是就可以指定回到未来的某个版本：
+#+BEGIN_SRC bash
+$ git reset --hard 1094a
+HEAD is now at 83b0afe append GPL
+#+END_SRC
+版本号没必要写全，前几位就可以了，Git会自动去找。当然也不能只写前一两位，因为Git可能会找到多个版本号，就无法确定是哪一个了。
+
+看看readme.txt的内容：
+#+BEGIN_SRC bash
+$ cat readme.txt
+Git is a distributed version control system.
+Git is free software distributed under the GPL.
+#+END_SRC
+Git的版本回退速度非常快，因为Git在内部有个指向当前版本的HEAD指针，当你回退版本的时候，Git仅仅是把HEAD从指向append GPL：
+#+BEGIN_EXAMPLE
+┌────┐
+│HEAD│
+└────┘
+   │
+   └──> ○ append GPL
+        │
+        ○ add distributed
+        │
+        ○ wrote a readme 
+#+END_EXAMPLE
+改为指向add distributed：
+#+BEGIN_EXAMPLE
+┌────┐
+│HEAD│
+└────┘
+   │
+   │    ○ append GPL
+   │    │
+   └──> ○ add distributed
+        │
+        ○ wrote a readme file
+#+END_EXAMPLE
+然后顺便把工作区的文件更新了。所以你让HEAD指向哪个版本号，你就把当前版本定位在哪。
+
+Git提供了一个命令git reflog用来记录你的每一次命令,我们可以用于查看commit id：
+#+BEGIN_SRC bash
+$ git reflog
+e475afc HEAD@{1}: reset: moving to HEAD^
+1094adb (HEAD -> master) HEAD@{2}: commit: append GPL
+e475afc HEAD@{3}: commit: add distributed
+eaadf4e HEAD@{4}: commit (initial): wrote a readme file
+#+END_SRC
+
+* 工作区和暂存区
+Git和其他版本控制系统如SVN的一个不同之处就是有暂存区的概念。
+
+工作区:就是你在电脑里能看到的目录，比如我的learngit文件夹就是一个工作区：
+
+版本库（Repository）
+工作区有一个隐藏目录.git，这个不算工作区，而是Git的版本库。
+
+Git的版本库里存了很多东西，其中最重要的就是称为stage（或者叫index）的暂存区，还有Git为我们自动创建的第一个分支master，以及指向master的一个指针叫HEAD。
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/0.jpg @ 2020-09-10 16:22:36
+[[file:%E5%B7%A5%E4%BD%9C%E5%8C%BA%E5%92%8C%E6%9A%82%E5%AD%98%E5%8C%BA/2020-09-10_16-22-36_0.jpg]]
+前面讲了我们把文件往Git版本库里添加的时候，是分两步执行的：
+
+第一步是用git add把文件添加进去，实际上就是把文件修改添加到暂存区；
+
+第二步是用git commit提交更改，实际上就是把暂存区的所有内容提交到当前分支。
+
+因为我们创建Git版本库时，Git自动为我们创建了唯一一个master分支，所以，现在，git commit就是往master分支上提交更改。
+
+你可以简单理解为，需要提交的文件修改通通放到暂存区，然后，一次性提交暂存区的所有修改。
+
+现在，我们再练习一遍，先对readme.txt做个修改，比如加上一行内容：
+#+BEGIN_SRC bash
+Git is a distributed version control system.
+Git is free software distributed under the GPL.
+Git has a mutable index called stage.
+#+END_SRC
+然后，在工作区新增一个LICENSE文本文件（内容随便写）。
+
+先用git status查看一下状态：
+#+BEGIN_SRC bash
+$ git status
+On branch master
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+	modified:   readme.txt
+
+Untracked files:
+  (use "git add <file>..." to include in what will be committed)
+
+	LICENSE
+
+no changes added to commit (use "git add" and/or "git commit -a")
+#+END_SRC
+Git非常清楚地告诉我们，readme.txt被修改了，而LICENSE还从来没有被添加过，所以它的状态是Untracked。
+
+现在，使用两次命令git add，把readme.txt和LICENSE都添加后，用git status再查看一下：
+#+BEGIN_SRC bash
+$ git status
+On branch master
+Changes to be committed:
+  (use "git reset HEAD <file>..." to unstage)
+
+	new file:   LICENSE
+	modified:   readme.txt
+#+END_SRC
+现在，暂存区的状态就变成这样了：
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/0%20%281%29.jpg @ 2020-09-10 16:25:44
+[[file:%E5%B7%A5%E4%BD%9C%E5%8C%BA%E5%92%8C%E6%9A%82%E5%AD%98%E5%8C%BA/2020-09-10_16-25-44_0%2520%25281%2529.jpg]]
+所以，git add命令实际上就是把要提交的所有修改放到暂存区（Stage），然后，执行git commit就可以一次性把暂存区的所有修改提交到分支。
+#+BEGIN_SRC bash
+$ git commit -m "understand how stage works"
+[master e43a48b] understand how stage works
+ 2 files changed, 2 insertions(+)
+ create mode 100644 LICENSE
+#+END_SRC
+一旦提交后，如果你又没有对工作区做任何修改，那么工作区就是“干净”的：
+#+BEGIN_SRC bash
+$ git status
+On branch master
+nothing to commit, working tree clean
+#+END_SRC
+现在版本库变成了这样，暂存区就没有任何内容了：
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/0%20%282%29.jpg @ 2020-09-10 16:27:22
+[[file:%E5%B7%A5%E4%BD%9C%E5%8C%BA%E5%92%8C%E6%9A%82%E5%AD%98%E5%8C%BA/2020-09-10_16-27-22_0%2520%25282%2529.jpg]]
+
+* 管理修改
+为什么Git比其他版本控制系统设计得优秀?因为Git跟踪并管理的是修改，而非文件
+
+Git管理的是修改，当你用git add命令后，在工作区的第一次修改被放入暂存区，准备提交，但是，在工作区的第二次修改并没有放入暂存区，所以，git commit只负责把暂存区的修改提交了，也就是第一次的修改被提交了，第二次的修改不会被提交。
+
+~git diff HEAD -- readme.txt~ 命令可以查看工作区和版本库里面最新版本的区别：
+#+BEGIN_SRC bash
+$ git diff HEAD -- readme.txt 
+diff --git a/readme.txt b/readme.txt
+index 76d770f..a9c5755 100644
+--- a/readme.txt
++++ b/readme.txt
+@@ -1,4 +1,4 @@
+ Git is a distributed version control system.
+ Git is free software distributed under the GPL.
+ Git has a mutable index called stage.
+-Git tracks changes.
++Git tracks changes of files.
+#+END_SRC
+** 实例
+第一步，对readme.txt做一个修改，比如加一行内容：
+#+BEGIN_SRC bash
+$ cat readme.txt
+Git is a distributed version control system.
+Git is free software distributed under the GPL.
+Git has a mutable index called stage.
+Git tracks changes.
+#+END_SRC
+然后，添加：
+#+BEGIN_SRC bash
+$ git add readme.txt
+$ git status
+# On branch master
+# Changes to be committed:
+#   (use "git reset HEAD <file>..." to unstage)
+#
+#       modified:   readme.txt
+#
+#+END_SRC
+然后，再修改readme.txt：
+#+BEGIN_SRC bash
+$ cat readme.txt 
+Git is a distributed version control system.
+Git is free software distributed under the GPL.
+Git has a mutable index called stage.
+Git tracks changes of files.
+#+END_SRC
+提交：
+#+BEGIN_SRC bash
+$ git commit -m "git tracks changes"
+[master 519219b] git tracks changes
+ 1 file changed, 1 insertion(+)
+#+END_SRC
+提交后，再看看状态：
+#+BEGIN_SRC bash
+$ git status
+On branch master
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+	modified:   readme.txt
+
+no changes added to commit (use "git add" and/or "git commit -a")
+#+END_SRC
+咦，怎么第二次的修改没有被提交？
+
+别激动，我们回顾一下操作过程：
+
+第一次修改 -> git add -> 第二次修改 -> git commit
+
+你看，我们前面讲了，Git管理的是修改，当你用git add命令后，在工作区的第一次修改被放入暂存区，准备提交，但是，在工作区的第二次修改并没有放入暂存区，所以，git commit只负责把暂存区的修改提交了，也就是第一次的修改被提交了，第二次的修改不会被提交。
+* 撤销修改
+~git checkout -- file~ 可以丢弃工作区的修改
+
+命令git checkout -- readme.txt意思就是，把readme.txt文件在工作区的修改全部撤销，这里有两种情况：
+- 一种是readme.txt自修改后还没有被放到暂存区，现在，撤销修改就回到和版本库一模一样的状态；
+- 一种是readme.txt已经添加到暂存区后，又作了修改，现在，撤销修改就回到添加到暂存区后的状态。
+
+总之，就是让这个文件回到最近一次git commit或git add时的状态。
+
+git checkout -- file命令中的--很重要，没有--，就变成了“切换到另一个分支”的命令
+
+用命令git reset HEAD <file>可以把暂存区的修改撤销掉（unstage），重新放回工作区：
+#+BEGIN_SRC bash
+$ git reset HEAD readme.txt
+Unstaged changes after reset:
+M	readme.txt
+#+END_SRC
+git reset命令既可以回退版本，也可以把暂存区的修改回退到工作区。当我们用HEAD时，表示最新的版本。
+
+小结:
+- 场景1：当你改乱了工作区某个文件的内容，想直接丢弃工作区的修改时，用命令git checkout -- file。
+- 场景2：当你不但改乱了工作区某个文件的内容，还添加到了暂存区时，想丢弃修改，分两步，第一步用命令git reset HEAD <file>，就回到了场景1，第二步按场景1操作。
+- 场景3：已经提交了不合适的修改到版本库时，想要撤销本次提交，参考版本回退一节，不过前提是没有推送到远程库。
+* 删除文件
+在Git中，删除也是一个修改操作，我们实战一下，先添加一个新文件test.txt到Git并且提交：
+#+BEGIN_SRC bash
+$ git add test.txt
+
+$ git commit -m "add test.txt"
+[master b84166e] add test.txt
+ 1 file changed, 1 insertion(+)
+ create mode 100644 test.txt
+#+END_SRC
+一般情况下，你通常直接在文件管理器中把没用的文件删了，或者用rm命令删了：
+#+BEGIN_SRC bash
+$ rm test.txt
+#+END_SRC
+这个时候，Git知道你删除了文件，因此，工作区和版本库就不一致了，git status命令会立刻告诉你哪些文件被删除了：
+#+BEGIN_SRC bash
+$ git status
+On branch master
+Changes not staged for commit:
+  (use "git add/rm <file>..." to update what will be committed)
+  (use "git checkout -- <file>..." to discard changes in working directory)
+
+	deleted:    test.txt
+
+no changes added to commit (use "git add" and/or "git commit -a")
+#+END_SRC
+现在你有两个选择，一是确实要从版本库中删除该文件，那就用命令git rm删掉，并且git commit：
+#+BEGIN_SRC bash
+$ git rm test.txt
+rm 'test.txt'
+
+$ git commit -m "remove test.txt"
+[master d46f35e] remove test.txt
+ 1 file changed, 1 deletion(-)
+ delete mode 100644 test.txt
+#+END_SRC
+现在，文件就从版本库中被删除了。
+
+另一种情况是删错了，因为版本库里还有呢，所以可以很轻松地把误删的文件恢复到最新版本：
+#+BEGIN_SRC bash
+$ git checkout -- test.txt
+#+END_SRC
+git checkout其实是用版本库里的版本替换工作区的版本，无论工作区是修改还是删除，都可以“一键还原”。
+* 使用git（同一账号）在多台电脑协同做工
+1、在你想要协同的工作文件夹中打开Git Bash Here，创建一个SSH key，这里用到了非对称公钥加密体系，生成的公钥放到github的网站上，二生成的私钥放在自己的电脑上，每当需要将文件上传到github上时，服务器就会用事先的公钥与你给出的私钥进行验证，验证是否是真正的用户在操作（原理类似于数字签名）。通过如下命令生成公私钥：
+#+BEGIN_SRC bash
+ssh-keygen -t rsa -C "你的github邮箱"
+#+END_SRC
+期间会要求你输入密码，并会给出存放生成的公钥在哪一个文件夹中。我们在这个文件夹中的id_rsa.pub中获得我们账户的公钥。如果一切顺利的话，可以在用户主目录里找到.ssh目录，里面有id_rsa和id_rsa.pub两个文件，这两个就是SSH Key的秘钥对，id_rsa是私钥，不能泄露出去，id_rsa.pub是公钥，可以放心地告诉任何人。
+
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/1803727-20200125171126826-2087303938.jpg @ 2020-09-10 20:12:17
+[[file:%E4%BD%BF%E7%94%A8git%EF%BC%88%E5%90%8C%E4%B8%80%E8%B4%A6%E5%8F%B7%EF%BC%89%E5%9C%A8%E5%A4%9A%E5%8F%B0%E7%94%B5%E8%84%91%E5%8D%8F%E5%90%8C%E5%81%9A%E5%B7%A5/2020-09-10_20-12-17_1803727-20200125171126826-2087303938.jpg]]
+2、将公钥添加到github自己的网站设置上，注意格式（打开的id_rsa.hub文件中不要将最后的邮箱也复制上去，这一点注意看github上的添加英文提醒）点“Add SSH Key”，填上任意Title，在Key文本框里粘贴id_rsa.pub文件的内容：
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/1803727-20200125171143306-574498943.png @ 2020-09-10 20:12:27
+[[file:%E4%BD%BF%E7%94%A8git%EF%BC%88%E5%90%8C%E4%B8%80%E8%B4%A6%E5%8F%B7%EF%BC%89%E5%9C%A8%E5%A4%9A%E5%8F%B0%E7%94%B5%E8%84%91%E5%8D%8F%E5%90%8C%E5%81%9A%E5%B7%A5/2020-09-10_20-12-27_1803727-20200125171143306-574498943.png]]
+3、然后我们在自己希望上传的文档的文件夹中打开git bash，初始化git仓库并作出添加提交，并需要进行一定的配置等命令，输入命令：
+#+BEGIN_SRC bash 
+git init
+
+git config --global user.name"自己账户的名字，建议就是github上的账户名，这样好记"
+git config --global user.email"自己账户的邮箱地址，建议也是用GitHub上的那个"
+
+git config --global -l //这条命令是用来查看上面的信息是否之前已经被输入了，自己检查下
+
+git add .   //将所有的文件加入到index进行缓存
+git commit -m "你想加入的备注"  //将所有的文件提交到仓库当中
+#+END_SRC
+4、在github上创建一个仓库，获得相应的url。在本地的git bash中输入命令使之与远程仓库进行关联，并将文件上传到github上，具体命令如下：
+#+BEGIN_SRC bash
+git remote add origin <你github上仓库的url>
+git push -u origin master //将主分支本地的内容推送到GitHub上的远程仓库上
+#+END_SRC
+5、以上的工作都是在某一台电脑上执行的，假设这台电脑是自己的笔记本，此时我们需要使用自己的台式机对该项目文件进行工作，此时就需要在另一台电脑上重复执行步骤1，生成一个公私钥在台式机上，并将公钥提交到github上去，并做好config --global的配置。这样github即使来自两台电脑对同一仓库的提交，都会认为确实是同一个用户在执行合法的操作，这样使用笔记本是可以提交工作，使用台式机时也可以提交工作。具体命令如下：
+#+BEGIN_SRC bash
+//假设前面已经完成了公私钥、config的配置
+
+git clone <你在GitHub上仓库的url>   //将远程仓库克隆到另一台电脑上
+
+
+
+//之后你就可以在这台电脑上进行修改，仿佛就是在原来的电脑上使用一样
+
+//在做出修改后同样做出提交工作
+git add .
+git commit -m "XX"
+git push origin master
+#+END_SRC
+6、有一点需要注意的是当github远程仓库有最新的版本时，本地仓库若不更新就直接做出修改然后试图上传到远程时，就会出现冲突conflict。这种情况最好的解决方法就是对本地仓库先更新再修改上传，可以使用如下命令进行下拉更新:
+#+BEGIN_SRC bash 
+git pull origin master  //进行下拉更新
+
+//然后再修改提交
+#+END_SRC
+
+* 添加远程库
+首先，登陆GitHub，然后，在右上角找到“Create a new repo”按钮，创建一个新的仓库
+
+在Repository name填入learngit，其他保持默认设置，点击“Create repository”按钮，就成功地创建了一个新的Git仓库：
+
+目前，在GitHub上的这个learngit仓库还是空的，GitHub告诉我们，可以从这个仓库克隆出新的仓库，也可以把一个已有的本地仓库与之关联，然后，把本地仓库的内容推送到GitHub仓库。
+
+现在，我们根据GitHub的提示，在本地的learngit仓库下运行命令：
+#+BEGIN_SRC bash
+git remote add origin https://github.com/Chan124a/leetcode-problems.git
+git branch -M master
+git push -u origin master
+#+END_SRC
+添加后，远程库的名字就是origin，这是Git默认的叫法，也可以改成别的，但是origin这个名字一看就知道是远程库。
+
+下一步，就可以把本地库的所有内容推送到远程库上：
+#+BEGIN_SRC bash
+$ git push -u origin master
+Counting objects: 20, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (15/15), done.
+Writing objects: 100% (20/20), 1.64 KiB | 560.00 KiB/s, done.
+Total 20 (delta 5), reused 0 (delta 0)
+remote: Resolving deltas: 100% (5/5), done.
+To github.com:michaelliao/learngit.git
+ * [new branch]      master -> master
+Branch 'master' set up to track remote branch 'master' from 'origin'.
+#+END_SRC
+把本地库的内容推送到远程，用git push命令，实际上是把当前分支master推送到远程。
+
+由于远程库是空的，我们第一次推送master分支时，加上了-u参数，Git不但会把本地的master分支内容推送的远程新的master分支，还会把本地的master分支和远程的master分支关联起来，在以后的推送或者拉取时就可以简化命令。
+
+推送成功后，可以立刻在GitHub页面中看到远程库的内容已经和本地一模一样
+
+从现在起，只要本地作了提交，就可以通过命令：
+#+BEGIN_SRC bash
+$ git push origin master
+#+END_SRC
+
+小结:
+
+要关联一个远程库，使用命令git remote add origin git@server-name:path/repo-name.git；
+
+关联后，使用命令git push -u origin master第一次推送master分支的所有内容；
+
+此后，每次本地提交后，只要有必要，就可以使用命令git push origin master推送最新修改；
+* 从远程库克隆
+要克隆一个仓库，首先必须知道仓库的地址，然后使用git clone命令克隆。
+
+Git支持多种协议，包括https，但ssh协议速度最快。
+* 创建与合并分支
+** 原理解释
+
+在版本回退里，你已经知道，每次提交，Git都把它们串成一条时间线，这条时间线就是一个分支。截止到目前，只有一条时间线，在Git里，这个分支叫主分支，即master分支。HEAD严格来说不是指向提交，而是指向master，master才是指向提交的，所以，HEAD指向的就是当前分支。
+
+一开始的时候，master分支是一条线，Git用master指向最新的提交，再用HEAD指向master，就能确定当前分支，以及当前分支的提交点：
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/0.png @ 2020-09-10 18:58:30
+[[file:%E5%88%9B%E5%BB%BA%E4%B8%8E%E5%90%88%E5%B9%B6%E5%88%86%E6%94%AF/2020-09-10_18-58-30_0.png]]
+每次提交，master分支都会向前移动一步，这样，随着你不断提交，master分支的线也越来越长。
+
+当我们创建新的分支，例如dev时，Git新建了一个指针叫dev，指向master相同的提交，再把HEAD指向dev，就表示当前分支在dev上：
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/l.png @ 2020-09-10 18:59:00
+[[file:%E5%88%9B%E5%BB%BA%E4%B8%8E%E5%90%88%E5%B9%B6%E5%88%86%E6%94%AF/2020-09-10_18-59-00_l.png]]
+Git创建一个分支很快，因为除了增加一个dev指针，改改HEAD的指向，工作区的文件都没有任何变化！
+
+不过，从现在开始，对工作区的修改和提交就是针对dev分支了，比如新提交一次后，dev指针往前移动一步，而master指针不变：
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/l%20%281%29.png @ 2020-09-10 18:59:36
+[[file:%E5%88%9B%E5%BB%BA%E4%B8%8E%E5%90%88%E5%B9%B6%E5%88%86%E6%94%AF/2020-09-10_18-59-36_l%2520%25281%2529.png]]
+假如我们在dev上的工作完成了，就可以把dev合并到master上。Git怎么合并呢？最简单的方法，就是直接把master指向dev的当前提交，就完成了合并：
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/0%20%281%29.png @ 2020-09-10 18:59:53
+[[file:%E5%88%9B%E5%BB%BA%E4%B8%8E%E5%90%88%E5%B9%B6%E5%88%86%E6%94%AF/2020-09-10_18-59-53_0%2520%25281%2529.png]]
+所以Git合并分支也很快！就改改指针，工作区内容也不变！
+
+合并完分支后，甚至可以删除dev分支。删除dev分支就是把dev指针给删掉，删掉后，我们就剩下了一条master分支：
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/0%20%282%29.png @ 2020-09-10 19:00:14
+[[file:%E5%88%9B%E5%BB%BA%E4%B8%8E%E5%90%88%E5%B9%B6%E5%88%86%E6%94%AF/2020-09-10_19-00-14_0%2520%25282%2529.png]]
+** 创建与合并命令
+- 查看分支：git branch
+- 创建分支：git branch <name>
+- 切换分支：git checkout <name>或者git switch <name>
+- 创建+切换分支：git checkout -b <name>或者git switch -c <name>
+- 合并某分支到当前分支：git merge <name>
+- 删除分支：git branch -d <name>
+** 实例
+首先，我们创建dev分支，然后切换到dev分支：
+#+BEGIN_SRC bash
+$ git checkout -b dev
+Switched to a new branch 'dev'
+#+END_SRC
+git checkout命令加上-b参数表示创建并切换，相当于以下两条命令：
+#+BEGIN_SRC bash
+$ git branch dev
+$ git checkout dev
+Switched to branch 'dev'
+#+END_SRC
+然后，用git branch命令查看当前分支：
+#+BEGIN_SRC bash
+ $ git branch
+ * dev
+  master
+#+END_SRC
+git branch命令会列出所有分支，当前分支前面会标一个*号。
+
+然后，我们就可以在dev分支上正常提交，比如对readme.txt做个修改，加上一行：
+#+BEGIN_SRC txt
+Creating a new branch is quick.
+#+END_SRC
+然后提交：
+#+BEGIN_SRC bash
+$ git add readme.txt 
+$ git commit -m "branch test"
+[dev b17d20e] branch test
+ 1 file changed, 1 insertion(+)
+#+END_SRC
+现在，dev分支的工作完成，我们就可以切换回master分支：
+#+BEGIN_SRC bash
+$ git checkout master
+Switched to branch 'master'
+#+END_SRC
+
+切换回master分支后，再查看一个readme.txt文件，刚才添加的内容不见了！因为那个提交是在dev分支上，而master分支此刻的提交点并没有变：
+
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/0%20%283%29.png @ 2020-09-10 19:06:55
+[[file:dev/2020-09-10_19-06-55_0%2520%25283%2529.png]]
+现在，我们把dev分支的工作成果合并到master分支上：
+#+BEGIN_SRC bash
+$ git merge dev
+Updating d46f35e..b17d20e
+Fast-forward
+ readme.txt | 1 +
+ 1 file changed, 1 insertion(+)
+#+END_SRC
+git merge命令用于合并指定分支到当前分支。合并后，再查看readme.txt的内容，就可以看到，和dev分支的最新提交是完全一样的。
+
+注意到上面的Fast-forward信息，Git告诉我们，这次合并是“快进模式”，也就是直接把master指向dev的当前提交，所以合并速度非常快。
+
+当然，也不是每次合并都能Fast-forward，我们后面会讲其他方式的合并。
+
+合并完成后，就可以放心地删除dev分支了：
+#+BEGIN_SRC bash
+$ git branch -d dev
+Deleted branch dev (was b17d20e).
+#+END_SRC
+删除后，查看branch，就只剩下master分支了：
+#+BEGIN_SRC bash
+ $ git branch
+ * master
+#+END_SRC
+
+我们注意到切换分支使用git checkout <branch>，而前面讲过的撤销修改则是git checkout -- <file>，同一个命令，有两种作用，确实有点令人迷惑。
+
+实际上，切换分支这个动作，用switch更科学。因此，最新版本的Git提供了新的git switch命令来切换分支：
+
+创建并切换到新的dev分支，可以使用：
+#+BEGIN_SRC bash
+$ git switch -c dev
+#+END_SRC
+直接切换到已有的master分支，可以使用：
+#+BEGIN_SRC bash
+$ git switch master
+#+END_SRC
+使用新的git switch命令，比git checkout要更容易理解。
+* 解决冲突
+准备新的feature1分支，继续我们的新分支开发：
+#+BEGIN_SRC bash
+$ git switch -c feature1
+Switched to a new branch 'feature1'
+#+END_SRC
+修改readme.txt最后一行，改为：
+#+BEGIN_EXAMPLE
+Creating a new branch is quick AND simple.
+#+END_EXAMPLE
+在feature1分支上提交：
+#+BEGIN_SRC bash
+$ git add readme.txt
+
+$ git commit -m "AND simple"
+[feature1 14096d0] AND simple
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+#+END_SRC
+切换到master分支：
+#+BEGIN_SRC bash
+$ git switch master
+Switched to branch 'master'
+Your branch is ahead of 'origin/master' by 1 commit.
+  (use "git push" to publish your local commits)
+#+END_SRC
+Git还会自动提示我们当前master分支比远程的master分支要超前1个提交。
+
+在master分支上把readme.txt文件的最后一行改为：
+#+BEGIN_EXAMPLE
+Creating a new branch is quick & simple.
+#+END_EXAMPLE
+提交：
+#+BEGIN_SRC bash
+$ git add readme.txt 
+$ git commit -m "& simple"
+[master 5dc6824] & simple
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+#+END_SRC
+现在，master分支和feature1分支各自都分别有新的提交，变成了这样：
+
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/0%20%284%29.png @ 2020-09-10 19:19:11
+[[file:%E8%A7%A3%E5%86%B3%E5%86%B2%E7%AA%81/2020-09-10_19-19-11_0%2520%25284%2529.png]]
+这种情况下，Git无法执行“快速合并”，只能试图把各自的修改合并起来，但这种合并就可能会有冲突，我们试试看：
+#+BEGIN_SRC bash
+$ git merge feature1
+Auto-merging readme.txt
+CONFLICT (content): Merge conflict in readme.txt
+Automatic merge failed; fix conflicts and then commit the result.
+#+END_SRC
+果然冲突了！Git告诉我们，readme.txt文件存在冲突，必须手动解决冲突后再提交。git status也可以告诉我们冲突的文件：
+#+BEGIN_SRC bash
+$ git status
+On branch master
+Your branch is ahead of 'origin/master' by 2 commits.
+  (use "git push" to publish your local commits)
+
+You have unmerged paths.
+  (fix conflicts and run "git commit")
+  (use "git merge --abort" to abort the merge)
+
+Unmerged paths:
+  (use "git add <file>..." to mark resolution)
+
+	both modified:   readme.txt
+
+no changes added to commit (use "git add" and/or "git commit -a")
+#+END_SRC
+我们可以直接查看readme.txt的内容：
+#+BEGIN_SRC bash
+Git is a distributed version control system.
+Git is free software distributed under the GPL.
+Git has a mutable index called stage.
+Git tracks changes of files.
+<<<<<<< HEAD
+Creating a new branch is quick & simple.
+=======
+Creating a new branch is quick AND simple.
+>>>>>>> feature1
+#+END_SRC
+Git用 ~<<<<<<<,=======,>>>>>>>~ 标记出不同分支的内容，我们修改如下后保存：
+#+BEGIN_EXAMPLE
+Creating a new branch is quick and simple.
+#+END_EXAMPLE
+再提交：
+#+BEGIN_SRC bash
+$ git add readme.txt 
+$ git commit -m "conflict fixed"
+[master cf810e4] conflict fixed
+#+END_SRC
+现在，master分支和feature1分支变成了下图所示：
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/0%20%285%29.png @ 2020-09-10 19:26:26
+[[file:%E8%A7%A3%E5%86%B3%E5%86%B2%E7%AA%81/2020-09-10_19-26-26_0%2520%25285%2529.png]]
+用带参数的用git log --graph命令可以看到分支合并图:
+#+BEGIN_SRC bash
+ $ git log --graph --pretty=oneline --abbrev-commit
+ *   cf810e4 (HEAD -> master) conflict fixed
+ |\  
+ | * 14096d0 (feature1) AND simple
+ * | 5dc6824 & simple
+ |/  
+ * b17d20e branch test
+ * d46f35e (origin/master) remove test.txt
+ * b84166e add test.txt
+ * 519219b git tracks changes
+ * e43a48b understand how stage works
+ * 1094adb append GPL
+ * e475afc add distributed
+ * eaadf4e wrote a readme file
+#+END_SRC
+最后，删除feature1分支：
+#+BEGIN_SRC 
+$ git branch -d feature1
+Deleted branch feature1 (was 14096d0).
+#+END_SRC
+工作完成。
+
+1、在你想要协同的工作文件夹中打开Git Bash Here，创建一个SSH key，这里用到了非对称公钥加密体系，生成的公钥放到github的网站上，二生成的私钥放在自己的电脑上，每当需要将文件上传到github上时，服务器就会用事先的公钥与你给出的私钥进行验证，验证是否是真正的用户在操作（原理类似于数字签名）。通过如下命令生成公私钥：
+#+BEGIN_SRC bash
+ssh-keygen -t rsa -C "你的github邮箱"
+#+END_SRC
+期间会要求你输入密码，并会给出存放生成的公钥在哪一个文件夹中。我们在这个文件夹中的id_rsa.pub中获得我们账户的公钥。
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/1803727-20200125171126826-2087303938.jpg @ 2020-09-10 20:03:57
+[[file:%E8%A7%A3%E5%86%B3%E5%86%B2%E7%AA%81/2020-09-10_20-03-57_1803727-20200125171126826-2087303938.jpg]]
+2、将公钥添加到github自己的网站设置上，注意格式（打开的id_rsa.hub文件中不要将最后的邮箱也复制上去，这一点注意看github上的添加英文提醒）
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/1803727-20200125171143306-574498943.png @ 2020-09-10 20:04:21
+[[file:%E8%A7%A3%E5%86%B3%E5%86%B2%E7%AA%81/2020-09-10_20-04-21_1803727-20200125171143306-574498943.png]]
+* 多人协作
+- 查看远程库信息，使用git remote -v；
+- 本地新建的分支如果不推送到远程，对其他人就是不可见的；
+- 从本地推送分支，使用git push origin branch-name，如果推送失败，先用git pull抓取远程的新提交；
+- 在本地创建和远程分支对应的分支，使用git checkout -b branch-name origin/branch-name，本地和远程分支的名称最好一致；
+- 建立本地分支和远程分支的关联，使用git branch --set-upstream branch-name origin/branch-name；
+- 从远程抓取分支，使用git pull，如果有冲突，要先处理冲突。
+
+当你从远程仓库克隆时，实际上Git自动把本地的master分支和远程的master分支对应起来了，并且，远程仓库的默认名称是origin。
+
+要查看远程库的信息，用git remote：
+#+BEGIN_SRC bash
+$ git remote
+origin
+#+END_SRC
+或者，用git remote -v显示更详细的信息：
+#+BEGIN_SRC bash
+$ git remote -v
+origin  git@github.com:michaelliao/learngit.git (fetch)
+origin  git@github.com:michaelliao/learngit.git (push)
+#+END_SRC
+上面显示了可以抓取和推送的origin的地址。如果没有推送权限，就看不到push的地址。
+** 推送分支
+推送分支，就是把该分支上的所有本地提交推送到远程库。推送时，要指定本地分支，这样，Git就会把该分支推送到远程库对应的远程分支上：
+#+BEGIN_SRC bash
+$ git push origin master
+#+END_SRC
+如果要推送其他分支，比如dev，就改成：
+#+BEGIN_SRC bash
+$ git push origin dev
+#+END_SRC
+但是，并不是一定要把本地分支往远程推送，那么，哪些分支需要推送，哪些不需要呢？
+- master分支是主分支，因此要时刻与远程同步；
+- dev分支是开发分支，团队所有成员都需要在上面工作，所以也需要与远程同步；
+- bug分支只用于在本地修复bug，就没必要推到远程了，除非老板要看看你每周到底修复了几个bug；
+- feature分支是否推到远程，取决于你是否和你的小伙伴合作在上面开发。
+
+总之，就是在Git中，分支完全可以在本地自己藏着玩，是否推送，视你的心情而定！
+** 抓取分支
+多人协作时，大家都会往master和dev分支上推送各自的修改。
+
+现在，模拟一个你的小伙伴，可以在另一台电脑（注意要把SSH Key添加到GitHub）或者同一台电脑的另一个目录下克隆：
+#+BEGIN_SRC bash
+$ git clone git@github.com:michaelliao/learngit.git
+Cloning into 'learngit'...
+remote: Counting objects: 40, done.
+remote: Compressing objects: 100% (21/21), done.
+remote: Total 40 (delta 14), reused 40 (delta 14), pack-reused 0
+Receiving objects: 100% (40/40), done.
+Resolving deltas: 100% (14/14), done.
+#+END_SRC
+当你的小伙伴从远程库clone时，默认情况下，你的小伙伴只能看到本地的master分支。不信可以用git branch命令看看：
+#+BEGIN_SRC bash
+ $ git branch
+ * master
+#+END_SRC
+现在，你的小伙伴要在dev分支上开发，就必须创建远程origin的dev分支到本地，于是他用这个命令创建本地dev分支：
+#+BEGIN_SRC bash
+$ git checkout -b dev origin/dev
+#+END_SRC
+现在，他就可以在dev上继续修改，然后，时不时地把dev分支push到远程：
+#+BEGIN_SRC bash
+$ git add env.txt
+
+$ git commit -m "add env"
+[dev 7a5e5dd] add env
+ 1 file changed, 1 insertion(+)
+ create mode 100644 env.txt
+
+$ git push origin dev
+Counting objects: 3, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (2/2), done.
+Writing objects: 100% (3/3), 308 bytes | 308.00 KiB/s, done.
+Total 3 (delta 0), reused 0 (delta 0)
+To github.com:michaelliao/learngit.git
+   f52c633..7a5e5dd  dev -> dev
+#+END_SRC
+你的小伙伴已经向origin/dev分支推送了他的提交，而碰巧你也对同样的文件作了修改，并试图推送：
+#+BEGIN_SRC bash 
+$ cat env.txt
+env
+
+$ git add env.txt
+
+$ git commit -m "add new env"
+[dev 7bd91f1] add new env
+ 1 file changed, 1 insertion(+)
+ create mode 100644 env.txt
+
+$ git push origin dev
+To github.com:michaelliao/learngit.git
+ ! [rejected]        dev -> dev (non-fast-forward)
+error: failed to push some refs to 'git@github.com:michaelliao/learngit.git'
+hint: Updates were rejected because the tip of your current branch is behind
+hint: its remote counterpart. Integrate the remote changes (e.g.
+hint: 'git pull ...') before pushing again.
+hint: See the 'Note about fast-forwards' in 'git push --help' for details.
+#+END_SRC
+推送失败，因为你的小伙伴的最新提交和你试图推送的提交有冲突，解决办法也很简单，Git已经提示我们，先用git pull把最新的提交从origin/dev抓下来，然后，在本地合并，解决冲突，再推送：
+#+BEGIN_SRC bash
+$ git pull
+There is no tracking information for the current branch.
+Please specify which branch you want to merge with.
+See git-pull(1) for details.
+
+    git pull <remote> <branch>
+
+If you wish to set tracking information for this branch you can do so with:
+
+    git branch --set-upstream-to=origin/<branch> dev
+#+END_SRC
+git pull也失败了，原因是没有指定本地dev分支与远程origin/dev分支的链接，根据提示，设置dev和origin/dev的链接：
+#+BEGIN_SRC bash
+$ git branch --set-upstream-to=origin/dev dev
+Branch 'dev' set up to track remote branch 'dev' from 'origin'.
+#+END_SRC
+再pull：
+#+BEGIN_SRC bash
+$ git pull
+Auto-merging env.txt
+CONFLICT (add/add): Merge conflict in env.txt
+Automatic merge failed; fix conflicts and then commit the result.
+#+END_SRC
+这回git pull成功，但是合并有冲突，需要手动解决，解决的方法和分支管理中的解决冲突完全一样。解决后，提交，再push：
+#+BEGIN_SRC bash
+$ git commit -m "fix env conflict"
+[dev 57c53ab] fix env conflict
+
+$ git push origin dev
+Counting objects: 6, done.
+Delta compression using up to 4 threads.
+Compressing objects: 100% (4/4), done.
+Writing objects: 100% (6/6), 621 bytes | 621.00 KiB/s, done.
+Total 6 (delta 0), reused 0 (delta 0)
+To github.com:michaelliao/learngit.git
+   7a5e5dd..57c53ab  dev -> dev
+#+END_SRC
+因此，多人协作的工作模式通常是这样：
+
+- 首先，可以试图用git push origin <branch-name>推送自己的修改；
+- 如果推送失败，则因为远程分支比你的本地更新，需要先用git pull试图合并；
+- 如果合并有冲突，则解决冲突，并在本地提交；
+- 没有冲突或者解决掉冲突后，再用git push origin <branch-name>推送就能成功！
+
+如果git pull提示no tracking information，则说明本地分支和远程分支的链接关系没有创建，用命令git branch --set-upstream-to <branch-name> origin/<branch-name>。
+
+这就是多人协作的工作模式，一旦熟悉了，就非常简单。

@@ -1,0 +1,119 @@
+\documentclass[UTF8]{ctexart}
+\newtheorem{theorem}{定理}[section]
+\newtheorem{pro}{命题}[section]
+\newtheorem{coro}{推论}[theorem]
+\newtheorem{lemma}{引理}[section]
+\begin{document}
+	\section{定义}
+	\subsection{R中稠密}
+	\subsection{数列收敛}
+	\subsection{上界、下界、有界数列}
+	\subsection{子列}
+	\subsection{数列趋向$\pm \infty$}数列正(负)无穷大的定义.
+	\subsection{单调数列}
+	\subsection{基本列}
+	\subsection{上下确界}
+	\subsection{开覆盖}
+	\subsection{上下极限}
+	
+	\section{实数}
+	任何分数一定是有尽小数或无尽循环小数。
+	
+	每一个实数都可以用有理数去逼近到任意精确的程度。
+	
+	有理数集Q在R中是稠密的。
+	
+	\section{数列极限}
+	\begin{theorem}
+		如果数列$\{a_n\}$收敛，则它只有一个极限。
+	\end{theorem}
+	\begin{theorem}
+	收敛数列是有界的。
+	\end{theorem}
+	\begin{theorem}
+	设收敛数列$\{a_n\}$的极限是$a$，那么$\{a_n\}$的任何一个子列都收敛于$a$。
+	\end{theorem}
+	\begin{coro}
+		数列$\{a_n\}$收敛的充分必要条件是它的偶数项子列$\{a_{2n}\}$和奇数项子列$\{a_{2n-1}\}$都收敛，并且有相同的极限。
+	\end{coro}
+	\begin{theorem}（极限的四则运算）
+	设$\{a_n\}$与$\{b_n\}$都是收敛数列，则${a_n+b_n}$，${a_nb_b}$也是收敛数列。如果$\lim\limits_{n\to\infty}b_n\neq0$,则$\{a_n/b_n\}$也收敛，并且有：
+	\begin{enumerate}
+		\item $\lim\limits_{n\to\infty}a_n+b_n=\lim\limits_{n\to\infty}a_n$;
+		\item $\lim\limits_{n\to\infty}a_nb_n=\lim\limits_{n\to\infty}a_n \cdot \lim\limits_{n\to\infty}b_n$，特别的，如果$c$是常熟，便有$\lim\limits_{n\to\infty}ca_n=c\lim\limits_{n\to\infty}a_n;$
+		\item $\lim\limits_{n\to\infty} \frac{a_n}{b_n}=\frac{\lim\limits_{n\to\infty}a_n}{\lim\limits_{n\to\infty}b_n}$,其中$\lim\limits_{n\to\infty}b_n\neq0.$	
+	\end{enumerate}
+	\end{theorem}
+	\begin{theorem}
+	（夹逼定理）设$a_n\leq b_n \leq c_n (n\in N_*)$,如果$\lim\limits_{n\to\infty}a_n=\lim\limits_{n\to\infty}c_n=a$,那么$\lim\limits_{n\to\infty}b_n=a$
+	\end{theorem}
+	\begin{theorem}保号性
+	\begin{enumerate}
+		\item 设$\lim\limits_{n\to\infty}a_n=a,\alpha,\beta$满足$\alpha<a<\beta$,那么当$n$充分大时,有$a_n>\alpha$;同样,当$n$充分大时,有$a_n<\beta$
+		\item 设$\lim\limits_{n\to\infty}a_n=a,\lim\limits_{n\to\infty}b_n=b$,且$a<b$,那么当$n$充分大时,一定有$a_n<b_n$.
+		\item 设$\lim\limits_{n\to\infty}a_n=a,\lim\limits_{n\to\infty}b_n=b$,并且当$n$充分大时$a_n\leq b_n$,那么有$a \leq b$.
+	\end{enumerate}
+	\end{theorem}
+	\begin{pro}无穷大的性质
+		\begin{enumerate}
+			\item 如果$\{a_n\}$是无穷大,那么$\{a_n\}$必然无界.
+			\item 从无界数列中一定能选出一个子列是无穷大.
+			\item 如果$\lim\limits_{n\to\infty}a_n=+\infty$(或$-\infty,\infty$),那么对$\{a_n\}$的任意子列$\{a_{k_n}\}$,也有\[\lim\limits_{n\to\infty}a_{k_n}=+\infty\mbox{(或}-\infty,\infty)\].
+			\item $\mbox{如果}\lim\limits_{n\to\infty}a_n=+\infty,\lim\limits_{n\to\infty}b_n=+\infty,\mbox{那么}$\[\lim\limits_{n\to\infty}(a_n+b_n)=+\infty,\lim\limits_{n\to\infty}a_nb_n=+\infty\]
+			\item $\{a_n\}$是无穷大的充分必要条件是$\{1/a_n\}$为无穷小.
+		\end{enumerate}
+	\end{pro}
+	\begin{theorem}
+		单调有界数列一定有极限.
+	\end{theorem}
+	\begin{theorem}
+		(闭区间套定理)设$I_n=[a_n,b_n](n\in N^*),\mbox{并且}I_1\supset I_2 \supset I_3 \supset \cdots \supset I_n\supset I_{n+1}\supset \cdots.$如果这一列区间的长度$\langle I_n\langle=b_n-a_n\to 0(n\to \infty),$那么交集$\bigcap\limits_{n=1}^\infty I_n$含有唯一的一点.
+	\end{theorem}
+	\begin{theorem}
+		自然对数的底是无理数.
+	\end{theorem}
+	\begin{lemma}
+		从任一数列中必可取出一个单调数列.
+	\end{lemma}
+	\begin{theorem}
+		(列紧性定理)从任何有界数列必可选出一个收敛子列.
+	\end{theorem}
+	\begin{theorem}(Cauchy收敛定理)
+		一个数列收敛的充分必要条件是,它是基本列.
+	\end{theorem}
+	\begin{theorem}(确界定理)
+		非空有上界的集合必有上确界.
+		
+		非空有下界的集合必有下确界.
+	\end{theorem}
+	\begin{pro}
+		$-sup(-E)=inf E\quad \mbox{或}\quad sup(-E)=-infE$ 
+	\end{pro}
+	\begin{theorem}
+		(紧致性定理,有限覆盖定理,Heine-Borel定理)设$[a,b]$是一个有限闭区间,并且它有一个开覆盖$\{I_\lambda\}$,那么从这个开区间族必可选出有限个成员(开区间)来,这有限个开区间所成的族仍是$[a,b]$的开覆盖.
+	\end{theorem}	
+	\begin{theorem}
+		设$\{a_n\}$为一数列,$E$为$\{a_n\}$所有极限点组成的集合,$a^*$为上极限.那么:
+		\begin{enumerate}
+			\item $a^*\in E;$
+			\item $\mbox{若} x>a^*,\mbox{则存在}N\in N^*,\mbox{使得当}n\leq N\mbox{时,有}a_n<x; $
+			\item $a^*$是满足前两条性质的唯一数.
+		\end{enumerate}
+		对下极限$a_*$也有类似定理.
+	\end{theorem}
+	\begin{theorem}
+		设$\{a_n\},\{\b_n\}$是两个数列.
+	\begin{enumerate}
+		\item $\liminf\limits_{n\to \infty} a_n\leq \limsup\limits_{n\to \infty} a_n$
+		\item $\lim\limits_{n\to \infty}a_n=a$当且仅当$\liminf\limits_{n\to \infty}a_n=\limsup\limits_{n\to \infty}a_n=a;$
+		\item 若\textup{N}是某个正整数,当$n>N$时,$a_\leq b_n$,那么\[\liminf\limits_{n\to \infty}a_n\leq\liminf\limits_{n\to \infty}b_n,\limsup\limits_{n\to \infty}a_n\leq\limsup\limits_{n\to \infty}b_n\]
+	\end{enumerate}
+	\end{theorem}
+	\begin{theorem}
+		对数列$\{a_n\}$,定义$\alpha_n=\inf\limits_{k\geq n}a_k,\beta_n=\sup\limits_{k\geq n}a_k$,那么:
+		\begin{enumerate}
+			\item $\{\alpha_n\}$是递增数列,$\{\beta_n\}$是递减数列;
+			\item $\lim\limits_{n\to \infty}\alpha_n=a_*,\lim\limits_{n\to \infty}\beta_n=a^*$.
+		\end{enumerate}
+	\end{theorem}
+\end{document}

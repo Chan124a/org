@@ -1,0 +1,12 @@
+mktexpk --mfmode / --bdpi 600 --mag 1+32/600 --dpi 632 unikai65
+mktexpk --mfmode / --bdpi 600 --mag 1+303/600 --dpi 903 unihei65
+mktextfm FangSong_GB2312/OT
+mktextfm FangSong_GB2312/OT
+mktextfm FangSong_GB2312/OT
+mktextfm FangSong_GB2312/BI/OT
+mktextfm FangSong_GB2312/OT
+mktextfm FangSong_GB2312/B/OT
+mktextfm FangSong_GB2312/OT
+mktextfm FangSong_GB2312/I/OT
+mktextfm FangSong_GB2312/OT
+mktextfm FangSong_GB2312/OT

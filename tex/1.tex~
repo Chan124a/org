@@ -1,0 +1,129 @@
+\documentclass[UTF8]{ctexart}
+\usepackage{mathtools}
+\begin{document}
+设输入空间为\textsl{n}维向量的集合，输出空间为类标记集合${c_1,c_2,\cdots,c_k}$.输入为特征向量\textsl{x}属于输入空间,输出为类标记\textsl{y}属于输出空间.\textsl{X}s是定义在输入空间上的随机变量,\textsl{Y}是定义在在输出空间上的随机向量.\textsl{P(X,Y)}是\textsl{X}和\textsl{Y}的联合概率分布.
+
+训练数据集为:$T={(x_1,y_{1}),(x_2,y_2),\cdots,(x_N,y_N)}$
+  由\textsl{P(X,Y)}独立同分布产生.
+
+  朴素贝叶斯通过训练数据集学习联合概率分布 \textsl{P(X,Y)}.
+  具体地，学习以下先验概率分布及条件概率分布:先验概率分布$P(Y=c_k),k=1,2,\cdots,K$,条件概率分布$P(X=x|Y=c_k)=P(X^{(1)}=x^{(1)},\cdots,X^{(n)}=x^{(n)}|Y=c_{k}),k=1,2,\cdots,K$
+
+  于是学习到联合概率分布\textsl{P(X,Y)}
+
+  假设$x^{(j)}$可取值有$S_j$个，则$x^{(j)}$可能取值的集合为${a_{j1},a_{j2},\cdots,a_{jS_{j}}}$, \textsl{j=1,2,...n};\textsl{Y} 可取值有\textsl{K} 个，那么参数个数为$K \prod^n_{j=1} S_j$
+
+  朴素贝叶斯法对条件概率分布作了条件独立性的假设.
+
+  $P(X=x|Y=c_k)=P(X^{(1)}=x^{(1)},\cdots,X^{(n)}=x^{(n)}|Y=c_{k})= \prod^n_{j=1} P(X^{(j)}=x^{(j)}|Y=c_{k})$
+
+  朴素贝叶斯法分类时，对给定的输入\textsl{x}，通过学习到的模型计算后验概率分布$P(Y=c_k|X=x)$，将后验概率最大的类作为输出.后验概率计算根据贝叶斯定理进行：
+
+$P(Y=c_k|X=x)= \frac{P(Y=c_k) \prod^n_{j=1} P(X^{(j)}=x^{(j)}|Y=c_{k})}{ \sum^K_{k=1}  P(X=x|Y=c_{k}) P(Y=c_k) }$
+
+将条件独立性假设代入上式得：
+
+$P(Y=c_k|X=x)= \frac{P(Y=c_k) \prod^n_{j=1} P(X^{(j)}=x^{(j)}|Y=c_{k})}{\sum^K_{k=1} P(Y=c_k) \prod^n_{j=1} P(X^{(j)}=x^{(j)}|Y=c_{k})}$
+
+这是朴素贝叶斯分类的基本公式.于是，朴素贝叶斯分类器可表示为：
+
+$y=f(x)=\mathop{\arg\max}\limits_{c_{k}} \frac{P(Y=c_k) \prod^n_{j=1} P(X^{(j)}=x^{(j)}|Y=c_{k})}{\sum^K_{k=1} P(Y=c_k) \prod^n_{j=1} P(X^{(j)}=x^{(j)}|Y=c_{k})}$
+
+注意到分母对所有$c_k$都是相同的，所以
+
+$y=f(x)=\mathop{\arg\max}\limits_{c_{k}} P(Y=c_k) \prod^n_{j=1} P(X^{(j)}=x^{(j)}|Y=c_{k})$
+
+从上式可以看出，朴素贝叶斯法的学习也就是要估计先验概率$P(Y=c_k)$和条件分布概率$P(X^{(j)}=x^{(j)}|Y=c_{k})$，可以应用极大似然估计法估计相应的概率.
+
+下面写出推导过程:
+
+把$p(Y=c_k)$和$p(x^{(j)}=a_{jl}|y=c_{k})$作为参数.
+
+$p(y)=\prod^K_{k=1} p(y=c_k)^{1 \{y=c_{k}\} }$
+
+$$p(x|y=c_k)= \prod^n_{j=1}p(x^j|y=c_k)= \prod^n_{j=1} \prod^{S_j}_{l=1} p(X^{(j)}=a_{jl}|Y=c_{k})^{1 \{x^{(j)}=a_{jl},y=c_k\} }$$
+
+为叙述方便起见，下面以$\varphi$代表参数集合${p(Y=c_k),p(x^{(j)}=a_{jl}|y=c_{k})}$
+
+先写出log似然函数
+
+\begin{equation*}
+  \begin{split}
+l(\varphi) &=log \prod^N_{i=1} p(x_i,y_i;\varphi) \\
+             &=log \prod^N_{i=1} p(x_i;y_i;\varphi)p(y_i;\varphi) \\
+            &=log \prod^N_{i=1}[\prod^n_{j=1} p(x^{(j)}_i | y_i;\varphi) ]p(y_i;\varphi) \\
+            &= \sum^N_{i=1}(log p(y_i,\varphi)+ \sum^n_{j=1} log p(x^{(j)}_i|y_i;\varphi)) \\
+            &=\sum^N_{i=1}[\sum^K_{k=1} log p(y=c_k)^{1\{y_i=c_k\} }+ \sum^{K}_{k=1}\sum^n_{j=1} \sum^{S_j}_{l=1} log p(x^j=a_{jl}|y=c_k)^{1\{x^{(j)}_i=a_{jl},y_i=c_k\} }] \\
+            &=\sum^N_{i=1}[\sum^K_{k=1} 1\{y_i=c_k\} log p(y=c_k)+\sum^{K}_{k=1} \sum^n_{j=1} \sum^{S_j}_{l=1} 1\{x^{(j)}_i=a_{jl},y_i=c_k\} logp(x^j=a_{jl}|y=c_k)]
+        \end{split}
+\end{equation*}
+
+在上式中把$p(Y=c_k)\mbox{和} p(x^{(j)}=a_{jl}|y=c_{k})(j=1,2,\cdots,n;l=1,2,\cdots,S_j;k=1,2,\cdots,K)$作为参数.
+
+先求先验概率$p(Y=c_k)$的最大似然估计,因为存在约束条件$\sum^K_{k=1} p(y=c_k)=1$，所以下面开始用拉格朗日乘数法分别求最大似然估计(条件极值):
+
+上式中只有前半段含有$p(Y=c_k)$，所以在求先验概率估计值时就只管前半部分.
+
+令$F=\sum\limits^N_{i=1} \Bigl\{ \bigl(\sum\limits^K_{k=1} 1\{y_i=c_k\}log p(y=c_k)\bigr)+ \lambda (1-\sum\limits^K_{k=1} p(y=c_k) ) \Bigr\}$
+
+分别对$p(y=c_{k})(k=1,2,\cdots,K) \mbox{和} \lambda$求导:
+
+\begin{equation}
+  \left\{ \begin{lgathered}
+      \frac{\partial F}{\partial p(y=c_{1})} = \sum\limits^N_{i=1} \{\frac{1\{y_i=c_{1}\}}{p(y=c_{1})} -\lambda\}=0 \\
+      \frac{\partial F}{\partial p(y=c_{2})}= \sum\limits^N_{i=1} \{\frac{1\{y_i=c_{2}\}}{p(y=c_{2})} -\lambda\}=0 \\
+              \vdots \\
+              \frac{\partial F}{\partial p(y=c_{K})}= \sum\limits^N_{i=1} \{\frac{1\{y_i=c_{K}\}}{p(y=c_{K})} -\lambda\}=0 \\
+      \frac{\partial F}{\partial \lambda } =\sum\limits^N_{i=1}\{1-\sum\limits^K_{k=1} p(y=c_k)        \}=0
+      \end{lgathered} \right.
+\end{equation}
+
+则由前面面$K$个式子可得:
+\begin{equation}
+  \begin{cases}
+    p(y=c_{1})=\frac{\sum\limits^N_{i=1} 1\{y_i=c_{1}\}}{N\lambda} \\
+    p(y=c_{2})=\frac{\sum\limits^N_{i=1} 1\{y_i=c_{2}\}}{N\lambda}\\
+    \vdots\\
+    p(y=c_{K})=\frac{\sum\limits^N_{i=1} 1\{y_i=c_{K}\}}{N\lambda}
+    \end{cases}
+\end{equation}
+  由于$\sum\limits^K_{k=1} p(y=c_k)=1$,则将上面左边全部式子加起来,可以得到
+  $$1=\sum\limits^K_{k=1} p(y=c_k)=\frac{\sum\limits^{K}_{k=1} \sum\limits^{N}_{i=1} 1\{y_{i}=c_{k}\}}{N\lambda} =\frac{N}{N\lambda} $$
+  即$\lambda =1$,代入方程组(2),可得$p(y=c_k)$的极大似然估计为:
+
+$p(y=c_k)= \frac{\sum\limits^N_{i=1} 1\{y_i=c_{2}\}}{N}(k=1,2,\cdots,K)$
+
+下面开始求$p(x^{(j)}=a_{jl}|y=c_{k})$的极大似然估计:
+
+已知log似然函数为:
+
+$$
+l(\varphi) =\sum^N_{i=1}[\sum^K_{k=1} 1\{y_i=c_k\}log p(y=c_k)+\sum^K_{k=1}\sum^n_{j=1} \sum^{S_j}_{l=1} 1\{x^{(j)}_i=a_{jl},y_i=c_k\} logp(x^{(j)}=a_{jl}|y=c_k)] $$
+
+只需对式子后面部分求偏导即可.由于存在约束条件$\sum\limits^{S_j}_{l=1}p(x^{(j)}=a_{jl}|y=c_k)=1$,所以也可用拉格朗日乘数法求极大似然估计:
+
+令$$G=\sum^N_{i=1} \biggl\{ \sum^K_{k=1} \sum^n_{j=1} \Bigl(  \bigl( \sum^{S_j}_{l=1} 1\{x^{(j)}_i=a_{jl},y_i=c_k\} logp(x^{(j)}=a_{jl}|y=c_k) \bigr) + \lambda_{kj} (1- \sum\limits^{S_j}_{l=1} p(x^{(j)}=a_{jl}|y=c_k)) \Bigr) \biggr\}$$
+
+注意由于对于每个\textsl{k}和\textsl{j}都存在约束条件$\sum\limits^{S_j}_{l=1}p(x^{(j)}=a_{jl}|y=c_k)=1$,所以总共有 $k\times l $ 个约束条件,上式中的参数$\lambda_{kj}$对应的是\textsl{k}和\textsl{j}固定时的约束条件.
+
+\begin{equation}
+  \left\{ \begin{lgathered}
+      \frac{\partial G}{\partial p(x^{(j)}=a_{jl}|y=c_k)} = \sum\limits^N_{i=1} \Bigl\{  \frac{ 1 \{ x^{(j)}_i=a_{jl},y_i=c_k \} }{ p( x^j = a_{jl} | y=c_k ) } - \lambda_{kj} \Bigr\}=0 \\
+      \frac{\partial G}{\partial \lambda_{kj} }= \sum\limits^N_{i=1}  \{ 1 - \sum\limits^{S_j}_l p(x^{(j)} =a_{jl} | y=c_k ) \}=0 
+      \end{lgathered} \right.
+  \end{equation}
+
+  由第1个式子可得$ p( x^j = a_{jl} | y=c_k ) = \frac{ \sum\limits^N_{i=1} 1 \{ x^{(j)}_i=a_{jl},y_i=c_k \} }{ N \lambda_{kj} }$
+
+  由第2个式子可得$ \sum\limits^{S_j}_l p(x^{(j)} =a_{jl} | y=c_k ) = 1 $
+
+  联立两个式子可以得到:
+
+  $1= \sum\limits^{S_j}_l p(x^{(j)} =a_{jl} | y=c_k ) =  \frac{  \sum\limits^{S_j}_l \sum\limits^N_{i=1} 1 \{ x^{(j)}_i=a_{jl},y_i=c_k \} }{ N \lambda_{kj} } = \frac{ \sum\limits^N_{i=1} 1 \{ y_i=c_k \} }{ N \lambda_{kj} }$
+
+  解得:$ N \lambda_{kj} = \sum\limits^N_{i=1} 1 \{ y_i=c_k \} $
+
+  则有:$ p( x^j = a_{jl} | y=c_k ) = \frac{  \sum\limits^N_{i=1} 1 \{ x^{(j)}_i=a_{jl},y_i=c_k \} }{ \sum\limits^N_{i=1} 1 \{ y_i=c_k \} }$
+
+  证明完毕.
+\end{document}

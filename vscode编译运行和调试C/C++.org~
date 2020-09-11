@@ -1,0 +1,114 @@
+* 一、前期准备
+首先在微软官网下载并安装好visual stdio code
+
+2. 因为vscode只是一个代码编辑器，没有自带有C/C++的编译器，因此首先需要安装一个C/C++编译器并且设置环境变量，这里使用mingw-w64。因为网络问题mingw-w64很难下载，建议离线下载然后手动添加环境变量
+
+此时我们要验证一下mingw是否可用，打开cmd输入gcc -v，出现版本信息就表明mingw是可用的，如果未出现版本信息则需要再检查一下，如果这里出现问题，后面全部无法进行
+
+3. 安装必要的插件，打开vscode，点击左面竖排第五个按钮，搜索并安装上如下两个插件，
+
+- C/C++
+- Code Runner
+
+安装好以后重启一下vscode
+
+* 二、编译运行程序
+编译运行程序介绍两种方法
+
+1. 使用之前安装好的 =Code Runner= 插件一键编译运行程序
+2. 打开vscode的集成终端使用命令行编译和运行
+
+点击：文件>新建文件，出现一个空白文档，将下面的代码复制粘贴到空白文档中
+
+#+BEGIN_SRC c++
+#include <stdio.h>
+int main(){
+   char name[100];
+   printf("What is your name?\n");
+   scanf("%s",name);
+   printf("Hello,%s,nice to meet you!\n",name);
+}
+#+END_SRC
+
+然后按Ctrl+S将文件后缀名改为.c或.cpp后保存到电脑上，然后点右上角的三角形按钮
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/v2-53ec0d2eaf6666c979e1504c703f5818_r.jpg @ 2020-06-13 15:15:36
+[[file:%E4%BA%8C%E3%80%81%E7%BC%96%E8%AF%91%E8%BF%90%E8%A1%8C%E7%A8%8B%E5%BA%8F/2020-06-13_15-15-36_v2-53ec0d2eaf6666c979e1504c703f5818_r.jpg]]
+
+但现在会出现下面的情况
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/v2-2e0d03900de9c53fd0e3b8d03a8b4eba_r.jpg @ 2020-06-13 15:16:39
+[[file:%E4%BA%8C%E3%80%81%E7%BC%96%E8%AF%91%E8%BF%90%E8%A1%8C%E7%A8%8B%E5%BA%8F/2020-06-13_15-16-39_v2-2e0d03900de9c53fd0e3b8d03a8b4eba_r.jpg]]
+
+程序段中使用了scanf函数从键盘读取一串字符，这时无法输入数据，也无法结束程序，需要重启一下vscode
+
+然后依次打开：文件>首选项>设置>用户>拓展>Run Code Configuration
+找到Run In Terminal勾选上
+
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/v2-4c6db31b60b54daceb5103000245a670_720w.jpg @ 2020-06-13 15:18:11
+[[file:%E4%BA%8C%E3%80%81%E7%BC%96%E8%AF%91%E8%BF%90%E8%A1%8C%E7%A8%8B%E5%BA%8F/2020-06-13_15-18-11_v2-4c6db31b60b54daceb5103000245a670_720w.jpg]]
+
+
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/v2-a105c336f1fb60e3c3e00027ee62e29b_720w.jpg @ 2020-06-13 15:18:18
+[[file:%E4%BA%8C%E3%80%81%E7%BC%96%E8%AF%91%E8%BF%90%E8%A1%8C%E7%A8%8B%E5%BA%8F/2020-06-13_15-18-18_v2-a105c336f1fb60e3c3e00027ee62e29b_720w.jpg]]
+
+现在程序已经可以正常运行了，此时程序是运行在vscode的集成终端上，并不会额外弹出一个外部窗口
+
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/v2-160df410dd5aac793c83c75d6cf9853f_720w.jpg @ 2020-06-13 15:19:08
+[[file:%E4%BA%8C%E3%80%81%E7%BC%96%E8%AF%91%E8%BF%90%E8%A1%8C%E7%A8%8B%E5%BA%8F/2020-06-13_15-19-08_v2-160df410dd5aac793c83c75d6cf9853f_720w.jpg]]
+
+点击右上角的垃圾桶图标可以直接结束程序运行并关闭集成终端
+
+用插件运行程序是一种偷懒的方法，它本质是替用户输入了命令，它存在局限，看一个例子
+
+假设说我们在代码中使用了 winsock2.h这个头文件，我们用刚刚的Code Runner插件的方式编译会无法通过
+#+BEGIN_SRC c++
+#include <winsock2.h>
+#include <stdio.h>
+int main(){
+   SOCKET client_socket=socket(AF_INET,SOCK_STREAM,IPPROTO_TCP);
+   printf("Compile successfully!");
+}
+#+END_SRC
+
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/v2-22850a1b973a338295215fb8d128b656_720w.png @ 2020-06-13 15:20:20
+[[file:%E4%BA%8C%E3%80%81%E7%BC%96%E8%AF%91%E8%BF%90%E8%A1%8C%E7%A8%8B%E5%BA%8F/2020-06-13_15-20-20_v2-22850a1b973a338295215fb8d128b656_720w.png]]
+
+造成问题是原因是：Code Runner是按照预先设定好的规则，自动在终端执行编译运行的指令，也就是图片上红色下划线标注出的
+#+BEGIN_SRC bash
+g++ Untitled-1.cpp -o Untitled-1  ;  
+#+END_SRC
+
+如果是使用了winsock2.h，同时又是使用gcc/g++编译，在编译时我们应该在编译指令中额外添加-lwsock32指令，而Code Runner默认下并不会添加这条指令
+
+正确的编译指令应该是：
+#+BEGIN_SRC bash
+g++ xxx.cpp -o xxx.exe -lwsock32
+#+END_SRC
+
+为了解决这个问题，可以使用比较原始的方法，直接在终端上用命令行编译和运行，vscode有一个集成终端，可以连通安装在操作系统上的各种终端
+
+按 Ctrl+~ 打开集成终端（其实是"`"，打"~"是方便大家找到），输入
+#+BEGIN_SRC bash
+g++ .\文件名.cpp -o 文件名.exe -lwsock32
+./文件名.exe
+#+END_SRC
+
+
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/v2-a6a46fc19ebf0ae22775ea655780b772_720w.png @ 2020-06-13 15:23:04
+[[file:%E4%BA%8C%E3%80%81%E7%BC%96%E8%AF%91%E8%BF%90%E8%A1%8C%E7%A8%8B%E5%BA%8F/2020-06-13_15-23-04_v2-a6a46fc19ebf0ae22775ea655780b772_720w.png]]
+
+* 三、调试程序
+当程序遇到bug，我们可以单步调试来定位错误，vscode支持添加断点，添加监视，显示鼠标指向变量的值，调试控制台查询变量值
+
+首先在电脑上的某个你习惯的位置新建一个文件夹（工作区），用于存放将要编写的代码，接下来配置好的调试环境，仅会对存放在这一个文件夹以及文件夹的子目录里的程序生效
+
+务必注意！调试的文件名和文件路径中不能出现中文字符！！否则将无法启动调试！
+
+这是由于调试用到的mingw中的gdb不支持中文路径！和vscode无关
+
+新建好文件夹后，在vscode界面，点击：文件>打开文件夹，用vscode打开刚刚新建的文件夹（安装时勾选了右键打开可以直接右键选通过code打开）
+
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/v2-b5792598d8e59aacef1af06746cf515f_720w.jpg @ 2020-06-13 15:24:52
+[[file:%E4%B8%89%E3%80%81%E8%B0%83%E8%AF%95%E7%A8%8B%E5%BA%8F/2020-06-13_15-24-52_v2-b5792598d8e59aacef1af06746cf515f_720w.jpg]]
+
+在vscode资源管理器点击新建文件夹图标新建一个.vscode文件夹（注意前面的"."号）
+

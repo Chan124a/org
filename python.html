@@ -1,0 +1,4304 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2020-07-26 周日 16:55 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>&lrm;</title>
+<meta name="generator" content="Org mode" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2019 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+        displayAlign: "center",
+        displayIndent: "0em",
+
+        "HTML-CSS": { scale: 100,
+                        linebreaks: { automatic: "false" },
+                        webFont: "TeX"
+                       },
+        SVG: {scale: 100,
+              linebreaks: { automatic: "false" },
+              font: "TeX"},
+        NativeMML: {scale: 100},
+        TeX: { equationNumbers: {autoNumber: "AMS"},
+               MultLineWidth: "85%",
+               TagSide: "right",
+               TagIndent: ".8em"
+             }
+});
+</script>
+<script type="text/javascript"
+        src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js?config=TeX-AMS_HTML"></script>
+</head>
+<body>
+<div id="content">
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org4bf10b2">1. 基本数据类型</a>
+<ul>
+<li><a href="#org59442f6">1.1. 字符串</a></li>
+<li><a href="#orgaaa184c">1.2. 布尔值</a></li>
+<li><a href="#orgf7027eb">1.3. 空值</a></li>
+<li><a href="#org1596dae">1.4. 列表</a>
+<ul>
+<li><a href="#org8ebafd4">1.4.1. Python列表脚本操作符</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#org027c167">2. 基本数据类型转换</a></li>
+<li><a href="#org56b93f9">3. 变量</a>
+<ul>
+<li><a href="#orgc7d2541">3.1. 变量的指向问题</a></li>
+<li><a href="#org5285a7b">3.2. 多个变量赋值</a></li>
+</ul>
+</li>
+<li><a href="#org8e42d7a">4. 内置方法</a>
+<ul>
+<li><a href="#org733d2f0">4.1. enumerate()</a>
+<ul>
+<li><a href="#org1940407">4.1.1. 参数</a></li>
+<li><a href="#org0821a47">4.1.2. 返回值</a></li>
+<li><a href="#org8270f41">4.1.3. 样例</a></li>
+</ul>
+</li>
+<li><a href="#org9f3345a">4.2. open</a>
+<ul>
+<li><a href="#org084f0a4">4.2.1. 参数</a></li>
+<li><a href="#org8725801">4.2.2. 打开文件的模式</a></li>
+<li><a href="#org03c9ba5">4.2.3. file 对象方法</a></li>
+</ul>
+</li>
+<li><a href="#orga1a4936">4.3. print</a></li>
+<li><a href="#org855420e">4.4. super()</a></li>
+</ul>
+</li>
+<li><a href="#org865ad29">5. 条件语句</a>
+<ul>
+<li><a href="#org4e55550">5.1. if</a></li>
+</ul>
+</li>
+<li><a href="#org05d6b5c">6. 三元表达式</a></li>
+<li><a href="#org80b8237">7. 参数</a>
+<ul>
+<li><a href="#org0638509">7.1. 默认参数</a></li>
+<li><a href="#org2d99690">7.2. 可变参数</a></li>
+<li><a href="#org36d4c28">7.3. positional argument vs keyword argument</a></li>
+</ul>
+</li>
+<li><a href="#org7878d06">8. Python3 序列解包</a>
+<ul>
+<li><a href="#orgb73e039">8.1. 序列解包</a></li>
+<li><a href="#orgfce0f07">8.2. 实战例子</a></li>
+</ul>
+</li>
+<li><a href="#orgf42da4f">9. 类</a>
+<ul>
+<li><a href="#org6119754">9.1. 类的定义</a></li>
+<li><a href="#org280e7c6">9.2. 类对象</a>
+<ul>
+<li><a href="#org62d2d5b">9.2.1. 属性引用</a></li>
+<li><a href="#org99f8a1b">9.2.2. 实例化</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#org52cd00d">10. 模块与包</a>
+<ul>
+<li><a href="#org1b36852">10.1. 模块简介</a></li>
+<li><a href="#org476edcf">10.2. 模块的使用</a>
+<ul>
+<li><a href="#org0425def">10.2.1. import</a></li>
+<li><a href="#org63207de">10.2.2. from &#x2026; import</a></li>
+<li><a href="#org2e137ac">10.2.3. <b>*</b> from ··· import *</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#orgf719bcd">11. py文件的两种执行方式</a>
+<ul>
+<li><a href="#orge7698a9">11.1. <code>if __name__ == '__main__':</code> 的运行原理</a></li>
+</ul>
+</li>
+<li><a href="#orgf33f4f3">12. numpy库</a>
+<ul>
+<li><a href="#org050c572">12.1. numpy.fromfile</a></li>
+</ul>
+</li>
+<li><a href="#orgf63b129">13. <code>__future__</code> 模块</a></li>
+<li><a href="#org0b7a157">14. argparse 库</a>
+<ul>
+<li><a href="#orgbaf8985">14.1. 使用示例1</a></li>
+<li><a href="#orgf471ece">14.2. 使用示例2</a></li>
+<li><a href="#org644ded3">14.3. ArgumentParser对象</a>
+<ul>
+<li><a href="#org81610f2">14.3.1. 参数</a></li>
+</ul>
+</li>
+<li><a href="#org704a3a3">14.4. add_argument()</a>
+<ul>
+<li><a href="#org43095cb">14.4.1. 参数</a></li>
+<li><a href="#org857e3bb">14.4.2. metavar的作用</a></li>
+<li><a href="#org0406051">14.4.3. choices的作用</a></li>
+</ul>
+</li>
+<li><a href="#org1f2e61b">14.5. parse_args()</a>
+<ul>
+<li><a href="#org0fd1092">14.5.1. 参数</a></li>
+<li><a href="#orgcaae4a0">14.5.2. Option value syntax</a></li>
+<li><a href="#org3f2a979">14.5.3. Invalid arguments</a></li>
+<li><a href="#org2ff1d2c">14.5.4. Arguments containing -</a></li>
+<li><a href="#orgde3cd0d">14.5.5. Argument abbreviations (prefix matching)¶</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#org729e287">15. torch</a>
+<ul>
+<li><a href="#org706c014">15.1. torch.Tensor</a>
+<ul>
+<li><a href="#org2e3af9d">15.1.1. 张量数据类型</a></li>
+<li><a href="#orgb7903d0">15.1.2. 创建张量</a></li>
+<li><a href="#orgb518e2a">15.1.3. 访问张量</a></li>
+</ul>
+</li>
+<li><a href="#org69e0fcd">15.2. torch.device</a></li>
+<li><a href="#org0549228">15.3. torch.utils.data</a>
+<ul>
+<li><a href="#orgb9d3379">15.3.1. torch.utils.data.DataLoader</a></li>
+<li><a href="#org6031561">15.3.2. ImageFolder</a></li>
+</ul>
+</li>
+<li><a href="#org909eaff">15.4. torch.optim</a>
+<ul>
+<li><a href="#org17bb585">15.4.1. 构建</a></li>
+<li><a href="#org2b2ef24">15.4.2. 为每个参数单独设置选项</a></li>
+<li><a href="#orgc40d8cd">15.4.3. 进行单次优化</a></li>
+<li><a href="#org315d531">15.4.4. 各种优化算法</a></li>
+<li><a href="#org922bd3b">15.4.5. 调整学习率</a></li>
+</ul>
+</li>
+<li><a href="#orgaa64e05">15.5. view的用法</a></li>
+<li><a href="#orge34d64b">15.6. permute的用法</a></li>
+</ul>
+</li>
+<li><a href="#org9a8deb3">16. torchvision</a>
+<ul>
+<li><a href="#orgce1eb47">16.1. torchvision.datasets</a>
+<ul>
+<li><a href="#orgb1741d6">16.1.1. MNIST</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#org89711fe">17. os库</a>
+<ul>
+<li><a href="#org7bb8a9c">17.1. path子模块</a>
+<ul>
+<li><a href="#org5d414df">17.1.1. exists(path)</a></li>
+<li><a href="#orgdb5273b">17.1.2. isfile(path)</a></li>
+<li><a href="#orgb8c44db">17.1.3. isdir(path)</a></li>
+<li><a href="#org7b0f5bb">17.1.4. basename(path)</a></li>
+<li><a href="#org008991f">17.1.5. dirname(path)</a></li>
+<li><a href="#org037d56e">17.1.6. split(path)</a></li>
+<li><a href="#org601e9b5">17.1.7. splitext(path)</a></li>
+<li><a href="#org04956cf">17.1.8. join(path, *paths)</a></li>
+<li><a href="#org36cf948">17.1.9. getsize(path)</a></li>
+</ul>
+</li>
+<li><a href="#org3c0154d">17.2. 目录操作</a>
+<ul>
+<li><a href="#orgbcc9f4f">17.2.1. listdir(path='.')</a></li>
+<li><a href="#org9ca2c42">17.2.2. mkdir(path, mode=0o777)</a></li>
+<li><a href="#orgcc3ae1d">17.2.3. makedirs(name, mode=0o777, exist_ok=False)</a></li>
+<li><a href="#org981f469">17.2.4. rmdir(path)</a></li>
+<li><a href="#org6d5541d">17.2.5. removedirs(path)</a></li>
+<li><a href="#org5096ea9">17.2.6. remove(path)</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#org9693ef1">18. time库</a>
+<ul>
+<li><a href="#org39696bb">18.1. time()</a></li>
+<li><a href="#org4fb3980">18.2. ctime()获取当前时间并以易读方式表示，返回字符串</a></li>
+<li><a href="#org1e363a9">18.3. gmtime()获取当前时间，表示为计算机可处理的时间格式</a></li>
+</ul>
+</li>
+<li><a href="#orgee9d65d">19. 注释</a>
+<ul>
+<li><a href="#orge246a48">19.1. 单行注释</a></li>
+<li><a href="#orgb6115d9">19.2. 多行注释</a></li>
+</ul>
+</li>
+<li><a href="#org165f053">20. 编码问题</a></li>
+<li><a href="#org3183157">21. namedtuple</a></li>
+<li><a href="#org16e077e">22. 字典(Dictionary)</a>
+<ul>
+<li><a href="#orgf6ce16e">22.1. items()方法</a></li>
+</ul>
+</li>
+<li><a href="#org86c7468">23. collections库</a>
+<ul>
+<li><a href="#org9559bca">23.1. OrderedDict用法</a></li>
+</ul>
+</li>
+<li><a href="#org7935a12">24. isinstance() 函数</a></li>
+<li><a href="#org9b0fe8c">25. format()用法</a></li>
+<li><a href="#org7c1fe70">26. 字符串</a>
+<ul>
+<li><a href="#orgb350513">26.1. split()方法</a>
+<ul>
+<li><a href="#org18eaefc">26.1.1. 例子</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#orgf05978e">27. pandas库</a>
+<ul>
+<li><a href="#orgb026949">27.1. read_csv()</a>
+<ul>
+<li><a href="#org396680b">27.1.1. 参数</a></li>
+</ul>
+</li>
+<li><a href="#orgf529dcd">27.2. pandas.get_dummies</a>
+<ul>
+<li><a href="#org1404574">27.2.1. 参数</a></li>
+<li><a href="#org77f4a2e">27.2.2. 示例</a></li>
+</ul>
+</li>
+<li><a href="#orgee27a02">27.3. pandas.conca</a>
+<ul>
+<li><a href="#org1d1f8a4">27.3.1. 参数</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#org5d5ad3c">28. Matplotlib</a>
+<ul>
+<li><a href="#org2dcfafa">28.1. 实例</a></li>
+<li><a href="#org170502d">28.2. 格式化字符</a>
+<ul>
+<li><a href="#org8aef406">28.2.1. 字符</a></li>
+<li><a href="#org246e0b4">28.2.2. 颜色</a></li>
+</ul>
+</li>
+<li><a href="#org2fd6895">28.3. 图形中文显示</a></li>
+<li><a href="#org0e5463b">28.4. pyplot</a>
+<ul>
+<li><a href="#org54c8d83">28.4.1. scatter</a></li>
+<li><a href="#org9ffb603">28.4.2. subplot()</a></li>
+<li><a href="#org8fd96a7">28.4.3. subplot2grid()</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#orgfeaa8b6">29. Sklearn</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org4bf10b2" class="outline-2">
+<h2 id="org4bf10b2"><span class="section-number-2">1</span> 基本数据类型</h2>
+<div class="outline-text-2" id="text-1">
+</div>
+<div id="outline-container-org59442f6" class="outline-3">
+<h3 id="org59442f6"><span class="section-number-3">1.1</span> 字符串</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+字符创用单引号 <code>‘ ‘</code> 、双引号 <code>“ “</code> 、三引号 <code>‘‘‘ ‘‘‘</code> 表示
+</p>
+
+<p>
+单引号可以嵌入到双引号和三引号，双引号可以嵌入到三引号里面
+</p>
+
+<p>
+三引号可以用于表示分行的字符串
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #FD971F;">str2</span>=<span style="color: #E6DB74;">"a 'b' c"</span>
+<span style="color: #F92672;">print</span>(str2) 
+
+<span style="color: #FD971F;">str3</span>=<span style="color: #E6DB74;">'''he said:''hello'' '''</span>
+<span style="color: #F92672;">print</span>(str3)
+</pre>
+</div>
+
+<pre class="example">
+a 'b' c
+he said:''hello'' 
+
+</pre>
+</div>
+</div>
+
+<div id="outline-container-orgaaa184c" class="outline-3">
+<h3 id="orgaaa184c"><span class="section-number-3">1.2</span> 布尔值</h3>
+<div class="outline-text-3" id="text-1-2">
+<p>
+python中可以直接用 True、False 表示布尔值（请注意大小写），也可以通过布尔运算计算出来。
+</p>
+</div>
+</div>
+<div id="outline-container-orgf7027eb" class="outline-3">
+<h3 id="orgf7027eb"><span class="section-number-3">1.3</span> 空值</h3>
+<div class="outline-text-3" id="text-1-3">
+<p>
+python中用None表示空值
+</p>
+</div>
+</div>
+<div id="outline-container-org1596dae" class="outline-3">
+<h3 id="org1596dae"><span class="section-number-3">1.4</span> 列表</h3>
+<div class="outline-text-3" id="text-1-4">
+<p>
+列表的数据项不需要具有相同的类型
+</p>
+
+<p>
+创建一个列表，只要把逗号分隔的不同的数据项使用方括号括起来即可。如下所示：
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #FD971F;">list1</span> = [<span style="color: #E6DB74;">'physics'</span>, <span style="color: #E6DB74;">'chemistry'</span>, 1997, 2000]
+<span style="color: #FD971F;">list2</span> = [1, 2, 3, 4, 5 ]
+<span style="color: #FD971F;">list3</span> = [<span style="color: #E6DB74;">"a"</span>, <span style="color: #E6DB74;">"b"</span>, <span style="color: #E6DB74;">"c"</span>, <span style="color: #E6DB74;">"d"</span>]
+</pre>
+</div>
+</div>
+<div id="outline-container-org8ebafd4" class="outline-4">
+<h4 id="org8ebafd4"><span class="section-number-4">1.4.1</span> Python列表脚本操作符</h4>
+<div class="outline-text-4" id="text-1-4-1">
+<p>
+列表对 + 和 * 的操作符与字符串相似。+ 号用于组合列表，* 号用于重复列表。
+</p>
+
+<p>
+如下所示：
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Python 表达式</th>
+<th scope="col" class="org-left">结果</th>
+<th scope="col" class="org-left">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">len([1, 2, 3])</td>
+<td class="org-left">3</td>
+<td class="org-left">长度</td>
+</tr>
+
+<tr>
+<td class="org-left">[1, 2, 3] + [4, 5, 6]</td>
+<td class="org-left">[1, 2, 3, 4, 5, 6]</td>
+<td class="org-left">组合</td>
+</tr>
+
+<tr>
+<td class="org-left">['Hi!'] * 4</td>
+<td class="org-left">['Hi!', 'Hi!', 'Hi!', 'Hi!']</td>
+<td class="org-left">重复</td>
+</tr>
+
+<tr>
+<td class="org-left">3 in [1, 2, 3]</td>
+<td class="org-left">True</td>
+<td class="org-left">元素是否存在于列表中</td>
+</tr>
+
+<tr>
+<td class="org-left">for x in [1, 2, 3]: print x,</td>
+<td class="org-left">1 2 3</td>
+<td class="org-left">迭代</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org027c167" class="outline-2">
+<h2 id="org027c167"><span class="section-number-2">2</span> 基本数据类型转换</h2>
+<div class="outline-text-2" id="text-2">
+<p>
+Python 中基本数据类型转换的方法有下面几个。
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">方法</th>
+<th scope="col" class="org-left">说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">int(x [,base ])</td>
+<td class="org-left">将x转换为一个整数</td>
+</tr>
+
+<tr>
+<td class="org-left">float(x )</td>
+<td class="org-left">将x转换到一个浮点数</td>
+</tr>
+
+<tr>
+<td class="org-left">complex(real [,imag ])</td>
+<td class="org-left">创建一个复数</td>
+</tr>
+
+<tr>
+<td class="org-left">str(x )</td>
+<td class="org-left">将对象 x 转换为字符串</td>
+</tr>
+
+<tr>
+<td class="org-left">repr(x )</td>
+<td class="org-left">将对象 x 转换为表达式字符串</td>
+</tr>
+
+<tr>
+<td class="org-left">eval(str )</td>
+<td class="org-left">用来计算在字符串中的有效 Python 表达式,并返回一个对象</td>
+</tr>
+
+<tr>
+<td class="org-left">tuple(s )</td>
+<td class="org-left">将序列 s 转换为一个元组</td>
+</tr>
+
+<tr>
+<td class="org-left">list(s )</td>
+<td class="org-left">将序列 s 转换为一个列表</td>
+</tr>
+
+<tr>
+<td class="org-left">chr(x )</td>
+<td class="org-left">将一个整数转换为一个字符</td>
+</tr>
+
+<tr>
+<td class="org-left">unichr(x )</td>
+<td class="org-left">将一个整数转换为 Unicode 字符</td>
+</tr>
+
+<tr>
+<td class="org-left">ord(x )</td>
+<td class="org-left">将一个字符转换为它的整数值</td>
+</tr>
+
+<tr>
+<td class="org-left">hex(x )</td>
+<td class="org-left">将一个整数转换为一个十六进制字符串</td>
+</tr>
+
+<tr>
+<td class="org-left">oct(x )</td>
+<td class="org-left">将一个整数转换为一个八进制字符串</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+注：在 Python 3 里，只有一种整数类型 int，表示为长整型，没有 python2 中的 Long。
+</p>
+</div>
+</div>
+<div id="outline-container-org56b93f9" class="outline-2">
+<h2 id="org56b93f9"><span class="section-number-2">3</span> 变量</h2>
+<div class="outline-text-2" id="text-3">
+<p>
+Python 是不用声明数据类型的。在 Python 中 = 是赋值语句，跟其他的编程语言也是一样的，因为 Python 定义变量时不需要声明数据类型，因此可以把任意的数据类型赋值给变量，且同一个变量可以反复赋值，而且可以是不同的数据类型。
+</p>
+
+<p>
+这种变量本身类型不固定的语言称之为动态语言，与之对应的是静态语言。静态语言在定义变量时必须指定变量类型，如果赋值的时候类型不匹配，就会报错。例如 Java 是静态语言。
+</p>
+</div>
+<div id="outline-container-orgc7d2541" class="outline-3">
+<h3 id="orgc7d2541"><span class="section-number-3">3.1</span> 变量的指向问题</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+这个跟c语言是一样的
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #FD971F;">a</span>=<span style="color: #E6DB74;">"hello python"</span>
+<span style="color: #FD971F;">b</span>=a
+<span style="color: #FD971F;">a</span>=123
+<span style="color: #F92672;">print</span>(b)
+</pre>
+</div>
+
+<pre class="example">
+hello python
+
+</pre>
+</div>
+</div>
+<div id="outline-container-org5285a7b" class="outline-3">
+<h3 id="org5285a7b"><span class="section-number-3">3.2</span> 多个变量赋值</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+Python 允许同时为多个变量赋值。例如：
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #FD971F;">a</span> = <span style="color: #FD971F;">b</span> = <span style="color: #FD971F;">c</span> = 1
+</pre>
+</div>
+
+<p>
+当然也可以为多个对象指定多个变量。例如：
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #FD971F;">a</span>, <span style="color: #FD971F;">b</span>, <span style="color: #FD971F;">c</span> = 1, 2, <span style="color: #E6DB74;">"liangdianshui"</span>
+</pre>
+</div>
+<p>
+以上实例，两个整型对象 1 和 2 的分配给变量 a 和 b，字符串对象 "liangdianshui" 分配给变量 c。
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org8e42d7a" class="outline-2">
+<h2 id="org8e42d7a"><span class="section-number-2">4</span> 内置方法</h2>
+<div class="outline-text-2" id="text-4">
+</div>
+<div id="outline-container-org733d2f0" class="outline-3">
+<h3 id="org733d2f0"><span class="section-number-3">4.1</span> enumerate()</h3>
+<div class="outline-text-3" id="text-4-1">
+<p>
+enumerate 函数用于遍历序列中的元素以及它们的下标
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F92672;">enumerate</span>(sequence, [start=0])
+</pre>
+</div>
+</div>
+<div id="outline-container-org1940407" class="outline-4">
+<h4 id="org1940407"><span class="section-number-4">4.1.1</span> 参数</h4>
+<div class="outline-text-4" id="text-4-1-1">
+<ul class="org-ul">
+<li>sequence &#x2013; 一个序列、迭代器或其他支持迭代对象。</li>
+<li>start &#x2013; 下标起始位置。</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org0821a47" class="outline-4">
+<h4 id="org0821a47"><span class="section-number-4">4.1.2</span> 返回值</h4>
+<div class="outline-text-4" id="text-4-1-2">
+<p>
+返回 enumerate(枚举) 对象。
+</p>
+</div>
+</div>
+<div id="outline-container-org8270f41" class="outline-4">
+<h4 id="org8270f41"><span class="section-number-4">4.1.3</span> 样例</h4>
+<div class="outline-text-4" id="text-4-1-3">
+<div class="org-src-container">
+<pre class="src src-python">&gt;&gt;&gt;<span style="color: #FD971F;">seasons</span> = [<span style="color: #E6DB74;">'Spring'</span>, <span style="color: #E6DB74;">'Summer'</span>, <span style="color: #E6DB74;">'Fall'</span>, <span style="color: #E6DB74;">'Winter'</span>]
+&gt;&gt;&gt; <span style="color: #F92672;">list</span>(<span style="color: #F92672;">enumerate</span>(seasons))
+[(0, <span style="color: #E6DB74;">'Spring'</span>), (1, <span style="color: #E6DB74;">'Summer'</span>), (2, <span style="color: #E6DB74;">'Fall'</span>), (3, <span style="color: #E6DB74;">'Winter'</span>)]
+&gt;&gt;&gt; <span style="color: #F92672;">list</span>(<span style="color: #F92672;">enumerate</span>(seasons, start=1))       <span style="color: #75715E;"># </span><span style="color: #75715E;">&#19979;&#26631;&#20174; 1 &#24320;&#22987;</span>
+[(1, <span style="color: #E6DB74;">'Spring'</span>), (2, <span style="color: #E6DB74;">'Summer'</span>), (3, <span style="color: #E6DB74;">'Fall'</span>), (4, <span style="color: #E6DB74;">'Winter'</span>)]
+
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-python">&gt;&gt;&gt;<span style="color: #FD971F;">seq</span> = [<span style="color: #E6DB74;">'one'</span>, <span style="color: #E6DB74;">'two'</span>, <span style="color: #E6DB74;">'three'</span>]
+&gt;&gt;&gt; <span style="color: #F92672;">for</span> i, element <span style="color: #F92672;">in</span> <span style="color: #F92672;">enumerate</span>(seq):
+...     <span style="color: #F92672;">print</span> i, element
+... 
+0 one
+1 two
+2 three
+
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org9f3345a" class="outline-3">
+<h3 id="org9f3345a"><span class="section-number-3">4.2</span> open</h3>
+<div class="outline-text-3" id="text-4-2">
+<p>
+python open() 函数用于打开一个文件，创建一个 <b><b>file</b></b> 对象，相关的方法才可以调用它进行读写。
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F92672;">open</span>(name[, mode[, buffering]])
+<span style="color: #75715E;">#</span><span style="color: #75715E;">&#31034;&#20363;</span>
+<span style="color: #F92672;">open</span>(path, <span style="color: #E6DB74;">"r"</span>)
+</pre>
+</div>
+</div>
+<div id="outline-container-org084f0a4" class="outline-4">
+<h4 id="org084f0a4"><span class="section-number-4">4.2.1</span> 参数</h4>
+<div class="outline-text-4" id="text-4-2-1">
+<ul class="org-ul">
+<li>name : 一个包含了你要访问的文件名称的字符串值。</li>
+<li>mode : mode 决定了打开文件的模式：只读，写入，追加等。所有可取值见如下的完全列表。这个参数是非强制的，默认文件访问模式为只读(r)。</li>
+<li>buffering : 如果 buffering 的值被设为 0，就不会有寄存。如果 buffering 的值取 1，访问文件时会寄存行。如果将 buffering 的值设为大于 1 的整数，表明了这就是的寄存区的缓冲大小。如果取负值，寄存区的缓冲大小则为系统默认。</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org8725801" class="outline-4">
+<h4 id="org8725801"><span class="section-number-4">4.2.2</span> 打开文件的模式</h4>
+<div class="outline-text-4" id="text-4-2-2">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">模式</td>
+<td class="org-left">描述</td>
+</tr>
+
+<tr>
+<td class="org-left">r</td>
+<td class="org-left">以只读方式打开文件。文件的指针将会放在文件的开头。这是默认模式。</td>
+</tr>
+
+<tr>
+<td class="org-left">rb</td>
+<td class="org-left">以二进制格式打开一个文件用于只读。文件指针将会放在文件的开头。这是默认模式。</td>
+</tr>
+
+<tr>
+<td class="org-left">r+</td>
+<td class="org-left">打开一个文件用于读写。文件指针将会放在文件的开头。</td>
+</tr>
+
+<tr>
+<td class="org-left">rb+</td>
+<td class="org-left">以二进制格式打开一个文件用于读写。文件指针将会放在文件的开头。</td>
+</tr>
+
+<tr>
+<td class="org-left">w</td>
+<td class="org-left">打开一个文件只用于写入。如果该文件已存在则打开文件，并从开头开始编辑，即原有内容会被删除。如果该文件不存在，创建新文件。</td>
+</tr>
+
+<tr>
+<td class="org-left">wb</td>
+<td class="org-left">以二进制格式打开一个文件只用于写入。如果该文件已存在则打开文件，并从开头开始编辑，即原有内容会被删除。如果该文件不存在，创建新文件。</td>
+</tr>
+
+<tr>
+<td class="org-left">w+</td>
+<td class="org-left">打开一个文件用于读写。如果该文件已存在则打开文件，并从开头开始编辑，即原有内容会被删除。如果该文件不存在，创建新文件。</td>
+</tr>
+
+<tr>
+<td class="org-left">wb+</td>
+<td class="org-left">以二进制格式打开一个文件用于读写。如果该文件已存在则打开文件，并从开头开始编辑，即原有内容会被删除。如果该文件不存在，创建新文件。</td>
+</tr>
+
+<tr>
+<td class="org-left">a</td>
+<td class="org-left">打开一个文件用于追加。如果该文件已存在，文件指针将会放在文件的结尾。也就是说，新的内容将会被写入到已有内容之后。如果该文件不存在，创建新文件进行写入。</td>
+</tr>
+
+<tr>
+<td class="org-left">ab</td>
+<td class="org-left">以二进制格式打开一个文件用于追加。如果该文件已存在，文件指针将会放在文件的结尾。也就是说，新的内容将会被写入到已有内容之后。如果该文件不存在，创建新文件进行写入。</td>
+</tr>
+
+<tr>
+<td class="org-left">a+</td>
+<td class="org-left">打开一个文件用于读写。如果该文件已存在，文件指针将会放在文件的结尾。文件打开时会是追加模式。如果该文件不存在，创建新文件用于读写。</td>
+</tr>
+
+<tr>
+<td class="org-left">ab+</td>
+<td class="org-left">以二进制格式打开一个文件用于追加。如果该文件已存在，文件指针将会放在文件的结尾。如果该文件不存在，创建新文件用于读写。</td>
+</tr>
+</tbody>
+</table>
+</div>
+<ol class="org-ol">
+<li><a id="orga6d90b6"></a>参考<br />
+<div class="outline-text-5" id="text-4-2-2-1">
+<p>
+<a href="https://www.runoob.com/python/python-func-open.html">菜鸟教程</a>
+</p>
+</div>
+</li>
+</ol>
+</div>
+
+<div id="outline-container-org03c9ba5" class="outline-4">
+<h4 id="org03c9ba5"><span class="section-number-4">4.2.3</span> file 对象方法</h4>
+<div class="outline-text-4" id="text-4-2-3">
+<ul class="org-ul">
+<li>file.read([size])：size 未指定则返回整个文件，如果文件大小 &gt;2 倍内存则有问题，f.read()读到文件尾时返回""(空字串)。</li>
+<li>file.readline()：返回一行。</li>
+<li>file.readlines([size]) ：返回包含size行的列表, size 未指定则返回全部行。</li>
+<li>for line in f: print line ：通过迭代器访问。</li>
+<li>f.write("hello\n")：如果要写入字符串以外的数据,先将他转换为字符串。</li>
+<li>f.tell()：返回一个整数,表示当前文件指针的位置(就是到文件头的比特数)。</li>
+<li>f.seek(偏移量,[起始位置])：用来移动文件指针。偏移量: 单位为比特，可正可负. 起始位置: 0 - 文件头, 默认值; 1 - 当前位置; 2 - 文件尾</li>
+<li>f.close() 关闭文件</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="outline-container-orga1a4936" class="outline-3">
+<h3 id="orga1a4936"><span class="section-number-3">4.3</span> print</h3>
+<div class="outline-text-3" id="text-4-3">
+<p>
+打印 Hello Python ，注意必须加单引号
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F92672;">print</span> (<span style="color: #E6DB74;">'hello python'</span>)
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org855420e" class="outline-3">
+<h3 id="org855420e"><span class="section-number-3">4.4</span> super()</h3>
+<div class="outline-text-3" id="text-4-4">
+<p>
+super() 函数是用于调用父类(超类)的一个方法。
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F92672;">super</span>(<span style="color: #F92672;">type</span>[, <span style="color: #F92672;">object</span>-<span style="color: #F92672;">or</span>-<span style="color: #F92672;">type</span>])
+</pre>
+</div>
+<ul class="org-ul">
+<li>type &#x2013; 类。</li>
+<li>object-or-type &#x2013; 类，一般是 self</li>
+</ul>
+
+<p>
+Python3.x 和 Python2.x 的一个区别是: Python 3 可以使用直接使用 super().xxx 代替 super(Class, self).xxx :
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #75715E;">#</span><span style="color: #75715E;">!/usr/bin/python</span>
+<span style="color: #75715E;"># </span><span style="color: #75715E;">-*- coding: UTF-8 -*-</span>
+
+<span style="color: #F92672;">class</span> <span style="color: #66D9EF;">FooParent</span>(<span style="color: #F92672;">object</span>):
+    <span style="color: #F92672;">def</span> <span style="color: #A6E22E;">__init__</span>(<span style="color: #F92672;">self</span>):
+        <span style="color: #F92672;">self</span>.parent = <span style="color: #E6DB74;">'I\'m the parent.'</span>
+        <span style="color: #F92672;">print</span> (<span style="color: #E6DB74;">'Parent'</span>)
+
+    <span style="color: #F92672;">def</span> <span style="color: #A6E22E;">bar</span>(<span style="color: #F92672;">self</span>,message):
+        <span style="color: #F92672;">print</span> (<span style="color: #E6DB74;">"%s from Parent"</span> % message)
+
+<span style="color: #F92672;">class</span> <span style="color: #66D9EF;">FooChild</span>(FooParent):
+    <span style="color: #F92672;">def</span> <span style="color: #A6E22E;">__init__</span>(<span style="color: #F92672;">self</span>):
+        <span style="color: #75715E;"># </span><span style="color: #75715E;">super(FooChild,self) &#39318;&#20808;&#25214;&#21040; FooChild &#30340;&#29238;&#31867;&#65288;&#23601;&#26159;&#31867; FooParent&#65289;&#65292;&#28982;&#21518;&#25226;&#31867; FooChild &#30340;&#23545;&#35937;&#36716;&#25442;&#20026;&#31867; FooParent &#30340;&#23545;&#35937;</span>
+        <span style="color: #F92672;">super</span>(FooChild,<span style="color: #F92672;">self</span>).__init__()    
+        <span style="color: #F92672;">print</span> (<span style="color: #E6DB74;">'Child'</span>)
+
+    <span style="color: #F92672;">def</span> <span style="color: #A6E22E;">bar</span>(<span style="color: #F92672;">self</span>,message):
+        <span style="color: #F92672;">super</span>(FooChild, <span style="color: #F92672;">self</span>).bar(message)
+        <span style="color: #F92672;">print</span> (<span style="color: #E6DB74;">'Child bar fuction'</span>)
+        <span style="color: #F92672;">print</span> (<span style="color: #F92672;">self</span>.parent)
+
+<span style="color: #F92672;">if</span> <span style="color: #F92672;">__name__</span> == <span style="color: #E6DB74;">'__main__'</span>:
+    <span style="color: #FD971F;">fooChild</span> = FooChild()
+    fooChild.bar(<span style="color: #E6DB74;">'HelloWorld'</span>)
+</pre>
+</div>
+<p>
+执行结果：
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">Parent
+Child
+HelloWorld from Parent
+Child bar fuction
+I<span style="color: #E6DB74;">'m the parent.</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org865ad29" class="outline-2">
+<h2 id="org865ad29"><span class="section-number-2">5</span> 条件语句</h2>
+<div class="outline-text-2" id="text-5">
+</div>
+<div id="outline-container-org4e55550" class="outline-3">
+<h3 id="org4e55550"><span class="section-number-3">5.1</span> if</h3>
+<div class="outline-text-3" id="text-5-1">
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F92672;">if</span>(...):
+    comment...
+
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org05d6b5c" class="outline-2">
+<h2 id="org05d6b5c"><span class="section-number-2">6</span> 三元表达式</h2>
+<div class="outline-text-2" id="text-6">
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #FD971F;">a</span> = 1
+<span style="color: #FD971F;">b</span> = 2
+<span style="color: #FD971F;">h</span> = <span style="color: #E6DB74;">""</span>
+<span style="color: #75715E;">#</span><span style="color: #75715E;">&#22914;&#26524;if&#21518;&#38754;&#30340;&#26465;&#20214;&#25104;&#31435;,&#21017;h=a-b,&#21542;&#21017;h=a+b</span>
+<span style="color: #FD971F;">h</span> = a-b <span style="color: #F92672;">if</span> a&gt;b <span style="color: #F92672;">else</span> a+b
+<span style="color: #F92672;">print</span>(h)
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org80b8237" class="outline-2">
+<h2 id="org80b8237"><span class="section-number-2">7</span> 参数</h2>
+<div class="outline-text-2" id="text-7">
+</div>
+<div id="outline-container-org0638509" class="outline-3">
+<h3 id="org0638509"><span class="section-number-3">7.1</span> 默认参数</h3>
+<div class="outline-text-3" id="text-7-1">
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F92672;">def</span> <span style="color: #A6E22E;">test_defargs</span>(one, two = 2):
+   <span style="color: #F92672;">print</span> <span style="color: #E6DB74;">'Required argument: '</span>, one
+   <span style="color: #F92672;">print</span> <span style="color: #E6DB74;">'Optional argument: '</span>, two
+
+test_defargs(1)
+<span style="color: #75715E;"># </span><span style="color: #75715E;">result:</span>
+<span style="color: #75715E;"># </span><span style="color: #75715E;">Required argument: 1</span>
+<span style="color: #75715E;"># </span><span style="color: #75715E;">Optional argument: 2</span>
+
+test_defargs(1, 3)
+<span style="color: #75715E;"># </span><span style="color: #75715E;">result:</span>
+<span style="color: #75715E;"># </span><span style="color: #75715E;">Required argument: 1</span>
+<span style="color: #75715E;"># </span><span style="color: #75715E;">Optional argument: 3</span>
+
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org2d99690" class="outline-3">
+<h3 id="org2d99690"><span class="section-number-3">7.2</span> 可变参数</h3>
+<div class="outline-text-3" id="text-7-2">
+<p>
+你可以将不定数量的参数传递给一个函数。不定的意思是：预先并不知道, 函数使用者会传递多少个参数给你, 所以在这个场景下使用这两个关键字。其实并不是必须写成 *args 和 **kwargs。  *(星号) 才是必须的. 你也可以写成 *ar  和 **k 。而写成 *args 和**kwargs 只是一个通俗的命名约定。
+</p>
+
+<p>
+其中，*args是可变的positional arguments列表，**kwargs是可变的keyword arguments列表。并且，*args必须位于**kwargs之前，因为positional arguments必须位于keyword arguments之前。
+</p>
+<ul class="org-ul">
+<li><code>*args</code> 表示任何多个无名参数，它本质是一个 tuple</li>
+<li><code>**kwargs</code> 表示关键字参数，它本质上是一个 dict</li>
+</ul>
+
+<p>
+下面一个例子使用*args，同时包含一个必须的参数：
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F92672;">def</span> <span style="color: #A6E22E;">test_args</span>(first, *args):
+   <span style="color: #F92672;">print</span> <span style="color: #E6DB74;">'Required argument: '</span>, first
+   <span style="color: #F92672;">for</span> v <span style="color: #F92672;">in</span> args:
+      <span style="color: #F92672;">print</span> <span style="color: #E6DB74;">'Optional argument: '</span>, v
+
+test_args(1, 2, 3, 4)
+<span style="color: #75715E;"># </span><span style="color: #75715E;">result:</span>
+<span style="color: #75715E;"># </span><span style="color: #75715E;">Required argument: 1</span>
+<span style="color: #75715E;"># </span><span style="color: #75715E;">Optional argument:  2</span>
+<span style="color: #75715E;"># </span><span style="color: #75715E;">Optional argument:  3</span>
+<span style="color: #75715E;"># </span><span style="color: #75715E;">Optional argument:  4</span>
+
+</pre>
+</div>
+<p>
+下面一个例子使用 <code>**kwargs</code>, 同时包含一个必须的参数和*args列表：
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F92672;">def</span> <span style="color: #A6E22E;">test_kwargs</span>(first, *args, **kwargs):
+   <span style="color: #F92672;">print</span> <span style="color: #E6DB74;">'Required argument: '</span>, first
+   <span style="color: #F92672;">for</span> v <span style="color: #F92672;">in</span> args:
+      <span style="color: #F92672;">print</span> <span style="color: #E6DB74;">'Optional argument (*args): '</span>, v
+   <span style="color: #F92672;">for</span> k, v <span style="color: #F92672;">in</span> kwargs.items():
+      <span style="color: #F92672;">print</span> <span style="color: #E6DB74;">'Optional argument %s (*kwargs): %s'</span> % (k, v)
+
+test_kwargs(1, 2, 3, 4, k1=5, k2=6)
+<span style="color: #75715E;"># </span><span style="color: #75715E;">results:</span>
+<span style="color: #75715E;"># </span><span style="color: #75715E;">Required argument:  1</span>
+<span style="color: #75715E;"># </span><span style="color: #75715E;">Optional argument (*args):  2</span>
+<span style="color: #75715E;"># </span><span style="color: #75715E;">Optional argument (*args):  3</span>
+<span style="color: #75715E;"># </span><span style="color: #75715E;">Optional argument (*args):  4</span>
+<span style="color: #75715E;"># </span><span style="color: #75715E;">Optional argument k2 (*kwargs): 6</span>
+<span style="color: #75715E;"># </span><span style="color: #75715E;">Optional argument k1 (*kwargs): 5</span>
+
+</pre>
+</div>
+<p>
+<code>*args</code> 和 <code>**kwargs</code> 语法不仅可以在函数定义中使用，同样可以在函数调用的时候使用。不同的是，如果说在函数定义的位置使用*args和**kwargs是一个将参数pack的过程，那么在函数调用的时候就是一个将参数unpack的过程了。下面使用一个例子来加深理解：
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F92672;">def</span> <span style="color: #A6E22E;">test_args</span>(first, second, third, fourth, fifth):
+    <span style="color: #F92672;">print</span>(<span style="color: #E6DB74;">'First argument: '</span>, first)
+    <span style="color: #F92672;">print</span>(<span style="color: #E6DB74;">'Second argument: '</span>, second)
+    <span style="color: #F92672;">print</span>(<span style="color: #E6DB74;">'Third argument: '</span>, third)
+    <span style="color: #F92672;">print</span>(<span style="color: #E6DB74;">'Fourth argument: '</span>, fourth)
+    <span style="color: #F92672;">print</span>(<span style="color: #E6DB74;">'Fifth argument: '</span>, fifth)
+
+<span style="color: #75715E;"># </span><span style="color: #75715E;">Use *args</span>
+<span style="color: #FD971F;">args</span> = [1, 2, 3, 4, 5]
+test_args(*args)
+<span style="color: #75715E;"># </span><span style="color: #75715E;">results:</span>
+<span style="color: #75715E;"># </span><span style="color: #75715E;">First argument:  1</span>
+<span style="color: #75715E;"># </span><span style="color: #75715E;">Second argument:  2</span>
+<span style="color: #75715E;"># </span><span style="color: #75715E;">Third argument:  3</span>
+<span style="color: #75715E;"># </span><span style="color: #75715E;">Fourth argument:  4</span>
+<span style="color: #75715E;"># </span><span style="color: #75715E;">Fifth argument:  5</span>
+
+<span style="color: #75715E;"># </span><span style="color: #75715E;">Use **kwargs</span>
+<span style="color: #FD971F;">kwargs</span> = {
+    <span style="color: #E6DB74;">'first'</span>: 1,   <span style="color: #75715E;">#</span><span style="color: #75715E;">&#27880;&#24847;&#36825;&#37324;&#30340;first&#12289;second&#31561;&#31561;&#37117;&#35201;&#21644;&#20989;&#25968;&#23450;&#20041;&#37324;&#30340;&#21442;&#25968;&#21517;&#19968;&#26679;&#65292;&#21542;&#21017;&#20250;&#25253;&#38169;</span>
+    <span style="color: #E6DB74;">'second'</span>: 2,
+    <span style="color: #E6DB74;">'third'</span>: 3,
+    <span style="color: #E6DB74;">'fourth'</span>: 4,
+    <span style="color: #E6DB74;">'fifth'</span>: 5
+}
+
+test_args(**kwargs)
+<span style="color: #75715E;"># </span><span style="color: #75715E;">results:</span>
+<span style="color: #75715E;"># </span><span style="color: #75715E;">First argument:  1</span>
+<span style="color: #75715E;"># </span><span style="color: #75715E;">Second argument:  2</span>
+<span style="color: #75715E;"># </span><span style="color: #75715E;">Third argument:  3</span>
+<span style="color: #75715E;"># </span><span style="color: #75715E;">Fourth argument:  4</span>
+<span style="color: #75715E;"># </span><span style="color: #75715E;">Fifth argument:  5</span>
+
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org36d4c28" class="outline-3">
+<h3 id="org36d4c28"><span class="section-number-3">7.3</span> positional argument vs keyword argument</h3>
+<div class="outline-text-3" id="text-7-3">
+<p>
+positional argument位置参数，是指用相对位置指代参数。关键字参数（keyword argument），见名知意使用关键字指代参数。
+</p>
+
+<p>
+位置参数或者按顺序传递参数，或者使用名字，使用名字时，对顺序没有要求。
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F92672;">def</span> <span style="color: #A6E22E;">fn</span>(a, b, c=1):
+    <span style="color: #F92672;">return</span> a*b+c
+<span style="color: #F92672;">print</span>(fn(1, 2))          <span style="color: #75715E;"># </span><span style="color: #75715E;">3, positional(a, b) and default(c)</span>
+<span style="color: #F92672;">print</span>(fn(1, 2, 3))       <span style="color: #75715E;"># </span><span style="color: #75715E;">5, positional(a, b)</span>
+<span style="color: #F92672;">print</span>(fn(c=5, b=2, a=2)) <span style="color: #75715E;"># </span><span style="color: #75715E;">9, named(b=2, a=2)</span>
+<span style="color: #F92672;">print</span>(fn(c=5, 1, 2))     <span style="color: #75715E;"># </span><span style="color: #75715E;">syntax error</span>
+<span style="color: #F92672;">print</span>(fn(b=2, a=2))      <span style="color: #75715E;"># </span><span style="color: #75715E;">5, named(b=2, a=2) and default</span>
+<span style="color: #F92672;">print</span>(fn(5, c=2, b=1))   <span style="color: #75715E;"># </span><span style="color: #75715E;">7, positional(a), named(b).</span>
+<span style="color: #F92672;">print</span>(fn(8, b=0))        <span style="color: #75715E;"># </span><span style="color: #75715E;">1, positional(a), named(b), default(c=1)</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org7878d06" class="outline-2">
+<h2 id="org7878d06"><span class="section-number-2">8</span> Python3 序列解包</h2>
+<div class="outline-text-2" id="text-8">
+<p>
+序列解包是 Python 3.0 之后才有的语法。
+</p>
+</div>
+<div id="outline-container-orgb73e039" class="outline-3">
+<h3 id="orgb73e039"><span class="section-number-3">8.1</span> 序列解包</h3>
+<div class="outline-text-3" id="text-8-1">
+<p>
+那什么是序列解包呢？先看一个例子：
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">&gt; a, b, c = 1, 2, 3
+&gt; a
+1
+&gt; b
+2
+&gt; c
+3
+</pre>
+</div>
+<p>
+这种方法并不限于列表和元组，而是适用于任意序列类型（甚至包括字符串和字节序列）。只要赋值运算符左边的变量数目与序列中的元素数目相等，你都可以用这种方法将元素序列解包到另一组变量中。
+</p>
+
+<p>
+可以利用 <code>*</code> 表达式获取单个变量中的多个元素，只要它的解释没有歧义即可。
+</p>
+
+<p>
+<code>*</code> 获取的值默认为 list
+</p>
+
+<p>
+获取剩余部分：
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">&gt; a, b, *c = 0, 1, 2, 3
+&gt; a
+0
+&gt; b
+1
+&gt; c       
+[2, 3]
+</pre>
+</div>
+<p>
+获取中间部分：
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">&gt; a, *b, c = 0, 1, 2, 3
+&gt; a
+0
+&gt; b
+[1, 2]
+&gt; c
+3
+</pre>
+</div>
+<p>
+如果左值比右值要多，那么带 * 的变量默认为空
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">&gt; a, b, *c = 0, 1
+&gt; a
+0
+&gt; b
+1
+&gt; c
+[]
+
+&gt; a, *b, c = 0, 1
+&gt; a
+0
+&gt; b
+[]
+&gt; c
+1
+</pre>
+</div>
+<p>
+嵌套解包:
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">&gt; (a, b), (c, d) = (1, 2), (3, 4)
+&gt; a
+1
+&gt; b
+2
+&gt; c
+3
+&gt; d
+4
+&gt; a, b, c, d
+(1, 2, 3, 4)
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgfce0f07" class="outline-3">
+<h3 id="orgfce0f07"><span class="section-number-3">8.2</span> 实战例子</h3>
+<div class="outline-text-3" id="text-8-2">
+<p>
+假如一个字符串 'ABCDEFGH'，要输出下列格式:
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">A [<span style="color: #E6DB74;">'B'</span>, <span style="color: #E6DB74;">'C'</span>, <span style="color: #E6DB74;">'D'</span>, <span style="color: #E6DB74;">'E'</span>, <span style="color: #E6DB74;">'F'</span>, <span style="color: #E6DB74;">'G'</span>, <span style="color: #E6DB74;">'H'</span>]
+B [<span style="color: #E6DB74;">'C'</span>, <span style="color: #E6DB74;">'D'</span>, <span style="color: #E6DB74;">'E'</span>, <span style="color: #E6DB74;">'F'</span>, <span style="color: #E6DB74;">'G'</span>, <span style="color: #E6DB74;">'H'</span>]
+C [<span style="color: #E6DB74;">'D'</span>, <span style="color: #E6DB74;">'E'</span>, <span style="color: #E6DB74;">'F'</span>, <span style="color: #E6DB74;">'G'</span>, <span style="color: #E6DB74;">'H'</span>]
+D [<span style="color: #E6DB74;">'E'</span>, <span style="color: #E6DB74;">'F'</span>, <span style="color: #E6DB74;">'G'</span>, <span style="color: #E6DB74;">'H'</span>]
+E [<span style="color: #E6DB74;">'F'</span>, <span style="color: #E6DB74;">'G'</span>, <span style="color: #E6DB74;">'H'</span>]
+F [<span style="color: #E6DB74;">'G'</span>, <span style="color: #E6DB74;">'H'</span>]
+G [<span style="color: #E6DB74;">'H'</span>]
+H []
+</pre>
+</div>
+<p>
+一般处理过程：
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">&gt; s = <span style="color: #E6DB74;">'ABCDEFGH'</span>
+&gt; while s:
+     x, s = s[0], list(s[1:])
+     print(x, s)
+
+A [<span style="color: #E6DB74;">'B'</span>, <span style="color: #E6DB74;">'C'</span>, <span style="color: #E6DB74;">'D'</span>, <span style="color: #E6DB74;">'E'</span>, <span style="color: #E6DB74;">'F'</span>, <span style="color: #E6DB74;">'G'</span>, <span style="color: #E6DB74;">'H'</span>]
+B [<span style="color: #E6DB74;">'C'</span>, <span style="color: #E6DB74;">'D'</span>, <span style="color: #E6DB74;">'E'</span>, <span style="color: #E6DB74;">'F'</span>, <span style="color: #E6DB74;">'G'</span>, <span style="color: #E6DB74;">'H'</span>]
+C [<span style="color: #E6DB74;">'D'</span>, <span style="color: #E6DB74;">'E'</span>, <span style="color: #E6DB74;">'F'</span>, <span style="color: #E6DB74;">'G'</span>, <span style="color: #E6DB74;">'H'</span>]
+D [<span style="color: #E6DB74;">'E'</span>, <span style="color: #E6DB74;">'F'</span>, <span style="color: #E6DB74;">'G'</span>, <span style="color: #E6DB74;">'H'</span>]
+E [<span style="color: #E6DB74;">'F'</span>, <span style="color: #E6DB74;">'G'</span>, <span style="color: #E6DB74;">'H'</span>]
+F [<span style="color: #E6DB74;">'G'</span>, <span style="color: #E6DB74;">'H'</span>]
+G [<span style="color: #E6DB74;">'H'</span>]
+H []
+
+</pre>
+</div>
+<p>
+使用序列解包的方法：
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">&gt; s = <span style="color: #E6DB74;">'ABCDEFGH'</span>
+&gt; while s:
+     x, *s = s
+     print(x, s)
+
+A [<span style="color: #E6DB74;">'B'</span>, <span style="color: #E6DB74;">'C'</span>, <span style="color: #E6DB74;">'D'</span>, <span style="color: #E6DB74;">'E'</span>, <span style="color: #E6DB74;">'F'</span>, <span style="color: #E6DB74;">'G'</span>, <span style="color: #E6DB74;">'H'</span>]
+B [<span style="color: #E6DB74;">'C'</span>, <span style="color: #E6DB74;">'D'</span>, <span style="color: #E6DB74;">'E'</span>, <span style="color: #E6DB74;">'F'</span>, <span style="color: #E6DB74;">'G'</span>, <span style="color: #E6DB74;">'H'</span>]
+C [<span style="color: #E6DB74;">'D'</span>, <span style="color: #E6DB74;">'E'</span>, <span style="color: #E6DB74;">'F'</span>, <span style="color: #E6DB74;">'G'</span>, <span style="color: #E6DB74;">'H'</span>]
+D [<span style="color: #E6DB74;">'E'</span>, <span style="color: #E6DB74;">'F'</span>, <span style="color: #E6DB74;">'G'</span>, <span style="color: #E6DB74;">'H'</span>]
+E [<span style="color: #E6DB74;">'F'</span>, <span style="color: #E6DB74;">'G'</span>, <span style="color: #E6DB74;">'H'</span>]
+F [<span style="color: #E6DB74;">'G'</span>, <span style="color: #E6DB74;">'H'</span>]
+G [<span style="color: #E6DB74;">'H'</span>]
+H []
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgf42da4f" class="outline-2">
+<h2 id="orgf42da4f"><span class="section-number-2">9</span> 类</h2>
+<div class="outline-text-2" id="text-9">
+<p>
+Python的类提供了面向对象编程的所有标准特性：类继承机制允许多个基类，派生类可以覆盖它基类的任何方法，一个方法可以调用基类中相同名称的的方法。对象可以包含任意数量和类型的数据。和模块一样，类也拥有 Python 天然的动态特性：它们在运行时创建，可以在创建后修改。
+</p>
+</div>
+<div id="outline-container-org6119754" class="outline-3">
+<h3 id="org6119754"><span class="section-number-3">9.1</span> 类的定义</h3>
+<div class="outline-text-3" id="text-9-1">
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F92672;">class</span> <span style="color: #66D9EF;">Student</span>(<span style="color: #F92672;">object</span>):
+        <span style="color: #F92672;">pass</span>
+</pre>
+</div>
+<p>
+(object)表示该类从哪个类继承下来的，Object类是所有类都会继承的类。
+</p>
+<div class="org-src-container">
+<pre class="src src-pyhton">class MyClass:
+    """A simple example class"""
+	i=12345
+    def f(self):
+	return 'hello world'
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org280e7c6" class="outline-3">
+<h3 id="org280e7c6"><span class="section-number-3">9.2</span> 类对象</h3>
+<div class="outline-text-3" id="text-9-2">
+<p>
+类对象支持两种操作：属性引用和实例化。
+</p>
+</div>
+<div id="outline-container-org62d2d5b" class="outline-4">
+<h4 id="org62d2d5b"><span class="section-number-4">9.2.1</span> 属性引用</h4>
+<div class="outline-text-4" id="text-9-2-1">
+<p>
+属性引用的标准语法：obj.name,如：MyClass.i和MyClass.f
+</p>
+
+<p>
+MyClass.__doc__这也是有效引用，将返回所属类的文档字符串: "A simple example class"
+</p>
+</div>
+</div>
+<div id="outline-container-org99f8a1b" class="outline-4">
+<h4 id="org99f8a1b"><span class="section-number-4">9.2.2</span> 实例化</h4>
+<div class="outline-text-4" id="text-9-2-2">
+<p>
+x=MyClass()
+</p>
+
+<p>
+<code>__init__</code> 是python中的一个内置方法，可以用来初始化类的状态，实际上就是为了能够给类传入参数。没有 <code>__init__</code> ，就没办法给类传入参数了。
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F92672;">class</span> <span style="color: #66D9EF;">Student</span>(<span style="color: #F92672;">object</span>):
+        <span style="color: #F92672;">def</span> <span style="color: #A6E22E;">__init__</span>(<span style="color: #F92672;">self</span>):  <span style="color: #75715E;">#</span><span style="color: #75715E;">&#36825;&#20010;&#21487;&#20197;&#29992;&#26469;&#21021;&#22987;&#21270;&#31867;&#30340;&#29366;&#24577;&#65292;&#23454;&#20363;&#21270;&#26102;&#21487;&#20197;&#19981;&#29992;&#20256;&#20837;&#21442;&#25968;&#12290;</span>
+                <span style="color: #F92672;">self</span>.data=[]
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F92672;">class</span> <span style="color: #66D9EF;">Student</span>(<span style="color: #F92672;">object</span>):
+        <span style="color: #F92672;">def</span> <span style="color: #A6E22E;">__inin__</span>(<span style="color: #F92672;">self</span>,name,score):
+                <span style="color: #F92672;">self</span>.name=name
+                <span style="color: #F92672;">self</span>.score=score
+</pre>
+</div>
+
+<p>
+__init__方法的第一参数永远为self，表示类 <b>实例</b> 本身
+</p>
+
+<p>
+定义了__init__方法，创建实例时就不能传入空的参数，必须传入与__init__匹配的参数，但是self不需要传，python解释器会自己添加。
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #FD971F;">student</span>=Student(<span style="color: #E6DB74;">"Hugh"</span>,99) <span style="color: #75715E;">#</span><span style="color: #75715E;">&#23454;&#20363;&#21270;</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org52cd00d" class="outline-2">
+<h2 id="org52cd00d"><span class="section-number-2">10</span> 模块与包</h2>
+<div class="outline-text-2" id="text-10">
+</div>
+<div id="outline-container-org1b36852" class="outline-3">
+<h3 id="org1b36852"><span class="section-number-3">10.1</span> 模块简介</h3>
+<div class="outline-text-3" id="text-10-1">
+<p>
+在 Python 中，一个 <code>.py</code> 文件就称之为一个模块（Module）
+</p>
+
+<p>
+使用模块还可以避免函数名和变量名冲突。相同名字的函数和变量完全可以分别存在不同的模块中，因此，我们自己在编写模块时，不必考虑名字会与其他模块冲突。但是也要注意，尽量不要与内置函数名字冲突。
+</p>
+
+<p>
+Python 本身就内置了很多非常有用的模块，比如我的 Python 安装目录是默认的安装目录，在 C:\Users\Administrator\AppData\Local\Programs\Python\Python36 ，然后找到 Lib 目录，就可以发现里面全部都是 <code>.py</code> 文件.这些 <code>.py</code> 文件就是模块了。
+</p>
+
+<p>
+模块可以分为标准库模块和自定义模块，Lib 目录下的都是标准库模块
+</p>
+</div>
+</div>
+<div id="outline-container-org476edcf" class="outline-3">
+<h3 id="org476edcf"><span class="section-number-3">10.2</span> 模块的使用</h3>
+<div class="outline-text-3" id="text-10-2">
+</div>
+<div id="outline-container-org0425def" class="outline-4">
+<h4 id="org0425def"><span class="section-number-4">10.2.1</span> import</h4>
+<div class="outline-text-4" id="text-10-2-1">
+<p>
+导入一个模块的方法我们使用的是 import 关键字，这样做是导入了这个模块.这里需要注意了，这样做只是导入了模块，并没有导入模块中具体的某个属性或方法的。
+</p>
+
+<p>
+<code>import</code> 的语法基本如下：
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F92672;">import</span> module1[, module2[,... moduleN]
+</pre>
+</div>
+<p>
+一个模块只会被导入一次，不管你执行了多少次 import。这样可以防止导入模块被一遍又一遍地执行。
+</p>
+
+<p>
+当我们使用 import 语句的时候，Python 解释器会根据 Python 的搜索路径去寻找文件.
+</p>
+
+<p>
+搜索路径是在 Python 编译或安装的时候确定的，安装新的库应该也会修改。搜索路径被存储在sys 模块中的 path 变量 。事实上，也可以通过定义环境变量的方式来确定搜索路径。
+</p>
+
+<p>
+我们可以查一下路径：
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #75715E;">#</span><span style="color: #75715E;">!/usr/bin/env python</span>
+<span style="color: #75715E;"># </span><span style="color: #75715E;">-*- coding: UTF-8 -*-</span>
+<span style="color: #F92672;">import</span> sys
+<span style="color: #F92672;">print</span>(sys.path)
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org63207de" class="outline-4">
+<h4 id="org63207de"><span class="section-number-4">10.2.2</span> from &#x2026; import</h4>
+<div class="outline-text-4" id="text-10-2-2">
+<p>
+from &#x2026; import 可以直接导入某个模块中的属性和方法
+</p>
+
+<p>
+语法如下:
+</p>
+<div class="org-src-container">
+<pre class="src src-python">&#30452;&#25509;&#23548;&#20837;&#26576;&#20010;&#27169;&#22359;&#20013;&#30340;&#23646;&#24615;&#21644;&#26041;&#27861;
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org2e137ac" class="outline-4">
+<h4 id="org2e137ac"><span class="section-number-4">10.2.3</span> <b>*</b> from ··· import *</h4>
+<div class="outline-text-4" id="text-10-2-3">
+<p>
+这个语句可以把某个模块中的所有方法属性都导入。
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #75715E;">#</span><span style="color: #75715E;">!/usr/bin/env python3</span>
+<span style="color: #75715E;"># </span><span style="color: #75715E;">-*- coding: UTF-8 -*-</span>
+<span style="color: #F92672;">from</span> sys <span style="color: #F92672;">import</span> *
+<span style="color: #F92672;">print</span>(version)
+<span style="color: #F92672;">print</span>(executable)
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgf719bcd" class="outline-2">
+<h2 id="orgf719bcd"><span class="section-number-2">11</span> py文件的两种执行方式</h2>
+<div class="outline-text-2" id="text-11">
+<p>
+一个python文件通常有两种使用方法，第一是作为脚本直接执行，第二是 import 到其他的 python 脚本中被调用（模块重用）执行。
+<code>if __name__== 'main':</code> 的作用就是控制这两种情况执行代码的过程，在 <code>if __name__== 'main':</code> 下的代码只有在第一种情况下（即文件作为脚本直接执行）才会被执行，而 <code>import</code> 到其他脚本中是不会被执行的。
+</p>
+
+<ul class="org-ul">
+<li>直接执行</li>
+</ul>
+
+<div class="figure">
+<p><img src="py%E6%96%87%E4%BB%B6%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%89%A7%E8%A1%8C%E6%96%B9%E5%BC%8F/2020-06-03_22-00-47_20190510141202522.png" alt="2020-06-03_22-00-47_20190510141202522.png" />
+</p>
+</div>
+
+<p>
+直接执行 test.py，结果如下图，可以成功 print 两行字符串。即， <code>if __name__=="__main__":</code> 语句之前和之后的代码都被执行。
+</p>
+
+
+<div class="figure">
+<p><img src="py%E6%96%87%E4%BB%B6%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%89%A7%E8%A1%8C%E6%96%B9%E5%BC%8F/2020-06-03_22-00-59_20190510141303114.png" alt="2020-06-03_22-00-59_20190510141303114.png" />
+</p>
+</div>
+
+<ul class="org-ul">
+<li>import 执行</li>
+</ul>
+<p>
+然后在同一文件夹新建名称为 import_test.py 的脚本，输入如下代码：
+</p>
+
+<div class="figure">
+<p><img src="py%E6%96%87%E4%BB%B6%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%89%A7%E8%A1%8C%E6%96%B9%E5%BC%8F/2020-06-03_22-01-45_20190510141602268.png" alt="2020-06-03_22-01-45_20190510141602268.png" />
+</p>
+</div>
+
+<p>
+执行 import_test.py 脚本，输出结果如下：
+</p>
+
+<div class="figure">
+<p><img src="py%E6%96%87%E4%BB%B6%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%89%A7%E8%A1%8C%E6%96%B9%E5%BC%8F/2020-06-03_22-02-00_20190510141624918.png" alt="2020-06-03_22-02-00_20190510141624918.png" />
+</p>
+</div>
+
+<p>
+只输出了第一行字符串。即， <code>if __name__=="__main__":</code> 之前的语句被执行，之后的没有被执行。
+</p>
+</div>
+
+<div id="outline-container-orge7698a9" class="outline-3">
+<h3 id="orge7698a9"><span class="section-number-3">11.1</span> <code>if __name__ == '__main__':</code> 的运行原理</h3>
+<div class="outline-text-3" id="text-11-1">
+<p>
+每个python模块（python文件，也就是此处的 test.py 和 import_test.py）都包含内置的变量 <code>__name__</code> ，当该模块被直接执行的时候， <code>__name__</code> 等于文件名（包含后缀 .py ）；如果该模块 import 到其他模块中，则该模块的 <code>__name__</code> 等于模块名称（不包含后缀.py）。
+</p>
+
+<p>
+而 <code>__main__</code> 始终指当前执行模块的名称（包含后缀.py）。进而当模块被直接执行时， <code>__name__ == 'main'</code> 结果为真。
+</p>
+
+<p>
+为了进一步说明，我们在 test.py 脚本的 if <span class="underline"><span class="underline">name__=="__main</span></span>": 之前加入 print(<span class="underline"><span class="underline">name</span></span>)，即将 <span class="underline"><span class="underline">name</span></span> 打印出来。文件内容和结果如下：
+</p>
+
+
+
+<div class="figure">
+<p><img src="py%E6%96%87%E4%BB%B6%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%89%A7%E8%A1%8C%E6%96%B9%E5%BC%8F/2020-06-04_08-41-55_20190510142230219.png" alt="2020-06-04_08-41-55_20190510142230219.png" />
+</p>
+</div>
+
+
+<div class="figure">
+<p><img src="py%E6%96%87%E4%BB%B6%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%89%A7%E8%A1%8C%E6%96%B9%E5%BC%8F/2020-06-04_08-42-02_20190510142253482.png" alt="2020-06-04_08-42-02_20190510142253482.png" />
+</p>
+</div>
+
+<p>
+可以看出，此时变量__name__的值为"<span class="underline"><span class="underline">main</span></span>"。
+</p>
+
+<p>
+再执行 import_test.py，执行结果如下：
+</p>
+
+
+<div class="figure">
+<p><img src="py%E6%96%87%E4%BB%B6%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%89%A7%E8%A1%8C%E6%96%B9%E5%BC%8F/2020-06-04_08-42-40_20190510142441889.png" alt="2020-06-04_08-42-40_20190510142441889.png" />
+</p>
+</div>
+
+
+<div class="figure">
+<p><img src="py%E6%96%87%E4%BB%B6%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%89%A7%E8%A1%8C%E6%96%B9%E5%BC%8F/2020-06-04_08-42-47_20190510142452571.png" alt="2020-06-04_08-42-47_20190510142452571.png" />
+</p>
+</div>
+
+<p>
+此时，test.py中的__name__变量值为 test，不满足 <span class="underline"><span class="underline">name__=="__main</span></span>" 的条件，因此，无法执行其后的代码。
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-orgf33f4f3" class="outline-2">
+<h2 id="orgf33f4f3"><span class="section-number-2">12</span> numpy库</h2>
+<div class="outline-text-2" id="text-12">
+</div>
+<div id="outline-container-org050c572" class="outline-3">
+<h3 id="org050c572"><span class="section-number-3">12.1</span> numpy.fromfile</h3>
+<div class="outline-text-3" id="text-12-1">
+<p>
+由一个text或者binary文件创建数组
+</p>
+<div class="org-src-container">
+<pre class="src src-python">numpy.fromfile(<span style="color: #F92672;">file</span>, dtype=<span style="color: #F92672;">float</span>, count=-1, sep=<span style="color: #E6DB74;">''</span>, offset=0)
+</pre>
+</div>
+
+<ul class="org-ul">
+<li><b><b>file</b></b> : file or str or Path
+Open file object or filename.</li>
+<li><b><b>dtype</b></b> : data-type   
+Data type of the returned array. For binary files, it is used to determine the size and byte-order of the items in the file.</li>
+<li><b><b>count</b></b> : int
+Number of items to read. `-1` means all items (i.e., the complete file).</li>
+<li><b><b>sep</b></b> : str
+Separator between items if file is a text file. Empty (“”) separator means the file should be treated as binary. Spaces (” “) in the separator match zero or more whitespace characters. A separator consisting only of spaces must match at least one whitespace.</li>
+<li><b><b>offset</b></b> : int
+The offset (in bytes) from the file’s current position. Defaults to 0. Only permitted for binary files.</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="outline-container-orgf63b129" class="outline-2">
+<h2 id="orgf63b129"><span class="section-number-2">13</span> <code>__future__</code> 模块</h2>
+<div class="outline-text-2" id="text-13">
+<p>
+from <span class="underline"><span class="underline">future</span></span> import division
+导入python未来支持的语言特征division(精确除法)，当我们没有在程序中导入该特征时，"<i>"操作符执行的是截断除法(Truncating Division),当我们导入精确除法之后，"</i>"执行的是精确除法，如下所示：
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">&gt;&gt;&gt; 3/4
+0
+&gt;&gt;&gt; from __future__ import division
+&gt;&gt;&gt; 3/4
+0.75
+</pre>
+</div>
+
+<p>
+导入精确除法后，若要执行截断除法，可以使用"//"操作符：
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">&gt;&gt;&gt; 3//4
+0
+&gt;&gt;&gt;&#160;
+</pre>
+</div>
+
+<p>
+一些将来特征如下：
+</p>
+
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-right" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">feature</th>
+<th scope="col" class="org-left">optional in</th>
+<th scope="col" class="org-right">mandatory in</th>
+<th scope="col" class="org-left">effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">nested_scopes</td>
+<td class="org-left">2.1.0b1</td>
+<td class="org-right">2.2</td>
+<td class="org-left">PEP 227: Statically Nested Scopes</td>
+</tr>
+
+<tr>
+<td class="org-left">generators</td>
+<td class="org-left">2.2.0a1</td>
+<td class="org-right">2.3</td>
+<td class="org-left">PEP 255: Simple Generators</td>
+</tr>
+
+<tr>
+<td class="org-left">division</td>
+<td class="org-left">2.2.0a2</td>
+<td class="org-right">3.0</td>
+<td class="org-left">PEP 238: Changing the Division Operator</td>
+</tr>
+
+<tr>
+<td class="org-left">absolute_import</td>
+<td class="org-left">2.5.0a1</td>
+<td class="org-right">2.7</td>
+<td class="org-left">PEP 328: Imports: Multi-Line and Absolute/Relative</td>
+</tr>
+
+<tr>
+<td class="org-left">with_statement</td>
+<td class="org-left">2.5.0a1</td>
+<td class="org-right">2.6</td>
+<td class="org-left">PEP 343: The “with” Statement</td>
+</tr>
+
+<tr>
+<td class="org-left">print_function</td>
+<td class="org-left">2.6.0a2</td>
+<td class="org-right">3.0</td>
+<td class="org-left">PEP 3105: Make print a function</td>
+</tr>
+
+<tr>
+<td class="org-left">unicode_literals</td>
+<td class="org-left">2.6.0a2</td>
+<td class="org-right">3.0</td>
+<td class="org-left">PEP 3112: Bytes literals in Python 3000</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+PEP：Python Enhancement Proposals
+</p>
+
+<p>
+可以在这个地方找到很多PEP：<a href="http://www.python.org/dev/peps/">http://www.python.org/dev/peps/</a> 里面还能看到许多提议的动机
+</p>
+</div>
+</div>
+<div id="outline-container-org0b7a157" class="outline-2">
+<h2 id="org0b7a157"><span class="section-number-2">14</span> argparse 库</h2>
+<div class="outline-text-2" id="text-14">
+<p>
+argparse是python的一个命令行解析包.argparse 模块可以让人轻松编写用户友好的命令行接口。程序定义它需要的参数，然后 argparse 将弄清如何从 sys.argv 解析出那些参数。 argparse 模块还会自动生成帮助和使用手册，并在用户给程序传入无效参数时报出错误信息。
+<a href="https://docs.python.org/zh-cn/3.10/library/argparse.html#module-argparse">官方中文文档</a>
+</p>
+</div>
+<div id="outline-container-orgbaf8985" class="outline-3">
+<h3 id="orgbaf8985"><span class="section-number-3">14.1</span> 使用示例1</h3>
+<div class="outline-text-3" id="text-14-1">
+<p>
+我们常常可以把argparse的使用简化成下面四个步骤
+</p>
+
+<ol class="org-ol">
+<li>import argparse</li>
+
+<li>parser = argparse.ArgumentParser()</li>
+
+<li>parser.add_argument()</li>
+
+<li>parser.parse_args()</li>
+</ol>
+
+<p>
+上面四个步骤解释如下：首先导入该模块；然后创建一个解析对象；然后向该对象中添加你要关注的命令行参数和选项，每一个add_argument方法对应一个你要关注的参数或选项；最后调用parse_args()方法进行解析；解析成功之后即可使用。
+</p>
+
+<p>
+以下代码是一个 Python 程序，它获取一个整数列表并计算总和或者最大值：
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F92672;">import</span> argparse
+
+<span style="color: #FD971F;">parser</span> = argparse.ArgumentParser(description=<span style="color: #E6DB74;">'Process some integers.'</span>)
+parser.add_argument(<span style="color: #E6DB74;">'integers'</span>, metavar=<span style="color: #E6DB74;">'N'</span>, <span style="color: #F92672;">type</span>=<span style="color: #F92672;">int</span>, nargs=<span style="color: #E6DB74;">'+'</span>,
+                    <span style="color: #F92672;">help</span>=<span style="color: #E6DB74;">'an integer for the accumulator'</span>)
+parser.add_argument(<span style="color: #E6DB74;">'--sum'</span>, dest=<span style="color: #E6DB74;">'accumulate'</span>, action=<span style="color: #E6DB74;">'store_const'</span>,
+                    const=<span style="color: #F92672;">sum</span>, default=<span style="color: #F92672;">max</span>,
+                    <span style="color: #F92672;">help</span>=<span style="color: #E6DB74;">'sum the integers (default: find the max)'</span>)
+
+<span style="color: #FD971F;">args</span> = parser.parse_args()
+<span style="color: #F92672;">print</span>(args.accumulate(args.integers))
+</pre>
+</div>
+<p>
+假设上面的 Python 代码保存在名为 prog.py 的文件中，它可以在命令行运行并提供有用的帮助消息：
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">$ python prog.py -h
+usage: prog.py [-h] [--sum] N [N ...]
+
+Process some integers.
+
+positional arguments:
+ N           an integer for the accumulator
+
+optional arguments:
+ -h, --help  show this help message and exit
+ --sum       sum the integers (default: find the max)
+</pre>
+</div>
+<p>
+当使用适当的参数运行时，它会输出命令行传入整数的总和或者最大值：
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">$ python prog.py 1 2 3 4
+4
+
+$ python prog.py 1 2 3 4 --sum
+10
+</pre>
+</div>
+<p>
+如果传入无效参数，则会报出错误：
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">$ python prog.py a b c
+usage: prog.py [-h] [--sum] N [N ...]
+prog.py: error: argument N: invalid int value: <span style="color: #E6DB74;">'a'</span>
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgf471ece" class="outline-3">
+<h3 id="orgf471ece"><span class="section-number-3">14.2</span> 使用示例2</h3>
+<div class="outline-text-3" id="text-14-2">
+<p>
+下面是采用argparse从命令行获取用户名，该python的文件名为： <code>fun_test.py</code>
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F92672;">import</span> argparse
+
+<span style="color: #F92672;">def</span> <span style="color: #A6E22E;">main</span>():
+    <span style="color: #FD971F;">parser</span> = argparse.ArgumentParser(description=<span style="color: #E6DB74;">"Demo of argparse"</span>)
+    parser.add_argument(<span style="color: #E6DB74;">'-n'</span>,<span style="color: #E6DB74;">'--name'</span>, default=<span style="color: #E6DB74;">' Li '</span>)
+    parser.add_argument(<span style="color: #E6DB74;">'-y'</span>,<span style="color: #E6DB74;">'--year'</span>, default=<span style="color: #E6DB74;">'20'</span>)
+    <span style="color: #FD971F;">args</span> = parser.parse_args()
+    <span style="color: #F92672;">print</span>(args)
+    <span style="color: #FD971F;">name</span> = args.name
+    <span style="color: #FD971F;">year</span> = args.year
+    <span style="color: #F92672;">print</span>(<span style="color: #E6DB74;">'Hello {}  {}'</span>.<span style="color: #F92672;">format</span>(name,year))
+
+<span style="color: #F92672;">if</span> <span style="color: #F92672;">__name__</span> == <span style="color: #E6DB74;">'__main__'</span>:
+    main()
+</pre>
+</div>
+<p>
+在终端执行命令:
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">python fun_test.py
+</pre>
+</div>
+<p>
+结果如下：
+</p>
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #A6E22E;">Namespace</span>(<span style="color: #FD971F;">name</span>=<span style="color: #E6DB74;">' Li '</span>, <span style="color: #FD971F;">year</span>=<span style="color: #E6DB74;">'20'</span>)
+Hello  Li   20
+</pre>
+</div>
+<p>
+在上面的代码中，我们先导入了 <code>argparse</code> 这个包，然后包中的 <code>ArgumentParser</code> 类生成一个 <code>parser</code> 对象（好多博客中把这个叫做参数解析器），其中的 <code>description</code> 描述这个参数解析器是干什么的，当我们在命令行显示帮助信息的时候会看到 <code>description</code> 描述的信息。
+</p>
+
+<p>
+接着我们通过对象的 <code>add_argument</code> 函数来增加参数。这里我们增加了两个参数 <code>name</code> 和 <code>year</code> ，其中 <code>-n,--name</code> 表示同一个参数，~default~ 参数表示我们在运行命令时若没有提供参数，程序会将此值当做参数值。
+</p>
+
+<p>
+最后采用对象的 <code>parse_args</code> 获取解析的参数，由上图可以看到， <code>Namespace</code> 中有两个属性（也叫成员）这里要注意个问题，当 <code>-</code> 和 <code>--</code> 同时出现的时候，系统默认后者为参数名，前者不是，但是在命令行输入的时候没有这个区分接下来就是打印参数信息了。
+</p>
+
+<p>
+当执行命令：
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">python fun_test.py -n chen --year 25
+</pre>
+</div>
+<p>
+结果如下：
+</p>
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #A6E22E;">Namespace</span>(<span style="color: #FD971F;">name</span>=<span style="color: #E6DB74;">'chen'</span>, <span style="color: #FD971F;">year</span>=<span style="color: #E6DB74;">'25'</span>)
+Hello chen  25
+</pre>
+</div>
+<p>
+当执行命令 <code>python fun_test.py -h</code> 可以查看帮助信息
+</p>
+<div class="org-src-container">
+<pre class="src src-python">usage: fun_test.py [-h] [-n NAME] [-y YEAR]
+
+Demo of argparse
+
+optional arguments:
+  -h, --<span style="color: #F92672;">help</span>            show this <span style="color: #F92672;">help</span> message <span style="color: #F92672;">and</span> <span style="color: #AE81FF;">exit</span>
+  -n NAME, --name NAME
+  -y YEAR, --year YEAR
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org644ded3" class="outline-3">
+<h3 id="org644ded3"><span class="section-number-3">14.3</span> ArgumentParser对象</h3>
+<div class="outline-text-3" id="text-14-3">
+<p>
+创建一个ArgumentParser对象
+</p>
+<div class="org-src-container">
+<pre class="src src-python">ArgumentParser(prog=<span style="color: #AE81FF;">None</span>, usage=<span style="color: #AE81FF;">None</span>, description=<span style="color: #AE81FF;">None</span>, epilog=<span style="color: #AE81FF;">None</span>, parents=[], formatter_class=argparse.HelpFormatter, prefix_chars=<span style="color: #E6DB74;">'-'</span>, fromfile_prefix_chars=<span style="color: #AE81FF;">None</span>, argument_default=<span style="color: #AE81FF;">None</span>, conflict_handler=<span style="color: #E6DB74;">'error'</span>, add_help=<span style="color: #AE81FF;">True</span>, allow_abbrev=<span style="color: #AE81FF;">True</span>)
+</pre>
+</div>
+</div>
+<div id="outline-container-org81610f2" class="outline-4">
+<h4 id="org81610f2"><span class="section-number-4">14.3.1</span> 参数</h4>
+<div class="outline-text-4" id="text-14-3-1">
+<ul class="org-ul">
+<li>prog - 程序的名称（默认：sys.argv[0]）</li>
+<li>usage - 描述程序用途的字符串（默认值：从添加到解析器的参数生成）</li>
+<li>description - 在参数帮助文档之前显示的文本（默认值：无）</li>
+<li>epilog - 在参数帮助文档之后显示的文本（默认值：无）</li>
+<li>parents - 一个 ArgumentParser 对象的列表，它们的参数也应包含在内</li>
+<li>formatter_class - 用于自定义帮助文档输出格式的类</li>
+<li>prefix_chars - 可选参数的前缀字符集合（默认值：'-'）</li>
+<li>fromfile_prefix_chars - 当需要从文件中读取其他参数时，用于标识文件名的前缀字符集合（默认值：None）</li>
+<li>argument_default - 参数的全局默认值（默认值： None）</li>
+<li>conflict_handler - 解决冲突选项的策略（通常是不必要的）</li>
+<li>add_help - 为解析器添加一个 -h/&#x2013;help 选项（默认值： True）</li>
+<li>allow_abbrev - 如果缩写是无歧义的，则允许缩写长选项 （默认值：True）</li>
+</ul>
+</div>
+<ol class="org-ol">
+<li><a id="org951d582"></a>参考<br />
+<div class="outline-text-5" id="text-14-3-1-1">
+<p>
+[<a href="https://docs.python.org/zh-cn/3/library/argparse.html#prog">https://docs.python.org/zh-cn/3/library/argparse.html#prog</a>]
+</p>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div id="outline-container-org704a3a3" class="outline-3">
+<h3 id="org704a3a3"><span class="section-number-3">14.4</span> add_argument()</h3>
+<div class="outline-text-3" id="text-14-4">
+<p>
+定义单个的命令行参数应当如何解析。给一个 ArgumentParser 添加程序参数信息是通过调用 add_argument() 方法完成的。
+</p>
+<div class="org-src-container">
+<pre class="src src-python">add_argument(name <span style="color: #F92672;">or</span> flags...[, action][, nargs][, const][, default][, <span style="color: #F92672;">type</span>][, choices][, required][, <span style="color: #F92672;">help</span>][, metavar][, dest])
+
+</pre>
+</div>
+</div>
+<div id="outline-container-org43095cb" class="outline-4">
+<h4 id="org43095cb"><span class="section-number-4">14.4.1</span> 参数</h4>
+<div class="outline-text-4" id="text-14-4-1">
+<ul class="org-ul">
+<li>name or flags - Either a name or a list of option strings, e.g. foo or -f, &#x2013;foo.</li>
+<li>action - The basic type of action to be taken when this argument is encountered at the command line.</li>
+<li>nargs - The number of command-line arguments that should be consumed.</li>
+<li>const - A constant value required by some action and nargs selections.</li>
+<li>default - The value produced if the argument is absent from the command line.</li>
+<li>type - The type to which the command-line argument should be converted.</li>
+<li>choices - A container of the allowable values for the argument.</li>
+<li>required - Whether or not the command-line option may be omitted (optionals only).</li>
+<li>help - A brief description of what the argument does.</li>
+<li>metavar - A name for the argument in usage messages.</li>
+<li>dest - The name of the attribute to be added to the object returned by parse_args().</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org857e3bb" class="outline-4">
+<h4 id="org857e3bb"><span class="section-number-4">14.4.2</span> metavar的作用</h4>
+<div class="outline-text-4" id="text-14-4-2">
+<p>
+用于设定在帮助中显示的内容.如下面所示，设定metavar后，打开帮助时，会显示metavar设定的内容
+</p>
+<div class="org-src-container">
+<pre class="src src-python">&gt; <span style="color: #F92672;">import</span> argparse
+&gt; <span style="color: #FD971F;">parser</span> = argparse.ArgumentParser()
+&gt; parser.add_argument(<span style="color: #E6DB74;">'--foo'</span>,metavar=<span style="color: #E6DB74;">'YYY'</span>)
+&gt; parser.add_argument(<span style="color: #E6DB74;">'--o'</span>)
+&gt; parser.print_help()
+usage: [-h] [--foo YYY] [--o O]
+
+optional arguments:
+  -h, --<span style="color: #F92672;">help</span>  show this <span style="color: #F92672;">help</span> message <span style="color: #F92672;">and</span> <span style="color: #AE81FF;">exit</span>
+  --foo YYY
+  --o O
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org0406051" class="outline-4">
+<h4 id="org0406051"><span class="section-number-4">14.4.3</span> choices的作用</h4>
+<div class="outline-text-4" id="text-14-4-3">
+<p>
+限制参数的取值范围。
+</p>
+
+<p>
+Some command-line arguments should be selected from a restricted set of values. These can be handled by passing a container object as the choices keyword argument to <code>add_argument()</code> . When the command line is parsed, argument values will be checked, and an error message will be displayed if the argument was not one of the acceptable values:
+</p>
+<div class="org-src-container">
+<pre class="src src-python">&gt;&gt;&gt; <span style="color: #FD971F;">parser</span> = argparse.ArgumentParser(prog=<span style="color: #E6DB74;">'game.py'</span>)
+&gt;&gt;&gt; parser.add_argument(<span style="color: #E6DB74;">'move'</span>, choices=[<span style="color: #E6DB74;">'rock'</span>, <span style="color: #E6DB74;">'paper'</span>, <span style="color: #E6DB74;">'scissors'</span>])
+&gt;&gt;&gt; parser.parse_args([<span style="color: #E6DB74;">'rock'</span>])
+Namespace(move=<span style="color: #E6DB74;">'rock'</span>)
+&gt;&gt;&gt; parser.parse_args([<span style="color: #E6DB74;">'fire'</span>])
+usage: game.py [-h] {rock,paper,scissors}
+game.py: error: argument move: invalid choice: <span style="color: #E6DB74;">'fire'</span> (choose <span style="color: #F92672;">from</span> <span style="color: #E6DB74;">'rock'</span>,
+<span style="color: #E6DB74;">'paper'</span>, <span style="color: #E6DB74;">'scissors'</span>)
+</pre>
+</div>
+<p>
+检查完 <code>type</code> 后会检查 <code>choices</code>
+</p>
+
+<p>
+Note that inclusion in the choices container is checked after any type conversions have been performed, so the type of the objects in the choices container should match the type specified:
+</p>
+<div class="org-src-container">
+<pre class="src src-python">&gt;&gt;&gt; <span style="color: #FD971F;">parser</span> = argparse.ArgumentParser(prog=<span style="color: #E6DB74;">'doors.py'</span>)
+&gt;&gt;&gt; parser.add_argument(<span style="color: #E6DB74;">'door'</span>, <span style="color: #F92672;">type</span>=<span style="color: #F92672;">int</span>, choices=<span style="color: #F92672;">range</span>(1, 4))
+&gt;&gt;&gt; <span style="color: #F92672;">print</span>(parser.parse_args([<span style="color: #E6DB74;">'3'</span>]))
+Namespace(door=3)
+&gt;&gt;&gt; parser.parse_args([<span style="color: #E6DB74;">'4'</span>])
+usage: doors.py [-h] {1,2,3}
+doors.py: error: argument door: invalid choice: 4 (choose <span style="color: #F92672;">from</span> 1, 2, 3)
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org1f2e61b" class="outline-3">
+<h3 id="org1f2e61b"><span class="section-number-3">14.5</span> parse_args()</h3>
+<div class="outline-text-3" id="text-14-5">
+<p>
+ArgumentParser 通过 parse_args() 方法解析参数。它将检查命令行，把每个参数转换为适当的类型然后调用相应的操作。将参数字符串转换为对象并分配namespace的属性
+</p>
+
+<p>
+Convert argument strings to objects and assign them as attributes of the namespace. Return the populated namespace.
+</p>
+<div class="org-src-container">
+<pre class="src src-python">parse_args(args=<span style="color: #AE81FF;">None</span>, namespace=<span style="color: #AE81FF;">None</span>)
+</pre>
+</div>
+<p>
+下面是 parse_args() 不加任何参数的结果
+</p>
+<div class="org-src-container">
+<pre class="src src-python">&gt; <span style="color: #FD971F;">parser</span> = argparse.ArgumentParser(description=<span style="color: #E6DB74;">"Demo of argparse"</span>)
+&gt; parser.add_argument(<span style="color: #E6DB74;">'-n'</span>,<span style="color: #E6DB74;">'--name'</span>, default=<span style="color: #E6DB74;">' Li '</span>)
+&gt; parser.add_argument(<span style="color: #E6DB74;">'-y'</span>,<span style="color: #E6DB74;">'--year'</span>, default=<span style="color: #E6DB74;">'20'</span>)
+&gt; <span style="color: #FD971F;">args</span> = parser.parse_args()
+&gt; <span style="color: #F92672;">print</span>(args)
+Namespace(name=<span style="color: #E6DB74;">' Li '</span>, year=<span style="color: #E6DB74;">'20'</span>)
+</pre>
+</div>
+</div>
+<div id="outline-container-org0fd1092" class="outline-4">
+<h4 id="org0fd1092"><span class="section-number-4">14.5.1</span> 参数</h4>
+<div class="outline-text-4" id="text-14-5-1">
+<ul class="org-ul">
+<li>args - List of strings to parse. The default is taken from sys.argv.</li>
+<li>namespace - An object to take the attributes. The default is a new empty Namespace object.</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgcaae4a0" class="outline-4">
+<h4 id="orgcaae4a0"><span class="section-number-4">14.5.2</span> Option value syntax</h4>
+<div class="outline-text-4" id="text-14-5-2">
+<p>
+对参数赋值的多种方法
+</p>
+
+<p>
+The parse_args() method supports several ways of specifying the value of an option (if it takes one). In the simplest case, the option and its value are passed as two separate arguments:
+</p>
+<div class="org-src-container">
+<pre class="src src-python">&gt;&gt;&gt; <span style="color: #FD971F;">parser</span> = argparse.ArgumentParser(prog=<span style="color: #E6DB74;">'PROG'</span>)
+&gt;&gt;&gt; parser.add_argument(<span style="color: #E6DB74;">'-x'</span>)
+&gt;&gt;&gt; parser.add_argument(<span style="color: #E6DB74;">'--foo'</span>)
+&gt;&gt;&gt; parser.parse_args([<span style="color: #E6DB74;">'-x'</span>, <span style="color: #E6DB74;">'X'</span>])  <span style="color: #75715E;">#</span><span style="color: #75715E;">&#36825;&#31181;&#26041;&#27861;&#35201;&#25226;&#21442;&#25968;&#21644;&#20540;&#25918;&#22312;&#25324;&#21495;[ ] &#37324;&#38754;</span>
+Namespace(foo=<span style="color: #AE81FF;">None</span>, x=<span style="color: #E6DB74;">'X'</span>)
+&gt;&gt;&gt; parser.parse_args([<span style="color: #E6DB74;">'--foo'</span>, <span style="color: #E6DB74;">'FOO'</span>])
+Namespace(foo=<span style="color: #E6DB74;">'FOO'</span>, x=<span style="color: #AE81FF;">None</span>)
+</pre>
+</div>
+<p>
+For long options (options with names longer than a single character), the option and value can also be passed as a single command-line argument, using = to separate them:
+</p>
+<div class="org-src-container">
+<pre class="src src-python">&gt;&gt;&gt; parser.parse_args([<span style="color: #E6DB74;">'--foo=FOO'</span>])
+Namespace(foo=<span style="color: #E6DB74;">'FOO'</span>, x=<span style="color: #AE81FF;">None</span>)
+</pre>
+</div>
+<p>
+For short options (options only one character long), the option and its value can be concatenated:
+</p>
+<div class="org-src-container">
+<pre class="src src-python">&gt;&gt;&gt; parser.parse_args([<span style="color: #E6DB74;">'-xX'</span>])
+Namespace(foo=<span style="color: #AE81FF;">None</span>, x=<span style="color: #E6DB74;">'X'</span>)
+</pre>
+</div>
+<p>
+Several short options can be joined together, using only a single - prefix, as long as only the last option (or none of them) requires a value:
+</p>
+<div class="org-src-container">
+<pre class="src src-python">&gt;&gt;&gt; <span style="color: #FD971F;">parser</span> = argparse.ArgumentParser(prog=<span style="color: #E6DB74;">'PROG'</span>)
+&gt;&gt;&gt; parser.add_argument(<span style="color: #E6DB74;">'-x'</span>, action=<span style="color: #E6DB74;">'store_true'</span>)
+&gt;&gt;&gt; parser.add_argument(<span style="color: #E6DB74;">'-y'</span>, action=<span style="color: #E6DB74;">'store_true'</span>)
+&gt;&gt;&gt; parser.add_argument(<span style="color: #E6DB74;">'-z'</span>)
+&gt;&gt;&gt; parser.parse_args([<span style="color: #E6DB74;">'-xyzZ'</span>])    <span style="color: #75715E;">#</span><span style="color: #75715E;">&#21482;&#26377;&#26368;&#21518;&#30340;z&#20250;&#36171;&#20540;&#20026;Z</span>
+Namespace(x=<span style="color: #AE81FF;">True</span>, y=<span style="color: #AE81FF;">True</span>, z=<span style="color: #E6DB74;">'Z'</span>)
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org3f2a979" class="outline-4">
+<h4 id="org3f2a979"><span class="section-number-4">14.5.3</span> Invalid arguments</h4>
+<div class="outline-text-4" id="text-14-5-3">
+<p>
+While parsing the command line, parse_args() checks for a variety of errors, including ambiguous options, invalid types, invalid options, wrong number of positional arguments, etc. When it encounters such an error, it exits and prints the error along with a usage message:
+</p>
+<div class="org-src-container">
+<pre class="src src-python">&gt;&gt;&gt; <span style="color: #FD971F;">parser</span> = argparse.ArgumentParser(prog=<span style="color: #E6DB74;">'PROG'</span>)
+&gt;&gt;&gt; parser.add_argument(<span style="color: #E6DB74;">'--foo'</span>, <span style="color: #F92672;">type</span>=<span style="color: #F92672;">int</span>)
+&gt;&gt;&gt; parser.add_argument(<span style="color: #E6DB74;">'bar'</span>, nargs=<span style="color: #E6DB74;">'?'</span>)
+
+&gt;&gt;&gt; <span style="color: #75715E;"># </span><span style="color: #75715E;">invalid type</span>
+&gt;&gt;&gt; parser.parse_args([<span style="color: #E6DB74;">'--foo'</span>, <span style="color: #E6DB74;">'spam'</span>])
+usage: PROG [-h] [--foo FOO] [bar]
+PROG: error: argument --foo: invalid <span style="color: #F92672;">int</span> value: <span style="color: #E6DB74;">'spam'</span>
+
+&gt;&gt;&gt; <span style="color: #75715E;"># </span><span style="color: #75715E;">invalid option</span>
+&gt;&gt;&gt; parser.parse_args([<span style="color: #E6DB74;">'--bar'</span>])
+usage: PROG [-h] [--foo FOO] [bar]
+PROG: error: no such option: --bar
+
+&gt;&gt;&gt; <span style="color: #75715E;"># </span><span style="color: #75715E;">wrong number of arguments</span>
+&gt;&gt;&gt; parser.parse_args([<span style="color: #E6DB74;">'spam'</span>, <span style="color: #E6DB74;">'badger'</span>])
+usage: PROG [-h] [--foo FOO] [bar]
+PROG: error: extra arguments found: badger
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org2ff1d2c" class="outline-4">
+<h4 id="org2ff1d2c"><span class="section-number-4">14.5.4</span> Arguments containing -</h4>
+<div class="outline-text-4" id="text-14-5-4">
+<p>
+参数名称包含-，即-x可以表示可选参数x，也可以表示位置参数-x;
+</p>
+
+<p>
+The parse_args() method attempts to give errors whenever the user has clearly made a mistake, but some situations are inherently ambiguous. For example, the command-line argument -1 could either be an attempt to specify an option or an attempt to provide a positional argument. The parse_args() method is cautious here: positional arguments may only begin with - if they look like negative numbers and there are no options in the parser that look like negative numbers:
+</p>
+<div class="org-src-container">
+<pre class="src src-python">&gt;&gt;&gt; <span style="color: #FD971F;">parser</span> = argparse.ArgumentParser(prog=<span style="color: #E6DB74;">'PROG'</span>)
+&gt;&gt;&gt; parser.add_argument(<span style="color: #E6DB74;">'-x'</span>)
+&gt;&gt;&gt; parser.add_argument(<span style="color: #E6DB74;">'foo'</span>, nargs=<span style="color: #E6DB74;">'?'</span>)
+
+&gt;&gt;&gt; <span style="color: #75715E;"># </span><span style="color: #75715E;">no negative number options, so -1 is a positional argument</span>
+&gt;&gt;&gt; parser.parse_args([<span style="color: #E6DB74;">'-x'</span>, <span style="color: #E6DB74;">'-1'</span>])
+Namespace(foo=<span style="color: #AE81FF;">None</span>, x=<span style="color: #E6DB74;">'-1'</span>)
+
+&gt;&gt;&gt; <span style="color: #75715E;"># </span><span style="color: #75715E;">no negative number options, so -1 and -5 are positional arguments</span>
+&gt;&gt;&gt; parser.parse_args([<span style="color: #E6DB74;">'-x'</span>, <span style="color: #E6DB74;">'-1'</span>, <span style="color: #E6DB74;">'-5'</span>])
+Namespace(foo=<span style="color: #E6DB74;">'-5'</span>, x=<span style="color: #E6DB74;">'-1'</span>)
+
+&gt;&gt;&gt; <span style="color: #FD971F;">parser</span> = argparse.ArgumentParser(prog=<span style="color: #E6DB74;">'PROG'</span>)
+&gt;&gt;&gt; parser.add_argument(<span style="color: #E6DB74;">'-1'</span>, dest=<span style="color: #E6DB74;">'one'</span>)
+&gt;&gt;&gt; parser.add_argument(<span style="color: #E6DB74;">'foo'</span>, nargs=<span style="color: #E6DB74;">'?'</span>)
+
+&gt;&gt;&gt; <span style="color: #75715E;"># </span><span style="color: #75715E;">negative number options present, so -1 is an option</span>
+&gt;&gt;&gt; parser.parse_args([<span style="color: #E6DB74;">'-1'</span>, <span style="color: #E6DB74;">'X'</span>])
+Namespace(foo=<span style="color: #AE81FF;">None</span>, one=<span style="color: #E6DB74;">'X'</span>)
+
+&gt;&gt;&gt; <span style="color: #75715E;"># </span><span style="color: #75715E;">negative number options present, so -2 is an option</span>
+&gt;&gt;&gt; parser.parse_args([<span style="color: #E6DB74;">'-2'</span>])
+usage: PROG [-h] [-1 ONE] [foo]
+PROG: error: no such option: -2
+
+&gt;&gt;&gt; <span style="color: #75715E;"># </span><span style="color: #75715E;">negative number options present, so both -1s are options</span>
+&gt;&gt;&gt; parser.parse_args([<span style="color: #E6DB74;">'-1'</span>, <span style="color: #E6DB74;">'-1'</span>])
+usage: PROG [-h] [-1 ONE] [foo]
+PROG: error: argument -1: expected one argument
+</pre>
+</div>
+<p>
+If you have positional arguments that must begin with - and don’t look like negative numbers, you can insert the pseudo-argument '&#x2013;' which tells parse_args() that everything after that is a positional argument:
+</p>
+<div class="org-src-container">
+<pre class="src src-python">&gt;&gt;&gt; parser.parse_args([<span style="color: #E6DB74;">'--'</span>, <span style="color: #E6DB74;">'-f'</span>])
+Namespace(foo=<span style="color: #E6DB74;">'-f'</span>, one=<span style="color: #AE81FF;">None</span>)
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgde3cd0d" class="outline-4">
+<h4 id="orgde3cd0d"><span class="section-number-4">14.5.5</span> Argument abbreviations (prefix matching)¶</h4>
+<div class="outline-text-4" id="text-14-5-5">
+<p>
+The <code>parse_args()</code> method by default allows long options to be abbreviated to a prefix, if the abbreviation is unambiguous (the prefix matches a unique option):
+</p>
+<div class="org-src-container">
+<pre class="src src-python">&gt;&gt;&gt; <span style="color: #FD971F;">parser</span> = argparse.ArgumentParser(prog=<span style="color: #E6DB74;">'PROG'</span>)
+&gt;&gt;&gt; parser.add_argument(<span style="color: #E6DB74;">'-bacon'</span>)
+&gt;&gt;&gt; parser.add_argument(<span style="color: #E6DB74;">'-badger'</span>)
+&gt;&gt;&gt; parser.parse_args(<span style="color: #E6DB74;">'-bac MMM'</span>.split())  <span style="color: #75715E;">#</span><span style="color: #75715E;">&#21069;&#32512;bac&#21487;&#20197;&#23545;&#24212;&#21442;&#25968;bacon</span>
+Namespace(bacon=<span style="color: #E6DB74;">'MMM'</span>, badger=<span style="color: #AE81FF;">None</span>)
+&gt;&gt;&gt; parser.parse_args(<span style="color: #E6DB74;">'-bad WOOD'</span>.split()) <span style="color: #75715E;">#</span><span style="color: #75715E;">&#21069;&#32512;bad&#23545;&#24212;&#21442;&#25968;badger</span>
+Namespace(bacon=<span style="color: #AE81FF;">None</span>, badger=<span style="color: #E6DB74;">'WOOD'</span>)
+&gt;&gt;&gt; parser.parse_args(<span style="color: #E6DB74;">'-ba BA'</span>.split())  <span style="color: #75715E;">#</span><span style="color: #75715E;">&#21457;&#29983;&#38169;&#35823;&#65292;&#22240;&#20026;&#21069;&#32512;ba&#21487;&#20197;&#23545;&#24212;bacon&#65292;&#20063;&#21487;&#23545;&#24212;badger</span>
+usage: PROG [-h] [-bacon BACON] [-badger BADGER]
+PROG: error: ambiguous option: -ba could match -badger, -bacon
+</pre>
+</div>
+<p>
+An error is produced for arguments that could produce more than one options. This feature can be disabled by setting allow_abbrev to False.
+</p>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org729e287" class="outline-2">
+<h2 id="org729e287"><span class="section-number-2">15</span> torch</h2>
+<div class="outline-text-2" id="text-15">
+</div>
+<div id="outline-container-org706c014" class="outline-3">
+<h3 id="org706c014"><span class="section-number-3">15.1</span> torch.Tensor</h3>
+<div class="outline-text-3" id="text-15-1">
+<p>
+torch.Tensor是一种包含单一数据类型元素的多维矩阵。torch.Tensor是默认的tensor类型（torch.FlaotTensor）的简称。
+</p>
+</div>
+
+<div id="outline-container-org2e3af9d" class="outline-4">
+<h4 id="org2e3af9d"><span class="section-number-4">15.1.1</span> 张量数据类型</h4>
+<div class="outline-text-4" id="text-15-1-1">
+<p>
+Torch定义了九种CPU tensor类型和九种GPU tensor类型：
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Data type</th>
+<th scope="col" class="org-left">dtype</th>
+<th scope="col" class="org-left">CPU tensor</th>
+<th scope="col" class="org-left">GPU tensor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">32-bit floating point</td>
+<td class="org-left">torch.float32 or torch.float</td>
+<td class="org-left">torch.FloatTensor</td>
+<td class="org-left">torch.cuda.FloatTensor</td>
+</tr>
+
+<tr>
+<td class="org-left">64-bit floating point</td>
+<td class="org-left">torch.float64 or torch.double</td>
+<td class="org-left">torch.DoubleTensor</td>
+<td class="org-left">torch.cuda.DoubleTensor</td>
+</tr>
+
+<tr>
+<td class="org-left">16-bit floating point</td>
+<td class="org-left">torch.float16 or torch.half</td>
+<td class="org-left">torch.HalfTensor</td>
+<td class="org-left">torch.cuda.HalfTensor</td>
+</tr>
+
+<tr>
+<td class="org-left">8-bit integer (unsigned)</td>
+<td class="org-left">torch.uint8</td>
+<td class="org-left">torch.ByteTensor</td>
+<td class="org-left">torch.cuda.ByteTensor</td>
+</tr>
+
+<tr>
+<td class="org-left">8-bit integer (signed)</td>
+<td class="org-left">torch.int8</td>
+<td class="org-left">torch.CharTensor</td>
+<td class="org-left">torch.cuda.CharTensor</td>
+</tr>
+
+<tr>
+<td class="org-left">16-bit integer (signed)</td>
+<td class="org-left">torch.int16 or torch.short</td>
+<td class="org-left">torch.ShortTensor</td>
+<td class="org-left">torch.cuda.ShortTensor</td>
+</tr>
+
+<tr>
+<td class="org-left">32-bit integer (signed)</td>
+<td class="org-left">torch.int32 or torch.int</td>
+<td class="org-left">torch.IntTensor</td>
+<td class="org-left">torch.cuda.IntTensor</td>
+</tr>
+
+<tr>
+<td class="org-left">64-bit integer (signed)</td>
+<td class="org-left">torch.int64 or torch.long</td>
+<td class="org-left">torch.LongTensor</td>
+<td class="org-left">torch.cuda.LongTensor</td>
+</tr>
+
+<tr>
+<td class="org-left">Boolean</td>
+<td class="org-left">torch.bool</td>
+<td class="org-left">torch.BoolTensor</td>
+<td class="org-left">torch.cuda.BoolTensor</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div id="outline-container-orgb7903d0" class="outline-4">
+<h4 id="orgb7903d0"><span class="section-number-4">15.1.2</span> 创建张量</h4>
+<div class="outline-text-4" id="text-15-1-2">
+<blockquote>
+<p>
+torch.tensor() 始终复制data。 如果您具有张量data，而只想更改其requires_grad标志，请使用 requires_grad_() 或 detach() 以避免复制。 如果您有一个 numpy 数组并且想要避免复制，请使用 torch.as_tensor() 。
+</p>
+</blockquote>
+
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #75715E;">#</span><span style="color: #75715E;">&#21487;&#20197;&#36890;&#36807;python&#21015;&#34920;&#25110;np&#25968;&#32452;&#21019;&#24314;&#24352;&#37327;</span>
+&gt;&gt;&gt; torch.tensor([[1., -1.], [1., -1.]])
+<span style="color: #A6E22E;">tensor</span>([[ 1.0000, -1.0000],
+        [ 1.0000, -1.0000]])
+&gt;&gt;&gt; torch.tensor(np.array([[1, 2, 3], [4, 5, 6]]))
+<span style="color: #A6E22E;">tensor</span>([[ 1,  2,  3],
+        [ 4,  5,  6]])
+</pre>
+</div>
+
+<p>
+可以通过将 torch.dtype 和 torch.device 传递给构造函数或张量创建操作来构造特定数据类型的张量：
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">&gt;&gt;&gt; torch.zeros([2, 4], <span style="color: #FD971F;">dtype</span>=torch.int32)
+<span style="color: #A6E22E;">tensor</span>([[ 0,  0,  0,  0],
+        [ 0,  0,  0,  0]], <span style="color: #FD971F;">dtype</span>=torch.int32)
+&gt;&gt;&gt; cuda0 = torch.device(<span style="color: #E6DB74;">'cuda:0'</span>)
+&gt;&gt;&gt; torch.ones([2, 4], <span style="color: #FD971F;">dtype</span>=torch.float64, <span style="color: #FD971F;">device</span>=cuda0)
+<span style="color: #A6E22E;">tensor</span>([[ 1.0000,  1.0000,  1.0000,  1.0000],
+        [ 1.0000,  1.0000,  1.0000,  1.0000]], <span style="color: #FD971F;">dtype</span>=torch.float64, <span style="color: #FD971F;">device</span>=<span style="color: #E6DB74;">'cuda:0'</span>)
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgb518e2a" class="outline-4">
+<h4 id="orgb518e2a"><span class="section-number-4">15.1.3</span> 访问张量</h4>
+<div class="outline-text-4" id="text-15-1-3">
+<p>
+张量的内容可以使用 Python 的索引和切片符号来访问和修改：
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">&gt;&gt;&gt; x = torch.tensor([[1, 2, 3], [4, 5, 6]])
+&gt;&gt;&gt; print(x[1][2])
+<span style="color: #A6E22E;">tensor</span>(6)
+&gt;&gt;&gt; x[0][1] = 8
+&gt;&gt;&gt; print(x)
+<span style="color: #A6E22E;">tensor</span>([[ 1,  8,  3],
+        [ 4,  5,  6]])
+</pre>
+</div>
+
+<p>
+使用 torch.Tensor.item() 从张量中获取包含单个值的 Python 数字：
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">&gt;&gt;&gt; x = torch.tensor([[1]])
+&gt;&gt;&gt; x
+<span style="color: #A6E22E;">tensor</span>([[ 1]])
+&gt;&gt;&gt; x.item()
+1
+&gt;&gt;&gt; x = torch.tensor(2.5)
+&gt;&gt;&gt; x
+<span style="color: #A6E22E;">tensor</span>(2.5000)
+&gt;&gt;&gt; x.item()
+2.5
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org69e0fcd" class="outline-3">
+<h3 id="org69e0fcd"><span class="section-number-3">15.2</span> torch.device</h3>
+<div class="outline-text-3" id="text-15-2">
+<p>
+torch.device代表将torch.Tensor分配到的设备的对象。
+</p>
+
+<p>
+torch.device包含一个设备类型（'cpu'or'cuda'）和可选的设备的序号。如果设备序号不存在，则为当前设备.
+</p>
+
+<p>
+一个 <code>torch.Tensor=的设备可以通过 =Tensor.device</code> 访问。
+</p>
+
+<p>
+<code>torch.device</code> 可以通过字符串或字符串和设备编号构造.
+</p>
+
+<p>
+通过字符串：
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">&gt;&gt;&gt; torch.device(<span style="color: #E6DB74;">'cuda:0'</span>)
+<span style="color: #A6E22E;">device</span>(<span style="color: #FD971F;">type</span>=<span style="color: #E6DB74;">'cuda'</span>, <span style="color: #FD971F;">index</span>=0)
+
+&gt;&gt;&gt; torch.device(<span style="color: #E6DB74;">'cpu'</span>)
+<span style="color: #A6E22E;">device</span>(<span style="color: #FD971F;">type</span>=<span style="color: #E6DB74;">'cpu'</span>)
+
+&gt;&gt;&gt; torch.device(<span style="color: #E6DB74;">'cuda'</span>)  <span style="color: #75715E;"># </span><span style="color: #75715E;">current cuda device</span>
+<span style="color: #A6E22E;">device</span>(<span style="color: #FD971F;">type</span>=<span style="color: #E6DB74;">'cuda'</span>)
+</pre>
+</div>
+
+<p>
+通过字符串和设备编号构造:
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">&gt;&gt;&gt; torch.device(<span style="color: #E6DB74;">'cuda'</span>, 0)
+<span style="color: #A6E22E;">device</span>(<span style="color: #FD971F;">type</span>=<span style="color: #E6DB74;">'cuda'</span>, <span style="color: #FD971F;">index</span>=0)
+
+&gt;&gt;&gt; torch.device(<span style="color: #E6DB74;">'cpu'</span>, 0)
+<span style="color: #A6E22E;">device</span>(<span style="color: #FD971F;">type</span>=<span style="color: #E6DB74;">'cpu'</span>, <span style="color: #FD971F;">index</span>=0)
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org0549228" class="outline-3">
+<h3 id="org0549228"><span class="section-number-3">15.3</span> torch.utils.data</h3>
+<div class="outline-text-3" id="text-15-3">
+</div>
+<div id="outline-container-orgb9d3379" class="outline-4">
+<h4 id="orgb9d3379"><span class="section-number-4">15.3.1</span> torch.utils.data.DataLoader</h4>
+<div class="outline-text-4" id="text-15-3-1">
+<p>
+PyTorch中数据读取的一个重要接口是torch.utils.data.DataLoader，该接口定义在dataloader.py脚本中，只要是用PyTorch来训练模型基本都会用到该接口，该接口主要用来将自定义的数据读取接口的输出或者PyTorch已有的数据读取接口的输入按照batch size封装成Tensor，后续只需要再包装成Variable即可作为模型的输入，因此该接口有点承上启下的作用，比较重要。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F92672;">class</span> <span style="color: #66D9EF;">torch</span>.utils.data.DataLoader(dataset, batch_size=1, shuffle=<span style="color: #AE81FF;">False</span>, sampler=<span style="color: #AE81FF;">None</span>, num_workers=0, collate_fn=&lt;function default_collate&gt;, pin_memory=<span style="color: #AE81FF;">False</span>, drop_last=<span style="color: #AE81FF;">False</span>)
+</pre>
+</div>
+</div>
+<ol class="org-ol">
+<li><a id="org1a9aa7b"></a>参数<br />
+<div class="outline-text-5" id="text-15-3-1-1">
+<ul class="org-ul">
+<li>dataset (Dataset) 加载数据的数据集。这个就是PyTorch已有的数据读取接口（比如torchvision.datasets.ImageFolder）或者自定义的数据接口的输出，该输出要么是torch.utils.data.Dataset类的对象，要么是继承自torch.utils.data.Dataset类的自定义类的对象。</li>
+<li>batch_size (int, optional) – 每个batch加载多少个样本(默认: 1)。</li>
+<li>shuffle (bool, optional) – 设置为True时会在每个epoch重新打乱数据(默认: False).</li>
+<li>sampler (Sampler, optional) – 定义从数据集中提取样本的策略。如果指定，则忽略shuffle参数。</li>
+<li>num_workers (int, optional) – 用多少个子进程加载数据。0表示数据将在主进程中加载(默认: 0)</li>
+<li>collate_fn (callable, optional) – 用来处理不同情况下的输入dataset的封装，一般采用默认即可，除非你自定义的数据读取输出非常少见。</li>
+<li>pin_memory (bool, optional) – If True, the data loader will copy tensors into CUDA pinned memory before returning them</li>
+<li>drop_last (bool, optional) – 如果数据集大小不能被batch size整除，则设置为True后可删除最后一个不完整的batch。如果设为False并且数据集的大小不能被batch size整除，则最后一个batch将更小。(默认: False)</li>
+</ul>
+</div>
+</li>
+</ol>
+</div>
+<div id="outline-container-org6031561" class="outline-4">
+<h4 id="org6031561"><span class="section-number-4">15.3.2</span> ImageFolder</h4>
+<div class="outline-text-4" id="text-15-3-2">
+<div class="org-src-container">
+<pre class="src src-python">ImageFolder(root,transform=<span style="color: #AE81FF;">None</span>,target_transform=<span style="color: #AE81FF;">None</span>,loader=default_loader)
+</pre>
+</div>
+<p>
+root : 在指定的root路径下面寻找图片
+transform: 对PIL Image进行转换操作,transform 输入是loader读取图片返回的对象
+target_transform :对label进行变换
+loader: 指定加载图片的函数，默认操作是读取PIL image对象
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org909eaff" class="outline-3">
+<h3 id="org909eaff"><span class="section-number-3">15.4</span> torch.optim</h3>
+<div class="outline-text-3" id="text-15-4">
+<p>
+<code>torch.optim</code> 是一个实现了各种优化算法的库。大部分常用的方法得到支持，并且接口具备足够的通用性，使得未来能够集成更加复杂的方法。
+</p>
+
+<p>
+为了使用torch.optim，你需要构建一个optimizer对象。这个对象能够保持当前参数状态并基于计算得到的梯度进行参数更新。
+</p>
+</div>
+<div id="outline-container-org17bb585" class="outline-4">
+<h4 id="org17bb585"><span class="section-number-4">15.4.1</span> 构建</h4>
+<div class="outline-text-4" id="text-15-4-1">
+<p>
+为了构建一个Optimizer，你需要给它一个包含了需要优化的参数（必须都是Variable对象）的iterable。然后，你可以设置optimizer的参 数选项，比如学习率，权重衰减，等等。
+例子：
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #FD971F;">optimizer</span> = optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
+<span style="color: #FD971F;">optimizer</span> = optim.Adam([var1, var2], lr=0.0001)
+</pre>
+</div>
+
+<blockquote>
+<p>
+如果您需要通过.cuda（）将模型移至GPU，请在为它构建优化器之前执行此操作。 .cuda（）之后的模型参数将与调用之前的对象不同。 通常，在构造和使用优化器时，应确保优化的参数位于一致的位置
+</p>
+</blockquote>
+</div>
+</div>
+<div id="outline-container-org2b2ef24" class="outline-4">
+<h4 id="org2b2ef24"><span class="section-number-4">15.4.2</span> 为每个参数单独设置选项</h4>
+<div class="outline-text-4" id="text-15-4-2">
+<p>
+Optimizer也支持为每个参数单独设置选项。若想这么做，不要直接传入Variable的iterable，而是传入dict的iterable。每一个dict都分别定 义了一组参数，并且包含一个param键，这个键对应参数的列表。其他的键应该optimizer所接受的其他参数的关键字相匹配，并且会被用于对这组参数的 优化。
+</p>
+
+<p>
+例如，当我们想指定每一层的学习率时，这是非常有用的：
+</p>
+<div class="org-src-container">
+<pre class="src src-python">optim.SGD([
+                {<span style="color: #E6DB74;">'params'</span>: model.base.parameters()},
+                {<span style="color: #E6DB74;">'params'</span>: model.classifier.parameters(), <span style="color: #E6DB74;">'lr'</span>: 1e-3}
+            ], lr=1e-2, momentum=0.9)
+</pre>
+</div>
+<p>
+这意味着model.base的参数将会使用1e-2的学习率，model.classifier的参数将会使用1e-3的学习率，并且0.9的momentum将会被用于所 有的参数。
+</p>
+</div>
+</div>
+<div id="outline-container-orgc40d8cd" class="outline-4">
+<h4 id="orgc40d8cd"><span class="section-number-4">15.4.3</span> 进行单次优化</h4>
+<div class="outline-text-4" id="text-15-4-3">
+<p>
+所有的optimizer都实现了step()方法，这个方法会更新所有的参数。它能按两种方式来使用： 
+</p>
+<ol class="org-ol">
+<li><code>optimizer.step()</code></li>
+</ol>
+
+<p>
+这是大多数optimizer所支持的简化版本。一旦梯度被如backward()之类的函数计算好后，我们就可以调用这个函数。
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F92672;">for</span> <span style="color: #F92672;">input</span>, target <span style="color: #F92672;">in</span> dataset:
+    optimizer.zero_grad()
+    <span style="color: #FD971F;">output</span> = model(<span style="color: #F92672;">input</span>)
+    <span style="color: #FD971F;">loss</span> = loss_fn(output, target)
+    loss.backward()
+    optimizer.step()
+</pre>
+</div>
+<ol class="org-ol">
+<li><code>optimizer.step(closure)</code></li>
+</ol>
+
+<p>
+一些优化算法例如Conjugate Gradient和LBFGS需要重复多次计算函数，因此你需要传入一个闭包(closure)去允许它们重新计算你的模型。这个闭包(closure)应当清空梯度， 计算损失，然后返回。
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F92672;">for</span> <span style="color: #F92672;">input</span>, target <span style="color: #F92672;">in</span> dataset:
+    <span style="color: #F92672;">def</span> <span style="color: #A6E22E;">closure</span>():
+        optimizer.zero_grad()
+        <span style="color: #FD971F;">output</span> = model(<span style="color: #F92672;">input</span>)
+        <span style="color: #FD971F;">loss</span> = loss_fn(output, target)
+        loss.backward()
+        <span style="color: #F92672;">return</span> loss
+    optimizer.step(closure)
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org315d531" class="outline-4">
+<h4 id="org315d531"><span class="section-number-4">15.4.4</span> 各种优化算法</h4>
+</div>
+<div id="outline-container-org922bd3b" class="outline-4">
+<h4 id="org922bd3b"><span class="section-number-4">15.4.5</span> 调整学习率</h4>
+<div class="outline-text-4" id="text-15-4-5">
+<p>
+<code>torch.optim.lr_scheduler</code> 提供了多种通过迭代次数调整学习率的方法。 <code>torch.optim.lr_scheduler.ReduceLROnPlateau</code> 允许基于某种衡量方法动态调整学习率。
+</p>
+
+<p>
+学习率调整应该在优化更新后使用，例如，你应该用下列的方式写代码：
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">&gt;&gt;&gt; scheduler = ...
+&gt;&gt;&gt; for epoch<span style="color: #F92672;"> in</span> range(100):
+&gt;&gt;&gt;     train(...)
+&gt;&gt;&gt;     validate(...)
+&gt;&gt;&gt;     scheduler.step()
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-orgaa64e05" class="outline-3">
+<h3 id="orgaa64e05"><span class="section-number-3">15.5</span> view的用法</h3>
+<div class="outline-text-3" id="text-15-5">
+<p>
+相当于numpy中resize（）的功能，但是用法可能不太一样。把原先tensor中的数据按照行优先的顺序排成一个一维的数据（这里应该是因为要求地址是连续存储的），然后按照参数组合成其他维度的tensor。比如说是不管你原先的数据是[[[1,2,3],[4,5,6]]]还是[1,2,3,4,5,6]，因为它们排成一维向量都是6个元素，所以只要view后面的参数一致，得到的结果都是一样的。比如，
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #FD971F;">a</span>=torch.Tensor([[[1,2,3],[4,5,6]]])
+<span style="color: #FD971F;">b</span>=torch.Tensor([1,2,3,4,5,6])
+
+<span style="color: #F92672;">print</span>(a.view(1,6))
+<span style="color: #F92672;">print</span>(b.view(1,6))
+</pre>
+</div>
+<p>
+得到的结果都是 <code>tensor([[1., 2., 3., 4., 5., 6.])</code>
+</p>
+
+<p>
+再看一个例子：
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #FD971F;">a</span>=torch.Tensor([[[1,2,3],[4,5,6]]])
+<span style="color: #F92672;">print</span>(a.view(3,2))
+</pre>
+</div>
+<p>
+将会得到：
+</p>
+<div class="org-src-container">
+<pre class="src src-python">tensor([[1., 2.],
+        [3., 4.],
+        [5., 6.]])
+</pre>
+</div>
+<p>
+相当于就是从1，2，3，4，5，6顺序的拿数组来填充需要的形状。但是如果您想得到如下的结果：
+</p>
+<div class="org-src-container">
+<pre class="src src-python">tensor([[1., 4.],
+        [2., 5.],
+        [3., 6.]])
+</pre>
+</div>
+<p>
+就需要使用另一个函数了：permute（）
+</p>
+</div>
+</div>
+<div id="outline-container-orge34d64b" class="outline-3">
+<h3 id="orge34d64b"><span class="section-number-3">15.6</span> permute的用法</h3>
+<div class="outline-text-3" id="text-15-6">
+<p>
+<code>permute(dims)</code>  将tensor的维度换位。
+</p>
+
+<p>
+参数：参数是一系列的整数，代表原来张量的维度。比如三维就有0，1，2这些dimension。
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org9a8deb3" class="outline-2">
+<h2 id="org9a8deb3"><span class="section-number-2">16</span> torchvision</h2>
+<div class="outline-text-2" id="text-16">
+<p>
+torchvision包是服务于pytorch深度学习框架的,用来生成图片,视频数据集,和一些流行的模型类和预训练模型.
+<a href="https://pytorch-cn.readthedocs.io/zh/latest/torchvision/torchvision/">中文文档</a>、<a href="https://pytorch.org/docs/stable/torchvision/index.html">英文文档</a>
+</p>
+
+<p>
+torchvision由以下四个部分组成:
+</p>
+<ol class="org-ol">
+<li>torchvision.datasets : Data loaders for popular vision datasets</li>
+<li>torchvision.models : Definitions for popular model architectures, such as AlexNet, VGG, and ResNet and pre-trained models.</li>
+<li>torchvision.transforms : Common image transformations such as random crop, rotations etc.</li>
+<li>torchvision.utils : Useful stuff such as saving tensor (3 x H x W) as image to disk, given a mini-batch creating a grid of images, etc.</li>
+</ol>
+</div>
+<div id="outline-container-orgce1eb47" class="outline-3">
+<h3 id="orgce1eb47"><span class="section-number-3">16.1</span> torchvision.datasets</h3>
+<div class="outline-text-3" id="text-16-1">
+<p>
+<code>torchvision.datasets</code> 中包含了以下数据集
+</p>
+
+<ul class="org-ul">
+<li>MNIST</li>
+<li>Fashion-MNIST</li>
+<li>KMNIST</li>
+<li>EMNIST</li>
+<li>QMNIST</li>
+<li>FakeData</li>
+<li>COCO
+<ul class="org-ul">
+<li>Captions</li>
+<li>Detection</li>
+</ul></li>
+<li>LSUN</li>
+<li>ImageFolder</li>
+<li>DatasetFolder</li>
+<li>ImageNet</li>
+<li>CIFAR</li>
+<li>STL10</li>
+<li>SVHN</li>
+<li>PhotoTour</li>
+<li>SBU</li>
+<li>Flickr</li>
+<li>VOC</li>
+<li>Cityscapes</li>
+<li>SBD</li>
+<li>USPS</li>
+<li>Kinetics-400</li>
+<li>HMDB51</li>
+<li>UCF101</li>
+<li>CelebA</li>
+</ul>
+
+<p>
+由于以上Datasets都是  <code>torch.utils.data.Dataset</code> 的子类，所以，他们也可以通过 <code>torch.utils.data.DataLoader</code> 使用多线程（python的多进程）。例如：
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #FD971F;">imagenet_data</span> = torchvision.datasets.ImageNet(<span style="color: #E6DB74;">'path/to/imagenet_root/'</span>)
+<span style="color: #FD971F;">data_loader</span> = torch.utils.data.DataLoader(imagenet_data,
+                                          batch_size=4,
+                                          shuffle=<span style="color: #AE81FF;">True</span>,
+                                          num_workers=args.nThreads)
+</pre>
+</div>
+
+<p>
+所有datasets都有相似的API。它们都有两个相同的参数： <code>transform</code> 和 <code>target_transform</code>
+</p>
+
+<ul class="org-ul">
+<li>transform： 一个函数，原始图片作为输入，返回一个转换后的图片。</li>
+<li>target_transform - 一个函数，输入为target，输出对其的转换</li>
+</ul>
+</div>
+<div id="outline-container-orgb1741d6" class="outline-4">
+<h4 id="orgb1741d6"><span class="section-number-4">16.1.1</span> MNIST</h4>
+<div class="outline-text-4" id="text-16-1-1">
+<div class="org-src-container">
+<pre class="src src-python">torchvision.datasets.MNIST(root, train=<span style="color: #AE81FF;">True</span>, transform=<span style="color: #AE81FF;">None</span>, target_transform=<span style="color: #AE81FF;">None</span>, download=<span style="color: #AE81FF;">False</span>)
+</pre>
+</div>
+<ul class="org-ul">
+<li>root (string) – Root directory of dataset where MNIST/processed/training.pt and MNIST/processed/test.pt exist.</li>
+<li>train (bool, optional) – If True, creates dataset from training.pt, otherwise from test.pt.</li>
+<li>download (bool, optional) – If true, downloads the dataset from the internet and puts it in root directory. If - dataset is already downloaded, it is not downloaded again.</li>
+<li>transform (callable, optional) – A function/transform that takes in an PIL image and returns a transformed version. E.g, transforms.RandomCrop</li>
+<li>target_transform (callable, optional) – A function/transform that takes in the target and transforms it.</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org89711fe" class="outline-2">
+<h2 id="org89711fe"><span class="section-number-2">17</span> os库</h2>
+<div class="outline-text-2" id="text-17">
+<p>
+<code>os</code> 是python标准库. <code>os</code> 顾名思义，就是与操作系统相关的标准库。如：文件，目录，执行系统命令等。
+</p>
+</div>
+
+<div id="outline-container-org7bb8a9c" class="outline-3">
+<h3 id="org7bb8a9c"><span class="section-number-3">17.1</span> path子模块</h3>
+<div class="outline-text-3" id="text-17-1">
+<p>
+涉及与磁盘文件操作，最常使用的当属 path 模块了。path 是 os 的子模块，可以通过 from os import path 使用，也可以直接通过 os.path 属性的方式使用。本文，为了保持一致性，统一采用后者的书写形式。
+</p>
+</div>
+
+<div id="outline-container-org5d414df" class="outline-4">
+<h4 id="org5d414df"><span class="section-number-4">17.1.1</span> exists(path)</h4>
+<div class="outline-text-4" id="text-17-1-1">
+<p>
+检测文件或目录是否存在。存在返回 True , 不存在返回 False 。
+</p>
+<div class="org-src-container">
+<pre class="src src-python">os.path.exists(<span style="color: #E6DB74;">"dog.jpeg"</span>)
+<span style="color: #AE81FF;">True</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgdb5273b" class="outline-4">
+<h4 id="orgdb5273b"><span class="section-number-4">17.1.2</span> isfile(path)</h4>
+<div class="outline-text-4" id="text-17-1-2">
+<p>
+判断是否为文件。是返回 True， 不是返回 False。也可以用来判断文件是否存在。
+</p>
+<div class="org-src-container">
+<pre class="src src-python">os.path.isfile(<span style="color: #E6DB74;">"dogs/"</span>)
+<span style="color: #AE81FF;">False</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgb8c44db" class="outline-4">
+<h4 id="orgb8c44db"><span class="section-number-4">17.1.3</span> isdir(path)</h4>
+<div class="outline-text-4" id="text-17-1-3">
+<p>
+判断是否为目录。是返回 True， 不是返回 False。也可以用来判断目录是否存在。
+</p>
+<div class="org-src-container">
+<pre class="src src-python">os.path.isdir(<span style="color: #E6DB74;">"dogs/"</span>)
+<span style="color: #AE81FF;">True</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org7b0f5bb" class="outline-4">
+<h4 id="org7b0f5bb"><span class="section-number-4">17.1.4</span> basename(path)</h4>
+<div class="outline-text-4" id="text-17-1-4">
+<p>
+返回不包含所在目录的文件名（含扩展）。
+</p>
+<div class="org-src-container">
+<pre class="src src-python">os.path.basename(<span style="color: #E6DB74;">"dir1/dir2/file.ext"</span>)
+<span style="color: #E6DB74;">'file.ext'</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org008991f" class="outline-4">
+<h4 id="org008991f"><span class="section-number-4">17.1.5</span> dirname(path)</h4>
+<div class="outline-text-4" id="text-17-1-5">
+<p>
+返回文件所在目录。
+</p>
+<div class="org-src-container">
+<pre class="src src-python">os.path.dirname(<span style="color: #E6DB74;">"dir1/dir2/file.ext"</span>)
+<span style="color: #E6DB74;">'dir1/dir2'</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org037d56e" class="outline-4">
+<h4 id="org037d56e"><span class="section-number-4">17.1.6</span> split(path)</h4>
+<div class="outline-text-4" id="text-17-1-6">
+<p>
+返回一个元组。元组第一个元素为文件所在目录，第二个元素为文件名（含扩展）。等效于 (dirname(path), basename(path))。
+</p>
+<div class="org-src-container">
+<pre class="src src-python">os.path.split(<span style="color: #E6DB74;">"dir1/dir2/file.ext"</span>)
+(<span style="color: #E6DB74;">'dir1/dir2'</span>, <span style="color: #E6DB74;">'file.ext'</span>)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org601e9b5" class="outline-4">
+<h4 id="org601e9b5"><span class="section-number-4">17.1.7</span> splitext(path)</h4>
+<div class="outline-text-4" id="text-17-1-7">
+<p>
+返回一个元组。元组第一个元素为文件所在目录和文件名（不含扩展），第二个元素为扩展名（包含 .）。常用来读取或更改文件扩展名。
+</p>
+<div class="org-src-container">
+<pre class="src src-python">os.path.splitext(<span style="color: #E6DB74;">"dir1/dir2/file.ext"</span>)
+(<span style="color: #E6DB74;">'dir1/dir2/file'</span>, <span style="color: #E6DB74;">'.ext'</span>)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org04956cf" class="outline-4">
+<h4 id="org04956cf"><span class="section-number-4">17.1.8</span> join(path, *paths)</h4>
+<div class="outline-text-4" id="text-17-1-8">
+<p>
+将路径不同部分拼接成一个完整的路径。等效于 os.sep.join([path, *paths]) 。
+</p>
+<div class="org-src-container">
+<pre class="src src-python">os.path.join(<span style="color: #E6DB74;">"dir1"</span>, <span style="color: #E6DB74;">"dir2"</span>, <span style="color: #E6DB74;">"file.ext"</span>)
+<span style="color: #E6DB74;">'dir1/dir2/file.ext'</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org36cf948" class="outline-4">
+<h4 id="org36cf948"><span class="section-number-4">17.1.9</span> getsize(path)</h4>
+<div class="outline-text-4" id="text-17-1-9">
+<p>
+返回文件大小。单位字节。
+</p>
+<div class="org-src-container">
+<pre class="src src-python">os.path.getsize(<span style="color: #E6DB74;">"dog.jpeg"</span>)
+18335
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org3c0154d" class="outline-3">
+<h3 id="org3c0154d"><span class="section-number-3">17.2</span> 目录操作</h3>
+<div class="outline-text-3" id="text-17-2">
+</div>
+<div id="outline-container-orgbcc9f4f" class="outline-4">
+<h4 id="orgbcc9f4f"><span class="section-number-4">17.2.1</span> listdir(path='.')</h4>
+<div class="outline-text-4" id="text-17-2-1">
+<p>
+返回一个列表。列表为给定目录下所有文件和子目录，但不包含特殊目录 <code>.</code> 和 <code>..</code> 
+默认为当前目录。
+</p>
+<div class="org-src-container">
+<pre class="src src-python">os.listdir(<span style="color: #E6DB74;">"dogs"</span>)[:5]
+[<span style="color: #E6DB74;">'122.Pointer'</span>,
+ <span style="color: #E6DB74;">'069.French_bulldog'</span>,
+ <span style="color: #E6DB74;">'124.Poodle'</span>,
+ <span style="color: #E6DB74;">'112.Nova_scotia_duck_tolling_retriever'</span>,
+ <span style="color: #E6DB74;">'043.Canaan_dog'</span>]
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org9ca2c42" class="outline-4">
+<h4 id="org9ca2c42"><span class="section-number-4">17.2.2</span> mkdir(path, mode=0o777)</h4>
+<div class="outline-text-4" id="text-17-2-2">
+<p>
+创建名为 path 的目录。并以数字形式指定目录权限，默认权限为 777 。
+</p>
+<div class="org-src-container">
+<pre class="src src-python">os.mkdir(<span style="color: #E6DB74;">"newdir"</span>)
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgcc3ae1d" class="outline-4">
+<h4 id="orgcc3ae1d"><span class="section-number-4">17.2.3</span> makedirs(name, mode=0o777, exist_ok=False)</h4>
+<div class="outline-text-4" id="text-17-2-3">
+<p>
+递归方式创建路径为 path 的目录。并以数字形式指定目录权限，默认权限为 777 。可以看作功能更强大的 mkdir，它会自动创建叶子节点目录的所有上级目录，而 mkdir 必须在上级目录已经存在情况下，才能创建叶子节点的目录。
+</p>
+
+<p>
+<code>, exist_ok=True</code> 是py3.2之后才有的写法,如果 exist_ok 为 False (默认值)，则如果目标目录已存在将引发 FileExistsError。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python">os.makedirs(<span style="color: #E6DB74;">"parent/child/newdir"</span>)
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org981f469" class="outline-4">
+<h4 id="org981f469"><span class="section-number-4">17.2.4</span> rmdir(path)</h4>
+<div class="outline-text-4" id="text-17-2-4">
+<p>
+删除目录。目录必须存在，并且只能删除空目录。不存在或不为空，都会异常。要想递归删除整个目录树，请使用 shutil.rmtree()。
+</p>
+<div class="org-src-container">
+<pre class="src src-python">os.rmdir(<span style="color: #E6DB74;">"newdir"</span>)
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org6d5541d" class="outline-4">
+<h4 id="org6d5541d"><span class="section-number-4">17.2.5</span> removedirs(path)</h4>
+<div class="outline-text-4" id="text-17-2-5">
+<p>
+递归删除目录。目录必须存在，并且只能删除空目录。不存在或不为空，都会异常。与 rmdir 不同的是，在删除了叶子节点目录后，会逐次删除上级目录，直到遇到不为空的目录。
+</p>
+<div class="org-src-container">
+<pre class="src src-python">os.removedirs(<span style="color: #E6DB74;">"parent/child/newdir"</span>)
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org5096ea9" class="outline-4">
+<h4 id="org5096ea9"><span class="section-number-4">17.2.6</span> remove(path)</h4>
+<div class="outline-text-4" id="text-17-2-6">
+<p>
+删除文件。不能删除目录，给定路径必须为文件，否则会异常。
+</p>
+
+<p>
+Warm Suggestion: 以下复制文件的操作，推荐使用 shutil.copyfile。
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #75715E;"># </span><span style="color: #75715E;">&#22797;&#21046;&#25991;&#20214;</span>
+<span style="color: #F92672;">with</span> <span style="color: #F92672;">open</span>(<span style="color: #E6DB74;">"dog.jpeg"</span>, <span style="color: #E6DB74;">"rb"</span>) <span style="color: #F92672;">as</span> f:
+    <span style="color: #FD971F;">content</span> = f.read()
+    <span style="color: #F92672;">with</span> <span style="color: #F92672;">open</span>(<span style="color: #E6DB74;">"dog.copy.jpeg"</span>, <span style="color: #E6DB74;">"wb"</span>) <span style="color: #F92672;">as</span> f2:
+        f2.write(content)
+
+<span style="color: #75715E;"># </span><span style="color: #75715E;">&#21024;&#38500;&#25991;&#20214;</span>
+os.remove(<span style="color: #E6DB74;">"dog.copy.jpeg"</span>)
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org9693ef1" class="outline-2">
+<h2 id="org9693ef1"><span class="section-number-2">18</span> time库</h2>
+<div class="outline-text-2" id="text-18">
+<p>
+time库是Python中处理时间的标准库
+</p>
+</div>
+<div id="outline-container-org39696bb" class="outline-3">
+<h3 id="org39696bb"><span class="section-number-3">18.1</span> time()</h3>
+<div class="outline-text-3" id="text-18-1">
+<p>
+time()获取当前时间戳，即计算机内部时间值，浮点数
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">&gt;&gt;&gt;time.time()
+1516939876.602228
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org4fb3980" class="outline-3">
+<h3 id="org4fb3980"><span class="section-number-3">18.2</span> ctime()获取当前时间并以易读方式表示，返回字符串</h3>
+<div class="outline-text-3" id="text-18-2">
+<div class="org-src-container">
+<pre class="src src-bash">&gt;&gt;&gt;time.ctime()
+<span style="color: #E6DB74;">'Fri Jan 26 12:11:16 2018'</span>
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org1e363a9" class="outline-3">
+<h3 id="org1e363a9"><span class="section-number-3">18.3</span> gmtime()获取当前时间，表示为计算机可处理的时间格式</h3>
+<div class="outline-text-3" id="text-18-3">
+<div class="org-src-container">
+<pre class="src src-bash">&gt;&gt;&gt;time.gmtime()
+<span style="color: #A6E22E;">time.struct_time</span>(<span style="color: #FD971F;">tm_year</span>=2018, <span style="color: #FD971F;">tm_mon</span>=1,
+<span style="color: #FD971F;">tm_mday</span>=26, <span style="color: #FD971F;">tm_hour</span>=4, <span style="color: #FD971F;">tm_min</span>=11, <span style="color: #FD971F;">tm_sec</span>=16,
+<span style="color: #FD971F;">tm_wday</span>=4, <span style="color: #FD971F;">tm_yday</span>=26, <span style="color: #FD971F;">tm_isdst</span>=0)
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-orgee9d65d" class="outline-2">
+<h2 id="orgee9d65d"><span class="section-number-2">19</span> 注释</h2>
+<div class="outline-text-2" id="text-19">
+</div>
+<div id="outline-container-orge246a48" class="outline-3">
+<h3 id="orge246a48"><span class="section-number-3">19.1</span> 单行注释</h3>
+<div class="outline-text-3" id="text-19-1">
+<p>
+Python中单行注释以 <code>#</code> 开头，例如
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #75715E;"># </span><span style="color: #75715E;">&#36825;&#26159;&#19968;&#20010;&#27880;&#37322;</span>
+<span style="color: #F92672;">print</span>(<span style="color: #E6DB74;">"Hello, World!"</span>)
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgb6115d9" class="outline-3">
+<h3 id="orgb6115d9"><span class="section-number-3">19.2</span> 多行注释</h3>
+<div class="outline-text-3" id="text-19-2">
+<p>
+多行注释用三个单引号 ''' 或者三个双引号 """ 将注释括起来，例如:
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #75715E;">#</span><span style="color: #75715E;">!/usr/bin/python3 </span>
+<span style="color: #E6DB74;">'''</span>
+<span style="color: #E6DB74;">&#36825;&#26159;&#22810;&#34892;&#27880;&#37322;&#65292;&#29992;&#19977;&#20010;&#21333;&#24341;&#21495;</span>
+<span style="color: #E6DB74;">&#36825;&#26159;&#22810;&#34892;&#27880;&#37322;&#65292;&#29992;&#19977;&#20010;&#21333;&#24341;&#21495; </span>
+<span style="color: #E6DB74;">&#36825;&#26159;&#22810;&#34892;&#27880;&#37322;&#65292;&#29992;&#19977;&#20010;&#21333;&#24341;&#21495;</span>
+<span style="color: #E6DB74;">'''</span>
+
+<span style="color: #E6DB74;">"""</span>
+<span style="color: #E6DB74;">&#36825;&#26159;&#22810;&#34892;&#27880;&#37322;&#65292;&#29992;&#19977;&#20010;&#21452;&#24341;&#21495;</span>
+<span style="color: #E6DB74;">&#36825;&#26159;&#22810;&#34892;&#27880;&#37322;&#65292;&#29992;&#19977;&#20010;&#21452;&#24341;&#21495; </span>
+<span style="color: #E6DB74;">&#36825;&#26159;&#22810;&#34892;&#27880;&#37322;&#65292;&#29992;&#19977;&#20010;&#21452;&#24341;&#21495;</span>
+<span style="color: #E6DB74;">"""</span>
+
+<span style="color: #F92672;">print</span>(<span style="color: #E6DB74;">"Hello, World!"</span>)
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org165f053" class="outline-2">
+<h2 id="org165f053"><span class="section-number-2">20</span> 编码问题</h2>
+<div class="outline-text-2" id="text-20">
+<p>
+最早的Python 只支持 ASCII 编码，普通的字符串 'ABC' 在 Python 内部都是 ASCII 编码的。
+</p>
+
+<p>
+Python 在后来添加了对 Unicode 的支持，以 Unicode 表示的字符串用u'&#x2026;'表示。
+</p>
+
+<p>
+不过在最新的 Python 3 版本中，字符串是以 Unicode 编码的，也就是说，Python 的字符串支持多语言。就像上面的例子一样，我的代码中没有加u'&#x2026;'，也能正常显示。
+</p>
+
+<p>
+不过由于 Python 源代码也是一个文本文件，所以，当你的源代码中包含中文的时候，在保存源代码时，就需要务必指定保存为 UTF-8 编码。当Python 解释器读取源代码时，为了让它按 UTF-8 编码读取，我们通常在文件开头写上这两行：
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #75715E;">#</span><span style="color: #75715E;">!/usr/bin/env python3</span>
+<span style="color: #75715E;"># </span><span style="color: #75715E;">-*- coding: utf-8 -*-</span>
+</pre>
+</div>
+
+<p>
+第一行注释是为了告诉 Linux/OS X 系统，这是一个 Python 可执行程序，Windows 系统会忽略这个注释；
+</p>
+
+<p>
+第二行注释是为了告诉 Python 解释器，按照 UTF-8 编码读取源代码，否则，你在源代码中写的中文输出可能会有乱码。
+</p>
+
+<p>
+申明了 UTF-8 编码并不意味着你的 .py 文件就是 UTF-8 编码的，必须并且要确保文本编辑器正在使用 UTF-8 without BOM 编码
+</p>
+</div>
+</div>
+<div id="outline-container-org3183157" class="outline-2">
+<h2 id="org3183157"><span class="section-number-2">21</span> namedtuple</h2>
+<div class="outline-text-2" id="text-21">
+<p>
+namedtuple是继承自tuple的子类。namedtuple创建一个和tuple类似的对象，而且对象拥有可访问的属性。
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F92672;">from</span> collections <span style="color: #F92672;">import</span> namedtuple
+
+<span style="color: #75715E;"># </span><span style="color: #75715E;">&#23450;&#20041;&#19968;&#20010;namedtuple&#31867;&#22411;User&#65292;&#24182;&#21253;&#21547;name&#65292;sex&#21644;age&#23646;&#24615;&#12290;</span>
+<span style="color: #FD971F;">User</span> = namedtuple(<span style="color: #E6DB74;">'User'</span>, [<span style="color: #E6DB74;">'name'</span>, <span style="color: #E6DB74;">'sex'</span>, <span style="color: #E6DB74;">'age'</span>])
+
+<span style="color: #75715E;"># </span><span style="color: #75715E;">&#21019;&#24314;&#19968;&#20010;User&#23545;&#35937;</span>
+<span style="color: #FD971F;">user</span> = User(name=<span style="color: #E6DB74;">'kongxx'</span>, sex=<span style="color: #E6DB74;">'male'</span>, age=21)
+
+<span style="color: #75715E;"># </span><span style="color: #75715E;">&#20063;&#21487;&#20197;&#36890;&#36807;&#19968;&#20010;list&#26469;&#21019;&#24314;&#19968;&#20010;User&#23545;&#35937;&#65292;&#36825;&#37324;&#27880;&#24847;&#38656;&#35201;&#20351;&#29992;"_make"&#26041;&#27861;</span>
+<span style="color: #FD971F;">user</span> = User._make([<span style="color: #E6DB74;">'kongxx'</span>, <span style="color: #E6DB74;">'male'</span>, 21])
+
+<span style="color: #F92672;">print</span> user
+<span style="color: #75715E;"># </span><span style="color: #75715E;">User(name='user1', sex='male', age=21)</span>
+
+<span style="color: #75715E;"># </span><span style="color: #75715E;">&#33719;&#21462;&#29992;&#25143;&#30340;&#23646;&#24615;</span>
+<span style="color: #F92672;">print</span> user.name
+<span style="color: #F92672;">print</span> user.sex
+<span style="color: #F92672;">print</span> user.age
+
+<span style="color: #75715E;"># </span><span style="color: #75715E;">&#20462;&#25913;&#23545;&#35937;&#23646;&#24615;&#65292;&#27880;&#24847;&#35201;&#20351;&#29992;"_replace"&#26041;&#27861;</span>
+<span style="color: #FD971F;">user</span> = user._replace(age=22)
+<span style="color: #F92672;">print</span> user
+<span style="color: #75715E;"># </span><span style="color: #75715E;">User(name='user1', sex='male', age=21)</span>
+
+<span style="color: #75715E;"># </span><span style="color: #75715E;">&#23558;User&#23545;&#35937;&#36716;&#25442;&#25104;&#23383;&#20856;&#65292;&#27880;&#24847;&#35201;&#20351;&#29992;"_asdict"</span>
+<span style="color: #F92672;">print</span> user._asdict()
+<span style="color: #75715E;"># </span><span style="color: #75715E;">OrderedDict([('name', 'kongxx'), ('sex', 'male'), ('age', 22)])</span>
+
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org16e077e" class="outline-2">
+<h2 id="org16e077e"><span class="section-number-2">22</span> 字典(Dictionary)</h2>
+<div class="outline-text-2" id="text-22">
+</div>
+<div id="outline-container-orgf6ce16e" class="outline-3">
+<h3 id="orgf6ce16e"><span class="section-number-3">22.1</span> items()方法</h3>
+<div class="outline-text-3" id="text-22-1">
+<p>
+<code>items()</code> 函数以列表返回可遍历的(键, 值) 元组数组。
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #75715E;">#</span><span style="color: #75715E;">!/usr/bin/python</span>
+<span style="color: #75715E;"># </span><span style="color: #75715E;">coding=utf-8</span>
+<span style="color: #F92672;">dict</span> = {<span style="color: #E6DB74;">'Google'</span>: <span style="color: #E6DB74;">'www.google.com'</span>, <span style="color: #E6DB74;">'Runoob'</span>: <span style="color: #E6DB74;">'www.runoob.com'</span>, <span style="color: #E6DB74;">'taobao'</span>: <span style="color: #E6DB74;">'www.taobao.com'</span>}
+
+<span style="color: #F92672;">print</span> <span style="color: #E6DB74;">"&#23383;&#20856;&#20540; : %s"</span> %  <span style="color: #F92672;">dict</span>.items()
+
+<span style="color: #75715E;"># </span><span style="color: #75715E;">&#36941;&#21382;&#23383;&#20856;&#21015;&#34920;</span>
+<span style="color: #F92672;">for</span> key,values <span style="color: #F92672;">in</span>  <span style="color: #F92672;">dict</span>.items():
+    <span style="color: #F92672;">print</span> key,values
+</pre>
+</div>
+<p>
+输出结果为：
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">&#23383;&#20856;&#20540; : [(<span style="color: #E6DB74;">'Google'</span>, <span style="color: #E6DB74;">'www.google.com'</span>), (<span style="color: #E6DB74;">'taobao'</span>, <span style="color: #E6DB74;">'www.taobao.com'</span>), (<span style="color: #E6DB74;">'Runoob'</span>, <span style="color: #E6DB74;">'www.runoob.com'</span>)]
+Google www.google.com
+taobao www.taobao.com
+Runoob www.runoob.com
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org86c7468" class="outline-2">
+<h2 id="org86c7468"><span class="section-number-2">23</span> collections库</h2>
+<div class="outline-text-2" id="text-23">
+</div>
+<div id="outline-container-org9559bca" class="outline-3">
+<h3 id="org9559bca"><span class="section-number-3">23.1</span> OrderedDict用法</h3>
+<div class="outline-text-3" id="text-23-1">
+<p>
+Python中的字典对象可以以“键：值”的方式存取数据。OrderedDict是它的一个子类，实现了对字典对象中元素的排序。比如下面比较了两种方式的不同：
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F92672;">import</span> collections
+
+<span style="color: #F92672;">print</span> <span style="color: #E6DB74;">'Regular dictionary:'</span>
+<span style="color: #FD971F;">d</span>={}
+<span style="color: #FD971F;">d</span>[<span style="color: #E6DB74;">'a'</span>]=<span style="color: #E6DB74;">'A'</span>
+<span style="color: #FD971F;">d</span>[<span style="color: #E6DB74;">'b'</span>]=<span style="color: #E6DB74;">'B'</span>
+<span style="color: #FD971F;">d</span>[<span style="color: #E6DB74;">'c'</span>]=<span style="color: #E6DB74;">'C'</span>
+<span style="color: #F92672;">for</span> k,v <span style="color: #F92672;">in</span> d.items():
+    <span style="color: #F92672;">print</span> k,v
+
+<span style="color: #F92672;">print</span> <span style="color: #E6DB74;">'\nOrderedDict:'</span>
+<span style="color: #FD971F;">d</span>=collections.OrderedDict()
+<span style="color: #FD971F;">d</span>[<span style="color: #E6DB74;">'a'</span>]=<span style="color: #E6DB74;">'A'</span>
+<span style="color: #FD971F;">d</span>[<span style="color: #E6DB74;">'b'</span>]=<span style="color: #E6DB74;">'B'</span>
+<span style="color: #FD971F;">d</span>[<span style="color: #E6DB74;">'c'</span>]=<span style="color: #E6DB74;">'C'</span>
+<span style="color: #F92672;">for</span> k,v <span style="color: #F92672;">in</span> d.items():
+    <span style="color: #F92672;">print</span> k,v
+</pre>
+</div>
+<p>
+输出结果如下：
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">Regular dictionary:
+a A
+c C
+b B
+
+OrderedDict:
+a A
+b B
+c C
+
+</pre>
+</div>
+<p>
+可以看到，同样是保存了ABC三个元素，但是使用OrderedDict会根据放入元素的先后顺序进行排序。由于进行了排序，所以OrderedDict对象的字典对象，如果其顺序不同那么Python也会把他们当做是两个不同的对象，比如下面的代码：
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F92672;">import</span> collections
+
+<span style="color: #F92672;">print</span> <span style="color: #E6DB74;">'Regular dictionary:'</span>
+<span style="color: #FD971F;">d1</span>={}
+<span style="color: #FD971F;">d1</span>[<span style="color: #E6DB74;">'a'</span>]=<span style="color: #E6DB74;">'A'</span>
+<span style="color: #FD971F;">d1</span>[<span style="color: #E6DB74;">'b'</span>]=<span style="color: #E6DB74;">'B'</span>
+<span style="color: #FD971F;">d1</span>[<span style="color: #E6DB74;">'c'</span>]=<span style="color: #E6DB74;">'C'</span>
+
+<span style="color: #FD971F;">d2</span>={}
+<span style="color: #FD971F;">d2</span>[<span style="color: #E6DB74;">'c'</span>]=<span style="color: #E6DB74;">'C'</span>
+<span style="color: #FD971F;">d2</span>[<span style="color: #E6DB74;">'a'</span>]=<span style="color: #E6DB74;">'A'</span>
+<span style="color: #FD971F;">d2</span>[<span style="color: #E6DB74;">'b'</span>]=<span style="color: #E6DB74;">'B'</span>
+
+<span style="color: #F92672;">print</span> d1==d2
+
+<span style="color: #F92672;">print</span> <span style="color: #E6DB74;">'\nOrderedDict:'</span>
+<span style="color: #FD971F;">d1</span>=collections.OrderedDict()
+<span style="color: #FD971F;">d1</span>[<span style="color: #E6DB74;">'a'</span>]=<span style="color: #E6DB74;">'A'</span>
+<span style="color: #FD971F;">d1</span>[<span style="color: #E6DB74;">'b'</span>]=<span style="color: #E6DB74;">'B'</span>
+<span style="color: #FD971F;">d1</span>[<span style="color: #E6DB74;">'c'</span>]=<span style="color: #E6DB74;">'C'</span>
+
+<span style="color: #FD971F;">d2</span>=collections.OrderedDict()
+<span style="color: #FD971F;">d2</span>[<span style="color: #E6DB74;">'c'</span>]=<span style="color: #E6DB74;">'C'</span>
+<span style="color: #FD971F;">d2</span>[<span style="color: #E6DB74;">'a'</span>]=<span style="color: #E6DB74;">'A'</span>
+<span style="color: #FD971F;">d2</span>[<span style="color: #E6DB74;">'b'</span>]=<span style="color: #E6DB74;">'B'</span>
+
+<span style="color: #F92672;">print</span>  d1==d2
+</pre>
+</div>
+<p>
+其输出结果为：
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">Regular dictionary:
+True
+
+OrderedDict:
+False
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org7935a12" class="outline-2">
+<h2 id="org7935a12"><span class="section-number-2">24</span> isinstance() 函数</h2>
+<div class="outline-text-2" id="text-24">
+<p>
+isinstance() 函数来判断一个对象是否是一个已知的类型，类似 type()。
+</p>
+
+<p>
+isinstance() 与 type() 区别：
+</p>
+<ul class="org-ul">
+<li>type() 不会认为子类是一种父类类型，不考虑继承关系。</li>
+<li>isinstance() 会认为子类是一种父类类型，考虑继承关系。</li>
+</ul>
+
+<p>
+如果要判断两个类型是否相同推荐使用 isinstance()。
+</p>
+
+<div class="org-src-container">
+<pre class="src src-python">&gt;<span style="color: #FD971F;">a</span> = 2
+&gt; <span style="color: #F92672;">isinstance</span> (a,<span style="color: #F92672;">int</span>)
+<span style="color: #AE81FF;">True</span>
+&gt; <span style="color: #F92672;">isinstance</span> (a,<span style="color: #F92672;">str</span>)
+<span style="color: #AE81FF;">False</span>
+&gt; <span style="color: #F92672;">isinstance</span> (a,(<span style="color: #F92672;">str</span>,<span style="color: #F92672;">int</span>,<span style="color: #F92672;">list</span>))    <span style="color: #75715E;"># </span><span style="color: #75715E;">&#26159;&#20803;&#32452;&#20013;&#30340;&#19968;&#20010;&#36820;&#22238; True</span>
+<span style="color: #AE81FF;">True</span>
+</pre>
+</div>
+<p>
+type() 与 isinstance() 区别：
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F92672;">class</span> <span style="color: #66D9EF;">A</span>:
+    <span style="color: #F92672;">pass</span>
+
+<span style="color: #F92672;">class</span> <span style="color: #66D9EF;">B</span>(A):
+    <span style="color: #F92672;">pass</span>
+
+<span style="color: #F92672;">isinstance</span>(A(), A)    <span style="color: #75715E;"># </span><span style="color: #75715E;">returns True</span>
+<span style="color: #F92672;">type</span>(A()) == A        <span style="color: #75715E;"># </span><span style="color: #75715E;">returns True</span>
+<span style="color: #F92672;">isinstance</span>(B(), A)    <span style="color: #75715E;"># </span><span style="color: #75715E;">returns True</span>
+<span style="color: #F92672;">type</span>(B()) == A        <span style="color: #75715E;"># </span><span style="color: #75715E;">returns False</span>
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org9b0fe8c" class="outline-2">
+<h2 id="org9b0fe8c"><span class="section-number-2">25</span> format()用法</h2>
+<div class="outline-text-2" id="text-25">
+<p>
+format():把传统的%替换为{}来实现格式化输出
+</p>
+
+<p>
+其实就是format()后面的内容，填入大括号中（可以按位置，或者按变量）
+</p>
+<div class="org-src-container">
+<pre class="src src-python">&gt; <span style="color: #E6DB74;">'&#25968;&#23383;{1}{2}&#21644;{0}'</span>.<span style="color: #F92672;">format</span>(<span style="color: #E6DB74;">"123"</span>,456,<span style="color: #E6DB74;">'789'</span>)
+<span style="color: #E6DB74;">'&#25968;&#23383;456789&#21644;123'</span>
+<span style="color: #75715E;">#</span><span style="color: #75715E;">&#36825;&#37324;&#27880;&#24847;&#26377;&#20004;&#23618;&#22823;&#25324;&#21495;&#65292;&#36755;&#20986;&#30340;&#32467;&#26524;&#21482;&#26377;&#19968;&#23618;&#22823;&#25324;&#21495;</span>
+&gt; <span style="color: #E6DB74;">'&#25968;&#23383;{{{1}{2}}}&#21644;{0}'</span>.<span style="color: #F92672;">format</span>(<span style="color: #E6DB74;">"123"</span>,456,<span style="color: #E6DB74;">'789'</span>)
+<span style="color: #E6DB74;">'&#25968;&#23383;{456789}&#21644;123'</span>
+<span style="color: #75715E;">#</span><span style="color: #75715E;">&#20801;&#35768;&#19968;&#20010;&#21442;&#25968;&#29992;&#20004;&#27425;</span>
+&gt; <span style="color: #E6DB74;">'{1}{0}{1}&#23681;'</span>.<span style="color: #F92672;">format</span>(<span style="color: #E6DB74;">'jc'</span>,22) 
+<span style="color: #E6DB74;">'22jc22&#23681;'</span>
+<span style="color: #75715E;">#</span><span style="color: #75715E;">&#21487;&#20197;&#36890;&#36807;&#28155;&#21152;&#20851;&#38190;&#23383;&#21442;&#25968;</span>
+&gt; <span style="color: #E6DB74;">'{name}{age}&#23681;'</span>.<span style="color: #F92672;">format</span>(age=22,name=<span style="color: #E6DB74;">'jc'</span>) 
+<span style="color: #E6DB74;">'jc22&#23681;'</span>
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org7c1fe70" class="outline-2">
+<h2 id="org7c1fe70"><span class="section-number-2">26</span> 字符串</h2>
+<div class="outline-text-2" id="text-26">
+</div>
+<div id="outline-container-orgb350513" class="outline-3">
+<h3 id="orgb350513"><span class="section-number-3">26.1</span> split()方法</h3>
+<div class="outline-text-3" id="text-26-1">
+<p>
+Python split() 通过指定分隔符对字符串进行切片，如果参数 num 有指定值，则分隔 num+1 个子字符串
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F92672;">str</span>.split(<span style="color: #F92672;">str</span>=<span style="color: #E6DB74;">""</span>, num=string.count(<span style="color: #F92672;">str</span>)).
+</pre>
+</div>
+<ul class="org-ul">
+<li>str &#x2013; 分隔符，默认为所有的空字符，包括空格、换行(\n)、制表符(\t)等。</li>
+<li>num &#x2013; 分割次数。默认为 -1, 即分隔所有。</li>
+</ul>
+</div>
+<div id="outline-container-org18eaefc" class="outline-4">
+<h4 id="org18eaefc"><span class="section-number-4">26.1.1</span> 例子</h4>
+<div class="outline-text-4" id="text-26-1-1">
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #75715E;">#</span><span style="color: #75715E;">!/usr/bin/python</span>
+<span style="color: #75715E;"># </span><span style="color: #75715E;">-*- coding: UTF-8 -*-</span>
+
+<span style="color: #F92672;">str</span> = <span style="color: #E6DB74;">"Line1-abcdef \nLine2-abc \nLine4-abcd"</span>;
+<span style="color: #F92672;">print</span>(<span style="color: #F92672;">str</span>.split());       <span style="color: #75715E;"># </span><span style="color: #75715E;">&#20197;&#31354;&#26684;&#20026;&#20998;&#38548;&#31526;&#65292;&#21253;&#21547; \n</span>
+<span style="color: #F92672;">print</span>(<span style="color: #F92672;">str</span>.split(<span style="color: #E6DB74;">' '</span>, 1 )); <span style="color: #75715E;"># </span><span style="color: #75715E;">&#20197;&#31354;&#26684;&#20026;&#20998;&#38548;&#31526;&#65292;&#20998;&#38548;&#25104;&#20004;&#20010;</span>
+</pre>
+</div>
+<p>
+以上实例输出结果如下：
+</p>
+<div class="org-src-container">
+<pre class="src src-python">[<span style="color: #E6DB74;">'Line1-abcdef'</span>, <span style="color: #E6DB74;">'Line2-abc'</span>, <span style="color: #E6DB74;">'Line4-abcd'</span>]
+[<span style="color: #E6DB74;">'Line1-abcdef'</span>, <span style="color: #E6DB74;">'\nLine2-abc \nLine4-abcd'</span>]
+</pre>
+</div>
+<p>
+以下实例以 # 号为分隔符，指定第二个参数为 1，返回两个参数列表。
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #75715E;">#</span><span style="color: #75715E;">!/usr/bin/python</span>
+<span style="color: #75715E;"># </span><span style="color: #75715E;">-*- coding: UTF-8 -*-</span>
+
+<span style="color: #FD971F;">txt</span> = <span style="color: #E6DB74;">"Google#Runoob#Taobao#Facebook"</span>
+
+<span style="color: #75715E;"># </span><span style="color: #75715E;">&#31532;&#20108;&#20010;&#21442;&#25968;&#20026; 1&#65292;&#36820;&#22238;&#20004;&#20010;&#21442;&#25968;&#21015;&#34920;</span>
+<span style="color: #FD971F;">x</span> = txt.split(<span style="color: #E6DB74;">"#"</span>, 1)
+
+<span style="color: #F92672;">print</span>(x)
+</pre>
+</div>
+<p>
+以上实例输出结果如下：
+</p>
+<div class="org-src-container">
+<pre class="src src-python">[<span style="color: #E6DB74;">'Google'</span>, <span style="color: #E6DB74;">'Runoob#Taobao#Facebook'</span>]
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgf05978e" class="outline-2">
+<h2 id="orgf05978e"><span class="section-number-2">27</span> pandas库</h2>
+<div class="outline-text-2" id="text-27">
+<p>
+pandas是常用的python数据处理包，把csv文件读入成dataframe各式
+</p>
+</div>
+<div id="outline-container-orgb026949" class="outline-3">
+<h3 id="orgb026949"><span class="section-number-3">27.1</span> read_csv()</h3>
+<div class="outline-text-3" id="text-27-1">
+<p>
+Read a comma-separated values (csv) file into DataFrame.
+</p>
+<div class="org-src-container">
+<pre class="src src-python">pandas.read_csv(filepath_or_buffer: Union[<span style="color: #F92672;">str</span>, pathlib.Path, IO[~ AnyStr]], sep=<span style="color: #E6DB74;">','</span>, delimiter=<span style="color: #AE81FF;">None</span>, header=<span style="color: #E6DB74;">'infer'</span>, names=<span style="color: #AE81FF;">None</span>, index_col=<span style="color: #AE81FF;">None</span>, usecols=<span style="color: #AE81FF;">None</span>, squeeze=<span style="color: #AE81FF;">False</span>, prefix=<span style="color: #AE81FF;">None</span>, mangle_dupe_cols=<span style="color: #AE81FF;">True</span>, dtype=<span style="color: #AE81FF;">None</span>, engine=<span style="color: #AE81FF;">None</span>, converters=<span style="color: #AE81FF;">None</span>, true_values=<span style="color: #AE81FF;">None</span>, false_values=<span style="color: #AE81FF;">None</span>, skipinitialspace=<span style="color: #AE81FF;">False</span>, skiprows=<span style="color: #AE81FF;">None</span>, skipfooter=0, nrows=<span style="color: #AE81FF;">None</span>, na_values=<span style="color: #AE81FF;">None</span>, keep_default_na=<span style="color: #AE81FF;">True</span>, na_filter=<span style="color: #AE81FF;">True</span>, verbose=<span style="color: #AE81FF;">False</span>, skip_blank_lines=<span style="color: #AE81FF;">True</span>, parse_dates=<span style="color: #AE81FF;">False</span>, infer_datetime_format=<span style="color: #AE81FF;">False</span>, keep_date_col=<span style="color: #AE81FF;">False</span>, date_parser=<span style="color: #AE81FF;">None</span>, dayfirst=<span style="color: #AE81FF;">False</span>, cache_dates=<span style="color: #AE81FF;">True</span>, iterator=<span style="color: #AE81FF;">False</span>, chunksize=<span style="color: #AE81FF;">None</span>, compression=<span style="color: #E6DB74;">'infer'</span>, thousands=<span style="color: #AE81FF;">None</span>, decimal: <span style="color: #F92672;">str</span> = <span style="color: #E6DB74;">'.'</span>, lineterminator=<span style="color: #AE81FF;">None</span>, quotechar=<span style="color: #E6DB74;">'"'</span>, quoting=0, doublequote=<span style="color: #AE81FF;">True</span>, escapechar=<span style="color: #AE81FF;">None</span>, comment=<span style="color: #AE81FF;">None</span>, encoding=<span style="color: #AE81FF;">None</span>, dialect=<span style="color: #AE81FF;">None</span>, error_bad_lines=<span style="color: #AE81FF;">True</span>, warn_bad_lines=<span style="color: #AE81FF;">True</span>, delim_whitespace=<span style="color: #AE81FF;">False</span>, low_memory=<span style="color: #AE81FF;">True</span>, memory_map=<span style="color: #AE81FF;">False</span>, float_precision=<span style="color: #AE81FF;">None</span>)
+</pre>
+</div>
+<p>
+示例：
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #FD971F;">data_train</span>=pd.read_csv(<span style="color: #E6DB74;">"./data/train.csv"</span>)
+</pre>
+</div>
+</div>
+<div id="outline-container-org396680b" class="outline-4">
+<h4 id="org396680b"><span class="section-number-4">27.1.1</span> 参数</h4>
+<div class="outline-text-4" id="text-27-1-1">
+</div>
+<ol class="org-ol">
+<li><a id="org8f441ce"></a>filepath_or_buffer：str, path object or file-like object<br />
+<div class="outline-text-5" id="text-27-1-1-1">
+<p>
+Any valid string path is acceptable. The string could be a URL. Valid URL schemes include http, ftp, s3, and file. For file URLs, a host is expected. A local file could be: <a href="file://localhost/path/to/table.csv">file://localhost/path/to/table.csv</a>.
+</p>
+
+<p>
+If you want to pass in a path object, pandas accepts any os.PathLike.
+</p>
+
+<p>
+By file-like object, we refer to objects with a read() method, such as a file handler (e.g. via builtin open function) or StringIO.
+</p>
+</div>
+</li>
+</ol>
+</div>
+</div>
+<div id="outline-container-orgf529dcd" class="outline-3">
+<h3 id="orgf529dcd"><span class="section-number-3">27.2</span> pandas.get_dummies</h3>
+<div class="outline-text-3" id="text-27-2">
+<div class="org-src-container">
+<pre class="src src-python">pandas.get_dummies(data, prefix=<span style="color: #AE81FF;">None</span>, prefix_sep=<span style="color: #E6DB74;">'_'</span>, dummy_na=<span style="color: #AE81FF;">False</span>, columns=<span style="color: #AE81FF;">None</span>, sparse=<span style="color: #AE81FF;">False</span>, drop_first=<span style="color: #AE81FF;">False</span>, dtype=<span style="color: #AE81FF;">None</span>) &#8594; &#8217;DataFrame&#8217;
+</pre>
+</div>
+<p>
+Convert categorical variable into dummy/indicator variables.
+</p>
+
+<p>
+Returns:DataFrame,Dummy-coded data.
+</p>
+</div>
+<div id="outline-container-org1404574" class="outline-4">
+<h4 id="org1404574"><span class="section-number-4">27.2.1</span> 参数</h4>
+<div class="outline-text-4" id="text-27-2-1">
+<ul class="org-ul">
+<li>data：array-like, Series, or DataFrame</li>
+</ul>
+<p>
+Data of which to get dummy indicators.
+</p>
+<ul class="org-ul">
+<li>prefix：str, list of str, or dict of str, default None</li>
+</ul>
+<p>
+String to append DataFrame column names. Pass a list with length equal to the number of columns when calling get_dummies on a DataFrame. Alternatively, prefix can be a dictionary mapping column names to prefixes.
+</p>
+<ul class="org-ul">
+<li>prefix_sep：str, default '_'</li>
+</ul>
+<p>
+If appending prefix, separator/delimiter to use. Or pass a list or dictionary as with prefix.
+</p>
+<ul class="org-ul">
+<li>dummy_na:bool, default False</li>
+</ul>
+<p>
+Add a column to indicate NaNs, if False NaNs are ignored.
+</p>
+<ul class="org-ul">
+<li>columns:list-like, default None</li>
+</ul>
+<p>
+Column names in the DataFrame to be encoded. If columns is None then all the columns with object or category dtype will be converted.
+</p>
+<ul class="org-ul">
+<li>sparse:bool, default False</li>
+</ul>
+<p>
+Whether the dummy-encoded columns should be backed by a SparseArray (True) or a regular NumPy array (False).
+</p>
+<ul class="org-ul">
+<li>drop_first:bool, default False</li>
+</ul>
+<p>
+Whether to get k-1 dummies out of k categorical levels by removing the first level.
+</p>
+<ul class="org-ul">
+<li>dtype:dtype, default np.uint8</li>
+</ul>
+<p>
+Data type for new columns. Only a single dtype is allowed.
+New in version 0.23.0.
+</p>
+</div>
+</div>
+<div id="outline-container-org77f4a2e" class="outline-4">
+<h4 id="org77f4a2e"><span class="section-number-4">27.2.2</span> 示例</h4>
+<div class="outline-text-4" id="text-27-2-2">
+<div class="org-src-container">
+<pre class="src src-python">&gt; <span style="color: #FD971F;">s</span> = pd.Series(<span style="color: #F92672;">list</span>(<span style="color: #E6DB74;">'abca'</span>))
+&gt; pd.get_dummies(s)
+   a  b  c
+0  1  0  0
+1  0  1  0
+2  0  0  1
+3  1  0  0
+&gt; <span style="color: #FD971F;">s1</span> = [<span style="color: #E6DB74;">'a'</span>, <span style="color: #E6DB74;">'b'</span>, np.nan]
+&gt; pd.get_dummies(s1)
+   a  b
+0  1  0
+1  0  1
+2  0  0
+&gt; pd.get_dummies(s1, dummy_na=<span style="color: #AE81FF;">True</span>)
+   a  b  NaN
+0  1  0    0
+1  0  1    0
+2  0  0    1
+&gt; <span style="color: #FD971F;">df</span> = pd.DataFrame({<span style="color: #E6DB74;">'A'</span>: [<span style="color: #E6DB74;">'a'</span>, <span style="color: #E6DB74;">'b'</span>, <span style="color: #E6DB74;">'a'</span>], <span style="color: #E6DB74;">'B'</span>: [<span style="color: #E6DB74;">'b'</span>, <span style="color: #E6DB74;">'a'</span>, <span style="color: #E6DB74;">'c'</span>],
+                   <span style="color: #E6DB74;">'C'</span>: [1, 2, 3]})
+&gt; pd.get_dummies(df, prefix=[<span style="color: #E6DB74;">'col1'</span>, <span style="color: #E6DB74;">'col2'</span>])
+   C  col1_a  col1_b  col2_a  col2_b  col2_c
+0  1       1       0       0       1       0
+1  2       0       1       1       0       0
+2  3       1       0       0       0       1
+&gt; pd.get_dummies(pd.Series(<span style="color: #F92672;">list</span>(<span style="color: #E6DB74;">'abcaa'</span>)))
+   a  b  c
+0  1  0  0
+1  0  1  0
+2  0  0  1
+3  1  0  0
+4  1  0  0
+&gt; pd.get_dummies(pd.Series(<span style="color: #F92672;">list</span>(<span style="color: #E6DB74;">'abcaa'</span>)), drop_first=<span style="color: #AE81FF;">True</span>)
+   b  c
+0  0  0
+1  1  0
+2  0  1
+3  0  0
+4  0  0
+&gt; pd.get_dummies(pd.Series(<span style="color: #F92672;">list</span>(<span style="color: #E6DB74;">'abc'</span>)), dtype=<span style="color: #F92672;">float</span>)
+     a    b    c
+0  1.0  0.0  0.0
+1  0.0  1.0  0.0
+2  0.0  0.0  1.0
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-orgee27a02" class="outline-3">
+<h3 id="orgee27a02"><span class="section-number-3">27.3</span> pandas.conca</h3>
+<div class="outline-text-3" id="text-27-3">
+<div class="org-src-container">
+<pre class="src src-python">pandas.concat(objs: Union[Iterable[&#8216;DataFrame&#8217;], Mapping[Optional[Hashable], &#8216;DataFrame&#8217;]], axis=<span style="color: #E6DB74;">'0'</span>, join: <span style="color: #F92672;">str</span> = <span style="color: #E6DB74;">"'outer'"</span>, ignore_index: <span style="color: #F92672;">bool</span> = <span style="color: #E6DB74;">'False'</span>, keys=<span style="color: #E6DB74;">'None'</span>, levels=<span style="color: #E6DB74;">'None'</span>, names=<span style="color: #E6DB74;">'None'</span>, verify_integrity: <span style="color: #F92672;">bool</span> = <span style="color: #E6DB74;">'False'</span>, sort: <span style="color: #F92672;">bool</span> = <span style="color: #E6DB74;">'False'</span>, copy: <span style="color: #F92672;">bool</span> = <span style="color: #E6DB74;">'True'</span>) &#8594; &#8217;DataFrame&#8217;
+</pre>
+</div>
+<p>
+Concatenate pandas objects along a particular axis with optional set logic along the other axes.
+</p>
+
+<p>
+Can also add a layer of hierarchical indexing on the concatenation axis, which may be useful if the labels are the same (or overlapping) on the passed axis number.
+</p>
+
+<p>
+Returns:object, type of objs.
+When concatenating all Series along the index (axis=0), a Series is returned. When objs contains at least one DataFrame, a DataFrame is returned. When concatenating along the columns (axis=1), a DataFrame is returned.
+</p>
+</div>
+<div id="outline-container-org1d1f8a4" class="outline-4">
+<h4 id="org1d1f8a4"><span class="section-number-4">27.3.1</span> 参数</h4>
+<div class="outline-text-4" id="text-27-3-1">
+<ul class="org-ul">
+<li>objs：a sequence or mapping of Series or DataFrame objects</li>
+</ul>
+<p>
+If a dict is passed, the sorted keys will be used as the keys argument, unless it is passed, in which case the values will be selected (see below). Any None objects will be dropped silently unless they are all None in which case a ValueError will be raised.
+</p>
+<ul class="org-ul">
+<li>axis：{0/’index’, 1/’columns’}, default 0</li>
+</ul>
+<p>
+The axis to concatenate along.
+</p>
+<ul class="org-ul">
+<li>join:{'inner', 'outer'}, default ‘outer’</li>
+</ul>
+<p>
+How to handle indexes on other axis (or axes).
+</p>
+<ul class="org-ul">
+<li>ignore_index:bool, default False</li>
+</ul>
+<p>
+If True, do not use the index values along the concatenation axis. The resulting axis will be labeled 0, …, n - 1. This is useful if you are concatenating objects where the concatenation axis does not have meaningful indexing information. Note the index values on the other axes are still respected in the join.
+</p>
+<ul class="org-ul">
+<li>keys:sequence, default None</li>
+</ul>
+<p>
+If multiple levels passed, should contain tuples. Construct hierarchical index using the passed keys as the outermost level.
+</p>
+<ul class="org-ul">
+<li>levels:list of sequences, default None</li>
+</ul>
+<p>
+Specific levels (unique values) to use for constructing a MultiIndex. Otherwise they will be inferred from the keys.
+</p>
+<ul class="org-ul">
+<li>names:list, default None</li>
+</ul>
+<p>
+Names for the levels in the resulting hierarchical index.
+</p>
+<ul class="org-ul">
+<li>verify_integrity:bool, default False</li>
+</ul>
+<p>
+Check whether the new concatenated axis contains duplicates. This can be very expensive relative to the actual data concatenation.
+</p>
+<ul class="org-ul">
+<li>sort:bool, default False</li>
+</ul>
+<p>
+Sort non-concatenation axis if it is not already aligned when join is ‘outer’. This has no effect when join='inner', which already preserves the order of the non-concatenation axis.
+New in version 0.23.0.
+Changed in version 1.0.0: Changed to not sort by default.
+</p>
+<ul class="org-ul">
+<li>copy:bool, default True</li>
+</ul>
+<p>
+If False, do not copy data unnecessarily.
+</p>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org5d5ad3c" class="outline-2">
+<h2 id="org5d5ad3c"><span class="section-number-2">28</span> Matplotlib</h2>
+<div class="outline-text-2" id="text-28">
+</div>
+<div id="outline-container-org2dcfafa" class="outline-3">
+<h3 id="org2dcfafa"><span class="section-number-3">28.1</span> 实例</h3>
+<div class="outline-text-3" id="text-28-1">
+<p>
+Matplotlib 是 Python 的绘图库。 它可与 NumPy 一起使用，提供了一种有效的 MatLab 开源替代方案。 它也可以和图形工具包一起使用，如 PyQt 和 wxPython。
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F92672;">import</span> matplotlib.pyplot <span style="color: #F92672;">as</span> plt
+plt.plot([1, 2, 3, 4])
+plt.ylabel(<span style="color: #E6DB74;">'some numbers'</span>)
+plt.show()
+</pre>
+</div>
+<p>
+图形由 show() 函数显示。
+</p>
+<p>
+<img src="Matplotlib/2020-07-23_10-23-43_Snipaste_2020-07-23_10-23-39.png" alt="2020-07-23_10-23-43_Snipaste_2020-07-23_10-23-39.png" />
+You may be wondering why the x-axis ranges from 0-3 and the y-axis from 1-4. If you provide a single list or array to plot, matplotlib assumes it is a sequence of y values, and automatically generates the x values for you. Since python ranges start with 0, the default x vector has the same length as y but starts with 0. Hence the x data are [0, 1, 2, 3].
+</p>
+
+<p>
+以下实例使用 matplotlib 生成折线图。
+</p>
+<div class="org-src-container">
+<pre class="src src-python">plt.plot([1, 2, 3, 4], [1, 4, 9, 16])  <span style="color: #75715E;">#</span><span style="color: #75715E;">&#21069;&#38754;&#30340;&#21442;&#25968;&#20316;&#20026;x&#65292;&#21518;&#38754;&#30340;&#21015;&#34920;&#20316;&#20026;y&#30340;&#21462;&#20540;</span>
+</pre>
+</div>
+<p>
+执行输出结果如下图：
+</p>
+<p>
+<img src="Matplotlib/2020-07-23_10-26-13_Snipaste_2020-07-23_10-26-01.png" alt="2020-07-23_10-26-13_Snipaste_2020-07-23_10-26-01.png" />q
+</p>
+</div>
+</div>
+
+<div id="outline-container-org170502d" class="outline-3">
+<h3 id="org170502d"><span class="section-number-3">28.2</span> 格式化字符</h3>
+<div class="outline-text-3" id="text-28-2">
+<p>
+作为线性图的替代，可以通过向 plot() 函数添加格式字符串来显示离散值。
+</p>
+
+<p>
+要显示圆来代表点，而不是上面示例中的线，请使用 ob 作为 plot() 函数中的格式字符串。
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #F92672;">import</span> numpy <span style="color: #F92672;">as</span> np 
+<span style="color: #F92672;">from</span> matplotlib <span style="color: #F92672;">import</span> pyplot <span style="color: #F92672;">as</span> plt 
+
+<span style="color: #FD971F;">x</span> = np.arange(1,11) 
+<span style="color: #FD971F;">y</span> =  2  * x +  5 
+plt.title(<span style="color: #E6DB74;">"Matplotlib demo"</span>) 
+plt.xlabel(<span style="color: #E6DB74;">"x axis caption"</span>) 
+plt.ylabel(<span style="color: #E6DB74;">"y axis caption"</span>) 
+plt.plot(x,y,<span style="color: #E6DB74;">"ob"</span>)  <span style="color: #75715E;">#</span><span style="color: #75715E;">&#36825;&#37324;ob&#30340;&#35299;&#37322;&#30475;&#19979;&#38754;&#30340;&#23383;&#31526;&#21644;&#39068;&#33394;&#32553;&#20889;</span>
+plt.show()
+</pre>
+</div>
+<p>
+执行输出结果如下图：
+</p>
+
+<div class="figure">
+<p><img src="Matplotlib/2020-07-23_10-11-23_Snipaste_2020-07-23_10-11-18.png" alt="2020-07-23_10-11-23_Snipaste_2020-07-23_10-11-18.png" />
+</p>
+</div>
+</div>
+
+<div id="outline-container-org8aef406" class="outline-4">
+<h4 id="org8aef406"><span class="section-number-4">28.2.1</span> 字符</h4>
+<div class="outline-text-4" id="text-28-2-1">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">字符</th>
+<th scope="col" class="org-left">描述</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">'-'</td>
+<td class="org-left">实线样式</td>
+</tr>
+
+<tr>
+<td class="org-left">'&#x2013;'</td>
+<td class="org-left">短横线样式</td>
+</tr>
+
+<tr>
+<td class="org-left">'-.'</td>
+<td class="org-left">点划线样式</td>
+</tr>
+
+<tr>
+<td class="org-left">':'</td>
+<td class="org-left">虚线样式</td>
+</tr>
+
+<tr>
+<td class="org-left">'.'</td>
+<td class="org-left">点标记</td>
+</tr>
+
+<tr>
+<td class="org-left">','</td>
+<td class="org-left">像素标记</td>
+</tr>
+
+<tr>
+<td class="org-left">'o'</td>
+<td class="org-left">圆标记</td>
+</tr>
+
+<tr>
+<td class="org-left">'v'</td>
+<td class="org-left">倒三角标记</td>
+</tr>
+
+<tr>
+<td class="org-left">'^'</td>
+<td class="org-left">正三角标记</td>
+</tr>
+
+<tr>
+<td class="org-left">'&amp;lt;'</td>
+<td class="org-left">左三角标记</td>
+</tr>
+
+<tr>
+<td class="org-left">'&amp;gt;'</td>
+<td class="org-left">右三角标记</td>
+</tr>
+
+<tr>
+<td class="org-left">'1'</td>
+<td class="org-left">下箭头标记</td>
+</tr>
+
+<tr>
+<td class="org-left">'2'</td>
+<td class="org-left">上箭头标记</td>
+</tr>
+
+<tr>
+<td class="org-left">'3'</td>
+<td class="org-left">左箭头标记</td>
+</tr>
+
+<tr>
+<td class="org-left">'4'</td>
+<td class="org-left">右箭头标记</td>
+</tr>
+
+<tr>
+<td class="org-left">'s'</td>
+<td class="org-left">正方形标记</td>
+</tr>
+
+<tr>
+<td class="org-left">'p'</td>
+<td class="org-left">五边形标记</td>
+</tr>
+
+<tr>
+<td class="org-left">'*'</td>
+<td class="org-left">星形标记</td>
+</tr>
+
+<tr>
+<td class="org-left">'h'</td>
+<td class="org-left">六边形标记 1</td>
+</tr>
+
+<tr>
+<td class="org-left">'H'</td>
+<td class="org-left">六边形标记 2</td>
+</tr>
+
+<tr>
+<td class="org-left">'+'</td>
+<td class="org-left">加号标记</td>
+</tr>
+
+<tr>
+<td class="org-left">'x'</td>
+<td class="org-left">X 标记</td>
+</tr>
+
+<tr>
+<td class="org-left">'D'</td>
+<td class="org-left">菱形标记</td>
+</tr>
+
+<tr>
+<td class="org-left">'d'</td>
+<td class="org-left">窄菱形标记</td>
+</tr>
+
+<tr>
+<td class="org-left">'&amp;#124;'</td>
+<td class="org-left">竖直线标记</td>
+</tr>
+
+<tr>
+<td class="org-left">'_'</td>
+<td class="org-left">水平线标记</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div id="outline-container-org246e0b4" class="outline-4">
+<h4 id="org246e0b4"><span class="section-number-4">28.2.2</span> 颜色</h4>
+<div class="outline-text-4" id="text-28-2-2">
+<p>
+以下是颜色的缩写：
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="org-left" />
+
+<col  class="org-left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">字符</th>
+<th scope="col" class="org-left">颜色</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">'b'</td>
+<td class="org-left">蓝色</td>
+</tr>
+
+<tr>
+<td class="org-left">'g'</td>
+<td class="org-left">绿色</td>
+</tr>
+
+<tr>
+<td class="org-left">'r'</td>
+<td class="org-left">红色</td>
+</tr>
+
+<tr>
+<td class="org-left">'c'</td>
+<td class="org-left">青色</td>
+</tr>
+
+<tr>
+<td class="org-left">'m'</td>
+<td class="org-left">品红色</td>
+</tr>
+
+<tr>
+<td class="org-left">'y'</td>
+<td class="org-left">黄色</td>
+</tr>
+
+<tr>
+<td class="org-left">'k'</td>
+<td class="org-left">黑色</td>
+</tr>
+
+<tr>
+<td class="org-left">'w'</td>
+<td class="org-left">白色</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div id="outline-container-org2fd6895" class="outline-3">
+<h3 id="org2fd6895"><span class="section-number-3">28.3</span> 图形中文显示</h3>
+<div class="outline-text-3" id="text-28-3">
+<p>
+Matplotlib 默认情况不支持中文
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #75715E;">#</span><span style="color: #75715E;">&#35299;&#20915;&#20013;&#25991;&#26174;&#31034;&#38382;&#39064;</span>
+<span style="color: #FD971F;">plt.rcParams</span>[<span style="color: #E6DB74;">'font.sans-serif'</span>]=[<span style="color: #E6DB74;">'SimHei'</span>]
+<span style="color: #FD971F;">plt.rcParams</span>[<span style="color: #E6DB74;">'axes.unicode_minus'</span>] = <span style="color: #AE81FF;">False</span>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org0e5463b" class="outline-3">
+<h3 id="org0e5463b"><span class="section-number-3">28.4</span> pyplot</h3>
+<div class="outline-text-3" id="text-28-4">
+</div>
+<div id="outline-container-org54c8d83" class="outline-4">
+<h4 id="org54c8d83"><span class="section-number-4">28.4.1</span> scatter</h4>
+<div class="outline-text-4" id="text-28-4-1">
+<p>
+scatter散点图
+</p>
+<div class="org-src-container">
+<pre class="src src-python">matplotlib.pyplot.scatter(x, y, s=<span style="color: #AE81FF;">None</span>, c=<span style="color: #AE81FF;">None</span>, marker=<span style="color: #AE81FF;">None</span>, cmap=<span style="color: #AE81FF;">None</span>, norm=<span style="color: #AE81FF;">None</span>, vmin=<span style="color: #AE81FF;">None</span>, vmax=<span style="color: #AE81FF;">None</span>, alpha=<span style="color: #AE81FF;">None</span>, linewidths=<span style="color: #AE81FF;">None</span>, verts=&lt;deprecated parameter&gt;, edgecolors=<span style="color: #AE81FF;">None</span>, *, plotnonfinite=<span style="color: #AE81FF;">False</span>, data=<span style="color: #AE81FF;">None</span>, **kwargs)[source]
+</pre>
+</div>
+<p>
+A scatter plot of y vs. x with varying marker size and/or color.
+</p>
+</div>
+<ol class="org-ol">
+<li><a id="orgb209018"></a>参数<br />
+<div class="outline-text-5" id="text-28-4-1-1">
+<ul class="org-ul">
+<li>x, y：float or array-like, shape (n, )</li>
+</ul>
+<p>
+The data positions.
+</p>
+<ul class="org-ul">
+<li>sfloat or array-like, shape (n, ), optional</li>
+</ul>
+<p>
+The marker size in points**2. Default is rcParams['lines.markersize'] ** 2.
+</p>
+<ul class="org-ul">
+<li>c:array-like or list of colors or color, optional</li>
+</ul>
+<p>
+The marker colors. Possible values:
+</p>
+
+<p>
+A scalar or sequence of n numbers to be mapped to colors using cmap and norm.
+</p>
+
+<p>
+A 2-D array in which the rows are RGB or RGBA.
+</p>
+
+<p>
+A sequence of colors of length n.
+</p>
+
+<p>
+A single color format string.
+</p>
+
+<p>
+Note that c should not be a single numeric RGB or RGBA sequence because that is indistinguishable from an array of values to be colormapped. If you want to specify the same RGB or RGBA value for all points, use a 2-D array with a single row. Otherwise, value- matching will have precedence in case of a size matching with x and y.
+</p>
+
+<p>
+If you wish to specify a single color for all points prefer the color keyword argument.
+</p>
+
+<p>
+Defaults to None. In that case the marker color is determined by the value of color, facecolor or facecolors. In case those are not specified or None, the marker color is determined by the next color of the Axes' current "shape and fill" color cycle. This cycle defaults to rcParams["axes.prop_cycle"] (default: cycler('color', ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'])).
+</p>
+<ul class="org-ul">
+<li>marker:MarkerStyle, default: rcParams["scatter.marker"] (default: 'o')</li>
+</ul>
+<p>
+The marker style. marker can be either an instance of the class or the text shorthand for a particular marker. See matplotlib.markers for more information about marker styles.
+</p>
+<ul class="org-ul">
+<li>cmap:str or Colormap, default: rcParams["image.cmap"] (default: 'viridis')</li>
+</ul>
+<p>
+A Colormap instance or registered colormap name. cmap is only used if c is an array of floats.
+</p>
+<ul class="org-ul">
+<li>norm:Normalize, default: None</li>
+</ul>
+<p>
+If c is an array of floats, norm is used to scale the color data, c, in the range 0 to 1, in order to map into the colormap cmap. If None, use the default colors.Normalize.
+</p>
+<ul class="org-ul">
+<li>vmin, vmax:float, default: None</li>
+</ul>
+<p>
+nvmin and vmax are used in conjunction with the default norm to map the color array c to the colormap cmap. If None, the respective min and max of the color array is used. It is deprecated to use vmin/vmax when norm is given.
+</p>
+<ul class="org-ul">
+<li>alpha:float, default: None</li>
+</ul>
+<p>
+The alpha blending value, between 0 (transparent) and 1 (opaque).
+</p>
+<ul class="org-ul">
+<li>linewidths:float or array-like, default: rcParams["lines.linewidth"] (default: 1.5)</li>
+</ul>
+<p>
+The linewidth of the marker edges. Note: The default edgecolors is 'face'. You may want to change this as well.
+</p>
+<ul class="org-ul">
+<li>edgecolors:{'face', 'none', None} or color or sequence of color, default: rcParams["scatter.edgecolors"] (default: 'face')</li>
+</ul>
+<p>
+The edge color of the marker. Possible values:
+</p>
+
+<p>
+'face': The edge color will always be the same as the face color.
+</p>
+
+<p>
+'none': No patch boundary will be drawn.
+</p>
+
+<p>
+A color or sequence of colors.
+</p>
+
+<p>
+For non-filled markers, the edgecolors kwarg is ignored and forced to 'face' internally.
+</p>
+<ul class="org-ul">
+<li>plotnonfinite:bool, default: False</li>
+</ul>
+<p>
+Set to plot points with nonfinite c, in conjunction with set_bad.
+</p>
+<ul class="org-ul">
+<li>Other Parameters:</li>
+</ul>
+<p>
+**kwargs:Collection properties
+</p>
+</div>
+</li>
+</ol>
+</div>
+<div id="outline-container-org9ffb603" class="outline-4">
+<h4 id="org9ffb603"><span class="section-number-4">28.4.2</span> subplot()</h4>
+<div class="outline-text-4" id="text-28-4-2">
+<p>
+subplot() 函数允许你在同一图中绘制不同的东西。
+</p>
+</div>
+</div>
+<div id="outline-container-org8fd96a7" class="outline-4">
+<h4 id="org8fd96a7"><span class="section-number-4">28.4.3</span> subplot2grid()</h4>
+<div class="outline-text-4" id="text-28-4-3">
+<p>
+subplot()这种子区函数只能绘制等分画布形式的图形样式，要想按照绘图区域的不同展示目的，进行非等分画布形式的图形展示，需要向画布多次使用子区函数subplot()完成非等分画布的展示任务，但是这么频繁地操作显得非常麻烦，而且在划分画布时易于出现疏漏和差错。因此，我们需要用高级的方法使用子区，需要定制化的网格区域，这个函数就是subplot2grid()，通过使用subplot2grid()函数的rowspan 和colspan 参数可以让子区跨越固定的网格布局的多个行和列，实现不同的子区布局。
+</p>
+<div class="org-src-container">
+<pre class="src src-python">plt.subplot2grid(shape, loc, rowspan=1, colspan=1, fig=<span style="color: #AE81FF;">None</span>, **kwargs)
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-orgfeaa8b6" class="outline-2">
+<h2 id="orgfeaa8b6"><span class="section-number-2">29</span> Sklearn</h2>
+<div class="outline-text-2" id="text-29">
+<p>
+Scikit-learn(sklearn)是机器学习中常用的第三方模块，对常用的机器学习方法进行了封装，包括回归(Regression)、降维(Dimensionality Reduction)、分类(Classfication)、聚类(Clustering)等方法。
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="date">Created: 2020-07-26 周日 16:55</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>

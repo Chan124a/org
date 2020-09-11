@@ -1,0 +1,76 @@
+* Spacemacs Rocks Season 2 (Day 4)                                      :TOC:
+   - [[#split-your-configs-into-multiple-files][Split your configs into multiple files]]
+   - [[#major-mode-and-minor-mode-in-details][Major mode and minor mode in details]]
+   - [[#better-defaults][Better Defaults]]
+   - [[#exercise][Exercise]]
+
+** Split your configs into multiple files
+1. use Git to management your init file
+
+2. help window is anoyying.. 
+#+BEGIN_SRC emacs-lisp
+;; add popwin mode
+;; why this line is needed
+(require 'popwin) (require 'init-packages)
+   ;;when require, wh(setq company-minimum-prefix-length 1)en not require
+(popwin-mode t)
+#+END_SRC
+
+3. load-file, load-path and load
+4. features, provide and require, autoload
+5. naming conventions
+zilongshanren/xxxx
+minor mode or major mode.
+niubi-mode
+niubi-xxx 
+
+   all of the names should have a prefix, such that the naming conflicts could be minimal.  
+6. define your abbrevs
+#+BEGIN_SRC emacs-lisp
+  (setq-default abbrev-mode t)
+
+  (define-abbrev-table 'global-abbrev-table '(
+                                              ;; signature
+                                              ("8zl" "zilongshanren")
+                                              ;; emacs regex
+                                              
+                                              ))
+#+END_SRC
+7. how to organize your configs
+- init-packages.el
+- init-ui.el
+- init-better-defaults.el
+- init-keybindings.el
+- custom.el
+#+BEGIN_SRC emacs-lisp
+(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+#+END_SRC
+
+8. use `counsel-git` to find file in git managed project.
+#+BEGIN_SRC emacs-lisp
+  (global-set-key (kbd "C-c p f") 'counsel-git)
+#+END_SRC
+
+
+** Major mode and minor mode in details
+1. conventions
+text-mode/special-mode/prog-mode
+naming:  xxx-mode,  xxx-mode-key-map  xxx-mode-hook
+
+2. mode key map and mode hook
+
+3. let's take a look at a pacakge in elpa (company)
+   
+** Better Defaults
+1. disable audio bell
+#+BEGIN_SRC emacs-lisp
+  (setq ring-bell-function 'ignore)
+#+END_SRC
+
+2. auto revert file when they are changed outside the editor
+#+BEGIN_SRC emacs-lisp
+(global-auto-revert-mode t)
+#+END_SRC
+
+** Exercise
+1. Only turn on Linum-mode when doing programming (tips: use prog-mode-hook)

@@ -1,0 +1,35 @@
+Vultr是一家国际知名的美国云主机提供商，每个月最低只需要2.5美刀即可使用上其云主机服务。因Vultr提供日本东京节点的服务器，国内访问延时非常小，所以受到了很多国内站长的欢迎。国内站长的大量涌入，以及国内搭梯子的需求，是的Vultr越来越多的IP地址被拦到了长城外面。假如你再Vultr使用的某个VPS主机IP地址被拦截，可以尝试使用Vultr的快照功能（使用快照功能备份原VPS，再通过快照创建一个新的VPS），快速实现IP地址更换。具体步骤如下：
+
+一、使用Vultr VPS的快照（Snapshot）功能，备份原服务器全部内容。
+
+1、点击选择你要快照备份的服务器
+
+Vultr VPS更换IP地址教程https://res.duoluodeyu.com/wp-content/uploads/2017/10/vultrcip-1-400x59.jpg
+
+2、点击选择“Snapshots”，在Label处输入快照名称，点击“Take Snapshot”创建快照。
+
+Vultr VPS更换IP地址教程
+
+3、也可以在首页点击“Snapshots”，点击“Add Snapshot”。
+
+Vultr VPS更换IP地址教程
+
+4、选择要备份的服务器，在Label处输入快照名称，点击“Take Snapshot”创建快照。
+
+Vultr VPS更换IP地址教程
+
+5、等待Vultr自动完成快照备份，时间稍微有点长，Status显示“Available”及标示快照备份完成。
+
+Vultr VPS更换IP地址教程
+
+二、点击+号“Deploy New Server”,在“Server Type”处点击“Snapshot”，选择上一步创建的快照Snapshot”。
+
+Vultr VPS更换IP地址教程
+
+其他信息按照你自己的需求选择、勾选，最后点击“Deploy Now”完成新服务器的创建。
+
+登陆新服务器确认IP地址及原服务器的各项服务运行正常后即可将原VPS删除。至此即完成Vultr VPS IP地址的更换。当然如果你是土豪，也可以使用Vultr的Reserved IP功能，具体可查看：Vultr Reserved IPs功能介绍及使用方法
+
+快速访问Vultr官网
+
+在更换Vultr IP地址的过程中，如遇到任何问题，欢迎在页面下留言反馈。

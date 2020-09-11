@@ -1,0 +1,44 @@
+* Spacemacs Rocks Season 2 (Day 6)
+** Bonus Time: Org-mdoe
+Use org-capture to take notes
+
+#+BEGIN_SRC emacs-lisp
+
+  (setq org-capture-templates
+        '(("t" "Todo" entry (file+headline "~/.emacs.d/gtd.org" "工作安排")
+           "* TODO [#B] %?\n  %i\n"
+           :empty-lines 1)))
+#+END_SRC
+
+Further reading:
+http://orgmode.org/manual/Capture.html
+*** Install Org pomodoro to track my time
+
+** clean up configs
+1. move keybindings into one place
+2. make c-n and c-p to select company condicate
+
+** Batch rename files
+1. press `C-x C-q` in dired mode
+2. use expand-region and iedit to batch change files
+
+** search and replace
+*** install helm-ag
+1. at first, you should install ag
+search speed:  ag > pt > ack > grep
+
+#+BEGIN_SRC sh
+brew install the_silver_searcher
+apt-get install silversearcher-ag
+#+END_SRC
+
+** Show  javascript errors with flycheck
+1. flycheck-checkers
+2. eslint
+
+
+** Snippets and auto snippet
+
+** exercises
+1. give `helm-swoop` package a try: https://github.com/ShingoFukuyama/helm-swoop
+2. Give `org-mac-link` package a try: http://melpa.org/#/org-mac-link

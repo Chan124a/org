@@ -1,0 +1,52 @@
+# -*- mode: Org; org-download-image-dir: "~/Pictures/foo"; -*-
+* vultr搭建ss
+
+先连接到云服务器上
+** 不同系统的连接方法
+*** windows
+使用Xshell 
+*** Mac/linux
+打开终端，输入ssh root@IP地址，其中IP地址换成你自己VPS的信息：
+
+** 一键安装ss
+分别执行下面三条命令
+#+BEGIN_SRC bash
+wget --no-check-certificate -O shadowsocks.sh https://raw.githubusercontent.com/teddysun/shadowsocks_install/master/shadowsocks.sh
+chmod +x shadowsocks.sh
+./shadowsocks.sh 2>&1 | tee shadowsocks.log
+#+END_SRC
+
+注意这里必须是Centos7系统，Centos8会报错
+
+之后分别输入密码、端口号和加密方式，并按任意键即可自动安装。
+** ss命令
+卸载方法：
+
+使用 root 用户登录，运行命令：./shadowsocksR.sh uninstall
+
+安装完成后即已后台启动 ShadowsocksR ，运行：/etc/init.d/shadowsocks status
+
+可以查看 ShadowsocksR 进程是否已经启动。
+
+本脚本安装完成后，已将 ShadowsocksR 自动加入开机自启动。
+
+使用命令：
+
+启动：/etc/init.d/shadowsocks start
+
+停止：/etc/init.d/shadowsocks stop
+
+重启：/etc/init.d/shadowsocks restart
+
+状态：/etc/init.d/shadowsocks status
+
+配置文件路径：/etc/shadowsocks.json
+
+日志文件路径：/var/log/shadowsocksr.log
+
+代码安装目录：/usr/local/shadowsocks
+** ss客户端全局模式和PAC模式的区别
+PAC模式：即只有一部分网站，在访问的时候，会翻墙访问。这些网站可以设置。
+
+全局模式：所有网站都会翻墙访问，这就导致了一些国内站也翻墙访问，速度反而不如不翻墙访问。
+** 安装bbr加速服务
