@@ -183,6 +183,37 @@ SyntaxError: invalid syntax
 上述for前面的表达式x if x % 2 == 0 else -x才能根据x计算出确定的结果。
 
 可见，在一个列表生成式中，for前面的if ... else是表达式，而for后面的if是过滤条件，不能带else。
+*** [None]的说明
+#+BEGIN_SRC python
+>>> a=[None]
+>>> a.append(1)
+>>> a
+[None, 1]
+>>> len(a)  #注意None是有占一个空间的
+2
+
+#+END_SRC
+*** pop()
+pop() 函数用于移除列表中的一个元素（默认最后一个元素），并且返回该元素的值。
+#+BEGIN_SRC python
+list.pop([index=-1])
+#+END_SRC
+- obj -- 可选参数，要移除列表元素的索引值，不能超过列表总长度，默认为 index=-1，删除最后一个列表值。
+
+该方法返回从列表中移除的元素对象。
+#+BEGIN_SRC python
+list1 = ['Google', 'Runoob', 'Taobao']
+list_pop=list1.pop(1)
+print "删除的项为 :", list_pop
+print "列表现在为 : ", list1
+#+END_SRC
+以上实例输出结果如下：
+#+BEGIN_SRC python
+删除的项为 : Runoob
+列表现在为 :  ['Google', 'Taobao']
+#+END_SRC
+
+
 * 基本数据类型转换
 Python 中基本数据类型转换的方法有下面几个。
 
