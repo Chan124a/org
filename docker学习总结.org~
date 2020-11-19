@@ -1,0 +1,43 @@
+* 命令
+#+BEGIN_SRC bash
+docker ps  #可以用来查看当前正在运行的容器
+docker images #可以查看docker registry上已有的镜像
+docker run [OPTIONS] IMAGE [COMMAND] [ARG...]
+#用于创建容器,参数使用方法可参考[官方文档](https://docs.docker.com/engine/reference/commandline/run/)
+
+docker exec -u root -t -i cpd /bin/bash #用于以root身份进入容器
+#需要注意的是，在容器内以root身份安装软件将会导致宿主机也安装软件
+#+END_SRC
+* 命令参数的解释
+** docker run命令
+#+BEGIN_SRC bash
+docker run --rm --shm-size=32G --runtime=nvidia -it -p 8000:8888 --user 1036:1036 -v /etc/group:/etc/group:ro -v /etc/passwd:/etc/passwd:ro -v /home/yangliu/:/home/yangliu --name 容器名 镜像名称 /bin/bash
+#+END_SRC
+- -rm,当容器退出时,自动将容器移除.
+- –shm-size:分配/dev/shm/文件夹的大小./dev/shm/是linux下一个非常有用的目录，因为这个目录不在硬盘上，而是在内存里。
+- –runtime指容器运行时.容器运行时是管理容器和容器镜像的程序,有各种不同的标准.用nvidia-docker才能启用GPU
+- -it: -t让docker分配一个伪终端并绑定到容器的标准输入上, -i则让容器的标准输入保持打开.
+- Docker中系统镜像的缺省命令是 bash，如果不加 -ti bash 命令执行了自动会退出。这是因为如果没有衔接输入流，本身就会马上结束。加-ti 后docker命令会为容器分配一个伪终端，并接管其stdin/stdout支持交互操作，这时候bash命令不会自动退出。
+- -p:将容器指定端口指定映射到宿主机的一个端口上.以上指令会将宿主机的8000端口映射到容器的8888端口上。
+- –user:如果不做相关的设置，容器中的进程默认以 root 用户权限启动.
+- -v:将 host 上已存在的目录或文件挂载(mount)到容器.挂载后的目录或文件使得宿主机和容器可以同步修改文件。 路径映射 /a : /b将主机的/a路径映射到容器的/b 。-v也可用–mount来代替.
+- –name:可以指定容器的名字
+- /bin/bash 启动镜像后执行的命令
+* 参考文档:
+1. [官方文档](https://docs.docker.com/engine/reference/commandline)
+2. [Docker 参数 -i -t 的作用](https://blog.csdn.net/upHailin/article/details/80892505)
+3. [容器运行时笔记](https://gobomb.github.io/post/container-runtime-note/)
+4. [解密容器运行时](https://gobomb.github.io/post/container-runtime-note/)
+5. [Docker容器的创建、启动、和停止](https://www.cnblogs.com/linjiqin/p/8608975.html)
+6. [启动容器](https://yeasy.gitbooks.io/docker_practice/container/run.html)
+7. [认识/dev/shm](http://www.361way.com/dev-shm/4029.html)
+8. [Docker-端口映射](https://www.jianshu.com/p/b92d4b845ed6)
+9. [理解 docker 容器中的 uid 和 gid](https://www.cnblogs.com/sparkdev/p/9614164.html)
+10. [Make “–user `whoami`” the default for “docker run”](https://forums.docker.com/t/make-user-whoami-the-default-for-docker-run/40874)
+11. [Data Volume 之 bind mount - 每天5分钟玩转 Docker 容器技术（39）](https://www.ibm.com/developerworks/community/blogs/132cfa78-44b0-4376-85d0-d3096cd30d3f/entry/Data_Volume_%E4%B9%8B_bind_mount_%E6%AF%8F%E5%A4%A95%E5%88%86%E9%92%9F%E7%8E%A9%E8%BD%AC_Docker_%E5%AE%B9%E5%99%A8%E6%8A%80%E6%9C%AF_39?lang=en)
+12. [官方文档:Use bind mounts](https://docs.docker.com/storage/bind-mounts/)
+13. [Docker数据管理-Volume， bind mount和tmpfs mount](https://michaelyou.github.io/2017/09/17/Docker%E6%95%B0%E6%8D%AE%E7%AE%A1%E7%90%86-Volume%EF%BC%8C-bind-mount%E5%92%8Ctmpfs-mount/)
+14. [Docker数据持久之volume和bind mount](https://blog.csdn.net/docerce/article/details/79265858)
+15. [Joe's Blog: Share volume between docker host and container](https://blog.johannes-beck.name/?p=571)
+16. [running-docker-container-with-my-own-privileges](https://github.com/docker/for-mac/issues/2458)
+17. [breaks mounting /etc/passwd or /etc/group #2458](https://github.com/docker/for-mac/issues/2458)

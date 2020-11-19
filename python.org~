@@ -183,82 +183,6 @@ SyntaxError: invalid syntax
 上述for前面的表达式x if x % 2 == 0 else -x才能根据x计算出确定的结果。
 
 可见，在一个列表生成式中，for前面的if ... else是表达式，而for后面的if是过滤条件，不能带else。
-*** [None]的说明
-#+BEGIN_SRC python
->>> a=[None]
->>> a.append(1)
->>> a
-[None, 1]
->>> len(a)  #注意None是有占一个空间的
-2
-
-#+END_SRC
-*** pop()
-pop() 函数用于移除列表中的一个元素（默认最后一个元素），并且返回该元素的值。
-#+BEGIN_SRC python
-list.pop([index=-1])
-#+END_SRC
-- obj -- 可选参数，要移除列表元素的索引值，不能超过列表总长度，默认为 index=-1，删除最后一个列表值。
-
-该方法返回从列表中移除的元素对象。
-#+BEGIN_SRC python
-list1 = ['Google', 'Runoob', 'Taobao']
-list_pop=list1.pop(1)
-print "删除的项为 :", list_pop
-print "列表现在为 : ", list1
-#+END_SRC
-以上实例输出结果如下：
-#+BEGIN_SRC python
-删除的项为 : Runoob
-列表现在为 :  ['Google', 'Taobao']
-#+END_SRC
-
-** 字典(Dictionary)
-*** items()方法
- ~items()~ 函数以列表返回可遍历的(键, 值) 元组数组。
- #+BEGIN_SRC python
- #!/usr/bin/python
- # coding=utf-8
- dict = {'Google': 'www.google.com', 'Runoob': 'www.runoob.com', 'taobao': 'www.taobao.com'}
-
- print "字典值 : %s" %  dict.items()
- 
- # 遍历字典列表
- for key,values in  dict.items():
-     print key,values
- #+END_SRC
- 输出结果为：
- #+BEGIN_SRC bash
- 字典值 : [('Google', 'www.google.com'), ('taobao', 'www.taobao.com'), ('Runoob', 'www.runoob.com')]
- Google www.google.com
- taobao www.taobao.com
- Runoob www.runoob.com
- #+END_SRC
-*** pop()
- 删除字典给定键 key 及对应的值，返回值为被删除的值。若字典中没有对应的值，则返回key后的值：
-
- 例子：
- #+BEGIN_SRC python
- #在字典kwargs中删除num_train_samples对应的值并将删除的值返回给A，若字典kwargs中没有num_train_samples对应的值，则将1000赋值给A
- A = kwargs.pop("num_train_samples", 1000)
- #+END_SRC
-*** get()
-~dict.get(key, default=None)~
-返回指定键的值，如果键不在字典中返回默认值 None 或者设置的默认值。
-**** 参数
-- key -- 字典中要查找的键。
-- default -- 如果指定键的值不存在时，返回该默认值。
-**** 例子
-#+BEGIN_SRC python
-dict = {'Name': 'Runoob', 'Age': 27}
-
-print "Value : %s" %  dict.get('Age')
-print "Value : %s" %  dict.get('Sex', "Never")
-
-#Value : 27
-#Value : Never
-#+END_SRC
-
 * 基本数据类型转换
 Python 中基本数据类型转换的方法有下面几个。
 
@@ -424,69 +348,6 @@ HelloWorld from Parent
 Child bar fuction
 I'm the parent.
 #+END_SRC
-** hasattr()
-~hasattr(object, name)~
-
-hasattr() 函数用于判断对象是否包含对应的属性。如果对象有该属性返回 True，否则返回 False。
-*** 参数
-- object -- 对象。
-- name -- 字符串，属性名。
-*** 实例
-#+BEGIN_SRC python
-class Coordinate:
-    x = 10
-    y = -5
-    z = 0
- 
-point1 = Coordinate() 
-print(hasattr(point1, 'x'))
-print(hasattr(point1, 'y'))
-print(hasattr(point1, 'z'))
-print(hasattr(point1, 'no'))  # 没有该属性
-#+END_SRC
-输出结果：
-#+BEGIN_SRC bash
-True
-True
-True
-False
-#+END_SRC
-** getattr()
-~getattr(object, name[, default])~
-getattr() 函数用于返回一个对象属性值。
-*** 参数
-- object: 对象。
-- name: 字符串，对象属性。
-- default : 默认返回值，如果不提供该参数，在没有对应属性时，将触发 AttributeError。
-*** 返回值
-返回对象属性值。
-*** 例子
-
-** range()
-~range(start, stop[, step])~
-
-*** 参数
-- start: 计数从 start 开始。默认是从 0 开始。例如range（5）等价于range（0， 5）;
-- stop: 计数到 stop 结束，但不包括 stop。例如：range（0， 5） 是[0, 1, 2, 3, 4]没有5
-- step：步长，默认为1。例如：range（0， 5） 等价于 range(0, 5, 1)
-*** 实例
-#+BEGIN_SRC python
->>>range(10)        # 从 0 开始到 10
-[0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
->>> range(1, 11)     # 从 1 开始到 11
-[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
->>> range(0, 30, 5)  # 步长为 5
-[0, 5, 10, 15, 20, 25]
->>> range(0, 10, 3)  # 步长为 3
-[0, 3, 6, 9]
->>> range(0, -10, -1) # 负数
-[0, -1, -2, -3, -4, -5, -6, -7, -8, -9]
->>> range(0)
-[]
->>> range(1, 0)
-[]
-#+END_SRC
-
 * 条件语句
 ** if
 #+BEGIN_SRC python
@@ -623,7 +484,7 @@ print(fn(8, b=0))        # 1, positional(a), named(b), default(c=1)
 Python 3以后  ：
 
 " / "就表示 浮点数除法，返回浮点结果;" // "表示整数除法。
-* Python3 序列解包(*号的作用)
+* Python3 序列解包
 序列解包是 Python 3.0 之后才有的语法。
 ** 序列解包
 那什么是序列解包呢？先看一个例子：
@@ -694,34 +555,6 @@ Python 3以后  ：
 > a, b, c, d
 (1, 2, 3, 4)
 #+END_SRC
-** 用在函数形参里
-如：*parameter是用来接受任意多个参数并将其放在一个元组中。
-#+BEGIN_SRC base
->>> def demo(*p):
- print(p)
-
->>> demo(1,2,3)
-(1, 2, 3)
-#+END_SRC
-
-** 用在调用函数实参里
-函数在调用多个参数时，在列表、元组、集合、字典及其他可迭代对象作为实参，并在前面加 *
-
-如 ~*（1,2,3）~ 解释器将自动进行解包然后传递给多个单变量参数（参数个数要对应相等）。
-#+BEGIN_SRC bash
->>> def d(a,b,c):
-    print(a,b,c)
->>> d(1,2,3)
-1 2 3
->>> a=[1,2,3]
->>> b=[1,2,3]
->>> c=[1,2,3]
->>> d(a,b,c)
-[1,2,3] [1,2,3] [1,2,3]
-
->>> d(*a)
-1 2 3
-#+END_SRC
 ** 实战例子
 假如一个字符串 'ABCDEFGH'，要输出下列格式:
 #+BEGIN_SRC bash
@@ -767,34 +600,6 @@ F ['G', 'H']
 G ['H']
 H []
 #+END_SRC
-
-* 双星号（**）的作用
-** 表示取幂
-第一种情况：用在两表达式的中间，*表示乘法，**表示取幂，如：
-#+BEGIN_SRC base 
->>> 2*5
-10
->>> 2**7
-128
-#+END_SRC
-** 用在变量前面
-1. 向函数传递参数，将变量中可迭代对象的元素拆解出来，作为独立的参数第传给函数，如：
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20201.jpg @ 2020-11-08 18:46:42
-[[file:asdf/2020-11-08_18-46-42_20201.jpg]]
-
-对于**，变量为字典，将其拆解出来，单独传给函数。如：
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/v2-d6669f8dfb6a267e993214d5a725e7fa_720w.jpg @ 2020-11-08 18:47:42
-[[file:asdf/2020-11-08_18-47-42_v2-d6669f8dfb6a267e993214d5a725e7fa_720w.jpg]]
-
-2.在函数定义中使用，收集参数。将参数捕捉到一个元组中，如：
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/v2-9e7ae9491d016162fe9c7aaab4d0a16e_720w.jpg @ 2020-11-08 18:49:18
-[[file:asdf/2020-11-08_18-49-18_v2-9e7ae9491d016162fe9c7aaab4d0a16e_720w.jpg]]
-该用法允许我们创建自己的函数时，可以接收任意数量的参数。
-
-双星号可以将参数捕捉到字典中，如：
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/v2-74c0f1151574fc5bbafa12b9c375ca41_720w.jpg @ 2020-11-08 18:49:42
-[[file:asdf/2020-11-08_18-49-42_v2-74c0f1151574fc5bbafa12b9c375ca41_720w.jpg]]
-
 
 * 类
 Python的类提供了面向对象编程的所有标准特性：类继承机制允许多个基类，派生类可以覆盖它基类的任何方法，一个方法可以调用基类中相同名称的的方法。对象可以包含任意数量和类型的数据。和模块一样，类也拥有 Python 天然的动态特性：它们在运行时创建，可以在创建后修改。
@@ -1155,249 +960,6 @@ step 缺省值为1
 >>> a[::-1]
 [9, 8, 7, 6, 5, 4, 3, 2, 1, 0]
 #+END_SRC
-* 注释
-** 单行注释
-Python中单行注释以 =#= 开头，例如
-#+BEGIN_SRC python
-# 这是一个注释
-print("Hello, World!")
-#+END_SRC
-** 多行注释
-多行注释用三个单引号 ''' 或者三个双引号 """ 将注释括起来，例如:
-#+BEGIN_SRC python
-#!/usr/bin/python3 
-'''
-这是多行注释，用三个单引号
-这是多行注释，用三个单引号 
-这是多行注释，用三个单引号
-'''
-
-"""
-这是多行注释，用三个双引号
-这是多行注释，用三个双引号 
-这是多行注释，用三个双引号
-"""
-
-print("Hello, World!")
-#+END_SRC
-* 编码问题
-最早的Python 只支持 ASCII 编码，普通的字符串 'ABC' 在 Python 内部都是 ASCII 编码的。
-
-Python 在后来添加了对 Unicode 的支持，以 Unicode 表示的字符串用u'...'表示。
-
-不过在最新的 Python 3 版本中，字符串是以 Unicode 编码的，也就是说，Python 的字符串支持多语言。就像上面的例子一样，我的代码中没有加u'...'，也能正常显示。
-
-不过由于 Python 源代码也是一个文本文件，所以，当你的源代码中包含中文的时候，在保存源代码时，就需要务必指定保存为 UTF-8 编码。当Python 解释器读取源代码时，为了让它按 UTF-8 编码读取，我们通常在文件开头写上这两行：
-#+BEGIN_SRC python
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-#+END_SRC
-
-第一行注释是为了告诉 Linux/OS X 系统，这是一个 Python 可执行程序，Windows 系统会忽略这个注释；
-
-第二行注释是为了告诉 Python 解释器，按照 UTF-8 编码读取源代码，否则，你在源代码中写的中文输出可能会有乱码。
-
-申明了 UTF-8 编码并不意味着你的 .py 文件就是 UTF-8 编码的，必须并且要确保文本编辑器正在使用 UTF-8 without BOM 编码
-
-* del用法
-python中的del用法比较特殊，新手学习往往产生误解，弄清del的用法，可以帮助深入理解python的内存方面的问题。
-
-python的del不同于C的free和C++的delete。
-
-由于python都是引用，而python有GC机制，所以，del语句作用在变量上，而不是数据对象上。
-#+BEGIN_SRC python
-if __name__=='__main__':  
-    a=1       # 对象 1 被 变量a引用，对象1的引用计数器为1  
-    b=a       # 对象1 被变量b引用，对象1的引用计数器加1  
-    c=a       #1对象1 被变量c引用，对象1的引用计数器加1  
-    del a     #删除变量a，解除a对1的引用  
-    del b     #删除变量b，解除b对1的引用  
-    print(c)  #最终变量c仍然引用1  
-#+END_SRC
-del删除的是变量，而不是数据。
-#+BEGIN_SRC python 
-if __name__=='__main__':  
-    li=[1,2,3,4,5]  #列表本身不包含数据1,2,3,4,5，而是包含变量：li[0] li[1] li[2] li[3] li[4]   
-    first=li[0]     #拷贝列表，也不会有数据对象的复制，而是创建新的变量引用  
-    del li[0]  
-    print(li)      #输出[2, 3, 4, 5]  
-    print(first)   #输出 1  
-#+END_SRC
-
-* lambda表达式
-** lambda简介
-
-先来看一段代码示例：
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20190207214329509.jpg @ 2020-11-08 12:53:08
-[[file:ambda%E8%A1%A8%E8%BE%BE%E5%BC%8F/2020-11-08_12-53-08_20190207214329509.jpg]]
-第一行是lambda声明，x,y相当于传入的参数，整个函数会返回x+y的值。lambda作为一个表达式，定义了一个匿名函数，上例的代码x，y为入口参数，x+y为函数体。在这里lambda简化了函数定义的书写形式。
-
-python允许用lambda关键字创造匿名函数。匿名是不需要以标准的方式来声明，比如说使用 def 语句。（除非赋值给一个局部变量，这样的对象也不会在任何的名字空间内创建名字，上面的例子中会创建名字。)
-
-作为函数，它们也能有参数。一个完整的 lambda"语句"代表了一个表达式，这个表达式的定义体必须和声明放在同一行。语法如下：
-
-lambda [arg1[, arg2, … argN]]: expression
-
-参数是可选的，如果使用的参数话，参数通常也是表达式的一部分
-
-lambda使用可以加参数也可以不加参数
-
-无参数：
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20190207214435106.jpg @ 2020-11-08 12:56:14
-[[file:ambda%E8%A1%A8%E8%BE%BE%E5%BC%8F/2020-11-08_12-56-14_20190207214435106.jpg]]
-
-lambda通常用来编写跳转表（jump table），也就是行为的列表或字典，能够按照需要执行相应的动作。如下段代码所示。
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20190207214542358.jpg @ 2020-11-08 12:56:36
-[[file:ambda%E8%A1%A8%E8%BE%BE%E5%BC%8F/2020-11-08_12-56-36_20190207214542358.jpg]]
-
-** 为什么要使用lambda？
-
-1、lambda函数主要用来写一些小体量的一次性函数，避免污染环境，同时也能简化代码。
-
-2、lambda起到了一种函数速写的作用，允许在使用的代码内嵌入一个函数的定义。他们完全是可选的（你总是能够使用def来替代它们），但是你仅需要嵌入小段可执行代码的情况下它们会带来一个更简洁的代码结构。
-
-例如：
-
-map( lambda x: x*x, [y for y in range(10)] )
-
-这个写法要好过
-
-def sq(x):
-
-return x * x
-
-map(sq, [y for y in range(10)])
-** lambda匿名函数与def区别
-lambda 和def它两个的基本用法差不多，参数都是可选，也都会返回对象
-
-如下：
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20190207214400126.jpg @ 2020-11-08 12:54:04
-[[file:ambda%E8%A1%A8%E8%BE%BE%E5%BC%8F/2020-11-08_12-54-04_20190207214400126.jpg]]
-
-不同之处：
-
-lambda可以定义一个匿名函数，而def定义的函数必须有一个名字。这应该是lambda与def两者最大的区别。
-
-lambda是一个表达式，而不是一个语句（lambda is an expression, not a statement.）因此，lambda能够出现在Python语法不允许def出现的地方——例如，在一个列表常量中或者函数调用的参数中。
-
-lambda的主体是一个单个的表达式，而不是一个代码块。（lambda’s body is a single expression, not a block of statements.），lambda里面的语句相当于def中return中的代码一样。只能是简单的表达式，所以说lambda的能力小于def，在lambda中只能使用简单的语法，不能使用if else while return等语句
-
-它的设计理念为：lambda是一个为编写简单的函数而设计的，而def用来处理更大的任务。（lambda is designed for coding simple functions, and def handles larger tasks.）
-
-
-* 异常处理
-** 什么是异常？
-异常即是一个事件，该事件会在程序执行过程中发生，影响了程序的正常执行。
-
-一般情况下，在Python无法正常处理程序时就会发生一个异常。
-
-异常是Python对象，表示一个错误。
-
-当Python脚本发生异常时我们需要捕获处理它，否则程序会终止执行。
-** 异常处理
-捕捉异常可以使用try/except语句。
-
-try/except语句用来检测try语句块中的错误，从而让except语句捕获异常信息并处理。
-
-如果你不想在异常发生时结束你的程序，只需在try里捕获它。
-
-以下为简单的try....except...else的语法：
-#+BEGIN_SRC python
-try:
-<语句>        #运行别的代码
-except <名字>：
-<语句>        #如果在try部份引发了'name'异常
-except <名字>，<数据>:
-<语句>        #如果引发了'name'异常，获得附加的数据
-else:
-<语句>        #如果没有异常发生
-#+END_SRC
-try的工作原理是，当开始一个try语句后，python就在当前程序的上下文中作标记，这样当异常出现时就可以回到这里，try子句先执行，接下来会发生什么依赖于执行时是否出现异常。
-- 如果当try后的语句执行时发生异常，python就跳回到try并执行第一个匹配该异常的except子句，异常处理完毕，控制流就通过整个try语句（除非在处理异常时又引发新的异常）。
-- 如果在try后的语句里发生了异常，却没有匹配的except子句，异常将被递交到上层的try，或者到程序的最上层（这样将结束程序，并打印默认的出错信息）。
-- 如果在try子句执行时没有发生异常，python将执行else语句后的语句（如果有else的话），然后控制流通过整个try语句。
-
-*** 使用except而不带任何异常类型
-
-你可以不带任何异常类型使用except，如下实例：
-#+BEGIN_SRC python
-try:
-    正常的操作
-   ......................
-except:
-    发生异常，执行这块代码
-   ......................
-else:
-    如果没有异常执行这块代码
-#+END_SRC
-以上方式try-except语句捕获所有发生的异常。但这不是一个很好的方式，我们不能通过该程序识别出具体的异常信息。因为它捕获所有的异常。
-*** 例子
-下面是简单的例子，它打开一个文件，在该文件中的内容写入内容，且并未发生异常：
-#+BEGIN_SRC python
-#!/usr/bin/python
-# -*- coding: UTF-8 -*-
-
-try:
-    fh = open("testfile", "w")
-    fh.write("这是一个测试文件，用于测试异常!!")
-except IOError:
-    print "Error: 没有找到文件或读取文件失败"
-else:
-    print "内容写入文件成功"
-    fh.close()
-
-#+END_SRC
-以上程序输出结果：
-#+BEGIN_SRC python
-$ python test.py 
-内容写入文件成功
-$ cat testfile       # 查看写入的内容
-这是一个测试文件，用于测试异常!!
-#+END_SRC
-
-* pass语句
-Python pass 是空语句，是为了保持程序结构的完整性。
-
-pass 不做任何事情，一般用做占位语句。
-#+BEGIN_SRC python
-#!/usr/bin/python
-# -*- coding: UTF-8 -*- 
- 
-# 输出 Python 的每个字母
-for letter in 'Python':
-   if letter == 'h':
-      pass
-      print '这是 pass 块'
-   print '当前字母 :', letter
- 
-print "Good bye!"
-#+END_SRC
-以上实例执行结果：
-#+BEGIN_EXAMPLE
-当前字母 : P
-当前字母 : y
-当前字母 : t
-这是 pass 块
-当前字母 : h
-当前字母 : o
-当前字母 : n
-Good bye!
-#+END_EXAMPLE
-
-在python2.0中是不能定义空函数的，必须用pass填充：
-#+BEGIN_SRC python
-def sample(n_samples):
-    pass
-#+END_SRC
-该处的 pass 便是占据一个位置，当你没有想好函数的内容是可以用 pass 填充，使程序可以正常运行。
-
-在 Python3.x 的时候 pass 可以写或不写:
-#+BEGIN_SRC python
-def function():
-    # 在Python3.x的时候pass可以写或不写
-    pass
-#+END_SRC
-
 * numpy库 
 ** numpy.fromfile
 由一个text或者binary文件创建数组
@@ -1415,816 +977,6 @@ numpy.fromfile(file, dtype=float, count=-1, sep='', offset=0)
   Separator between items if file is a text file. Empty (“”) separator means the file should be treated as binary. Spaces (” “) in the separator match zero or more whitespace characters. A separator consisting only of spaces must match at least one whitespace.
 - **offset** : int
   The offset (in bytes) from the file’s current position. Defaults to 0. Only permitted for binary files.
-** np.argsort()
-~numpy.argsort(a, axis=-1, kind=’quicksort’, order=None)~
-
-功能: 将矩阵a按照axis排序，并返回排序后的下标
-
-参数: a:输入矩阵， axis:需要排序的维度
-
-返回值: 输出排序后的下标
-*** 例子
-#+BEGIN_SRC python
-import numpy as np
-x = np.array([1,4,3,-1,6,9])
-x.argsort()
-# array([3, 0, 1, 2, 4, 5], dtype=int64)
-#+END_SRC
-
-** numpy.bincount
-~numpy.bincount(x, weights=None, minlength=0)~
-
-Count number of occurrences of each value in array of non-negative ints.
-
-The number of bins (of size 1) is one larger than the largest value in x. If minlength is specified, there will be at least this number of bins in the output array (though it will be longer if necessary, depending on the contents of x). Each bin gives the number of occurrences of its index value in x. If weights is specified the input array is weighted by it, i.e. if a value n is found at position i, out[n] += weight[i] instead of out[n] += 1.
-
-*** 参数
-- x:array_like, 1 dimension, nonnegative ints
-Input array.
-
-- weights:array_like, optional
-Weights, array of the same shape as x.
-
-- minlength:int, optional
-A minimum number of bins for the output array.
-
-*** 返回值
-out：ndarray of ints
-The result of binning the input array. The length of out is equal to np.amax(x)+1.
-*** 例子
-它大致说bin的数量比x中的最大值大1，每个bin给出了它的索引值在x中出现的次数。下面，我举个例子让大家更好的理解一下：
-#+BEGIN_SRC python
-# 我们可以看到x中最大的数为7，因此bin的数量为8，那么它的索引值为0->7
-x = np.array([0, 1, 1, 3, 2, 1, 7])
-# 索引0出现了1次，索引1出现了3次......索引5出现了0次......
-np.bincount(x)
-#因此，输出结果为：array([1, 3, 1, 1, 0, 0, 0, 1])
-
-# 我们可以看到x中最大的数为7，因此bin的数量为8，那么它的索引值为0->7
-x = np.array([7, 6, 2, 1, 4])
-# 索引0出现了0次，索引1出现了1次......索引5出现了0次......
-np.bincount(x)
-#输出结果为：array([0, 1, 1, 0, 1, 0, 1, 1])
-#+END_SRC
-下面，我来解释一下weights这个参数。文档说，如果weights参数被指定，那么x会被它加权，也就是说，如果值n发现在位置i，那么out[n] += weight[i]而不是out[n] += 1.**因此，我们weights的大小必须与x相同，否则报错。**下面，我举个例子让大家更好的理解一下：
-#+BEGIN_SRC python
-w = np.array([0.3, 0.5, 0.2, 0.7, 1., -0.6])
-# 我们可以看到x中最大的数为4，因此bin的数量为5，那么它的索引值为0->4
-x = np.array([2, 1, 3, 4, 4, 3])
-# 索引0 -> 0
-# 索引1 -> w[1] = 0.5
-# 索引2 -> w[0] = 0.3
-# 索引3 -> w[2] + w[5] = 0.2 - 0.6 = -0.4
-# 索引4 -> w[3] + w[4] = 0.7 + 1 = 1.7
-np.bincount(x,  weights=w)
-# 因此，输出结果为：array([ 0. ,  0.5,  0.3, -0.4,  1.7])
-#+END_SRC
-最后，我们来看一下minlength这个参数。文档说，如果minlength被指定，那么输出数组中bin的数量至少为它指定的数（如果必要的话，bin的数量会更大，这取决于x）。下面，我举个例子让大家更好的理解一下：
-#+BEGIN_SRC python
-# 我们可以看到x中最大的数为3，因此bin的数量为4，那么它的索引值为0->3
-x = np.array([3, 2, 1, 3, 1])
-# 本来bin的数量为4，现在我们指定了参数为7，因此现在bin的数量为7，所以现在它的索引值为0->6
-np.bincount(x, minlength=7)
-# 因此，输出结果为：array([0, 2, 1, 2, 0, 0, 0])
-
-# 我们可以看到x中最大的数为3，因此bin的数量为4，那么它的索引值为0->3
-x = np.array([3, 2, 1, 3, 1])
-# 本来bin的数量为4，现在我们指定了参数为1，那么它指定的数量小于原本的数量，因此这个参数失去了作用，索引值还是0->3
-np.bincount(x, minlength=1)
-# 因此，输出结果为：array([0, 2, 1, 2])
-#+END_SRC
-** numpy.array_split
-~numpy.array_split(ary, indices_or_sections, axis=0)[source]~
-
-Split an array into multiple sub-arrays.
-
-Please refer to the split documentation. The only difference between these functions is that array_split allows indices_or_sections to be an integer that does not equally divide the axis. For an array of length l that should be split into n sections, it returns l % n sub-arrays of size l//n + 1 and the rest of size l//n.
-*** 例子
-#+BEGIN_SRC python 
->>>x = np.arange(8.0)
->>>np.array_split(x, 3)
-    [array([0.,  1.,  2.]), array([3.,  4.,  5.]), array([6.,  7.])]
->>>x = np.arange(7.0)
->>>np.array_split(x, 3)
-    [array([0.,  1.,  2.]), array([3.,  4.]), array([5.,  6.])]
-#+END_SRC
-** numpy.vstack
-~numpy.vstack(tup)~
-Stack arrays in sequence vertically (row wise).
-
-Take a sequence of arrays and stack them vertically to make a single array. Rebuild arrays divided by vsplit.
-
-This function continues to be supported for backward compatibility, but you should prefer np.concatenate or np.stack. The np.stack function was added in NumPy 1.10.
-
-*** nParameters:
-tup : sequence of ndarrays
-
-Tuple containing arrays to be stacked. The arrays must have the same shape along all but the first axis.
-
-*** Returns:
-stacked : ndarray
-
-The array formed by stacking the given arrays.
-*** 例子
-#+BEGIN_SRC python
->>> a = np.array([1, 2, 3])
->>> b = np.array([2, 3, 4])
->>> np.vstack((a,b))
-array([[1, 2, 3],
-       [2, 3, 4]])
->>> a = np.array([[1], [2], [3]])
->>> b = np.array([[2], [3], [4]])
->>> np.vstack((a,b))
-array([[1],
-       [2],
-       [3],
-       [2],
-       [3],
-       [4]])
-#+END_SRC
-** numpy.hstack
-~numpy.hstack(tup)~
-Stack arrays in sequence horizontally (column wise).
-
-Take a sequence of arrays and stack them horizontally to make a single array. Rebuild arrays divided by hsplit.
-
-This function continues to be supported for backward compatibility, but you should prefer np.concatenate or np.stack. The np.stack function was added in NumPy 1.10.
-
-*** Parameters:	
-tup : sequence of ndarrays
-
-All arrays must have the same shape along all but the second axis.
-
-*** Returns:	
-stacked : ndarray
-
-The array formed by stacking the given arrays.
-*** 例子
-#+BEGIN_SRC python
->>> a = np.array((1,2,3))
->>> b = np.array((2,3,4))
->>> np.hstack((a,b))
-array([1, 2, 3, 2, 3, 4])
->>> a = np.array([[1],[2],[3]])
->>> b = np.array([[2],[3],[4]])
->>> np.hstack((a,b))
-array([[1, 2],
-       [2, 3],
-       [3, 4]])
-
-
->>> a=np.array([[1,2],[3,4],[5,6]])
->>> np.hstack(a)
-array([1, 2, 3, 4, 5, 6])
->>> np.vstack(a)
-array([[1, 2],
-       [3, 4],
-       [5, 6]])
-#+END_SRC
-** np.random
-*** np.random.choice
-~numpy.random.choice(a, size=None, replace=True, p=None)~
-从a(只要是ndarray都可以，但必须是一维的)中随机抽取数字，并组成指定大小(size)的数组
-
-replace:True表示可以取相同数字，False表示不可以取相同数字
-
-数组p：与数组a相对应，表示取数组a中每个元素的概率，默认为选取每个元素的概率相同。
-**** 例子
-产生随机数
-#+BEGIN_SRC python
->>>np.random.choice(5)#从[0, 5)中随机输出一个随机数
-#相当于np.random.randint(0, 5)
-	2
-
->>>np.random.choice(5, 3)#在[0, 5)内输出3个数字并组成一维数组（ndarray）
-#相当于np.random.randint(0, 5, 3)
-	array([1, 4, 1])
-#+END_SRC
-从数组、列表或元组中随机抽取
-
-注意：不管是什么，它必须是一维的！
-#+BEGIN_SRC python 
-L = [1, 2, 3, 4, 5]#list列表
-T = (2, 4, 6, 2)#tuple元组
-A = np.array([4, 2, 1])#numpy,array数组,必须是一维的
-A0 = np.arange(10).reshape(2, 5)#二维数组会报错
-
->>>np.random.choice(L, 5)
-	array([3, 5, 2, 1, 5])
-	
->>>np.random.choice(T, 5)
-	array([2, 2, 2, 4, 2])
- 
->>>np.random.choice(A, 5)
-	array([1, 4, 2, 2, 1])
-
->>>np.random.choice(A0, 5)#如果是二维数组，会报错
-	ValueError: 'a' must be 1-dimensional
-#+END_SRC
-参数replace
-
-用来设置是否可以取相同元素：True表示可以取相同数字；False表示不可以取相同数字。默认是True
-#+BEGIN_SRC python 
-np.random.choice(5, 6, replace=True)#可以看到有相同元素
-	array([3, 4, 1, 1, 0, 3])
-np.random.choice(5, 6, replace=False)#会报错，因为五个数字中取六个，不可能不取到重复的数字
-	ValueError: Cannot take a larger sample than population when 'replace=False'
-#+END_SRC
-参数p
-
-p实际是个数组，大小（size）应该与指定的a相同，用来规定选取a中每个元素的概率，默认为概率相同
-#+BEGIN_SRC python 
->>> aa_milne_arr = ['pooh', 'rabbit', 'piglet', 'Christopher']
->>> np.random.choice(aa_milne_arr, 5, p=[0.5, 0.1, 0.1, 0.3])
-	array(['pooh', 'pooh', 'pooh', 'Christopher', 'piglet'], dtype='|S11')
-#可以看到，‘pooh’被选取的概率明显比其他几个高很多
-#+END_SRC
-*** numpy.random.normal
-~numpy.random.normal(loc=0.0, scale=1.0, size=None)~
-生成正太分布
-
-Draw random samples from a normal (Gaussian) distribution.
-**** Parameters:	
-- loc : float
-Mean (“centre”) of the distribution.
-- scale : float
-Standard deviation (spread or “width”) of the distribution.
-- size : int or tuple of ints, optional
-Output shape. If the given shape is, e.g., (m, n, k), then m * n * k samples are drawn. Default is None, in which case a single value is returned.
-
-** np.max
-~np.max(a, axis=None, out=None, keepdims=False)~
-
-求序列的最值
-
-最少接受一个参数
-
-axis默认为axis=0即列向,如果axis=1即横向
-
-ex:
-
->> np.max([-2, -1, 0, 1, 2])
-2
-** np.maximum
-~np.maximum(X, Y, out=None)~
-
-X和Y逐位进行比较,选择最大值.
-
-最少接受两个参数
-
-ex:
-
->> np.maximum([-3, -2, 0, 1, 2], 0)
-array([0, 0, 0, 1, 2])
-** np.sum
-sum(a)默认为对输入参数中的所有元素进行求和
-#+BEGIN_SRC python 
->>> a
-array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11])
->>> np.sum(a)
-66
-
-
->>> b=np.arange(12)
->>> b=b.reshape(2,6)
->>> b
-array([[ 0,  1,  2,  3,  4,  5],
-       [ 6,  7,  8,  9, 10, 11]])
->>> np.sum(b)
-66
-#+END_SRC
-sum()输入参数带有axis时，将按照指定axis进行对应求和
-#+BEGIN_SRC python 
->>> b=np.arange(12)
->>> b=b.reshape(2,6)
->>> b
-array([[ 0,  1,  2,  3,  4,  5],
-       [ 6,  7,  8,  9, 10, 11]])
->>> np.sum(b)	#默认对所有元素进行求和
-66
->>> np.sum(b,axis=0)		#在第一个轴展开方向上求和
-array([ 6,  8, 10, 12, 14, 16])
->>> np.sum(b,axis=1)
-array([15, 51])
-#+END_SRC
-sum()输入参数axis为多个轴时，则依次按要求在axis上进行多次求和
-#+BEGIN_SRC python 
->>> a=np.arange(12).reshape(2,2,3)
->>> a
-array([[[ 0,  1,  2],
-        [ 3,  4,  5]],
-
-       [[ 6,  7,  8],
-        [ 9, 10, 11]]])
-
->>> b=np.sum(a,axis=(0,1))	#分别在axis=0 和 1两个方向上进行求和
->>> b
-array([18, 22, 26])
->>> b=np.sum(a,axis=(1,2))
->>> b
-array([15, 51])
-
->>> b=np.sum(a,axis=(0,1,2))	#由于a为3为矩阵，所有在三个axis上分别求和相当于对所有元素进行求和 
->>> b
-66
-#+END_SRC
-
-** numpy.linspace
-~numpy.linspace(start, stop, num=50, endpoint=True, retstep=False, dtype=None, axis=0)~
-用于创建等差数列
-
-Return evenly spaced numbers over a specified interval.
-
-Returns num evenly spaced samples, calculated over the interval [start, stop].
-
-The endpoint of the interval can optionally be excluded.
-
-Changed in version 1.16.0: Non-scalar start and stop are now supported.
-*** 参数
-- start：array_like
-The starting value of the sequence.
-- stop：array_like
-The end value of the sequence, unless endpoint is set to False. In that case, the sequence consists of all but the last of num + 1 evenly spaced samples, so that stop is excluded. Note that the step size changes when endpoint is False.
-- num：int, optional
-Number of samples to generate. Default is 50. Must be non-negative.
-- endpoint：bool, optional
-If True, stop is the last sample. Otherwise, it is not included. Default is True.
-- retstep：bool, optional
-If True, return (samples, step), where step is the spacing between samples.
-- dtype：dtype, optional
-The type of the output array. If dtype is not given, infer the data type from the other input arguments.
-New in version 1.9.0.
-- axis：int, optional
-The axis in the result to store the samples. Relevant only if start or stop are array-like. By default (0), the samples will be along a new axis inserted at the beginning. Use -1 to get an axis at the end.
-New in version 1.16.0.
-*** Returns
-- samples：ndarray
-There are num equally spaced samples in the closed interval [start, stop] or the half-open interval [start, stop) (depending on whether endpoint is True or False).
-- step：float, optional
-Only returned if retstep is True
-Size of spacing between samples.
-*** 例子
-#+BEGIN_SRC bash
->>> np.linspace(2.0, 3.0, num=5)
-array([2.  , 2.25, 2.5 , 2.75, 3.  ])
->>> np.linspace(2.0, 3.0, num=5, endpoint=False)
-array([2. ,  2.2,  2.4,  2.6,  2.8])
->>> np.linspace(2.0, 3.0, num=5, retstep=True)
-(array([2.  ,  2.25,  2.5 ,  2.75,  3.  ]), 0.25)
-#+END_SRC
-** numpy.logspace
-~numpy.logspace(start, stop, num, endpoint, base, dtype)~
-对数等比数列
-*** 参数
-- start：代表间隔的起始值。
-- stop：代表以区间为基础的间隔的停止值。
-- num：范围之间的值数。
-- endpoint:是否包含结束值
-- base：指定对数的底，默认为10
-- dtype：代表数组项的数据类型。
-*** 例子
-#+BEGIN_SRC python
-b = np.logspace(0,5,6,base=2)    # base指定对数的底为2
-#结果为array([ 1.,  2.,  4.,  8., 16., 32.])
-a = np.logspace(0,3,4) 
-#结果为array([   1.,   10.,  100., 1000.])
-#+END_SRC
-** numpy.mean()
-~numpy.mean(a, axis=None, dtype=None, out=None, keepdims=<no value>)~
-Compute the arithmetic mean along the specified axis.
-
-Returns the average of the array elements. The average is taken over the flattened array by default, otherwise over the specified axis. float64 intermediate and return values are used for integer inputs.
-
-*** Parameters
-- a：array_like
-Array containing numbers whose mean is desired. If a is not an array, a conversion is attempted.
-- axis：None or int or tuple of ints, optional
-Axis or axes along which the means are computed. The default is to compute the mean of the flattened array.
-
-New in version 1.7.0.
-
-If this is a tuple of ints, a mean is performed over multiple axes, instead of a single axis or all the axes as before.
-
-- dtype：data-type, optional
-Type to use in computing the mean. For integer inputs, the default is float64; for floating point inputs, it is the same as the input dtype.
-
-- out：ndarray, optional
-Alternate output array in which to place the result. The default is None; if provided, it must have the same shape as the expected output, but the type will be cast if necessary. See ufuncs-output-type for more details.
-
-- keepdims：bool, optional
-If this is set to True, the axes which are reduced are left in the result as dimensions with size one. With this option, the result will broadcast correctly against the input array.
-
-If the default value is passed, then keepdims will not be passed through to the mean method of sub-classes of ndarray, however any non-default value will be. If the sub-class’ method does not implement keepdims any exceptions will be raised.
-*** Returns
-m:ndarray, see dtype parameter above
-
-If out=None, returns a new array containing the mean values, otherwise a reference to the output array is returned.
-*** 例子
-#+BEGIN_SRC python
->>> x=np.array([[6,12,18],[24,30,36]])
->>> b=np.mean(x,axis=0)
-array([15., 21., 27.])
->>> c=np.mean(x,axis=1)
-array([12., 30.])
-
->>> b.shape  #注意b和c的shape都为（3，）
-(3,)
->>> c.shape
-(2,)
-
->>> d=b.reshape(1,-1)
->>> d
-array([[15., 21., 27.]])
->>> d.shape
-(1, 3)
-#+END_SRC
-** numpy.std
-~numpy.std(a, axis=None, dtype=None, out=None, ddof=0, keepdims=<no value>)~
-Compute the standard deviation along the specified axis.
-
-Returns the standard deviation, a measure of the spread of a distribution, of the array elements. The standard deviation is computed for the flattened array by default, otherwise over the specified axis.
-
-*** Parameters
-- a:array_like
-Calculate the standard deviation of these values.
-
-- axis:None or int or tuple of ints, optional
-Axis or axes along which the standard deviation is computed. The default is to compute the standard deviation of the flattened array.
-
-New in version 1.7.0.
-
-If this is a tuple of ints, a standard deviation is performed over multiple axes, instead of a single axis or all the axes as before.
-
-- dtype:dtype, optional
-Type to use in computing the standard deviation. For arrays of integer type the default is float64, for arrays of float types it is the same as the array type.
-
-- out:ndarray, optional
-Alternative output array in which to place the result. It must have the same shape as the expected output but the type (of the calculated values) will be cast if necessary.
-
-- ddof:int, optional
-Means Delta Degrees of Freedom. The divisor used in calculations is N - ddof, where N represents the number of elements. By default ddof is zero.
-
-- keepdims:bool, optional
-If this is set to True, the axes which are reduced are left in the result as dimensions with size one. With this option, the result will broadcast correctly against the input array.
-
-If the default value is passed, then keepdims will not be passed through to the std method of sub-classes of ndarray, however any non-default value will be. If the sub-class’ method does not implement keepdims any exceptions will be raised.
-
-**** Returns
-standard_deviation:ndarray, see dtype parameter above.
-
-If out is None, return a new array containing the standard deviation, otherwise return a reference to the output array.
-** numpy.var
-~numpy.var(a, axis=None, dtype=None, out=None, ddof=0, keepdims=<no value>)~
-Compute the variance along the specified axis.
-
-Returns the variance of the array elements, a measure of the spread of a distribution. The variance is computed for the flattened array by default, otherwise over the specified axis.
-
-*** Parameters
-- a:array_like
-Array containing numbers whose variance is desired. If a is not an array, a conversion is attempted.
-
-- axis:None or int or tuple of ints, optional
-Axis or axes along which the variance is computed. The default is to compute the variance of the flattened array.
-
-New in version 1.7.0.
-
-If this is a tuple of ints, a variance is performed over multiple axes, instead of a single axis or all the axes as before.
-
-- dtype:data-type, optional
-Type to use in computing the variance. For arrays of integer type the default is float64; for arrays of float types it is the same as the array type.
-
-- out:ndarray, optional
-Alternate output array in which to place the result. It must have the same shape as the expected output, but the type is cast if necessary.
-
-- ddof:int, optional
-“Delta Degrees of Freedom”: the divisor used in the calculation is N - ddof, where N represents the number of elements. By default ddof is zero.
-
-- keepdims:bool, optional
-If this is set to True, the axes which are reduced are left in the result as dimensions with size one. With this option, the result will broadcast correctly against the input array.
-
-If the default value is passed, then keepdims will not be passed through to the var method of sub-classes of ndarray, however any non-default value will be. If the sub-class’ method does not implement keepdims any exceptions will be raised.
-
-*** Returns
-variance:ndarray, see dtype parameter above
-
-If out=None, returns a new array containing the variance; otherwise, a reference to the output array is returned.
-** np.pad()
-~pad(array, pad_width, mode, **kwargs)~
-
-返回值：数组
-*** 参数
-- array——表示需要填充的数组；
-- pad_width——表示每个轴（axis）边缘需要填充的数值数目。
-参数输入方式为：（(before_1, after_1), … (before_N, after_N)），其中(before_1, after_1)表示第1轴两边缘分别填充before_1个和after_1个数值。取值为：{sequence, array_like, int}
-
-- mode——表示填充的方式（取值：str字符串或用户提供的函数）,总共有11种填充模式；
-*** 填充方式
-- ‘constant’——表示连续填充相同的值，每个轴可以分别指定填充值，constant_values=（x, y）时前面用x填充，后面用y填充，缺省值填充0
-- ‘edge’——表示用边缘值填充
-- ‘linear_ramp’——表示用边缘递减的方式填充
-- ‘maximum’——表示最大值填充
-- ‘mean’——表示均值填充
-- ‘median’——表示中位数填充
-- ‘minimum’——表示最小值填充
-- ‘reflect’——表示对称填充
-- ‘symmetric’——表示对称填充
-- ‘wrap’——表示用原数组后面的值填充前面，前面的值填充后面
-*** 例子
-**** 常数填充模式——’constant’
-#+BEGIN_SRC python
->>> A = np.arange(95,99).reshape(2,2)    #原始输入数组
->>> A
-array([[95, 96],
-       [97, 98]])
-
-#在数组A的边缘填充constant_values指定的数值
-#（3,2）表示在A的第[0]轴填充（二维数组中，0轴表示行），即在0轴前面填充3个宽度的0，比如数组A中的95,96两个元素前面各填充了3个0；在后面填充2个0，比如数组A中的97,98两个元素后面各填充了2个0
-#（2,3）表示在A的第[1]轴填充（二维数组中，1轴表示列），即在1轴前面填充2个宽度的0，后面填充3个宽度的0
->>> np.pad(A,((3,2),(2,3)),'constant',constant_values = (0,0))  #constant_values表示填充值，且(before，after)的填充值等于（0,0）
-array([[ 0,  0,  0,  0,  0,  0,  0],
-       [ 0,  0,  0,  0,  0,  0,  0],
-       [ 0,  0,  0,  0,  0,  0,  0],
-       [ 0,  0, 95, 96,  0,  0,  0],
-       [ 0,  0, 97, 98,  0,  0,  0],
-       [ 0,  0,  0,  0,  0,  0,  0],
-       [ 0,  0,  0,  0,  0,  0,  0]])
-
-#填充时，从前面轴，往后面轴依次填充
->>> np.pad(A,((3,2),(2,3)),'constant',constant_values = (-2,2))   #填充值，前面填充改为-2，后面填充改为2
-array([[-2, -2, -2, -2,  2,  2,  2],
-       [-2, -2, -2, -2,  2,  2,  2],
-       [-2, -2, -2, -2,  2,  2,  2],
-       [-2, -2, 95, 96,  2,  2,  2],
-       [-2, -2, 97, 98,  2,  2,  2],
-       [-2, -2,  2,  2,  2,  2,  2],
-       [-2, -2,  2,  2,  2,  2,  2]])
-
->>> np.pad(A,((3,2),(2,3)),'constant',constant_values = ((0,0),(1,2)))    #0轴和1轴分别填充不同的值，先填充0轴，后填充1轴，存在1轴填充覆盖0轴填充的情形
-array([[ 1,  1,  0,  0,  2,  2,  2],
-       [ 1,  1,  0,  0,  2,  2,  2],
-       [ 1,  1,  0,  0,  2,  2,  2],
-       [ 1,  1, 95, 96,  2,  2,  2],
-       [ 1,  1, 97, 98,  2,  2,  2],
-       [ 1,  1,  0,  0,  2,  2,  2],
-       [ 1,  1,  0,  0,  2,  2,  2]])
-
->>> np.pad(A,((3,2),(2,3)),'constant')     #,constant_values 缺省，则默认填充均为0
-array([[ 0,  0,  0,  0,  0,  0,  0],
-       [ 0,  0,  0,  0,  0,  0,  0],
-       [ 0,  0,  0,  0,  0,  0,  0],
-       [ 0,  0, 95, 96,  0,  0,  0],
-       [ 0,  0, 97, 98,  0,  0,  0],
-       [ 0,  0,  0,  0,  0,  0,  0],
-       [ 0,  0,  0,  0,  0,  0,  0]])
-#+END_SRC
-**** 边缘值填充模式——’edge’
-#+BEGIN_SRC python 
->>>B = np.arange(1,5).reshape(2,2)  #原始输入数组
->>>B
-array([[1, 2],
-       [3, 4]])
-
->>>np.pad(B,((1,2),(2,1)),'edge')   #注意先填充0轴，后面填充1轴，依次填充
-array([[1, 1, 1, 2, 2],
-       [1, 1, 1, 2, 2],
-       [3, 3, 3, 4, 4],
-       [3, 3, 3, 4, 4],
-       [3, 3, 3, 4, 4]])
-#+end_src
-**** 边缘最大值填充模式——’maximum’
-#+BEGIN_SRC python 
->>> B = np.arange(1,5).reshape(2,2)  #原始输入数组
->>> B
-array([[1, 2],
-       [3, 4]])
-
->>>np.pad(B,((1,2),(2,1)),'maximum')    #maximum填充模式还有其他控制参数，比如stat_length，详细见numpy库
-array([[4, 4, 3, 4, 4],
-       [2, 2, 1, 2, 2],
-       [4, 4, 3, 4, 4],
-       [4, 4, 3, 4, 4],
-       [4, 4, 3, 4, 4]])
-
->>> C = np.arange(0,9).reshape(3,3)  #原始输入数组
->>> C
-array([[0, 1, 2],
-       [3, 4, 5],
-       [6, 7, 8]])
-
->>>np.pad(C,((3,2),(2,1)),'maximum')  
-array([[8, 8, 6, 7, 8, 8],
-       [8, 8, 6, 7, 8, 8],
-       [8, 8, 6, 7, 8, 8],
-       [2, 2, 0, 1, 2, 2],
-       [5, 5, 3, 4, 5, 5],
-       [8, 8, 6, 7, 8, 8],
-       [8, 8, 6, 7, 8, 8],
-       [8, 8, 6, 7, 8, 8]])
-#+END_SRC
-**** 官方例子
-#+BEGIN_SRC python
->>> a = [1, 2, 3, 4, 5]
-
->>> np.pad(a, (2, 3), 'constant', constant_values=(4, 6))
-array([4, 4, 1, ..., 6, 6, 6])
-
->>> np.pad(a, (2, 3), 'edge')
-array([1, 1, 1, ..., 5, 5, 5])
-
->>> np.pad(a, (2, 3), 'linear_ramp', end_values=(5, -4))
-array([ 5,  3,  1,  2,  3,  4,  5,  2, -1, -4])
-
->>>np.pad(a, (2,), 'maximum')
-array([5, 5, 1, 2, 3, 4, 5, 5, 5])
-
->>> np.pad(a, (2,), 'mean')
-array([3, 3, 1, 2, 3, 4, 5, 3, 3])
-
->>> np.pad(a, (2,), 'median')
-array([3, 3, 1, 2, 3, 4, 5, 3, 3])
-
->>> a = [[1, 2], [3, 4]]
-
->>> np.pad(a, ((3, 2), (2, 3)), 'minimum')
-array([[1, 1, 1, 2, 1, 1, 1],
-       [1, 1, 1, 2, 1, 1, 1],
-       [1, 1, 1, 2, 1, 1, 1],
-       [1, 1, 1, 2, 1, 1, 1],
-       [3, 3, 3, 4, 3, 3, 3],
-       [1, 1, 1, 2, 1, 1, 1],
-       [1, 1, 1, 2, 1, 1, 1]])
-
->>> a = [1, 2, 3, 4, 5]
-
->>> np.pad(a, (2, 3), 'reflect')
-array([3, 2, 1, 2, 3, 4, 5, 4, 3, 2])
->>> np.pad(a, (2, 3), 'reflect', reflect_type='odd')
-array([-1,  0,  1,  2,  3,  4,  5,  6,  7,  8])
->>> np.pad(a, (2, 3), 'symmetric')
-array([2, 1, 1, 2, 3, 4, 5, 5, 4, 3])
->>> np.pad(a, (2, 3), 'symmetric', reflect_type='odd')
-array([0, 1, 1, 2, 3, 4, 5, 5, 6, 7])
->>> np.pad(a, (2, 3), 'wrap')
-array([4, 5, 1, 2, 3, 4, 5, 1, 2, 3])
->>> def pad_with(vector, pad_width, iaxis, kwargs):
-       pad_value = kwargs.get('padder', 10)
-       vector[:pad_width[0]] = pad_value
-       vector[-pad_width[1]:] = pad_value
->>> a = np.arange(6)
->>> a = a.reshape((2, 3))
->>> np.pad(a, 2, pad_with)
-array([[10, 10, 10, 10, 10, 10, 10],
-       [10, 10, 10, 10, 10, 10, 10],
-       [10, 10,  0,  1,  2, 10, 10],
-       [10, 10,  3,  4,  5, 10, 10],
-       [10, 10, 10, 10, 10, 10, 10],
-       [10, 10, 10, 10, 10, 10, 10]])
->>> np.pad(a, 2, pad_with, padder=100)
-array([[100, 100, 100, 100, 100, 100, 100],
-       [100, 100, 100, 100, 100, 100, 100],
-       [100, 100,   0,   1,   2, 100, 100],
-       [100, 100,   3,   4,   5, 100, 100],
-       [100, 100, 100, 100, 100, 100, 100],
-       [100, 100, 100, 100, 100, 100, 100]])
-#+END_SRC
-** None的作用
-在数组索引中，加入None就相当于在对应维度加一维
-#+BEGIN_SRC python 
->>> import numpy as np
->a=[1,2,3,4]
->>> a=np.array(a)
->>> a
-array([1, 2, 3, 4])
->>> b=a[:,None]
->>> b
-array([[1],
-       [2],
-       [3],
-       [4]])
->>> c=a[:,None,None]
->>> c
-array([[[1]],
-
-       [[2]],
-
-       [[3]],
-
-       [[4]]])
-
->>> a=np.ones((2,3))
->>> a
-array([[1., 1., 1.],
-       [1., 1., 1.]])
->>> b=a[:,None,:]
->>> b
-array([[[1., 1., 1.]],
-
-       [[1., 1., 1.]]])
->>> b=a[None,:,:]
->>> b
-array([[[1., 1., 1.],
-        [1., 1., 1.]]])
-
-
-###在pytorch中：
->>> import torch as t
->>> a=t.from_numpy(a)
->>> a
-tensor([[1., 1., 1.],
-        [1., 1., 1.]], dtype=torch.float64)
->>> b=a[:,None,:]
->>> b
-tensor([[[1., 1., 1.]],
-
-        [[1., 1., 1.]]], dtype=torch.float64)
->>>
->>>
-#+END_SRC
-** keepdims的作用
-当 keepidms=True,保持其二维或者三维的特性,(结果保持其原来维数)
-#+BEGIN_SRC python
-import numpy as np
-a = np.array([[1,2],[3,4]])
-
-# 按行相加，并且保持其二维特性
-print(np.sum(a, axis=1, keepdims=True))
-
-# 按行相加，不保持其二维特性
-print(np.sum(a, axis=1))
-#+END_SRC
-输出
-#+BEGIN_SRC python 
-array([[3], [7]])
-array([3, 7])
-#+END_SRC
-
-** np.transpose
-~numpy.transpose(a, axes=None)~
-Reverse or permute the axes of an array; returns the modified array.
-
-For an array a with two axes, transpose(a) gives the matrix transpose.
-
-*** Parameters
-- a：array_like
-Input array.
-
-- axes：tuple or list of ints, optional
-If specified, it must be a tuple or list which contains a permutation of [0,1,..,N-1] where N is the number of axes of a. The i’th axis of the returned array will correspond to the axis numbered axes[i] of the input. If not specified, defaults to range(a.ndim)[::-1], which reverses the order of the axes.
-
-*** Returns
-- p：ndarray
-a with its axes permuted. A view is returned whenever possible.
-
-*** examples
-#+BEGIN_SRC python
-
-
->>>x = np.arange(4).reshape((2,2))
->>>x
-array([[0, 1],
-       [2, 3]])
->>>np.transpose(x)
-array([[0, 2],
-       [1, 3]])
->>>x = np.ones((1, 2, 3))
->>>np.transpose(x, (1, 0, 2)).shape
-(2, 1, 3)
-#+END_SRC
-** numpy.prod
-~numpy.prod(a, axis=None, dtype=None, out=None, keepdims=<no value>, initial=<no value>)~
-
-Return the product of array elements over a given axis.
-
-*** Parameters
-- a : array_like
-Input data.
-- axis : None or int or tuple of ints, optional
-Axis or axes along which a product is performed. The default, axis=None, will calculate the product of all the elements in the input array. If axis is negative it counts from the last to the first axis.
-
-New in version 1.7.0.
-
-If axis is a tuple of ints, a product is performed on all of the axes specified in the tuple instead of a single axis or all the axes as before.
-
-- dtype : dtype, optional
-The type of the returned array, as well as of the accumulator in which the elements are multiplied. The dtype of a is used by default unless a has an integer dtype of less precision than the default platform integer. In that case, if a is signed then the platform integer is used while if a is unsigned then an unsigned integer of the same precision as the platform integer is used.
-
-- out : ndarray, optional
-Alternative output array in which to place the result. It must have the same shape as the expected output, but the type of the output values will be cast if necessary.
-
-- keepdims : bool, optional
-If this is set to True, the axes which are reduced are left in the result as dimensions with size one. With this option, the result will broadcast correctly against the input array.
-
-If the default value is passed, then keepdims will not be passed through to the prod method of sub-classes of ndarray, however any non-default value will be. If the sub-class’ method does not implement keepdims any exceptions will be raised.
-
-- initial : scalar, optional
-The starting value for this product. See reduce for details.
-
-New in version 1.15.0.
-
-*** Returns
-product_along_axis : ndarray, see dtype parameter above.
-
-An array shaped as a but with the specified axis removed. Returns a reference to out if specified.
 * ~__future__~ 模块
 from __future__ import division
 导入python未来支持的语言特征division(精确除法)，当我们没有在程序中导入该特征时，"/"操作符执行的是截断除法(Truncating Division),当我们导入精确除法之后，"/"执行的是精确除法，如下所示：
@@ -2798,7 +1550,7 @@ scheduler.step(train_loss)
 # scheduler.step(val_loss)
 #+END_SRC
 ** view的用法
-相当于numpy中reshape（）的功能，但是用法可能不太一样。把原先tensor中的数据按照行优先的顺序排成一个一维的数据（这里应该是因为要求地址是连续存储的），然后按照参数组合成其他维度的tensor。比如说是不管你原先的数据是[[[1,2,3],[4,5,6]]]还是[1,2,3,4,5,6]，因为它们排成一维向量都是6个元素，所以只要view后面的参数一致，得到的结果都是一样的。比如，
+相当于numpy中resize（）的功能，但是用法可能不太一样。把原先tensor中的数据按照行优先的顺序排成一个一维的数据（这里应该是因为要求地址是连续存储的），然后按照参数组合成其他维度的tensor。比如说是不管你原先的数据是[[[1,2,3],[4,5,6]]]还是[1,2,3,4,5,6]，因为它们排成一维向量都是6个元素，所以只要view后面的参数一致，得到的结果都是一样的。比如，
 #+BEGIN_SRC python
 a=torch.Tensor([[[1,2,3],[4,5,6]]])
 b=torch.Tensor([1,2,3,4,5,6])
@@ -3438,42 +2190,6 @@ self = torch.Tensor(3, 5)
 tesnor = torch.IntTensor(2,3)
 print self.type_as(tesnor)
 #+END_SRC
-** torch.mul() 和 torch.mm() 的区别
-- torch.mul(a, b)是矩阵a和b对应位相乘，a和b的维度必须相等，比如a的维度是(1, 2)，b的维度是(1, 2)，返回的仍是(1, 2)的矩阵
-- torch.mm(a, b)是矩阵a和b矩阵相乘，比如a的维度是(1, 2)，b的维度是(2, 3)，返回的就是(1, 3)的矩阵
-
-#+BEGIN_SRC python
-import torch
-
-a = torch.rand(1, 2)
-b = torch.rand(1, 2)
-c = torch.rand(2, 3)
-
-print(torch.mul(a, b))  # 返回 1*2 的tensor
-print(torch.mm(a, c))   # 返回 1*3 的tensor
-print(torch.mul(a, c))  # 由于a、b维度不同，报错
-#+END_SRC
-** 关于with torch.no_grad()
-*** 关于with
-with是python中上下文管理器，简单理解，当要进行固定的进入，返回操作时，可以将对应需要的操作，放在with所需要的语句中。比如文件的写入（需要打开关闭文件）等。
-
-以下为一个文件写入使用with的例子。
-#+BEGIN_SRC python
-with open (filename,'w') as sh:    
-  sh.write("#!/bin/bash\n")
-  sh.write("#$ -N "+'IC'+altas+str(patientNumber)+altas+'\n')
-  sh.write("#$ -o "+pathSh+altas+'log.log\n') 
-  sh.write("#$ -e "+pathSh+altas+'err.log\n') 
-  sh.write('source ~/.bashrc\n')          
-  sh.write('. "/home/kjsun/anaconda3/etc/profile.d/conda.sh"\n')
-  sh.write('conda activate python27\n')
-  sh.write('echo "to python"\n')
-  sh.write('echo "finish"\n')
-  sh.close()
-#+END_SRC
-with后部分，可以将with后的语句运行，将其返回结果给到as后的变量（sh），之后的代码块对close进行操作。
-*** 关于with torch.no_grad():
-在使用pytorch时，并不是所有的操作都需要进行计算图的生成（计算过程的构建，以便梯度反向传播等操作）。而对于tensor的计算操作，默认是要进行计算图的构建的，在这种情况下，可以使用 with torch.no_grad():，强制之后的内容不进行计算图构建。
 
 * torchvision
 torchvision包是服务于pytorch深度学习框架的,用来生成图片,视频数据集,和一些流行的模型类和预训练模型.
@@ -3537,70 +2253,6 @@ torchvision.datasets.MNIST(root, train=True, transform=None, target_transform=No
 - download (bool, optional) – If true, downloads the dataset from the internet and puts it in root directory. If - dataset is already downloaded, it is not downloaded again.
 - transform (callable, optional) – A function/transform that takes in an PIL image and returns a transformed version. E.g, transforms.RandomCrop
 - target_transform (callable, optional) – A function/transform that takes in the target and transforms it.
-** torchvision.transforms
-*** torchvision.transforms.Compose(transforms)
-~torchvision.transforms.Compose(transforms)~
-Composes several transforms together. This transform does not support torchscript.
-
-Compose这个类是用来管理各个transform的，可以看到主要的__call__方法就是对输入图像img循环所有的transform操作
-#+BEGIN_SRC python
-class Compose(object):
-    """Composes several transforms together.
-
-    Args:
-        transforms (list of ``Transform`` objects): list of transforms to compose.
-
-    Example:
-        >>> transforms.Compose([
-        >>>     transforms.CenterCrop(10),
-        >>>     transforms.ToTensor(),
-        >>> ])
-    """
-
-    def __init__(self, transforms):
-        self.transforms = transforms
-
-    def __call__(self, img):
-        for t in self.transforms:
-            img = t(img)
-        return img
-
-    def __repr__(self):
-        format_string = self.__class__.__name__ + '('
-        for t in self.transforms:
-            format_string += '\n'
-            format_string += '    {0}'.format(t)
-        format_string += '\n)'
-        return format_string
-#+END_SRC
-**** Parameters
-transforms (list of Transform objects) – list of transforms to compose.
-
-**** Example
-#+BEGIN_SRC python
->>> transforms.Compose([
->>>     transforms.CenterCrop(10),
->>>     transforms.ToTensor(),
->>> ])
-#+END_SRC
-
-*** torchvision.transforms.Normalize
-~torchvision.transforms.Normalize(mean, std, inplace=False)~
-Normalize a tensor image with mean and standard deviation. Given mean: (mean[1],...,mean[n]) and std: (std[1],..,std[n]) for n channels, this transform will normalize each channel of the input torch.*Tensor i.e., output[channel] = (input[channel] - mean[channel]) / std[channel]
-
-Normalize类是做数据归一化的，一般都会对输入数据做这样的操作
-**** Parameters
-- mean (sequence) – Sequence of means for each channel.
-- std (sequence) – Sequence of standard deviations for each channel.
-- inplace (bool,optional) – Bool to make this operation in-place.
-
-** torchvision.utils
-~torch.utils.data.SubsetRandomSampler(indices: Sequence[int], generator=None)~
-Samples elements randomly from a given list of indices, without replacement.
-*** Parameters
-- indices (sequence) – a sequence of indices
-- generator (Generator) – Generator used in sampling.
-
 * os库
 =os= 是python标准库. =os= 顾名思义，就是与操作系统相关的标准库。如：文件，目录，执行系统命令等。
 
@@ -3733,6 +2385,7 @@ with open("dog.jpeg", "rb") as f:
 # 删除文件
 os.remove("dog.copy.jpeg")
 #+END_SRC
+
 * time库
 time库是Python中处理时间的标准库
 ** time()
@@ -3753,6 +2406,49 @@ time.struct_time(tm_year=2018, tm_mon=1,
 tm_mday=26, tm_hour=4, tm_min=11, tm_sec=16,
 tm_wday=4, tm_yday=26, tm_isdst=0)
 #+END_SRC
+* 注释
+** 单行注释
+Python中单行注释以 =#= 开头，例如
+#+BEGIN_SRC python
+# 这是一个注释
+print("Hello, World!")
+#+END_SRC
+** 多行注释
+多行注释用三个单引号 ''' 或者三个双引号 """ 将注释括起来，例如:
+#+BEGIN_SRC python
+#!/usr/bin/python3 
+'''
+这是多行注释，用三个单引号
+这是多行注释，用三个单引号 
+这是多行注释，用三个单引号
+'''
+
+"""
+这是多行注释，用三个双引号
+这是多行注释，用三个双引号 
+这是多行注释，用三个双引号
+"""
+
+print("Hello, World!")
+#+END_SRC
+* 编码问题
+最早的Python 只支持 ASCII 编码，普通的字符串 'ABC' 在 Python 内部都是 ASCII 编码的。
+
+Python 在后来添加了对 Unicode 的支持，以 Unicode 表示的字符串用u'...'表示。
+
+不过在最新的 Python 3 版本中，字符串是以 Unicode 编码的，也就是说，Python 的字符串支持多语言。就像上面的例子一样，我的代码中没有加u'...'，也能正常显示。
+
+不过由于 Python 源代码也是一个文本文件，所以，当你的源代码中包含中文的时候，在保存源代码时，就需要务必指定保存为 UTF-8 编码。当Python 解释器读取源代码时，为了让它按 UTF-8 编码读取，我们通常在文件开头写上这两行：
+#+BEGIN_SRC python
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+#+END_SRC
+
+第一行注释是为了告诉 Linux/OS X 系统，这是一个 Python 可执行程序，Windows 系统会忽略这个注释；
+
+第二行注释是为了告诉 Python 解释器，按照 UTF-8 编码读取源代码，否则，你在源代码中写的中文输出可能会有乱码。
+
+申明了 UTF-8 编码并不意味着你的 .py 文件就是 UTF-8 编码的，必须并且要确保文本编辑器正在使用 UTF-8 without BOM 编码
 * namedtuple
 namedtuple是继承自tuple的子类。namedtuple创建一个和tuple类似的对象，而且对象拥有可访问的属性。
 #+BEGIN_SRC python
@@ -3784,6 +2480,27 @@ print user
 print user._asdict()
 # OrderedDict([('name', 'kongxx'), ('sex', 'male'), ('age', 22)])
 
+#+END_SRC
+* 字典(Dictionary)
+** items()方法
+~items()~ 函数以列表返回可遍历的(键, 值) 元组数组。
+#+BEGIN_SRC python
+#!/usr/bin/python
+# coding=utf-8
+dict = {'Google': 'www.google.com', 'Runoob': 'www.runoob.com', 'taobao': 'www.taobao.com'}
+
+print "字典值 : %s" %  dict.items()
+ 
+# 遍历字典列表
+for key,values in  dict.items():
+    print key,values
+#+END_SRC
+输出结果为：
+#+BEGIN_SRC bash
+字典值 : [('Google', 'www.google.com'), ('taobao', 'www.taobao.com'), ('Runoob', 'www.runoob.com')]
+Google www.google.com
+taobao www.taobao.com
+Runoob www.runoob.com
 #+END_SRC
 
 * collections库
@@ -4515,17 +3232,6 @@ Scikit-learn(sklearn)是机器学习中常用的第三方模块，对常用的�
 glob是python自己带的一个文件操作相关模块，用它可以查找符合自己目的的文件，类似于Windows下的文件搜索，支持通配符操作，,?,[]这三个通配符，代表0个或多个字符，?代表一个字符，[]匹配指定范围内的字符，如[0-9]匹配数字。两个主要方法如下。
 ** glob方法
 glob模块的主要方法就是glob,该方法返回所有匹配的文件路径列表（list）；该方法需要一个参数用来指定匹配的路径字符串（字符串可以为绝对路径也可以为相对路径），其返回的文件名只包括当前目录里的文件名，不包括子文件夹里的文件。
-#+BEGIN_SRC python
-glob(pathname, recursive=False)
-#+END_SRC
-第一个参数pathname为需要匹配的字符串。（该参数应尽量加上r前缀，以免发生不必要的错误）
-
-第二个参数代表递归调用，与特殊通配符“**”一同使用，默认为False。
-
-该函数返回一个符合条件的路径的字符串列表，如果使用的是Windows系统，路径上的“\”符号会自动加上转义符号变为“\\”（方便使用）。
-
-在3.5版本之后，glob函数支持一个特殊的通配符“**”，该通配符可以匹配指定路径里所有文件和目录，包括子目录里的所有文件和目录。相当于递归地调用了这个函数。使用这个通配符必须加上recursive=True参数。（在有复杂目录结构的情况下使用该通配符可能会导致性能下降，拖累整个程序的运行，需谨慎使用！）
-
 比如：
 #+BEGIN_SRC python
 glob.glob(r’c:*.txt’)
@@ -4540,40 +3246,8 @@ glob.glob(r’E:\pic**.jpg’)
 #+BEGIN_SRC python
 glob.glob(r’../*.py’)
 #+END_SRC
-
-需要注意的地方：
-
-glob默认不匹配以点符号（.）开始的文件，如果有这类文件，则需要做特殊处理。
-
-假如当前文件夹包含test.txt和.test.txt两个文件。
-#+BEGIN_SRC python
->>> import glob
->>> glob.glob('*.txt')
-['test.txt']
->>> glob.glob('.*.txt')
-['.test.txt']
-#+END_SRC
-*** glob模块支持的通配符
-| 通配符 | 功能                                                      |
-|--------+-----------------------------------------------------------|
-| *      | 匹配0或多个字符                                           |
-| **     | 匹配所有文件、目录、子目录和子目录里的文件（3.5版本新增） |
-| ?      | 匹配1个字符，与正则表达式里的?不同                        |
-| [exp]  | 匹配指定范围内的字符，如：[1-9]匹配1至9范围内的字符       |
-| [!exp] | 匹配不在指定范围内的字符                                  |
-虽然glob模块可以很轻松地匹配特定文件和文件夹，但是仅仅支持少量的通配符，没办法像正则表达式一样匹配更复杂的字符串。使用的时候应当认真考虑使用场景，根据需求针对性地选择解决方案。
 ** iglob方法
-获取一个迭代器（ iterator ）对象，使用它可以逐个获取匹配的文件路径名。与glob.glob()的区别是：glob.glob同时获取所有的匹配路径，而 glob.iglob一次只获取一个匹配路径。
-#+BEGIN_SRC python
-iglob(pathname, recursive=False)
-#+END_SRC
-参数与glob()一致。
-
-返回一个迭代器，该迭代器不会同时保存所有匹配到的路径，遍历该迭代器的结果与使用相同参数调用glob()的返回结果一致。
-
-
-
-下面是一个简单的例子：
+获取一个迭代器（ iterator ）对象，使用它可以逐个获取匹配的文件路径名。与glob.glob()的区别是：glob.glob同时获取所有的匹配路径，而 glob.iglob一次只获取一个匹配路径。下面是一个简单的例子：
 #+BEGIN_SRC python
 #父目录中所有的.py文件
 f = glob.iglob(r'../*.py')
@@ -4585,10 +3259,6 @@ for py in f:
 
 #+END_SRC
 f是一个迭代器对象，通过遍历，可以输出所有满足条件的*.py文件
-** escape(pathname)
-
-这个函数是在3.4版本之后才有的，功能是忽略所有通配符。（可以用于测试某文件是否存在）
-（3.5.1版本该函数不能正常运行，升级到3.5.2之后恢复正常）
 * logging模块
 ** 日志相关概念
 日志是一种可以追踪某些软件运行时所发生事件的方法。软件开发人员可以向他们的代码中调用日志记录相关的方法来表明发生了某些事情。一个事件可以用一个可包含可选变量数据的消息来描述。此外，事件也有重要性的概念，这个重要性也可以被称为严重性级别（level）。
@@ -4676,7 +3346,7 @@ logging模块定义的模块级别的常用函数
 | logging.log(level, *args, **kwargs)    | 创建一条严重级别为level的日志记录    |
 | logging.basicConfig(**kwargs)          | 对root logger进行一次性配置          |
 其中logging.basicConfig(**kwargs)函数用于指定“要记录的日志级别”、“日志格式”、“日志输出位置”、“日志文件的打开模式”等信息，
-* PILq（Pillow）库
+* PIL（Pillow）库
 PIL：Python Imaging Library，已经是Python平台事实上的图像处理标准库了。PIL功能非常强大，但API却非常简单易用。
 
 由于PIL仅支持到Python 2.7，加上年久失修，于是一群志愿者在PIL的基础上创建了兼容的版本，名字叫Pillow，支持最新Python 3.x，又加入了许多新特性，因此，我们可以直接安装使用Pillow。安装命令： pip3  install pillow
@@ -4746,43 +3416,3 @@ tf.clip_by_value(grad, min_value, max_value)
 tf.clip_by_average_norm(grad, clip_norm)
 tf.clip_by_global_norm(grad, clip_norm)
 #+END_SRC
-* pickle库
-pickle是python语言的一个标准模块，安装python后已包含pickle库，不需要单独再安装。
-
-#+BEGIN_EXAMPLE
-pickle是Python序列化的一个工具。
-序列化，通俗来讲，就是把一个Python对象转成一串字节。如果你想把Python对象保存到一个文件里，你是需要Python虚拟机支持的，不能够直接把Python对象保存进文件，更不能进行网络传输，所以序列化这个东西就产生了。
-pickle可以把Python对象变成一串字符，让它可以保存到一个文件里，可以让Python对象进行网络传输，也可以从一串字符中恢复为Python对象，这样就可以把Python中虚拟的对象转化为实际的一串字符了。
-
-如果你想存取一个对象到文件当中就可以用这个库啊。就像你在java当中如果要传输一个对象的时候，或者你想存取一个一个对象到文件当中的时候，你发现直接不像基本数据类型int，char，byte这种可以直接写，而还要实现Seriable活着时Paracle接口啥的。而现在在python当中直接用pickle.dump(obj,file,[protocol])就可以了，所以说python有的时候是很好用的，可以快速的解决一些问题，好多库可以用，大牛们都帮你实现好了，等着你去用就好了。
-#+END_EXAMPLE
-
-可以参考[[https://docs.python.org/3/library/pickle.html][官方文档]]
-
-** dumps
-To serialize an object hierarchy, you simply call the dumps() function. 
-
-~pickle.dump(obj, file, protocol=None, *, fix_imports=True, buffer_callback=None)~
-
-Write the pickled representation of the object obj to the open file object file. This is equivalent to Pickler(file, protocol).dump(obj).
-
-Arguments file, protocol, fix_imports and buffer_callback have the same meaning as in the [[https://docs.python.org/3/library/pickle.html#pickle.Pickler][Pickler]] constructor.
-
-Changed in version 3.8: The buffer_callback argument was added.
-** pickle.load
-~pickle.load(file, *, fix_imports=True, encoding="ASCII", errors="strict", buffers=None)~
-
-Read the pickled representation of an object from the open file object file and return the reconstituted object hierarchy specified therein. This is equivalent to Unpickler(file).load().
-
-The protocol version of the pickle is detected automatically, so no protocol argument is needed. Bytes past the pickled representation of the object are ignored.
-
-Arguments file, fix_imports, encoding, errors, strict and buffers have the same meaning as in the [[https://docs.python.org/3/library/pickle.html#pickle.Unpickler][Unpickler]] constructor.
-
-Changed in version 3.8: The buffers argument was added.
-
-* 问题集锦
-** python3 报错TypeError: 'range' object does not support item assignment
-尝试使用range() 创建整数列表（导致“TypeError: ‘range’ object does not support item assignment”）有时你想要得到一个有序的整数列表，所以range() 看上去是生成此列表的不错方式。然而，你需要记住range() 返回的是“range object”，而不是实际的list 值。
-
-~nums = range(5)改为nums = list(range(5))~
-

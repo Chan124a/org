@@ -1,0 +1,210 @@
+* 配置init.el
+** 使emacs加载auctex
+#+BEGIN_SRC emacs-lisp
+;;配置auctex
+;;这两行不是必要的,如果打开tex文件，菜单栏会出现Preview、LaTex和Command三个选项即可
+(load "auctex.el" nil t t)
+(load "preview.el" nil t t)
+;;下面两行命令是文档解析功能，为了获得在文档中使用的许多LaTeX软件包的支持
+(setq TeX-auto-save t)
+(setq TeX-parse-self t)
+;;如果您经常使用\include或 \input，可以用下面的命令使AUCTeX能够加载多文件文档的结构。
+;;每次您打开一个新文件时，AUTCeX都会要求您提供一个主文件。
+(setq-default TeX-master nil)
+#+END_SRC
+** 高亮显示代码
+M-x font-lock-mode 可以高亮显示代码
+
+下面是设置全局高亮显示：
+#+BEGIN_SRC emacs-lisp
+(setq global-font-lock-mode t) ;;高亮显示代码，这个默认设置为t
+#+END_SRc
+** 将xetex设为编译器
+将以下命令添加到配置文件中: =(setq TeX-engine 'xetex)=
+* 编辑文件
+** 插入章节
+=C-c C-s= 可插入章节，可使用 =<TAB> or <SPC>= 选择\chapter’, ‘\section’, ‘\subsection’
+** 插入环境
+=C-c C-e= 插入环境，使用 =<TAB> or <SPC>=选择不同环境，如：‘\begin{}’–‘\end{}’或‘\documentclass’
+
+使用 =M-p or M-n= 或者向上、向下箭头键选择先前插入的命令
+** 插入宏
+=C-c C-m= 或者 =C-c RET= 插入宏
+
+同样，可使用 =M-p or M-n= 或者向上、向下箭头键选择先前插入的命令
+
+** 更改字体格式
+=C-c C-f C-b=
+插入粗体字 '\ textbf {*}文字。
+
+=C-c C-f C-i=
+插入斜体 '\ textit {*}文字。
+
+=C-c C-f C-e=
+插入强调 “\ emph {*}文字。
+
+=C-c C-f C-s=
+插入倾斜的 “\ textsl {*}文字。
+
+=C-c C-f C-r=
+插入罗马\ textrm {*}文本。
+
+=C-c C-f C-f=
+插入 无衬线 '\ textsf {*}文字。
+
+=C-c C-f C-t=
+插入打字机 '\ texttt {*}文字。
+
+=C-c C-f C-c=
+插入小写字母 '\ textsc {*}文字。
+
+=C-c C-f C-d=
+删除最里面的字体规范包含点。
+
+可以选择一段文字，然后按命令，就可以改变全部文字的字体格式。
+** 注释
+=C-c := 针对当前选中区域
+
+=C-c %= 针对所在的段落
+
+如果区域或段落已被注释掉，则相同的按键将删除％符号
+** 选择
+- =C-c *= 选择光标所在章节
+- =C-c .= 选择光标所在环境
+* 输出和调试
+
+在tex文件里，按下 =C-c C-c= ,系统会询问是否保存文件以及调用哪个程序。
+
+- =C-c C-c latex= 使用Latex编译当前文档
+- =C-c C-r= 只编译选定区域,编辑后用 =C-c C-v= 查看
+- =C-c C-c view= 或者 =C-c C-v= 预览当前文档
+- =C-c C-a= 快速执行编译并查看
+
+在多数情况下，AUTCeX建议的选择正是你想要的：首先是latex，然后是查看器(a viewer).
+** preview
+可以通过菜单栏的preview实现所见即所得功能.
+* cdlatex
+安装cdlatex后可以用 =M-x cdlatex-mode= 打开cdlatex
+
+cdlatex可以自动补全latex符号或用TAB补全命令。
+
+=C-c ?= 可以查看所有可以用TAB补全的命令或环境.
+
+输入公式后可以TAB跳出公式
+
+设置打开tex文件时自动开启cdlatex: (add-hook 'LaTeX-mode-hook 'turn-on-cdlatex)
+** 快速输入符号
+1. `输入`(反引号)可以快速输入latex符号,如 =`a= 可以快速输入 =\alpha= .
+2. 若按下`后没有输入按键,则会打开latex符号列表.在符号列表中按`可以切换不同级别的列表,级别越高,符号越不常用. 
+3. 若要快速输入第二级列表的符号,可以按两次``,如 =``d= 可以快速输入 =\partial=.
+4. 符号列表中的所有字符对应按键都是可以自定义的.
+
+** 数学字体的快捷输入
+1. 在数学公式环境下,输入数学符号后按 ='= (单引号)则可快捷输入数学字体.如输入 =$R$= 后,在R的后面输入 ='b= 则可以改变符号R为粗体R,即 =$\mathbf{R}$=
+2. 列表中的快捷键都是可以自定义的
+** 文本字体的快速输入
+1. 在空白位置输入 ='= (单引号),即可快速输入文本格式.如 ='b= 可以快速插入粗体环境.
+2. 在单词后面按下 ='=
+3. 若要对多个单词同时改变字体,可以用 =M-数字 '= ,例如:输入 =aa bb cc dd ee= 后,按下 =M-5 ' b= 即可对这五个单词进行加粗,即变为 =\textbf{aa bb cc dd ee}= 
+** cdlatex的自定义设置
+cdlatex主要有三种快捷输入:反引号`,单引号'和TAB补全.
+以下分别是这三种方式的自定义设置方式:
+- =M-x customize-variable REF cdlatex-math-symbol-alist= ,这个是修改反引号快捷键
+- =M-x customize-variable REF cdlatex-math-modify-alist= ,这个是修改单引号快捷键
+- =M-x customize-variable REF cdlatex-command-alist= ,这个是修改TAB补全快捷键
+
+在变量 =cdlatex-command-alist= 里的替换符号添加?并将Hook改为 =cdlatex-position-cursor=,之后每次按TAB补全后,光标就会停留在?所在的位置.
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-02-07_16-32-18.png @ 2020-02-07 16:51:12
+[[file:cdlatex/2020-02-07_16-51-12_Snipaste_2020-02-07_16-32-18.png]]
+
+修改完后可以用以下方法使得设置生效:
+1. 重启emacs
+2. 关闭文件并重新打开
+3. =C-c C-n= ,即菜单栏中的 =Reset Buffer= 命令,
+
+*** 括号匹配的自定义
+对变量 =cdlatex-paired-parens= 进行设置即可.
+* RefTex
+=M-x reftex-mode=
+
+使用下面的配置可以使得emacs打开latex文档时自动打开reftex.
+(add-hook 'LaTeX-mode-hook 'turn-on-reftex)
+
+添加标签的快捷键:
+- =|b| TAB= ,这个必须打开cdlatex才有效
+- =C-c (= ,这个是打开reftex后自带的快捷键
+
+
+添加引用的快捷键:
+- =ref TAB= ,这个必须打开cdlatex才有效
+- =C-c )= ,这个是reftex自带的
+
+在引用列表里,可用以下操作按键:
+- =n= ,向下移动
+- =p= ,向上移动
+- =SPC= ,显示上下文
+- =REF= ,引用(并关闭列表)
+
+=reftex-label-alist=
+* 预览功能
+保证光标在公式块内，键入 =C-c C-p C-e= 即可
+
+如果想要移除当前文档内的全部预览结果，键入 =C-c C-p C-c C-d= 即可
+
+在菜单栏的Preview有各种选项可以选择。
+
+* outline
+outline模式可以像org文件一样折叠tex文件的章节.
+
+打开outline模式的命令: =M-x outline-minor-mode= ,打开后emacs菜单栏会显示Outline选项.
+
+=M-数字N C-o C-q= 显示前N层目录.
+
+** outline的自定义设置
+将outline的快捷键改为 =C-o= : =(setq outline-minor-mode-prefix [(control o)])=
+
+设置打开tex文件时自动开启outline: =(add-hook 'LaTeX-mode-hook 'outline-minor-mode)=
+
+设置打开tex文件时自动折叠章节: =(add-hook 'LaTeX-mode-hook 'outline-hide-body)=
+* latex代码和pdf预览的正向搜索和逆向搜索
+** 正向搜索
+正向搜索即来latex文件中按 =C-c C-v= 即可跳转到pdf文件中对应的光标位置.
+
+将下面代码添加到emacs配置文件里,即可实现正向搜索.
+#+BEGIN_SRC emacs-lisp
+(setq TeX-PDF-mode t) 
+(setq TeX-source-correlate-mode t) 
+(setq TeX-source-correlate-method 'synctex) 
+(setq TeX-view-program-list 
+'(("Sumatra PDF" ("\"C:/Program Files/SumatraPDF/SumatraPDF.exe\" -reuse-
+instance" (mode-io-correlate " -forward-search %b %n ") " %o")))) 
+;;注意这里要把路径"C:/Program Files/SumatraPDF/SumatraPDF.exe\" 换成你自己的SumatraPDF安装路径
+(add-hook 'LaTeX-mode-hook
+(lambda ()
+(assq-delete-all 'output-pdf TeX-view-program-selection)
+(add-to-list 'TeX-view-program-selection '(output-pdf "Sumatra PDF"))))
+#+END_SRC
+** 逆向搜索
+逆向搜索即在pdf文件中双击鼠标左键即可跳转到emacs的tex文件中对应源代码位置.
+
+设置完正向搜索后,在Sumatra PDF的 设置->选项 窗口的最下面会出现 "请键入双击PDF文件时,应运行的命令" 输入框.
+将下面代码复制到该输入框里面即可.
+#+BEGIN_SRC emacs-lisp
+"C:/Program Files (x86)/Emacs26/bin/emacsclientw.exe" -n +%l "%f"
+;;这里的路径"C:/Program Files (x86)/Emacs26/bin/emacsclientw.exe"必须改为你的emacs安装路径
+#+END_SRC
+
+** 参考资料
+[[https://www.bilibili.com/video/av52415392][金色飞贼小米的讲解视频]]
+* TeX-fold
+打开TeX-fold mode 的方式:
+1. =M-x TeX-fold-mode=
+2. 菜单栏 -> LaTeX -> Show/Hide -> Fold Mode
+3. =C-c C-o C-f=
+
+设置打开tex文件自动开启TeX-fold: (add-hook 'LaTeX-mode-hook 'TeX-fold-mode 1)
+
+在tex文件含有中文时,打开tex-fold会出现卡顿现象,解决方法为添加以下配置:
+#+BEGIN_SRC emacs-lisp
+(setq inhibit-compacting-font-caches t)  ;;解决Windows下Emacs显示Unicode字符的卡顿问题
+#+END_SRC

@@ -1,0 +1,253 @@
+
+#+options: ^:nil
+* ÄÚÖÃ·½·¨
+** enumerate()
+#+BEGIN_SRC python
+enumerate(sequence, [start=0])
+#+END_SRC
+*** ²ÎÊý
+- sequence -- Ò»¸öÐòÁÐ¡¢µü´úÆ÷»òÆäËûÖ§³Öµü´ú¶ÔÏó¡£
+- start -- ÏÂ±êÆðÊ¼Î»ÖÃ¡£
+*** ·µ»ØÖµ
+·µ»Ø enumerate(Ã¶¾Ù) ¶ÔÏó¡£
+*** ÑùÀý
+#+BEGIN_SRC python
+>>>seasons = ['Spring', 'Summer', 'Fall', 'Winter']
+>>> list(enumerate(seasons))
+[(0, 'Spring'), (1, 'Summer'), (2, 'Fall'), (3, 'Winter')]
+>>> list(enumerate(seasons, start=1))       # ÏÂ±ê´Ó 1 ¿ªÊ¼
+[(1, 'Spring'), (2, 'Summer'), (3, 'Fall'), (4, 'Winter')]
+
+#+END_SRC
+#+BEGIN_SRC python
+>>>seq = ['one', 'two', 'three']
+>>> for i, element in enumerate(seq):
+...     print i, element
+... 
+0 one
+1 two
+2 three
+
+#+END_SRC
+** open
+python open() º¯ÊýÓÃÓÚ´ò¿ªÒ»¸öÎÄ¼þ£¬´´½¨Ò»¸ö **file** ¶ÔÏó£¬Ïà¹ØµÄ·½·¨²Å¿ÉÒÔµ÷ÓÃËü½øÐÐ¶ÁÐ´¡£
+#+BEGIN_SRC python
+open(name[, mode[, buffering]])
+
+#+END_SRC
+*** ²ÎÊý
+- name : Ò»¸ö°üº¬ÁËÄãÒª·ÃÎÊµÄÎÄ¼þÃû³ÆµÄ×Ö·û´®Öµ¡£
+- mode : mode ¾ö¶¨ÁË´ò¿ªÎÄ¼þµÄÄ£Ê½£ºÖ»¶Á£¬Ð´Èë£¬×·¼ÓµÈ¡£ËùÓÐ¿ÉÈ¡Öµ¼ûÈçÏÂµÄÍêÈ«ÁÐ±í¡£Õâ¸ö²ÎÊýÊÇ·ÇÇ¿ÖÆµÄ£¬Ä¬ÈÏÎÄ¼þ·ÃÎÊÄ£Ê½ÎªÖ»¶Á(r)¡£
+- buffering : Èç¹û buffering µÄÖµ±»ÉèÎª 0£¬¾Í²»»áÓÐ¼Ä´æ¡£Èç¹û buffering µÄÖµÈ¡ 1£¬·ÃÎÊÎÄ¼þÊ±»á¼Ä´æÐÐ¡£Èç¹û½« buffering µÄÖµÉèÎª´óÓÚ 1 µÄÕûÊý£¬±íÃ÷ÁËÕâ¾ÍÊÇµÄ¼Ä´æÇøµÄ»º³å´óÐ¡¡£Èç¹ûÈ¡¸ºÖµ£¬¼Ä´æÇøµÄ»º³å´óÐ¡ÔòÎªÏµÍ³Ä¬ÈÏ¡£
+
+**** ²Î¿¼  
+[[https://www.runoob.com/python/python-func-open.html][²ËÄñ½Ì³Ì]]
+* Ìõ¼þÓï¾ä
+** if
+#+BEGIN_SRC python
+if(...):
+    comment...
+
+#+END_SRC
+* ²ÎÊý
+** Ä¬ÈÏ²ÎÊý
+#+BEGIN_SRC python
+def test_defargs(one, two = 2):
+   print 'Required argument: ', one
+   print 'Optional argument: ', two
+
+test_defargs(1)
+# result:
+# Required argument: 1
+# Optional argument: 2
+
+test_defargs(1, 3)
+# result:
+# Required argument: 1
+# Optional argument: 3
+
+#+END_SRC
+** ¿É±ä²ÎÊý
+Ê¹ÓÃ`*args`ºÍ`**kwargs`Óï·¨.¡£ÆäÖÐ£¬*argsÊÇ¿É±äµÄpositional argumentsÁÐ±í£¬**kwargsÊÇ¿É±äµÄkeyword argumentsÁÐ±í¡£²¢ÇÒ£¬*args±ØÐëÎ»ÓÚ**kwargsÖ®Ç°£¬ÒòÎªpositional arguments±ØÐëÎ»ÓÚkeyword argumentsÖ®Ç°¡£
+
+ÏÂÃæÒ»¸öÀý×ÓÊ¹ÓÃ*args£¬Í¬Ê±°üº¬Ò»¸ö±ØÐëµÄ²ÎÊý£º
+#+BEGIN_SRC python
+def test_args(first, *args):
+   print 'Required argument: ', first
+   for v in args:
+      print 'Optional argument: ', v
+
+test_args(1, 2, 3, 4)
+# result:
+# Required argument: 1
+# Optional argument:  2
+# Optional argument:  3
+# Optional argument:  4
+
+#+END_SRC
+ÏÂÃæÒ»¸öÀý×ÓÊ¹ÓÃ*kwargs, Í¬Ê±°üº¬Ò»¸ö±ØÐëµÄ²ÎÊýºÍ*argsÁÐ±í£º
+#+BEGIN_SRC python
+def test_kwargs(first, *args, **kwargs):
+   print 'Required argument: ', first
+   for v in args:
+      print 'Optional argument (*args): ', v
+   for k, v in kwargs.items():
+      print 'Optional argument %s (*kwargs): %s' % (k, v)
+
+test_kwargs(1, 2, 3, 4, k1=5, k2=6)
+# results:
+# Required argument:  1
+# Optional argument (*args):  2
+# Optional argument (*args):  3
+# Optional argument (*args):  4
+# Optional argument k2 (*kwargs): 6
+# Optional argument k1 (*kwargs): 5
+
+#+END_SRC
+*argsºÍ**kwargsÓï·¨²»½ö¿ÉÒÔÔÚº¯Êý¶¨ÒåÖÐÊ¹ÓÃ£¬Í¬Ñù¿ÉÒÔÔÚº¯Êýµ÷ÓÃµÄÊ±ºòÊ¹ÓÃ¡£²»Í¬µÄÊÇ£¬Èç¹ûËµÔÚº¯Êý¶¨ÒåµÄÎ»ÖÃÊ¹ÓÃ*argsºÍ**kwargsÊÇÒ»¸ö½«²ÎÊýpackµÄ¹ý³Ì£¬ÄÇÃ´ÔÚº¯Êýµ÷ÓÃµÄÊ±ºò¾ÍÊÇÒ»¸ö½«²ÎÊýunpackµÄ¹ý³ÌÁË¡£ÏÂÃæÊ¹ÓÃÒ»¸öÀý×ÓÀ´¼ÓÉîÀí½â£º
+#+BEGIN_SRC python
+def test_args(first, second, third, fourth, fifth):
+    print 'First argument: ', first
+    print 'Second argument: ', second
+    print 'Third argument: ', third
+    print 'Fourth argument: ', fourth
+    print 'Fifth argument: ', fifth
+
+# Use *args
+args = [1, 2, 3, 4, 5]
+test_args(*args)
+# results:
+# First argument:  1
+# Second argument:  2
+# Third argument:  3
+# Fourth argument:  4
+# Fifth argument:  5
+
+# Use **kwargs
+kwargs = {
+    'first': 1,
+    'second': 2,
+    'third': 3,
+    'fourth': 4,
+    'fifth': 5
+}
+
+test_args(**kwargs)
+# results:
+# First argument:  1
+# Second argument:  2
+# Third argument:  3
+# Fourth argument:  4
+# Fifth argument:  5
+
+#+END_SRC
+
+* Àà
+PythonµÄÀàÌá¹©ÁËÃæÏò¶ÔÏó±à³ÌµÄËùÓÐ±ê×¼ÌØÐÔ£ºÀà¼Ì³Ð»úÖÆÔÊÐí¶à¸ö»ùÀà£¬ÅÉÉúÀà¿ÉÒÔ¸²¸ÇËü»ùÀàµÄÈÎºÎ·½·¨£¬Ò»¸ö·½·¨¿ÉÒÔµ÷ÓÃ»ùÀàÖÐÏàÍ¬Ãû³ÆµÄµÄ·½·¨¡£¶ÔÏó¿ÉÒÔ°üº¬ÈÎÒâÊýÁ¿ºÍÀàÐÍµÄÊý¾Ý¡£ºÍÄ£¿éÒ»Ñù£¬ÀàÒ²ÓµÓÐ Python ÌìÈ»µÄ¶¯Ì¬ÌØÐÔ£ºËüÃÇÔÚÔËÐÐÊ±´´½¨£¬¿ÉÒÔÔÚ´´½¨ºóÐÞ¸Ä¡£
+** ÀàµÄ¶¨Òå
+#+BEGIN_SRC python
+class Student(object):
+	pass
+#+END_SRC
+(object)±íÊ¾¸ÃÀà´ÓÄÄ¸öÀà¼Ì³ÐÏÂÀ´µÄ£¬ObjectÀàÊÇËùÓÐÀà¶¼»á¼Ì³ÐµÄÀà¡£
+#+BEGIN_SRC pyhton
+class MyClass:
+    """A simple example class"""
+	i=12345
+    def f(self):
+        return 'hello world'
+#+END_SRC
+** Àà¶ÔÏó
+Àà¶ÔÏóÖ§³ÖÁ½ÖÖ²Ù×÷£ºÊôÐÔÒýÓÃºÍÊµÀý»¯¡£
+*** ÊôÐÔÒýÓÃ
+ÊôÐÔÒýÓÃµÄ±ê×¼Óï·¨£ºobj.name,Èç£ºMyClass.iºÍMyClass.f
+
+MyClass.__doc__ÕâÒ²ÊÇÓÐÐ§ÒýÓÃ£¬½«·µ»ØËùÊôÀàµÄÎÄµµ×Ö·û´®: "A simple example class"
+*** ÊµÀý»¯
+x=MyClass()
+
+__init__ÊÇpythonÖÐµÄÒ»¸öÄÚÖÃ·½·¨£¬¿ÉÒÔÓÃÀ´³õÊ¼»¯ÀàµÄ×´Ì¬£¬Êµ¼ÊÉÏ¾ÍÊÇÎªÁËÄÜ¹»¸øÀà´«Èë²ÎÊý¡£Ã»ÓÐ__init__£¬¾ÍÃ»°ì·¨¸øÀà´«Èë²ÎÊýÁË¡£
+#+BEGIN_SRC python
+def __init__(self):
+    self.data=[]
+#+END_SRC
+Õâ¸ö¿ÉÒÔÓÃÀ´³õÊ¼»¯ÀàµÄ×´Ì¬£¬ÊµÀý»¯Ê±¿ÉÒÔ²»ÓÃ´«Èë²ÎÊý¡£
+#+BEGIN_SRC python
+class Student(object):
+	def __inin__(self,name,score):
+		self.name=name
+		self.score=score
+#+END_SRC
+
+\under\under{}init\under\under{}·½·¨µÄµÚÒ»²ÎÊýÓÀÔ¶Îªself£¬±íÊ¾Àà *ÊµÀý* ±¾Éí
+
+¶¨ÒåÁË\under\under{}init\under\under{}·½·¨£¬´´½¨ÊµÀýÊ±¾Í²»ÄÜ´«Èë¿ÕµÄ²ÎÊý£¬±ØÐë´«ÈëÓë\under\under{}init\under\under{}Æ¥ÅäµÄ²ÎÊý£¬µ«ÊÇself²»ÐèÒª´«£¬python½âÊÍÆ÷»á×Ô¼ºÌí¼Ó¡£
+#+BEGIN_SRC python
+student=Student("Hugh",99) #ÊµÀý»¯
+#+END_SRC
+
+* numpy¿â 
+** numpy.fromfile
+ÓÉÒ»¸ötext»òÕßbinaryÎÄ¼þ´´½¨Êý×é
+#+BEGIN_SRC python
+numpy.fromfile(file, dtype=float, count=-1, sep='', offset=0)
+#+END_SRC
+
+- **file** : file or str or Path
+  Open file object or filename.
+- **dtype** : data-type   
+  Data type of the returned array. For binary files, it is used to determine the size and byte-order of the items in the file.
+- **count** : int
+  Number of items to read. `-1` means all items (i.e., the complete file).
+- **sep** : str
+  Separator between items if file is a text file. Empty (¡°¡±) separator means the file should be treated as binary. Spaces (¡± ¡°) in the separator match zero or more whitespace characters. A separator consisting only of spaces must match at least one whitespace.
+- **offset** : int
+  The offset (in bytes) from the file¡¯s current position. Defaults to 0. Only permitted for binary files.
+* argparse ¿â
+** ArgumentParser¶ÔÏó
+´´½¨Ò»¸öArgumentParser¶ÔÏó
+#+BEGIN_SRC python
+ArgumentParser(prog=None, usage=None, description=None, epilog=None, parents=[], formatter_class=argparse.HelpFormatter, prefix_chars='-', fromfile_prefix_chars=None, argument_default=None, conflict_handler='error', add_help=True, allow_abbrev=True)
+#+END_SRC
+*** ²ÎÊý
+- prog - ³ÌÐòµÄÃû³Æ£¨Ä¬ÈÏ£ºsys.argv[0]£©
+- usage - ÃèÊö³ÌÐòÓÃÍ¾µÄ×Ö·û´®£¨Ä¬ÈÏÖµ£º´ÓÌí¼Óµ½½âÎöÆ÷µÄ²ÎÊýÉú³É£©
+- description - ÔÚ²ÎÊý°ïÖúÎÄµµÖ®Ç°ÏÔÊ¾µÄÎÄ±¾£¨Ä¬ÈÏÖµ£ºÎÞ£©
+- epilog - ÔÚ²ÎÊý°ïÖúÎÄµµÖ®ºóÏÔÊ¾µÄÎÄ±¾£¨Ä¬ÈÏÖµ£ºÎÞ£©
+- parents - Ò»¸ö ArgumentParser ¶ÔÏóµÄÁÐ±í£¬ËüÃÇµÄ²ÎÊýÒ²Ó¦°üº¬ÔÚÄÚ
+- formatter_class - ÓÃÓÚ×Ô¶¨Òå°ïÖúÎÄµµÊä³ö¸ñÊ½µÄÀà
+- prefix_chars - ¿ÉÑ¡²ÎÊýµÄÇ°×º×Ö·û¼¯ºÏ£¨Ä¬ÈÏÖµ£º'-'£©
+- fromfile_prefix_chars - µ±ÐèÒª´ÓÎÄ¼þÖÐ¶ÁÈ¡ÆäËû²ÎÊýÊ±£¬ÓÃÓÚ±êÊ¶ÎÄ¼þÃûµÄÇ°×º×Ö·û¼¯ºÏ£¨Ä¬ÈÏÖµ£ºNone£©
+- argument_default - ²ÎÊýµÄÈ«¾ÖÄ¬ÈÏÖµ£¨Ä¬ÈÏÖµ£º None£©
+- conflict_handler - ½â¾ö³åÍ»Ñ¡ÏîµÄ²ßÂÔ£¨Í¨³£ÊÇ²»±ØÒªµÄ£©
+- add_help - Îª½âÎöÆ÷Ìí¼ÓÒ»¸ö -h/--help Ñ¡Ïî£¨Ä¬ÈÏÖµ£º True£©
+- allow_abbrev - Èç¹ûËõÐ´ÊÇÎÞÆçÒåµÄ£¬ÔòÔÊÐíËõÐ´³¤Ñ¡Ïî £¨Ä¬ÈÏÖµ£ºTrue£©
+**** ²Î¿¼
+[https://docs.python.org/zh-cn/3/library/argparse.html#prog]
+** add_argument()
+¶¨Òåµ¥¸öµÄÃüÁîÐÐ²ÎÊýÓ¦µ±ÈçºÎ½âÎö¡£
+#+BEGIN_SRC python
+add_argument(name or flags...[, action][, nargs][, const][, default][, type][, choices][, required][, help][, metavar][, dest])
+
+#+END_SRC
+*** ²ÎÊý
+- name or flags - Ò»¸öÃüÃû»òÕßÒ»¸öÑ¡Ïî×Ö·û´®µÄÁÐ±í£¬ÀýÈç foo »ò -f, --foo¡£
+- action - µ±²ÎÊýÔÚÃüÁîÐÐÖÐ³öÏÖÊ±Ê¹ÓÃµÄ¶¯×÷»ù±¾ÀàÐÍ¡£
+- nargs - ÃüÁîÐÐ²ÎÊýÓ¦µ±ÏûºÄµÄÊýÄ¿¡£
+- const - ±»Ò»Ð© action ºÍ nargs Ñ¡ÔñËùÐèÇóµÄ³£Êý¡£
+- default - µ±²ÎÊýÎ´ÔÚÃüÁîÐÐÖÐ³öÏÖÊ±Ê¹ÓÃµÄÖµ¡£
+- type - ÃüÁîÐÐ²ÎÊýÓ¦µ±±»×ª»»³ÉµÄÀàÐÍ¡£
+- choices - ¿ÉÓÃµÄ²ÎÊýµÄÈÝÆ÷¡£
+- required - ´ËÃüÁîÐÐÑ¡ÏîÊÇ·ñ¿ÉÊ¡ÂÔ £¨½öÑ¡Ïî¿ÉÓÃ£©¡£
+- help - Ò»¸ö´ËÑ¡Ïî×÷ÓÃµÄ¼òµ¥ÃèÊö¡£
+- metavar - ÔÚÊ¹ÓÃ·½·¨ÏûÏ¢ÖÐÊ¹ÓÃµÄ²ÎÊýÖµÊ¾Àý¡£
+- dest - ±»Ìí¼Óµ½ parse_args() Ëù·µ»Ø¶ÔÏóÉÏµÄÊôÐÔÃû¡£
+** parse_args()
+½«²ÎÊý×Ö·û´®×ª»»Îª¶ÔÏó²¢·ÖÅänamespaceµÄÊôÐÔ
+#+BEGIN_SRC python
+parse_args(args=None, namespace=None)
+
+#+END_SRC
+*** ²ÎÊý
+- args - List of strings to parse. The default is taken from sys.argv.
+- namespace - An object to take the attributes. The default is a new empty Namespace object.

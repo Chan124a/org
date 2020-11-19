@@ -1,0 +1,6 @@
+* 第1课
+#+BEGIN_SRC bash
+echo hello world #这个表示两个参数hello world
+echo "hello world" #这个表示一个参数
+echo hello\ world #这个有转义字符，表示一个参数
+#+END_SRC
