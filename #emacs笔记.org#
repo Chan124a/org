@@ -1418,6 +1418,10 @@ imenu 可以显示当前缓冲区的所有函数列表，下面的配置可以�
 
 iedit 是一个可以同时编辑多个区域的插件，它类似 Sublime Text 中的多光标编辑。它的 GitHub 仓库在[[https://github.com/victorhge/iedit][这里]]。
 
+
+asdf
+
+
 我们将其绑定快捷键以便更快捷的使用这个模式（ =C-;= 为默认快捷键），
 
 #+BEGIN_SRC emacs-lisp

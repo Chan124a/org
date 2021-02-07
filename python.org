@@ -2225,6 +2225,589 @@ New in version 1.15.0.
 product_along_axis : ndarray, see dtype parameter above.
 
 An array shaped as a but with the specified axis removed. Returns a reference to out if specified.
+** numpy.ufunc.at
+~ufunc.at(a, indices, b=None)~
+
+Performs unbuffered in place operation on operand ‘a’ for elements specified by ‘indices’. For addition ufunc, this method is equivalent to a[indices] += b, except that results are accumulated for elements that are indexed more than once. For example, a[[0,0]] += 1 will only increment the first element once because of buffering, whereas add.at(a, [0,0], 1) will increment the first element twice.
+
+New in version 1.8.0.
+
+*** Parameters
+- a : array_like
+The array to perform in place operation on.
+
+- indices : array_like or tuple
+
+Array like index object or slice object for indexing into first operand. If first operand has multiple dimensions, indices can be a tuple of array like index objects or slice objects.
+
+- b : array_like
+
+Second operand for ufuncs requiring two operands. Operand must be broadcastable over first operand after indexing or slicing.
+
+*** examples
+Set items 0 and 1 to their negative values:
+#+BEGIN_SRC python
+>>> a = np.array([1, 2, 3, 4])
+>>> np.negative.at(a, [0, 1])
+>>> print(a)
+array([-1, -2, 3, 4])
+#+END_SRC
+Increment items 0 and 1, and increment item 2 twice:
+#+BEGIN_SRC pyhton
+>>> a = np.array([1, 2, 3, 4])
+>>> np.add.at(a, [0, 1, 2, 2], 1)
+>>> print(a)
+array([2, 3, 5, 4])
+#+END_SRC
+Add items 0 and 1 in first array to second array, and store results in first array:
+#+BEGIN_SRC python
+>>> a = np.array([1, 2, 3, 4])
+>>> b = np.array([1, 2])
+>>> np.add.at(a, [0, 1], b)
+>>> print(a)
+array([2, 4, 3, 4])
+#+END_SRC
+
+** 关于indexing的总结
+*** Single element indexing
+Single element indexing for a 1-D array is what one expects. It work exactly like that for other standard Python sequences. It is 0-based, and accepts negative indices for indexing from the end of the array.
+#+BEGIN_SRC python
+>>> x=np.arange(10)
+>>> x
+array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+>>> x[2]
+2
+>>> x[-2]
+8
+#+END_SRC
+Unlike lists and tuples, numpy arrays support multidimensional indexing for multidimensional arrays. That means that it is not necessary to separate each dimension’s index into its own set of square brackets.
+#+BEGIN_SRC python
+>>> x.shape=(2,5) #now x is 2-dimensional 
+>>> x
+array([[0, 1, 2, 3, 4],
+       [5, 6, 7, 8, 9]])
+>>> x[1,3]
+8
+>>> x[1,-1]
+9
+#+END_SRC
+Note that if one indexes a multidimensional array with fewer indices than dimensions, one gets a subdimensional array. For example:
+#+BEGIN_SRC python
+>>> x[0]
+array([0, 1, 2, 3, 4])
+#+END_SRC
+That is, each index specified selects the array corresponding to the rest of the dimensions selected. In the above example, choosing 0 means that the remaining dimension of length 5 is being left unspecified, and that what is returned is an array of that dimensionality and size. It must be noted that the returned array is not a copy of the original, but points to the same values in memory as does the original array. In this case, the 1-D array at the first position (0) is returned. So using a single index on the returned array, results in a single element being returned. That is:
+#+BEGIN_SRC python
+>>> x[0][2]
+2
+#+END_SRC
+So note that =x[0,2] = x[0][2]= though the second case is more inefficient as a new temporary array is created after the first index that is subsequently indexed by 2.
+
+Note to those used to IDL or Fortran memory order as it relates to indexing. NumPy uses C-order indexing. That means that the last index usually represents the most rapidly changing memory location, unlike Fortran or IDL, where the first index represents the most rapidly changing location in memory. This difference represents a great potential for confusion.
+*** Other indexing options
+It is possible to slice and stride arrays to extract arrays of the same number of dimensions, but of different sizes than the original. The slicing and striding works exactly the same way it does for lists and tuples except that they can be applied to multiple dimensions as well. A few examples illustrates best:
+#+BEGIN_SRC python
+>>> x = np.arange(10)
+>>> x
+array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+>>> x[2:5]
+array([2, 3, 4])
+>>> x[:-7]
+array([0, 1, 2])
+>>> x[1:7:2]
+array([1, 3, 5])
+>>> y = np.arange(35).reshape(5,7)
+>>> y
+array([[ 0,  1,  2,  3,  4,  5,  6],
+       [ 7,  8,  9, 10, 11, 12, 13],
+       [14, 15, 16, 17, 18, 19, 20],
+       [21, 22, 23, 24, 25, 26, 27],
+       [28, 29, 30, 31, 32, 33, 34]])
+>>> y[1:5:2,::3]
+array([[ 7, 10, 13],
+       [21, 24, 27]])
+>>> y[[1,2],[3,4]]
+array([10, 18])
+>>> y[[1,2,0],[3,4,2]]  #第一个list作为行指标，第二个list作为列指标
+array([10, 18,  2])
+>>> y[(1,2),(2,3)]  #每个tuples作为坐标
+array([ 9, 17])
+#+END_SRC
+Note that slices of arrays do not copy the internal array data but also produce new views of the original data.
+
+It is possible to index arrays with other arrays for the purposes of selecting lists of values out of arrays into new arrays. There are two different ways of accomplishing this. One uses one or more arrays of index values. The other involves giving a boolean array of the proper shape to indicate the values to be selected. Index arrays are a very powerful tool that allow one to avoid looping over individual elements in arrays and thus greatly improve performance.
+
+It is possible to use special features to effectively increase the number of dimensions in an array through indexing so the resulting array aquires the shape needed for use in an expression or with a specific function.
+*** Index arrays
+NumPy arrays may be indexed with other arrays (or any other sequence- like object that can be converted to an array, such as lists, with the exception of tuples; see the end of this document for why this is). The use of index arrays ranges from simple, straightforward cases to complex, hard-to-understand cases. For all cases of index arrays, what is returned is a copy of the original data, not a view as one gets for slices.
+
+Index arrays must be of integer type. Each value in the array indicates which value in the array to use in place of the index. To illustrate:
+#+BEGIN_SRC python
+>>> x = np.arange(10,1,-1)
+>>> x
+array([10,  9,  8,  7,  6,  5,  4,  3,  2])
+>>> x[np.array([3, 3, 1, 8])]
+array([7, 7, 9, 2])
+
+>>> d=np.arange(105).reshape(3,5,7)
+>>> d
+array([[[  0,   1,   2,   3,   4,   5,   6],
+        [  7,   8,   9,  10,  11,  12,  13],
+        [ 14,  15,  16,  17,  18,  19,  20],
+        [ 21,  22,  23,  24,  25,  26,  27],
+        [ 28,  29,  30,  31,  32,  33,  34]],
+
+       [[ 35,  36,  37,  38,  39,  40,  41],
+        [ 42,  43,  44,  45,  46,  47,  48],
+        [ 49,  50,  51,  52,  53,  54,  55],
+        [ 56,  57,  58,  59,  60,  61,  62],
+        [ 63,  64,  65,  66,  67,  68,  69]],
+
+       [[ 70,  71,  72,  73,  74,  75,  76],
+        [ 77,  78,  79,  80,  81,  82,  83],
+        [ 84,  85,  86,  87,  88,  89,  90],
+        [ 91,  92,  93,  94,  95,  96,  97],
+        [ 98,  99, 100, 101, 102, 103, 104]]])
+
+>>> d[np.array([2,0])]
+array([[[ 70,  71,  72,  73,  74,  75,  76],
+        [ 77,  78,  79,  80,  81,  82,  83],
+        [ 84,  85,  86,  87,  88,  89,  90],
+        [ 91,  92,  93,  94,  95,  96,  97],
+        [ 98,  99, 100, 101, 102, 103, 104]],
+
+       [[  0,   1,   2,   3,   4,   5,   6],
+        [  7,   8,   9,  10,  11,  12,  13],
+        [ 14,  15,  16,  17,  18,  19,  20],
+        [ 21,  22,  23,  24,  25,  26,  27],
+        [ 28,  29,  30,  31,  32,  33,  34]]])
+>>> d[np.array([[0,2],[2,2]])]
+array([[[[  0,   1,   2,   3,   4,   5,   6],
+         [  7,   8,   9,  10,  11,  12,  13],
+         [ 14,  15,  16,  17,  18,  19,  20],
+         [ 21,  22,  23,  24,  25,  26,  27],
+         [ 28,  29,  30,  31,  32,  33,  34]],
+
+        [[ 70,  71,  72,  73,  74,  75,  76],
+         [ 77,  78,  79,  80,  81,  82,  83],
+         [ 84,  85,  86,  87,  88,  89,  90],
+         [ 91,  92,  93,  94,  95,  96,  97],
+         [ 98,  99, 100, 101, 102, 103, 104]]],
+
+
+       [[[ 70,  71,  72,  73,  74,  75,  76],
+         [ 77,  78,  79,  80,  81,  82,  83],
+         [ 84,  85,  86,  87,  88,  89,  90],
+         [ 91,  92,  93,  94,  95,  96,  97],
+         [ 98,  99, 100, 101, 102, 103, 104]],
+
+        [[ 70,  71,  72,  73,  74,  75,  76],
+         [ 77,  78,  79,  80,  81,  82,  83],
+         [ 84,  85,  86,  87,  88,  89,  90],
+         [ 91,  92,  93,  94,  95,  96,  97],
+         [ 98,  99, 100, 101, 102, 103, 104]]]])
+#+END_SRC
+The index array consisting of the values 3, 3, 1 and 8 correspondingly create an array of length 4 (same as the index array) where each index is replaced by the value the index array has in the array being indexed.
+
+Negative values are permitted and work as they do with single indices or slices:
+#+BEGIN_SRC python
+>>> x[np.array([3,3,-3,8])]
+array([7, 7, 4, 2])
+#+END_SRC
+It is an error to have index values out of bounds:
+#+BEGIN_SRC python
+>>> x[np.array([3, 3, 20, 8])]
+<type 'exceptions.IndexError'>: index 20 out of bounds 0<=index<9
+#+END_SRC
+Generally speaking, what is returned when index arrays are used is an array with the same shape as the index array, but with the type and values of the array being indexed. As an example, we can use a multidimensional index array instead:
+#+BEGIN_SRC python
+>>> x[np.array([[1,1],[2,3]])]
+array([[9, 9],
+       [8, 7]])
+#+END_SRC
+*** Indexing Multi-dimensional arrays
+Things become more complex when multidimensional arrays are indexed, particularly with multidimensional index arrays. These tend to be more unusual uses, but they are permitted, and they are useful for some problems. We’ll start with the simplest multidimensional case (using the array y from the previous examples):
+#+BEGIN_SRC python
+>>> y
+array([[ 0,  1,  2,  3,  4,  5,  6],
+       [ 7,  8,  9, 10, 11, 12, 13],
+       [14, 15, 16, 17, 18, 19, 20],
+       [21, 22, 23, 24, 25, 26, 27],
+       [28, 29, 30, 31, 32, 33, 34]])
+>>> y[np.array([0,2,4]), np.array([0,1,2])]
+array([ 0, 15, 30])
+
+>>> d=np.arange(105).reshape(3,5,7)
+>>> d
+array([[[  0,   1,   2,   3,   4,   5,   6],
+        [  7,   8,   9,  10,  11,  12,  13],
+        [ 14,  15,  16,  17,  18,  19,  20],
+        [ 21,  22,  23,  24,  25,  26,  27],
+        [ 28,  29,  30,  31,  32,  33,  34]],
+
+       [[ 35,  36,  37,  38,  39,  40,  41],
+        [ 42,  43,  44,  45,  46,  47,  48],
+        [ 49,  50,  51,  52,  53,  54,  55],
+        [ 56,  57,  58,  59,  60,  61,  62],
+        [ 63,  64,  65,  66,  67,  68,  69]],
+
+       [[ 70,  71,  72,  73,  74,  75,  76],
+        [ 77,  78,  79,  80,  81,  82,  83],
+        [ 84,  85,  86,  87,  88,  89,  90],
+        [ 91,  92,  93,  94,  95,  96,  97],
+        [ 98,  99, 100, 101, 102, 103, 104]]])
+>>> d[np.array([[0,2],[2,2]]),np.array([[0,2],[2,2]])]  #由于d有3个维度,(3,5,7),所以这里第一个指标np.array([[0,2],[2,2]]指的是第一个维度，np.array([[0,2],[2,2]]指的是第二个维度
+array([[[ 0,  1,  2,  3,  4,  5,  6],
+        [84, 85, 86, 87, 88, 89, 90]],
+
+       [[84, 85, 86, 87, 88, 89, 90],
+        [84, 85, 86, 87, 88, 89, 90]]])
+>>> d[np.array([[0,2],[2,2]]),np.array([[0,2],[2,2]])]
+array([[[ 0,  1,  2,  3,  4,  5,  6],
+        [84, 85, 86, 87, 88, 89, 90]],
+
+       [[84, 85, 86, 87, 88, 89, 90],
+        [84, 85, 86, 87, 88, 89, 90]]])
+>>> d[np.array([[0,2],[2,2]]),np.array([[0,2]])]   #这里第二个参数np.array([[0,2]])由于与第一个参数np.array([[0,2],[2,2]])不同shape,所以第二个参数会通过广播机制转化为np.array([[0,2],[0,2]]),然后继续操作
+array([[[ 0,  1,  2,  3,  4,  5,  6],
+        [84, 85, 86, 87, 88, 89, 90]],
+
+       [[70, 71, 72, 73, 74, 75, 76],
+        [84, 85, 86, 87, 88, 89, 90]]])
+#+END_SRC
+In this case, if the index arrays have a matching shape, and there is an index array for each dimension of the array being indexed, the resultant array has the same shape as the index arrays, and the values correspond to the index set for each position in the index arrays. In this example, the first index value is 0 for both index arrays, and thus the first value of the resultant array is y[0,0]. The next value is y[2,1], and the last is y[4,2].
+
+If the index arrays do not have the same shape, there is an attempt to broadcast them to the same shape. If they cannot be broadcast to the same shape, an exception is raised:
+#+BEGIN_SRC python
+>>> y[np.array([0,2,4]), np.array([0,1])]
+<type 'exceptions.ValueError'>: shape mismatch: objects cannot be
+broadcast to a single shape
+#+END_SRC
+The broadcasting mechanism permits index arrays to be combined with scalars for other indices. The effect is that the scalar value is used for all the corresponding values of the index arrays:
+#+BEGIN_SRC python
+>>> y[np.array([0,2,4]), 1]
+array([ 1, 15, 29])
+#+END_SRC
+Jumping to the next level of complexity, it is possible to only partially index an array with index arrays. It takes a bit of thought to understand what happens in such cases. For example if we just use one index array with y:
+#+BEGIN_SRC python
+>>> y[np.array([0,2,4])]
+array([[ 0,  1,  2,  3,  4,  5,  6],
+       [14, 15, 16, 17, 18, 19, 20],
+       [28, 29, 30, 31, 32, 33, 34]])
+#+END_SRC
+What results is the construction of a new array where each value of the index array selects one row from the array being indexed and the resultant array has the resulting shape (number of index elements, size of row).
+
+An example of where this may be useful is for a color lookup table where we want to map the values of an image into RGB triples for display. The lookup table could have a shape (nlookup, 3). Indexing such an array with an image with shape (ny, nx) with dtype=np.uint8 (or any integer type so long as values are with the bounds of the lookup table) will result in an array of shape (ny, nx, 3) where a triple of RGB values is associated with each pixel location.
+
+In general, the shape of the resultant array will be the concatenation of the shape of the index array (or the shape that all the index arrays were broadcast to) with the shape of any unused dimensions (those not indexed) in the array being indexed.
+*** Boolean or “mask” index arrays
+Boolean arrays used as indices are treated in a different manner entirely than index arrays. Boolean arrays must be of the same shape as the initial dimensions of the array being indexed. In the most straightforward case, the boolean array has the same shape:
+#+BEGIN_SRC python
+>>> y = np.arange(35).reshape(5,7)
+>>> y
+array([[ 0,  1,  2,  3,  4,  5,  6],
+       [ 7,  8,  9, 10, 11, 12, 13],
+       [14, 15, 16, 17, 18, 19, 20],
+       [21, 22, 23, 24, 25, 26, 27],
+       [28, 29, 30, 31, 32, 33, 34]])
+>>> b = y>20
+>>> y[b]
+array([21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34])
+>>> b=y>20
+>>> b
+array([[False, False, False, False, False, False, False],
+       [False, False, False, False, False, False, False],
+       [False, False, False, False, False, False, False],
+       [ True,  True,  True,  True,  True,  True,  True],
+       [ True,  True,  True,  True,  True,  True,  True]])
+>>> b[:,5]
+array([False, False, False,  True,  True])
+>>> y[b[:,5]]
+array([[21, 22, 23, 24, 25, 26, 27],
+       [28, 29, 30, 31, 32, 33, 34]])
+#+END_SRC
+
+Unlike in the case of integer index arrays, in the boolean case, the result is a 1-D array containing all the elements in the indexed array corresponding to all the true elements in the boolean array. The elements in the indexed array are always iterated and returned in row-major (C-style) order. The result is also identical to y[np.nonzero(b)]. As with index arrays, what is returned is a copy of the data, not a view as one gets with slices.
+
+The result will be multidimensional if y has more dimensions than b. For example:
+#+BEGIN_SRC python
+>>> b[:,5] # use a 1-D boolean whose first dim agrees with the first dim of y
+array([False, False, False,  True,  True], dtype=bool)
+>>> y[b[:,5]]
+array([[21, 22, 23, 24, 25, 26, 27],
+       [28, 29, 30, 31, 32, 33, 34]])
+#+END_SRC
+Here the 4th and 5th rows are selected from the indexed array and combined to make a 2-D array.
+
+In general, when the boolean array has fewer dimensions than the array being indexed, this is equivalent to y[b, ...], which means y is indexed by b followed by as many : as are needed to fill out the rank of y. Thus the shape of the result is one dimension containing the number of True elements of the boolean array, followed by the remaining dimensions of the array being indexed.
+
+For example, using a 2-D boolean array of shape (2,3) with four True elements to select rows from a 3-D array of shape (2,3,5) results in a 2-D result of shape (4,5):
+#+BEGIN_SRC python
+>>> x = np.arange(30).reshape(2,3,5)
+>>> x
+array([[[ 0,  1,  2,  3,  4],
+        [ 5,  6,  7,  8,  9],
+        [10, 11, 12, 13, 14]],
+       [[15, 16, 17, 18, 19],
+        [20, 21, 22, 23, 24],
+        [25, 26, 27, 28, 29]]])
+>>> b = np.array([[True, True, False], [False, True, True]])
+>>> x[b]
+array([[ 0,  1,  2,  3,  4],
+       [ 5,  6,  7,  8,  9],
+       [20, 21, 22, 23, 24],
+       [25, 26, 27, 28, 29]])
+#+END_SRC
+For further details, consult the numpy reference documentation on array indexing.
+*** Combining index arrays with slices
+Index arrays may be combined with slices. For example:
+#+BEGIN_SRC python
+>>> y[np.array([0,2,4]),1:3]
+array([[ 1,  2],
+       [15, 16],
+       [29, 30]])
+#+END_SRC
+In effect, the slice is converted to an index array np.array([[1,2]]) (shape (1,2)) that is broadcast with the index array to produce a resultant array of shape (3,2).
+
+Likewise, slicing can be combined with broadcasted boolean indices:
+#+BEGIN_SRC python
+>>> y
+array([[ 0,  1,  2,  3,  4,  5,  6],
+       [ 7,  8,  9, 10, 11, 12, 13],
+       [14, 15, 16, 17, 18, 19, 20],
+       [21, 22, 23, 24, 25, 26, 27],
+       [28, 29, 30, 31, 32, 33, 34]])
+>>> y[b[:,5],1:3]
+array([[22, 23],
+       [29, 30]])
+#+END_SRC
+*** Structural indexing tools
+To facilitate easy matching of array shapes with expressions and in assignments, the np.newaxis object can be used within array indices to add new dimensions with a size of 1. For example:
+#+BEGIN_SRC python 
+>>> y.shape
+(5, 7)
+>>> y[:,np.newaxis,:].shape
+(5, 1, 7)
+#+END_SRC
+Note that there are no new elements in the array, just that the dimensionality is increased. This can be handy to combine two arrays in a way that otherwise would require explicitly reshaping operations. For example:
+#+BEGIN_SRC python
+>>> x = np.arange(5)
+>>> x[:,np.newaxis] + x[np.newaxis,:]
+array([[0, 1, 2, 3, 4],
+       [1, 2, 3, 4, 5],
+       [2, 3, 4, 5, 6],
+       [3, 4, 5, 6, 7],
+       [4, 5, 6, 7, 8]])
+#+END_SRC
+The ellipsis syntax maybe used to indicate selecting in full any remaining unspecified dimensions. For example:
+#+BEGIN_SRC python
+>>> z = np.arange(81).reshape(3,3,3,3)
+>>> z[1,...,2]
+array([[29, 32, 35],
+       [38, 41, 44],
+       [47, 50, 53]])
+#+END_SRC
+This is equivalent to:
+#+BEGIN_SRC pytho
+>>> z[1,:,:,2]
+array([[29, 32, 35],
+       [38, 41, 44],
+       [47, 50, 53]])
+#+END_SRC
+*** Structural indexing tools
+To facilitate easy matching of array shapes with expressions and in assignments, the np.newaxis object can be used within array indices to add new dimensions with a size of 1. For example:
+#+BEGIN_SRC python
+>>> y.shape
+(5, 7)
+>>> y[:,np.newaxis,:].shape
+(5, 1, 7)
+#+END_SRC
+Note that there are no new elements in the array, just that the dimensionality is increased. This can be handy to combine two arrays in a way that otherwise would require explicitly reshaping operations. For example:
+#+BEGIN_SRC python
+>>> x = np.arange(5)
+>>> x
+array([0, 1, 2, 3, 4])
+>>> x[:,np.newaxis]
+array([[0],
+       [1],
+       [2],
+       [3],
+       [4]])
+>>> x[np.newaxis,:]
+array([[0, 1, 2, 3, 4]])
+>>> x[:,np.newaxis] + x[np.newaxis,:]
+array([[0, 1, 2, 3, 4],
+       [1, 2, 3, 4, 5],
+       [2, 3, 4, 5, 6],
+       [3, 4, 5, 6, 7],
+       [4, 5, 6, 7, 8]])
+#+END_SRC
+The ellipsis syntax maybe used to indicate selecting in full any remaining unspecified dimensions. For example:
+#+BEGIN_SRC python 
+>>> z = np.arange(81).reshape(3,3,3,3)
+>>> z[1,...,2]
+array([[29, 32, 35],
+       [38, 41, 44],
+       [47, 50, 53]])
+#+END_SRC
+This is equivalent to:
+#+BEGIN_SRC python 
+>>> z[1,:,:,2]
+array([[29, 32, 35],
+       [38, 41, 44],
+       [47, 50, 53]])
+#+END_SRC
+*** Assigning values to indexed arrays
+As mentioned, one can select a subset of an array to assign to using a single index, slices, and index and mask arrays. The value being assigned to the indexed array must be shape consistent (the same shape or broadcastable to the shape the index produces). For example, it is permitted to assign a constant to a slice:
+#+BEGIN_SRC python 
+>>> x = np.arange(10)
+>>> x[2:7] = 1
+#+END_SRC
+or an array of the right size:
+#+BEGIN_SRC python
+>>> x[2:7] = np.arange(5)
+#+END_SRC
+Note that assignments may result in changes if assigning higher types to lower types (like floats to ints) or even exceptions (assigning complex to floats or ints):
+#+BEGIN_SRC python
+>>> x[1] = 1.2
+>>> x[1]
+1
+>>> x[1] = 1.2j
+<type 'exceptions.TypeError'>: can't convert complex to long; use long(abs(z))
+#+END_SRC
+
+Unlike some of the references (such as array and mask indices) assignments are always made to the original data in the array (indeed, nothing else would make sense!). Note though, that some actions may not work as one may naively expect. This particular example is often surprising to people:
+#+BEGIN_SRC python 
+>>> x = np.arange(0, 50, 10)
+>>> x
+array([ 0, 10, 20, 30, 40])
+>>> x[np.array([1, 1, 3, 1])] += 1
+>>> x
+array([ 0, 11, 20, 31, 40])
+#+END_SRC
+
+Where people expect that the 1st location will be incremented by 3. In fact, it will only be incremented by 1. The reason is because a new array is extracted from the original (as a temporary) containing the values at 1, 1, 3, 1, then the value 1 is added to the temporary, and then the temporary is assigned back to the original array. Thus the value of the array at x[1]+1 is assigned to x[1] three times, rather than being incremented 3 times.
+*** Dealing with variable numbers of indices within programs
+The index syntax is very powerful but limiting when dealing with a variable number of indices. For example, if you want to write a function that can handle arguments with various numbers of dimensions without having to write special case code for each number of possible dimensions, how can that be done? If one supplies to the index a tuple, the tuple will be interpreted as a list of indices. For example (using the previous definition for the array z):
+#+BEGIN_SRC python 
+>>> z = np.arange(81).reshape(3,3,3,3)
+>>> z
+array([[[[ 0,  1,  2],
+         [ 3,  4,  5],
+         [ 6,  7,  8]],
+
+        [[ 9, 10, 11],
+         [12, 13, 14],
+         [15, 16, 17]],
+
+        [[18, 19, 20],
+         [21, 22, 23],
+         [24, 25, 26]]],
+
+
+       [[[27, 28, 29],
+         [30, 31, 32],
+         [33, 34, 35]],
+
+        [[36, 37, 38],
+         [39, 40, 41],
+         [42, 43, 44]],
+
+        [[45, 46, 47],
+         [48, 49, 50],
+         [51, 52, 53]]],
+
+
+       [[[54, 55, 56],
+         [57, 58, 59],
+         [60, 61, 62]],
+
+        [[63, 64, 65],
+         [66, 67, 68],
+         [69, 70, 71]],
+
+        [[72, 73, 74],
+         [75, 76, 77],
+         [78, 79, 80]]]])
+>>> indices = (1,1,1,1)
+>>> z[indices]
+40
+#+END_SRC
+So one can use code to construct tuples of any number of indices and then use these within an index.
+
+Slices can be specified within programs by using the slice() function in Python. For example:
+#+BEGIN_SRC python 
+>>> indices = (1,1,1,slice(0,2)) # same as [1,1,1,0:2]
+>>> z[indices]
+array([39, 40])
+#+END_SRC
+Likewise, ellipsis can be specified by code by using the Ellipsis object:
+#+BEGIN_SRC python
+>>> indices = (1, Ellipsis, 1) # same as [1,...,1]
+>>> z[indices]
+array([[28, 31, 34],
+       [37, 40, 43],
+       [46, 49, 52]])
+#+END_SRC
+For this reason it is possible to use the output from the np.where() function directly as an index since it always returns a tuple of index arrays.
+
+Because the special treatment of tuples, they are not automatically converted to an array as a list would be. As an example:
+#+BEGIN_SRC python
+>>> z[[1,1,1,1]] # produces a large array
+array([[[[27, 28, 29],
+         [30, 31, 32],
+         [33, 34, 35]],
+
+        [[36, 37, 38],
+         [39, 40, 41],
+         [42, 43, 44]],
+
+        [[45, 46, 47],
+         [48, 49, 50],
+         [51, 52, 53]]],
+
+
+       [[[27, 28, 29],
+         [30, 31, 32],
+         [33, 34, 35]],
+
+        [[36, 37, 38],
+         [39, 40, 41],
+         [42, 43, 44]],
+
+        [[45, 46, 47],
+         [48, 49, 50],
+         [51, 52, 53]]],
+
+
+       [[[27, 28, 29],
+         [30, 31, 32],
+         [33, 34, 35]],
+
+        [[36, 37, 38],
+         [39, 40, 41],
+         [42, 43, 44]],
+
+        [[45, 46, 47],
+         [48, 49, 50],
+         [51, 52, 53]]],
+
+
+       [[[27, 28, 29],
+         [30, 31, 32],
+         [33, 34, 35]],
+
+        [[36, 37, 38],
+         [39, 40, 41],
+         [42, 43, 44]],
+
+        [[45, 46, 47],
+         [48, 49, 50],
+         [51, 52, 53]]]])
+>>> z[(1,1,1,1)] # returns a single value
+40
+#+END_SRC
+
 * ~__future__~ 模块
 from __future__ import division
 导入python未来支持的语言特征division(精确除法)，当我们没有在程序中导入该特征时，"/"操作符执行的是截断除法(Truncating Division),当我们导入精确除法之后，"/"执行的是精确除法，如下所示：
@@ -3475,6 +4058,50 @@ with后部分，可以将with后的语句运行，将其返回结果给到as后�
 *** 关于with torch.no_grad():
 在使用pytorch时，并不是所有的操作都需要进行计算图的生成（计算过程的构建，以便梯度反向传播等操作）。而对于tensor的计算操作，默认是要进行计算图的构建的，在这种情况下，可以使用 with torch.no_grad():，强制之后的内容不进行计算图构建。
 
+** torch.gather
+~torch.gather(input, dim, index, *, sparse_grad=False, out=None) → Tensor~
+
+沿给定轴dim，将输入索引张量index指定位置的值进行聚合。
+
+Gathers values along an axis specified by dim.
+
+If input is an n-dimensional tensor with size (x_0, x_1..., x_{i-1}, x_i, x_{i+1}, ..., x_{n-1}) and dim = i, then index must be an n-dimensional tensor with size (x_0, x_1, ..., x_{i-1}, y, x_{i+1}, ..., x_{n-1}) where y≥1 and out will have the same size as index.
+
+*** Parameters
+- input (Tensor) – the source tensor
+- dim (int) – the axis along which to index
+- index (LongTensor) – the indices of elements to gather
+- sparse_grad (bool,optional) – If True, gradient w.r.t. input will be a sparse tensor.
+- out (Tensor, optional) – the destination tensor
+*** 例子
+#+BEGIN_SRC python
+>>> t = torch.tensor([[1,2],[3,4]])
+>>> torch.gather(t, 1, torch.tensor([[0,0],[1,0]]))
+tensor([[ 1,  1],
+        [ 4,  3]])
+
+>>> a = torch.Tensor([[1,2],[3,4]])
+>>> a
+ 1  2
+ 3  4
+
+>>> b = torch.gather(a,1,torch.LongTensor([[0,0],[1,0]]))
+>>> b
+ 1  1
+ 4  3
+
+>>> b = torch.gather(a,1,torch.LongTensor([[1,0],[1,0]]))
+>>> b
+ 2  1
+ 4  3
+
+>>> b = torch.gather(a,1,torch.LongTensor([[1,1],[1,0]]))
+>>> b
+ 2  2
+ 4  3
+
+#+END_SRC
+
 * torchvision
 torchvision包是服务于pytorch深度学习框架的,用来生成图片,视频数据集,和一些流行的模型类和预训练模型.
 [[https://pytorch-cn.readthedocs.io/zh/latest/torchvision/torchvision/][中文文档]]、[[https://pytorch.org/docs/stable/torchvision/index.html][英文文档]]
@@ -4676,7 +5303,7 @@ logging模块定义的模块级别的常用函数
 | logging.log(level, *args, **kwargs)    | 创建一条严重级别为level的日志记录    |
 | logging.basicConfig(**kwargs)          | 对root logger进行一次性配置          |
 其中logging.basicConfig(**kwargs)函数用于指定“要记录的日志级别”、“日志格式”、“日志输出位置”、“日志文件的打开模式”等信息，
-* PILq（Pillow）库
+* PIL（Pillow）库
 PIL：Python Imaging Library，已经是Python平台事实上的图像处理标准库了。PIL功能非常强大，但API却非常简单易用。
 
 由于PIL仅支持到Python 2.7，加上年久失修，于是一群志愿者在PIL的基础上创建了兼容的版本，名字叫Pillow，支持最新Python 3.x，又加入了许多新特性，因此，我们可以直接安装使用Pillow。安装命令： pip3  install pillow
@@ -4706,6 +5333,19 @@ im.show()
 im.save(outfile,options…)
 im.save(outfile, format, options…)
 #+END_EXAMPLE
+** Image.fromarray的作用
+简而言之，就是实现array到image的转换
+1. PIL image转换成array
+~img = np.asarray(image)~
+
+需要注意的是，如果出现read-only错误，并不是转换的错误，一般是你读取的图片的时候，默认选择的是"r","rb"模式有关。
+
+修正的办法:　手动修改图片的读取状态
+
+~img.flags.writeable = True  # 将数组改为读写模式~
+
+2. array转换成image
+~Image.fromarray(np.uint8(img))~
 * 关于梯度裁剪
 神经网络的训练过程中，有时候会出现梯度爆炸的情况，具体表现为某些参数值变为nan，为了尽可能避免这种情况，需要对梯度进行裁剪，也就是把梯度限定在一定的范围内。
 
@@ -4746,6 +5386,114 @@ tf.clip_by_value(grad, min_value, max_value)
 tf.clip_by_average_norm(grad, clip_norm)
 tf.clip_by_global_norm(grad, clip_norm)
 #+END_SRC
+* Keras
+** tf.layers
+*** tf.keras.layers.Embedding
+#+BEGIN_SRC python
+keras.layers.Embedding(input_dim, output_dim, embeddings_initializer='uniform', embeddings_regularizer=None, activity_regularizer=None, embeddings_constraint=None, mask_zero=False, input_length=None)
+#+END_SRC
+将正整数（索引值）转换为固定尺寸的稠密向量。 例如： [[4], [20]] -> [[0.25, 0.1], [0.6, -0.2]]
+
+该层只能用作模型中的第一层。
+
+输入尺寸为 (batch_size, sequence_length) 的 2D 张量。
+
+输出尺寸为 (batch_size, sequence_length, output_dim) 的 3D 张量。
+**** 例子
+#+BEGIN_SRC python
+model = Sequential()
+model.add(Embedding(1000, 64, input_length=10))
+# 模型将输入一个大小为 (batch, input_length) 的整数矩阵。
+# 输入中最大的整数（即词索引）不应该大于 999 （词汇表大小）
+# 现在 model.output_shape == (None, 10, 64)，其中 None 是 batch 的维度。
+
+input_array = np.random.randint(1000, size=(32, 10))
+
+model.compile('rmsprop', 'mse')
+output_array = model.predict(input_array)
+assert output_array.shape == (32, 10, 64)
+#+END_SRC
+**** 参数
+- input_dim: int > 0。词汇表大小， 即，最大整数 index + 1。
+- output_dim: int >= 0。词向量的维度。
+- embeddings_initializer: embeddings 矩阵的初始化方法 (详见 initializers)。
+- embeddings_regularizer: embeddings matrix 的正则化方法 (详见 regularizer)。
+- embeddings_constraint: embeddings matrix 的约束函数 (详见 constraints)。
+- mask_zero: 是否把 0 看作为一个应该被遮蔽的特殊的 "padding" 值。 这对于可变长的 循环神经网络层 十分有用。 如果设定为 True，那么接下来的所有层都必须支持 masking，否则就会抛出异常。 如果 mask_zero 为 True，作为结果，索引 0 就不能被用于词汇表中 （input_dim 应该与 vocabulary + 1 大小相同）。
+- input_length: 输入序列的长度，当它是固定的时。 如果你需要连接 Flatten 和 Dense 层，则这个参数是必须的 （没有它，dense 层的输出尺寸就无法计算）。
+
+*** tf.keras.layers.GRU
+#+BEGIN_SRC python
+tf.keras.layers.GRU(
+    units,
+    activation="tanh",
+    recurrent_activation="sigmoid",
+    use_bias=True,
+    kernel_initializer="glorot_uniform",
+    recurrent_initializer="orthogonal",
+    bias_initializer="zeros",
+    kernel_regularizer=None,
+    recurrent_regularizer=None,
+    bias_regularizer=None,
+    activity_regularizer=None,
+    kernel_constraint=None,
+    recurrent_constraint=None,
+    bias_constraint=None,
+    dropout=0.0,
+    recurrent_dropout=0.0,
+    return_sequences=False,
+    return_state=False,
+    go_backwards=False,
+    stateful=False,
+    unroll=False,
+    time_major=False,
+    reset_after=True,
+    **kwargs
+)
+#+END_SRC
+门限循环单元网络（Gated Recurrent Unit） - Cho et al. 2014.
+
+Based on available runtime hardware and constraints, this layer will choose different implementations (cuDNN-based or pure-TensorFlow) to maximize the performance. If a GPU is available and all the arguments to the layer meet the requirement of the CuDNN kernel (see below for details), the layer will use a fast cuDNN implementation.
+
+The requirements to use the cuDNN implementation are:
+1. activation == tanh
+2. recurrent_activation == sigmoid
+3. recurrent_dropout == 0
+4. unroll is False
+5. use_bias is True
+6. reset_after is True
+7. Inputs, if use masking, are strictly right-padded.
+8. Eager execution is enabled in the outermost context.
+
+There are two variants of the GRU implementation. The default one is based on v3 and has reset gate applied to hidden state before matrix multiplication. The other one is based on original and has the order reversed.
+
+The second variant is compatible with CuDNNGRU (GPU-only) and allows inference on CPU. Thus it has separate biases for kernel and recurrent_kernel. To use this variant, set reset_after=True and recurrent_activation=sigmoid.
+
+**** 参数
+- units: 正整数，输出空间的维度。
+- activation: 要使用的激活函数 (详见 activations)。 默认：双曲正切 (tanh)。 如果传入 None，则不使用激活函数 (即 线性激活：a(x) = x)。
+- recurrent_activation: 用于循环时间步的激活函数 (详见 activations)。 默认：分段线性近似 sigmoid (hard_sigmoid)。 如果传入 None，则不使用激活函数 (即 线性激活：a(x) = x)。
+- use_bias: 布尔值，该层是否使用偏置向量。
+- kernel_initializer: kernel 权值矩阵的初始化器， 用于输入的线性转换 (详见 initializers)。
+- recurrent_initializer: recurrent_kernel 权值矩阵 的初始化器，用于循环层状态的线性转换 (详见 initializers)。
+- bias_initializer:偏置向量的初始化器 (详见initializers).
+- kernel_regularizer: 运用到 kernel 权值矩阵的正则化函数 (详见 regularizer)。
+- recurrent_regularizer: 运用到 recurrent_kernel 权值矩阵的正则化函数 (详见 regularizer)。
+- bias_regularizer: 运用到偏置向量的正则化函数 (详见 regularizer)。
+- activity_regularizer: 运用到层输出（它的激活值）的正则化函数 (详见 regularizer)。
+- kernel_constraint: 运用到 kernel 权值矩阵的约束函数 (详见 constraints)。
+- recurrent_constraint: 运用到 recurrent_kernel 权值矩阵的约束函数 (详见 constraints)。
+- bias_constraint: 运用到偏置向量的约束函数 (详见 constraints)。
+- dropout: 在 0 和 1 之间的浮点数。 单元的丢弃比例，用于输入的线性转换。
+- recurrent_dropout: 在 0 和 1 之间的浮点数。 单元的丢弃比例，用于循环层状态的线性转换。
+- implementation: 实现模式，1 或 2。 模式 1 将把它的操作结构化为更多的小的点积和加法操作， 而模式 2 将把它们分批到更少，更大的操作中。 这些模式在不同的硬件和不同的应用中具有不同的性能配置文件。
+- return_sequences: 布尔值。是返回输出序列中的最后一个输出，还是全部序列。
+- return_state: 布尔值。除了输出之外是否返回最后一个状态。
+- go_backwards: 布尔值 (默认 False)。 如果为 True，则向后处理输入序列并返回相反的序列。
+- stateful: 布尔值 (默认 False)。 如果为 True，则批次中索引 i 处的每个样品的最后状态 将用作下一批次中索引 i 样品的初始状态。
+- unroll: 布尔值 (默认 False)。 如果为 True，则网络将展开，否则将使用符号循环。 展开可以加速 RNN，但它往往会占用更多的内存。 展开只适用于短序列。
+- reset_after:
+- GRU 公约 (是否在矩阵乘法之前或者之后使用重置门)。 False =「之前」(默认)，Ture =「之后」( CuDNN 兼容)。
 * pickle库
 pickle是python语言的一个标准模块，安装python后已包含pickle库，不需要单独再安装。
 
@@ -4779,6 +5527,28 @@ The protocol version of the pickle is detected automatically, so no protocol arg
 Arguments file, fix_imports, encoding, errors, strict and buffers have the same meaning as in the [[https://docs.python.org/3/library/pickle.html#pickle.Unpickler][Unpickler]] constructor.
 
 Changed in version 3.8: The buffers argument was added.
+
+* imageio库
+IMAIO是一个Python库，它提供了一个简单的接口来读取和写入大量的图像数据，包括动画图像、体积数据和科学格式。它是跨平台的，运行在Python 2 .x和3。x上，并且易于安装。
+
+** imageio.imread
+~imageio.imread(uri, format=None, **kwargs)~
+Reads an image from the specified file. Returns a numpy array, which comes with a dict of meta data at its ‘meta’ attribute.
+
+Note that the image data is returned as-is, and may not always have a dtype of uint8 (and thus may differ from what e.g. PIL returns).
+
+从指定的文件读取图像。返回一个NUMPY数组，该数组带有元数据的元属性。注意，图像数据按原样返回，并且可能不总是具有uTI8的dType（因此可能不同于例如PIL返回）。
+*** Parameters
+- uri:{str, pathlib.Path, bytes, file}
+The resource to load the image from, e.g. a filename, pathlib.Path, http address or file object, see the docs for more info.
+
+- format:str
+The format to use to read the file. By default imageio selects the appropriate for you based on the filename and its contents.
+
+- kwargs:…
+Further keyword arguments are passed to the reader. See help() to see what arguments are available for a particular format.
+
+
 
 * 问题集锦
 ** python3 报错TypeError: 'range' object does not support item assignment

@@ -45,6 +45,7 @@
 
 - =C-u 8 C-f= 为向前移动8个字符， =C-u 8 *= 将插入8个 *
 - =C-o= 插入行,若光标在行首,则在上方插入空行,若光标在文字中间,则将光标后的文字移到下一行
+- =C-x C-o= 删除多个空行，只留下一个空行
 - =C-m= 相当于回车
 - =C-d= 删除光标后的字符
 - =M-d= 删除光标后一个词
@@ -75,13 +76,16 @@
 - =C-M-s= 使用正则表达式正向搜索
 - =C-M-r= 使用正则表达式反向搜索
 - =RET=	退出搜索并停留在当前搜索到的位置
-- =M-%=	交互替换
-- =M-x query-replace-regexp=	使用正则表达式
+- =M-%= 或 =query-replace=	交互替换，即选择替换，可以自己选择是否替换内容
+- =M-x query-replace-regexp=	选择替换的正则表达式版本
 - =SPC或y=	替换当前匹配
 - =DEL或n=	不要替换当前匹配
 - =.=	仅仅替换当前匹配并退出（替换）
 - =,=	替换并暂停（按 Space 或 y 继续）
 
+=replace-string= 命令会将所有匹配都替换，即暴力替换。暴力替换的正则表达式版本是 =replace-regexp=
+
+[[rmail:https://www.cnblogs.com/robertzml/archive/2010/03/03/1675870.html][参考文章]]
 ** 标记
 - =C-<spc>= 或 =C-@= 会显示Mark set，可以片选文字
 - =C-x C-x= 在标记和光标进行切换
@@ -3159,3 +3163,179 @@ M-x describe-code-system
 M-x customize-face 然后输入 region
 
 之后点击Choose对Background进行设置。
+
+* Prefix key
+If a key sequence invokes a command, we call it a complete key.
+If a key sequence isn’t long enough to invoke a command, we call it a prefix key
+
+By default, the prefix keys in Emacs are C-c, C-h, C-x, C-x RET, C-x @, C-x a, C-x n, C-x r, C-x t, C-x v, C-x 4, C-x 5, C-x 6, ESC, M-g, and M-o. (F1 and F2 are aliases for C-h and C-x 6.) 
+
+Typing the help character (C-h or F1) after a prefix key displays a list of the commands starting with that prefix. The sole exception to this rule is ESC: ESC C-h is equivalent to C-M-h, which does something else entirely. You can, however, use F1 to display a list of commands starting with ESC.
+* Keys and Commands
+Every command has a name chosen by a programmer. The name is usually made of a few English words separated by dashes; for example, next-line or forward-word. Internally, each command is a special type of Lisp function, and the actions associated with the command are performed by running the function. 
+
+The bindings between keys and commands are recorded in tables called keymaps. 
+* Entering Emacs
+Using a command line argument, you can tell Emacs to visit one or more files as soon as it starts up. For example, emacs foo.txt starts Emacs with a buffer displaying the contents of the file ‘foo.txt’. This feature exists mainly for compatibility with other editors, which are designed to be launched from the shell for short editing sessions. If you call Emacs this way, the initial frame is split into two windows—one showing the specified file, and the other showing the startup screen. 
+
+If the variable inhibit-startup-screen is non-nil, Emacs does not display the startup screen. In that case, if one or more files were specified on the command line, Emacs simply displays those files; otherwise, it displays a buffer named *scratch*, which can be used to evaluate Emacs Lisp expressions interactively.
+
+You can also force Emacs to display a file or directory at startup by setting the variable initial-buffer-choice to a string naming that file or directory. The value of initial-buffer-choice may also be a function (of no arguments) that should return a buffer which is then displayed. If initial-buffer-choice is non-nil, then if you specify any files on the command line, Emacs still visits them, but does not display them initially.
+
+Setting inhibit-startup-screen in site-start.el doesn’t work, because the startup screen is set up before reading site-start.el. 
+* Exiting Emacs
+=C-x C-c= Kill Emacs (save-buffers-kill-terminal).
+
+
+C-x C-c behaves specially if you are using Emacs as a server. If you type it from a client frame, it closes the client connection. 
+
+Emacs can, optionally, record certain session information when you kill it, such as the files you were visiting at the time. This information is then available the next time you start Emacs. 
+
+If the value of the variable confirm-kill-emacs is non-nil, C-x C-c assumes that its value is a predicate function, and calls that function. If the result of the function call is non-nil, the session is killed, otherwise Emacs continues to run. One convenient function to use as the value of confirm-kill-emacs is the function yes-or-no-p. The default value of confirm-kill-emacs is nil.
+
+If the value of the variable confirm-kill-processes is nil, C-x C-c does not ask for confirmation before killing subprocesses started by Emacs. The value is t by default.
+
+To kill Emacs without being prompted about saving, type M-x kill-emacs.
+
+Text terminals usually listen for certain special characters whose meaning is to kill or suspend the program you are running. This terminal feature is turned off while you are in Emacs. The meanings of C-z and C-x C-c as keys in Emacs were inspired by the use of C-z and C-c on several operating systems as the characters for stopping or killing a program, but that is their only relationship with the operating system. You can customize these keys to run any commands of your choice
+* Basic Editing Commands
+** Inserting Text
+To turn off the auto-indentation, you can either disable Electric Indent mode (see Indent Convenience) or type C-j, which inserts just a newline, without any auto-indentation.
+
+The minor mode called Auto Fill mode splits lines automatically when they get too long (see Filling). The minor mode called Overwrite mode causes inserted characters to replace (overwrite) existing text, instead of shoving it to the right. See Minor Modes.
+
+To insert a non-graphic character, or a character that your keyboard does not support, first quote it by typing C-q (quoted-insert). There are two ways to use C-q:
+- C-q followed by any non-graphic character (even C-g) inserts that character. For instance, C-q DEL inserts a literal ‘DEL’ character.
+- C-q followed by a sequence of octal digits inserts the character with the specified octal character code. You can use any number of octal digits; any non-digit terminates the sequence. If the terminating character is RET, that RET serves only to terminate the sequence. Any other non-digit terminates the sequence and then acts as normal input—thus, C-q 1 0 1 B inserts ‘AB’.The use of octal sequences is disabled in ordinary non-binary Overwrite mode, to give you a convenient way to insert a digit instead of overwriting with it.
+
+To use decimal or hexadecimal instead of octal, set the variable read-quoted-char-radix to 10 or 16. If the radix is 16, the letters a to f serve as part of a character code, just like digits. Case is ignored.
+
+A few common Unicode characters can be inserted via a command starting with C-x 8. For example, C-x 8 [ inserts ‘ which is Unicode code-point U+2018 LEFT SINGLE QUOTATION MARK, sometimes called a left single “curved quote” or “curly quote”. Similarly, C-x 8 ], C-x 8 { and C-x 8 } insert the curved quotes ’, “ and ”, respectively. Also, a working Alt key acts like C-x 8 (unless followed by RET); e.g., A-[ acts like C-x 8 [ and inserts ‘. To see which characters have C-x 8 shorthands, type C-x 8 C-h.
+
+Alternatively, you can use the command C-x 8 RET (insert-char). This prompts for the Unicode name or code-point of a character, using the minibuffer. If you enter a name, the command provides completion (see Completion). If you enter a code-point, it should be as a hexadecimal number (the convention for Unicode), or a number with a specified radix, e.g., #o23072 (octal); See Integer Basics in The Emacs Lisp Reference Manual. The command then inserts the corresponding character into the buffer.
+
+For example, the following all insert the same character:
+#+BEGIN_EXAMPLE
+C-x 8 RET left single quotation mark RET
+C-x 8 RET left sin TAB RET
+C-x 8 RET 2018 RET
+C-x 8 [
+A-[  (if the Alt key works)
+`    (in Electric Quote mode)
+#+END_EXAMPLE
+A numeric argument to C-q or C-x 8 ... specifies how many copies of the character to insert (see Arguments).
+
+In addition, in some contexts, if you type a quotation using grave accent and apostrophe `like this', it is converted to a form ‘like this’ using single quotation marks, even without C-x 8 commands. Similarly, typing a quotation ``like this'' using double grave accent and apostrophe converts it to a form “like this” using double quotation marks. See Quotation Marks.
+** Changing the Location of Point
+‘M-g c’
+     Read a number N and move point to buffer position N.  Position 1 is
+     the beginning of the buffer.
+
+‘M-g M-g’
+‘M-g g’
+     Read a number N and move point to the beginning of line number N
+     (‘goto-line’).  Line 1 is the beginning of the buffer.  If point is
+     on or just after a number in the buffer, that is the default for N.
+     Just type <RET> in the minibuffer to use it.  You can also specify
+     N by giving ‘M-g M-g’ a numeric prefix argument.  *Note Select
+     Buffer::, for the behavior of ‘M-g M-g’ when you give it a plain
+     prefix argument.
+
+‘M-g <TAB>’
+     Read a number N and move to column N in the current line.  Column 0
+     is the leftmost column.  If called with a prefix argument, move to
+     the column number specified by the argument’s numeric value.
+
+‘C-x C-n’
+     Use the current column of point as the “semipermanent goal column”
+     for ‘C-n’ and ‘C-p’ (‘set-goal-column’) in the current buffer.
+     When a semipermanent goal column is in effect, those commands
+     always try to move to this column, or as close as possible to it,
+     after moving vertically.  The goal column remains in effect until
+     canceled.
+
+‘C-u C-x C-n’
+     Cancel the goal column.  Henceforth, ‘C-n’ and ‘C-p’ try to
+     preserve the horizontal position, as usual.
+
+
+When a line of text in the buffer is longer than the width of the window, Emacs usually displays it on two or more screen lines. For convenience, C-n and C-p move point by screen lines, as do the equivalent keys down and up. You can force these commands to move according to logical lines (i.e., according to the text lines in the buffer) by setting the variable line-move-visual to nil; if a logical line occupies multiple screen lines, the cursor then skips over the additional screen lines. For details, see Continuation Lines. See Variables, for how to set variables such as line-move-visual.     
+
+When line-move-visual is nil, you can also set the variable track-eol to a non-nil value. Then C-n and C-p, when starting at the end of the logical line, move to the end of the next logical line. Normally, track-eol is nil.
+
+C-n normally stops at the end of the buffer when you use it on the last line in the buffer. However, if you set the variable next-line-add-newlines to a non-nil value, C-n on the last line of a buffer creates an additional line at the end and moves down into it.
+** Erasing Text
+‘M-<DEL>’
+‘M-<BACKSPACE>’
+     Kill back to the beginning of the previous word
+     (‘backward-kill-word’).
+
+On some text terminals, Emacs may not recognize the DEL key properly. See DEL Does Not Delete, if you encounter this problem.
+** Continuation Lines
+Sometimes, a line of text in the buffer—a logical line—is too long to fit in the window, and Emacs displays it as two or more screen lines. 
+On a graphical display, Emacs indicates line wrapping with small bent arrows in the left and right window fringes. On a text terminal, Emacs indicates line wrapping by displaying a ‘\’ character at the right margin.
+** Cursor Position Information
+‘M-x what-line’
+     Display the line number of point.
+‘M-x line-number-mode’
+‘M-x column-number-mode’
+     Toggle automatic display of the current line number or column
+     number.  *Note Optional Mode Line::.  If you want to have a line
+     number displayed before each line, see *note Display Custom::.
+
+‘M-=’
+     Display the number of lines, words, and characters that are present
+     in the region (‘count-words-region’).  *Note Mark::, for
+     information about the region.
+
+‘M-x count-words’
+     Display the number of lines, words, and characters that are present
+     in the buffer.  If the region is active (*note Mark::), display the
+     numbers for the region instead.
+
+‘C-x =’
+     Display the character code of character after point, character
+     position of point, and column of point (‘what-cursor-position’).
+‘M-x hl-line-mode’
+     Enable or disable highlighting of the current line.  *Note Cursor
+     Display::.
+‘M-x size-indication-mode’
+     Toggle automatic display of the size of the buffer.  *Note Optional
+     Mode Line::.
+** Numeric Arguments
+If you enter more than one digit, you need not hold down the Meta key for the second and subsequent digits. Thus, to move down fifty lines, type
+
+M-5 0 C-n
+Note that this does not insert five copies of ‘0’ and move down one line, as you might expect—the ‘0’ is treated as part of the prefix argument.
+
+(What if you do want to insert five copies of ‘0’? Type M-5 C-u 0. Here, C-u terminates the prefix argument, so that the next keystroke begins the command that you want to execute. Note that this meaning of C-u applies only to this case. For the usual role of C-u, see below.)
+
+C-u alone has the special meaning of “four times”: it multiplies the argument for the next command by four. C-u C-u multiplies it by sixteen. Thus, C-u C-u C-f moves forward sixteen characters. Other useful combinations are C-u C-n, C-u C-u C-n (move down a good fraction of a screen), C-u C-u C-o (make sixteen blank lines), and C-u C-k (kill four lines).You can separate the argument from the digit to insert with another C-u; for example, C-u 6 4 C-u 1 does insert 64 copies of the character ‘1’.
+** Repeating a Command
+The command C-x z (repeat) provides another way to repeat an Emacs command many times. This command repeats the previous Emacs command, whatever that was.
+
+For example, suppose you type C-u 2 0 C-d to delete 20 characters. You can repeat that command (including its argument) three additional times, to delete a total of 80 characters, by typing C-x z z z. 
+
+* The Minibuffer
+
+** Minibuffers for File Names
+Commands such as C-x C-f (find-file) use the minibuffer to read a file name argument
+
+you can ignore the default, and enter an absolute file name starting with a slash or a tilde after the default directory. For example, you can specify /etc/termcap as follows:
+#+BEGIN_EXAMPLE
+Find file: /u2/emacs/src//etc/termcap
+#+END_EXAMPLE
+A double slash causes Emacs to ignore everything before the second slash in the pair.
+
+The ignored part of the file name is dimmed if the terminal allows it. (To disable this dimming, turn off File Name Shadow mode with the command M-x file-name-shadow-mode.)
+
+When completing remote file names (see Remote Files), a double slash behaves slightly differently: it causes Emacs to ignore only the file-name part, leaving the rest (method, host and username, etc.) intact. Typing three slashes in a row ignores everything in remote file names. See File name completion in The Tramp Manual.
+
+Emacs interprets ~/ as your home directory. Thus, ~/foo/bar.txt specifies a file named bar.txt, inside a directory named foo, which is in turn located in your home directory. In addition, ~user-id/ means the home directory of a user whose login name is user-id. Any leading directory name in front of the ~ is ignored: thus, /u2/emacs/~/foo/bar.txt is equivalent to ~/foo/bar.txt.
+
+To prevent Emacs from inserting the default directory when reading file names, change the variable insert-default-directory to nil. In that case, the minibuffer starts out empty. Nonetheless, relative file name arguments are still interpreted based on the same default directory.
+
+** Editing in the Minibuffer
+When the minibuffer is active, the echo area is treated much like an ordinary Emacs window. For instance, you can switch to another window (with C-x o), edit text there, then return to the minibuffer window to finish the argument.
+
+Normally, the minibuffer window occupies a single screen line. However, if you add two or more lines’ worth of text into the minibuffer, it expands automatically to accommodate the text. The variable resize-mini-windows controls the resizing of the minibuffer. The default value is grow-only, which means the behavior we have just described. If the value is t, the minibuffer window will also shrink automatically if you remove some lines of text from the minibuffer, down to a minimum of one screen line. If the value is nil, the minibuffer window never changes size automatically, but you can use the usual window-resizing commands on it (see Windows).

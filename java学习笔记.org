@@ -1,0 +1,6642 @@
+* 快速入门
+** java简介
+Java介于编译型语言和解释型语言之间。编译型语言如C、C++，代码是直接编译成机器码执行，但是不同的平台（x86、ARM等）CPU的指令集不同，因此，需要编译出每一种平台的对应机器码。解释型语言如Python、Ruby没有这个问题，可以由解释器直接加载源码然后运行，代价是运行效率太低。而Java是将代码编译成一种“字节码”，它类似于抽象的CPU指令，然后，针对不同平台编写虚拟机，不同平台的虚拟机负责加载字节码并执行，这样就实现了“一次编写，到处运行”的效果。当然，这是针对Java开发者而言。对于虚拟机，需要为每个平台分别开发。为了保证不同平台、不同公司开发的虚拟机都能正确执行Java字节码，SUN公司制定了一系列的Java虚拟机规范。从实践的角度看，JVM的兼容性做得非常好，低版本的Java字节码完全可以正常运行在高版本的JVM上。
+
+随着Java的发展，SUN给Java又分出了三个不同版本：
+- Java SE：Standard Edition
+- Java EE：Enterprise Edition
+- Java ME：Micro Edition
+
+这三者之间有啥关系呢？
+
+┌───────────────────────────┐
+│Java EE                    │
+│    ┌────────────────────┐ │
+│    │Java SE             │ │
+│    │    ┌─────────────┐ │ │
+│    │    │   Java ME   │ │ │
+│    │    └─────────────┘ │ │
+│    └────────────────────┘ │
+└───────────────────────────┘
+
+简单来说，Java SE就是标准版，包含标准的JVM和标准库，而Java EE是企业版，它只是在Java SE的基础上加上了大量的API和库，以便方便开发Web应用、数据库、消息服务等，Java EE的应用使用的虚拟机和Java SE完全相同。
+
+Java ME就和Java SE不同，它是一个针对嵌入式设备的“瘦身版”，Java SE的标准库无法在Java ME上使用，Java ME的虚拟机也是“瘦身版”。
+
+毫无疑问，Java SE是整个Java平台的核心，而Java EE是进一步学习Web应用所必须的。我们熟悉的Spring等框架都是Java EE开源生态系统的一部分。不幸的是，Java ME从来没有真正流行起来，反而是Android开发成为了移动平台的标准之一，因此，没有特殊需求，不建议学习Java ME。
+
+因此我们推荐的Java学习路线图如下：
+1. 首先要学习Java SE，掌握Java语言本身、Java核心开发技术以及Java标准库的使用；
+2. 如果继续学习Java EE，那么Spring框架、数据库开发、分布式架构就是需要学习的；
+3. 如果要学习大数据开发，那么Hadoop、Spark、Flink这些大数据平台就是需要学习的，他们都基于Java或Scala开发；
+4. 如果想要学习移动开发，那么就深入Android平台，掌握Android App开发。
+
+*** 名词解释
+初学者学Java，经常听到JDK、JRE这些名词，它们到底是啥？
+- JDK：Java Development Kit
+- JRE：Java Runtime Environment
+简单地说，JRE就是运行Java字节码的虚拟机。但是，如果只有Java源码，要编译成Java字节码，就需要JDK，因为JDK除了包含JRE，还提供了编译器、调试器等开发工具。
+
+二者关系如下：
+
+  ┌─    ┌──────────────────────────────────┐
+  │     │     Compiler, debugger, etc.     │
+  │     └──────────────────────────────────┘
+ JDK ┌─ ┌──────────────────────────────────┐
+  │  │  │                                  │
+  │ JRE │      JVM + Runtime Library       │
+  │  │  │                                  │
+  └─ └─ └──────────────────────────────────┘
+        ┌───────┐┌───────┐┌───────┐┌───────┐
+        │Windows││ Linux ││ macOS ││others │
+        └───────┘└───────┘└───────┘└───────┘
+
+Java Development Kit（JDK）是太阳微系统针对Java开发人员发布的免费软件开发工具包（SDK，Software development kit）。自从Java推出以来，JDK已经成为使用最广泛的Java SDK。
+
+作为Java语言的SDK，普通用户并不需要安装JDK来运行Java程序，而只需要安装JRE（Java Runtime Environment）。而程序开发者必须安装JDK来编译、调试程序。
+
+要学习Java开发，当然需要安装JDK了。
+
+那JSR、JCP……又是啥？
+- JSR规范：Java Specification Request
+- JCP组织：Java Community Process
+为了保证Java语言的规范性，SUN公司搞了一个JSR规范，凡是想给Java平台加一个功能，比如说访问数据库的功能，大家要先创建一个JSR规范，定义好接口，这样，各个数据库厂商都按照规范写出Java驱动程序，开发者就不用担心自己写的数据库代码在MySQL上能跑，却不能跑在PostgreSQL上。
+
+所以JSR是一系列的规范，从JVM的内存模型到Web程序接口，全部都标准化了。而负责审核JSR的组织就是JCP。
+
+一个JSR规范发布时，为了让大家有个参考，还要同时发布一个“参考实现”，以及一个“兼容性测试套件”：
+- RI：Reference Implementation
+- TCK：Technology Compatibility Kit
+比如有人提议要搞一个基于Java开发的消息服务器，这个提议很好啊，但是光有提议还不行，得贴出真正能跑的代码，这就是RI。如果有其他人也想开发这样一个消息服务器，如何保证这些消息服务器对开发者来说接口、功能都是相同的？所以还得提供TCK。
+
+通常来说，RI只是一个“能跑”的正确的代码，它不追求速度，所以，如果真正要选择一个Java的消息服务器，一般是没人用RI的，大家都会选择一个有竞争力的商用或开源产品。
+
+** 安装JDK
+因为Java程序必须运行在JVM之上，所以，我们第一件事情就是安装JDK。
+
+搜索JDK 15，确保从Oracle的官网下载最新的稳定版JDK：
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/2020-12-1.png @ 2020-12-01 20:23:28
+[[file:%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/2020-12-01_20-23-28_2020-12-1.png]]
+
+找到Java SE 15的下载链接，下载安装即可。
+
+*** 设置环境变量
+安装完JDK后，需要设置一个JAVA_HOME的环境变量，它指向JDK的安装目录。在Windows下，它是安装目录，类似：
+~C:\Program Files\Java\jdk-15~
+
+在Mac下，它在 ~~/.bash_profile~ 或 ~~/.zprofile~ 里，它是：
+
+~export JAVA_HOME=`/usr/libexec/java_home -v 15`~
+
+然后，把JAVA_HOME的bin目录附加到系统环境变量PATH上。在Windows下，它长这样：
+~Path=%JAVA_HOME%\bin;<现有的其他路径>~
+
+在Mac下，它在 ~~/.bash_profile~ 或 ~~/.zprofile~ 里，长这样：
+
+~export PATH=$JAVA_HOME/bin:$PATH~
+
+把 ~JAVA_HOME~ 的 ~bin~ 目录添加到 ~PATH~ 中是为了在任意文件夹下都可以运行java。打开命令提示符窗口，输入命令 ~java -version~ ，如果一切正常，你会看到如下输出：
+
+┌────────────────────────────────────────────────────────┐
+│Command Prompt                                    - □ x │
+├────────────────────────────────────────────────────────┤
+│Microsoft Windows [Version 10.0.0]                      │
+│(c) 2015 Microsoft Corporation. All rights reserved.    │
+│                                                        │
+│C:\> java -version                                      │
+│java version "15" ...                                   │
+│Java(TM) SE Runtime Environment                         │
+│Java HotSpot(TM) 64-Bit Server VM                       │
+│                                                        │
+│C:\>                                                    │
+│                                                        │
+│                                                        │
+└────────────────────────────────────────────────────────┘
+如果你看到的版本号不是15，而是14、1.8之类，说明系统存在多个JDK，且默认JDK不是JDK 15，需要把JDK 15提到PATH前面。
+
+如果你得到一个错误输出：
+
+┌────────────────────────────────────────────────────────┐
+│Command Prompt                                    - □ x │
+├────────────────────────────────────────────────────────┤
+│Microsoft Windows [Version 10.0.0]                      │
+│(c) 2015 Microsoft Corporation. All rights reserved.    │
+│                                                        │
+│C:\> java -version                                      │
+│'java' is not recognized as an internal or external comm│
+│and, operable program or batch file.                    │
+│                                                        │
+│C:\>                                                    │
+│                                                        │
+│                                                        │
+│                                                        │
+└────────────────────────────────────────────────────────┘
+这是因为系统无法找到Java虚拟机的程序 ~java.exe~ ，需要检查JAVA_HOME和PATH的配置。
+
+可以参考如何设置或更改PATH系统变量。
+
+*** JDK
+细心的童鞋还可以在 ~JAVA_HOME~ 的 ~bin~ 目录下找到很多可执行文件：
+- java：这个可执行程序其实就是JVM，运行Java程序，就是启动JVM，然后让JVM执行指定的编译后的代码；
+- javac：这是Java的编译器，它用于把Java源码文件（以.java后缀结尾）编译为Java字节码文件（以.class后缀结尾）；
+- jar：用于把一组.class文件打包成一个.jar文件，便于发布；
+- javadoc：用于从Java源码中自动提取注释并生成文档；
+- jdb：Java调试器，用于开发阶段的运行调试。
+*** 第一个java程序
+我们来编写第一个Java程序。
+
+打开文本编辑器，输入以下代码：
+
+public class Hello {
+    public static void main(String[] args) {
+        System.out.println("Hello, world!");
+    }
+}
+在一个Java程序中，你总能找到一个类似：
+
+public class Hello {
+    ...
+}
+的定义，这个定义被称为class（类），这里的类名是Hello，大小写敏感，class用来定义一个类，public表示这个类是公开的，public、class都是Java的关键字，必须小写，Hello是类的名字，按照习惯，首字母H要大写。而花括号{}中间则是类的定义。
+
+注意到类的定义中，我们定义了一个名为main的方法：
+
+    public static void main(String[] args) {
+        ...
+    }
+方法是可执行的代码块，一个方法除了方法名main，还有用()括起来的方法参数，这里的main方法有一个参数，参数类型是String[]，参数名是args，public、static用来修饰方法，这里表示它是一个公开的静态方法，void是方法的返回类型，而花括号{}中间的就是方法的代码。
+
+方法的代码每一行用;结束，这里只有一行代码，就是：
+
+        System.out.println("Hello, world!");
+它用来打印一个字符串到屏幕上。
+
+Java规定，某个类定义的public static void main(String[] args)是Java程序的固定入口方法，因此，Java程序总是从main方法开始执行。
+
+注意到Java源码的缩进不是必须的，但是用缩进后，格式好看，很容易看出代码块的开始和结束，缩进一般是4个空格或者一个tab。
+
+最后，当我们把代码保存为文件时，文件名必须是Hello.java，而且文件名也要注意大小写，因为要和我们定义的类名Hello完全保持一致。
+
+如何运行Java程序
+Java源码本质上是一个文本文件，我们需要先用javac把Hello.java编译成字节码文件Hello.class，然后，用java命令执行这个字节码文件：
+
+┌──────────────────┐
+│    Hello.java    │<─── source code
+└──────────────────┘
+          │ compile
+          ▼
+┌──────────────────┐
+│   Hello.class    │<─── byte code
+└──────────────────┘
+          │ execute
+          ▼
+┌──────────────────┐
+│    Run on JVM    │
+└──────────────────┘
+因此，可执行文件javac是编译器，而可执行文件java就是虚拟机。
+
+第一步，在保存Hello.java的目录下执行命令javac Hello.java：
+
+$ javac Hello.java
+如果源代码无误，上述命令不会有任何输出，而当前目录下会产生一个Hello.class文件：
+
+$ ls
+Hello.class	Hello.java
+第二步，执行Hello.class，使用命令java Hello：
+
+$ java Hello
+Hello, world!
+注意：给虚拟机传递的参数Hello是我们定义的类名，虚拟机自动查找对应的class文件并执行。
+
+有一些童鞋可能知道，直接运行java Hello.java也是可以的：
+
+$ java Hello.java 
+Hello, world!
+这是Java 11新增的一个功能，它可以直接运行一个单文件源码！
+
+需要注意的是，在实际项目中，单个不依赖第三方库的Java源码是非常罕见的，所以，绝大多数情况下，我们无法直接运行一个Java源码文件，原因是它需要依赖其他的库。
+
+小结
+- 一个Java源码只能定义一个public类型的class，并且class名称和文件名要完全一致；
+- 使用javac可以将.java源码编译成.class字节码；
+- 使用java可以运行一个已编译的Java程序，参数是类名。
+** 使用IDE
+本教程使用Eclipse作为开发演示环境
+
+*** 安装Eclipse
+Eclipse的发行版提供了预打包的开发环境，包括Java、JavaEE、C++、PHP、Rust等。从[[https://www.eclipse.org/downloads/packages/][这里]]下载：
+
+我们需要下载的版本是Eclipse IDE for Java Developers：
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-02_21-31-59.png @ 2020-12-02 21:34:44
+[[file:%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/2020-12-02_21-34-44_Snipaste_2020-12-02_21-31-59.png]]
+
+*** 设置Eclipse
+下载并安装完成后，我们启动Eclipse，对IDE环境做一个基本设置：
+
+选择菜单“Eclipse/Window”-“Preferences”，打开配置对话框：
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-02_21-35-03.png @ 2020-12-02 21:36:16
+[[file:%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/2020-12-02_21-36-16_Snipaste_2020-12-02_21-35-03.png]]
+
+
+我们需要调整以下设置项：
+
+1. General > Editors > Text Editors
+钩上“Show line numbers”，这样编辑器会显示行号；
+
+2. General > Workspace
+
+钩上“Refresh using native hooks or polling”，这样Eclipse会自动刷新文件夹的改动；
+
+对于“Text file encoding”，如果Default不是UTF-8，一定要改为“Other：UTF-8”，所有文本文件均使用UTF-8编码；
+
+对于“New text file line delimiter”，建议使用Unix，即换行符使用\n而不是Windows的\r\n。
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-02_21-36-39.png @ 2020-12-02 21:36:44
+[[file:%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/2020-12-02_21-36-44_Snipaste_2020-12-02_21-36-39.png]]
+
+3. Java > Compiler
+
+将“Compiler compliance level”设置为15，本教程的所有代码均使用Java 15的语法，并且编译到Java 15的版本。
+
+去掉“Use default compliance settings”并钩上“Enable preview features for Java 15”，这样我们就可以使用Java 15的预览功能。
+
+如果Compiler compliance level没有15这个选项，请更新到最新版Eclipse。如果更新后还是没有15，打开Help - Eclipse Marketplace，搜索Java 15 Support安装后重启即可。
+
+4. Java > Installed JREs
+
+在Installed JREs中应该看到Java SE 15，如果还有其他的JRE，可以删除，以确保Java SE 15是默认的JRE。
+
+*** Eclipse IDE结构
+打开Eclipse后，整个IDE由若干个区域组成：
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-02_21-42-49.png @ 2020-12-02 21:45:17
+[[file:%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/2020-12-02_21-45-17_Snipaste_2020-12-02_21-42-49.png]]
+
+- 中间可编辑的文本区（见1）是编辑器，用于编辑源码；
+- 分布在左右和下方的是视图：
+  - Package Exploroer（见2）是Java项目的视图
+  - Console（见3）是命令行输出视图
+  - Outline（见4）是当前正在编辑的Java源码的结构视图
+- 视图可以任意组合，然后把一组视图定义成一个Perspective（见5），Eclipse预定义了Java、Debug等几个Perspective，用于快速切换。
+
+*** 新建Java项目
+在Eclipse菜单选择“File”-“New”-“Java Project”，填入HelloWorld，JRE选择Java SE 15：
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-02_21-46-41.png @ 2020-12-02 21:46:51
+[[file:%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/2020-12-02_21-46-51_Snipaste_2020-12-02_21-46-41.png]]
+
+
+暂时不要勾选“Create module-info.java file”，因为模块化机制我们后面才会讲到：
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-02_21-46-46.png @ 2020-12-02 21:47:04
+[[file:%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/2020-12-02_21-47-04_Snipaste_2020-12-02_21-46-46.png]]
+
+
+点击“Finish”就成功创建了一个名为HelloWorld的Java工程。
+
+*** 新建Java文件并运行
+展开HelloWorld工程，选中源码目录src，点击右键，在弹出菜单中选择“New”-“Class”：
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-02_21-47-11.png @ 2020-12-02 21:47:46
+[[file:%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/2020-12-02_21-47-46_Snipaste_2020-12-02_21-47-11.png]]
+
+
+在弹出的对话框中，Name一栏填入Hello：
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-02_21-47-16.png @ 2020-12-02 21:47:54
+[[file:%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/2020-12-02_21-47-54_Snipaste_2020-12-02_21-47-16.png]]
+
+
+点击”Finish“，就自动在src目录下创建了一个名为Hello.java的源文件。我们双击打开这个源文件，填上代码：
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-02_21-47-23.png @ 2020-12-02 21:48:10
+[[file:%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/2020-12-02_21-48-10_Snipaste_2020-12-02_21-47-23.png]]
+
+
+保存，然后选中文件Hello.java，点击右键，在弹出的菜单中选中“Run As...”-“Java Application”：
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-02_21-47-26.png @ 2020-12-02 21:48:17
+[[file:%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/2020-12-02_21-48-17_Snipaste_2020-12-02_21-47-26.png]]
+
+在Console窗口中就可以看到运行结果：
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-02_21-47-33.png @ 2020-12-02 21:48:23
+[[file:%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/2020-12-02_21-48-23_Snipaste_2020-12-02_21-47-33.png]]
+
+如果没有在主界面中看到Console窗口，请选中菜单“Window”-“Show View”-“Console”，即可显示。
+** JDK8与Java1.8的区别
+从下方的JDK各个版本发布时间和版本名称表也可以看到，Java大体有3大类命名方式：JDK、J2SE、JAVA SE。
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/20200407153336875.png @ 2021-02-02 22:27:29
+[[file:%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/2021-02-02_22-27-29_20200407153336875.png]]
+
+JDK8或者JDK1.8是由于自从JDK1.5/JDK5命名方式改变后遗留的新旧命令方式问题。所以JDK8或者JDK1.8也是同一个东西。
+
+JAVA就是指JDK开发工具，所以我们可以理解为JAVA等价于JDK。JAVA有3个版本：J2SE J2EE J2ME，而J2SE是标准版本，J2ME是手机方向的，J2EE是网站开发方向的。
+* 基本数据类型
+** 字符
+还可以直接用转义字符\u+Unicode编码来表示一个字符：
+#+BEGIN_SRC java 
+// 注意是十六进制:
+char c3 = '\u0041'; // 'A'，因为十六进制0041 = 十进制65
+char c4 = '\u4e2d'; // '中'，因为十六进制4e2d = 十进制20013
+#+END_SRC
+** 字符串
+Java的编译器对字符串做了特殊照顾，可以使用+连接任意字符串和其他数据类型，这样极大地方便了字符串的处理。
+
+从Java 13开始，字符串可以用"""..."""表示多行字符串（Text Blocks）了
+#+HEADERS: :classname HelloWorld 
+#+begin_src java  :results output :exports both
+public class HelloWorld {
+    public static void main(String[] args) {
+        String s = """
+                   SELECT * FROM
+                     users
+                   WHERE id > 100
+                   ORDER BY name DESC
+                   """;
+        System.out.println(s);
+    }
+}
+#+END_SRC
+
+#+RESULTS:
+: SELECT * FROM
+:   users
+: WHERE id > 100
+: ORDER BY name DESC
+: 
+
+上述多行字符串实际上是5行，在最后一个DESC后面还有一个\n。如果我们不想在字符串末尾加一个\n，就需要这么写：
+#+begin_src java  
+String s = """ 
+           SELECT * FROM
+             users
+           WHERE id > 100
+           ORDER BY name DESC""";
+#+end_src
+还需要注意到，多行字符串前面共同的空格会被去掉，即：
+#+begin_src java  
+String s = """
+...........SELECT * FROM
+...........  users
+...........WHERE id > 100
+...........ORDER BY name DESC
+...........""";
+#+end_src
+用.标注的空格都会被去掉。
+
+如果多行字符串的排版不规则，那么，去掉的空格就会变成这样：
+#+begin_src java  
+String s = """
+.........  SELECT * FROM
+.........    users
+.........WHERE id > 100
+.........  ORDER BY name DESC
+.........  """;
+#+end_src
+
+*** 不可变特性
+Java的字符串除了是一个引用类型外，还有个重要特点，就是字符串不可变。考察以下代码：
+#+HEADERS: :classname Main
+#+begin_src java  :results output :exports both
+public class Main {
+    public static void main(String[] args) {
+        String s = "hello";
+        System.out.println(s); // 显示 hello
+        s = "world";
+        System.out.println(s); // 显示 world
+    }
+}
+
+#+END_SRC
+
+#+RESULTS:
+: hello
+: world
+
+观察执行结果，难道字符串s变了吗？其实变的不是字符串，而是变量s的“指向”。
+
+执行String s = "hello";时，JVM虚拟机先创建字符串"hello"，然后，把字符串变量s指向它：
+
+      s
+      │
+      ▼
+┌───┬───────────┬───┐
+│   │  "hello"  │   │
+└───┴───────────┴───┘
+紧接着，执行s = "world";时，JVM虚拟机先创建字符串"world"，然后，把字符串变量s指向它：
+
+      s ──────────────┐
+                      │
+                      ▼
+┌───┬───────────┬───┬───────────┬───┐
+│   │  "hello"  │   │  "world"  │   │
+└───┴───────────┴───┴───────────┴───┘
+原来的字符串"hello"还在，只是我们无法通过变量s访问它而已。因此，字符串的不可变是指字符串内容不可变。
+
+理解了引用类型的“指向”后，试解释下面的代码输出：
+#+HEADERS: :classname Main
+#+begin_src java  :results output :exports both
+public class Main {
+    public static void main(String[] args) {
+        String s = "hello";
+        String t = s;
+        s = "world";
+        System.out.println(t); //t显示是"hello"还是"world"?
+    }
+}
+#+END_SRC
+
+#+RESULTS:
+: hello
+** 数组
+#+HEADERS: :classname Main
+#+begin_src java  :results output :exports both
+public class Main {
+    public static void main(String[] args) {
+        // 5位同学的成绩:
+        int[] ns = new int[5];
+        ns[0] = 68;
+        ns[1] = 79;
+        ns[2] = 91;
+        ns[3] = 85;
+        ns[4] = 62;
+	System.out.println(ns.length); // 5
+    }
+}
+#+END_SRC
+
+#+RESULTS:
+: 5
+
+Java的数组有几个特点：
+- 数组所有元素初始化为默认值，整型都是0，浮点型是0.0，布尔型是false；
+- 数组一旦创建后，大小就不可改变。
+
+可以用 ~数组变量.length~ 获取数组大小
+
+可以在定义数组时直接指定初始化的元素:
+#+HEADERS: :classname Main
+#+begin_src java  :results output :exports both
+public class Main {
+    public static void main(String[] args) {
+        // 5位同学的成绩:
+        int[] ns = new int[] { 68, 79, 91, 85, 62 };
+        System.out.println(ns.length); // 编译器自动推算数组大小为5
+    }
+}
+
+#+END_SRC
+
+#+RESULTS:
+: 5
+
+还可以进一步简写为：
+#+begin_src java  
+int[] ns = { 68, 79, 91, 85, 62 };
+#+end_src
+注意数组是引用类型，并且数组大小不可变。我们观察下面的代码：
+#+HEADERS: :classname Main
+#+begin_src java  :results output :exports both
+public class Main {
+    public static void main(String[] args) {
+        // 5位同学的成绩:
+        int[] ns;
+        ns = new int[] { 68, 79, 91, 85, 62 };
+        System.out.println(ns.length); // 5
+        ns = new int[] { 1, 2, 3 };
+        System.out.println(ns.length); // 3
+    }
+}
+
+#+END_SRC
+
+#+RESULTS:
+: 5
+: 3
+
+数组大小变了吗？看上去好像是变了，但其实根本没变。
+
+对于数组ns来说，执行ns = new int[] { 68, 79, 91, 85, 62 };时，它指向一个5个元素的数组：
+
+     ns
+      │
+      ▼
+┌───┬───┬───┬───┬───┬───┬───┐
+│   │68 │79 │91 │85 │62 │   │
+└───┴───┴───┴───┴───┴───┴───┘
+执行ns = new int[] { 1, 2, 3 };时，它指向一个新的3个元素的数组：
+
+     ns ──────────────────────┐
+                              │
+                              ▼
+┌───┬───┬───┬───┬───┬───┬───┬───┬───┬───┬───┐
+│   │68 │79 │91 │85 │62 │   │ 1 │ 2 │ 3 │   │
+└───┴───┴───┴───┴───┴───┴───┴───┴───┴───┴───┘
+但是，原有的5个元素的数组并没有改变，只是无法通过变量ns引用到它们而已。
+** 字符串数组
+如果数组元素不是基本类型，而是一个引用类型，那么，修改数组元素会有哪些不同？
+
+字符串是引用类型，因此我们先定义一个字符串数组：
+#+begin_src java  
+String[] names = {
+    "ABC", "XYZ", "zoo"
+};
+#+end_src
+对于String[]类型的数组变量names，它实际上包含3个元素，但每个元素都指向某个字符串对象：
+
+          ┌─────────────────────────┐
+    names │   ┌─────────────────────┼───────────┐
+      │   │   │                     │           │
+      ▼   │   │                     ▼           ▼
+┌───┬───┬─┴─┬─┴─┬───┬───────┬───┬───────┬───┬───────┬───┐
+│   │░░░│░░░│░░░│   │ "ABC" │   │ "XYZ" │   │ "zoo" │   │
+└───┴─┬─┴───┴───┴───┴───────┴───┴───────┴───┴───────┴───┘
+      │                 ▲
+      └─────────────────┘
+对names[1]进行赋值，例如names[1] = "cat";，效果如下：
+
+          ┌─────────────────────────────────────────────────┐
+    names │   ┌─────────────────────────────────┐           │
+      │   │   │                                 │           │
+      ▼   │   │                                 ▼           ▼
+┌───┬───┬─┴─┬─┴─┬───┬───────┬───┬───────┬───┬───────┬───┬───────┬───┐
+│   │░░░│░░░│░░░│   │ "ABC" │   │ "XYZ" │   │ "zoo" │   │ "cat" │   │
+└───┴─┬─┴───┴───┴───┴───────┴───┴───────┴───┴───────┴───┴───────┴───┘
+      │                 ▲
+      └─────────────────┘
+这里注意到原来names[1]指向的字符串"XYZ"并没有改变，仅仅是将names[1]的引用从指向"XYZ"改成了指向"cat"，其结果是字符串"XYZ"再也无法通过names[1]访问到了。
+
+对“指向”有了更深入的理解后，试解释如下代码：
+#+HEADERS: :classname Main2
+#+begin_src java  :results output :exports both
+public class Main2 {
+    public static void main(String[] args) {
+        String[] names = {"ABC", "XYZ", "zoo"};
+        String s = names[1];
+        names[1] = "cat";
+        System.out.println(s); // s是"XYZ"还是"cat"?
+    }
+}
+
+#+END_SRC
+
+#+RESULTS:
+: XYZ
+
+* 输入和输出
+** 输出
+在前面的代码中，我们总是使用System.out.println()来向屏幕输出一些内容。
+
+println是print line的缩写，表示输出并换行。因此，如果输出后不想换行，可以用print()：
+
+#+HEADERS: :classname Main
+#+begin_src java  :results output :exports both
+public class Main {
+    public static void main(String[] args) {
+        System.out.print("A,");
+        System.out.print("B,");
+        System.out.print("C.");
+        System.out.println();
+        System.out.println("END");
+    }
+}
+
+#+END_SRC
+
+#+RESULTS:
+: A,B,C.
+: END
+** 格式化输出
+Java还提供了格式化输出的功能。为什么要格式化输出？因为计算机表示的数据不一定适合人来阅读：
+#+HEADERS: :classname Main :cmdline "-cp . -encoding UTF-8"
+#+begin_src java  :results output :exports both 
+public class Main {
+    public static void main(String[] args) {
+        double d = 3.1415926;
+        System.out.printf("%.2f\n", d); // 显示两位小数3.14
+        System.out.printf("%.4f\n", d); // 显示4位小数3.1416
+    }
+}
+
+
+#+END_SRC
+* 面向对象编程基础
+** 方法
+*** 方法的调用
+一个class可以包含多个field，例如，我们给Person类就定义了两个field：
+#+begin_src java  
+class Person {
+    public String name;
+    public int age;
+}
+#+end_src
+
+但是，直接把field用public暴露给外部可能会破坏封装性。比如，代码可以这样写：
+#+begin_src java  
+Person ming = new Person();
+ming.name = "Xiao Ming";
+ming.age = -99; // age设置为负数 
+#+end_src
+显然，直接操作field，容易造成逻辑混乱。为了避免外部代码直接去访问field，我们可以用private修饰field，拒绝外部访问：
+#+begin_src java  
+class Person {
+    private String name;
+    private int age;
+}
+#+end_src
+
+试试private修饰的field有什么效果：
+#+HEADERS: :classname Main
+#+begin_src java  :results output :exports both
+public class Main {
+    public static void main(String[] args) {
+        Person ming = new Person();
+        ming.name = "Xiao Ming"; // 对字段name赋值
+        ming.age = 12; // 对字段age赋值
+    }
+}
+
+class Person {
+    private String name;
+    private int age;
+}
+#+END_SRC
+
+#+BEGIN_EXAMPLE
+Main.java:5: error: name has private access in Person
+        ming.name = "Xiao Ming"; // 对字段name赋值
+            ^
+Main.java:6: error: age has private access in Person
+        ming.age = 12; // 对字段age赋值
+            ^
+2 errors
+error: compilation failed
+#+END_EXAMPLE
+是不是编译报错？把访问field的赋值语句去了就可以正常编译了。
+
+把field从public改成private，外部代码不能访问这些field，那我们定义这些field有什么用？怎么才能给它赋值？怎么才能读取它的值？
+
+所以我们需要使用方法（method）来让外部代码可以间接修改field：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        Person ming = new Person();
+        ming.setName("Xiao Ming"); // 设置name
+        ming.setAge(12); // 设置age
+        System.out.println(ming.getName() + ", " + ming.getAge());
+    }
+}
+
+class Person {
+    private String name;
+    private int age;
+
+    public String getName() {
+        return this.name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return this.age;
+    }
+
+    public void setAge(int age) {
+        if (age < 0 || age > 100) {
+            throw new IllegalArgumentException("invalid age value");
+        }
+        this.age = age;
+    }
+}
+#+end_src
+#+BEGIN_EXAMPLE
+Xiao Ming, 12
+#+END_EXAMPLE
+虽然外部代码不能直接修改private字段，但是，外部代码可以调用方法setName()和setAge()来间接修改private字段。在方法内部，我们就有机会检查参数对不对。比如，setAge()就会检查传入的参数，参数超出了范围，直接报错。这样，外部代码就没有任何机会把age设置成不合理的值。
+
+对setName()方法同样可以做检查，例如，不允许传入null和空字符串：
+#+begin_src java  
+public void setName(String name) {
+    if (name == null || name.isBlank()) {
+        throw new IllegalArgumentException("invalid name");
+    }
+    this.name = name.strip(); // 去掉首尾空格
+}
+#+end_src
+
+同样，外部代码不能直接读取private字段，但可以通过getName()和getAge()间接获取private字段的值。
+
+所以，一个类通过定义方法，就可以给外部代码暴露一些操作的接口，同时，内部自己保证逻辑一致性。
+
+调用方法的语法是实例变量.方法名(参数);。一个方法调用就是一个语句，所以不要忘了在末尾加;。例如：ming.setName("Xiao Ming");。
+*** 定义方法
+定义方法的语法是：
+#+begin_src java  
+修饰符 方法返回类型 方法名(方法参数列表) {
+    若干方法语句;
+    return 方法返回值;
+}
+#+end_src
+方法返回值通过return语句实现，如果没有返回值，返回类型设置为void，可以省略return。
+*** private方法
+有public方法，自然就有private方法。和private字段一样，private方法不允许外部调用，那我们定义private方法有什么用？
+
+定义private方法的理由是内部方法是可以调用private方法的。例如：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        Person ming = new Person();
+        ming.setBirth(2008);
+        System.out.println(ming.getAge());
+    }
+}
+
+class Person {
+    private String name;
+    private int birth;
+
+    public void setBirth(int birth) {
+        this.birth = birth;
+    }
+
+    public int getAge() {
+        return calcAge(2019); // 调用private方法
+    }
+
+    // private方法:
+    private int calcAge(int currentYear) {
+        return currentYear - this.birth;
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+11
+#+END_EXAMPLE
+观察上述代码，calcAge()是一个private方法，外部代码无法调用，但是，内部方法getAge()可以调用它。
+
+此外，我们还注意到，这个Person类只定义了birth字段，没有定义age字段，获取age时，通过方法getAge()返回的是一个实时计算的值，并非存储在某个字段的值。这说明方法可以封装一个类的对外接口，调用方不需要知道也不关心Person实例在内部到底有没有age字段。
+*** this变量
+在方法内部，可以使用一个隐含的变量this，它始终指向当前实例。因此，通过this.field就可以访问当前实例的字段。
+
+如果没有命名冲突，可以省略this。例如：
+#+begin_src java  
+class Person {
+    private String name;
+
+    public String getName() {
+        return name; // 相当于this.name
+    }
+}
+#+end_src
+但是，如果有局部变量和字段重名，那么局部变量优先级更高，就必须加上this：
+#+begin_src java  
+class Person {
+    private String name;
+
+    public void setName(String name) {
+        this.name = name; // 前面的this不可少，少了就变成局部变量name了
+    }
+}
+#+end_src
+*** 可变参数
+可变参数用类型...定义，可变参数相当于数组类型：
+#+begin_src java  
+class Group {
+    private String[] names;
+
+    public void setNames(String... names) {
+        this.names = names;
+    }
+}
+#+end_src
+上面的setNames()就定义了一个可变参数。调用时，可以这么写：
+#+begin_src java  
+Group g = new Group();
+g.setNames("Xiao Ming", "Xiao Hong", "Xiao Jun"); // 传入3个String
+g.setNames("Xiao Ming", "Xiao Hong"); // 传入2个String
+g.setNames("Xiao Ming"); // 传入1个String
+g.setNames(); // 传入0个String
+#+end_src
+完全可以把可变参数改写为String[]类型：
+#+begin_src java  
+class Group {
+    private String[] names;
+
+    public void setNames(String[] names) {
+        this.names = names;
+    }
+}
+#+end_src
+但是，调用方需要自己先构造String[]，比较麻烦。例如：
+#+begin_src java  
+Group g = new Group();
+g.setNames(new String[] {"Xiao Ming", "Xiao Hong", "Xiao Jun"}); // 传入1个String[]
+#+end_src
+另一个问题是，调用方可以传入null：
+#+begin_src java 
+Group g = new Group();
+g.setNames(null);
+#+end_src
+
+而可变参数可以保证无法传入null，因为传入0个参数时，接收到的实际值是一个空数组而不是null。
+*** 参数绑定
+**** 值传递 
+调用方把参数传递给实例方法时，调用时传递的值会按参数位置一一绑定。
+
+那什么是参数绑定？
+
+我们先观察一个基本类型参数的传递：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        Person p = new Person();
+        int n = 15; // n的值为15
+        p.setAge(n); // 传入n的值
+        System.out.println(p.getAge()); // 15
+        n = 20; // n的值改为20
+        System.out.println(p.getAge()); // 15还是20?
+    }
+}
+
+class Person {
+    private int age;
+
+    public int getAge() {
+        return this.age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+15
+15
+#+END_EXAMPLE
+**** 引用传递
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        Person p = new Person();
+        String[] fullname = new String[] { "Homer", "Simpson" };
+        p.setName(fullname); // 传入fullname数组
+        System.out.println(p.getName()); // "Homer Simpson"
+        fullname[0] = "Bart"; // fullname数组的第一个元素修改为"Bart"
+        System.out.println(p.getName()); // "Homer Simpson"还是"Bart Simpson"?
+    }
+}
+
+class Person {
+    private String[] name;
+
+    public String getName() {
+        return this.name[0] + " " + this.name[1];
+    }
+
+    public void setName(String[] name) {
+        this.name = name;
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+Homer Simpson
+Bart Simpson
+#+END_EXAMPLE
+注意到setName()的参数现在是一个数组。一开始，把fullname数组传进去，然后，修改fullname数组的内容，结果发现，实例p的字段p.name也被修改了！
+
+结论：引用类型参数的传递，调用方的变量，和接收方的参数变量，指向的是同一个对象。双方任意一方对这个对象的修改，都会影响对方（因为指向同一个对象嘛）。
+** 构造方法
+创建实例的时候，我们经常需要同时初始化这个实例的字段，例如：
+#+begin_src java  
+Person ming = new Person();
+ming.setName("小明");
+ming.setAge(12);
+#+end_src
+这时，我们就需要构造方法。
+
+创建实例的时候，实际上是通过构造方法来初始化实例的。我们先来定义一个构造方法，能在创建Person实例的时候，一次性传入name和age，完成初始化：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        Person p = new Person("Xiao Ming", 15);
+        System.out.println(p.getName());
+        System.out.println(p.getAge());
+    }
+}
+
+class Person {
+    private String name;
+    private int age;
+
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+    
+    public String getName() {
+        return this.name;
+    }
+
+    public int getAge() {
+        return this.age;
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+Xiao Ming
+15
+#+END_EXAMPLE
+由于构造方法是如此特殊，所以构造方法的名称就是类名。构造方法的参数没有限制，在方法内部，也可以编写任意语句。但是，和普通方法相比，构造方法没有返回值（也没有void），调用构造方法，必须用new操作符。
+*** 默认构造方法
+如果一个类没有定义构造方法，编译器会自动为我们生成一个默认构造方法，它没有参数，也没有执行语句，类似这样：
+#+begin_src java  
+class Person {
+    public Person() {
+    }
+}
+#+end_src
+要特别注意的是，如果我们自定义了一个构造方法，那么，编译器就不再自动创建默认构造方法：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        Person p = new Person(); // 编译错误:找不到这个构造方法
+    }
+}
+
+class Person {
+    private String name;
+    private int age;
+
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+    
+    public String getName() {
+        return this.name;
+    }
+
+    public int getAge() {
+        return this.age;
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+Main.java:4: error: constructor Person in class Person cannot be applied to given types;
+        Person p = new Person(); // 编译错误:找不到这个构造方法
+                   ^
+  required: String,int
+  found:    no arguments
+  reason: actual and formal argument lists differ in length
+1 error
+error: compilation failed
+#+END_EXAMPLE
+如果既要能使用带参数的构造方法，又想保留不带参数的构造方法，那么只能把两个构造方法都定义出来：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        Person p1 = new Person("Xiao Ming", 15); // 既可以调用带参数的构造方法
+        Person p2 = new Person(); // 也可以调用无参数构造方法
+    }
+}
+
+class Person {
+    private String name;
+    private int age;
+
+    public Person() {
+    }
+
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+    
+    public String getName() {
+        return this.name;
+    }
+
+    public int getAge() {
+        return this.age;
+    }
+}
+
+#+end_src
+没有在构造方法中初始化字段时，引用类型的字段默认是null，数值类型的字段用默认值，int类型默认值是0，布尔类型默认值是false：
+#+begin_src java  
+class Person {
+    private String name; // 默认初始化为null
+    private int age; // 默认初始化为0
+
+    public Person() {
+    }
+}
+#+end_src
+也可以对字段直接进行初始化：
+#+begin_src java  
+class Person {
+    private String name = "Unamed";
+    private int age = 10;
+}
+#+end_src
+那么问题来了：既对字段进行初始化，又在构造方法中对字段进行初始化：
+#+begin_src java  
+class Person {
+    private String name = "Unamed";
+    private int age = 10;
+
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+}
+#+end_src
+当我们创建对象的时候，new Person("Xiao Ming", 12)得到的对象实例，字段的初始值是啥？
+
+在Java中，创建对象实例的时候，按照如下顺序进行初始化：
+1. 先初始化字段，例如，int age = 10;表示字段初始化为10，double salary;表示字段默认初始化为0，String name;表示引用类型字段默认初始化为null；
+2. 执行构造方法的代码进行初始化。
+
+因此，构造方法的代码由于后运行，所以，new Person("Xiao Ming", 12)的字段值最终由构造方法的代码确定。
+*** 多构造方法
+可以定义多个构造方法，在通过new操作符调用的时候，编译器通过构造方法的参数数量、位置和类型自动区分：
+#+begin_src java  
+class Person {
+    private String name;
+    private int age;
+
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public Person(String name) {
+        this.name = name;
+        this.age = 12;
+    }
+
+    public Person() {
+    }
+}
+#+end_src
+
+如果调用new Person("Xiao Ming", 20);，会自动匹配到构造方法public Person(String, int)。
+
+如果调用new Person("Xiao Ming");，会自动匹配到构造方法public Person(String)。
+
+如果调用new Person();，会自动匹配到构造方法public Person()。
+
+一个构造方法可以调用其他构造方法，这样做的目的是便于代码复用。调用其他构造方法的语法是this(…)：
+#+begin_src java  
+class Person {
+    private String name;
+    private int age;
+
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public Person(String name) {
+        this(name, 18); // 调用另一个构造方法Person(String, int)
+    }
+
+    public Person() {
+        this("Unnamed"); // 调用另一个构造方法Person(String)
+#+end_src
+** 方法重载
+一个类中，我们可以定义多个方法。如果有一系列方法，它们的功能都是类似的，只有参数有所不同，那么，可以把这一组方法名做成同名方法。例如，在Hello类中，定义多个hello()方法：
+#+begin_src java  
+class Hello {
+    public void hello() {
+        System.out.println("Hello, world!");
+    }
+
+    public void hello(String name) {
+        System.out.println("Hello, " + name + "!");
+    }
+
+    public void hello(String name, int age) {
+        if (age < 18) {
+            System.out.println("Hi, " + name + "!");
+        } else {
+            System.out.println("Hello, " + name + "!");
+        }
+    }
+}
+#+end_src
+这种方法名相同，但各自的参数不同，称为方法重载（Overload）。方法重载的目的是，功能类似的方法使用同一名字，更容易记住，因此，调用起来更简单。
+
+注意：方法重载的返回值类型通常都是相同的。
+
+举个例子，String类提供了多个重载方法indexOf()，可以查找子串：
+- int indexOf(int ch)：根据字符的Unicode码查找；
+- int indexOf(String str)：根据字符串查找；
+- int indexOf(int ch, int fromIndex)：根据字符查找，但指定起始位置；
+- int indexOf(String str, int fromIndex)根据字符串查找，但指定起始位置。
+** 继承
+*** 简介 
+在前面的章节中，我们已经定义了Person类：
+#+begin_src java  
+class Person {
+    private String name;
+    private int age;
+
+    public String getName() {...}
+    public void setName(String name) {...}
+    public int getAge() {...}
+    public void setAge(int age) {...}
+}
+#+end_src
+现在，假设需要定义一个Student类，字段如下：
+#+begin_src java  
+class Student {
+    private String name;
+    private int age;
+    private int score;
+
+    public String getName() {...}
+    public void setName(String name) {...}
+    public int getAge() {...}
+    public void setAge(int age) {...}
+    public int getScore() { … }
+    public void setScore(int score) { … }
+}
+#+end_src
+
+仔细观察，发现Student类包含了Person类已有的字段和方法，只是多出了一个score字段和相应的getScore()、setScore()方法。
+
+继承是面向对象编程中非常强大的一种机制，它首先可以复用代码。当我们让Student从Person继承时，Student就获得了Person的所有功能，我们只需要为Student编写新增的功能。
+
+Java使用extends关键字来实现继承：
+#+begin_src java  
+class Person {
+    private String name;
+    private int age;
+
+    public String getName() {...}
+    public void setName(String name) {...}
+    public int getAge() {...}
+    public void setAge(int age) {...}
+}
+
+class Student extends Person {
+    // 不要重复name和age字段/方法,
+    // 只需要定义新增score字段/方法:
+    private int score;
+
+    public int getScore() { … }
+    public void setScore(int score) { … }
+}
+#+end_src
+可见，通过继承，Student只需要编写额外的功能，不再需要重复代码。
+
+注意：子类自动获得了父类的所有字段，严禁定义与父类重名的字段！
+
+在OOP的术语中，我们把Person称为超类（super class），父类（parent class），基类（base class），把Student称为子类（subclass），扩展类（extended class）。
+*** 继承树
+注意到我们在定义Person的时候，没有写extends。在Java中，没有明确写extends的类，编译器会自动加上extends Object。所以，任何类，除了Object，都会继承自某个类。下图是Person、Student的继承树：
+
+┌───────────┐
+│  Object   │
+└───────────┘
+      ▲
+      │
+┌───────────┐
+│  Person   │
+└───────────┘
+      ▲
+      │
+┌───────────┐
+│  Student  │
+└───────────┘
+Java只允许一个class继承自一个类，因此，一个类有且仅有一个父类。只有Object特殊，它没有父类。
+
+类似的，如果我们定义一个继承自Person的Teacher，它们的继承树关系如下：
+
+       ┌───────────┐
+       │  Object   │
+       └───────────┘
+             ▲
+             │
+       ┌───────────┐
+       │  Person   │
+       └───────────┘
+          ▲     ▲
+          │     │
+          │     │
+┌───────────┐ ┌───────────┐
+│  Student  │ │  Teacher  │
+└───────────┘ └───────────┘
+*** protected
+继承有个特点，就是子类无法访问父类的private字段或者private方法。例如，Student类就无法访问Person类的name和age字段：
+#+begin_src java  
+class Person {
+    private String name;
+    private int age;
+}
+
+class Student extends Person {
+    public String hello() {
+        return "Hello, " + name; // 编译错误：无法访问name字段
+    }
+}
+#+end_src
+这使得继承的作用被削弱了。为了让子类可以访问父类的字段，我们需要把private改为protected。用protected修饰的字段可以被子类访问：
+#+begin_src java  
+class Person {
+    protected String name;
+    protected int age;
+}
+
+class Student extends Person {
+    public String hello() {
+        return "Hello, " + name; // OK!
+    }
+}
+#+end_src
+因此，protected关键字可以把字段和方法的访问权限控制在继承树内部，一个protected字段和方法可以被其子类，以及子类的子类所访问，后面我们还会详细讲解。
+*** super
+super关键字表示父类（超类）。子类引用父类的字段时，可以用super.fieldName。例如：
+#+begin_src java  
+class Student extends Person {
+    public String hello() {
+        return "Hello, " + super.name;
+    }
+}
+#+end_src
+实际上，这里使用super.name，或者this.name，或者name，效果都是一样的。编译器会自动定位到父类的name字段。
+
+但是，在某些时候，就必须使用super。我们来看一个例子：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        Student s = new Student("Xiao Ming", 12, 89);
+    }
+}
+
+class Person {
+    protected String name;
+    protected int age;
+
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+}
+
+class Student extends Person {
+    protected int score;
+
+    public Student(String name, int age, int score) {
+        this.score = score;
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+Main.java:21: error: constructor Person in class Person cannot be applied to given types;
+    public Student(String name, int age, int score) {
+                                                    ^
+  required: String,int
+  found:    no arguments
+  reason: actual and formal argument lists differ in length
+1 error
+error: compilation failed
+#+END_EXAMPLE
+运行上面的代码，会得到一个编译错误，大意是在Student的构造方法中，无法调用Person的构造方法。
+
+这是因为在Java中，任何class的构造方法，第一行语句必须是调用父类的构造方法。如果没有明确地调用父类的构造方法，编译器会帮我们自动加一句super();，所以，Student类的构造方法实际上是这样：
+#+begin_src java  
+class Student extends Person {
+    protected int score;
+
+    public Student(String name, int age, int score) {
+        super(); // 自动调用父类的构造方法
+        this.score = score;
+    }
+}
+#+end_src
+但是，Person类并没有无参数的构造方法，因此，编译失败。
+
+解决方法是调用Person类存在的某个构造方法。例如：
+#+begin_src java  
+class Student extends Person {
+    protected int score;
+
+    public Student(String name, int age, int score) {
+        super(name, age); // 调用父类的构造方法Person(String, int)
+        this.score = score;
+    }
+}
+#+end_src
+这样就可以正常编译了！
+
+因此我们得出结论：如果父类没有默认的构造方法，子类就必须显式调用super()并给出参数以便让编译器定位到父类的一个合适的构造方法。
+
+这里还顺带引出了另一个问题：即子类不会继承任何父类的构造方法。子类默认的构造方法是编译器自动生成的，不是继承的。
+*** 阻止继承
+正常情况下，只要某个class没有final修饰符，那么任何类都可以从该class继承。
+
+从Java 15开始，允许使用sealed修饰class，并通过permits明确写出能够从该class继承的子类名称。
+
+例如，定义一个Shape类：
+#+begin_src java  
+public sealed class Shape permits Rect, Circle, Triangle {
+    ...
+}
+#+end_src
+上述Shape类就是一个sealed类，它只允许指定的3个类继承它。如果写：
+~public final class Rect extends Shape {...}~
+
+是没问题的，因为Rect出现在Shape的permits列表中。但是，如果定义一个Ellipse就会报错：
+#+begin_src java  
+public final class Ellipse extends Shape {...}
+// Compile error: class is not allowed to extend sealed class: Shape
+#+end_src
+原因是Ellipse并未出现在Shape的permits列表中。这种sealed类主要用于一些框架，防止继承被滥用。
+
+sealed类在Java 15中目前是预览状态，要启用它，必须使用参数--enable-preview和--source 15。
+*** 向上转型
+如果一个引用变量的类型是Student，那么它可以指向一个Student类型的实例：
+~Student s = new Student();~
+
+如果一个引用类型的变量是Person，那么它可以指向一个Person类型的实例：
+~Person p = new Person();~
+
+现在问题来了：如果Student是从Person继承下来的，那么，一个引用类型为Person的变量，能否指向Student类型的实例？
+~Person p = new Student(); // ???~
+
+测试一下就可以发现，这种指向是允许的！
+
+这是因为Student继承自Person，因此，它拥有Person的全部功能。Person类型的变量，如果指向Student类型的实例，对它进行操作，是没有问题的！
+
+这种把一个子类类型安全地变为父类类型的赋值，被称为向上转型（upcasting）。
+
+向上转型实际上是把一个子类型安全地变为更加抽象的父类型：
+#+begin_src java  
+Student s = new Student();
+Person p = s; // upcasting, ok
+Object o1 = p; // upcasting, ok
+Object o2 = s; // upcasting, ok
+#+end_src
+注意到继承树是Student > Person > Object，所以，可以把Student类型转型为Person，或者更高层次的Object。
+*** 向下转型
+和向上转型相反，如果把一个父类类型强制转型为子类类型，就是向下转型（downcasting）。例如：
+#+begin_src java  
+Person p1 = new Student(); // upcasting, ok
+Person p2 = new Person();
+Student s1 = (Student) p1; // ok
+Student s2 = (Student) p2; // runtime error! ClassCastException!
+#+end_src
+如果测试上面的代码，可以发现：
+
+Person类型p1实际指向Student实例，Person类型变量p2实际指向Person实例。在向下转型的时候，把p1转型为Student会成功，因为p1确实指向Student实例，把p2转型为Student会失败，因为p2的实际类型是Person，不能把父类变为子类，因为子类功能比父类多，多的功能无法凭空变出来。
+
+因此，向下转型很可能会失败。失败的时候，Java虚拟机会报ClassCastException。
+
+为了避免向下转型出错，Java提供了instanceof操作符，可以先判断一个实例究竟是不是某种类型：
+#+begin_src java  
+Person p = new Person();
+System.out.println(p instanceof Person); // true
+System.out.println(p instanceof Student); // false
+
+Student s = new Student();
+System.out.println(s instanceof Person); // true
+System.out.println(s instanceof Student); // true
+
+Student n = null;
+System.out.println(n instanceof Student); // false
+#+end_src
+instanceof实际上判断一个变量所指向的实例是否是指定类型，或者这个类型的子类。如果一个引用变量为null，那么对任何instanceof的判断都为false。
+
+利用instanceof，在向下转型前可以先判断：
+#+begin_src java  
+Person p = new Student();
+if (p instanceof Student) {
+    // 只有判断成功才会向下转型:
+    Student s = (Student) p; // 一定会成功
+}
+#+end_src
+从Java 14开始，判断instanceof后，可以直接转型为指定变量，避免再次强制转型。例如，对于以下代码：
+#+begin_src java  
+Object obj = "hello";
+if (obj instanceof String) {
+    String s = (String) obj;
+    System.out.println(s.toUpperCase());
+}
+#+end_src
+
+可以改写如下：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        Object obj = "hello";
+        if (obj instanceof String s) {
+            // 可以直接使用变量s:
+            System.out.println(s.toUpperCase());
+        }
+    }
+}
+#+end_src
+#+BEGIN_EXAMPLE
+Note: Main.java uses preview language features.
+Note: Recompile with -Xlint:preview for details.
+HELLO
+#+END_EXAMPLE
+这种使用instanceof的写法更加简洁。
+*** 区分继承和组合
+在使用继承时，我们要注意逻辑一致性。
+
+考察下面的Book类：
+#+begin_src java  
+class Book {
+    protected String name;
+    public String getName() {...}
+    public void setName(String name) {...}
+}
+#+end_src
+这个Book类也有name字段，那么，我们能不能让Student继承自Book呢？
+#+begin_src java  
+class Student extends Book {
+    protected int score;
+}
+#+end_src
+显然，从逻辑上讲，这是不合理的，Student不应该从Book继承，而应该从Person继承。
+
+究其原因，是因为Student是Person的一种，它们是is关系，而Student并不是Book。实际上Student和Book的关系是has关系。
+
+具有has关系不应该使用继承，而是使用组合，即Student可以持有一个Book实例：
+#+begin_src java  
+class Student extends Person {
+    protected Book book;
+    protected int score;
+}
+#+end_src
+因此，继承是is关系，组合是has关系。
+** 多态
+*** 复写（override）
+在继承关系中，子类如果定义了一个与父类方法签名完全相同的方法，被称为覆写（Override）。
+
+例如，在Person类中，我们定义了run()方法：
+#+begin_src java  
+class Person {
+    public void run() {
+        System.out.println("Person.run");
+    }
+}
+#+end_src
+在子类Student中，覆写这个run()方法：
+#+begin_src java  
+class Student extends Person {
+    @Override
+    public void run() {
+        System.out.println("Student.run");
+    }
+}
+#+end_src
+Override和Overload不同的是，如果方法签名如果不同，就是Overload，Overload方法是一个新方法；如果方法签名相同，并且返回值也相同，就是Override。
+
+注意：方法名相同，方法参数相同，但方法返回值不同，也是不同的方法。在Java程序中，出现这种情况，编译器会报错。
+#+begin_src java  
+class Person {
+    public void run() { … }
+}
+
+class Student extends Person {
+    // 不是Override，因为参数不同:
+    public void run(String s) { … }
+    // 不是Override，因为返回值不同:
+    public int run() { … }
+}
+#+end_src
+
+加上@Override可以让编译器帮助检查是否进行了正确的覆写。希望进行覆写，但是不小心写错了方法签名，编译器会报错。
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+    }
+}
+
+class Person {
+    public void run() {}
+}
+
+public class Student extends Person {
+    @Override // Compile error!
+    public void run(String s) {}
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+Main.java:12: error: method does not override or implement a method from a supertype
+    @Override // Compile error!
+    ^
+1 error
+error: compilation failed
+#+END_EXAMPLE
+但是@Override不是必需的。
+
+在上一节中，我们已经知道，引用变量的声明类型可能与其实际类型不符，例如：
+
+~Person p = new Student();~
+
+现在，我们考虑一种情况，如果子类覆写了父类的方法：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        Person p = new Student();
+        p.run(); // 应该打印Person.run还是Student.run?
+    }
+}
+
+class Person {
+    public void run() {
+        System.out.println("Person.run");
+    }
+}
+
+class Student extends Person {
+    @Override
+    public void run() {
+        System.out.println("Student.run");
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+Student.run
+#+END_EXAMPLE
+
+那么，一个实际类型为Student，引用类型为Person的变量，调用其run()方法，调用的是Person还是Student的run()方法？
+
+运行一下上面的代码就可以知道，实际上调用的方法是Student的run()方法。因此可得出结论：Java的实例方法调用是基于运行时的实际类型的动态调用，而非变量的声明类型。
+
+这个非常重要的特性在面向对象编程中称之为多态。它的英文拼写非常复杂：Polymorphic。
+*** 多态
+多态是指，针对某个类型的方法调用，其真正执行的方法取决于运行时期实际类型的方法。例如：
+#+begin_src java  
+Person p = new Student();
+p.run(); // 无法确定运行时究竟调用哪个run()方法
+#+end_src
+有童鞋会问，从上面的代码一看就明白，肯定调用的是Student的run()方法啊。
+
+但是，假设我们编写这样一个方法：
+#+begin_src java  
+public void runTwice(Person p) {
+    p.run();
+    p.run();
+}
+#+end_src
+
+它传入的参数类型是Person，我们是无法知道传入的参数实际类型究竟是Person，还是Student，还是Person的其他子类，因此，也无法确定调用的是不是Person类定义的run()方法。
+
+所以，多态的特性就是，运行期才能动态决定调用的子类方法。对某个类型调用某个方法，执行的实际方法可能是某个子类的覆写方法。这种不确定性的方法调用，究竟有什么作用？
+
+我们还是来举栗子。
+
+假设我们定义一种收入，需要给它报税，那么先定义一个Income类：
+#+begin_src java  
+class Income {
+    protected double income;
+    public double getTax() {
+        return income * 0.1; // 税率10%
+    }
+}
+#+end_src
+对于工资收入，可以减去一个基数，那么我们可以从Income派生出SalaryIncome，并覆写getTax()：
+#+begin_src java  
+class Salary extends Income {
+    @Override
+    public double getTax() {
+        if (income <= 5000) {
+            return 0;
+        }
+        return (income - 5000) * 0.2;
+    }
+}
+#+end_src
+如果你享受国务院特殊津贴，那么按照规定，可以全部免税：
+#+begin_src java  
+class StateCouncilSpecialAllowance extends Income {
+    @Override
+    public double getTax() {
+        return 0;
+    }
+}
+#+end_src
+现在，我们要编写一个报税的财务软件，对于一个人的所有收入进行报税，可以这么写：
+#+begin_src java  
+public double totalTax(Income... incomes) {
+    double total = 0;
+    for (Income income: incomes) {
+        total = total + income.getTax();
+    }
+    return total;
+}
+#+end_src
+来试一下：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        // 给一个有普通收入、工资收入和享受国务院特殊津贴的小伙伴算税:
+        Income[] incomes = new Income[] {
+            new Income(3000),
+            new Salary(7500),
+            new StateCouncilSpecialAllowance(15000)
+        };
+        System.out.println(totalTax(incomes));
+    }
+
+    public static double totalTax(Income... incomes) {
+        double total = 0;
+        for (Income income: incomes) {
+            total = total + income.getTax();
+        }
+        return total;
+    }
+}
+
+class Income {
+    protected double income;
+
+    public Income(double income) {
+        this.income = income;
+    }
+
+    public double getTax() {
+        return income * 0.1; // 税率10%
+    }
+}
+
+class Salary extends Income {
+    public Salary(double income) {
+        super(income);
+    }
+
+    @Override
+    public double getTax() {
+        if (income <= 5000) {
+            return 0;
+        }
+        return (income - 5000) * 0.2;
+    }
+}
+
+class StateCouncilSpecialAllowance extends Income {
+    public StateCouncilSpecialAllowance(double income) {
+        super(income);
+    }
+
+    @Override
+    public double getTax() {
+        return 0;
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+800.0
+#+END_EXAMPLE
+观察totalTax()方法：利用多态，totalTax()方法只需要和Income打交道，它完全不需要知道Salary和StateCouncilSpecialAllowance的存在，就可以正确计算出总的税。如果我们要新增一种稿费收入，只需要从Income派生，然后正确覆写getTax()方法就可以。把新的类型传入totalTax()，不需要修改任何代码。
+
+可见，多态具有一个非常强大的功能，就是允许添加更多类型的子类实现功能扩展，却不需要修改基于父类的代码。
+*** 覆写Object方法
+因为所有的class最终都继承自Object，而Object定义了几个重要的方法：
+- toString()：把instance输出为String；
+- equals()：判断两个instance是否逻辑相等；
+- hashCode()：计算一个instance的哈希值。
+
+在必要的情况下，我们可以覆写Object的这几个方法。例如：
+#+begin_src java  
+class Person {
+    ...
+    // 显示更有意义的字符串:
+    @Override
+    public String toString() {
+        return "Person:name=" + name;
+    }
+
+    // 比较是否相等:
+    @Override
+    public boolean equals(Object o) {
+        // 当且仅当o为Person类型:
+        if (o instanceof Person) {
+            Person p = (Person) o;
+            // 并且name字段相同时，返回true:
+            return this.name.equals(p.name);
+        }
+        return false;
+    }
+
+    // 计算hash:
+    @Override
+    public int hashCode() {
+        return this.name.hashCode();
+    }
+}
+#+end_src
+*** 调用super
+在子类的覆写方法中，如果要调用父类的被覆写的方法，可以通过super来调用。例如：
+#+begin_src java  
+class Person {
+    protected String name;
+    public String hello() {
+        return "Hello, " + name;
+    }
+}
+
+Student extends Person {
+    @Override
+    public String hello() {
+        // 调用父类的hello()方法:
+        return super.hello() + "!";
+    }
+}
+#+end_src
+*** final
+继承可以允许子类覆写父类的方法。如果一个父类不允许子类对它的某个方法进行覆写，可以把该方法标记为final。用final修饰的方法不能被Override：
+#+begin_src java  
+class Person {
+    protected String name;
+    public final String hello() {
+        return "Hello, " + name;
+    }
+}
+
+Student extends Person {
+    // compile error: 不允许覆写
+    @Override
+    public String hello() {
+    }
+}
+#+end_src
+如果一个类不希望任何其他类继承自它，那么可以把这个类本身标记为final。用final修饰的类不能被继承：
+#+begin_src java  
+final class Person {
+    protected String name;
+}
+
+// compile error: 不允许继承自Person
+Student extends Person {
+}
+#+end_src
+对于一个类的实例字段，同样可以用final修饰。用final修饰的字段在初始化后不能被修改。例如：
+#+begin_src java  
+class Person {
+    public final String name = "Unamed";
+}
+#+end_src
+对final字段重新赋值会报错：
+#+begin_src java  
+Person p = new Person();
+p.name = "New Name"; // compile error!
+#+end_src
+可以在构造方法中初始化final字段：
+#+begin_src java  
+class Person {
+    public final String name;
+    public Person(String name) {
+        this.name = name;
+    }
+}
+#+end_src
+这种方法更为常用，因为可以保证实例一旦创建，其final字段就不可修改。
+** 抽象类
+*** 抽象方法
+由于多态的存在，每个子类都可以覆写父类的方法，例如：
+#+begin_src java  
+class Person {
+    public void run() { … }
+}
+
+class Student extends Person {
+    @Override
+    public void run() { … }
+}
+
+class Teacher extends Person {
+    @Override
+    public void run() { … }
+}
+#+end_src
+从Person类派生的Student和Teacher都可以覆写run()方法。
+
+如果父类Person的run()方法没有实际意义，能否去掉方法的执行语句？
+#+begin_src java  
+class Person {
+    public void run(); // Compile Error!
+}
+#+end_src
+答案是不行，会导致编译错误，因为定义方法的时候，必须实现方法的语句。
+
+能不能去掉父类的run()方法？
+
+答案还是不行，因为去掉父类的run()方法，就失去了多态的特性。例如，runTwice()就无法编译：
+#+begin_src java  
+public void runTwice(Person p) {
+    p.run(); // Person没有run()方法，会导致编译错误
+    p.run();
+}
+#+end_src
+如果父类的方法本身不需要实现任何功能，仅仅是为了定义方法签名，目的是让子类去覆写它，那么，可以把父类的方法声明为抽象方法：
+#+begin_src java  
+class Person {
+    public abstract void run();
+}
+#+end_src
+把一个方法声明为abstract，表示它是一个抽象方法，本身没有实现任何方法语句。因为这个抽象方法本身是无法执行的，所以，Person类也无法被实例化。编译器会告诉我们，无法编译Person类，因为它包含抽象方法。
+
+必须把Person类本身也声明为abstract，才能正确编译它：
+#+begin_src java  
+abstract class Person {
+    public abstract void run();
+}
+#+end_src
+*** 抽象类
+如果一个class定义了方法，但没有具体执行代码，这个方法就是抽象方法，抽象方法用abstract修饰。
+
+因为无法执行抽象方法，因此这个类也必须申明为抽象类（abstract class）。
+
+使用abstract修饰的类就是抽象类。我们无法实例化一个抽象类：
+
+~Person p = new Person(); // 编译错误~
+
+无法实例化的抽象类有什么用？
+
+因为抽象类本身被设计成只能用于被继承，因此，抽象类可以强迫子类实现其定义的抽象方法，否则编译会报错。因此，抽象方法实际上相当于定义了“规范”。
+
+例如，Person类定义了抽象方法run()，那么，在实现子类Student的时候，就必须覆写run()方法：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        Person p = new Student();
+        p.run();
+    }
+}
+
+abstract class Person {
+    public abstract void run();
+}
+
+class Student extends Person {
+    @Override
+    public void run() {
+        System.out.println("Student.run");
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+Student.run
+#+END_EXAMPLE
+*** 面向抽象编程
+当我们定义了抽象类Person，以及具体的Student、Teacher子类的时候，我们可以通过抽象类Person类型去引用具体的子类的实例：
+#+begin_src java  
+Person s = new Student();
+Person t = new Teacher();
+#+end_src
+这种引用抽象类的好处在于，我们对其进行方法调用，并不关心Person类型变量的具体子类型：
+#+begin_src java  
+// 不关心Person变量的具体子类型:
+s.run();
+t.run();
+#+end_src
+同样的代码，如果引用的是一个新的子类，我们仍然不关心具体类型：
+#+begin_src java  
+// 同样不关心新的子类是如何实现run()方法的：
+Person e = new Employee();
+e.run();
+#+end_src
+这种尽量引用高层类型，避免引用实际子类型的方式，称之为面向抽象编程。
+
+面向抽象编程的本质就是：
+- 上层代码只定义规范（例如：abstract class Person）；
+- 不需要子类就可以实现业务逻辑（正常编译）；
+- 具体的业务逻辑由不同的子类实现，调用者并不关心。
+** 接口
+在抽象类中，抽象方法本质上是定义接口规范：即规定高层类的接口，从而保证所有子类都有相同的接口实现，这样，多态就能发挥出威力。
+
+如果一个抽象类没有字段，所有方法全部都是抽象方法：
+#+begin_src java  
+abstract class Person {
+    public abstract void run();
+    public abstract String getName();
+}
+#+end_src
+就可以把该抽象类改写为接口：interface。
+
+在Java中，使用interface可以声明一个接口：
+#+begin_src java  
+interface Person {
+    void run();
+    String getName();
+}
+#+end_src
+所谓interface，就是比抽象类还要抽象的纯抽象接口，因为它连字段都不能有。因为接口定义的所有方法默认都是public abstract的，所以这两个修饰符不需要写出来（写不写效果都一样）。
+
+当一个具体的class去实现一个interface时，需要使用implements关键字。举个例子：
+#+begin_src java  
+class Student implements Person {
+    private String name;
+
+    public Student(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public void run() {
+        System.out.println(this.name + " run");
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
+    }
+}
+#+end_src
+我们知道，在Java中，一个类只能继承自另一个类，不能从多个类继承。但是，一个类可以实现多个interface，例如：
+#+begin_src java  
+class Student implements Person, Hello { // 实现了两个interface
+    ...
+}
+#+end_src
+*** 术语
+注意区分术语：
+
+Java的接口特指interface的定义，表示一个接口类型和一组方法签名，而编程接口泛指接口规范，如方法签名，数据格式，网络协议等。
+
+抽象类和接口的对比如下：
+|            | abstract class       | interface                   |
+|------------+----------------------+-----------------------------|
+| 继承       | 只能extends一个class | 可以implements多个interface |
+| 字段       | 可以定义实例字段     | 不能定义实例字段            |
+| 抽象方法   | 可以定义抽象方法     | 可以定义抽象方法            |
+| 非抽象方法 | 可以定义非抽象方法   | 可以定义default方法         |
+*** 接口继承
+一个interface可以继承自另一个interface。interface继承自interface使用extends，它相当于扩展了接口的方法。例如：
+#+begin_src java  
+interface Hello {
+    void hello();
+}
+
+interface Person extends Hello {
+    void run();
+    String getName();
+}
+#+end_src
+此时，Person接口继承自Hello接口，因此，Person接口现在实际上有3个抽象方法签名，其中一个来自继承的Hello接口。
+*** 继承关系
+合理设计interface和abstract class的继承关系，可以充分复用代码。一般来说，公共逻辑适合放在abstract class中，具体逻辑放到各个子类，而接口层次代表抽象程度。可以参考Java的集合类定义的一组接口、抽象类以及具体子类的继承关系：
+
+┌───────────────┐
+│   Iterable    │
+└───────────────┘
+        ▲                ┌───────────────────┐
+        │                │      Object       │
+┌───────────────┐        └───────────────────┘
+│  Collection   │                  ▲
+└───────────────┘                  │
+        ▲     ▲          ┌───────────────────┐
+        │     └──────────│AbstractCollection │
+┌───────────────┐        └───────────────────┘
+│     List      │                  ▲
+└───────────────┘                  │
+              ▲          ┌───────────────────┐
+              └──────────│   AbstractList    │
+                         └───────────────────┘
+                                ▲     ▲
+                                │     │
+                                │     │
+                     ┌────────────┐ ┌────────────┐
+                     │ ArrayList  │ │ LinkedList │
+                     └────────────┘ └────────────┘
+在使用的时候，实例化的对象永远只能是某个具体的子类，但总是通过接口去引用它，因为接口比抽象类更抽象：
+#+begin_src java  
+List list = new ArrayList(); // 用List接口引用具体子类的实例
+Collection coll = list; // 向上转型为Collection接口
+Iterable it = coll; // 向上转型为Iterable接口
+#+end_src
+*** default方法
+在接口中，可以定义default方法。例如，把Person接口的run()方法改为default方法：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        Person p = new Student("Xiao Ming");
+        p.run();
+    }
+}
+
+interface Person {
+    String getName();
+    default void run() {
+        System.out.println(getName() + " run");
+    }
+}
+
+class Student implements Person {
+    private String name;
+
+    public Student(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+Xiao Ming run
+#+END_EXAMPLE
+实现类可以不必覆写default方法。default方法的目的是，当我们需要给接口新增一个方法时，会涉及到修改全部子类。如果新增的是default方法，那么子类就不必全部修改，只需要在需要覆写的地方去覆写新增方法。
+
+default方法和抽象类的普通方法是有所不同的。因为interface没有字段，default方法无法访问字段，而抽象类的普通方法可以访问实例字段。
+** 静态字段和静态方法
+*** 静态字段
+在一个class中定义的字段，我们称之为实例字段。实例字段的特点是，每个实例都有独立的字段，各个实例的同名字段互不影响。
+
+还有一种字段，是用static修饰的字段，称为静态字段：static field。
+
+实例字段在每个实例中都有自己的一个独立“空间”，但是静态字段只有一个共享“空间”，所有实例都会共享该字段。举个例子：
+#+begin_src java  
+class Person {
+    public String name;
+    public int age;
+    // 定义静态字段number:
+    public static int number;
+}
+#+end_src
+我们来看看下面的代码：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        Person ming = new Person("Xiao Ming", 12);
+        Person hong = new Person("Xiao Hong", 15);
+        ming.number = 88;
+        System.out.println(hong.number);
+        hong.number = 99;
+        System.out.println(ming.number);
+    }
+}
+
+class Person {
+    public String name;
+    public int age;
+
+    public static int number;
+
+    public Person(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+88
+99
+#+END_EXAMPLE
+对于静态字段，无论修改哪个实例的静态字段，效果都是一样的：所有实例的静态字段都被修改了，原因是静态字段并不属于实例：
+
+        ┌──────────────────┐
+ming ──>│Person instance   │
+        ├──────────────────┤
+        │name = "Xiao Ming"│
+        │age = 12          │
+        │number ───────────┼──┐    ┌─────────────┐
+        └──────────────────┘  │    │Person class │
+                              │    ├─────────────┤
+                              ├───>│number = 99  │
+        ┌──────────────────┐  │    └─────────────┘
+hong ──>│Person instance   │  │
+        ├──────────────────┤  │
+        │name = "Xiao Hong"│  │
+        │age = 15          │  │
+        │number ───────────┼──┘
+        └──────────────────┘
+虽然实例可以访问静态字段，但是它们指向的其实都是Person class的静态字段。所以，所有实例共享一个静态字段。
+
+因此，不推荐用实例变量.静态字段去访问静态字段，因为在Java程序中，实例对象并没有静态字段。在代码中，实例对象能访问静态字段只是因为编译器可以根据实例类型自动转换为类名.静态字段来访问静态对象。
+
+推荐用类名来访问静态字段。可以把静态字段理解为描述class本身的字段（非实例字段）。对于上面的代码，更好的写法是：
+#+begin_src java  
+Person.number = 99;
+System.out.println(Person.number);
+#+end_src
+*** 静态方法
+有静态字段，就有静态方法。用static修饰的方法称为静态方法。
+
+调用实例方法必须通过一个实例变量，而调用静态方法则不需要实例变量，通过类名就可以调用。静态方法类似其它编程语言的函数。例如： 
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        Person.setNumber(99);
+        System.out.println(Person.number);
+    }
+}
+
+class Person {
+    public static int number;
+
+    public static void setNumber(int value) {
+        number = value;
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+99
+#+END_EXAMPLE
+因为静态方法属于class而不属于实例，因此，静态方法内部，无法访问this变量，也无法访问实例字段，它只能访问静态字段。
+
+通过实例变量也可以调用静态方法，但这只是编译器自动帮我们把实例改写成类名而已。
+
+通常情况下，通过实例变量访问静态字段和静态方法，会得到一个编译警告。
+
+静态方法经常用于工具类。例如：
+- Arrays.sort()
+- Math.random()
+
+静态方法也经常用于辅助方法。注意到Java程序的入口main()也是静态方法。
+*** 接口的静态字段
+因为interface是一个纯抽象类，所以它不能定义实例字段。但是，interface是可以有静态字段的，并且静态字段必须为final类型：
+#+begin_src java  
+public interface Person {
+    public static final int MALE = 1;
+    public static final int FEMALE = 2;
+}
+#+end_src
+实际上，因为interface的字段只能是public static final类型，所以我们可以把这些修饰符都去掉，上述代码可以简写为：
+#+begin_src java  
+public interface Person {
+    // 编译器会自动加上public statc final:
+    int MALE = 1;
+    int FEMALE = 2;
+}
+#+end_src
+编译器会自动把该字段变为public static final类型。
+** 包
+在前面的代码中，我们把类和接口命名为Person、Student、Hello等简单名字。
+
+在现实中，如果小明写了一个Person类，小红也写了一个Person类，现在，小白既想用小明的Person，也想用小红的Person，怎么办？
+
+如果小军写了一个Arrays类，恰好JDK也自带了一个Arrays类，如何解决类名冲突？
+
+在Java中，我们使用package来解决名字冲突。
+
+Java定义了一种名字空间，称之为包：package。一个类总是属于某个包，类名（比如Person）只是一个简写，真正的完整类名是包名.类名。
+
+例如：
+
+小明的Person类存放在包ming下面，因此，完整类名是ming.Person；
+
+小红的Person类存放在包hong下面，因此，完整类名是hong.Person；
+
+小军的Arrays类存放在包mr.jun下面，因此，完整类名是mr.jun.Arrays；
+
+JDK的Arrays类存放在包java.util下面，因此，完整类名是java.util.Arrays。
+
+在定义class的时候，我们需要在第一行声明这个class属于哪个包。
+
+小明的Person.java文件：
+#+begin_src java  
+package ming; // 申明包名ming
+
+public class Person {
+}
+#+end_src
+
+小军的Arrays.java文件：
+#+begin_src java  
+package mr.jun; // 申明包名mr.jun
+
+public class Arrays {
+}
+#+end_src
+在Java虚拟机执行的时候，JVM只看完整类名，因此，只要包名不同，类就不同。
+
+包可以是多层结构，用.隔开。例如：java.util。
+
+要特别注意：包没有父子关系。java.util和java.util.zip是不同的包，两者没有任何继承关系。
+
+没有定义包名的class，它使用的是默认包，非常容易引起名字冲突，因此，不推荐不写包名的做法。
+
+我们还需要按照包结构把上面的Java文件组织起来。假设以package_sample作为根目录，src作为源码目录，那么所有文件结构就是：
+
+package_sample
+└─ src
+    ├─ hong
+    │  └─ Person.java
+    │  ming
+    │  └─ Person.java
+    └─ mr
+       └─ jun
+          └─ Arrays.java
+即所有Java文件对应的目录层次要和包的层次一致。
+
+编译后的.class文件也需要按照包结构存放。如果使用IDE，把编译后的.class文件放到bin目录下，那么，编译的文件结构就是：
+
+package_sample
+└─ bin
+   ├─ hong
+   │  └─ Person.class
+   │  ming
+   │  └─ Person.class
+   └─ mr
+      └─ jun
+         └─ Arrays.class
+编译的命令相对比较复杂，我们需要在src目录下执行javac命令：
+~javac -d ../bin ming/Person.java hong/Person.java mr/jun/Arrays.java~
+
+在IDE中，会自动根据包结构编译所有Java源码，所以不必担心使用命令行编译的复杂命令。
+*** 包作用域
+位于同一个包的类，可以访问包作用域的字段和方法。不用public、protected、private修饰的字段和方法就是包作用域。例如，Person类定义在hello包下面：
+#+begin_src java  
+package hello;
+
+public class Person {
+    // 包作用域:
+    void hello() {
+        System.out.println("Hello!");
+    }
+}
+#+end_src
+Main类也定义在hello包下面：
+#+begin_src java  
+package hello;
+
+public class Main {
+    public static void main(String[] args) {
+        Person p = new Person();
+        p.hello(); // 可以调用，因为Main和Person在同一个包
+    }
+}
+#+end_src
+*** import
+在一个class中，我们总会引用其他的class。例如，小明的ming.Person类，如果要引用小军的mr.jun.Arrays类，他有三种写法：
+
+第一种，直接写出完整类名，例如：
+#+begin_src java  
+// Person.java
+package ming;
+
+public class Person {
+    public void run() {
+        mr.jun.Arrays arrays = new mr.jun.Arrays();
+    }
+}
+#+end_src
+很显然，每次写完整类名比较痛苦。
+
+因此，第二种写法是用import语句，导入小军的Arrays，然后写简单类名：
+#+begin_src java  
+// Person.java
+package ming;
+
+// 导入完整类名:
+import mr.jun.Arrays;
+
+public class Person {
+    public void run() {
+        Arrays arrays = new Arrays();
+    }
+}
+#+end_src
+在写import的时候，可以使用*，表示把这个包下面的所有class都导入进来（但不包括子包的class）：
+#+begin_src java  
+// Person.java
+package ming;
+
+// 导入mr.jun包的所有class:
+import mr.jun.*;
+
+public class Person {
+    public void run() {
+        Arrays arrays = new Arrays();
+    }
+}
+#+end_src
+我们一般不推荐这种写法，因为在导入了多个包后，很难看出Arrays类属于哪个包。
+
+还有一种import static的语法，它可以导入可以导入一个类的静态字段和静态方法：
+#+begin_src java  
+package main;
+
+// 导入System类的所有静态字段和静态方法:
+import static java.lang.System.*;
+
+public class Main {
+    public static void main(String[] args) {
+        // 相当于调用System.out.println(…)
+        out.println("Hello, world!");
+    }
+}
+#+end_src
+import static很少使用。
+
+Java编译器最终编译出的.class文件只使用完整类名，因此，在代码中，当编译器遇到一个class名称时：
+- 如果是完整类名，就直接根据完整类名查找这个class；
+- 如果是简单类名，按下面的顺序依次查找：
+  - 查找当前package是否存在这个class；
+  - 查找import的包是否包含这个class；
+  - 查找java.lang包是否包含这个class。
+
+如果按照上面的规则还无法确定类名，则编译报错。
+
+我们来看一个例子：
+#+begin_src java  
+// Main.java
+package test;
+
+import java.text.Format;
+
+public class Main {
+    public static void main(String[] args) {
+        java.util.List list; // ok，使用完整类名 -> java.util.List
+        Format format = null; // ok，使用import的类 -> java.text.Format
+        String s = "hi"; // ok，使用java.lang包的String -> java.lang.String
+        System.out.println(s); // ok，使用java.lang包的System -> java.lang.System
+        MessageFormat mf = null; // 编译错误：无法找到MessageFormat: MessageFormat cannot be resolved to a type
+    }
+}
+#+end_src
+因此，编写class的时候，编译器会自动帮我们做两个import动作：
+- 默认自动import当前package的其他class；
+- 默认自动import java.lang.*。
+
+注意：自动导入的是java.lang包，但类似java.lang.reflect这些包仍需要手动导入。
+
+如果有两个class名称相同，例如，mr.jun.Arrays和java.util.Arrays，那么只能import其中一个，另一个必须写完整类名。
+*** 最佳实践
+为了避免名字冲突，我们需要确定唯一的包名。推荐的做法是使用倒置的域名来确保唯一性。例如：
+- org.apache
+- org.apache.commons.log
+- com.liaoxuefeng.sample
+子包就可以根据功能自行命名。
+
+要注意不要和java.lang包的类重名，即自己的类不要使用这些名字：
+- String
+- System
+- Runtime
+- ...
+要注意也不要和JDK常用类重名：
+- java.util.List
+- java.text.Format
+- java.math.BigInteger
+- ...
+
+** 作用域
+在Java中，我们经常看到public、protected、private这些修饰符。在Java中，这些修饰符可以用来限定访问作用域。
+
+*** public
+定义为public的class、interface可以被其他任何类访问：
+#+begin_src java  
+package abc;
+
+public class Hello {
+    public void hi() {
+    }
+}
+#+end_src
+上面的Hello是public，因此，可以被其他包的类访问：
+#+begin_src java  
+package xyz;
+
+class Main {
+    void foo() {
+        // Main可以访问Hello
+        Hello h = new Hello();
+    }
+}
+#+end_src
+定义为public的field、method可以被其他类访问，前提是首先有访问class的权限：
+#+begin_src java  
+package abc;
+
+public class Hello {
+    public void hi() {
+    }
+}
+#+end_src
+上面的hi()方法是public，可以被其他类调用，前提是首先要能访问Hello类：
+#+begin_src java  
+package xyz;
+
+class Main {
+    void foo() {
+        Hello h = new Hello();
+        h.hi();
+    }
+}
+#+end_src
+
+*** private
+定义为private的field、method无法被其他类访问：
+#+begin_src java  
+package abc;
+
+public class Hello {
+    // 不能被其他类调用:
+    private void hi() {
+    }
+
+    public void hello() {
+        this.hi();
+    }
+}
+#+end_src
+实际上，确切地说，private访问权限被限定在class的内部，而且与方法声明顺序无关。推荐把private方法放到后面，因为public方法定义了类对外提供的功能，阅读代码的时候，应该先关注public方法：
+#+begin_src java  
+package abc;
+
+public class Hello {
+    public void hello() {
+        this.hi();
+    }
+
+    private void hi() {
+    }
+}
+#+end_src
+由于Java支持嵌套类，如果一个类内部还定义了嵌套类，那么，嵌套类拥有访问private的权限：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        Inner i = new Inner();
+        i.hi();
+    }
+
+    // private方法:
+    private static void hello() {
+        System.out.println("private hello!");
+    }
+
+    // 静态内部类:
+    static class Inner {
+        public void hi() {
+            Main.hello();
+        }
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+private hello!
+#+END_EXAMPLE
+
+*** protected
+protected作用于继承关系。定义为protected的字段和方法可以被子类访问，以及子类的子类：
+#+begin_src java  
+package abc;
+
+public class Hello {
+    // protected方法:
+    protected void hi() {
+    }
+}
+#+end_src
+上面的protected方法可以被继承的类访问：
+#+begin_src java  
+package xyz;
+
+class Main extends Hello {
+    void foo() {
+        // 可以访问protected方法:
+        hi();
+    }
+}
+#+end_src
+
+*** package
+最后，包作用域是指一个类允许访问同一个package的没有public、private修饰的class，以及没有public、protected、private修饰的字段和方法。
+#+begin_src java  
+package abc;
+// package权限的类:
+class Hello {
+    // package权限的方法:
+    void hi() {
+    }
+}
+#+end_src
+
+只要在同一个包，就可以访问package权限的class、field和method：
+#+begin_src java  
+package abc;
+
+class Main {
+    void foo() {
+        // 可以访问package权限的类:
+        Hello h = new Hello();
+        // 可以调用package权限的方法:
+        h.hi();
+    }
+}
+#+end_src
+注意，包名必须完全一致，包没有父子关系，com.apache和com.apache.abc是不同的包。
+
+*** 局部变量
+在方法内部定义的变量称为局部变量，局部变量作用域从变量声明处开始到对应的块结束。方法参数也是局部变量。
+#+begin_src java  
+package abc;
+
+public class Hello {
+    void hi(String name) { // ①
+        String s = name.toLowerCase(); // ②
+        int len = s.length(); // ③
+        if (len < 10) { // ④
+            int p = 10 - len; // ⑤
+            for (int i=0; i<10; i++) { // ⑥
+                System.out.println(); // ⑦
+            } // ⑧
+        } // ⑨
+    } // ⑩
+}
+#+end_src
+我们观察上面的hi()方法代码：
+
+方法参数name是局部变量，它的作用域是整个方法，即①～⑩；
+- 变量s的作用域是定义处到方法结束，即②～⑩；
+- 变量len的作用域是定义处到方法结束，即③～⑩；
+- 变量p的作用域是定义处到if块结束，即⑤～⑨；
+- 变量i的作用域是for循环，即⑥～⑧。
+
+使用局部变量时，应该尽可能把局部变量的作用域缩小，尽可能延后声明局部变量。
+
+*** final
+Java还提供了一个final修饰符。final与访问权限不冲突，它有很多作用。
+
+用final修饰class可以阻止被继承：
+#+begin_src java  
+package abc;
+
+// 无法被继承:
+public final class Hello {
+    private int n = 0;
+    protected void hi(int t) {
+        long i = t;
+    }
+}
+#+end_src
+用final修饰method可以阻止被子类覆写：
+#+begin_src java  
+package abc;
+
+public class Hello {
+    // 无法被覆写:
+    protected final void hi() {
+    }
+}
+#+end_src
+
+用final修饰field可以阻止被重新赋值：
+#+begin_src java  
+package abc;
+
+public class Hello {
+    private final int n = 0;
+    protected void hi() {
+        this.n = 1; // error!
+    }
+}
+#+end_src
+
+用final修饰局部变量可以阻止被重新赋值：
+#+begin_src java  
+package abc;
+
+public class Hello {
+    protected void hi(final int t) {
+        t = 1; // error!
+    }
+}
+#+end_src
+
+*** 最佳实践
+如果不确定是否需要public，就不声明为public，即尽可能少地暴露对外的字段和方法。
+
+把方法定义为package权限有助于测试，因为测试类和被测试类只要位于同一个package，测试代码就可以访问被测试类的package权限方法。
+
+一个.java文件只能包含一个public类，但可以包含多个非public类。如果有public类，文件名必须和public类的名字相同。
+
+** 内部类
+在Java程序中，通常情况下，我们把不同的类组织在不同的包下面，对于一个包下面的类来说，它们是在同一层次，没有父子关系：
+
+java.lang
+├── Math
+├── Runnable
+├── String
+└── ...
+还有一种类，它被定义在另一个类的内部，所以称为内部类（Nested Class）。Java的内部类分为好几种，通常情况用得不多，但也需要了解它们是如何使用的。
+
+*** Inner Class
+如果一个类定义在另一个类的内部，这个类就是Inner Class：
+#+begin_src java  
+class Outer {
+    class Inner {
+        // 定义了一个Inner Class
+    }
+}
+#+end_src
+上述定义的Outer是一个普通类，而Inner是一个Inner Class，它与普通类有个最大的不同，就是Inner Class的实例不能单独存在，必须依附于一个Outer Class的实例。示例代码如下：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        Outer outer = new Outer("Nested"); // 实例化一个Outer
+        Outer.Inner inner = outer.new Inner(); // 实例化一个Inner
+        inner.hello();
+    }
+}
+
+class Outer {
+    private String name;
+
+    Outer(String name) {
+        this.name = name;
+    }
+
+    class Inner {
+        void hello() {
+            System.out.println("Hello, " + Outer.this.name);
+        }
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+Hello, Nested
+#+END_EXAMPLE
+观察上述代码，要实例化一个Inner，我们必须首先创建一个Outer的实例，然后，调用Outer实例的new来创建Inner实例：
+~Outer.Inner inner = outer.new Inner();~
+这是因为Inner Class除了有一个this指向它自己，还隐含地持有一个Outer Class实例，可以用Outer.this访问这个实例。所以，实例化一个Inner Class不能脱离Outer实例。
+
+Inner Class和普通Class相比，除了能引用Outer实例外，还有一个额外的“特权”，就是可以修改Outer Class的private字段，因为Inner Class的作用域在Outer Class内部，所以能访问Outer Class的private字段和方法。
+
+观察Java编译器编译后的.class文件可以发现，Outer类被编译为Outer.class，而Inner类被编译为Outer$Inner.class。
+
+*** Anonymous Class
+还有一种定义Inner Class的方法，它不需要在Outer Class中明确地定义这个Class，而是在方法内部，通过匿名类（Anonymous Class）来定义。示例代码如下：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        Outer outer = new Outer("Nested");
+        outer.asyncHello();
+    }
+}
+
+class Outer {
+    private String name;
+
+    Outer(String name) {
+        this.name = name;
+    }
+
+    void asyncHello() {
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                System.out.println("Hello, " + Outer.this.name);
+            }
+        };
+        new Thread(r).start();
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+Hello, Nested
+#+END_EXAMPLE
+观察asyncHello()方法，我们在方法内部实例化了一个Runnable。Runnable本身是接口，接口是不能实例化的，所以这里实际上是定义了一个实现了Runnable接口的匿名类，并且通过new实例化该匿名类，然后转型为Runnable。在定义匿名类的时候就必须实例化它，定义匿名类的写法如下：
+#+begin_src java  
+Runnable r = new Runnable() {
+    // 实现必要的抽象方法...
+};
+#+end_src
+匿名类和Inner Class一样，可以访问Outer Class的private字段和方法。之所以我们要定义匿名类，是因为在这里我们通常不关心类名，比直接定义Inner Class可以少写很多代码。
+
+观察Java编译器编译后的.class文件可以发现，Outer类被编译为Outer.class，而匿名类被编译为Outer$1.class。如果有多个匿名类，Java编译器会将每个匿名类依次命名为Outer$1、Outer$2、Outer$3……
+
+除了接口外，匿名类也完全可以继承自普通类。观察以下代码：
+#+begin_src java  
+import java.util.HashMap;
+
+public class Main {
+    public static void main(String[] args) {
+        HashMap<String, String> map1 = new HashMap<>();
+        HashMap<String, String> map2 = new HashMap<>() {}; // 匿名类!
+        HashMap<String, String> map3 = new HashMap<>() {
+            {
+                put("A", "1");
+                put("B", "2");
+            }
+        };
+        System.out.println(map3.get("A"));
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+1
+#+END_EXAMPLE
+map1是一个普通的HashMap实例，但map2是一个匿名类实例，只是该匿名类继承自HashMap。map3也是一个继承自HashMap的匿名类实例，并且添加了static代码块来初始化数据。观察编译输出可发现Main$1.class和Main$2.class两个匿名类文件。
+
+*** Static Nested Class
+最后一种内部类和Inner Class类似，但是使用static修饰，称为静态内部类（Static Nested Class）：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        Outer.StaticNested sn = new Outer.StaticNested();
+        sn.hello();
+    }
+}
+
+class Outer {
+    private static String NAME = "OUTER";
+
+    private String name;
+
+    Outer(String name) {
+        this.name = name;
+    }
+
+    static class StaticNested {
+        void hello() {
+            System.out.println("Hello, " + Outer.NAME);
+        }
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+Hello, OUTER
+#+END_EXAMPLE
+用static修饰的内部类和Inner Class有很大的不同，它不再依附于Outer的实例，而是一个完全独立的类，因此无法引用Outer.this，但它可以访问Outer的private静态字段和静态方法。如果把StaticNested移到Outer之外，就失去了访问private的权限。
+
+** classpath和jar
+*** classpath
+在Java中，我们经常听到classpath这个东西。网上有很多关于“如何设置classpath”的文章，但大部分设置都不靠谱。
+
+到底什么是classpath？
+
+classpath是JVM用到的一个环境变量，它用来指示JVM如何搜索class。
+
+因为Java是编译型语言，源码文件是.java，而编译后的.class文件才是真正可以被JVM执行的字节码。因此，JVM需要知道，如果要加载一个abc.xyz.Hello的类，应该去哪搜索对应的Hello.class文件。
+
+所以，classpath就是一组目录的集合，它设置的搜索路径与操作系统相关。例如，在Windows系统上，用;分隔，带空格的目录用""括起来，可能长这样：
+~C:\work\project1\bin;C:\shared;"D:\My Documents\project1\bin"~
+在Linux系统上，用:分隔，可能长这样：
+~/usr/shared:/usr/local/bin:/home/liaoxuefeng/bin~
+现在我们假设classpath是 ~.;C:\work\project1\bin;C:\shared~ ，当JVM在加载abc.xyz.Hello这个类时，会依次查找：
+- <当前目录>\abc\xyz\Hello.class
+- C:\work\project1\bin\abc\xyz\Hello.class
+- C:\shared\abc\xyz\Hello.class
+
+注意到.代表当前目录。如果JVM在某个路径下找到了对应的class文件，就不再往后继续搜索。如果所有路径下都没有找到，就报错。
+
+classpath的设定方法有两种：
+- 在系统环境变量中设置classpath环境变量，不推荐；
+- 在启动JVM时设置classpath变量，推荐。
+
+我们强烈不推荐在系统环境变量中设置classpath，那样会污染整个系统环境。在启动JVM时设置classpath才是推荐的做法。实际上就是给java命令传入-classpath或-cp参数：
+~java -classpath .;C:\work\project1\bin;C:\shared abc.xyz.Hello~
+或者使用-cp的简写：
+~java -cp .;C:\work\project1\bin;C:\shared abc.xyz.Hello~
+
+没有设置系统环境变量，也没有传入-cp参数，那么JVM默认的classpath为.，即当前目录：
+~java abc.xyz.Hello~
+上述命令告诉JVM只在当前目录搜索Hello.class。
+
+在IDE中运行Java程序，IDE自动传入的-cp参数是当前工程的bin目录和引入的jar包。
+
+通常，我们在自己编写的class中，会引用Java核心库的class，例如，String、ArrayList等。这些class应该上哪去找？
+
+有很多“如何设置classpath”的文章会告诉你把JVM自带的rt.jar放入classpath，但事实上，根本不需要告诉JVM如何去Java核心库查找class，JVM怎么可能笨到连自己的核心库在哪都不知道？
+
+注意：不要把任何Java核心库添加到classpath中！JVM根本不依赖classpath加载核心库！
+
+更好的做法是，不要设置classpath.默认的当前目录.对于绝大多数情况都够用了。
+
+假设我们有一个编译后的Hello.class，它的包名是com.example，当前目录是C:\work，那么，目录结构必须如下：
+
+C:\work
+└─ com
+   └─ example
+      └─ Hello.class
+运行这个Hello.class必须在当前目录下使用如下命令：
+~C:\work> java -cp . com.example.Hello~~~
+
+JVM根据classpath设置的.在当前目录下查找com.example.Hello，即实际搜索文件必须位于com/example/Hello.class。如果指定的.class文件不存在，或者目录结构和包名对不上，均会报错。
+
+*** jar包
+如果有很多.class文件，散落在各层目录中，肯定不便于管理。如果能把目录打一个包，变成一个文件，就方便多了。
+
+jar包就是用来干这个事的，它可以把package组织的目录层级，以及各个目录下的所有文件（包括.class文件和其他文件）都打成一个jar文件，这样一来，无论是备份，还是发给客户，就简单多了。
+
+jar包实际上就是一个zip格式的压缩文件，而jar包相当于目录。如果我们要执行一个jar包的class，就可以把jar包放到classpath中：
+~java -cp ./hello.jar abc.xyz.Hello~
+
+这样JVM会自动在hello.jar文件里去搜索某个类。
+
+那么问题来了：如何创建jar包？
+
+因为jar包就是zip包，所以，直接在资源管理器中，找到正确的目录，点击右键，在弹出的快捷菜单中选择“发送到”，“压缩(zipped)文件夹”，就制作了一个zip文件。然后，把后缀从.zip改为.jar，一个jar包就创建成功。
+
+假设编译输出的目录结构是这样：
+
+package_sample
+└─ bin
+   ├─ hong
+   │  └─ Person.class
+   │  ming
+   │  └─ Person.class
+   └─ mr
+      └─ jun
+         └─ Arrays.class
+这里需要特别注意的是，jar包里的第一层目录，不能是bin，而应该是hong、ming、mr。如果在Windows的资源管理器中看，应该长这样：
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-11_16-12-04.png @ 2020-12-11 16:12:46
+[[file:%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/2020-12-11_16-12-46_Snipaste_2020-12-11_16-12-04.png]]
+如果长这样：
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-11_16-12-11.png @ 2020-12-11 16:13:00
+[[file:%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/2020-12-11_16-13-00_Snipaste_2020-12-11_16-12-11.png]]
+
+说明打包打得有问题，JVM仍然无法从jar包中查找正确的class，原因是hong.Person必须按hong/Person.class存放，而不是bin/hong/Person.class。
+
+jar包还可以包含一个特殊的/META-INF/MANIFEST.MF文件，MANIFEST.MF是纯文本，可以指定Main-Class和其它信息。JVM会自动读取这个MANIFEST.MF文件，如果存在Main-Class，我们就不必在命令行指定启动的类名，而是用更方便的命令：
+~java -jar hello.jar~
+
+jar包还可以包含其它jar包，这个时候，就需要在MANIFEST.MF文件里配置classpath了。
+
+在大型项目中，不可能手动编写MANIFEST.MF文件，再手动创建zip包。Java社区提供了大量的开源构建工具，例如Maven，可以非常方便地创建jar包。
+
+** 模块
+从Java 9开始，JDK又引入了模块（Module）。
+
+什么是模块？这要从Java 9之前的版本说起。
+
+我们知道，.class文件是JVM看到的最小可执行文件，而一个大型程序需要编写很多Class，并生成一堆.class文件，很不便于管理，所以，jar文件就是class文件的容器。
+
+在Java 9之前，一个大型Java程序会生成自己的jar文件，同时引用依赖的第三方jar文件，而JVM自带的Java标准库，实际上也是以jar文件形式存放的，这个文件叫rt.jar，一共有60多M。
+
+如果是自己开发的程序，除了一个自己的app.jar以外，还需要一堆第三方的jar包，运行一个Java程序，一般来说，命令行写这样：
+~java -cp app.jar:a.jar:b.jar:c.jar com.liaoxuefeng.sample.Main~
+
+注意：JVM自带的标准库rt.jar不要写到classpath中，写了反而会干扰JVM的正常运行。
+
+如果漏写了某个运行时需要用到的jar，那么在运行期极有可能抛出ClassNotFoundException。
+
+所以，jar只是用于存放class的容器，它并不关心class之间的依赖。
+
+从Java 9开始引入的模块，主要是为了解决“依赖”这个问题。如果a.jar必须依赖另一个b.jar才能运行，那我们应该给a.jar加点说明啥的，让程序在编译和运行的时候能自动定位到b.jar，这种自带“依赖关系”的class容器就是模块。
+
+为了表明Java模块化的决心，从Java 9开始，原有的Java标准库已经由一个单一巨大的rt.jar分拆成了几十个模块，这些模块以.jmod扩展名标识，可以在$JAVA_HOME/jmods目录下找到它们：
+- java.base.jmod
+- java.compiler.jmod
+- java.datatransfer.jmod
+- java.desktop.jmod
+- ...
+
+这些.jmod文件每一个都是一个模块，模块名就是文件名。例如：模块java.base对应的文件就是java.base.jmod。模块之间的依赖关系已经被写入到模块内的module-info.class文件了。所有的模块都直接或间接地依赖java.base模块，只有java.base模块不依赖任何模块，它可以被看作是“根模块”，好比所有的类都是从Object直接或间接继承而来。
+
+把一堆class封装为jar仅仅是一个打包的过程，而把一堆class封装为模块则不但需要打包，还需要写入依赖关系，并且还可以包含二进制代码（通常是JNI扩展）。此外，模块支持多版本，即在同一个模块中可以为不同的JVM提供不同的版本。
+
+*** 编写模块
+那么，我们应该如何编写模块呢？还是以具体的例子来说。首先，创建模块和原有的创建Java项目是完全一样的，以oop-module工程为例，它的目录结构如下：
+
+oop-module
+├── bin
+├── build.sh
+└── src
+    ├── com
+    │   └── itranswarp
+    │       └── sample
+    │           ├── Greeting.java
+    │           └── Main.java
+    └── module-info.java
+其中，bin目录存放编译后的class文件，src目录存放源码，按包名的目录结构存放，仅仅在src目录下多了一个module-info.java这个文件，这就是模块的描述文件。在这个模块中，它长这样：
+#+begin_src java  
+module hello.world {
+	requires java.base; // 可不写，任何模块都会自动引入java.base
+	requires java.xml;
+}
+#+end_src
+其中，module是关键字，后面的hello.world是模块的名称，它的命名规范与包一致。花括号的requires xxx;表示这个模块需要引用的其他模块名。除了java.base可以被自动引入外，这里我们引入了一个java.xml的模块。
+
+当我们使用模块声明了依赖关系后，才能使用引入的模块。例如，Main.java代码如下：
+#+begin_src java  
+package com.itranswarp.sample;
+
+// 必须引入java.xml模块后才能使用其中的类:
+import javax.xml.XMLConstants;
+
+public class Main {
+	public static void main(String[] args) {
+		Greeting g = new Greeting();
+		System.out.println(g.hello(XMLConstants.XML_NS_PREFIX));
+	}
+}
+#+end_src
+如果把requires java.xml;从module-info.java中去掉，编译将报错。可见，模块的重要作用就是声明依赖关系。
+
+下面，我们用JDK提供的命令行工具来编译并创建模块。
+
+首先，我们把工作目录切换到oop-module，在当前目录下编译所有的.java文件，并存放到bin目录下，命令如下：
+
+~$ javac -d bin src/module-info.java src/com/itranswarp/sample/*.java~
+
+如果编译成功，现在项目结构如下：
+
+oop-module
+├── bin
+│   ├── com
+│   │   └── itranswarp
+│   │       └── sample
+│   │           ├── Greeting.class
+│   │           └── Main.class
+│   └── module-info.class
+└── src
+    ├── com
+    │   └── itranswarp
+    │       └── sample
+    │           ├── Greeting.java
+    │           └── Main.java
+    └── module-info.java
+注意到src目录下的module-info.java被编译到bin目录下的module-info.class。
+
+下一步，我们需要把bin目录下的所有class文件先打包成jar，在打包的时候，注意传入--main-class参数，让这个jar包能自己定位main方法所在的类：
+
+~$ jar --create --file hello.jar --main-class com.itranswarp.sample.Main -C bin .~
+
+现在我们就在当前目录下得到了hello.jar这个jar包，它和普通jar包并无区别，可以直接使用命令java -jar hello.jar来运行它。但是我们的目标是创建模块，所以，继续使用JDK自带的jmod命令把一个jar包转换成模块：
+
+~$ jmod create --class-path hello.jar hello.jmod~
+
+于是，在当前目录下我们又得到了hello.jmod这个模块文件，这就是最后打包出来的传说中的模块！
+
+*** 运行模块
+要运行一个jar，我们使用java -jar xxx.jar命令。要运行一个模块，我们只需要指定模块名。试试：
+
+~$ java --module-path hello.jmod --module hello.world~
+
+结果是一个错误：
+#+BEGIN_EXAMPLE
+Error occurred during initialization of boot layer
+java.lang.module.FindException: JMOD format not supported at execution time: hello.jmod
+#+END_EXAMPLE
+原因是.jmod不能被放入--module-path中。换成.jar就没问题了：
+#+BEGIN_EXAMPLE
+$ java --module-path hello.jar --module hello.world
+Hello, xml!
+#+END_EXAMPLE
+那我们辛辛苦苦创建的hello.jmod有什么用？答案是我们可以用它来打包JRE。
+
+*** 打包JRE
+前面讲了，为了支持模块化，Java 9首先带头把自己的一个巨大无比的rt.jar拆成了几十个.jmod模块，原因就是，运行Java程序的时候，实际上我们用到的JDK模块，并没有那么多。不需要的模块，完全可以删除。
+
+过去发布一个Java应用程序，要运行它，必须下载一个完整的JRE，再运行jar包。而完整的JRE块头很大，有100多M。怎么给JRE瘦身呢？
+
+现在，JRE自身的标准库已经分拆成了模块，只需要带上程序用到的模块，其他的模块就可以被裁剪掉。怎么裁剪JRE呢？并不是说把系统安装的JRE给删掉部分模块，而是“复制”一份JRE，但只带上用到的模块。为此，JDK提供了jlink命令来干这件事。命令如下：
+
+~$ jlink --module-path hello.jmod --add-modules java.base,java.xml,hello.world --output jre/~
+
+我们在--module-path参数指定了我们自己的模块hello.jmod，然后，在--add-modules参数中指定了我们用到的3个模块java.base、java.xml和hello.world，用,分隔。最后，在--output参数指定输出目录。
+
+现在，在当前目录下，我们可以找到jre目录，这是一个完整的并且带有我们自己hello.jmod模块的JRE。试试直接运行这个JRE：
+#+BEGIN_EXAMPLE
+$ jre/bin/java --module hello.world
+Hello, xml!
+#+END_EXAMPLE
+要分发我们自己的Java应用程序，只需要把这个jre目录打个包给对方发过去，对方直接运行上述命令即可，既不用下载安装JDK，也不用知道如何配置我们自己的模块，极大地方便了分发和部署。
+
+*** 访问权限
+前面我们讲过，Java的class访问权限分为public、protected、private和默认的包访问权限。引入模块后，这些访问权限的规则就要稍微做些调整。
+
+确切地说，class的这些访问权限只在一个模块内有效，模块和模块之间，例如，a模块要访问b模块的某个class，必要条件是b模块明确地导出了可以访问的包。
+
+举个例子：我们编写的模块hello.world用到了模块java.xml的一个类javax.xml.XMLConstants，我们之所以能直接使用这个类，是因为模块java.xml的module-info.java中声明了若干导出：
+#+begin_src java  
+module java.xml {
+    exports java.xml;
+    exports javax.xml.catalog;
+    exports javax.xml.datatype;
+    ...
+}
+#+end_src
+只有它声明的导出的包，外部代码才被允许访问。换句话说，如果外部代码想要访问我们的hello.world模块中的com.itranswarp.sample.Greeting类，我们必须将其导出：
+#+begin_src java  
+module hello.world {
+    exports com.itranswarp.sample;
+
+    requires java.base;
+	requires java.xml;
+}
+#+end_src
+因此，模块进一步隔离了代码的访问权限。
+* Java核心类
+** 字符串
+在Java中，String是一个引用类型，它本身也是一个class。但是，Java编译器对String有特殊处理，即可以直接用"..."来表示一个字符串：
+
+~String s1 = "Hello!";~
+实际上字符串在String内部是通过一个char[]数组表示的，因此，按下面的写法也是可以的：
+
+~String s2 = new String(new char[] {'H', 'e', 'l', 'l', 'o', '!'});~
+
+Java字符串的一个重要特点就是字符串不可变。这种不可变性是通过内部的private final char[]字段，以及没有任何修改char[]的方法实现的。
+
+*** 字符串比较
+当我们想要比较两个字符串是否相同时，要特别注意，我们实际上是想比较字符串的内容是否相同。必须使用equals()方法而不能用==。
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        String s1 = "hello";
+        String s2 = "hello";
+        System.out.println(s1 == s2);
+        System.out.println(s1.equals(s2));
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+true
+true
+#+END_EXAMPLE
+从表面上看，两个字符串用==和equals()比较都为true，但实际上那只是Java编译器在编译期，会自动把所有相同的字符串当作一个对象放入常量池，自然s1和s2的引用就是相同的。
+
+所以，这种==比较返回true纯属巧合。换一种写法，==比较就会失败：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        String s1 = "hello";
+        String s2 = "HELLO".toLowerCase();
+        System.out.println(s1 == s2);
+        System.out.println(s1.equals(s2));
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+false
+true
+#+END_EXAMPLE
+结论：两个字符串比较，必须总是使用equals()方法。
+
+要忽略大小写比较，使用equalsIgnoreCase()方法。
+
+*** 搜索和提取
+String类还提供了多种方法来搜索子串、提取子串。常用的方法有：
+#+begin_src java  
+// 是否包含子串:
+"Hello".contains("ll"); // true
+#+end_src
+注意到contains()方法的参数是CharSequence而不是String，因为CharSequence是String的父类。
+
+搜索子串的更多的例子：
+#+begin_src java  
+"Hello".indexOf("l"); // 2
+"Hello".lastIndexOf("l"); // 3
+"Hello".startsWith("He"); // true
+"Hello".endsWith("lo"); // true
+#+end_src
+提取子串的例子：
+#+begin_src java  
+"Hello".substring(2); // "llo"
+"Hello".substring(2, 4); "ll"
+#+end_src
+注意索引号是从0开始的。
+
+*** 去除首尾空白字符
+使用trim()方法可以移除字符串首尾空白字符。空白字符包括空格，\t，\r，\n：
+
+~"  \tHello\r\n ".trim(); // "Hello"~
+
+注意：trim()并没有改变字符串的内容，而是返回了一个新字符串。
+
+另一个strip()方法也可以移除字符串首尾空白字符。它和trim()不同的是，类似中文的空格字符\u3000也会被移除：
+#+begin_src java  
+"\u3000Hello\u3000".strip(); // "Hello"
+" Hello ".stripLeading(); // "Hello "
+" Hello ".stripTrailing(); // " Hello"
+#+end_src
+String还提供了isEmpty()和isBlank()来判断字符串是否为空和空白字符串：
+#+begin_src java  
+"".isEmpty(); // true，因为字符串长度为0
+"  ".isEmpty(); // false，因为字符串长度不为0
+"  \n".isBlank(); // true，因为只包含空白字符
+" Hello ".isBlank(); // false，因为包含非空白字符
+#+end_src
+
+*** 替换子串
+要在字符串中替换子串，有两种方法。一种是根据字符或字符串替换：
+#+begin_src java  
+String s = "hello";
+s.replace('l', 'w'); // "hewwo"，所有字符'l'被替换为'w'
+s.replace("ll", "~~"); // "he~~o"，所有子串"ll"被替换为"~~"
+#+end_src
+另一种是通过正则表达式替换：
+#+begin_src java  
+String s = "A,,B;C ,D";
+s.replaceAll("[\\,\\;\\s]+", ","); // "A,B,C,D"
+#+end_src
+上面的代码通过正则表达式，把匹配的子串统一替换为","。关于正则表达式的用法我们会在后面详细讲解。
+
+*** 分割字符串
+要分割字符串，使用split()方法，并且传入的也是正则表达式：
+#+begin_src java  
+String s = "A,B,C,D";
+String[] ss = s.split("\\,"); // {"A", "B", "C", "D"}
+#+end_src
+
+*** 拼接字符串
+拼接字符串使用静态方法join()，它用指定的字符串连接字符串数组：
+#+begin_src java  
+String[] arr = {"A", "B", "C"};
+String s = String.join("***", arr); // "A***B***C"
+#+end_src
+
+*** 格式化字符串
+字符串提供了formatted()方法和format()静态方法，可以传入其他参数，替换占位符，然后生成新的字符串：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        String s = "Hi %s, your score is %d!";
+        System.out.println(s.formatted("Alice", 80));
+        System.out.println(String.format("Hi %s, your score is %.2f!", "Bob", 59.5));
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+Hi Alice, your score is 80!
+Hi Bob, your score is 59.50!
+#+END_EXAMPLE
+有几个占位符，后面就传入几个参数。参数类型要和占位符一致。我们经常用这个方法来格式化信息。常用的占位符有：
+- %s：显示字符串；
+- %d：显示整数；
+- %x：显示十六进制整数；
+- %f：显示浮点数。
+占位符还可以带格式，例如%.2f表示显示两位小数。如果你不确定用啥占位符，那就始终用%s，因为%s可以显示任何数据类型。要查看完整的格式化语法，请参考JDK文档。
+
+*** 类型转换
+要把任意基本类型或引用类型转换为字符串，可以使用静态方法valueOf()。这是一个重载方法，编译器会根据参数自动选择合适的方法：
+#+begin_src java  
+String.valueOf(123); // "123"
+String.valueOf(45.67); // "45.67"
+String.valueOf(true); // "true"
+String.valueOf(new Object()); // 类似java.lang.Object@636be97c
+#+end_src
+要把字符串转换为其他类型，就需要根据情况。例如，把字符串转换为int类型：
+#+begin_src java  
+int n1 = Integer.parseInt("123"); // 123
+int n2 = Integer.parseInt("ff", 16); // 按十六进制转换，255
+#+end_src
+把字符串转换为boolean类型：
+#+begin_src java  
+boolean b1 = Boolean.parseBoolean("true"); // true
+boolean b2 = Boolean.parseBoolean("FALSE"); // false
+#+end_src
+要特别注意，Integer有个getInteger(String)方法，它不是将字符串转换为int，而是把该字符串对应的系统变量转换为Integer：
+
+~Integer.getInteger("java.version"); // 版本号，11~
+
+*** 转换为char[]
+String和char[]类型可以互相转换，方法是：
+#+begin_src java  
+char[] cs = "Hello".toCharArray(); // String -> char[]
+String s = new String(cs); // char[] -> String
+#+end_src
+如果修改了char[]数组，String并不会改变：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        char[] cs = "Hello".toCharArray();
+        String s = new String(cs);
+        System.out.println(s);
+        cs[0] = 'X';
+        System.out.println(s);
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+Hello
+Hello
+#+END_EXAMPLE
+这是因为通过new String(char[])创建新的String实例时，它并不会直接引用传入的char[]数组，而是会复制一份，所以，修改外部的char[]数组不会影响String实例内部的char[]数组，因为这是两个不同的数组。
+
+从String的不变性设计可以看出，如果传入的对象有可能改变，我们需要复制而不是直接引用。
+
+例如，下面的代码设计了一个Score类保存一组学生的成绩：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        int[] scores = new int[] { 88, 77, 51, 66 };
+        Score s = new Score(scores);
+        s.printScores();
+        scores[2] = 99;
+        s.printScores();
+    }
+}
+
+class Score {
+    private int[] scores;
+    public Score(int[] scores) {
+        this.scores = scores;
+    }
+
+    public void printScores() {
+        System.out.println(Arrays.toString(scores));
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+[88, 77, 51, 66]
+[88, 77, 99, 66]
+#+END_EXAMPLE
+观察两次输出，由于Score内部直接引用了外部传入的int[]数组，这会造成外部代码对int[]数组的修改，影响到Score类的字段。如果外部代码不可信，这就会造成安全隐患。
+
+** 字符编码
+在早期的计算机系统中，为了给字符编码，美国国家标准学会（American National Standard Institute：ANSI）制定了一套英文字母、数字和常用符号的编码，它占用一个字节，编码范围从0到127，最高位始终为0，称为ASCII编码。例如，字符'A'的编码是0x41，字符'1'的编码是0x31。
+
+如果要把汉字也纳入计算机编码，很显然一个字节是不够的。GB2312标准使用两个字节表示一个汉字，其中第一个字节的最高位始终为1，以便和ASCII编码区分开。例如，汉字'中'的GB2312编码是0xd6d0。
+
+类似的，日文有Shift_JIS编码，韩文有EUC-KR编码，这些编码因为标准不统一，同时使用，就会产生冲突。
+
+为了统一全球所有语言的编码，全球统一码联盟发布了Unicode编码，它把世界上主要语言都纳入同一个编码，这样，中文、日文、韩文和其他语言就不会冲突。
+
+Unicode编码需要两个或者更多字节表示，我们可以比较中英文字符在ASCII、GB2312和Unicode的编码：
+
+英文字符'A'的ASCII编码和Unicode编码：
+
+         ┌────┐
+ASCII:   │ 41 │
+         └────┘
+         ┌────┬────┐
+Unicode: │ 00 │ 41 │
+         └────┴────┘
+英文字符的Unicode编码就是简单地在前面添加一个00字节。
+
+中文字符'中'的GB2312编码和Unicode编码：
+
+         ┌────┬────┐
+GB2312:  │ d6 │ d0 │
+         └────┴────┘
+         ┌────┬────┐
+Unicode: │ 4e │ 2d │
+         └────┴────┘
+那我们经常使用的UTF-8又是什么编码呢？因为英文字符的Unicode编码高字节总是00，包含大量英文的文本会浪费空间，所以，出现了UTF-8编码，它是一种变长编码，用来把固定长度的Unicode编码变成1～4字节的变长编码。通过UTF-8编码，英文字符'A'的UTF-8编码变为0x41，正好和ASCII码一致，而中文'中'的UTF-8编码为3字节0xe4b8ad。
+
+UTF-8编码的另一个好处是容错能力强。如果传输过程中某些字符出错，不会影响后续字符，因为UTF-8编码依靠高字节位来确定一个字符究竟是几个字节，它经常用来作为传输编码。
+
+在Java中，char类型实际上就是两个字节的Unicode编码。如果我们要手动把字符串转换成其他编码，可以这样做：
+#+begin_src java  
+byte[] b1 = "Hello".getBytes(); // 按系统默认编码转换，不推荐
+byte[] b2 = "Hello".getBytes("UTF-8"); // 按UTF-8编码转换
+byte[] b2 = "Hello".getBytes("GBK"); // 按GBK编码转换
+byte[] b3 = "Hello".getBytes(StandardCharsets.UTF_8); // 按UTF-8编码转换
+#+end_src
+注意：转换编码后，就不再是char类型，而是byte类型表示的数组。
+
+如果要把已知编码的byte[]转换为String，可以这样做：
+#+begin_src java  
+byte[] b = ...
+string s1 = new String(b, "GBK"); // 按GBK转换
+String s2 = new String(b, StandardCharsets.UTF_8); // 按UTF-8转换
+#+end_src
+始终牢记：Java的String和char在内存中总是以Unicode编码表示。
+** StringBuilder
+Java编译器对String做了特殊处理，使得我们可以直接用+拼接字符串。
+
+考察下面的循环代码：
+#+begin_src java  
+String s = "";
+for (int i = 0; i < 1000; i++) {
+    s = s + "," + i;
+}
+#+end_src
+虽然可以直接拼接字符串，但是，在循环中，每次循环都会创建新的字符串对象，然后扔掉旧的字符串。这样，绝大部分字符串都是临时对象，不但浪费内存，还会影响GC效率。
+
+为了能高效拼接字符串，Java标准库提供了StringBuilder，它是一个可变对象，可以预分配缓冲区，这样，往StringBuilder中新增字符时，不会创建新的临时对象：
+#+begin_src java  
+StringBuilder sb = new StringBuilder(1024);
+for (int i = 0; i < 1000; i++) {
+    sb.append(',');
+    sb.append(i);
+}
+String s = sb.toString();
+#+end_src
+StringBuilder还可以进行链式操作：   
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        var sb = new StringBuilder(1024);
+        sb.append("Mr ")
+          .append("Bob")
+          .append("!")
+          .insert(0, "Hello, ");
+        System.out.println(sb.toString());
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+Hello, Mr Bob!
+#+END_EXAMPLE
+如果我们查看StringBuilder的源码，可以发现，进行链式操作的关键是，定义的append()方法会返回this，这样，就可以不断调用自身的其他方法。
+
+仿照StringBuilder，我们也可以设计支持链式操作的类。例如，一个可以不断增加的计数器：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        Adder adder = new Adder();
+        adder.add(3)
+             .add(5)
+             .inc()
+             .add(10);
+        System.out.println(adder.value());
+    }
+}
+
+class Adder {
+    private int sum = 0;
+
+    public Adder add(int n) {
+        sum += n;
+        return this;
+    }
+
+    public Adder inc() {
+        sum ++;
+        return this;
+    }
+
+    public int value() {
+        return sum;
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+19
+#+END_EXAMPLE
+注意：对于普通的字符串+操作，并不需要我们将其改写为StringBuilder，因为Java编译器在编译时就自动把多个连续的+操作编码为StringConcatFactory的操作。在运行期，StringConcatFactory会自动把字符串连接操作优化为数组复制或者StringBuilder操作。
+
+你可能还听说过StringBuffer，这是Java早期的一个StringBuilder的线程安全版本，它通过同步来保证多个线程操作StringBuffer也是安全的，但是同步会带来执行速度的下降。
+
+StringBuilder和StringBuffer接口完全相同，现在完全没有必要使用StringBuffer。
+** StringJoiner
+要高效拼接字符串，应该使用StringBuilder。
+
+很多时候，我们拼接的字符串像这样：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        String[] names = {"Bob", "Alice", "Grace"};
+        var sb = new StringBuilder();
+        sb.append("Hello ");
+        for (String name : names) {
+            sb.append(name).append(", ");
+        }
+        // 注意去掉最后的", ":
+        sb.delete(sb.length() - 2, sb.length());
+        sb.append("!");
+        System.out.println(sb.toString());
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+Hello Bob, Alice, Grace!
+#+END_EXAMPLE
+类似用分隔符拼接数组的需求很常见，所以Java标准库还提供了一个StringJoiner来干这个事：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        String[] names = {"Bob", "Alice", "Grace"};
+        var sj = new StringJoiner(", ");
+        for (String name : names) {
+            sj.add(name);
+        }
+        System.out.println(sj.toString());
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+Bob, Alice, Grace
+#+END_EXAMPLE
+慢着！用StringJoiner的结果少了前面的"Hello "和结尾的"!"！遇到这种情况，需要给StringJoiner指定“开头”和“结尾”：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        String[] names = {"Bob", "Alice", "Grace"};
+        var sj = new StringJoiner(", ", "Hello ", "!");
+        for (String name : names) {
+            sj.add(name);
+        }
+        System.out.println(sj.toString());
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+Hello Bob, Alice, Grace!
+#+END_EXAMPLE
+*** String.join()
+String还提供了一个静态方法join()，这个方法在内部使用了StringJoiner来拼接字符串，在不需要指定“开头”和“结尾”的时候，用String.join()更方便：
+#+begin_src java  
+String[] names = {"Bob", "Alice", "Grace"};
+var s = String.join(", ", names);
+#+end_src
+** 包装类型
+*** 包装类型
+Java的数据类型分两种：
+- 基本类型：byte，short，int，long，boolean，float，double，char
+- 引用类型：所有class和interface类型
+
+引用类型可以赋值为null，表示空，但基本类型不能赋值为null：
+#+begin_src java  
+String s = null;
+int n = null; // compile error!
+#+end_src
+那么，如何把一个基本类型视为对象（引用类型）？
+
+比如，想要把int基本类型变成一个引用类型，我们可以定义一个Integer类，它只包含一个实例字段int，这样，Integer类就可以视为int的包装类（Wrapper Class）：
+#+begin_src java  
+public class Integer {
+    private int value;
+
+    public Integer(int value) {
+        this.value = value;
+    }
+
+    public int intValue() {
+        return this.value;
+    }
+}
+#+end_src
+定义好了Integer类，我们就可以把int和Integer互相转换：
+#+begin_src java  
+Integer n = null;
+Integer n2 = new Integer(99);
+int n3 = n2.intValue();
+#+end_src
+实际上，因为包装类型非常有用，Java核心库为每种基本类型都提供了对应的包装类型：
+
+| 基本类型 | 对应的引用类型      |
+|----------+---------------------|
+| boolean  | java.lang.Boolean   |
+| byte     | java.lang.Byte      |
+| short    | java.lang.Short     |
+| int      | java.lang.Integer   |
+| long     | java.lang.Long      |
+| float    | java.lang.Float     |
+| double   | java.lang.Double    |
+| char     | java.lang.Character |
+
+我们可以直接使用，并不需要自己去定义：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        int i = 100;
+        // 通过new操作符创建Integer实例(不推荐使用,会有编译警告):
+        Integer n1 = new Integer(i);
+        // 通过静态方法valueOf(int)创建Integer实例:
+        Integer n2 = Integer.valueOf(i);
+        // 通过静态方法valueOf(String)创建Integer实例:
+        Integer n3 = Integer.valueOf("100");
+        System.out.println(n3.intValue());
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+Note: Main.java uses or overrides a deprecated API.
+Note: Recompile with -Xlint:deprecation for details.
+100
+#+END_EXAMPLE
+*** Auto Boxing
+因为int和Integer可以互相转换：
+#+begin_src java  
+int i = 100;
+Integer n = Integer.valueOf(i);
+int x = n.intValue();
+#+end_src
+所以，Java编译器可以帮助我们自动在int和Integer之间转型：
+#+begin_src java  
+Integer n = 100; // 编译器自动使用Integer.valueOf(int)
+int x = n; // 编译器自动使用Integer.intValue()
+#+end_src
+这种直接把int变为Integer的赋值写法，称为自动装箱（Auto Boxing），反过来，把Integer变为int的赋值写法，称为自动拆箱（Auto Unboxing）。
+
+注意：自动装箱和自动拆箱只发生在编译阶段，目的是为了少写代码。
+
+装箱和拆箱会影响代码的执行效率，因为编译后的class代码是严格区分基本类型和引用类型的。并且，自动拆箱执行时可能会报NullPointerException：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        Integer n = null;
+        int i = n;
+    }
+}
+#+end_src
+#+BEGIN_EXAMPLE
+Exception in thread "main" java.lang.NullPointerException: Cannot invoke "java.lang.Integer.intValue()" because "<local1>" is null
+at Main.main(Main.java:5)
+#+END_EXAMPLE
+*** 不变类
+所有的包装类型都是不变类。我们查看Integer的源码可知，它的核心代码如下：
+#+begin_src java  
+public final class Integer {
+    private final int value;
+}
+#+end_src
+因此，一旦创建了Integer对象，该对象就是不变的。
+
+对两个Integer实例进行比较要特别注意：绝对不能用==比较，因为Integer是引用类型，必须使用equals()比较：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        Integer x = 127;
+        Integer y = 127;
+        Integer m = 99999;
+        Integer n = 99999;
+        System.out.println("x == y: " + (x==y)); // true
+        System.out.println("m == n: " + (m==n)); // false
+        System.out.println("x.equals(y): " + x.equals(y)); // true
+        System.out.println("m.equals(n): " + m.equals(n)); // true
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+x == y: true
+m == n: false
+x.equals(y): true
+m.equals(n): true
+#+END_EXAMPLE
+仔细观察结果的童鞋可以发现，==比较，较小的两个相同的Integer返回true，较大的两个相同的Integer返回false，这是因为Integer是不变类，编译器把Integer x = 127;自动变为Integer x = Integer.valueOf(127);，为了节省内存，Integer.valueOf()对于较小的数，始终返回相同的实例，因此，==比较“恰好”为true，但我们绝不能因为Java标准库的Integer内部有缓存优化就用==比较，必须用equals()方法比较两个Integer。
+
+按照语义编程，而不是针对特定的底层实现去“优化”。
+
+因为Integer.valueOf()可能始终返回同一个Integer实例，因此，在我们自己创建Integer的时候，以下两种方法：
+- 方法1：Integer n = new Integer(100);
+- 方法2：Integer n = Integer.valueOf(100);
+方法2更好，因为方法1总是创建新的Integer实例，方法2把内部优化留给Integer的实现者去做，即使在当前版本没有优化，也有可能在下一个版本进行优化。
+
+我们把能创建“新”对象的静态方法称为静态工厂方法。Integer.valueOf()就是静态工厂方法，它尽可能地返回缓存的实例以节省内存。
+
+创建新对象时，优先选用静态工厂方法而不是new操作符。
+
+如果我们考察Byte.valueOf()方法的源码，可以看到，标准库返回的Byte实例全部是缓存实例，但调用者并不关心静态工厂方法以何种方式创建新实例还是直接返回缓存的实例。
+*** 进制转换
+Integer类本身还提供了大量方法，例如，最常用的静态方法parseInt()可以把字符串解析成一个整数：
+#+begin_src java  
+int x1 = Integer.parseInt("100"); // 100
+int x2 = Integer.parseInt("100", 16); // 256,因为按16进制解析
+#+end_src
+Integer还可以把整数格式化为指定进制的字符串：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        System.out.println(Integer.toString(100)); // "100",表示为10进制
+        System.out.println(Integer.toString(100, 36)); // "2s",表示为36进制
+        System.out.println(Integer.toHexString(100)); // "64",表示为16进制
+        System.out.println(Integer.toOctalString(100)); // "144",表示为8进制
+        System.out.println(Integer.toBinaryString(100)); // "1100100",表示为2进制
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+100
+2s
+64
+144
+1100100
+#+END_EXAMPLE
+注意：上述方法的输出都是String，在计算机内存中，只用二进制表示，不存在十进制或十六进制的表示方法。int n = 100在内存中总是以4字节的二进制表示：
+
+┌────────┬────────┬────────┬────────┐
+│00000000│00000000│00000000│01100100│
+└────────┴────────┴────────┴────────┘
+我们经常使用的System.out.println(n);是依靠核心库自动把整数格式化为10进制输出并显示在屏幕上，使用Integer.toHexString(n)则通过核心库自动把整数格式化为16进制。
+
+这里我们注意到程序设计的一个重要原则：数据的存储和显示要分离。
+
+Java的包装类型还定义了一些有用的静态变量
+#+begin_src java  
+// boolean只有两个值true/false，其包装类型只需要引用Boolean提供的静态字段:
+Boolean t = Boolean.TRUE;
+Boolean f = Boolean.FALSE;
+// int可表示的最大/最小值:
+int max = Integer.MAX_VALUE; // 2147483647
+int min = Integer.MIN_VALUE; // -2147483648
+// long类型占用的bit和byte数量:
+int sizeOfLong = Long.SIZE; // 64 (bits)
+int bytesOfLong = Long.BYTES; // 8 (bytes)
+#+end_src
+最后，所有的整数和浮点数的包装类型都继承自Number，因此，可以非常方便地直接通过包装类型获取各种基本类型：
+#+begin_src java  
+// 向上转型为Number:
+Number num = new Integer(999);
+// 获取byte, int, long, float, double:
+byte b = num.byteValue();
+int n = num.intValue();
+long ln = num.longValue();
+float f = num.floatValue();
+double d = num.doubleValue();
+#+end_src
+*** 处理无符号整型
+在Java中，并没有无符号整型（Unsigned）的基本数据类型。byte、short、int和long都是带符号整型，最高位是符号位。而C语言则提供了CPU支持的全部数据类型，包括无符号整型。无符号整型和有符号整型的转换在Java中就需要借助包装类型的静态方法完成。
+
+例如，byte是有符号整型，范围是-128~+127，但如果把byte看作无符号整型，它的范围就是0~255。我们把一个负的byte按无符号整型转换为int：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        byte x = -1;
+        byte y = 127;
+        System.out.println(Byte.toUnsignedInt(x)); // 255
+        System.out.println(Byte.toUnsignedInt(y)); // 127
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+255
+127
+#+END_EXAMPLE
+因为byte的-1的二进制表示是11111111，以无符号整型转换后的int就是255。
+
+类似的，可以把一个short按unsigned转换为int，把一个int按unsigned转换为long。
+** JavaBena
+*** JavaBena
+在Java中，有很多class的定义都符合这样的规范：
+- 若干private实例字段；
+- 通过public方法来读写实例字段。
+例如：
+#+begin_src java  
+public class Person {
+    private String name;
+    private int age;
+
+    public String getName() { return this.name; }
+    public void setName(String name) { this.name = name; }
+
+    public int getAge() { return this.age; }
+    public void setAge(int age) { this.age = age; }
+}
+#+end_src
+如果读写方法符合以下这种命名规范：
+#+begin_src java  
+// 读方法:
+public Type getXyz()
+// 写方法:
+public void setXyz(Type value)
+#+end_src
+那么这种class被称为JavaBean：   
+上面的字段是xyz，那么读写方法名分别以get和set开头，并且后接大写字母开头的字段名Xyz，因此两个读写方法名分别是getXyz()和setXyz()。
+
+boolean字段比较特殊，它的读方法一般命名为isXyz()：
+#+begin_src java  
+// 读方法:
+public boolean isChild()
+// 写方法:
+public void setChild(boolean value)
+#+end_src
+我们通常把一组对应的读方法（getter）和写方法（setter）称为属性（property）。例如，name属性：
+- 对应的读方法是String getName()
+- 对应的写方法是setName(String)
+只有getter的属性称为只读属性（read-only），例如，定义一个age只读属性：
+- 对应的读方法是int getAge()
+- 无对应的写方法setAge(int)
+类似的，只有setter的属性称为只写属性（write-only）。
+
+很明显，只读属性很常见，只写属性不常见。
+
+属性只需要定义getter和setter方法，不一定需要对应的字段。例如，child只读属性定义如下：
+#+begin_src java  
+public class Person {
+    private String name;
+    private int age;
+
+    public String getName() { return this.name; }
+    public void setName(String name) { this.name = name; }
+
+    public int getAge() { return this.age; }
+    public void setAge(int age) { this.age = age; }
+
+    public boolean isChild() {
+        return age <= 6;
+    }
+}
+#+end_src
+可以看出，getter和setter也是一种数据封装的方法。
+*** JavaBean的作用
+JavaBean主要用来传递数据，即把一组数据组合成一个JavaBean便于传输。此外，JavaBean可以方便地被IDE工具分析，生成读写属性的代码，主要用在图形界面的可视化设计中。
+
+通过IDE，可以快速生成getter和setter。例如，在Eclipse中，先输入以下代码：
+
+public class Person {
+    private String name;
+    private int age;
+}
+然后，点击右键，在弹出的菜单中选择“Source”，“Generate Getters and Setters”，在弹出的对话框中选中需要生成getter和setter方法的字段，点击确定即可由IDE自动完成所有方法代码。
+
+枚举JavaBean属性
+要枚举一个JavaBean的所有属性，可以直接使用Java核心库提供的Introspector：
+#+begin_src java  
+import java.beans.*;
+public class Main {
+    public static void main(String[] args) throws Exception {
+        BeanInfo info = Introspector.getBeanInfo(Person.class);
+        for (PropertyDescriptor pd : info.getPropertyDescriptors()) {
+            System.out.println(pd.getName());
+            System.out.println("  " + pd.getReadMethod());
+            System.out.println("  " + pd.getWriteMethod());
+        }
+    }
+}
+
+class Person {
+    private String name;
+    private int age;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+age
+  public int Person.getAge()
+  public void Person.setAge(int)
+class
+  public final native java.lang.Class java.lang.Object.getClass()
+  null
+name
+  public java.lang.String Person.getName()
+  public void Person.setName(java.lang.String)
+#+END_EXAMPLE
+** 枚举类
+*** 枚举类的用处
+在Java中，我们可以通过static final来定义常量。例如，我们希望定义周一到周日这7个常量，可以用7个不同的int表示：
+#+begin_src java  
+public class Weekday {
+    public static final int SUN = 0;
+    public static final int MON = 1;
+    public static final int TUE = 2;
+    public static final int WED = 3;
+    public static final int THU = 4;
+    public static final int FRI = 5;
+    public static final int SAT = 6;
+}
+#+end_src
+使用常量的时候，可以这么引用：
+#+begin_src java 
+if (day == Weekday.SAT || day == Weekday.SUN) {
+    // TODO: work at home
+}
+#+end_src
+
+也可以把常量定义为字符串类型，例如，定义3种颜色的常量：
+#+begin_src java  
+public class Color {
+    public static final String RED = "r";
+    public static final String GREEN = "g";
+    public static final String BLUE = "b";
+}
+#+end_src
+使用常量的时候，可以这么引用：
+#+begin_src java  
+String color = ...
+if (Color.RED.equals(color)) {
+    // TODO:
+}
+#+end_src
+无论是int常量还是String常量，使用这些常量来表示一组枚举值的时候，有一个严重的问题就是，编译器无法检查每个值的合理性。例如：
+#+begin_src java  
+if (weekday == 6 || weekday == 7) {
+    if (tasks == Weekday.MON) {
+        // TODO:
+    }
+}
+#+end_src
+上述代码编译和运行均不会报错，但存在两个问题：
+
+注意到Weekday定义的常量范围是0~6，并不包含7，编译器无法检查不在枚举中的int值；
+定义的常量仍可与其他变量比较，但其用途并非是枚举星期值。
+*** enum
+为了让编译器能自动检查某个值在枚举的集合内，并且，不同用途的枚举需要不同的类型来标记，不能混用，我们可以使用enum来定义枚举类：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        Weekday day = Weekday.SUN;  //注意这里定义的方式
+        if (day == Weekday.SAT || day == Weekday.SUN) {
+            System.out.println("Work at home!");
+        } else {
+            System.out.println("Work at office!");
+        }
+    }
+}
+
+enum Weekday {
+    SUN, MON, TUE, WED, THU, FRI, SAT;
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+Work at home!
+#+END_EXAMPLE
+注意到定义枚举类是通过关键字enum实现的，我们只需依次列出枚举的常量名。
+
+和int定义的常量相比，使用enum定义枚举有如下好处：
+
+首先，enum常量本身带有类型信息，即Weekday.SUN类型是Weekday，编译器会自动检查出类型错误。例如，下面的语句不可能编译通过：
+#+begin_src java  
+int day = 1;
+if (day == Weekday.SUN) { // Compile error: bad operand types for binary operator '=='
+}
+#+end_src
+其次，不可能引用到非枚举的值，因为无法通过编译。
+
+最后，不同类型的枚举不能互相比较或者赋值，因为类型不符。例如，不能给一个Weekday枚举类型的变量赋值为Color枚举类型的值：
+#+begin_src java  
+Weekday x = Weekday.SUN; // ok!
+Weekday y = Color.RED; // Compile error: incompatible types
+#+end_src
+这就使得编译器可以在编译期自动检查出所有可能的潜在错误。
+*** enum的比较
+使用enum定义的枚举类是一种引用类型。前面我们讲到，引用类型比较，要使用equals()方法，如果使用==比较，它比较的是两个引用类型的变量是否是同一个对象。因此，引用类型比较，要始终使用equals()方法，但enum类型可以例外。
+
+这是因为enum类型的每个常量在JVM中只有一个唯一实例，所以可以直接用==比较：
+#+begin_src java  
+if (day == Weekday.FRI) { // ok!
+}
+if (day.equals(Weekday.SUN)) { // ok, but more code!
+}
+#+end_src
+*** enum类型
+通过enum定义的枚举类，和其他的class有什么区别？
+
+答案是没有任何区别。enum定义的类型就是class，只不过它有以下几个特点：
+- 定义的enum类型总是继承自java.lang.Enum，且无法被继承；
+- 只能定义出enum的实例，而无法通过new操作符创建enum的实例；
+- 定义的每个实例都是引用类型的唯一实例；
+- 可以将enum类型用于switch语句。
+例如，我们定义的Color枚举类：
+#+begin_src java  
+public enum Color {
+    RED, GREEN, BLUE;
+}
+#+end_src
+编译器编译出的class大概就像这样：
+#+begin_src java  
+public final class Color extends Enum { // 继承自Enum，标记为final class
+    // 每个实例均为全局唯一:
+    public static final Color RED = new Color();
+    public static final Color GREEN = new Color();
+    public static final Color BLUE = new Color();
+    // private构造方法，确保外部无法调用new操作符:
+    private Color() {}
+}
+#+end_src
+所以，编译后的enum类和普通class并没有任何区别。但是我们自己无法按定义普通class那样来定义enum，必须使用enum关键字，这是Java语法规定的。
+
+因为enum是一个class，每个枚举的值都是class实例，因此，这些实例有一些方法：
+*** enum实例方法
+**** name()
+返回常量名，例如：
+#+begin_src java  
+String s = Weekday.SUN.name(); // "SUN"
+#+end_src
+**** ordinal()
+返回定义的常量的顺序，从0开始计数，例如：
+
+~int n = Weekday.MON.ordinal(); // 1~
+改变枚举常量定义的顺序就会导致ordinal()返回值发生变化。例如：
+#+begin_src java  
+public enum Weekday {
+    SUN, MON, TUE, WED, THU, FRI, SAT;
+}
+#+end_src
+和
+#+begin_src java  
+public enum Weekday {
+    MON, TUE, WED, THU, FRI, SAT, SUN;
+}
+#+end_src
+的ordinal就是不同的。如果在代码中编写了类似if(x.ordinal()==1)这样的语句，就要保证enum的枚举顺序不能变。新增的常量必须放在最后。
+
+有些童鞋会想，Weekday的枚举常量如果要和int转换，使用ordinal()不是非常方便？比如这样写：
+#+begin_src java  
+String task = Weekday.MON.ordinal() + "/ppt";
+saveToFile(task);
+#+end_src
+但是，如果不小心修改了枚举的顺序，编译器是无法检查出这种逻辑错误的。要编写健壮的代码，就不要依靠ordinal()的返回值。因为enum本身是class，所以我们可以定义private的构造方法，并且，给每个枚举常量添加字段：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        Weekday day = Weekday.SUN;
+        if (day.dayValue == 6 || day.dayValue == 0) {
+            System.out.println("Work at home!");
+        } else {
+            System.out.println("Work at office!");
+        }
+    }
+}
+
+enum Weekday {
+    MON(1), TUE(2), WED(3), THU(4), FRI(5), SAT(6), SUN(0);
+
+    public final int dayValue;
+
+    private Weekday(int dayValue) {
+        this.dayValue = dayValue;
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+Work at home!
+#+END_EXAMPLE
+这样就无需担心顺序的变化，新增枚举常量时，也需要指定一个int值。
+
+注意：枚举类的字段也可以是非final类型，即可以在运行期修改，但是不推荐这样做！
+
+默认情况下，对枚举常量调用toString()会返回和name()一样的字符串。但是，toString()可以被覆写，而name()则不行。我们可以给Weekday添加toString()方法：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        Weekday day = Weekday.SUN;
+        if (day.dayValue == 6 || day.dayValue == 0) {
+            System.out.println("Today is " + day + ". Work at home!");
+        } else {
+            System.out.println("Today is " + day + ". Work at office!");
+        }
+    }
+}
+
+enum Weekday {
+    MON(1, "星期一"), TUE(2, "星期二"), WED(3, "星期三"), THU(4, "星期四"), FRI(5, "星期五"), SAT(6, "星期六"), SUN(0, "星期日");
+
+    public final int dayValue;
+    private final String chinese;
+
+    private Weekday(int dayValue, String chinese) {
+        this.dayValue = dayValue;
+        this.chinese = chinese;
+    }
+
+    @Override
+    public String toString() {
+        return this.chinese;
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+Today is 星期日. Work at home!
+#+END_EXAMPLE\
+**** switch
+最后，枚举类可以应用在switch语句中。因为枚举类天生具有类型信息和有限个枚举常量，所以比int、String类型更适合用在switch语句中：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        Weekday day = Weekday.SUN;
+        switch(day) {
+        case MON:
+        case TUE:
+        case WED:
+        case THU:
+        case FRI:
+            System.out.println("Today is " + day + ". Work at office!");
+            break;
+        case SAT:
+        case SUN:
+            System.out.println("Today is " + day + ". Work at home!");
+            break;
+        default:
+            throw new RuntimeException("cannot process " + day);
+        }
+    }
+}
+
+enum Weekday {
+    MON, TUE, WED, THU, FRI, SAT, SUN;
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+Today is SUN. Work at home!
+#+END_EXAMPLE
+加上default语句，可以在漏写某个枚举常量时自动报错，从而及时发现错误。
+** 记录类
+使用String、Integer等类型的时候，这些类型都是不变类，一个不变类具有以下特点：
+- 定义class时使用final，无法派生子类；
+- 每个字段使用final，保证创建实例后无法修改任何字段。
+假设我们希望定义一个Point类，有x、y两个变量，同时它是一个不变类，可以这么写：
+#+begin_src java  
+public final class Point {
+    private final int x;
+    private final int y;
+
+    public Point(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public int x() {
+        return this.x;
+    }
+
+    public int y() {
+        return this.y;
+    }
+}
+#+end_src
+为了保证不变类的比较，还需要正确覆写equals()和hashCode()方法，这样才能在集合类中正常使用。后续我们会详细讲解正确覆写equals()和hashCode()，这里演示Point不变类的写法目的是，这些代码写起来都非常简单，但是很繁琐。
+*** record
+从Java 14开始，引入了新的Record类。我们定义Record类时，使用关键字record。把上述Point类改写为Record类，代码如下：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        Point p = new Point(123, 456);
+        System.out.println(p.x());
+        System.out.println(p.y());
+        System.out.println(p);
+    }
+}
+
+public record Point(int x, int y) {}
+#+end_src
+#+BEGIN_EXAMPLE
+Note: Main.java uses preview language features.
+Note: Recompile with -Xlint:preview for details.
+123
+456
+Point[x=123, y=456]
+#+END_EXAMPLE
+仔细观察Point的定义：
+
+~public record Point(int x, int y) {}~
+
+把上述定义改写为class，相当于以下代码：
+#+begin_src java  
+public final class Point extends Record {
+    private final int x;
+    private final int y;
+
+    public Point(int x, int y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public int x() {
+        return this.x;
+    }
+
+    public int y() {
+        return this.y;
+    }
+
+    public String toString() {
+        return String.format("Point[x=%s, y=%s]", x, y);
+    }
+
+    public boolean equals(Object o) {
+        ...
+    }
+    public int hashCode() {
+        ...
+    }
+}
+#+end_src
+除了用final修饰class以及每个字段外，编译器还自动为我们创建了构造方法，和字段名同名的方法，以及覆写toString()、equals()和hashCode()方法。
+
+换句话说，使用record关键字，可以一行写出一个不变类。
+
+和enum类似，我们自己不能直接从Record派生，只能通过record关键字由编译器实现继承。
+*** 构造方法
+编译器默认按照record声明的变量顺序自动创建一个构造方法，并在方法内给字段赋值。那么问题来了，如果我们要检查参数，应该怎么办？
+
+假设Point类的x、y不允许负数，我们就得给Point的构造方法加上检查逻辑：
+#+begin_src java  
+public record Point(int x, int y) {
+    public Point {
+        if (x < 0 || y < 0) {
+            throw new IllegalArgumentException();
+        }
+    }
+}
+#+end_src
+注意到方法public Point {...}被称为Compact Constructor，它的目的是让我们编写检查逻辑，编译器最终生成的构造方法如下：
+#+begin_src java  
+public final class Point extends Record {
+    public Point(int x, int y) {
+        // 这是我们编写的Compact Constructor:
+        if (x < 0 || y < 0) {
+            throw new IllegalArgumentException();
+        }
+        // 这是编译器继续生成的赋值代码:
+        this.x = x;
+        this.y = y;
+    }
+    ...
+}
+#+end_src
+作为record的Point仍然可以添加静态方法。一种常用的静态方法是of()方法，用来创建Point：
+#+begin_src java  
+public record Point(int x, int y) {
+    public static Point of() {
+        return new Point(0, 0);
+    }
+    public static Point of(int x, int y) {
+        return new Point(x, y);
+    }
+}
+#+end_src
+这样我们可以写出更简洁的代码：
+#+begin_src java  
+var z = Point.of();
+var p = Point.of(123, 456);
+#+end_src
+** BigInteger
+在Java中，由CPU原生提供的整型最大范围是64位long型整数。使用long型整数可以直接通过CPU指令进行计算，速度非常快。
+
+如果我们使用的整数范围超过了long型怎么办？这个时候，就只能用软件来模拟一个大整数。java.math.BigInteger就是用来表示任意大小的整数。BigInteger内部用一个int[]数组来模拟一个非常大的整数：
+#+begin_src java  
+BigInteger bi = new BigInteger("1234567890");
+System.out.println(bi.pow(5)); // 2867971860299718107233761438093672048294900000
+#+end_src
+对BigInteger做运算的时候，只能使用实例方法，例如，加法运算：
+#+begin_src java  
+BigInteger i1 = new BigInteger("1234567890");
+BigInteger i2 = new BigInteger("12345678901234567890");
+BigInteger sum = i1.add(i2); // 12345678902469135780
+#+end_src
+和long型整数运算比，BigInteger不会有范围限制，但缺点是速度比较慢。
+
+也可以把BigInteger转换成long型：
+#+begin_src java  
+BigInteger i = new BigInteger("123456789000");
+System.out.println(i.longValue()); // 123456789000
+System.out.println(i.multiply(i).longValueExact()); // java.lang.ArithmeticException: BigInteger out of long range
+#+end_src
+使用longValueExact()方法时，如果超出了long型的范围，会抛出ArithmeticException。
+
+BigInteger和Integer、Long一样，也是不可变类，并且也继承自Number类。因为Number定义了转换为基本类型的几个方法：
+- 转换为byte：byteValue()
+- 转换为short：shortValue()
+- 转换为int：intValue()
+- 转换为long：longValue()
+- 转换为float：floatValue()
+- 转换为double：doubleValue()
+
+因此，通过上述方法，可以把BigInteger转换成基本类型。如果BigInteger表示的范围超过了基本类型的范围，转换时将丢失高位信息，即结果不一定是准确的。如果需要准确地转换成基本类型，可以使用intValueExact()、longValueExact()等方法，在转换时如果超出范围，将直接抛出ArithmeticException异常。
+
+如果BigInteger的值甚至超过了float的最大范围（3.4x1038），那么返回的float是什么呢？
+#+begin_src java  
+import java.math.BigInteger;
+public class Main {
+    public static void main(String[] args) {
+        BigInteger n = new BigInteger("999999").pow(99);
+        float f = n.floatValue();
+        System.out.println(f);
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+Infinity
+#+END_EXAMPLE
+** BigDecimal
+
+和BigInteger类似，BigDecimal可以表示一个任意大小且精度完全准确的浮点数。
+#+begin_src java  
+BigDecimal bd = new BigDecimal("123.4567");
+System.out.println(bd.multiply(bd)); // 15241.55677489
+#+end_src
+BigDecimal用scale()表示小数位数，例如：
+#+begin_src java  
+BigDecimal d1 = new BigDecimal("123.45");
+BigDecimal d2 = new BigDecimal("123.4500");
+BigDecimal d3 = new BigDecimal("1234500");
+System.out.println(d1.scale()); // 2,两位小数
+System.out.println(d2.scale()); // 4
+System.out.println(d3.scale()); // 0
+#+end_src
+通过BigDecimal的stripTrailingZeros()方法，可以将一个BigDecimal格式化为一个相等的，但去掉了末尾0的BigDecimal：
+#+begin_src java  
+BigDecimal d1 = new BigDecimal("123.4500");
+BigDecimal d2 = d1.stripTrailingZeros();
+System.out.println(d1.scale()); // 4
+System.out.println(d2.scale()); // 2,因为去掉了00
+
+BigDecimal d3 = new BigDecimal("1234500");
+BigDecimal d4 = d3.stripTrailingZeros();
+System.out.println(d3.scale()); // 0
+System.out.println(d4.scale()); // -2
+#+end_src
+如果一个BigDecimal的scale()返回负数，例如，-2，表示这个数是个整数，并且末尾有2个0。
+
+可以对一个BigDecimal设置它的scale，如果精度比原始值低，那么按照指定的方法进行四舍五入或者直接截断：
+#+begin_src java  
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+public class Main {
+    public static void main(String[] args) {
+        BigDecimal d1 = new BigDecimal("123.456789");
+        BigDecimal d2 = d1.setScale(4, RoundingMode.HALF_UP); // 四舍五入，123.4568
+        BigDecimal d3 = d1.setScale(4, RoundingMode.DOWN); // 直接截断，123.4567
+        System.out.println(d2);
+        System.out.println(d3);
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+123.4568
+123.4567
+#+END_EXAMPLE
+对BigDecimal做加、减、乘时，精度不会丢失，但是做除法时，存在无法除尽的情况，这时，就必须指定精度以及如何进行截断：
+#+begin_src java  
+BigDecimal d1 = new BigDecimal("123.456");
+BigDecimal d2 = new BigDecimal("23.456789");
+BigDecimal d3 = d1.divide(d2, 10, RoundingMode.HALF_UP); // 保留10位小数并四舍五入
+BigDecimal d4 = d1.divide(d2); // 报错：ArithmeticException，因为除不尽
+#+end_src
+还可以对BigDecimal做除法的同时求余数：
+#+begin_src java  
+import java.math.BigDecimal;
+public class Main {
+    public static void main(String[] args) {
+        BigDecimal n = new BigDecimal("12.345");
+        BigDecimal m = new BigDecimal("0.12");
+        BigDecimal[] dr = n.divideAndRemainder(m);
+        System.out.println(dr[0]); // 102
+        System.out.println(dr[1]); // 0.105
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+102.0
+0.105
+#+END_EXAMPLE
+调用divideAndRemainder()方法时，返回的数组包含两个BigDecimal，分别是商和余数，其中商总是整数，余数不会大于除数。我们可以利用这个方法判断两个BigDecimal是否是整数倍数：
+#+begin_src java  
+BigDecimal n = new BigDecimal("12.75");
+BigDecimal m = new BigDecimal("0.15");
+BigDecimal[] dr = n.divideAndRemainder(m);
+if (dr[1].signum() == 0) {
+    // n是m的整数倍
+}
+#+end_src
+*** 比较BigDecimal
+在比较两个BigDecimal的值是否相等时，要特别注意，使用equals()方法不但要求两个BigDecimal的值相等，还要求它们的scale()相等：
+#+begin_src java  
+BigDecimal d1 = new BigDecimal("123.456");
+BigDecimal d2 = new BigDecimal("123.45600");
+System.out.println(d1.equals(d2)); // false,因为scale不同
+System.out.println(d1.equals(d2.stripTrailingZeros())); // true,因为d2去除尾部0后scale变为2
+System.out.println(d1.compareTo(d2)); // 0
+#+end_src
+必须使用compareTo()方法来比较，它根据两个值的大小分别返回负数、正数和0，分别表示小于、大于和等于。
+
+总是使用compareTo()比较两个BigDecimal的值，不要使用equals()！
+
+如果查看BigDecimal的源码，可以发现，实际上一个BigDecimal是通过一个BigInteger和一个scale来表示的，即BigInteger表示一个完整的整数，而scale表示小数位数：
+#+begin_src java  
+public class BigDecimal extends Number implements Comparable<BigDecimal> {
+    private final BigInteger intVal;
+    private final int scale;
+}
+#+end_srcQ
+BigDecimal也是从Number继承的，也是不可变对象。
+** 常用工具类
+*** Math
+顾名思义，Math类就是用来进行数学计算的，它提供了大量的静态方法来便于我们实现数学计算：
+
+求绝对值：
+#+begin_src java  
+Math.abs(-100); // 100
+Math.abs(-7.8); // 7.8
+#+end_src
+取最大或最小值：
+#+begin_src java  
+Math.max(100, 99); // 100
+Math.min(1.2, 2.3); // 1.2
+#+end_src
+
+计算x的y次方：
+~Math.pow(2, 10); // 2的10次方=1024~
+
+计算x开根号
+~Math.sqrt(2); // 1.414...~
+
+计算e的x次方：
+~Math.exp(2); // 7.389...~
+
+计算以e为底的对数：
+~Math.log(4); // 1.386...~
+
+计算以10为底的对数：
+~Math.log10(100); // 2~
+
+三角函数：
+#+begin_src java  
+Math.sin(3.14); // 0.00159...
+Math.cos(3.14); // -0.9999...
+Math.tan(3.14); // -0.0015...
+Math.asin(1.0); // 1.57079...
+Math.acos(1.0); // 0.0
+#+end_src
+
+Math还提供了几个数学常量：
+#+begin_src java  
+double pi = Math.PI; // 3.14159...
+double e = Math.E; // 2.7182818...
+Math.sin(Math.PI / 6); // sin(π/6) = 0.5
+#+end_src
+
+生成一个随机数x，x的范围是0 <= x < 1：
+~Math.random(); // 0.53907... 每次都不一样~
+
+如果我们要生成一个区间在[MIN, MAX)的随机数，可以借助Math.random()实现，计算如下：
+#+begin_src java  
+// 区间在[MIN, MAX)的随机数
+public class Main {
+    public static void main(String[] args) {
+        double x = Math.random(); // x的范围是[0,1)
+        double min = 10;
+        double max = 50;
+        double y = x * (max - min) + min; // y的范围是[10,50)
+        long n = (long) y; // n的范围是[10,50)的整数
+        System.out.println(y);
+        System.out.println(n);
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+25.093392576189743
+25
+#+END_EXAMPLE
+有些童鞋可能注意到Java标准库还提供了一个StrictMath，它提供了和Math几乎一模一样的方法。这两个类的区别在于，由于浮点数计算存在误差，不同的平台（例如x86和ARM）计算的结果可能不一致（指误差不同），因此，StrictMath保证所有平台计算结果都是完全相同的，而Math会尽量针对平台优化计算速度，所以，绝大多数情况下，使用Math就足够了。
+*** Random
+Random用来创建伪随机数。所谓伪随机数，是指只要给定一个初始的种子，产生的随机数序列是完全一样的。
+
+要生成一个随机数，可以使用nextInt()、nextLong()、nextFloat()、nextDouble()：
+#+begin_src java  
+Random r = new Random();
+r.nextInt(); // 2071575453,每次都不一样
+r.nextInt(10); // 5,生成一个[0,10)之间的int
+r.nextLong(); // 8811649292570369305,每次都不一样
+r.nextFloat(); // 0.54335...生成一个[0,1)之间的float
+r.nextDouble(); // 0.3716...生成一个[0,1)之间的double
+#+end_src
+有童鞋问，每次运行程序，生成的随机数都是不同的，没看出伪随机数的特性来。
+
+这是因为我们创建Random实例时，如果不给定种子，就使用系统当前时间戳作为种子，因此每次运行时，种子不同，得到的伪随机数序列就不同。
+
+如果我们在创建Random实例时指定一个种子，就会得到完全确定的随机数序列：
+#+begin_src java  
+import java.util.Random;
+public class Main {
+    public static void main(String[] args) {
+        Random r = new Random(12345);
+        for (int i = 0; i < 10; i++) {
+            System.out.println(r.nextInt(100));
+        }
+        // 51, 80, 41, 28, 55...
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+51
+80
+41
+28
+55
+84
+75
+2
+1
+89
+#+END_EXAMPLE
+*** SecureRandom
+有伪随机数，就有真随机数。实际上真正的真随机数只能通过量子力学原理来获取，而我们想要的是一个不可预测的安全的随机数，SecureRandom就是用来创建安全的随机数的：
+#+begin_src java  
+SecureRandom sr = new SecureRandom();
+System.out.println(sr.nextInt(100));
+#+end_src
+SecureRandom无法指定种子，它使用RNG（random number generator）算法。JDK的SecureRandom实际上有多种不同的底层实现，有的使用安全随机种子加上伪随机数算法来产生安全的随机数，有的使用真正的随机数生成器。实际使用的时候，可以优先获取高强度的安全随机数生成器，如果没有提供，再使用普通等级的安全随机数生成器：
+#+begin_src java  
+import java.util.Arrays;
+import java.security.SecureRandom;
+import java.security.NoSuchAlgorithmException;
+public class Main {
+    public static void main(String[] args) {
+        SecureRandom sr = null;
+        try {
+            sr = SecureRandom.getInstanceStrong(); // 获取高强度安全随机数生成器
+        } catch (NoSuchAlgorithmException e) {
+            sr = new SecureRandom(); // 获取普通的安全随机数生成器
+        }
+        byte[] buffer = new byte[16];
+        sr.nextBytes(buffer); // 用安全随机数填充buffer
+        System.out.println(Arrays.toString(buffer));
+    }
+}
+
+#+end_src
+SecureRandom的安全性是通过操作系统提供的安全的随机种子来生成随机数。这个种子是通过CPU的热噪声、读写磁盘的字节、网络流量等各种随机事件产生的“熵”。
+
+在密码学中，安全的随机数非常重要。如果使用不安全的伪随机数，所有加密体系都将被攻破。因此，时刻牢记必须使用SecureRandom来产生安全的随机数。
+
+需要使用安全随机数的时候，必须使用SecureRandom，绝不能使用Random！
+* 异常处理
+** java的异常
+*** 异常介绍
+Java内置了一套异常处理机制，总是使用异常来表示错误。
+
+异常是一种class，因此它本身带有类型信息。异常可以在任何地方抛出，但只需要在上层捕获，这样就和方法调用分离了：
+#+begin_src java  
+try {
+    String s = processFile(“C:\\test.txt”);
+    // ok:
+} catch (FileNotFoundException e) {
+    // file not found:
+} catch (SecurityException e) {
+    // no read permission:
+} catch (IOException e) {
+    // io error:
+} catch (Exception e) {
+    // other error:
+}
+#+end_src
+因为Java的异常是class，它的继承关系如下：
+
+                     ┌───────────┐
+                     │  Object   │
+                     └───────────┘
+                           ▲
+                           │
+                     ┌───────────┐
+                     │ Throwable │
+                     └───────────┘
+                           ▲
+                 ┌─────────┴─────────┐
+                 │                   │
+           ┌───────────┐       ┌───────────┐
+           │   Error   │       │ Exception │
+           └───────────┘       └───────────┘
+                 ▲                   ▲
+         ┌───────┘              ┌────┴──────────┐
+         │                      │               │
+┌─────────────────┐    ┌─────────────────┐┌───────────┐
+│OutOfMemoryError │... │RuntimeException ││IOException│...
+└─────────────────┘    └─────────────────┘└───────────┘
+                                ▲
+                    ┌───────────┴─────────────┐
+                    │                         │
+         ┌─────────────────────┐ ┌─────────────────────────┐
+         │NullPointerException │ │IllegalArgumentException │...
+         └─────────────────────┘ └─────────────────────────┘
+从继承关系可知：Throwable是异常体系的根，它继承自Object。Throwable有两个体系：Error和Exception，Error表示严重的错误，程序对此一般无能为力，例如：
+- OutOfMemoryError：内存耗尽
+- NoClassDefFoundError：无法加载某个Class
+- StackOverflowError：栈溢出
+而Exception则是运行时的错误，它可以被捕获并处理。
+
+某些异常是应用程序逻辑处理的一部分，应该捕获并处理。例如：
+- NumberFormatException：数值类型的格式错误
+- FileNotFoundException：未找到文件
+- SocketException：读取网络失败
+还有一些异常是程序逻辑编写不对造成的，应该修复程序本身。例如：
+- NullPointerException：对某个null的对象调用方法或字段
+- IndexOutOfBoundsException：数组索引越界
+Exception又分为两大类：
+- RuntimeException以及它的子类；
+- 非RuntimeException（包括IOException、ReflectiveOperationException等等）
+
+Java规定：
+- 必须捕获的异常，包括Exception及其子类，但不包括RuntimeException及其子类，这种类型的异常称为Checked Exception。
+- 不需要捕获的异常，包括Error及其子类，RuntimeException及其子类。
+
+注意：编译器对RuntimeException及其子类不做强制捕获要求，不是指应用程序本身不应该捕获并处理RuntimeException。是否需要捕获，具体问题具体分析。
+*** 捕获异常
+捕获异常使用try...catch语句，把可能发生异常的代码放到try {...}中，然后使用catch捕获对应的Exception及其子类：
+#+begin_src java  
+// try...catch
+import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
+public class Main {
+    public static void main(String[] args) {
+        byte[] bs = toGBK("中文");
+        System.out.println(Arrays.toString(bs));
+    }
+
+    static byte[] toGBK(String s) {
+        try {
+            // 用指定编码转换String为byte[]:
+            return s.getBytes("GBK");
+        } catch (UnsupportedEncodingException e) {
+            // 如果系统不支持GBK编码，会捕获到UnsupportedEncodingException:
+            System.out.println(e); // 打印异常信息
+            return s.getBytes(); // 尝试使用用默认编码
+        }
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+[-42, -48, -50, -60]
+#+END_EXAMPLE
+如果我们不捕获UnsupportedEncodingException，会出现编译失败的问题：
+#+begin_src java  
+// try...catch
+import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
+public class Main {
+    public static void main(String[] args) {
+        byte[] bs = toGBK("中文");
+        System.out.println(Arrays.toString(bs));
+    }
+
+    static byte[] toGBK(String s) {
+        return s.getBytes("GBK");
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+Main.java:11: error: unreported exception UnsupportedEncodingException; must be caught or declared to be thrown
+        return s.getBytes("GBK");
+                         ^
+1 error
+error: compilation failed
+#+END_EXAMPLE
+编译器会报错，错误信息类似：unreported exception UnsupportedEncodingException; must be caught or declared to be thrown，并且准确地指出需要捕获的语句是return s.getBytes("GBK");。意思是说，像UnsupportedEncodingException这样的Checked Exception，必须被捕获。
+
+这是因为String.getBytes(String)方法定义是：
+#+begin_src java  
+public byte[] getBytes(String charsetName) throws UnsupportedEncodingException {
+    ...
+}
+#+end_src
+在方法定义的时候，使用throws Xxx表示该方法可能抛出的异常类型。调用方在调用的时候，必须强制捕获这些异常，否则编译器会报错。
+
+在toGBK()方法中，因为调用了String.getBytes(String)方法，就必须捕获UnsupportedEncodingException。我们也可以不捕获它，而是在方法定义处用throws表示toGBK()方法可能会抛出UnsupportedEncodingException，就可以让toGBK()方法通过编译器检查：
+#+begin_src java  
+// try...catch
+import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
+public class Main {
+    public static void main(String[] args) {
+        byte[] bs = toGBK("中文");
+        System.out.println(Arrays.toString(bs));
+    }
+
+    static byte[] toGBK(String s) throws UnsupportedEncodingException {
+        return s.getBytes("GBK");
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+Main.java:6: error: unreported exception UnsupportedEncodingException; must be caught or declared to be thrown
+        byte[] bs = toGBK("中文");
+                         ^
+1 error
+error: compilation failed
+#+END_EXAMPLE
+上述代码仍然会得到编译错误，但这一次，编译器提示的不是调用return s.getBytes("GBK");的问题，而是byte[] bs = toGBK("中文");。因为在main()方法中，调用toGBK()，没有捕获它声明的可能抛出的UnsupportedEncodingException。
+
+修复方法是在main()方法中捕获异常并处理：
+#+begin_src java  
+// try...catch
+import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
+public class Main {
+    public static void main(String[] args) {
+        try {
+            byte[] bs = toGBK("中文");
+            System.out.println(Arrays.toString(bs));
+        } catch (UnsupportedEncodingException e) {
+            System.out.println(e);
+        }
+    }
+
+    static byte[] toGBK(String s) throws UnsupportedEncodingException {
+        // 用指定编码转换String为byte[]:
+        return s.getBytes("GBK");
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+[-42, -48, -50, -60]
+#+END_EXAMPLE
+可见，只要是方法声明的Checked Exception，不在调用层捕获，也必须在更高的调用层捕获。所有未捕获的异常，最终也必须在main()方法中捕获，不会出现漏写try的情况。这是由编译器保证的。main()方法也是最后捕获Exception的机会。
+
+如果是测试代码，上面的写法就略显麻烦。如果不想写任何try代码，可以直接把main()方法定义为throws Exception：
+
+#+begin_src java  
+// try...catch
+import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
+public class Main {
+    public static void main(String[] args) throws Exception {
+        byte[] bs = toGBK("中文");
+        System.out.println(Arrays.toString(bs));
+    }
+
+    static byte[] toGBK(String s) throws UnsupportedEncodingException {
+        // 用指定编码转换String为byte[]:
+        return s.getBytes("GBK");
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+[-42, -48, -50, -60]
+#+END_EXAMPLE
+因为main()方法声明了可能抛出Exception，也就声明了可能抛出所有的Exception，因此在内部就无需捕获了。代价就是一旦发生异常，程序会立刻退出。
+
+还有一些童鞋喜欢在toGBK()内部“消化”异常：
+#+begin_src java  
+static byte[] toGBK(String s) {
+    try {
+        return s.getBytes("GBK");
+    } catch (UnsupportedEncodingException e) {
+        // 什么也不干
+    }
+    return null;
+#+end_src
+这种捕获后不处理的方式是非常不好的，即使真的什么也做不了，也要先把异常记录下来：
+#+begin_src java  
+static byte[] toGBK(String s) {
+    try {
+        return s.getBytes("GBK");
+    } catch (UnsupportedEncodingException e) {
+        // 先记下来再说:
+        e.printStackTrace();
+    }
+    return null;
+#+end_src
+所有异常都可以调用printStackTrace()方法打印异常栈，这是一个简单有用的快速打印异常的方法。
+** 捕获异常
+在Java中，凡是可能抛出异常的语句，都可以用try ... catch捕获。把可能发生异常的语句放在try { ... }中，然后使用catch捕获对应的Exception及其子类。
+
+*** 多catch语句
+可以使用多个catch语句，每个catch分别捕获对应的Exception及其子类。JVM在捕获到异常后，会从上到下匹配catch语句，匹配到某个catch后，执行catch代码块，然后不再继续匹配。
+
+简单地说就是：多个catch语句只有一个能被执行。例如：
+#+begin_src java  
+public static void main(String[] args) {
+    try {
+        process1();
+        process2();
+        process3();
+    } catch (IOException e) {
+        System.out.println(e);
+    } catch (NumberFormatException e) {
+        System.out.println(e);
+    }
+}
+#+end_src
+存在多个catch的时候，catch的顺序非常重要：子类必须写在前面。例如：
+#+begin_src java  
+public static void main(String[] args) {
+    try {
+        process1();
+        process2();
+        process3();
+    } catch (IOException e) {
+        System.out.println("IO error");
+    } catch (UnsupportedEncodingException e) { // 永远捕获不到
+        System.out.println("Bad encoding");
+    }
+}
+#+end_src
+对于上面的代码，UnsupportedEncodingException异常是永远捕获不到的，因为它是IOException的子类。当抛出UnsupportedEncodingException异常时，会被catch (IOException e) { ... }捕获并执行。
+
+因此，正确的写法是把子类放到前面：
+#+begin_src java  
+public static void main(String[] args) {
+    try {
+        process1();
+        process2();
+        process3();
+    } catch (UnsupportedEncodingException e) {
+        System.out.println("Bad encoding");
+    } catch (IOException e) {
+        System.out.println("IO error");
+    }
+}
+#+end_src
+
+*** finally语句
+无论是否有异常发生，如果我们都希望执行一些语句，例如清理工作，怎么写？
+
+可以把执行语句写若干遍：正常执行的放到try中，每个catch再写一遍。例如：
+#+begin_src java  
+public static void main(String[] args) {
+    try {
+        process1();
+        process2();
+        process3();
+        System.out.println("END");
+    } catch (UnsupportedEncodingException e) {
+        System.out.println("Bad encoding");
+        System.out.println("END");
+    } catch (IOException e) {
+        System.out.println("IO error");
+        System.out.println("END");
+    }
+}
+#+end_src
+上述代码无论是否发生异常，都会执行System.out.println("END");这条语句。
+
+那么如何消除这些重复的代码？Java的try ... catch机制还提供了finally语句，finally语句块保证有无错误都会执行。上述代码可以改写如下：
+#+begin_src java  
+public static void main(String[] args) {
+    try {
+        process1();
+        process2();
+        process3();
+    } catch (UnsupportedEncodingException e) {
+        System.out.println("Bad encoding");
+    } catch (IOException e) {
+        System.out.println("IO error");
+    } finally {
+        System.out.println("END");
+    }
+}
+#+end_src
+注意finally有几个特点：
+- finally语句不是必须的，可写可不写；
+- finally总是最后执行。
+
+如果没有发生异常，就正常执行try { ... }语句块，然后执行finally。如果发生了异常，就中断执行try { ... }语句块，然后跳转执行匹配的catch语句块，最后执行finally。
+
+可见，finally是用来保证一些代码必须执行的。
+
+某些情况下，可以没有catch，只使用try ... finally结构。例如：
+#+begin_src java  
+void process(String file) throws IOException {
+    try {
+        ...
+    } finally {
+        System.out.println("END");
+    }
+}
+#+end_src
+
+因为方法声明了可能抛出的异常，所以可以不写catch。
+
+*** 捕获多种异常
+如果某些异常的处理逻辑相同，但是异常本身不存在继承关系，那么就得编写多条catch子句：
+#+begin_src java  
+public static void main(String[] args) {
+    try {
+        process1();
+        process2();
+        process3();
+    } catch (IOException e) {
+        System.out.println("Bad input");
+    } catch (NumberFormatException e) {
+        System.out.println("Bad input");
+    } catch (Exception e) {
+        System.out.println("Unknown error");
+    }
+}
+#+end_src
+因为处理IOException和NumberFormatException的代码是相同的，所以我们可以把它两用|合并到一起：
+#+begin_src java  
+public static void main(String[] args) {
+    try {
+        process1();
+        process2();
+        process3();
+    } catch (IOException | NumberFormatException e) { // IOException或NumberFormatException
+        System.out.println("Bad input");
+    } catch (Exception e) {
+        System.out.println("Unknown error");
+    }
+}
+#+end_src
+
+** 抛出异常
+
+*** 异常的传播
+当某个方法抛出了异常时，如果当前方法没有捕获异常，异常就会被抛到上层调用方法，直到遇到某个try ... catch被捕获为止：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        try {
+            process1();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    static void process1() {
+        process2();
+    }
+
+    static void process2() {
+        Integer.parseInt(null); // 会抛出NumberFormatException
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+java.lang.NumberFormatException: null
+at java.base/java.lang.Integer.parseInt(Integer.java:614)
+at java.base/java.lang.Integer.parseInt(Integer.java:770)
+at Main.process2(Main.java:16)
+at Main.process1(Main.java:12)
+at Main.main(Main.java:5)
+at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:64)
+at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+at java.base/java.lang.reflect.Method.invoke(Method.java:564)
+at jdk.compiler/com.sun.tools.javac.launcher.Main.execute(Main.java:415)
+at jdk.compiler/com.sun.tools.javac.launcher.Main.run(Main.java:192)
+at jdk.compiler/com.sun.tools.javac.launcher.Main.main(Main.java:132)
+#+END_EXAMPLE
+通过printStackTrace()可以打印出方法的调用栈，类似：
+#+begin_src java  
+java.lang.NumberFormatException: null
+    at java.base/java.lang.Integer.parseInt(Integer.java:614)
+    at java.base/java.lang.Integer.parseInt(Integer.java:770)
+    at Main.process2(Main.java:16)
+    at Main.process1(Main.java:12)
+    at Main.main(Main.java:5)
+#+end_src
+printStackTrace()对于调试错误非常有用，上述信息表示：NumberFormatException是在java.lang.Integer.parseInt方法中被抛出的，从下往上看，调用层次依次是：
+1. main()调用process1()；
+2. process1()调用process2()；
+3. process2()调用Integer.parseInt(String)；
+4. Integer.parseInt(String)调用Integer.parseInt(String, int)。
+
+查看Integer.java源码可知，抛出异常的方法代码如下：
+#+begin_src java  
+public static int parseInt(String s, int radix) throws NumberFormatException {
+    if (s == null) {
+        throw new NumberFormatException("null");
+    }
+    ...
+}
+#+end_src
+并且，每层调用均给出了源代码的行号，可直接定位。
+
+*** 抛出异常
+当发生错误时，例如，用户输入了非法的字符，我们就可以抛出异常。
+
+如何抛出异常？参考Integer.parseInt()方法，抛出异常分两步：
+1. 创建某个Exception的实例；
+2. 用throw语句抛出。
+
+下面是一个例子：
+#+begin_src java  
+void process2(String s) {
+    if (s==null) {
+        NullPointerException e = new NullPointerException();
+        throw e;
+    }
+}
+#+end_src
+
+实际上，绝大部分抛出异常的代码都会合并写成一行：
+#+begin_src java  
+void process2(String s) {
+    if (s==null) {
+        throw new NullPointerException();
+    }
+}
+#+end_src
+如果一个方法捕获了某个异常后，又在catch子句中抛出新的异常，就相当于把抛出的异常类型“转换”了：
+#+begin_src java  
+void process1(String s) {
+    try {
+        process2();
+    } catch (NullPointerException e) {
+        throw new IllegalArgumentException();
+    }
+}
+
+void process2(String s) {
+    if (s==null) {
+        throw new NullPointerException();
+    }
+}
+#+end_src
+当process2()抛出NullPointerException后，被process1()捕获，然后抛出IllegalArgumentException()。
+
+如果在main()中捕获IllegalArgumentException，我们看看打印的异常栈：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        try {
+            process1();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    static void process1() {
+        try {
+            process2();
+        } catch (NullPointerException e) {
+            throw new IllegalArgumentException();
+        }
+    }
+
+    static void process2() {
+        throw new NullPointerException();
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+java.lang.IllegalArgumentException
+at Main.process1(Main.java:15)
+at Main.main(Main.java:5)
+at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:64)
+at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+at java.base/java.lang.reflect.Method.invoke(Method.java:564)
+at jdk.compiler/com.sun.tools.javac.launcher.Main.execute(Main.java:415)
+at jdk.compiler/com.sun.tools.javac.launcher.Main.run(Main.java:192)
+at jdk.compiler/com.sun.tools.javac.launcher.Main.main(Main.java:132)
+#+END_EXAMPLE
+打印出的异常栈类似：
+#+begin_src java  
+java.lang.IllegalArgumentException
+    at Main.process1(Main.java:15)
+    at Main.main(Main.java:5)
+#+end_src
+
+这说明新的异常丢失了原始异常信息，我们已经看不到原始异常NullPointerException的信息了。
+
+为了能追踪到完整的异常栈，在构造异常的时候，把原始的Exception实例传进去，新的Exception就可以持有原始Exception信息。对上述代码改进如下：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        try {
+            process1();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    static void process1() {
+        try {
+            process2();
+        } catch (NullPointerException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    static void process2() {
+        throw new NullPointerException();
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+java.lang.IllegalArgumentException: java.lang.NullPointerException
+at Main.process1(Main.java:15)
+at Main.main(Main.java:5)
+at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:64)
+at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+at java.base/java.lang.reflect.Method.invoke(Method.java:564)
+at jdk.compiler/com.sun.tools.javac.launcher.Main.execute(Main.java:415)
+at jdk.compiler/com.sun.tools.javac.launcher.Main.run(Main.java:192)
+at jdk.compiler/com.sun.tools.javac.launcher.Main.main(Main.java:132)
+Caused by: java.lang.NullPointerException
+at Main.process2(Main.java:20)
+at Main.process1(Main.java:13)
+... 8 more
+#+END_EXAMPLE
+运行上述代码，打印出的异常栈类似：
+#+BEGIN_EXAMPLE
+java.lang.IllegalArgumentException: java.lang.NullPointerException
+    at Main.process1(Main.java:15)
+    at Main.main(Main.java:5)
+Caused by: java.lang.NullPointerException
+    at Main.process2(Main.java:20)
+    at Main.process1(Main.java:13)
+#+END_EXAMPLE
+注意到Caused by: Xxx，说明捕获的IllegalArgumentException并不是造成问题的根源，根源在于NullPointerException，是在Main.process2()方法抛出的。
+
+在代码中获取原始异常可以使用Throwable.getCause()方法。如果返回null，说明已经是“根异常”了。
+
+有了完整的异常栈的信息，我们才能快速定位并修复代码的问题。
+
+捕获到异常并再次抛出时，一定要留住原始异常，否则很难定位第一案发现场！
+
+如果我们在try或者catch语句块中抛出异常，finally语句是否会执行？例如：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        try {
+            Integer.parseInt("abc");
+        } catch (Exception e) {
+            System.out.println("catched");
+            throw new RuntimeException(e);
+        } finally {
+            System.out.println("finally");
+        }
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+catched
+finally
+Exception in thread "main" java.lang.RuntimeException: java.lang.NumberFormatException: For input string: "abc"
+at Main.main(Main.java:8)
+Caused by: java.lang.NumberFormatException: For input string: "abc"
+at java.base/java.lang.NumberFormatException.forInputString(NumberFormatException.java:68)
+at java.base/java.lang.Integer.parseInt(Integer.java:652)
+at java.base/java.lang.Integer.parseInt(Integer.java:770)
+at Main.main(Main.java:5)
+at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:64)
+at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+at java.base/java.lang.reflect.Method.invoke(Method.java:564)
+at jdk.compiler/com.sun.tools.javac.launcher.Main.execute(Main.java:415)
+at jdk.compiler/com.sun.tools.javac.launcher.Main.run(Main.java:192)
+at jdk.compiler/com.sun.tools.javac.launcher.Main.main(Main.java:132)
+#+END_EXAMPLE
+上述代码执行结果如下：
+#+BEGIN_EXAMPLE
+catched
+finally
+Exception in thread "main" java.lang.RuntimeException: java.lang.NumberFormatException: For input string: "abc"
+    at Main.main(Main.java:8)
+Caused by: java.lang.NumberFormatException: For input string: "abc"
+    at ...
+#+END_EXAMPLE
+第一行打印了catched，说明进入了catch语句块。第二行打印了finally，说明执行了finally语句块。
+
+因此，在catch中抛出异常，不会影响finally的执行。JVM会先执行finally，然后抛出异常。
+
+*** 异常屏蔽
+如果在执行finally语句时抛出异常，那么，catch语句的异常还能否继续抛出？例如：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        try {
+            Integer.parseInt("abc");
+        } catch (Exception e) {
+            System.out.println("catched");
+            throw new RuntimeException(e);
+        } finally {
+            System.out.println("finally");
+            throw new IllegalArgumentException();
+        }
+    }
+}
+#+end_src
+#+BEGIN_EXAMPLE
+catched
+finally
+Exception in thread "main" java.lang.IllegalArgumentException
+at Main.main(Main.java:11)
+#+END_EXAMPLE
+执行上述代码，发现异常信息如下：
+#+BEGIN_EXAMPLE
+catched
+finally
+Exception in thread "main" java.lang.IllegalArgumentException
+    at Main.main(Main.java:11)
+#+END_EXAMPLE
+这说明finally抛出异常后，原来在catch中准备抛出的异常就“消失”了，因为只能抛出一个异常。没有被抛出的异常称为“被屏蔽”的异常（Suppressed Exception）。
+
+在极少数的情况下，我们需要获知所有的异常。如何保存所有的异常信息？方法是先用origin变量保存原始异常，然后调用Throwable.addSuppressed()，把原始异常添加进来，最后在finally抛出：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) throws Exception {
+        Exception origin = null;
+        try {
+            System.out.println(Integer.parseInt("abc"));
+        } catch (Exception e) {
+            origin = e;
+            throw e;
+        } finally {
+            Exception e = new IllegalArgumentException();
+            if (origin != null) {
+                e.addSuppressed(origin);
+            }
+            throw e;
+        }
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+Exception in thread "main" java.lang.IllegalArgumentException
+at Main.main(Main.java:11)
+Suppressed: java.lang.NumberFormatException: For input string: "abc"
+at java.base/java.lang.NumberFormatException.forInputString(NumberFormatException.java:68)
+at java.base/java.lang.Integer.parseInt(Integer.java:652)
+at java.base/java.lang.Integer.parseInt(Integer.java:770)
+at Main.main(Main.java:6)
+at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:64)
+at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+at java.base/java.lang.reflect.Method.invoke(Method.java:564)
+at jdk.compiler/com.sun.tools.javac.launcher.Main.execute(Main.java:415)
+at jdk.compiler/com.sun.tools.javac.launcher.Main.run(Main.java:192)
+at jdk.compiler/com.sun.tools.javac.launcher.Main.main(Main.java:132)
+#+END_EXAMPLE
+当catch和finally都抛出了异常时，虽然catch的异常被屏蔽了，但是，finally抛出的异常仍然包含了它：
+#+BEGIN_EXAMPLE
+Exception in thread "main" java.lang.IllegalArgumentException
+    at Main.main(Main.java:11)
+Suppressed: java.lang.NumberFormatException: For input string: "abc"
+    at java.base/java.lang.NumberFormatException.forInputString(NumberFormatException.java:65)
+    at java.base/java.lang.Integer.parseInt(Integer.java:652)
+    at java.base/java.lang.Integer.parseInt(Integer.java:770)
+    at Main.main(Main.java:6)
+#+END_EXAMPLE
++通过Throwable.getSuppressed()可以获取所有的Suppressed Exception。
+
+绝大多数情况下，在finally中不要抛出异常。因此，我们通常不需要关心Suppressed Exception。
+
+*** 提问时贴出异常
+异常打印的详细的栈信息是找出问题的关键，许多初学者在提问时只贴代码，不贴异常，相当于只报案不给线索，福尔摩斯也无能为力。
+
+还有的童鞋只贴部分异常信息，最关键的Caused by: xxx给省略了，这都属于不正确的提问方式，得改。
+
+** 自定义异常
+Java标准库定义的常用异常包括：
+
+Exception
+│
+├─ RuntimeException
+│  │
+│  ├─ NullPointerException
+│  │
+│  ├─ IndexOutOfBoundsException
+│  │
+│  ├─ SecurityException
+│  │
+│  └─ IllegalArgumentException
+│     │
+│     └─ NumberFormatException
+│
+├─ IOException
+│  │
+│  ├─ UnsupportedCharsetException
+│  │
+│  ├─ FileNotFoundException
+│  │
+│  └─ SocketException
+│
+├─ ParseException
+│
+├─ GeneralSecurityException
+│
+├─ SQLException
+│
+└─ TimeoutException
+当我们在代码中需要抛出异常时，尽量使用JDK已定义的异常类型。例如，参数检查不合法，应该抛出IllegalArgumentException：
+#+begin_src java  
+static void process1(int age) {
+    if (age <= 0) {
+        throw new IllegalArgumentException();
+    }
+}
+#+end_src
+在一个大型项目中，可以自定义新的异常类型，但是，保持一个合理的异常继承体系是非常重要的。
+
+一个常见的做法是自定义一个BaseException作为“根异常”，然后，派生出各种业务类型的异常。
+
+BaseException需要从一个适合的Exception派生，通常建议从RuntimeException派生：
+#+begin_src java  
+public class BaseException extends RuntimeException {
+}
+#+end_src
+
+其他业务类型的异常就可以从BaseException派生：
+#+begin_src java  
+public class UserNotFoundException extends BaseException {
+}
+
+public class LoginFailedException extends BaseException {
+}
+
+...
+#+end_src
+自定义的BaseException应该提供多个构造方法：
+#+begin_src java  
+public class BaseException extends RuntimeException {
+    public BaseException() {
+        super();
+    }
+
+    public BaseException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public BaseException(String message) {
+        super(message);
+    }
+
+    public BaseException(Throwable cause) {
+        super(cause);
+    }
+}
+#+end_src
+
+上述构造方法实际上都是原样照抄RuntimeException。这样，抛出异常的时候，就可以选择合适的构造方法。通过IDE可以根据父类快速生成子类的构造方法。
+
+** NullPointerException
+在所有的RuntimeException异常中，Java程序员最熟悉的恐怕就是NullPointerException了。
+
+NullPointerException即空指针异常，俗称NPE。如果一个对象为null，调用其方法或访问其字段就会产生NullPointerException，这个异常通常是由JVM抛出的，例如：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        String s = null;
+        System.out.println(s.toLowerCase());
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+Exception in thread "main" java.lang.NullPointerException: Cannot invoke "String.toLowerCase()" because "<local1>" is null
+at Main.main(Main.java:5)
+#+END_EXAMPLE
+指针这个概念实际上源自C语言，Java语言中并无指针。我们定义的变量实际上是引用，Null Pointer更确切地说是Null Reference，不过两者区别不大。
+
+*** 处理NullPointerException
+如果遇到NullPointerException，我们应该如何处理？首先，必须明确，NullPointerException是一种代码逻辑错误，遇到NullPointerException，遵循原则是早暴露，早修复，严禁使用catch来隐藏这种编码错误：
+#+begin_src java  
+// 错误示例: 捕获NullPointerException
+try {
+    transferMoney(from, to, amount);
+} catch (NullPointerException e) {
+}
+#+end_src
+好的编码习惯可以极大地降低NullPointerException的产生，例如：
+
+成员变量在定义时初始化：
+#+begin_src java  
+public class Person {
+    private String name = "";
+}
+#+end_src
+使用空字符串""而不是默认的null可避免很多NullPointerException，编写业务逻辑时，用空字符串""表示未填写比null安全得多。
+
+返回空字符串""、空数组而不是null：
+#+begin_src java  
+public String[] readLinesFromFile(String file) {
+    if (getFileSize(file) == 0) {
+        // 返回空数组而不是null:
+        return new String[0];
+    }
+    ...
+}
+#+end_src
+这样可以使得调用方无需检查结果是否为null。
+
+如果调用方一定要根据null判断，比如返回null表示文件不存在，那么考虑返回Optional<T>：
+#+begin_src java  
+public Optional<String> readFromFile(String file) {
+    if (!fileExist(file)) {
+        return Optional.empty();
+    }
+    ...
+}
+#+end_src
+
+这样调用方必须通过Optional.isPresent()判断是否有结果。
+
+*** 定位NullPointerException
+如果产生了NullPointerException，例如，调用a.b.c.x()时产生了NullPointerException，原因可能是：
+- a是null；
+- a.b是null；
+- a.b.c是null；
+确定到底是哪个对象是null以前只能打印这样的日志：
+#+begin_src java  
+System.out.println(a);
+System.out.println(a.b);
+System.out.println(a.b.c);
+#+end_src
+从Java 14开始，如果产生了NullPointerException，JVM可以给出详细的信息告诉我们null对象到底是谁。我们来看例子：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        Person p = new Person();
+        System.out.println(p.address.city.toLowerCase());
+    }
+}
+
+class Person {
+    String[] name = new String[2];
+    Address address = new Address();
+}
+
+class Address {
+    String city;
+    String street;
+    String zipcode;
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+Exception in thread "main" java.lang.NullPointerException: Cannot invoke "String.toLowerCase()" because "<local1>.address.city" is null
+at Main.main(Main.java:5)
+#+END_EXAMPLE
+可以在NullPointerException的详细信息中看到类似... because "<local1>.address.city" is null，意思是city字段为null，这样我们就能快速定位问题所在。
+
+这种增强的NullPointerException详细信息是Java 14新增的功能，但默认是关闭的，我们可以给JVM添加一个-XX:+ShowCodeDetailsInExceptionMessages参数启用它：
+
+~java -XX:+ShowCodeDetailsInExceptionMessages Main.java~
+
+** 使用断言
+断言（Assertion）是一种调试程序的方式。在Java中，使用assert关键字来实现断言。
+
+我们先看一个例子：
+#+begin_src java  
+public static void main(String[] args) {
+    double x = Math.abs(-123.45);
+    assert x >= 0;
+    System.out.println(x);
+}
+#+end_src
+语句assert x >= 0;即为断言，断言条件x >= 0预期为true。如果计算结果为false，则断言失败，抛出AssertionError。
+
+使用assert语句时，还可以添加一个可选的断言消息：
+
+~assert x >= 0 : "x must >= 0";~
+
+这样，断言失败的时候，AssertionError会带上消息x must >= 0，更加便于调试。
+
+Java断言的特点是：断言失败时会抛出AssertionError，导致程序结束退出。因此，断言不能用于可恢复的程序错误，只应该用于开发和测试阶段。
+
+对于可恢复的程序错误，不应该使用断言。例如：
+#+begin_src java  
+void sort(int[] arr) {
+    assert arr != null;
+}
+#+end_src
+
+应该抛出异常并在上层捕获：
+#+begin_src java  
+void sort(int[] arr) {
+    if (x == null) {
+        throw new IllegalArgumentException("array cannot be null");
+    }
+}
+#+end_src
+当我们在程序中使用assert时，例如，一个简单的断言：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        int x = -1;
+        assert x > 0;
+        System.out.println(x);
+    }
+}
+#+end_src
+#+BEGIN_EXAMPLE
+-1
+#+END_EXAMPLE
+断言x必须大于0，实际上x为-1，断言肯定失败。执行上述代码，发现程序并未抛出AssertionError，而是正常打印了x的值。
+
+这是怎么肥四？为什么assert语句不起作用？
+
+这是因为JVM默认关闭断言指令，即遇到assert语句就自动忽略了，不执行。
+
+要执行assert语句，必须给Java虚拟机传递-enableassertions（可简写为-ea）参数启用断言。所以，上述程序必须在命令行下运行才有效果：
+#+begin_src bash
+$ java -ea Main.java
+Exception in thread "main" java.lang.AssertionError
+	at Main.main(Main.java:5)
+#+end_src
+还可以有选择地对特定地类启用断言，命令行参数是：-ea:com.itranswarp.sample.Main，表示只对com.itranswarp.sample.Main这个类启用断言。
+
+或者对特定地包启用断言，命令行参数是：-ea:com.itranswarp.sample...（注意结尾有3个.），表示对com.itranswarp.sample这个包启动断言。
+
+实际开发中，很少使用断言。更好的方法是编写单元测试，后续我们会讲解JUnit的使用。
+
+** 使用JDK Logging
+在编写程序的过程中，发现程序运行结果与预期不符，怎么办？当然是用System.out.println()打印出执行过程中的某些变量，观察每一步的结果与代码逻辑是否符合，然后有针对性地修改代码。
+
+代码改好了怎么办？当然是删除没有用的System.out.println()语句了。
+
+如果改代码又改出问题怎么办？再加上System.out.println()。
+
+反复这么搞几次，很快大家就发现使用System.out.println()非常麻烦。
+
+怎么办？
+
+解决方法是使用日志。
+
+那什么是日志？日志就是Logging，它的目的是为了取代System.out.println()。
+
+输出日志，而不是用System.out.println()，有以下几个好处：
+
+可以设置输出样式，避免自己每次都写"ERROR: " + var；
+可以设置输出级别，禁止某些级别输出。例如，只输出错误日志；
+可以被重定向到文件，这样可以在程序运行结束后查看日志；
+可以按包名控制日志级别，只输出某些包打的日志；
+可以……
+总之就是好处很多啦。
+
+那如何使用日志？
+
+因为Java标准库内置了日志包java.util.logging，我们可以直接用。先看一个简单的例子：
+#+begin_src java  
+// logging
+import java.util.logging.Level;
+import java.util.logging.Logger;
+public class Hello {
+    public static void main(String[] args) {
+        Logger logger = Logger.getGlobal();
+        logger.info("start process...");
+        logger.warning("memory is running out...");
+        logger.fine("ignored.");
+        logger.severe("process will be terminated...");
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+Dec 26, 2020 8:09:14 AM Hello main
+INFO: start process...
+Dec 26, 2020 8:09:14 AM Hello main
+WARNING: memory is running out...
+Dec 26, 2020 8:09:14 AM Hello main
+SEVERE: process will be terminated...
+#+END_EXAMPLE
+对比可见，使用日志最大的好处是，它自动打印了时间、调用类、调用方法等很多有用的信息。
+
+再仔细观察发现，4条日志，只打印了3条，logger.fine()没有打印。这是因为，日志的输出可以设定级别。JDK的Logging定义了7个日志级别，从严重到普通：
+- SEVERE
+- WARNING
+- INFO
+- CONFIG
+- FINE
+- FINER
+- FINEST
+因为默认级别是INFO，因此，INFO级别以下的日志，不会被打印出来。使用日志级别的好处在于，调整级别，就可以屏蔽掉很多调试相关的日志输出。
+
+使用Java标准库内置的Logging有以下局限：
+
+Logging系统在JVM启动时读取配置文件并完成初始化，一旦开始运行main()方法，就无法修改配置；
+
+配置不太方便，需要在JVM启动时传递参数-Djava.util.logging.config.file=<config-file-name>。
+
+因此，Java标准库内置的Logging使用并不是非常广泛。更方便的日志系统我们稍后介绍。
+
+** 使用Commons Logging
+* 多线程
+** 多线程基础
+*** 进程
+在计算机中，我们把一个任务称为一个进程，浏览器就是一个进程，视频播放器是另一个进程，类似的，音乐播放器和Word都是进程。
+
+某些进程内部还需要同时执行多个子任务。例如，我们在使用Word时，Word可以让我们一边打字，一边进行拼写检查，同时还可以在后台进行打印，我们把子任务称为线程。
+
+进程和线程的关系就是：一个进程可以包含一个或多个线程，但至少会有一个线程。
+
+                        ┌──────────┐
+                        │Process   │
+                        │┌────────┐│
+            ┌──────────┐││ Thread ││┌──────────┐
+            │Process   ││└────────┘││Process   │
+            │┌────────┐││┌────────┐││┌────────┐│
+┌──────────┐││ Thread ││││ Thread ││││ Thread ││
+│Process   ││└────────┘││└────────┘││└────────┘│
+│┌────────┐││┌────────┐││┌────────┐││┌────────┐│
+││ Thread ││││ Thread ││││ Thread ││││ Thread ││
+│└────────┘││└────────┘││└────────┘││└────────┘│
+└──────────┘└──────────┘└──────────┘└──────────┘
+┌──────────────────────────────────────────────┐
+│               Operating System               │
+└──────────────────────────────────────────────┘
+操作系统调度的最小任务单位其实不是进程，而是线程。常用的Windows、Linux等操作系统都采用抢占式多任务，如何调度线程完全由操作系统决定，程序自己不能决定什么时候执行，以及执行多长时间。
+
+因为同一个应用程序，既可以有多个进程，也可以有多个线程，因此，实现多任务的方法，有以下几种：
+
+多进程模式（每个进程只有一个线程）：
+
+┌──────────┐ ┌──────────┐ ┌──────────┐
+│Process   │ │Process   │ │Process   │
+│┌────────┐│ │┌────────┐│ │┌────────┐│
+││ Thread ││ ││ Thread ││ ││ Thread ││
+│└────────┘│ │└────────┘│ │└────────┘│
+└──────────┘ └──────────┘ └──────────┘
+多线程模式（一个进程有多个线程）：
+
+┌────────────────────┐
+│Process             │
+│┌────────┐┌────────┐│
+││ Thread ││ Thread ││
+│└────────┘└────────┘│
+│┌────────┐┌────────┐│
+││ Thread ││ Thread ││
+│└────────┘└────────┘│
+└────────────────────┘
+多进程＋多线程模式（复杂度最高）：
+
+┌──────────┐┌──────────┐┌──────────┐
+│Process   ││Process   ││Process   │
+│┌────────┐││┌────────┐││┌────────┐│
+││ Thread ││││ Thread ││││ Thread ││
+│└────────┘││└────────┘││└────────┘│
+│┌────────┐││┌────────┐││┌────────┐│
+││ Thread ││││ Thread ││││ Thread ││
+│└────────┘││└────────┘││└────────┘│
+└──────────┘└──────────┘└──────────┘
+*** 进程 vs 线程
+进程和线程是包含关系，但是多任务既可以由多进程实现，也可以由单进程内的多线程实现，还可以混合多进程＋多线程。
+
+具体采用哪种方式，要考虑到进程和线程的特点。
+
+和多线程相比，多进程的缺点在于：
+- 创建进程比创建线程开销大，尤其是在Windows系统上；
+- 进程间通信比线程间通信要慢，因为线程间通信就是读写同一个变量，速度很快。
+
+而多进程的优点在于：
+- 多进程稳定性比多线程高，因为在多进程的情况下，一个进程崩溃不会影响其他进程，而在多线程的情况下，任何一个线程崩溃会直接导致整个进程崩溃。
+*** 多线程
+Java语言内置了多线程支持：一个Java程序实际上是一个JVM进程，JVM进程用一个主线程来执行main()方法，在main()方法内部，我们又可以启动多个线程。此外，JVM还有负责垃圾回收的其他工作线程等。
+
+因此，对于大多数Java程序来说，我们说多任务，实际上是说如何使用多线程实现多任务。
+
+和单线程相比，多线程编程的特点在于：多线程经常需要读写共享数据，并且需要同步。例如，播放电影时，就必须由一个线程播放视频，另一个线程播放音频，两个线程需要协调运行，否则画面和声音就不同步。因此，多线程编程的复杂度高，调试更困难。
+
+Java多线程编程的特点又在于：
+- 多线程模型是Java程序最基本的并发模型；
+- 后续读写网络、数据库、Web开发等都依赖Java多线程模型。
+因此，必须掌握Java多线程编程才能继续深入学习其他内容。
+** 创建新线程
+*** 创建新线程
+Java语言内置了多线程支持。当Java程序启动的时候，实际上是启动了一个JVM进程，然后，JVM启动主线程来执行main()方法。在main()方法中，我们又可以启动其他线程。
+
+要创建一个新线程非常容易，我们需要实例化一个Thread实例，然后调用它的start()方法：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        Thread t = new Thread();
+        t.start(); // 启动新线程
+    }
+}
+
+#+end_src
+但是这个线程启动后实际上什么也不做就立刻结束了。我们希望新线程能执行指定的代码，有以下几种方法：
+
+方法一：从Thread派生一个自定义类，然后覆写run()方法：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        Thread t = new MyThread();
+        t.start(); // 启动新线程
+    }
+}
+
+class MyThread extends Thread {
+    @Override
+    public void run() {
+        System.out.println("start new thread!");
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+start new thread!
+#+END_EXAMPLE
+执行上述代码，注意到start()方法会在内部自动调用实例的run()方法。
+
+方法二：创建Thread实例时，传入一个Runnable实例：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        Thread t = new Thread(new MyRunnable());
+        t.start(); // 启动新线程
+    }
+}
+
+class MyRunnable implements Runnable {
+    @Override
+    public void run() {
+        System.out.println("start new thread!");
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+start new thread!
+#+END_EXAMPLE
+或者用Java8引入的lambda语法进一步简写为：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        Thread t = new Thread(() -> {
+            System.out.println("start new thread!");
+        });
+        t.start(); // 启动新线程
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+start new thread!
+#+END_EXAMPLE
+有童鞋会问，使用线程执行的打印语句，和直接在main()方法执行有区别吗？
+
+区别大了去了。我们看以下代码：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("main start...");
+        Thread t = new Thread() {
+            public void run() {
+                System.out.println("thread run...");
+                System.out.println("thread end.");
+            }
+        };
+        t.start();
+        System.out.println("main end...");
+    }
+}
+#+end_src
+我们用蓝色表示主线程，也就是main线程，main线程执行的代码有4行，首先打印main start，然后创建Thread对象，紧接着调用start()启动新线程。当start()方法被调用时，JVM就创建了一个新线程，我们通过实例变量t来表示这个新线程对象，并开始执行。
+
+接着，main线程继续执行打印main end语句，而t线程在main线程执行的同时会并发执行，打印thread run和thread end语句。
+
+当run()方法结束时，新线程就结束了。而main()方法结束时，主线程也结束了。
+
+我们再来看线程的执行顺序：
+- main线程肯定是先打印main start，再打印main end；
+- t线程肯定是先打印thread run，再打印thread end。
+但是，除了可以肯定，main start会先打印外，main end打印在thread run之前、thread end之后或者之间，都无法确定。因为从t线程开始运行以后，两个线程就开始同时运行了，并且由操作系统调度，程序本身无法确定线程的调度顺序。
+
+要模拟并发执行的效果，我们可以在线程中调用Thread.sleep()，强迫当前线程暂停一段时间：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        System.out.println("main start...");
+        Thread t = new Thread() {
+            public void run() {
+                System.out.println("thread run...");
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException e) {}
+                System.out.println("thread end.");
+            }
+        };
+        t.start();
+        try {
+            Thread.sleep(20);
+        } catch (InterruptedException e) {}
+        System.out.println("main end...");
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+main start...
+thread run...
+thread end.
+main end...
+#+END_EXAMPLE
+sleep()传入的参数是毫秒。调整暂停时间的大小，我们可以看到main线程和t线程执行的先后顺序。
+
+要特别注意：直接调用Thread实例的run()方法是无效的：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        Thread t = new MyThread();
+        t.run();
+    }
+}
+
+class MyThread extends Thread {
+    public void run() {
+        System.out.println("hello");
+    }
+}
+#+end_src
+直接调用run()方法，相当于调用了一个普通的Java方法，当前线程并没有任何改变，也不会启动新线程。上述代码实际上是在main()方法内部又调用了run()方法，打印hello语句是在main线程中执行的，没有任何新线程被创建。
+
+必须调用Thread实例的start()方法才能启动新线程，如果我们查看Thread类的源代码，会看到start()方法内部调用了一个private native void start0()方法，native修饰符表示这个方法是由JVM虚拟机内部的C代码实现的，不是由Java代码实现的。
+*** 线程的优先级
+
+可以对线程设定优先级，设定优先级的方法是：
+#+begin_src java  
+Thread.setPriority(int n) // 1~10, 默认值5
+#+end_src
+优先级高的线程被操作系统调度的优先级较高，操作系统对高优先级线程可能调度更频繁，但我们决不能通过设置优先级来确保高优先级的线程一定会先执行。
+** 线程的状态
+在Java程序中，一个线程对象只能调用一次start()方法启动新线程，并在新线程中执行run()方法。一旦run()方法执行完毕，线程就结束了。因此，Java线程的状态有以下几种：
+- New：新创建的线程，尚未执行；
+- Runnable：运行中的线程，正在执行run()方法的Java代码；
+- Blocked：运行中的线程，因为某些操作被阻塞而挂起；
+- Waiting：运行中的线程，因为某些操作在等待中；
+- Timed Waiting：运行中的线程，因为执行sleep()方法正在计时等待；
+- Terminated：线程已终止，因为run()方法执行完毕。
+
+用一个状态转移图表示如下：
+
+         ┌─────────────┐
+         │     New     │
+         └─────────────┘
+                │
+                ▼
+┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐
+ ┌─────────────┐ ┌─────────────┐
+││  Runnable   │ │   Blocked   ││
+ └─────────────┘ └─────────────┘
+│┌─────────────┐ ┌─────────────┐│
+ │   Waiting   │ │Timed Waiting│
+│└─────────────┘ └─────────────┘│
+ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─
+                │
+                ▼
+         ┌─────────────┐
+         │ Terminated  │
+         └─────────────┘
+当线程启动后，它可以在Runnable、Blocked、Waiting和Timed Waiting这几个状态之间切换，直到最后变成Terminated状态，线程终止。
+
+线程终止的原因有：
+- 线程正常终止：run()方法执行到return语句返回；
+- 线程意外终止：run()方法因为未捕获的异常导致线程终止；
+- 对某个线程的Thread实例调用stop()方法强制终止（强烈不推荐使用）。
+
+一个线程还可以等待另一个线程直到其运行结束。例如，main线程在启动t线程后，可以通过t.join()等待t线程结束后再继续运行：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) throws InterruptedException {
+        Thread t = new Thread(() -> {
+            System.out.println("hello");
+        });
+        System.out.println("start");
+        t.start();
+        t.join();
+        System.out.println("end");
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+start
+hello
+end
+#+END_EXAMPLE
+当main线程对线程对象t调用join()方法时，主线程将等待变量t表示的线程运行结束，即join就是指等待该线程结束，然后才继续往下执行自身线程。所以，上述代码打印顺序可以肯定是main线程先打印start，t线程再打印hello，main线程最后再打印end。
+
+如果t线程已经结束，对实例t调用join()会立刻返回。此外，join(long)的重载方法也可以指定一个等待时间，超过等待时间后就不再继续等待。
+** 中断线程
+如果线程需要执行一个长时间任务，就可能需要能中断线程。中断线程就是其他线程给该线程发一个信号，该线程收到信号后结束执行run()方法，使得自身线程能立刻结束运行。
+
+我们举个栗子：假设从网络下载一个100M的文件，如果网速很慢，用户等得不耐烦，就可能在下载过程中点“取消”，这时，程序就需要中断下载线程的执行。
+
+中断一个线程非常简单，只需要在其他线程中对目标线程调用interrupt()方法，目标线程需要反复检测自身状态是否是interrupted状态，如果是，就立刻结束运行。
+
+我们还是看示例代码：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) throws InterruptedException {
+        Thread t = new MyThread();
+        t.start();
+        Thread.sleep(1); // 暂停1毫秒
+        t.interrupt(); // 中断t线程
+        t.join(); // 等待t线程结束
+        System.out.println("end");
+    }
+}
+
+class MyThread extends Thread {
+    public void run() {
+        int n = 0;
+        while (! isInterrupted()) {
+            n ++;
+            System.out.println(n + " hello!");
+        }
+    }
+}
+
+#+end_src
+#+BEGIN_EXAMPLE
+1 hello!
+2 hello!
+3 hello!
+4 hello!
+5 hello!
+6 hello!
+7 hello!
+8 hello!
+9 hello!
+end
+#+END_EXAMPLE
+仔细看上述代码，main线程通过调用t.interrupt()方法中断t线程，但是要注意，interrupt()方法仅仅向t线程发出了“中断请求”，至于t线程是否能立刻响应，要看具体代码。而t线程的while循环会检测isInterrupted()，所以上述代码能正确响应interrupt()请求，使得自身立刻结束运行run()方法。
+
+如果线程处于等待状态，例如，t.join()会让main线程进入等待状态，此时，如果对main线程调用interrupt()，join()方法会立刻抛出InterruptedException，因此，目标线程只要捕获到join()方法抛出的InterruptedException，就说明有其他线程对其调用了interrupt()方法，通常情况下该线程应该立刻结束运行。
+
+我们来看下面的示例代码：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) throws InterruptedException {
+        Thread t = new MyThread();
+        t.start();
+        Thread.sleep(1000);
+        t.interrupt(); // 中断t线程
+        t.join(); // 等待t线程结束
+        System.out.println("end");
+    }
+}
+
+class MyThread extends Thread {
+    public void run() {
+        Thread hello = new HelloThread();
+        hello.start(); // 启动hello线程
+        try {
+            hello.join(); // 等待hello线程结束
+        } catch (InterruptedException e) {
+            System.out.println("interrupted!");
+        }
+        hello.interrupt();
+    }
+}
+
+class HelloThread extends Thread {
+    public void run() {
+        int n = 0;
+        while (!isInterrupted()) {
+            n++;
+            System.out.println(n + " hello!");
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                break;
+            }
+        }
+    }
+}
+
+#+end_src
+
+* 设计模式
+** 简介
+设计模式（Design pattern）代表了最佳的实践，通常被有经验的面向对象的软件开发人员所采用。设计模式是软件开发人员在软件开发过程中面临的一般问题的解决方案。这些解决方案是众多软件开发人员经过相当长的一段时间的试验和错误总结出来的。
+
+设计模式是一套被反复使用的、多数人知晓的、经过分类编目的、代码设计经验的总结。使用设计模式是为了重用代码、让代码更容易被他人理解、保证代码可靠性。 毫无疑问，设计模式于己于他人于系统都是多赢的，设计模式使代码编制真正工程化，设计模式是软件工程的基石，如同大厦的一块块砖石一样。项目中合理地运用设计模式可以完美地解决很多问题，每种模式在现实中都有相应的原理来与之对应，每种模式都描述了一个在我们周围不断重复发生的问题，以及该问题的核心解决方案，这也是设计模式能被广泛应用的原因。
+*** 什么是 GOF（四人帮，全拼 Gang of Four）？
+在 1994 年，由 Erich Gamma、Richard Helm、Ralph Johnson 和 John Vlissides 四人合著出版了一本名为 Design Patterns - Elements of Reusable Object-Oriented Software（中文译名：设计模式 - 可复用的面向对象软件元素） 的书，该书首次提到了软件开发中设计模式的概念。
+
+四位作者合称 GOF（四人帮，全拼 Gang of Four）。他们所提出的设计模式主要是基于以下的面向对象设计原则。
+- 对接口编程而不是对实现编程。
+- 优先使用对象组合而不是继承。
+
+*** 设计模式的类型
+根据设计模式的参考书 Design Patterns - Elements of Reusable Object-Oriented Software（中文译名：设计模式 - 可复用的面向对象软件元素） 中所提到的，总共有 23 种设计模式。这些模式可以分为三大类：创建型模式（Creational Patterns）、结构型模式（Structural Patterns）、行为型模式（Behavioral Patterns）。当然，我们还会讨论另一类设计模式：J2EE 设计模式。
+
+下面用一个图片来整体描述一下设计模式之间的关系：
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-27_22-33-59.png @ 2020-12-27 22:34:04
+[[file:%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/2020-12-27_22-34-04_Snipaste_2020-12-27_22-33-59.png]]
+
+**** 创建型模式
+这些设计模式提供了一种在创建对象的同时隐藏创建逻辑的方式，而不是使用 new 运算符直接实例化对象。这使得程序在判断针对某个给定实例需要创建哪些对象时更加灵活
+
+- 工厂模式（Factory Pattern）
+- 抽象工厂模式（Abstract Factory Pattern）
+- 单例模式（Singleton Pattern）
+- 建造者模式（Builder Pattern）
+- 原型模式（Prototype Pattern）
+**** 结构型模式
+这些设计模式关注类和对象的组合。继承的概念被用来组合接口和定义组合对象获得新功能的方式。	
+- 适配器模式（Adapter Pattern）
+- 桥接模式（Bridge Pattern）
+- 过滤器模式（Filter、Criteria Pattern）
+- 组合模式（Composite Pattern）
+- 装饰器模式（Decorator Pattern）
+- 外观模式（Facade Pattern）
+- 享元模式（Flyweight Pattern）
+- 代理模式（Proxy Pattern）
+**** 行为型模式
+这些设计模式特别关注对象之间的通信。	
+- 责任链模式（Chain of Responsibility Pattern）
+- 命令模式（Command Pattern）
+- 解释器模式（Interpreter Pattern）
+- 迭代器模式（Iterator Pattern）
+- 中介者模式（Mediator Pattern）
+- 备忘录模式（Memento Pattern）
+- 观察者模式（Observer Pattern）
+- 状态模式（State Pattern）
+- 空对象模式（Null Object Pattern）
+- 策略模式（Strategy Pattern）
+- 模板模式（Template Pattern）
+- 访问者模式（Visitor Pattern）
+
+**** J2EE 模式
+这些设计模式特别关注表示层。这些模式是由 Sun Java Center 鉴定的。	
+- MVC 模式（MVC Pattern）
+- 业务代表模式（Business Delegate Pattern）
+- 组合实体模式（Composite Entity Pattern）
+- 数据访问对象模式（Data Access Object Pattern）
+- 前端控制器模式（Front Controller Pattern）
+- 拦截过滤器模式（Intercepting Filter Pattern）
+- 服务定位器模式（Service Locator Pattern）
+- 传输对象模式（Transfer Object Pattern）
+** MVC模式
+MVC 模式代表 Model-View-Controller（模型-视图-控制器） 模式。这种模式用于应用程序的分层开发。
+- Model（模型） - 模型代表一个存取数据的对象或 JAVA POJO。它也可以带有逻辑，在数据变化时更新控制器。
+- View（视图） - 视图代表模型包含的数据的可视化。
+- Controller（控制器） - 控制器作用于模型和视图上。它控制数据流向模型对象，并在数据变化时更新视图。它使视图与模型分离开。
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-28_11-14-19.png @ 2020-12-28 11:14:31
+[[file:%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/2020-12-28_11-14-31_Snipaste_2020-12-28_11-14-19.png]]
+*** 实现
+我们将创建一个作为模型的 Student 对象。StudentView 是一个把学生详细信息输出到控制台的视图类，StudentController 是负责存储数据到 Student 对象中的控制器类，并相应地更新视图 StudentView。
+
+MVCPatternDemo，我们的演示类使用 StudentController 来演示 MVC 模式的用法。
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-28_11-16-08.png @ 2020-12-28 11:16:14
+[[file:%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/2020-12-28_11-16-14_Snipaste_2020-12-28_11-16-08.png]]
+**** 步骤一：创建模型
+#+begin_src java  
+public class Student {
+   private String rollNo;
+   private String name;
+   public String getRollNo() {
+      return rollNo;
+   }
+   public void setRollNo(String rollNo) {
+      this.rollNo = rollNo;
+   }
+   public String getName() {
+      return name;
+   }
+   public void setName(String name) {
+      this.name = name;
+   }
+}
+#+end_src
+**** 步骤2：创建视图
+#+begin_src java  
+public class StudentView {
+   public void printStudentDetails(String studentName, String studentRollNo){
+      System.out.println("Student: ");
+      System.out.println("Name: " + studentName);
+      System.out.println("Roll No: " + studentRollNo);
+   }
+}
+#+end_src
+**** 步骤3：创建控制器
+#+begin_src java  
+public class StudentController {
+   private Student model;
+   private StudentView view;
+ 
+   public StudentController(Student model, StudentView view){
+      this.model = model;
+      this.view = view;
+   }
+ 
+   public void setStudentName(String name){
+      model.setName(name);    
+   }
+ 
+   public String getStudentName(){
+      return model.getName();    
+   }
+ 
+   public void setStudentRollNo(String rollNo){
+      model.setRollNo(rollNo);      
+   }
+ 
+   public String getStudentRollNo(){
+      return model.getRollNo();     
+   }
+ 
+   public void updateView(){           
+      view.printStudentDetails(model.getName(), model.getRollNo());
+   }  
+}
+#+end_src
+**** 步骤 4：使用 StudentController 方法来演示 MVC 设计模式的用法。
+#+begin_src java  
+public class MVCPatternDemo {
+   public static void main(String[] args) {
+ 
+      //从数据库获取学生记录
+      Student model  = retrieveStudentFromDatabase();
+ 
+      //创建一个视图：把学生详细信息输出到控制台
+      StudentView view = new StudentView();
+ 
+      StudentController controller = new StudentController(model, view);
+ 
+      controller.updateView();
+ 
+      //更新模型数据
+      controller.setStudentName("John");
+ 
+      controller.updateView();
+   }
+ 
+   private static Student retrieveStudentFromDatabase(){
+      Student student = new Student();
+      student.setName("Robert");
+      student.setRollNo("10");
+      return student;
+   }
+}
+#+end_src
+**** 步骤5：输出结果
+执行程序，输出结果：
+#+BEGIN_EXAMPLE
+Student: 
+Name: Robert
+Roll No: 10
+Student: 
+Name: John
+Roll No: 10
+#+END_EXAMPLE
+* Swing介绍
+** 简介
+Swing 是一个为Java设计的GUI工具包。
+
+Swing是JAVA基础类的一部分。
+
+Swing包括了图形用户界面（GUI）器件如：文本框，按钮，分隔窗格和表。
+
+Swing 是新一代的图形界面工具。使用 Swing 来开发图形界面比 AWT 更加优秀，因为 Swing 是一种轻量级组件，它采用纯 Java 实现，不再依赖于本地平台的图形界面，所以可以在所有平台上保持相同的运行效果，对跨平台支持比较出色。除此之外，Swing 提供了比 AWT 更多的图形界面组件，因此可以开发出美观的图形界面程序。
+
+- JFrame – java的GUI程序的基本思路是以JFrame为基础，它是屏幕上window的对象，能够最大化、最小化、关闭。
+- JPanel – Java图形用户界面(GUI)工具包swing中的面板容器类，包含在javax.swing 包中，可以进行嵌套，功能是对窗体中具有相同逻辑功能的组件进行组合，是一种轻量级容器，可以加入到JFrame窗体中。。
+- JLabel – JLabel 对象可以显示文本、图像或同时显示二者。可以通过设置垂直和水平对齐方式，指定标签显示区中标签内容在何处对齐。默认情况下，标签在其显示区内垂直居中对齐。默认情况下，只显示文本的标签是开始边对齐；而只显示图像的标签则水平居中对齐。
+- JTextField –一个轻量级组件，它允许编辑单行文本。
+- JPasswordField – 允许我们输入了一行字像输入框，但隐藏星号(*) 或点创建密码(密码)
+- JButton – JButton 类的实例。用于创建按钮类似实例中的 "Login"。
+
+*** Swing 类库结构
+Swing 组件都采用 MVC（Model-View-Controller，即模型-视图-控制器）的设计，实现 GUI 组件的显示逻辑和数据逻辑的分离，从而允许程序员自定义 Render 来改变 GUI 组件的显示外观，以提供更多的灵活性。
+
+Swing 围绕 JComponent 组件构建，JComponent 则由 AWT 的容器类扩展而来。Swing 组织结构如图所示。
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-27_22-12-28.png @ 2020-12-27 22:12:47
+[[file:Swing%E4%BB%8B%E7%BB%8D/2020-12-27_22-12-47_Snipaste_2020-12-27_22-12-28.png]]
+从上图可以看出，Swing 组件除了 AbstmctButton 类之外都以 J 开头。Swing 容器组件直接继承 AWT 类库中的容器组件类，其他大部分组件都是继承 JComponet 组件。组件可以划分为容器组件和非容器组件，容器组件包括 JFmme 和 JDialog。其中 JComponent 定义了非容器类的轻量级组件（JBntton、JPanel、JMenu 等）。
+
+*** Swing 包
+Swing 类库由许多包组成，通过这些包中的类相互协作来完成 GUI 设计。其中，javax.swing 包是 Swing 提供的最大包，它包含将近 100 个类和 25 个接口。几乎所有 Swing 组件都在该包中。表 1 列出了常用的 Swing 包。
+
+| 包名称                  | 描述                                                             |
+|-------------------------+------------------------------------------------------------------|
+| javax.swing             | 提供一组“轻量级”组件，尽量让这些组件在所有平台上的工作方式都相同 |
+| javax.swing.border      | 提供围绕 Swing 组件绘制特殊边框的类和接口                        |
+| javax.swing.event       | 提供 Swing 组件触发的事件                                        |
+| javax.swing.filechooser | 提供 JFileChooser 组件使用的类和接口                             |
+| javax.swing.table       | 提供用于处理 javax.swing.JTable 的类和接口                       |
+| javax.swing.text        | 提供类 HTMLEditorKit 和创建 HTML 文本编辑器的支持类              |
+| javax.swing.tree        | 提供处理 javax.swingJTree 的类和接口                             |
+
+javax.swing.event 包中定义了事件和事件监听器类，javax.swing.event 包与 AWT 的 event 包类似。Java.awt.event 和 javax.swing.event 都包含事件类和监听器接口，它们分别响应由 AWT 组件和 Swing 组件触发的事件。
+
+例如，当在树组件中需要节点扩展（或折叠）的通知时，则要实现 Swing 的 TreeExpansionListener 接口，并把一个 TreeExpansionEvent 实例传送给 TreeExpansionListener 接口中定义的方法，而 TreeExpansionListener 和 TreeExpansionEvent 都是在 swing.event 包中定义的。
+
+虽然 Swing 的表格组件（JTable）在 javax.swing 包中，但它的支持类却在 javax.swing.table 包中。表格模型、图形绘制类和编辑器等也都在 javax.swing.table 包中。
+
+与 JTable 类一样，Swing 中的树 JTree（用于按层次组织数据的结构组件）也在 javax.swing 包中，而它的支持类却在 javax.swing.tree 包中。javax.swing.tree 包提供树模型、树节点、树单元编辑类和树绘制类等支持类。
+
+*** Swing 容器
+创建图形用户界面程序的第一步是创建一个容器类以容纳其他组件，常见的窗口就是一种容器。容器本身也是一种组件，它的作用就是用来组织、管理和显示其他组件。
+
+Swing 中容器可以分为两类：顶层容器和中间容器。
+
+顶层容器是进行图形编程的基础，一切图形化的东西都必须包括在顶层容器中。顶层容器是任何图形界面程序都要涉及的主窗口，是显示并承载组件的容器组件。在 Swing 中有三种可以使用的顶层容器，分别是 JFrame、JDialog 和 JApplet。
+- JFrame：用于框架窗口的类，此窗口带有边框、标题、关闭和最小化窗口的图标。带 GUI 的应用程序至少使用一个框架窗口。
+- JDialog：用于对话框的类。
+- JApplet：用于使用 Swing 组件的 Java Applet 类。
+
+中间容器是容器组件的一种，也可以承载其他组件，但中间容器不能独立显示，必须依附于其他的顶层容器。常见的中间容器有 JPanel、JScrollPane、JTabbedPane 和 JToolBar。
+- JPanel：表示一个普通面板，是最灵活、最常用的中间容器。
+- JScrollPane：与 JPanel 类似，但它可在大的组件或可扩展组件周围提供滚动条。
+- JTabbedPane：表示选项卡面板，可以包含多个组件，但一次只显示一个组件，用户可在组件之间方便地切换。
+- JToolBar：表示工具栏，按行或列排列一组组件（通常是按钮）。
+
+在 Java 程序中容器类都是继承自 Container 类。中间容器和顶层容器在，AWT 包和 Swing 包中继承 Container 类的继承关系，如图 2 所示。
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-28_20-06-43.png @ 2020-12-28 20:07:00
+[[file:Swing%E4%BB%8B%E7%BB%8D/2020-12-28_20-07-00_Snipaste_2020-12-28_20-06-43.png]]
+** Swing事件监听
+事件表示程序和用户之间的交互，例如在文本框中输入，在列表框或组合框中选择，选中复选框和单选框，单击按钮等。事件处理表示程序对事件的响应，对用户的交互或者说对事件的处理是事件处理程序完成的。
+
+当事件发生时，系统会自动捕捉这一事件，创建表示动作的事件对象并把它们分派给程序内的事件处理程序代码。这种代码确定了如何处理此事件以使用户得到相应的回答。
+*** 事件处理模型
+前面我们讲解了如何放置各种组件，使图形界面更加丰富多彩，但是还不能响应用户的任何操作。若使图形界面能够接收用户的操作，必须给各个组件加上事件处理机制。在事件处理的过程中，主要涉及三类对象。
+- Event（事件）：用户对组件的一次操作称为一个事件，以类的形式出现。例如，键盘操作对应的事件类是 KeyEvent。
+- Event Source（事件源）：事件发生的场所，通常就是各个组件，例如按钮 Button。
+- Event Handler（事件处理者）：接收事件对象并对其进行处理的对象事件处理器，通常就是某个 Java 类中负责处理事件的成员方法。
+
+例如，如果鼠标单击了按钮对象 Button，则该按钮 Button 就是事件源，而 Java 运行时系统会生成 ActionEvent 类的对象 ActionEvent，该对象中描述了单击事件发生时的一些信息。之后，事件处理者对象将接收由 Java 运行时系统传递过来的事件对象 ActionEvent，并进行相应的处理。事件处理模型如图 1 所示。
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-28_20-09-30.png @ 2020-12-28 20:09:34
+[[file:Swing%E4%BB%8B%E7%BB%8D/2020-12-28_20-09-34_Snipaste_2020-12-28_20-09-30.png]]
+
+由于同一个事件源上可能发生多种事件，因此，Java 采取了授权模型（Delegation Model），事件源可以把在其自身上所有可能发生的事件分别授权给不同的事件处理者来处理。例如，在 Panel 对象上既可能发生鼠标事件，也可能发生键盘事件，该 Panel 对象可以授权给事件处理者 a 来处理鼠标事件，同时授权给事件处理者 b 来处理键盘事件。
+
+有时也将事件处理者称为监听器，主要原因在于监听器时刻监听事件源上所有发生的事件类型，一旦该事件类型与自己所负责处理的事件类型一致，就马上进行处理。授权模型把事件的处理委托给外部的处理实体进行处理，实现了将事件源和监听器分开的机制。
+
+事件处理者（监听器）通常是一个类，该类如果能够处理某种类型的事件，就必须实现与该事件类型相对的接口。例如，一个 ButtonHandler 类之所以能够处理 ActionEvent 事件，原因在于它实现了与 ActionEvent 事件对应的接口 ActionListener。每个事件类都有一个与之相对应的接口。
+*** 动作事件监听器
+动作事件监听器是 Swing 中比较常用的事件监听器，很多组件的动作都会使用它监听，像按钮被里击、列表框中选择一项等。与动作事件监听器有关的信息如下。
+- 事件名称：ActionEvent。
+- 事件监听接口: ActionListener。
+- 事件相关方法：addActionListener() 添加监听，removeActionListener() 删除监听。
+- 涉及事件源：JButton、JList、JTextField 等。
+
+**** 例 1
+下面以按钮的单击事件为例来说明动作单击事件监听器的应用。在此案例中统计了窗口内按钮被单击的次数。
+
+本案例的核心代码如下：
+#+begin_src java  
+package ch17;
+import java.awt.BorderLayout;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+public class ActionListenerDemo extends JFrame
+{
+    JList list;
+    JLabel label;
+    JButton button1;
+    int clicks=0;
+    public ActionListenerDemo()
+    {
+        setTitle("动作事件监听器示例");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setBounds(100,100,400,200);
+        JPanel contentPane=new JPanel();
+        contentPane.setBorder(new EmptyBorder(5,5,5,5));
+        contentPane.setLayout(new BorderLayout(0,0));
+        setContentPane(contentPane);
+        label=new JLabel(" ");
+        label.setFont(new Font("楷体",Font.BOLD,16));    //修改字体样式
+        contentPane.add(label, BorderLayout.SOUTH);
+        button1=new JButton("我是普通按钮");    //创建JButton对象
+        button1.setFont(new Font("黑体",Font.BOLD,16));    //修改字体样式
+        button1.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent e)
+            {
+                label.setText("按钮被单击了 "+(clicks++)+" 次");
+            }
+        });
+        contentPane.add(button1);
+    }
+    //处理按钮单击事件的匿名内部类
+    class button1ActionListener implements ActionListener
+    {
+        @Override
+        public void actionPerformed(ActionEvent e)
+        {
+            label.setText("按钮被单击了 "+(clicks++)+" 次");
+        }
+    }
+    public static void main(String[] args)
+    {
+        ActionListenerDemo frame=new ActionListenerDemo();
+        frame.setVisible(true);
+    }
+}
+#+end_src
+上述代码调用 addActionListener() 方法为 button1 添加了单击动作的事件监听器，该监听器由 button1ActionListener 类来实现。button1ActionListener 类必须继承 ActionListener 类，并重写父类的 actionPerformed() 方法。在 actionPerformed() 方法内编写按钮被单击后执行的功能。
+
+图 2 所示为程序运行后，没有单击和单击后的效果。
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-28_20-18-43.png @ 2020-12-28 20:18:47
+[[file:Swing%E4%BB%8B%E7%BB%8D/2020-12-28_20-18-47_Snipaste_2020-12-28_20-18-43.png]]
+在本例中使用的是内部类形式，当然也可以写成如下形式的代码：
+#+begin_src java  
+//为按钮buttonl添加ActionEvent事件的处理程序
+buttonl.addActionListener(new ActionListener()
+{
+    public void action Performed(Action Event e)
+    {
+        //具体代码编写在这里
+        label.setTextC 按钮被单击了 "+(ciicks++)+1 次");
+    }
+}
+)
+#+end_src
+
+** Swing窗口容器和面板容器
+在 Swing 中，任何其他组件都必须位于一个顶层容器中。JFrame 窗口和 JPanel 面板是常用的顶层容器，本节详细介绍这两个容器的使用方法。
+*** JFrame 窗口
+JFrame 用来设计类似于 Windows 系统中窗口形式的界面。JFrame 是 Swing 组件的顶层容器，该类继承了 AWT 的 Frame 类，支持 Swing 体系结构的高级 GUI 属性。
+JFrame 类的常用构造方法如下所示。
+- JFrame()：构造一个初始时不可见的新窗体。
+- JFrame(String title)：创建一个具有 title 指定标题的不可见新窗体。
+
+当创建一个 JFrame 类的实例化对象后，其他组件并不能够直接放到容器上面，需要将组件添加至内容窗格，而不是直接添加至 JFrame 对象。示例代码如下：
+
+#+BEGIN_SRC python
+frame.getContentPane().add(b);
+#+END_SRC
+使用 JFrame 类创建 GUI 界面时，其组件的布局组织示意如图 1 所示。
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-29_15-01-37.png @ 2020-12-29 15:02:28
+[[file:Swing%E4%BB%8B%E7%BB%8D/2020-12-29_15-02-28_Snipaste_2020-12-29_15-01-37.png]]
+在图 1 中显示有“大家好”的 Swing 组件需要放到内容窗格的上面，内容窗格再放到 JFrame 顶层容器的上面。菜单栏可以直接放到顶层容器 JFrame 上，而不通过内容窗格。内容窗格是一个透明的没有边框的中间容器。
+
+JFrame 类中的常用方法如表 1 所示。
+| 方法名称                                                             | 概述                                                                     |
+|----------------------------------------------------------------------+--------------------------------------------------------------------------|
+| getContentPane()                                                     | 返回此窗体的 contentPane 对象                                            |
+| getDefaultCloseOperation()                                           | 返回用户在此窗体上单击“关闭”按钮时执行的操作                             |
+| setContentPane(Container contentPane)                                | 设置 contentPane 属性                                                    |
+| setDefaultCloseOperation(int operation)                              | 设置用户在此窗体上单击“关闭”按钮时默认执行的操作                         |
+| setDefaultLookAndFeelDecorated (boolean defaultLookAndFeelDecorated) | 设置 JFrame 窗口使用的 Windows 外观（如边框、关闭窗口的 小部件、标题等） |
+| setIconImage(Image image)                                            | 设置要作为此窗口图标显不的图像                                           |
+| setJMenuBar( JMenuBar menubar)                                       | 设置此窗体的菜单栏                                                       |
+| setLayout(LayoutManager manager)                                     | 设置 LayoutManager 属性                                                  |
+**** 例 1
+在了解窗口组件 JFrame 的语法之后，下面使用 JFrame 类创建一个窗口。要求设置窗口的标题为“Java 第一个 GUI 程序”，并向窗口内添加“这是使用 JFrame 类创建的窗口”文本。具体实现代码如下：
+#+begin_src java  
+package ch17;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import java.awt.*;
+public class JFrameDemo extends JFrame
+{
+    public JFrameDemo()
+    {
+        setTitle("Java 第一个 GUI 程序");    //设置显示窗口标题
+        setSize(400,200);    //设置窗口显示尺寸
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);    //置窗口是否可以关闭
+        JLabel jl=new JLabel("这是使用JFrame类创建的窗口");    //创建一个标签
+        Container c=getContentPane();    //获取当前窗口的内容窗格
+        c.add(jl);    //将标签组件添加到内容窗格上
+        setVisible(true);    //设置窗口是否可见
+    }
+    public static void main(String[] agrs)
+    {
+        new JFrameDemo();    //创建一个实例化对象
+    }
+}
+#+end_src
+上述代码创建的 JFrameDemo 类继承了 JFrame 类，因此 JFrameDemo 类可以直接使用 JFrame 类的方法。setTitle() 方法用来设置窗口标题，setDefaultCloseOperation() 方法用来设置响应方式，即当单击“关闭”按钮时退出该程序。
+
+在构造方法中使用 JLabel 类创建一个标签对象 jl，其参数是标签的文本提示信息。JFrame 框架的 getContentPane() 方法获取了内容窗格对象，并使用 add() 方法将标签添加到内容窗格上。最后的 setVisible() 方法是从父类中继承的方法。
+
+程序运行的窗口结果如图 2 所示。
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-29_15-11-26.png @ 2020-12-29 15:11:34
+[[file:Swing%E4%BB%8B%E7%BB%8D/2020-12-29_15-11-34_Snipaste_2020-12-29_15-11-26.png]]
+*** JPanel 面板
+JPanel 是一种中间层容器，它能容纳组件并将组件组合在一起，但它本身必须添加到其他容器中使用。JPanel 类的构造方法如下。
+- JPanel()：使用默认的布局管理器创建新面板，默认的布局管理器为 FlowLayout。
+- JPanel(LayoutManagerLayout layout)：创建指定布局管理器的 JPanel 对象。
+
+JPanel 类的常用方法如表 2 所示。
+| 方法名及返回值类型                | 说明                           |
+|-----------------------------------+--------------------------------|
+| Component add(Component comp)     | 将指定的组件追加到此容器的尾部 |
+| void remove(Component comp)       | 从容器中移除指定的组件         |
+| void setFont(Font f)              | 设置容器的字体                 |
+| void setLayout(LayoutManager mgr) | 设置容器的布局管理器           |
+| void setBackground(Color c)       | 设置组件的背景色               |
+**** 例子
+编写一个使用 JPanel 组件的窗口程序。要求设置标题为“Java的第二个GUI程序”，然后向窗口中添加一个面板，并设置面板上显示的文本为“这是放在JPanel上的标签”，设置面板背景颜色为白色。具体实现代码如下：
+#+begin_src java  
+package ch17;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import java.awt.*;
+public class JPanelDemo
+{   
+    public static void main(String[] agrs)
+    {
+        JFrame jf=new JFrame("Java第二个GUI程序");    //创建一个JFrame对象
+        jf.setBounds(300, 100, 400, 200);    //设置窗口大小和位置
+        JPanel jp=new JPanel();    //创建一个JPanel对象
+        JLabel jl=new JLabel("这是放在JPanel上的标签");    //创建一个标签
+        jp.setBackground(Color.white);    //设置背景色
+        jp.add(jl);    //将标签添加到面板
+        jf.add(jp);    //将面板添加到窗口
+        jf.setVisible(true);    //设置窗口可见
+    }
+}
+#+end_src
+如上述代码，首先创建了一个 JFrame 对象，并设置其大小和位置，然后创建了一个 JPanel对象表示面板，调用 setBackground() 方法设置面板的背景色为白色，调用 add() 方法将标签添加到此面板。JFrame 类的 add() 方法将 JPanel 面板添加到 JFmme 窗口中。最后调用 setVisible() 方法将窗口设置为可见。
+
+运行程序，显示的窗口如图 3 所示。
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-29_19-08-47.png @ 2020-12-29 19:09:05
+[[file:Swing%E4%BB%8B%E7%BB%8D/2020-12-29_19-09-05_Snipaste_2020-12-29_19-08-47.png]]
+* spring
+** spring入门
+任何不平凡的应用程序都由许多组件组成，每个组件负责自己的在整体应用程序中的那部分功能，并与其他应用程序元素协调以完成工作。在运行应用程序时，需要以某种方式创建这些组件并相互引用。
+
+Spring 的核心是一个 容器，通常称为 Spring 应用程序上下文，用于创建和管理应用程序组件。这些组件（或 bean）在 Spring 应用程序上下文中连接在一起以构成一个完整的应用程序，就像将砖、灰浆、木材、钉子、管道和电线绑在一起以组成房屋。
+
+将 bean 连接在一起的行为是基于一种称为 依赖注入（DI）的模式。依赖项注入的应用程序不是由组件自身创建和维护它们依赖的其他 bean 的生命周期，而是依赖于单独的实体（容器）来创建和维护所有组件，并将这些组件注入需要它们的 bean。通常通过构造函数参数或属性访问器方法完成此操作。
+
+例如，假设在应用程序的许多组件中，要处理两个组件：inventory service（用于获取库存级别）和 product service（用于提供基本产品信息）。product service 取决于 inventory service，以便能够提供有关产品的完整信息。图 1.1 说明了这些 bean 与 Spring 应用程序上下文之间的关系。
+
+除了其核心容器之外，Spring 和完整的相关库产品组合还提供 Web 框架、各种数据持久性选项、安全框架与其他系统的集成、运行时监视、微服务支持、响应式编程模型以及许多其他功能，应用于现代应用程序开发。
+
+从历史上看，引导 Spring 应用程序上下文将 bean 连接在一起的方式是使用一个或多个 XML 文件，这些文件描述了组件及其与其他组件的关系。例如，以下 XML 声明两个 bean，一个 InventoryService bean 和一个 ProductService bean，然后通过构造函数参数将 InventoryService bean 注入到 ProductService 中：
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-02-03_17-34-31.png @ 2021-02-03 17:35:06
+[[file:spring/2021-02-03_17-35-06_Snipaste_2021-02-03_17-34-31.png]]
+
+#+BEGIN_EXAMPLE
+<bean id="inventoryService" class="com.example.InventoryService" />
+<bean id="productService" class="com.example.ProductService" >
+    <constructor-arg ref="inventoryService" />
+</bean>
+#+END_EXAMPLE
+但是，在最新版本的 Spring 中，基于 Java 的配置更为常见。以下基于 Java 的配置类等效于 XML 配置：
+#+begin_src java  
+@Configuration
+public class ServiceConfiguration {
+    @Bean
+    public InventoryService inventoryService() {
+        return new InventoryService();
+    }
+    
+    @Bean
+    public ProductService productService() {
+        return new ProductService(inventoryService());
+    }
+}
+#+end_src
+@Configuration 注释向 Spring 表明这是一个配置类，它将为 Spring 应用程序上下文提供 beans。 配置的类方法带有 @Bean 注释，指示它们返回的对象应作为 beans 添加到应用程序上下文中（默认情况下，它们各自的 bean IDs 将与定义它们的方法的名称相同）。
+
+与基于 XML 的配置相比，基于 Java 的配置具有多个优点，包括更高的类型安全性和改进的可重构性。即使这样，仅当 Spring 无法自动配置组件时，才需要使用 Java 或 XML 进行显式配置。
+
+自动配置起源于 Spring 技术，即 自动装配 和 组件扫描。借助组件扫描，Spring 可以自动从应用程序的类路径中发现组件，并将其创建为 Spring 应用程序上下文中的 bean。通过自动装配，Spring 会自动将组件与它们依赖的其他 bean 一起注入。
+
+最近，随着 Spring Boot 的推出，自动配置的优势已经远远超出了组件扫描和自动装配。Spring Boot 是 Spring 框架的扩展，它提供了多项生产力增强功能。这些增强功能中最著名的就是 自动配置，在这种配置中，Spring Boot 可以根据类路径中的条目、环境变量和其他因素，合理地猜测需要配置哪些组件，并将它们连接在一起。
+
+这里想要展示一些演示自动配置的示例代码，但是并没有这样的代码，自动配置就如同风一样，可以看到它的效果，但是没有代码可以展示。我可以说 “看！这是自动配置的示例！” 事情发生、组件启用并且提供了功能，而无需编写代码。缺少代码是自动配置必不可少的要素，这使它如此出色。
+
+Spring Boot 自动配置大大减少了构建应用程序所需的显式配置（无论是 XML 还是 Java）的数量。实际上，当完成本章中的示例时，将拥有一个正在运行的 Spring 应用程序，该应用程序仅包含一行 Spring 配置代码！
+
+Spring Boot 极大地增强了 Spring 开发的能力，很难想象没有它如何开发 Spring 应用程序。因此，本书将 Spring 和 Spring Boot 视为一模一样。我们将尽可能使用 Spring Boot，并仅在必要时使用显式配置。而且，由于 Spring XML 配置是使用 Spring 的老派方式，因此我们将主要关注基于 Java 的 Spring 配置。
+
+但是有这些功能就足够了，本书的标题包括 实战 这个词语，因此让我们动起来，立马开始使用 Spring 编写第一个应用程序。
+** 初始化 Spring 应用程序
+在本书的学习过程中，将创建 Taco Cloud，这是一个在线应用程序，用于订购由真人制作的最美味的食物 - 玉米饼。 当然，将使用 Spring、Spring Boot 以及各种相关的库和框架来实现此目标。
+初始化 Spring 应用程序的有多个选择。尽管我可以指导你逐步完成手动创建项目目录结构和定义构建规范的步骤，但这却浪费了时间，最好花费更多时间编写应用程序代码。因此，将依靠 Spring Initializr 来引导应用程序的创建。
+Spring Initializr 既是一个基于浏览器的 Web 应用程序，又是一个 REST API，它们可以生成一个基本的 Spring 项目结构，可以使用所需的任何功能充实自己。 使用 Spring Initializr 的几种方法如下：
+- 从 Web 应用程序 http://start.spring.io 创建
+- 使用 curl 命令从命令行创建
+- 使用 Spring Boot 命令行接口从命令行创建
+- 使用 Spring Tool Suite 创建一个新项目的时候
+- 使用 IntelliJ IDEA 创建一个新项目的时候
+- 使用 NetBean 创建一个新项目的时候
+
+我没有在本章中花费数页来讨论这些选项中的每一个，而是在附录中收集了这些详细信息。在本章以及整本书中，将展示如何使用 Spring Tool Suite 中对 Spring Initializr 的支持来创建一个新项目。
+
+顾名思义，Spring Tool Suite 是一个绝佳的 Spring 开发环境。但是它还提供了一个方便的 Spring Boot Dashboard 功能（至少在撰写本文时）其他任何 IDE 选项中均不提供。
+
+如果你不是 Spring Tool Suite 用户，很好，我们是朋友了。跳至附录，用最适合你的 Initializr 选项代替以下各节中的说明。但是要知道，在本书中，我偶尔会引用特定于 Spring Tool Suite 的功能，例如 Spring Boot Dashboard。如果你不使用 Spring Tool Suite，则需要调整这些说明以适合你的 IDE。
+* static {}的用法
+静态代码块, 在类的构造方法之前执行, 并且只会在第一次执行, 之后都不会执行的方法代码块.
+
+比较耗资源的数据库连接啊之类的, 在构造方法前调用, 或者持有文件句柄之类的, 都可以在静态代码库内使用. 总之理解它的调用次序就可以啦.
+* Graphics类
+** 1. 画线
+在窗口画一条线段，可以使用Graphics类的drawLine()方法：
+#+begin_src java  
+drawLine(int x1,int y1,int x2,int y2)
+#+end_src
+例如，以下代码在点（3,3）与点（50,50）之间画线段，在点（100,100）处画一个点。
+#+begin_src java  
+g.drawLine(3,3,50,50);//画一条线段
+g.drawLine(100,100,100,100);//画一个点。
+#+end_src
+** 2. 画矩形
+有两种矩形：普通型和圆角型。
+(1) 画普通矩形有两个方法：
+#+begin_src java  
+drawRect(int x,int y,int width,int height)//画线框围起来的矩形。其中参数x和y指定左上角的位置，参数width和height是矩形的宽和高。
+fillRect(int x,int y,int width,int height)//是用预定的颜色填充一个矩形，得到一个着色的矩形块。
+#+end_src
+以下代码是画矩形的例子：
+#+begin_src java  
+g.drawRect(80,100,40,25);//画线框
+g.setColor(Color.yellow);g.fillRect(20,70,20,30);//画着色块
+#+end_src
+(2)画圆角矩形也有两个方法：
+#+begin_src java  
+drawRoundRect(int x,int y,int width, int height, int arcWidth, int arcHeight)//是用线围起来的圆角矩形。其中参数x和y指定矩形左上角的位置；参数width和heigth是矩形的宽和高；arcWidth和arcHeight分别是圆角弧的横向直径和圆角弧的纵向直径。
+fillRoundRect(int x,int y,int width,int height,int arcWidth,int archeight)//是用预定的颜色填充的圆角矩形。各参数的意义同前一个方法。
+#+end_src
+以下代码是画矩形的例子：
+#+begin_src java  
+g.drawRoundRect(10,10,150,70,40,25);//画一个圆角矩形
+g.setColor(Color.blue); g.fillRoundRect(80,100,100,100,60,40);//涂一个圆角矩形块
+g.drawRoundRect(10,150,40,40,40,40);//画圆
+g.setColor(Color.red); g.fillRoundRect(80,100,100,100,100,100);//画圆块
+#+end_src
+可以用画圆角矩形方法画圆形，当矩形的宽和高相等，圆角弧的横向直径和圆角弧的纵向直径也相等，并等于矩形的宽和高时，画的就是圆形。参见上述例子中的注释，前一个是画圆，后一个是涂圆块。
+
+** 3. 画三维矩形
+画三维矩形有两个方法：
+draw3DRect(int x,int y,int width,int height, boolean raised)：画一个突出显示的矩形。其中x和y指定矩形左上角的位置，参数width和height是矩形的宽和高，参数raised是突出与否。
+fill3DRect(int x,int y,int width,int height,boolean raised)：用预定的颜色填充一个突出显示的矩形。
+以下代码是画突出矩形的例子：
+#+begin_src java  
+g.draw3DRect(80,100,40,25,true);//画一个线框
+g.setColor(Color.yellow); g.fill3DRect(20,70,20,30,true);//画一个着色块
+#+end_src
+** 4.画椭圆形
+椭圆形由椭圆的横轴和纵轴确定。画椭圆形有两个方法：
+drawOval(int x,int y,int width,int height)：是画用线围成的椭圆形。其中参数x和参数y指定椭圆形左上角的位置，参数width和height是横轴和纵轴。
+fillOval(int x,int y,int width,int height)：是用预定的颜色填充的椭圆形，是一个着色块。也可以用画椭圆形方法画圆形，当横轴和纵轴相等时，所画的椭圆形即为圆形。
+以下代码是画椭圆形的例子：
+#+begin_src java  
+g.drawOval(10,10,60,120);//画椭圆
+g.setColor(Color.cyan);g.fillOval(100,30,60,60);//涂圆块
+g.setColor(Color.magenta);g.fillOval(15,140,100,50);//涂椭圆
+
+#+end_src
+** 5. 画圆弧
+画圆弧有两个方法：
+drawArc(int x,int y,int width,int height,int startAngle, int arcAngle)：画椭圆一部分的圆弧线。椭圆的中心是它的外接矩形的中心，其中参数是外接矩形的左上角坐标(x,y)，宽是width，高是heigh。参数startAngle的单位是 “度”，起始角度0度是指3点钟方位.参数startAngle和arcAngle表示从startAngle角度开始，逆时针方向画arcAngle度的弧，约定，正值度数是逆时针方向，负值度数是顺时针方向，例如-90度是6点钟方位。
+fillArc(int x,int y,int width, int height, int startAngle, int arcAngle)：用setColor()方法设定的颜色,画着色椭圆的一部分。
+以下代码是画圆弧的例子：
+#+begin_src java  
+g.drawArc(10,40,90,50,0,180);//画圆弧线
+g.drawArc(100,40,90,50,180,180);//画圆弧线
+g.setColor(Color.yellow); g.fillArc(10,100,40,40,0,-270);//填充缺右上角的四分之三的椭圆
+g.setColor(Color.green); g.fillArc(60,110,110,60,-90,-270);//填充缺左下角的四分之三的椭圆
+#+end_src
+** 6. 画多边形
+多边形是用多条线段首尾连接而成的封闭平面图。多边形线段端点的x坐标和y坐标分别存储在两个数组中，画多边形就是按给定的坐标点顺序用直线段将它们连起来。以下是画多边形常用的两个方法：
+drawPolygon(int xpoints[],int yPoints[],int nPoints)：画一个多边形
+fillPolygon(int xPoints[],int yPoints[],int nPoints)：用方法setColor()设定的颜色着色多边形。其中数组xPoints[]存储x坐标点，yPoints[]存储y坐标点，nPoints是坐标点个数。
+
+注意，上述方法并不自动闭合多边形，要画一个闭合的多边形，给出的坐标点的最后一点必须与第一点相同.以下代码实现填充一个三角形和画一个八边形。
+#+begin_src java  
+int px1[]={50,90,10,50};//首末点相重,才能画多边形 
+int py1[]={10,50,50,10};
+int px2[]={140,180,170,180,140,100,110,140};
+int py2[]={5,25,35,45,65,35,25,5};
+g.setColor(Color.blue);
+g.fillPolygon(px1,py1,4);
+g.setColor(Color.red);
+g.drawPolygon(px2,py2,9);
+#+end_src
+也可以用多边形对象画多边形。用多边形类Polygon创建一个多边形对象，然后用这个对象绘制多边形。Polygon类的主要方法：
+Polygon()：创建多边形对象，暂时没有坐标点。
+Polygon(int xPoints[],int yPoints[],int nPoints)：用指定的坐标点创建多边形对象。
+addPoint()：将一个坐标点加入到Polygon对象中。
+drawPolygon(Polygon p)：绘制多边形。
+fillPolygon(Polygon p)：和指定的颜色填充多边形。
+例如,以下代码，画一个三角形和填充一个黄色的三角形。注意，用多边形对象画封闭多边形不要求首末点重合。
+#+begin_src java  
+int x[]={140,180,170,180,140,100,110,100};
+int y[]={5,25,35,45,65,45,35,25};
+Polygon ponlygon1=new Polygon();
+polygon1.addPoint(50,10);
+polygon1.addPoint(90,50);
+polygon1.addPoint(10,50);
+g.drawPolygon(polygon1);
+g.setColor(Color.yellow);
+Polygon polygon2 = new Polygon(x,y,8);
+g.fillPolygon(polygon2);
+#+end_src
+** 7. 擦除矩形块
+当需要在一个着色图形的中间有一个空缺的矩形的情况，可用背景色填充一矩形块实现，相当于在该矩形块上使用了 “橡皮擦”.实现的方法是：
+clearRect(int x,int y, int width,int height)：擦除一个由参数指定的矩形块的着色。
+例如，以下代码实现在一个圆中擦除一个矩形块的着色：
+#+begin_src java  
+g.setColor(Color.blue);
+g.fillOval(50,50,100,100);g.clearRect(70,70,40,55);
+#+end_src
+** 8. 限定作图显示区域
+用一个矩形表示图形的显示区域，要求图形在指定的范围内有效，不重新计算新的坐标值，自动实现超出部分不显示。方法是clipRect(int x,int y,int width,int height)，限制图形在指定区域内的显示，超出部分不显示。多个限制区有覆盖时，得到限制区域的交集区域。例如，代码：
+g.clipRect(0,0,100,50);g.clipRect(50,25,100,50);
+
+相当于
+
+g.clipRect(50,25,50,25);
+** 9. 复制图形
+利用Graphics类的方法copyArea()可以实现图形的复制,其使用格式是：
+
+    copyArea(int x,int y,int width,int height, int dx, int dy)，dx和dy分别表示将图形粘贴到原位置偏移的像素点数，正值为往右或往下偏移是，负值为往左或往上偏移量。位移的参考点是要复制矩形的左上角坐标。
+
+例如，以下代码示意图形的复制,将一个矩形的一部分、另一个矩形的全部分别自制。
+#+begin_src java  
+g.drawRect(10,10,60,90);
+g.fillRect(90,10,60,90);
+g.copyArea(40,50,60,70,-20,80);
+g.copyArea(110,50,60,60,10,80);
+#+end_src
+
+【例】小应用程序重写update()方法,只清除圆块，不清除文字，窗口显示一个不断移动的红色方块。
+#+begin_src java  
+import java.applet.*;
+import java.awt.*;
+public class Example7_3 extends Applet{
+ int i=1;
+ public void init(){
+ setBackground(Color.yellow);
+ }
+ public void paint(Graphics g){
+ i = i+8; if(i>160)i=1;
+ g.setColor(Color.red);g.fillRect(i,10,20,20);
+ g.drawString("我正学习update()方法",100,100);
+ try{
+  Thread.sleep(100);
+ }
+ catch(InterruptedException e){}
+ repaint();
+ }
+ public void update(Graphics g){
+ g.clearRect(i,10,200,100);//不清除"我正在学习update()方法"
+ paint(g);
+ }
+}
+#+end_src
+一般的绘图程序要继承JFrame，定义一个JFrame窗口子类，还要继承JPanel，定义一个JPanel子类。在JPanel子类 中重定义方法paintComponent()，在这个方法中调用绘图方法,绘制各种图形。
+
+【例】使用XOR绘图模式的应用程序。
+#+begin_src java  
+import javax.swing.*;
+import java.awt.*;
+public class Example7_4 extends JFrame{
+ public static void main(String args[]){
+ GraphicsDemo myGraphicsFrame = new GraphicsDemo();
+ }
+}
+class ShapesPanel extends JPanel{
+ SharpesPanel(){
+ setBackground(Color.white);
+ }
+ public void paintComponent(Graphics g){
+ super.paintComponent(g);
+ setBackground(Color.yellow); //背景色为黄色
+ g.setXORMode(Color.red); //设置XOR绘图模式,颜色为红色
+ g.setColor(Color.green);
+ g.fillRect(20, 20, 80, 40); //实际颜色是green + yellow的混合色=灰色
+ g.setColor(Color.yellow);
+ g.fillRect(60, 20, 80, 40); //后一半是yellow+yellow=read,前一半是yellow+灰色
+ g.setColor(Color.green);
+ g.fillRect(20, 70, 80, 40); //实际颜色是green+yellow的混合色=灰色.
+ g.fillRect(60, 70, 80, 40);
+ //前一半是(green+yellow)+gray =背景色,后一半是green+yellow = gray
+ g.setColor(Color.green);
+ g.drawLine(80, 100, 180, 200); //该直线是green+yellow = gray
+ g.drawLine(100, 100, 200, 200); //同上
+ /*再绘制部分重叠的直线.原直线中间段是灰色+灰色=背景色,延长部分是green+yellow=gray.*/
+ g.drawLine(140, 140, 220, 220);
+ g.setColor(Color.yellow); //分析下列直线颜色变化,与早先的力有重叠
+ g.drawLine(20, 30, 160, 30);
+ g.drawLine(20, 75, 160, 75);
+ }
+}
+class GraphicsDemod extends JFrame{
+ public GraphicsDemo(){
+ this.getContentPane().add(new ShapesPanel());
+ setTile("基本绘图方法演示");
+ setSize(300, 300);
+ setVisible(true);
+ }
+}
+#+end_src

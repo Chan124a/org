@@ -10,3 +10,6 @@ TEX Live 是由TUG（TEX User Group，TEX 用户组）发布的一个发行版�
 供相当可靠的工作环境¬。
 * PDF阅读器
 CTEX 套装和TEX Live 都已经预装了DVI 文件和PostScript 文件的阅读器。
+* 数学公式
+** 插入方式
+行内
