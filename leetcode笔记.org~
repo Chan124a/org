@@ -1,11 +1,17 @@
 * 优先队列
 1046题
+
+priority_queue<Type, Container, Functional>
+
+Type 就是数据类型，Container 就是容器类型（Container必须是用数组实现的容器，比如vector,deque等等，但不能用 list。STL里面默认用的是vector），Functional 就是比较的方式。
 #+BEGIN_SRC c++
 #include <queue>
 //升序队列
 priority_queue <int,vector<int>,greater<int> > q;
 //降序队列
 priority_queue <int,vector<int>,less<int> >q;
+
+//greater和less是std实现的两个仿函数（就是使一个类的使用看上去像一个函数。其实现就是类中实现一个operator()，这个类就有了类似函数的行为，就是一个仿函数类了）
 #+END_SRC
 * 多维数组的定义
 #+BEGIN_SRC c++
@@ -580,8 +586,6 @@ public:
 };
 #+END_SRC
 
-
-
 * 由vector创建set
 217. 存在重复元素
 
@@ -617,3 +621,15 @@ public:
     }
 };
 #+END_SRC
+* 取中点避免溢出的技巧
+二分查找中，计算 mid 时需要防止溢出，代码中 left + (right - left) / 2 就和 (left + right) / 2 的结果相同，但是有效防止了 left 和 right 太大直接相加导致溢出。
+* 异或运算
+异或运算有以下三个性质。
+- 任何数和 0 做异或运算，结果仍然是原来的数
+- 任何数和其自身做异或运算，结果是 0 .
+- 异或运算满足交换律和结合律.
+
+
+* 一个包含所有c++的头文件的头文件
+
+#include<bits/stdc++.h>包含了目前c++所包含的所有头文件

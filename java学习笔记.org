@@ -31,7 +31,8 @@ Java ME就和Java SE不同，它是一个针对嵌入式设备的“瘦身版”
 3. 如果要学习大数据开发，那么Hadoop、Spark、Flink这些大数据平台就是需要学习的，他们都基于Java或Scala开发；
 4. 如果想要学习移动开发，那么就深入Android平台，掌握Android App开发。
 
-*** 名词解释
+** 名词解释
+
 初学者学Java，经常听到JDK、JRE这些名词，它们到底是啥？
 - JDK：Java Development Kit
 - JRE：Java Runtime Environment
@@ -71,6 +72,13 @@ Java Development Kit（JDK）是太阳微系统针对Java开发人员发布的�
 
 通常来说，RI只是一个“能跑”的正确的代码，它不追求速度，所以，如果真正要选择一个Java的消息服务器，一般是没人用RI的，大家都会选择一个有竞争力的商用或开源产品。
 
+** 字节码
+在 Java 中，JVM 可以理解的代码就叫做字节码（即扩展名为 .class 的文件），它不面向任何特定的处理器，只面向虚拟机。Java 语言通过字节码的方式，在一定程度上解决了传统解释型语言执行效率低的问题，同时又保留了解释型语言可移植的特点。所以 Java 程序运行时比较高效，而且，由于字节码并不针对一种特定的机器，因此，Java 程序无须重新编译便可在多种不同操作系统的计算机上运行。
+** java编译过程
+Java 程序从源代码到运行一般有下面 3 步：
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-08_15-37-33.png @ 2021-03-08 15:37:37
+[[file:%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/2021-03-08_15-37-37_Snipaste_2021-03-08_15-37-33.png]]
+我们需要格外注意的是 .class->机器码 这一步。在这一步 JVM 类加载器首先加载字节码文件，然后通过解释器逐行解释执行，这种方式的执行速度会相对比较慢。而且，有些方法和代码块是经常需要被调用的(也就是所谓的热点代码)，所以后面引进了 JIT 编译器，而 JIT 属于运行时编译。当 JIT 编译器完成第一次编译后，其会将字节码对应的机器码保存下来，下次可以直接使用。而我们知道，机器码的运行效率肯定是高于 Java 解释器的。这也解释了我们为什么经常会说 Java 是编译与解释共存的语言。
 ** 安装JDK
 因为Java程序必须运行在JVM之上，所以，我们第一件事情就是安装JDK。
 
@@ -333,6 +341,12 @@ Eclipse的发行版提供了预打包的开发环境，包括Java、JavaEE、C++
 JDK8或者JDK1.8是由于自从JDK1.5/JDK5命名方式改变后遗留的新旧命令方式问题。所以JDK8或者JDK1.8也是同一个东西。
 
 JAVA就是指JDK开发工具，所以我们可以理解为JAVA等价于JDK。JAVA有3个版本：J2SE J2EE J2ME，而J2SE是标准版本，J2ME是手机方向的，J2EE是网站开发方向的。
+** Java 和 C++的区别?
+- 都是面向对象的语言，都支持封装、继承和多态
+- Java 不提供指针来直接访问内存，程序内存更加安全
+- Java 的类是单继承的，C++ 支持多重继承；虽然 Java 的类不可以多继承，但是接口可以多继承。单继承也就是一个子类只有一个父类。多继承就是一个子类可以有多个父类
+- Java 有自动内存管理垃圾回收机制(GC)，不需要程序员手动释放无用内存
+- 在 C 语言中，字符串或字符数组最后都会有一个额外的字符'\0'来表示结束。但是，Java 语言中没有结束符这一概念。 这是一个值得深度思考的问题，具体原因推荐看这篇文章： https://blog.csdn.net/sszgg2006/article/details/49148189
 * 基本数据类型
 ** 字符
 还可以直接用转义字符\u+Unicode编码来表示一个字符：
@@ -913,6 +927,126 @@ Bart Simpson
 注意到setName()的参数现在是一个数组。一开始，把fullname数组传进去，然后，修改fullname数组的内容，结果发现，实例p的字段p.name也被修改了！
 
 结论：引用类型参数的传递，调用方的变量，和接收方的参数变量，指向的是同一个对象。双方任意一方对这个对象的修改，都会影响对方（因为指向同一个对象嘛）。
+*** Java 中只有值传递
+下面这段话是我复制来的，我也看不太懂。。。
+#+BEGIN_EXAMPLE
+首先回顾一下在程序设计语言中有关将参数传递给方法（或函数）的一些专业术语。按值调用(call by value)表示方法接收的是调用者提供的值，而按引用调用（call by reference)表示方法接收的是调用者提供的变量地址。一个方法可以修改传递引用所对应的变量值，而不能修改传递值调用所对应的变量值。 它用来描述各种程序设计语言（不只是 Java)中方法参数传递方式。
+#+END_EXAMPLE
+
+Java 程序设计语言总是采用按值调用。也就是说，方法得到的是所有参数值的一个拷贝，也就是说，方法不能修改传递给它的任何参数变量的内容。
+下面通过 3 个例子来给大家说明
+**** example 1
+#+begin_src java  
+public static void main(String[] args) {
+    int num1 = 10;
+    int num2 = 20;
+
+    swap(num1, num2);
+
+    System.out.println("num1 = " + num1);
+    System.out.println("num2 = " + num2);
+}
+
+public static void swap(int a, int b) {
+    int temp = a;
+    a = b;
+    b = temp;
+
+    System.out.println("a = " + a);
+    System.out.println("b = " + b);
+}
+#+end_src
+结果：
+#+BEGIN_EXAMPLE
+a = 20
+b = 10
+num1 = 10
+num2 = 20
+#+END_EXAMPLE
+解析：
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-08_20-56-03.png @ 2021-03-08 20:56:14
+[[file:%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/2021-03-08_20-56-14_Snipaste_2021-03-08_20-56-03.png]]
+
+在 swap 方法中，a、b 的值进行交换，并不会影响到 num1、num2。因为，a、b 中的值，只是从 num1、num2 的复制过来的。也就是说，a、b 相当于 num1、num2 的副本，副本的内容无论怎么修改，都不会影响到原件本身。
+
+通过上面例子，我们已经知道了一个方法不能修改一个基本数据类型的参数，而对象引用作为参数就不一样，请看 example2.
+**** example 2
+#+begin_src java  
+public static void main(String[] args) {
+	int[] arr = { 1, 2, 3, 4, 5 };
+	System.out.println(arr[0]);
+	change(arr);
+	System.out.println(arr[0]);
+}
+public static void change(int[] array) {
+	// 将数组的第一个元素变为0
+	array[0] = 0;
+}
+#+end_src
+
+结果：
+#+BEGIN_EXAMPLE
+1
+0
+#+END_EXAMPLE
+解析：
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-08_20-58-34.png @ 2021-03-08 20:58:38
+[[file:%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/2021-03-08_20-58-38_Snipaste_2021-03-08_20-58-34.png]]
+array 被初始化 arr 的拷贝也就是一个对象的引用，也就是说 array 和 arr 指向的是同一个数组对象。 因此，外部对引用对象的改变会反映到所对应的对象上。
+
+通过 example2 我们已经看到，实现一个改变对象参数状态的方法并不是一件难事。理由很简单，方法得到的是对象引用的拷贝，对象引用及其他的拷贝同时引用同一个对象。
+
+很多程序设计语言（特别是，C++和 Pascal)提供了两种参数传递的方式：值调用和引用调用。有些程序员（甚至本书的作者）认为 Java 程序设计语言对对象采用的是引用调用，实际上，这种理解是不对的。由于这种误解具有一定的普遍性，所以下面给出一个反例来详细地阐述一下这个问题。
+**** example 3
+#+begin_src java  
+public class Test {
+	public static void main(String[] args) {
+		// TODO Auto-generated method stub
+		Student s1 = new Student("小张");
+		Student s2 = new Student("小李");
+		Test.swap(s1, s2);
+		System.out.println("s1:" + s1.getName());
+		System.out.println("s2:" + s2.getName());
+	}
+
+	public static void swap(Student x, Student y) {
+		Student temp = x;
+		x = y;
+		y = temp;
+		System.out.println("x:" + x.getName());
+		System.out.println("y:" + y.getName());
+	}
+}
+#+end_src
+结果：
+#+BEGIN_EXAMPLE
+x:小李
+y:小张
+s1:小张
+s2:小李
+#+END_EXAMPLE
+解析：
+
+交换之前：
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-08_20-59-41.png @ 2021-03-08 20:59:52
+[[file:%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/2021-03-08_20-59-52_Snipaste_2021-03-08_20-59-41.png]]
+
+交换之后：
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-08_20-59-43.png @ 2021-03-08 20:59:50
+[[file:%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/2021-03-08_20-59-50_Snipaste_2021-03-08_20-59-43.png]]
+通过上面两张图可以很清晰的看出： 方法并没有改变存储在变量 s1 和 s2 中的对象引用。swap 方法的参数 x 和 y 被初始化为两个对象引用的拷贝，这个方法交换的是这两个拷贝
+
+Java 程序设计语言对对象采用的不是引用调用，实际上，对象引用是按 值传递的。
+
+下面再总结一下 Java 中方法参数的使用情况：
+- 一个方法不能修改一个基本数据类型的参数（即数值型或布尔型）。
+- 一个方法可以改变一个对象参数的状态。
+- 一个方法不能让对象参数引用一个新的对象。
+
+参考：《Java 核心技术卷 Ⅰ》基础知识第十版第四章 4.5 小节
+
 ** 构造方法
 创建实例的时候，我们经常需要同时初始化这个实例的字段，例如：
 #+begin_src java  
@@ -2137,6 +2271,8 @@ System.out.println(Person.number);
 #+end_src
 *** 静态方法
 有静态字段，就有静态方法。用static修饰的方法称为静态方法。
+
+在类中使用static修饰的静态方法会随着类的定义而被分配和装载入内存中；而非静态方法属于对象的具体实例，只有在类的对象创建时在对象的内存中才有这个方法的代码段。
 
 调用实例方法必须通过一个实例变量，而调用静态方法则不需要实例变量，通过类名就可以调用。静态方法类似其它编程语言的函数。例如： 
 #+begin_src java  
@@ -5525,6 +5661,1246 @@ Logging系统在JVM启动时读取配置文件并完成初始化，一旦开始�
 因此，Java标准库内置的Logging使用并不是非常广泛。更方便的日志系统我们稍后介绍。
 
 ** 使用Commons Logging
+* 反射
+** 什么是反射？
+
+反射就是Reflection，Java的反射是指程序在运行期可以拿到一个对象的所有信息。
+
+正常情况下，如果我们要调用一个对象的方法，或者访问一个对象的字段，通常会传入对象实例：
+#+begin_src java  
+// Main.java
+import com.itranswarp.learnjava.Person;
+
+public class Main {
+    String getFullName(Person p) {
+        return p.getFirstName() + " " + p.getLastName();
+    }
+}
+#+end_src
+但是，如果不能获得Person类，只有一个Object实例，比如这样：
+#+begin_src java  
+String getFullName(Object obj) {
+    return ???
+}
+#+end_src
+怎么办？有童鞋会说：强制转型啊！
+#+begin_src java  
+String getFullName(Object obj) {
+    Person p = (Person) obj;
+    return p.getFirstName() + " " + p.getLastName();
+}
+#+end_src
+强制转型的时候，你会发现一个问题：编译上面的代码，仍然需要引用Person类。不然，去掉import语句，你看能不能编译通过？
+
+所以，反射是为了解决在运行期，对某个实例一无所知的情况下，如何调用其方法。
+** class类
+** Java反射技术详解
+*** 基本反射技术
+**** 1.1 根据一个字符串得到一个类
+***** getClass方法
+#+begin_src java  
+ String name = "Huanglinqing";
+ Class c1 = name.getClass();
+ System.out.println(c1.getName());
+#+end_src
+打印结果如下：
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-27_10-07-12.png @ 2021-03-27 10:07:24
+[[file:%E5%8F%8D%E5%B0%84/2021-03-27_10-07-24_Snipaste_2021-03-27_10-07-12.png]]
+***** Class.forName
+ 比如我们获取java.lang.String的类名 
+#+begin_src java  
+String name="java.lang.String";
+Class c1 = null;
+try {
+    c1=Class.forName(name);
+    System.out.println(c1.getName());
+}catch(ClassNotFoundException e) {
+}
+#+end_src
+这里也通过捕获异常，因为我们传的这个字符串可能不合法，字符串合法命名是类的命名空间和类的名称组成
+
+打印结果如下：
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-27_10-10-52.png @ 2021-03-27 10:10:57
+[[file:%E5%8F%8D%E5%B0%84/2021-03-27_10-10-57_Snipaste_2021-03-27_10-10-52.png]]
+我们还可以通过c1.getSuperclass()获取到他的父类
+***** Type属性
+基本类型都有type属性，可以得到这个基本类型的类型，比如：
+#+begin_src java  
+Class c1 = Boolean.TYPE;
+Class c2 = Byte.TYPE;
+Class c3 = Float.TYPE;
+Class c4 = Double.TYPE;
+#+end_src
+
+停停停！这些东西有啥子用，如此鸡肋！ 别急，一切都是为后续做准备。
+
+*** 获取类的成员
+当类中方法定义为私有的时候我们能调用？不能！当变量是私有的时候我们能获取吗？不能！但是反射可以，比如源码中有你需要用到的方法，但是那个方法是私有的，这个时候你就可以通过反射去执行这个私有方法，并且获取私有变量。
+
+**** 获取类的构造函数
+为了便于测试，我们定义一个Test类，Test类如下：（省略get和set方法）
+
+Test类中我们定义是三个私有变量，生成两个公有的含参构造方法和一个私有的含参构造方法以及一个公有的无参构造方法。
+#+begin_src java  
+public class Test {
+ 
+    private int age;
+    private String name;
+    private int testint;
+ 
+    public Test(int age) {
+        this.age = age;
+    }
+ 
+    public Test(int age, String name) {
+        this.age = age;
+        this.name = name;
+    }
+ 
+    private Test(String name) {
+        this.name = name;
+    }
+ 
+    public Test() {
+    }
+
+#+end_src
+下面我们通过反射获取这些构造方法
+
+**** 获取类的所有构造方法
+#+begin_src java  
+Test test = new Test();
+Class c4 = test.getClass();
+Constructor[] constructors ;
+constructors = c4.getDeclaredConstructors();
+#+end_src
+- 通过getDeclaredConstructors可以返回类的所有构造方法，返回的是一个数组因为构造方法可能不止一个
+- 通过getModifiers可以得到构造方法的类型
+- 通过getParameterTypes可以得到构造方法的所有参数，返回的是一个Class数组，
+
+所以我们如果想获取所有构造方法以及每个构造方法的参数类型，可以有如下代码：
+#+begin_src java  
+for (int i = 0; i < constructors.length; i++) {
+        System.out.print(Modifier.toString(constructors[i].getModifiers()) + "参数：");
+        Class[] parametertypes = constructors[i].getParameterTypes();
+        for (int j = 0; j < parametertypes.length; j++) {
+             System.out.print(parametertypes[j].getName() + " ");
+       }
+      System.out.println("");
+  }
+#+end_src
+运行结果如下所示：
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-27_10-17-44.png @ 2021-03-27 10:17:49
+[[file:%E5%8F%8D%E5%B0%84/2021-03-27_10-17-49_Snipaste_2021-03-27_10-17-44.png]]
+这样我们就得到了类中所有构造方法和构造方法中的参数，那么我们如何获取特定的构造方法呢？
+
+**** 获取类中特定的构造方法
+我们可以通过getConstructors方法获取类中 所有的public类型的构造方法，代码和上面一样就不演示了。
+
+我们可以通过getDeclaredConstructor()方法传参获取特定参数类型的构造方法，这里注意是getDeclaredConstructor()不是  getDeclaredConstructors() ，所以返回的是一个Class对象而不是一个Class数组。
+
+获取无参构造方法直接不传参数，如下所示:
+#+begin_src java  
+try {
+          constructors = c4.getDeclaredConstructor();
+          System.out.print(Modifier.toString(constructors.getModifiers()) + );
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+      }
+
+#+end_src
+这里要进行异常捕获，因为可能不存在对应的构造方法，打印结果如下：  
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-27_10-44-46.png @ 2021-03-27 10:44:50
+[[file:%E5%8F%8D%E5%B0%84/2021-03-27_10-44-50_Snipaste_2021-03-27_10-44-46.png]]
+如果我们想获取有两个参数分别为int和String类型的构造方法，代码如下：
+#+begin_src java  
+ Class[] p = {int.class,String.class};
+  try {
+       constructors = c4.getDeclaredConstructor(p);
+       System.out.print(Modifier.toString(constructors.getModifiers()) + "参数:");
+       Class[] parametertypes = constructors.getParameterTypes();
+       for (int j = 0; j < parametertypes.length; j++) {
+            System.out.print(parametertypes[j].getName() + " ");
+          }
+       } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+     }
+
+#+end_src
+
+这里我们同样打印出构造方法的参数：
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-27_10-45-28.png @ 2021-03-27 10:45:32
+[[file:%E5%8F%8D%E5%B0%84/2021-03-27_10-45-32_Snipaste_2021-03-27_10-45-28.png]]
+
+
+**** 调用构造方法
+从这里开始慢慢到了关键的一步，得到类的实例，我们主要借助于newInstance方法，为了方便演示我们将测试类的两个构造方法打印出来.
+#+begin_src java  
+public Test(int age, String name) {
+        this.age = age;
+        this.name = name;
+        System.out.println("hello" + name + "i am" + age);
+    }
+ 
+ 
+    private Test(String name) {
+        this.name = name;
+        System.out.println("My Name is" +
+                name);
+    }
+#+end_src
+我们先来调用public的方法，如下所示：
+#+begin_src java  
+Class[] p = {int.class,String.class};
+constructors = c4.getDeclaredConstructor(p);
+constructors.newInstance(24,"HuangLinqing");
+#+end_src
+运行打印结果如下：
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-27_10-47-38.png @ 2021-03-27 10:47:42
+[[file:%E5%8F%8D%E5%B0%84/2021-03-27_10-47-42_Snipaste_2021-03-27_10-47-38.png]]
+那么调用私有构造方法呢，和上面一样，只是我们要设置constructors.setAccessible(true);代码如下：
+#+begin_src java 
+Class[] p = {String.class};
+constructors = c4.getDeclaredConstructor(p);
+constructors.setAccessible(true);
+constructors.newInstance("HuangLinqing");
+#+end_src
+打印结果如下：
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-27_10-50-06.png @ 2021-03-27 10:50:10
+[[file:%E5%8F%8D%E5%B0%84/2021-03-27_10-50-10_Snipaste_2021-03-27_10-50-06.png]]
+
+**** 调用类的私有方法
+如何调用类中的私有方法呢，我们先在测试类中编写一个测试的私有方法 如下：
+#+begin_src java  
+private void welcome(String tips){
+        System.out.println(tips);
+    }
+#+end_src
+我们知道如果我们要正常的调用类的方法都是通过类.方法调用，所以我们调用私有方法也需要得到类的实例，而我们上面newInstace已经得到了类的实例，这样就好办了。
+#+begin_src java  
+Class[] p4 = {String.class};
+Method method = c4.getDeclaredMethod("welcome",p4);
+method.setAccessible(true);
+#+end_src
+我们首先通过 getDeclaredMethod方法获取到这个私有方法，第一个参数是方法名，第二个参数是参数类型
+
+然后通过invoke方法执行，invoke需要两个参数一个是类的实例，一个是方法参数。
+#+begin_src java  
+Class[] p4 = {String.class};
+Method method = c4.getDeclaredMethod("welcome",p4);
+method.setAccessible(true);
+Object arg1s[] = {"欢迎关注代码男人技术公众号"};
+method.invoke(test,arg1s);
+#+end_src
+test类的实例当不能new 获取的时候我们也可以通过反射获取，就是上面的newInstance方法。打印结果如下：
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-27_10-56-13.png @ 2021-03-27 10:56:17
+[[file:%E5%8F%8D%E5%B0%84/2021-03-27_10-56-17_Snipaste_2021-03-27_10-56-13.png]]
+
+**** 获取类的私有字段并修改值
+看到这里你可能会说，有了set方法，什么私有不私有，test.set不就可以了，但是这里要注意我们是没有办法得到这个类的实例的，要不然都可以得到实例就没有反射一说了。我们在通过反射得到类的实例之后先获取字段：
+#+begin_src java  
+Field field = c4.getDeclaredField("name");
+field.setAccessible(true);
+field.set(o,"代码男人");
+#+end_src
+o是我们上面通过反射构造方法获取的实例，  打印field.get(o).toString()的值如下：
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-27_10-57-46.png @ 2021-03-27 10:57:50
+[[file:%E5%8F%8D%E5%B0%84/2021-03-27_10-57-50_Snipaste_2021-03-27_10-57-46.png]]
+不过要注意的是我们修改了name的值只对当前的实例对象有效。
+
+*** 完整代码
+#+begin_src java  
+package jnidemo.hlq.com.hookdemo;
+ 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+ 
+/**
+ * @author Huanglinqing
+ * @date 2019/4/28
+ */
+ 
+public class Reflex {
+ 
+    /**
+     * 获取无参构造函数
+     * @param className
+     * @return
+     */
+    public static Object createObject(String className) {
+        Class[] pareTyples = new Class[]{};
+        Object[] pareVaules = new Object[]{};
+ 
+        try {
+            Class r = Class.forName(className);
+            return createObject(r, pareTyples, pareVaules);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+ 
+        return null;
+    }
+ 
+    /**
+     * 获取无参构造方法
+     * @param clazz
+     * @return
+     */
+    public static Object createObject(Class clazz) {
+        Class[] pareTyple = new Class[]{};
+        Object[] pareVaules = new Object[]{};
+ 
+        return createObject(clazz, pareTyple, pareVaules);
+    }
+ 
+    /**
+     * 获取一个参数的构造函数  已知className
+     *
+     * @param className
+     * @param pareTyple
+     * @param pareVaule
+     * @return
+     */
+    public static Object createObject(String className, Class pareTyple, Object pareVaule) {
+ 
+        Class[] pareTyples = new Class[]{pareTyple};
+        Object[] pareVaules = new Object[]{pareVaule};
+ 
+        try {
+            Class r = Class.forName(className);
+            return createObject(r, pareTyples, pareVaules);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+ 
+        return null;
+    }
+ 
+ 
+    /**
+     * 获取单个参数的构造方法 已知类
+     *
+     * @param clazz
+     * @param pareTyple
+     * @param pareVaule
+     * @return
+     */
+    public static Object createObject(Class clazz, Class pareTyple, Object pareVaule) {
+        Class[] pareTyples = new Class[]{pareTyple};
+        Object[] pareVaules = new Object[]{pareVaule};
+ 
+        return createObject(clazz, pareTyples, pareVaules);
+    }
+ 
+    /**
+     * 获取多个参数的构造方法 已知className
+     * @param className
+     * @param pareTyples
+     * @param pareVaules
+     * @return
+     */
+    public static Object createObject(String className, Class[] pareTyples, Object[] pareVaules) {
+        try {
+            Class r = Class.forName(className);
+            return createObject(r, pareTyples, pareVaules);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+ 
+        return null;
+    }
+ 
+ 
+    /**
+     * 获取构造方法
+     *
+     * @param clazz
+     * @param pareTyples
+     * @param pareVaules
+     * @return
+     */
+    public static Object createObject(Class clazz, Class[] pareTyples, Object[] pareVaules) {
+        try {
+            Constructor ctor = clazz.getDeclaredConstructor(pareTyples);
+            ctor.setAccessible(true);
+            return ctor.newInstance(pareVaules);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+ 
+        return null;
+    }
+ 
+ 
+    /**
+     * 获取多个参数的方法
+     * @param obj
+     * @param methodName
+     * @param pareTyples
+     * @param pareVaules
+     * @return
+     */
+    public static Object invokeInstanceMethod(Object obj, String methodName, Class[] pareTyples, Object[] pareVaules) {
+        if (obj == null) {
+            return null;
+        }
+ 
+        try {
+            //调用一个private方法 //在指定类中获取指定的方法
+            Method method = obj.getClass().getDeclaredMethod(methodName, pareTyples);
+            method.setAccessible(true);
+            return method.invoke(obj, pareVaules);
+ 
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+ 
+        return null;
+    }
+ 
+    /**
+     * 获取一个参数的方法
+     * @param obj
+     * @param methodName
+     * @param pareTyple
+     * @param pareVaule
+     * @return
+     */
+    public static Object invokeInstanceMethod(Object obj, String methodName, Class pareTyple, Object pareVaule) {
+        Class[] pareTyples = {pareTyple};
+        Object[] pareVaules = {pareVaule};
+ 
+        return invokeInstanceMethod(obj, methodName, pareTyples, pareVaules);
+    }
+ 
+    /**
+     * 获取无参方法
+     * @param obj
+     * @param methodName
+     * @return
+     */
+    public static Object invokeInstanceMethod(Object obj, String methodName) {
+        Class[] pareTyples = new Class[]{};
+        Object[] pareVaules = new Object[]{};
+ 
+        return invokeInstanceMethod(obj, methodName, pareTyples, pareVaules);
+    }
+ 
+ 
+    /**
+     * 无参静态方法
+     * @param className
+     * @param method_name
+     * @return
+     */
+    public static Object invokeStaticMethod(String className, String method_name) {
+        Class[] pareTyples = new Class[]{};
+        Object[] pareVaules = new Object[]{};
+ 
+        return invokeStaticMethod(className, method_name, pareTyples, pareVaules);
+    }
+ 
+    /**
+     * 获取一个参数的静态方法
+     * @param className
+     * @param method_name
+     * @param pareTyple
+     * @param pareVaule
+     * @return
+     */
+    public static Object invokeStaticMethod(String className, String method_name, Class pareTyple, Object pareVaule) {
+        Class[] pareTyples = new Class[]{pareTyple};
+        Object[] pareVaules = new Object[]{pareVaule};
+ 
+        return invokeStaticMethod(className, method_name, pareTyples, pareVaules);
+    }
+ 
+    /**
+     * 获取多个参数的静态方法
+     * @param className
+     * @param method_name
+     * @param pareTyples
+     * @param pareVaules
+     * @return
+     */
+    public static Object invokeStaticMethod(String className, String method_name, Class[] pareTyples, Object[] pareVaules) {
+        try {
+            Class obj_class = Class.forName(className);
+            return invokeStaticMethod(obj_class, method_name, pareTyples, pareVaules);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+ 
+        return null;
+    }
+ 
+    /**
+     * 无参静态方法
+     * @param method_name
+     * @return
+     */
+    public static Object invokeStaticMethod(Class clazz, String method_name) {
+        Class[] pareTyples = new Class[]{};
+        Object[] pareVaules = new Object[]{};
+ 
+        return invokeStaticMethod(clazz, method_name, pareTyples, pareVaules);
+    }
+ 
+    /**
+     * 一个参数静态方法
+     * @param clazz
+     * @param method_name
+     * @param classType
+     * @param pareVaule
+     * @return
+     */
+    public static Object invokeStaticMethod(Class clazz, String method_name, Class classType, Object pareVaule) {
+        Class[] classTypes = new Class[]{classType};
+        Object[] pareVaules = new Object[]{pareVaule};
+ 
+        return invokeStaticMethod(clazz, method_name, classTypes, pareVaules);
+    }
+ 
+    /**
+     * 多个参数的静态方法
+     * @param clazz
+     * @param method_name
+     * @param pareTyples
+     * @param pareVaules
+     * @return
+     */
+    public static Object invokeStaticMethod(Class clazz, String method_name, Class[] pareTyples, Object[] pareVaules) {
+        try {
+            Method method = clazz.getDeclaredMethod(method_name, pareTyples);
+            method.setAccessible(true);
+            return method.invoke(null, pareVaules);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+ 
+        return null;
+    }
+ 
+ 
+    public static Object getFieldObject(String className, Object obj, String filedName) {
+        try {
+            Class obj_class = Class.forName(className);
+            return getFieldObject(obj_class, obj, filedName);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+ 
+    public static Object getFieldObject(Class clazz, Object obj, String filedName) {
+        try {
+            Field field = clazz.getDeclaredField(filedName);
+            field.setAccessible(true);
+            return field.get(obj);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+ 
+        return null;
+    }
+ 
+ 
+    public static void setFieldObject(Class clazz, Object obj, String filedName, Object filedVaule) {
+        try {
+            Field field = clazz.getDeclaredField(filedName);
+            field.setAccessible(true);
+            field.set(obj, filedVaule);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+ 
+    public static void setFieldObject(String className, Object obj, String filedName, Object filedVaule) {
+        try {
+            Class obj_class = Class.forName(className);
+            setFieldObject(obj_class, obj, filedName, filedVaule);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+ 
+ 
+    public static Object getStaticFieldObject(String className, String filedName) {
+        return getFieldObject(className, null, filedName);
+    }
+ 
+    public static Object getStaticFieldObject(Class clazz, String filedName) {
+        return getFieldObject(clazz, null, filedName);
+    }
+ 
+    public static void setStaticFieldObject(String classname, String filedName, Object filedVaule) {
+        setFieldObject(classname, null, filedName, filedVaule);
+    }
+ 
+    public static void setStaticFieldObject(Class clazz, String filedName, Object filedVaule) {
+        setFieldObject(clazz, null, filedName, filedVaule);
+    }
+}
+
+#+end_src
+* 泛型
+泛型是一种“代码模板”，可以用一套代码套用各种类型。
+** 什么是泛型
+*** 什么是泛型
+为了能让ArrayList适应不同类型的数据，我们必须把ArrayList变成一种模板：ArrayList<T>，代码如下：
+#+begin_src java  
+public class ArrayList<T> {
+    private T[] array;
+    private int size;
+    public void add(T e) {...}
+    public void remove(int index) {...}
+    public T get(int index) {...}
+}
+#+end_src
+T可以是任何class。这样一来，我们就实现了：编写一次模版，可以创建任意类型的ArrayList：
+#+begin_src java  
+// 创建可以存储String的ArrayList:
+ArrayList<String> strList = new ArrayList<String>();
+// 创建可以存储Float的ArrayList:
+ArrayList<Float> floatList = new ArrayList<Float>();
+// 创建可以存储Person的ArrayList:
+ArrayList<Person> personList = new ArrayList<Person>();
+#+end_src
+因此，泛型就是定义一种模板，例如ArrayList<T>，然后在代码中为用到的类创建对应的ArrayList<类型>：
+#+begin_src java  
+ArrayList<String> strList = new ArrayList<String>();
+#+end_src
+由编译器针对类型作检查：
+#+begin_src java  
+strList.add("hello"); // OK
+String s = strList.get(0); // OK
+strList.add(new Integer(123)); // compile error!
+Integer n = strList.get(0); // compile error!
+#+end_src
+这样一来，既实现了编写一次，万能匹配，又通过编译器保证了类型安全：这就是泛型。
+*** 向上转型
+在Java标准库中的ArrayList<T>实现了List<T>接口，它可以向上转型为List<T>：
+#+begin_src java  
+public class ArrayList<T> implements List<T> {
+    ...
+}
+
+List<String> list = new ArrayList<String>();
+#+end_src
+即类型ArrayList<T>可以向上转型为List<T>。
+
+要特别注意：不能把ArrayList<Integer>向上转型为ArrayList<Number>或List<Number>。
+
+这是为什么呢？假设ArrayList<Integer>可以向上转型为ArrayList<Number>，观察一下代码：
+#+begin_src java  
+// 创建ArrayList<Integer>类型：
+ArrayList<Integer> integerList = new ArrayList<Integer>();
+// 添加一个Integer：
+integerList.add(new Integer(123));
+// “向上转型”为ArrayList<Number>：
+ArrayList<Number> numberList = integerList;
+// 添加一个Float，因为Float也是Number：
+numberList.add(new Float(12.34));
+// 从ArrayList<Integer>获取索引为1的元素（即添加的Float）：
+Integer n = integerList.get(1); // ClassCastException!
+#+end_src
+我们把一个ArrayList<Integer>转型为ArrayList<Number>类型后，这个ArrayList<Number>就可以接受Float类型，因为Float是Number的子类。但是，ArrayList<Number>实际上和ArrayList<Integer>是同一个对象，也就是ArrayList<Integer>类型，它不可能接受Float类型， 所以在获取Integer的时候将产生ClassCastException。
+
+实际上，编译器为了避免这种错误，根本就不允许把ArrayList<Integer>转型为ArrayList<Number>。
+
+ArrayList<Integer>和ArrayList<Number>两者完全没有继承关系。
+
+注意泛型的继承关系：可以把ArrayList<Integer>向上转型为List<Integer>（T不能变！），但不能把ArrayList<Integer>向上转型为ArrayList<Number>（T不能变成父类）。
+** 泛型的使用
+*** 使用泛型
+使用ArrayList时，如果不定义泛型类型时，泛型类型实际上就是Object：
+#+begin_src java  
+// 编译器警告:
+List list = new ArrayList();
+list.add("Hello");
+list.add("World");
+String first = (String) list.get(0);
+String second = (String) list.get(1);
+#+end_src
+此时，只能把<T>当作Object使用，没有发挥泛型的优势。
+
+当我们定义泛型类型<String>后，List<T>的泛型接口变为强类型List<String>：
+#+begin_src java  
+// 无编译器警告:
+List<String> list = new ArrayList<String>();
+list.add("Hello");
+list.add("World");
+// 无强制转型:
+String first = list.get(0);
+String second = list.get(1);
+#+end_src
+当我们定义泛型类型<Number>后，List<T>的泛型接口变为强类型List<Number>：
+#+begin_src java  
+List<Number> list = new ArrayList<Number>();
+list.add(new Integer(123));
+list.add(new Double(12.34));
+Number first = list.get(0);
+Number second = list.get(1);
+#+end_src
+编译器如果能自动推断出泛型类型，就可以省略后面的泛型类型。例如，对于下面的代码：
+#+begin_src java  
+List<Number> list = new ArrayList<Number>();
+#+end_src
+编译器看到泛型类型List<Number>就可以自动推断出后面的ArrayList<T>的泛型类型必须是ArrayList<Number>，因此，可以把代码简写为：
+#+begin_src java  
+// 可以省略后面的Number，编译器可以自动推断泛型类型：
+List<Number> list = new ArrayList<>();
+#+end_src
+*** 泛型接口
+除了ArrayList<T>使用了泛型，还可以在接口中使用泛型。例如，Arrays.sort(Object[])可以对任意数组进行排序，但待排序的元素必须实现Comparable<T>这个泛型接口：
+#+begin_src java  
+public interface Comparable<T> {
+    /**
+     * 返回负数: 当前实例比参数o小
+     * 返回0: 当前实例与参数o相等
+     * 返回正数: 当前实例比参数o大
+     */
+    int compareTo(T o);
+}
+#+end_src
+可以直接对String数组进行排序：
+#+begin_src java  
+// sort
+import java.util.Arrays;
+
+public class Main {
+    public static void main(String[] args) {
+        String[] ss = new String[] { "Orange", "Apple", "Pear" };
+        Arrays.sort(ss);
+        System.out.println(Arrays.toString(ss));
+   }
+}
+#+end_src
+#+BEGIN_EXAMPLE
+[Apple, Orange, Pear]
+#+END_EXAMPLE
+这是因为String本身已经实现了Comparable<String>接口。如果换成我们自定义的Person类型试试：
+#+begin_src java  
+// sort
+import java.util.Arrays;
+
+public class Main {
+    public static void main(String[] args) {
+        Person[] ps = new Person[] {
+            new Person("Bob", 61),
+            new Person("Alice", 88),
+            new Person("Lily", 75),
+        };
+        Arrays.sort(ps);
+        System.out.println(Arrays.toString(ps));
+    }
+}
+
+class Person {
+    String name;
+    int score;
+    Person(String name, int score) {
+        this.name = name;
+        this.score = score;
+    }
+    public String toString() {
+        return this.name + "," + this.score;
+    }
+}
+#+end_src
+#+begin_src java  
+Exception in thread "main" java.lang.ClassCastException: class Person cannot be cast to class java.lang.Comparable (Person is in unnamed module of loader com.sun.tools.javac.launcher.Main$MemoryClassLoader @52e677af; java.lang.Comparable is in module java.base of loader 'bootstrap')
+at java.base/java.util.ComparableTimSort.countRunAndMakeAscending(ComparableTimSort.java:320)
+at java.base/java.util.ComparableTimSort.sort(ComparableTimSort.java:188)
+at java.base/java.util.Arrays.sort(Arrays.java:1040)
+at Main.main(Main.java:11)
+#+end_src
+运行程序，我们会得到ClassCastException，即无法将Person转型为Comparable。我们修改代码，让Person实现Comparable<T>接口：
+#+begin_src java  
+// sort
+import java.util.Arrays;
+
+public class Main {
+    public static void main(String[] args) {
+        Person[] ps = new Person[] {
+            new Person("Bob", 61),
+            new Person("Alice", 88),
+            new Person("Lily", 75),
+        };
+        Arrays.sort(ps);
+        System.out.println(Arrays.toString(ps));
+    }
+}
+class Person implements Comparable<Person> {
+    String name;
+    int score;
+    Person(String name, int score) {
+        this.name = name;
+        this.score = score;
+    }
+    public int compareTo(Person other) {
+        return this.name.compareTo(other.name);
+    }
+    public String toString() {
+        return this.name + "," + this.score;
+    }
+}
+#+end_src
+#+BEGIN_EXAMPLE
+[Alice,88, Bob,61, Lily,75]
+#+END_EXAMPLE
+运行上述代码，可以正确实现按name进行排序。
+
+也可以修改比较逻辑，例如，按score从高到低排序。请自行修改测试。
+
+小结:
+- 使用泛型时，把泛型参数<T>替换为需要的class类型，例如：ArrayList<String>，ArrayList<Number>等；
+- 可以省略编译器能自动推断出的类型，例如：List<String> list = new ArrayList<>();；
+- 不指定泛型参数类型时，编译器会给出警告，且只能将<T>视为Object类型；
+- 可以在接口中定义泛型类型，实现此接口的类必须实现正确的泛型类型。
+
+*** 三种使用方式的总结:泛型类、泛型接口、泛型方法
+**** 1.泛型类：
+#+begin_src java  
+//此处T可以随便写为任意标识，常见的如T、E、K、V等形式的参数常用于表示泛型
+//在实例化泛型类时，必须指定T的具体类型
+public class Generic<T>{
+
+    private T key;
+
+    public Generic(T key) {
+        this.key = key;
+    }
+
+    public T getKey(){
+        return key;
+    }
+}
+#+end_src
+如何实例化泛型类：
+#+begin_src java  
+Generic<Integer> genericInteger = new Generic<Integer>(123456);
+#+end_src
+**** 2.泛型接口 ：
+#+begin_src java  
+public interface Generator<T> {
+    public T method();
+}
+#+end_src
+实现泛型接口，不指定类型：
+#+begin_src java  
+class GeneratorImpl<T> implements Generator<T>{
+    @Override
+    public T method() {
+        return null;
+    }
+}
+#+end_src
+实现泛型接口，指定类型：
+#+begin_src java  
+class GeneratorImpl<T> implements Generator<String>{
+    @Override
+    public String method() {
+        return "hello";
+    }
+}
+#+end_src
+**** 3.泛型方法 ：
+#+begin_src java  
+public static < E > void printArray( E[] inputArray )
+{
+     for ( E element : inputArray ){
+        System.out.printf( "%s ", element );
+     }
+     System.out.println();
+}
+#+end_src
+使用：
+#+begin_src java  
+// 创建不同类型数组： Integer, Double 和 Character
+Integer[] intArray = { 1, 2, 3 };
+String[] stringArray = { "Hello", "World" };
+printArray( intArray  );
+printArray( stringArray  );
+#+end_src
+** 编写泛型
+*** 泛型的编写
+编写泛型类比普通类要复杂。通常来说，泛型类一般用在集合类中，例如ArrayList<T>，我们很少需要编写泛型类。
+
+如果我们确实需要编写一个泛型类，那么，应该如何编写它？
+
+可以按照以下步骤来编写一个泛型类。
+
+首先，按照某种类型，例如：String，来编写类：
+#+begin_src java  
+public class Pair {
+    private String first;
+    private String last;
+    public Pair(String first, String last) {
+        this.first = first;
+        this.last = last;
+    }
+    public String getFirst() {
+        return first;
+    }
+    public String getLast() {
+        return last;
+    }
+}
+#+end_src
+最后，把特定类型String替换为T，并申明<T>：
+#+begin_src java  
+public class Pair<T> {
+    private T first;
+    private T last;
+    public Pair(T first, T last) {
+        this.first = first;
+        this.last = last;
+    }
+    public T getFirst() {
+        return first;
+    }
+    public T getLast() {
+        return last;
+    }
+}
+#+end_src
+熟练后即可直接从T开始编写。
+*** 泛型类型<T>不能用于静态方法
+编写泛型类时，要特别注意，泛型类型<T>不能用于静态方法。例如：
+#+begin_src java  
+public class Pair<T> {
+    private T first;
+    private T last;
+    public Pair(T first, T last) {
+        this.first = first;
+        this.last = last;
+    }
+    public T getFirst() { ... }
+    public T getLast() { ... }
+
+    // 对静态方法使用<T>:
+    public static Pair<T> create(T first, T last) {
+        return new Pair<T>(first, last);
+    }
+}
+#+end_src
+
+上述代码会导致编译错误，我们无法在静态方法create()的方法参数和返回类型上使用泛型类型T。
+
+有些同学在网上搜索发现，可以在static修饰符后面加一个<T>，编译就能通过：
+#+begin_src java  
+public class Pair<T> {
+    private T first;
+    private T last;
+    public Pair(T first, T last) {
+        this.first = first;
+        this.last = last;
+    }
+    public T getFirst() { ... }
+    public T getLast() { ... }
+
+    // 可以编译通过:
+    public static <T> Pair<T> create(T first, T last) {
+        return new Pair<T>(first, last);
+    }
+}
+#+end_src
+但实际上，这个<T>和Pair<T>类型的<T>已经没有任何关系了。
+
+对于静态方法，我们可以单独改写为“泛型”方法，只需要使用另一个类型即可。对于上面的create()静态方法，我们应该把它改为另一种泛型类型，例如，<K>：
+#+begin_src java  
+public class Pair<T> {
+    private T first;
+    private T last;
+    public Pair(T first, T last) {
+        this.first = first;
+        this.last = last;
+    }
+    public T getFirst() { ... }
+    public T getLast() { ... }
+
+    // 静态泛型方法应该使用其他类型区分:
+    public static <K> Pair<K> create(K first, K last) {
+        return new Pair<K>(first, last);
+    }
+}
+#+end_src
+这样才能清楚地将静态方法的泛型类型和实例类型的泛型类型区分开。
+*** 多个泛型类型
+泛型还可以定义多种类型。例如，我们希望Pair不总是存储两个类型一样的对象，就可以使用类型<T, K>：
+#+begin_src java  
+public class Pair<T, K> {
+    private T first;
+    private K last;
+    public Pair(T first, K last) {
+        this.first = first;
+        this.last = last;
+    }
+    public T getFirst() { ... }
+    public K getLast() { ... }
+}
+#+end_src
+使用的时候，需要指出两种类型：
+
+Pair<String, Integer> p = new Pair<>("test", 123);
+Java标准库的Map<K, V>就是使用两种泛型类型的例子。它对Key使用一种类型，对Value使用另一种类型。
+
+小结:
+- 编写泛型时，需要定义泛型类型<T>；
+- 静态方法不能引用泛型类型<T>，必须定义其他类型（例如<K>）来实现静态泛型方法；
+- 泛型可以同时定义多种类型，例如Map<K, V>。
+
+** 擦拭法
+*** 擦拭法
+泛型是一种类似”模板代码“的技术，不同语言的泛型实现方式不一定相同。
+
+Java语言的泛型实现方式是擦拭法（Type Erasure）。
+
+所谓擦拭法是指，虚拟机对泛型其实一无所知，所有的工作都是编译器做的。
+
+例如，我们编写了一个泛型类Pair<T>，这是编译器看到的代码：
+#+begin_src java  
+public class Pair<T> {
+    private T first;
+    private T last;
+    public Pair(T first, T last) {
+        this.first = first;
+        this.last = last;
+    }
+    public T getFirst() {
+        return first;
+    }
+    public T getLast() {
+        return last;
+    }
+}
+#+end_src
+而虚拟机根本不知道泛型。这是虚拟机执行的代码：
+#+begin_src java  
+public class Pair {
+    private Object first;
+    private Object last;
+    public Pair(Object first, Object last) {
+        this.first = first;
+        this.last = last;
+    }
+    public Object getFirst() {
+        return first;
+    }
+    public Object getLast() {
+        return last;
+    }
+}
+#+end_src
+因此，Java使用擦拭法实现泛型，导致了：
+- 编译器把类型<T>视为Object；
+- 编译器根据<T>实现安全的强制转型。
+
+使用泛型的时候，我们编写的代码也是编译器看到的代码：
+#+begin_src java  
+Pair<String> p = new Pair<>("Hello", "world");
+String first = p.getFirst();
+String last = p.getLast();
+#+end_src
+而虚拟机执行的代码并没有泛型：
+#+begin_src java  
+Pair p = new Pair("Hello", "world");
+String first = (String) p.getFirst();
+String last = (String) p.getLast();
+#+end_src
+所以，Java的泛型是由编译器在编译时实行的，编译器内部永远把所有类型T视为Object处理，但是，在需要转型的时候，编译器会根据T的类型自动为我们实行安全地强制转型。
+
+了解了Java泛型的实现方式——擦拭法，我们就知道了Java泛型的局限：
+**** 局限一：<T>不能是基本类型，例如int，因为实际类型是Object，Object类型无法持有基本类型：
+#+begin_src java  
+Pair<int> p = new Pair<>(1, 2); // compile error!
+#+end_src
+泛型要求包容的是对象类型，而基本数据类型在Java中不属于对象。但是基本数据类型有其封装类，且为对象类型。
+
+**** 局限二：无法取得带泛型的Class。观察以下代码：
+#+begin_src java  
+public class Main {
+    public static void main(String[] args) {
+        Pair<String> p1 = new Pair<>("Hello", "world");
+        Pair<Integer> p2 = new Pair<>(123, 456);
+        Class c1 = p1.getClass();
+        Class c2 = p2.getClass();
+        System.out.println(c1==c2); // true
+        System.out.println(c1==Pair.class); // true
+    }
+}
+
+class Pair<T> {
+    private T first;
+    private T last;
+    public Pair(T first, T last) {
+        this.first = first;
+        this.last = last;
+    }
+    public T getFirst() {
+        return first;
+    }
+    public T getLast() {
+        return last;
+    }
+}
+#+end_src
+#+BEGIN_EXAMPLE
+true
+true
+#+END_EXAMPLE
+因为T是Object，我们对Pair<String>和Pair<Integer>类型获取Class时，获取到的是同一个Class，也就是Pair类的Class。
+
+换句话说，所有泛型实例，无论T的类型是什么，getClass()返回同一个Class实例，因为编译后它们全部都是Pair<Object>。
+**** 局限三：无法判断带泛型的类型：
+#+begin_src java  
+Pair<Integer> p = new Pair<>(123, 456);
+// Compile error:
+if (p instanceof Pair<String>) {
+}
+#+end_src
+原因和前面一样，并不存在Pair<String>.class，而是只有唯一的Pair.class。
+**** 局限四：不能实例化T类型：
+#+begin_src java  
+public class Pair<T> {
+    private T first;
+    private T last;
+    public Pair() {
+        // Compile error:
+        first = new T();
+        last = new T();
+    }
+}
+#+end_src
+上述代码无法通过编译，因为构造方法的两行语句：
+#+begin_src java  
+first = new T();
+last = new T();
+#+end_src
+擦拭后实际上变成了：
+#+begin_src java  
+first = new Object();
+last = new Object();
+#+end_src
+这样一来，创建new Pair<String>()和创建new Pair<Integer>()就全部成了Object，显然编译器要阻止这种类型不对的代码。
+
+要实例化T类型，我们必须借助额外的Class<T>参数：
+#+begin_src java  
+public class Pair<T> {
+    private T first;
+    private T last;
+    public Pair(Class<T> clazz) {
+        first = clazz.newInstance();
+        last = clazz.newInstance();
+    }
+}
+#+end_src
+上述代码借助Class<T>参数并通过反射来实例化T类型，使用的时候，也必须传入Class<T>。例如：
+#+begin_src java  
+Pair<String> pair = new Pair<>(String.class);
+#+end_src
+因为传入了Class<String>的实例，所以我们借助String.class就可以实例化String类型。
+*** 不恰当的覆写方法
+有些时候，一个看似正确定义的方法会无法通过编译。例如：
+#+begin_src java  
+public class Pair<T> {
+    public boolean equals(T t) {
+        return this == t;
+    }
+}
+#+end_src
+这是因为，定义的equals(T t)方法实际上会被擦拭成equals(Object t)，而这个方法是继承自Object的，编译器会阻止一个实际上会变成覆写的泛型方法定义。
+
+换个方法名，避开与Object.equals(Object)的冲突就可以成功编译：
+#+begin_src java  
+public class Pair<T> {
+    public boolean same(T t) {
+        return this == t;
+    }
+}
+#+end_src
+*** 泛型继承
+一个类可以继承自一个泛型类。例如：父类的类型是Pair<Integer>，子类的类型是IntPair，可以这么继承：
+#+begin_src java  
+public class IntPair extends Pair<Integer> {
+}
+#+end_src
+使用的时候，因为子类IntPair并没有泛型类型，所以，正常使用即可：
+#+begin_src java  
+IntPair ip = new IntPair(1, 2);
+#+end_src 
+前面讲了，我们无法获取Pair<T>的T类型，即给定一个变量Pair<Integer> p，无法从p中获取到Integer类型。
+
+但是，在父类是泛型类型的情况下，编译器就必须把类型T（对IntPair来说，也就是Integer类型）保存到子类的class文件中，不然编译器就不知道IntPair只能存取Integer这种类型。
+
+在继承了泛型类型的情况下，子类可以获取父类的泛型类型。例如：IntPair可以获取到父类的泛型类型Integer。获取父类的泛型类型代码比较复杂：
+#+begin_src java  
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+
+public class Main {
+    public static void main(String[] args) {
+        Class<IntPair> clazz = IntPair.class;
+        Type t = clazz.getGenericSuperclass();
+        if (t instanceof ParameterizedType) {
+            ParameterizedType pt = (ParameterizedType) t;
+            Type[] types = pt.getActualTypeArguments(); // 可能有多个泛型类型
+            Type firstType = types[0]; // 取第一个泛型类型
+            Class<?> typeClass = (Class<?>) firstType;
+            System.out.println(typeClass); // Integer
+        }
+
+    }
+}
+
+class Pair<T> {
+    private T first;
+    private T last;
+    public Pair(T first, T last) {
+        this.first = first;
+        this.last = last;
+    }
+    public T getFirst() {
+        return first;
+    }
+    public T getLast() {
+        return last;
+    }
+}
+
+class IntPair extends Pair<Integer> {
+    public IntPair(Integer first, Integer last) {
+        super(first, last);
+    }
+}
+#+end_src
+#+BEGIN_EXAMPLE
+class java.lang.Integer
+#+END_EXAMPLE
+因为Java引入了泛型，所以，只用Class来标识类型已经不够了。实际上，Java的类型系统结构如下：
+
+                      ┌────┐
+                      │Type│
+                      └────┘
+                         ▲
+                         │
+   ┌────────────┬────────┴─────────┬───────────────┐
+   │            │                  │               │
+┌─────┐┌─────────────────┐┌────────────────┐┌────────────┐
+│Class││ParameterizedType││GenericArrayType││WildcardType│
+└─────┘└─────────────────┘└────────────────┘└────────────┘
+** 常用的通配符
+常用的通配符为： T，E，K，V，？
+- ？ 表示不确定的 java 类型
+- T (type) 表示具体的一个 java 类型
+- K V (key value) 分别代表 java 键值中的 Key Value
+- E (element) 代表 Element
+
 * 多线程
 ** 多线程基础
 *** 进程
@@ -6089,6 +7465,31 @@ Student:
 Name: John
 Roll No: 10
 #+END_EXAMPLE
+* Object 类的常见方法总结
+Object 类是一个特殊的类，是所有类的父类。它主要提供了以下 11 个方法：
+#+begin_src java  
+public final native Class<?> getClass()//native方法，用于返回当前运行时对象的Class对象，使用了final关键字修饰，故不允许子类重写。
+
+public native int hashCode() //native方法，用于返回对象的哈希码，主要使用在哈希表中，比如JDK中的HashMap。
+public boolean equals(Object obj)//用于比较2个对象的内存地址是否相等，String类对该方法进行了重写用户比较字符串的值是否相等。
+
+protected native Object clone() throws CloneNotSupportedException//naitive方法，用于创建并返回当前对象的一份拷贝。一般情况下，对于任何对象 x，表达式 x.clone() != x 为true，x.clone().getClass() == x.getClass() 为true。Object本身没有实现Cloneable接口，所以不重写clone方法并且进行调用的话会发生CloneNotSupportedException异常。
+
+public String toString()//返回类的名字@实例的哈希码的16进制的字符串。建议Object所有的子类都重写这个方法。
+
+public final native void notify()//native方法，并且不能重写。唤醒一个在此对象监视器上等待的线程(监视器相当于就是锁的概念)。如果有多个线程在等待只会任意唤醒一个。
+
+public final native void notifyAll()//native方法，并且不能重写。跟notify一样，唯一的区别就是会唤醒在此对象监视器上等待的所有线程，而不是一个线程。
+
+public final native void wait(long timeout) throws InterruptedException//native方法，并且不能重写。暂停线程的执行。注意：sleep方法没有释放锁，而wait方法释放了锁 。timeout是等待时间。
+
+public final void wait(long timeout, int nanos) throws InterruptedException//多了nanos参数，这个参数表示额外时间（以毫微秒为单位，范围是 0-999999）。 所以超时的时间还需要加上nanos毫秒。
+
+public final void wait() throws InterruptedException//跟之前的2个wait方法一样，只不过该方法一直等待，没有超时时间这个概念
+
+protected void finalize() throws Throwable { }//实例被垃圾回收器回收的时候触发的操作
+#+end_src
+
 * Swing介绍
 ** 简介
 Swing 是一个为Java设计的GUI工具包。
@@ -6640,3 +8041,424 @@ class GraphicsDemod extends JFrame{
  }
 }
 #+end_src
+* BufferedImage类
+Image是一个抽象类，BufferedImage是其实现类，是一个带缓冲区图像类，主要作用是将一幅图片加载到内存中（BufferedImage生成的图片在内存里有一个图像缓冲区，利用这个缓冲区我们可以很方便地操作这个图片），提供获得绘图对象、图像缩放、选择图像平滑度等功能，通常用来做图片大小变换、图片变灰、设置透明不透明等。
+#+begin_src java  
+public abstract Graphics getGraphics()； //获得在图像上绘图的Graphics对象
+#+end_src
+Java将一幅图片加载到内存的方法是：
+#+begin_src java  
+String imgPath = "C://demo.jpg";  
+BufferedImage image = ImageIO.read(new FileInputStream(imgPath));
+#+end_src
+
+继而可以对图片进行操作,比如，获得图片的宽度：image.getWidth()
+
+图片只有加载到内存中才能进行进一步的处理。
+
+* repain
+public void repaint()
+
+重绘此组件。
+
+如果此组件是轻量组件，则此方法会尽快调用此组件的 paint 方法。否则此方法会尽快调用此组件的 update 方法。
+
+repaint()这个方法是一个具有刷新页面效果的方法，如果你要页面进行重画就可以调用．一般都是在AWT的图形绘制当中调用的到
+
+轻量级组件是用JAVA代码画出来的,这样du具有平台移植性
+
+重量级组件是调用操作系统的函zhuan数画出来的组件,比如主窗体
+
+一般来说尽量用轻量级的组件,这样对程序的移植性很好，一般javax.swing包里的组件大部分是轻量级的java.awt里面的是重量级的。
+* getclass
+** 示例代码：
+#+begin_src java  
+public class Test {
+    public static void main(String[] args) {
+        Person p = new Person(1,"刘德华");
+        System.out.println(p.getClass());  
+        System.out.println(p.getClass().getName()); 
+    }
+}
+
+class Person{
+    int id;
+    String name;
+    public Person(int id, String name) {
+        super();
+        this.id = id;
+        this.name = name;
+    }
+}
+#+end_src
+运行结果
+#+BEGIN_EXAMPLE
+class Person
+Person
+#+END_EXAMPLE
+** getClass(）返回Class类型的对象。
+getClass(）返回Class类型的对象。
+返回的是内存中实实在在存在的Person 这个类
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-08_18-48-21.png @ 2021-03-08 18:48:26
+[[file:getclass/2021-03-08_18-48-26_Snipaste_2021-03-08_18-48-21.png]]
+** 返回类型为Class理解：
+一个男人有爸爸的称呼，丈夫（老公），还有儿子的称呼，还有爷爷，叔叔等等的称呼，而这些称呼的参照物不同导致有不同的称呼。当参照物是老婆时，这个男人的称呼是丈夫(老公)，当参照物是男人的儿子时，此男人的称呼是爸爸。以此类推等等。
+
+同理对于Person类，或者准确的说每个类（除所有类的父类Object）也有两个称呼，既可以称为是类，也可称为变量。参照物不同称呼不同。
+
+上面的代码为例：
+- 参照物： Person的属性id,name 则：Person的称呼是类(Class）
+- 参照物： Class类 则：Person的称呼是变量/属性
+
+例如：
+- String name
+- Class Person
+
+name的类型是String，此时 Class Person 的性质和String name一样。
+- String 等同于 Class，是类。
+- name 等同于 Person，是对象 / 变量的称呼。
+
+String类下有很多方法供name对象使用，同理Class类下也有很多方法供Person对象使用。
+
+Class类和String类一样，都是继承于Object类，Object是所有类的根类 。
+** getClass()方法的作用
+获得了Person这个(类)Class，进而通过返回的Class对象获取Person的相关信息，比如：获取Person的构造方法，方法，属性有哪些等等信息。
+
+当我们想要获取Person的信息，比如：获取Person的名字，获取Person的构造函数，获取Person的继承关系等等这些Person的相关信息就不能仅仅只是通过new Person()的方式了,而是需要获取内存中实实在在存在的这个Class Person，通过获取到的。
+#+begin_src java  
+Person p = new Person(1,”刘德华”);
+Class cla = p.getClass(); // 通过对象p调用getClass()方法返回Class
+#+end_src
+然后通过cla对象来获取Person的相关信息，因为Class提供了大量的方法来获取类(？extends Object)的信息。
+#+begin_src java  
+String perName = cla.getName(); // 返回Class 对象所表示的实体（类、接口、数组类、基本类型或 void）名称
+#+end_src
+
+* 浅拷贝和深拷贝
+** 拷贝的引入
+*** 引用拷贝
+创建一个指向对象的引用变量的拷贝。
+#+begin_src java  
+public class QuoteCopy {
+    public static void main(String[] args) {
+        Teacher teacher = new Teacher("riemann", 28);
+        Teacher otherTeacher = teacher;
+        System.out.println(teacher);
+        System.out.println(otherTeacher);
+    }
+}
+
+class Teacher {
+    private String name;
+    private int age;
+
+    public Teacher(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+}
+#+end_src
+输出结果：
+#+BEGIN_EXAMPLE
+com.test.Teacher@28a418fc
+com.test.Teacher@28a418fc
+#+END_EXAMPLE
+结果分析：由输出结果可以看出，它们的地址值是相同的，那么它们肯定是同一个对象。teacher和otherTeacher的只是引用而已，他们都指向了一个相同的对象Teacher(“riemann”,28)。 这就叫做引用拷贝。
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-09_20-27-38.png @ 2021-03-09 20:27:42
+[[file:%E6%B5%85%E6%8B%B7%E8%B4%9D%E5%92%8C%E6%B7%B1%E6%8B%B7%E8%B4%9D/2021-03-09_20-27-42_Snipaste_2021-03-09_20-27-38.png]]
+*** 对象拷贝
+注：深拷贝和浅拷贝都是对象拷贝
+
+创建对象本身的一个副本。
+#+begin_src java  
+public class ObjectCopy {
+    public static void main(String[] args) throws CloneNotSupportedException {
+        Teacher teacher = new Teacher("riemann", 28);
+        Teacher otherTeacher = (Teacher) teacher.clone();
+        System.out.println(teacher);
+        System.out.println(otherTeacher);
+    }
+}
+
+class Teacher implements Cloneable {
+    private String name;
+    private int age;
+
+    public Teacher(String name, int age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public Object clone() throws CloneNotSupportedException {
+        Object object = super.clone();
+        return object;
+    }
+}
+#+end_src
+输出结果：
+#+BEGIN_EXAMPLE
+com.test.Teacher@28a418fc
+com.test.Teacher@5305068a
+#+END_EXAMPLE
+结果分析：由输出结果可以看出，它们的地址是不同的，也就是说创建了新的对象， 而不是把原对象的地址赋给了一个新的引用变量,这就叫做对象拷贝。
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-09_20-31-45.png @ 2021-03-09 20:31:49
+[[file:%E6%B5%85%E6%8B%B7%E8%B4%9D%E5%92%8C%E6%B7%B1%E6%8B%B7%E8%B4%9D/2021-03-09_20-31-49_Snipaste_2021-03-09_20-31-45.png]]
+
+** 浅拷贝
+对基本数据类型进行值传递，对引用数据类型进行引用传递般的拷贝，此为浅拷贝。
+
+被复制对象的所有变量都含有与原来的对象相同的值，而所有的对其他对象的引用仍然指向原来的对象。即对象的浅拷贝会对“主”对象进行拷贝，但不会复制主对象里面的对象。”里面的对象“会在原来的对象和它的副本之间共享。
+
+简而言之，浅拷贝仅仅复制所考虑的对象，而不复制它所引用的对象。
+#+begin_src java  
+public class ShallowCopy {
+    public static void main(String[] args) throws CloneNotSupportedException {
+        Teacher teacher = new Teacher();
+        teacher.setName("riemann");
+        teacher.setAge(28);
+
+        Student student1 = new Student();
+        student1.setName("edgar");
+        student1.setAge(18);
+        student1.setTeacher(teacher);
+
+        Student student2 = (Student) student1.clone();
+        System.out.println("-------------拷贝后-------------");
+        System.out.println(student2.getName());
+        System.out.println(student2.getAge());
+        System.out.println(student2.getTeacher().getName());
+        System.out.println(student2.getTeacher().getAge());
+
+        System.out.println("-------------修改老师的信息后-------------");
+        // 修改老师的信息
+        teacher.setName("jack");
+        System.out.println("student1的teacher为： " + student1.getTeacher().getName());
+        System.out.println("student2的teacher为： " + student2.getTeacher().getName());
+
+    }
+}
+
+class Teacher implements Cloneable {
+    private String name;
+    private int age;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+}
+
+class Student implements Cloneable {
+    private String name;
+    private int age;
+    private Teacher teacher;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public Teacher getTeacher() {
+        return teacher;
+    }
+
+    public void setTeacher(Teacher teacher) {
+        this.teacher = teacher;
+    }
+
+    public Object clone() throws CloneNotSupportedException {
+        Object object = super.clone();
+        return object;
+    }
+}
+
+#+end_src
+输出结果：
+#+BEGIN_EXAMPLE
+-------------拷贝后-------------
+edgar
+18
+riemann
+28
+-------------修改老师的信息后-------------
+student1的teacher为： jack
+student2的teacher为： jack
+#+END_EXAMPLE
+结果分析： 两个引用student1和student2指向不同的两个对象，但是两个引用student1和student2中的两个teacher引用指向的是同一个对象，所以说明是浅拷贝。
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-09_20-33-45.png @ 2021-03-09 20:33:50
+[[file:%E6%B5%85%E6%8B%B7%E8%B4%9D%E5%92%8C%E6%B7%B1%E6%8B%B7%E8%B4%9D/2021-03-09_20-33-50_Snipaste_2021-03-09_20-33-45.png]]
+
+** 深拷贝
+深拷贝：对基本数据类型进行值传递，对引用数据类型，创建一个新的对象，并复制其内容，此为深拷贝。
+
+深拷贝是一个整个独立的对象拷贝，深拷贝会拷贝所有的属性,并拷贝属性指向的动态分配的内存。当对象和它所引用的对象一起拷贝时即发生深拷贝。深拷贝相比于浅拷贝速度较慢并且花销较大。
+
+简而言之，深拷贝把要复制的对象所引用的对象都复制了一遍。
+
+#+begin_src java  
+public class DeepCopy {
+    public static void main(String[] args) throws CloneNotSupportedException {
+        Teacher teacher = new Teacher();
+        teacher.setName("riemann");
+        teacher.setAge(28);
+
+        Student student1 = new Student();
+        student1.setName("edgar");
+        student1.setAge(18);
+        student1.setTeacher(teacher);
+
+        Student student2 = (Student) student1.clone();
+        System.out.println("-------------拷贝后-------------");
+        System.out.println(student2.getName());
+        System.out.println(student2.getAge());
+        System.out.println(student2.getTeacher().getName());
+        System.out.println(student2.getTeacher().getAge());
+
+        System.out.println("-------------修改老师的信息后-------------");
+        // 修改老师的信息
+        teacher.setName("jack");
+        System.out.println("student1的teacher为： " + student1.getTeacher().getName());
+        System.out.println("student2的teacher为： " + student2.getTeacher().getName());
+    }
+}
+
+class Teacher implements Cloneable {
+    private String name;
+    private int age;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
+    }
+}
+
+class Student implements Cloneable {
+    private String name;
+    private int age;
+    private Teacher teacher;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public void setAge(int age) {
+        this.age = age;
+    }
+
+    public Teacher getTeacher() {
+        return teacher;
+    }
+
+    public void setTeacher(Teacher teacher) {
+        this.teacher = teacher;
+    }
+
+    public Object clone() throws CloneNotSupportedException {
+        // 浅复制时：
+        // Object object = super.clone();
+        // return object;
+
+        // 改为深复制：
+        Student student = (Student) super.clone();
+        // 本来是浅复制，现在将Teacher对象复制一份并重新set进来
+        student.setTeacher((Teacher) student.getTeacher().clone());
+        return student;
+
+    }
+}
+
+#+end_src
+输出结果：
+#+BEGIN_EXAMPLE
+-------------拷贝后-------------
+edgar
+18
+riemann
+28
+-------------修改老师的信息后-------------
+student1的teacher为： jack
+student2的teacher为： riemann
+#+END_EXAMPLE
+结果分析：
+两个引用student1和student2指向不同的两个对象，两个引用student1和student2中的两个teacher引用指向的是两个对象，但对teacher对象的修改只能影响student1对象,所以说是深拷贝。
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-09_20-43-15.png @ 2021-03-09 20:43:19
+[[file:%E6%B5%85%E6%8B%B7%E8%B4%9D%E5%92%8C%E6%B7%B1%E6%8B%B7%E8%B4%9D/2021-03-09_20-43-19_Snipaste_2021-03-09_20-43-15.png]]

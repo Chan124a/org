@@ -19,7 +19,7 @@ Initialized empty Git repository in /Users/michael/learngit/.git/
 
 如果你没有看到.git目录，那是因为这个目录默认是隐藏的，用ls -ah命令就可以看见。
 
-* 把文件gi添加到仓库
+* 把文件添加到仓库
 第一步，用命令git add告诉Git，把文件添加到仓库：
 #+BEGIN_SRC bash
 $ git add readme.txt

@@ -884,7 +884,7 @@ option(USE_MYMATH
 "Use provided math implementation" ON)
 # 是否加入 MathFunctions 库
 if (USE_MYMATH)
-include_directories("${PROJECT_SOURCE_DIR}/math")
+ include_directories("${PROJECT_SOURCE_DIR}/math")
 add_subdirectory(math)
 set (EXTRA_LIBS ${EXTRA_LIBS} MathFunctions)
 endif (USE_MYMATH)
@@ -960,6 +960,9 @@ set(PNAME rose PARENT_SCOPE)
 message("sub name = ${PNAME}") #sub name = jack
 #+END_SRC
 *** 设置缓存变量(Set Cache Entry)
+什么是缓存变量，缓存变量可以理解为当第一次运行cmake时，这些变量缓存到一份文件中(即编译目录下的CMakeCache.txt)。当再次运行cmake时，这些变量会直接使用缓存值，可以利用ccmake或者cmake-gui等工具来重新赋值。缓存变量在整个cmake运行过程中都可以起作用。
+
+当使用CACHE时，且缓存(cache)中没有该变量时，变量被创建并存入缓存(cache)中，如果原缓存(cache)中有该变量，也不会改变原缓存中该变量的值，除非后面使用FORCE。
 #+BEGIN_SRC c++
 set(<variable> <value>... CACHE <type> <docstring> [FORCE])
 #+END_SRC
@@ -972,9 +975,34 @@ set(<variable> <value>... CACHE <type> <docstring> [FORCE])
     - FILEPATH,文件路径
     - PATH,目录路径
     - STRING,字符串
-    - INTERNAL,单行文字
+    - INTERNAL,单行文字.INTERNAL将变量为内部变量，即cmake-gui不会向用户显示这类变量，而其它类型的缓存变量用户都可以通cmake-gui按照特定的类型改变。
 - 描述字符串 <docstring>: 单行文字,用于 CMAKE-GUI 的时提示用户
 - FORCE 用于是否强制更新缓存里面的值，配置后，每次都会强制更新　CMakeCache.txt 里面的值
+**** 例子
+#+BEGIN_SRC c++
+set(FOO, "x" CACHE <type>)  
+//原缓存中没有FOO则将FOO赋值为x且存入cache中。
+//原缓存中有FOO则不做任何改变，即便原cache中FOO存的不是x。
+set(FOO, "x" CACHE <type><docstring> FORCE) 　　　
+//即便原cache中存在FOO也会创建另一个FOO，官方文档原话(If FORCE is specified, the value of the cache variable 
+//is set, even if the variable is already in the cache.This should normally be avoided, as it will 
+//remove any changes to the cache variable’s value by the user.)，小弟笨拙没有搞懂。
+#+END_SRC
+**** 注意
+1. CACHE与PARENT_SCOPE不能一起使用。
+2. 同一名称(例FOO)的一般变量和缓存变量可以同时存在，但在调用该变量时(${FOO})会在先取一般变量的值，一般变量中没有再取缓存变量的值。
+一些栗子：
+#+BEGIN_EXAMPLE
+set(FOO “x”)　　　　　　　　//设置一般变量FOO，不会触及cache，但是会隐藏cache中的FOO。
+
+set(FOO “x” CACHE ...)　　//忽视相同名称的一般变量，在cache中检查FOO是否存在，
+#+END_EXAMPLE
+3. 当改变cache中的变量时，同名的一般变量会被删除。一般不建议使用相同名称的一般变量和缓存变量。
+
+然而在有些工程中可以很好的借助这一交互例如：
+
+一个工程利用ADD_SUBDIRECTOTY()添加子工程，子工程有它自己的CMakeList.txt。如果在父工程和子工程中都对同一缓存变量赋值，cmake时父工程率先将变量存入cache中，子工程直接在cache中调用该值，保证了父子工程的一致性。当父工程需要改变该变量，而子程序需要利用原值时，可以直接在父工程中设置同名称的一般变量即可。
+
 *** 设置环境变量(Set Environment Variable)
 #+BEGIN_SRC c++
 set(ENV{<variable>} [<value>])
@@ -1037,6 +1065,329 @@ If the CONFIGURE_DEPENDS flag is specified, CMake will add logic to the main bui
 产生一个匹配 <globbing-expressions> 的文件列表并将它存储到变量 <variable> 中。文件名替代表达式和正则表达式相似，但更简单。如果 RELATIVE 标志位被设定，将返回指定路径的相对路径。结果将按字典顺序排序。
 
 如果 CONFIGURE_DEPENDS 标志位被指定，CMake 将在编译时给主构建系统添加逻辑来检查目标，以重新运行 GLOB 标志的命令。如果任何输出被改变，CMake都将重新生成这个构建系统。
+** include指令
+[[https://blog.csdn.net/qq_38410730/article/details/102677143][参考文章]]
+*** include指令
+include指令一般用于语句的复用，也就是说，如果有一些语句需要在很多CMakeLists.txt文件中使用，为避免重复编写，可以将其写在.cmake文件中，然后在需要的CMakeLists.txt文件中进行include操作就行了。
+
+include指令的结构为：
+#+BEGIN_EXAMPLE
+include(<file|module> [OPTIONAL] [RESULT_VARIABLE <var>]
+                      [NO_POLICY_SCOPE])
+#+END_EXAMPLE
+虽然，有不少的可选参数，但是一般情况下，都是直接写：
+#+BEGIN_EXAMPLE
+include(file|module)
+#+END_EXAMPLE
+
+注意，为了使CMakeLists.txt能够找到该文件，需要指定文件完整路径(绝对路径或相对路径)，当然如果指定了CMAKE_MODULE_PATH，就可以直接include该目录下的.cmake文件了。
+
+.cmake文件里面通常是什么信息呢？
+
+.cmake文件里包含了一些cmake命令和一些宏/函数，当CMakeLists.txt包含该.cmake文件时，当编译运行时，该.cmake里的一些命令就会在该包含处得到执行，并且在包含以后的地方能够调用该.cmake里的一些宏和函数。
+
+什么是宏？什么是函数？
+*** 宏和函数的定义
+先看一下关键字：cmake的宏是MACRO，函数是function。它们的用法是：
+#+BEGIN_SRC c++
+macro(<name> [arg1 [arg2 [arg3 ...]]])
+  COMMAND1(ARGS ...)            # 命令语句
+  COMMAND2(ARGS ...)
+  ...
+endmacro()
+
+function(<name> [arg1 [arg2 [arg3 ...]]])
+  COMMAND1(ARGS ...)            # 命令语句
+  COMMAND2(ARGS ...)
+  ...
+function()
+#+END_SRC
+定义一个名称为name的宏（函数），arg1...是传入的参数。我们除了可以用${arg1}来引用变量以外，系统为我们提供了一些特殊的变量：
+
+| 变量  | 说明                                                 |
+|-------+------------------------------------------------------|
+| argv# | #是一个下标，0指向第一个参数，累加                   |
+| argv  | 所有的定义时要求传入的参数                           |
+| argn  | 定义时要求传入的参数以外的参数                       |
+| argc  | 传入的实际参数的个数，也就是调用函数是传入的参数个数 |
+
+*** 宏和函数的区别
+那么宏和函数之间的区别是什么呢？
+
+其实和C/C++里面宏和函数之间的区别差不多，宏就是字符串替换，函数就是使用变量，在命令中途可以对改变量进行修改。
+
+以StackOverflow的例子来了解一下区别：
+
+首先创建一个CMakeLists.txt：
+#+BEGIN_EXAMPLE
+cmake_minimum_required(VERSION 3.0)
+include(test.cmake)
+#+END_EXAMPLE
+在同目录下创建文件test.cmake：
+#+BEGIN_EXAMPLE
+set(var "ABC")
+
+macro(Moo arg)
+  message("arg = ${arg}")
+  set(arg "abc")
+  message("# After change the value of arg.")
+  message("arg = ${arg}")
+endmacro()
+message("=== Call macro ===")
+Moo(${var})
+
+function(Foo arg)
+  message("arg = ${arg}")
+  set(arg "abc")
+  message("# After change the value of arg.")
+  message("arg = ${arg}")
+endfunction()
+message("=== Call function ===")
+Foo(${var})
+#+END_EXAMPLE
+运行cmake：
+#+BEGIN_SRC bash
+mkdir build && cd build
+cmake ..
+#+END_SRC
+运行后的输出结果是：
+#+BEGIN_EXAMPLE
+-- The C compiler identification is GNU 5.4.0
+-- The CXX compiler identification is GNU 5.4.0
+-- Check for working C compiler: /usr/bin/cc
+-- Check for working C compiler: /usr/bin/cc -- works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Check for working CXX compiler: /usr/bin/c++
+-- Check for working CXX compiler: /usr/bin/c++ -- works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+=== Call macro ===
+arg = ABC
+# After change the value of arg.
+arg = ABC
+=== Call function ===
+arg = ABC
+# After change the value of arg.
+arg = abc
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/yngzmiao/test/build
+#+END_EXAMPLE
+从这里可以看出，宏实现的仅仅是字符串替换，宏定义的过程中是无法进行修改的，而函数却是可以的。
+
+*** 宏和函数参数的差异
+一般情况下，从上面的例子就能看出宏和函数的用法了，但很多情况下，我们自以为的“懂了”都是假懂。比如一不小心，就会出错。
+
+更换test.cmake为下面的内容，并运行：
+#+BEGIN_EXAMPLE
+set(var "ABC")
+
+macro(Moo arg)
+  message("arg = ${arg}")
+  set(arg "abc")
+  message("# After change the value of arg.")
+  message("arg = ${arg}")
+endmacro()
+message("=== Call macro ===")
+Moo(var)
+
+function(Foo arg)
+  message("arg = ${arg}")
+  set(arg "abc")
+  message("# After change the value of arg.")
+  message("arg = ${arg}")
+endfunction()
+message("=== Call function ===")
+Foo(var)
+#+END_EXAMPLE
+运行后的输出结果是：
+#+BEGIN_EXAMPLE
+-- The C compiler identification is GNU 5.4.0
+-- The CXX compiler identification is GNU 5.4.0
+-- Check for working C compiler: /usr/bin/cc
+-- Check for working C compiler: /usr/bin/cc -- works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Check for working CXX compiler: /usr/bin/c++
+-- Check for working CXX compiler: /usr/bin/c++ -- works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+=== Call macro ===
+arg = var
+# After change the value of arg.
+arg = var
+=== Call function ===
+arg = var
+# After change the value of arg.
+arg = abc
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/yngzmiao/test/build
+#+END_EXAMPLE
+对比两段程序可以看出其中的区别：无论是宏还是函数，当调用的时候如果使用的是set出来的变量，都必须通过${}将变量的内容传递进去，而不能只写上变量名。
+
+这是将实参传递给形参时的注意点，但在宏和函数的实现过程中，还有需要注意的内容。
+
+例子：
+#+BEGIN_EXAMPLE
+set(var "ABC")
+
+macro(Moo arg)
+  if (arg STREQUAL "ABC")
+    message("arg1 = ${arg}")
+  endif()
+  if (${arg} STREQUAL "ABC")
+    message("arg2 = ${arg}")
+  endif()
+endmacro()
+message("=== Call macro ===")
+Moo(${var})
+
+function(Foo arg)
+  if (arg STREQUAL "ABC")
+    message("arg1 = ${arg}")
+  endif()
+  if (${arg} STREQUAL "ABC")
+    message("arg2 = ${arg}")
+  endif()
+endfunction()
+message("=== Call function ===")
+Foo(${var})
+#+END_EXAMPLE
+运行后的输出结果是：
+#+BEGIN_EXAMPLE
+-- The C compiler identification is GNU 5.4.0
+-- The CXX compiler identification is GNU 5.4.0
+-- Check for working C compiler: /usr/bin/cc
+-- Check for working C compiler: /usr/bin/cc -- works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Check for working CXX compiler: /usr/bin/c++
+-- Check for working CXX compiler: /usr/bin/c++ -- works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+=== Call macro ===
+arg2 = ABC
+=== Call function ===
+arg1 = ABC
+arg2 = ABC
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/yngzmiao/test/build
+#+END_EXAMPLE
+可以看出，在宏和函数的实现过程中，宏的参数由于不是传统意义上的变量，而是字符串替换，因此需要通过${}取出内容。而函数却不一定需要这样。
+
+也就是说，对于macro宏而言：
+#+BEGIN_EXAMPLE
+if(argv0)                         # 错误用法
+if(${argv0})                      # 正确用法
+if(defined argv0)                 # 错误用法
+if(defined ${argv0})              # 正确用法
+#+END_EXAMPLE
+也就是说，对于宏和函数的参数而言：
+- 当宏和函数调用的时候，如果传递的是经set设置的变量，必须通过${}取出内容；
+- 在宏的定义过程中，对变量进行的操作必须通过${}取出内容，而函数就没有这个必要。
+** cmake命令选项
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-05-01_15-36-45.png @ 2021-05-01 15:36:52
+[[file:cmake/2021-05-01_15-36-52_Snipaste_2021-05-01_15-36-45.png]]
+
+** message
+纪录一条消息。
+*** General messages
+#+BEGIN_SRC c++
+message([<mode>] "message text" ...)
+#+END_SRC
+Record the specified message text in the log. If more than one message string is given, they are concatenated into a single message with no separator between the strings.
+
+The optional <mode> keyword determines the type of message, which influences the way the message is handled:
+
+The CMake command-line tool displays STATUS to TRACE messages on stdout with the message preceded by two hyphens and a space. All other message types are sent to stderr and are not prefixed with hyphens. The CMake GUI displays all messages in its log area. The curses interface shows STATUS to TRACE messages one at a time on a status line and other messages in an interactive pop-up box. The --log-level command-line option to each of these tools can be used to control which messages will be shown.
+
+New in version 3.17: To make a log level persist between CMake runs, the CMAKE_MESSAGE_LOG_LEVEL variable can be set instead. Note that the command line option takes precedence over the cache variable.
+
+New in version 3.16: Messages of log levels NOTICE and below will have each line preceded by the content of the CMAKE_MESSAGE_INDENT variable (converted to a single string by concatenating its list items). For STATUS to TRACE messages, this indenting content will be inserted after the hyphens.
+
+New in version 3.17: Messages of log levels NOTICE and below can also have each line preceded with context of the form [some.context.example]. The content between the square brackets is obtained by converting the CMAKE_MESSAGE_CONTEXT list variable to a dot-separated string. The message context will always appear before any indenting content but after any automatically added leading hyphens. By default, message context is not shown, it has to be explicitly enabled by giving the cmake --log-context command-line option or by setting the CMAKE_MESSAGE_CONTEXT_SHOW variable to true. See the CMAKE_MESSAGE_CONTEXT documentation for usage examples.
+
+CMake Warning and Error message text displays using a simple markup language. Non-indented text is formatted in line-wrapped paragraphs delimited by newlines. Indented text is considered pre-formatted.
+**** mode
+- FATAL_ERROR: CMake Error, stop processing and generation.
+- SEND_ERROR: CMake Error, continue processing, but skip generation.
+- WARNING: CMake Warning, continue processing.
+- AUTHOR_WARNING: CMake Warning (dev), continue processing.
+- DEPRECATION: CMake Deprecation Error or Warning if variable CMAKE_ERROR_DEPRECATED or CMAKE_WARN_DEPRECATED is enabled, respectively, else no message.
+- (none) or NOTICE: Important message printed to stderr to attract user's attention.
+- STATUS： The main interesting messages that project users might be interested in. Ideally these should be concise, no more than a single line, but still informative.
+- VERBOSE： Detailed informational messages intended for project users. These messages should provide additional details that won't be of interest in most cases, but which may be useful to those building the project when they want deeper insight into what's happening.
+- DEBUG： Detailed informational messages intended for developers working on the project itself as opposed to users who just want to build it. These messages will not typically be of interest to other users building the project and will often be closely related to internal implementation details.
+- TRACE： Fine-grained messages with very low-level implementation details. Messages using this log level would normally only be temporary and would expect to be removed before releasing the project, packaging up the files, etc.
+
+*** Reporting checks
+A common pattern in CMake output is a message indicating the start of some sort of check, followed by another message reporting the result of that check. For example:
+#+BEGIN_SRC c++
+message(STATUS "Looking for someheader.h")
+#... do the checks, set checkSuccess with the result
+if(checkSuccess)
+  message(STATUS "Looking for someheader.h - found")
+else()
+  message(STATUS "Looking for someheader.h - not found")
+endif()
+#+END_SRC
+This can be more robustly and conveniently expressed using the CHECK_... keyword form of the message() command:
+#+BEGIN_SRC c++
+message(<checkState> "message" ...)where <checkState> must be one of the following:
+#+END_SRC
+- CHECK_START:Record a concise message about the check about to be performed.
+- CHECK_PASS:Record a successful result for a check.
+- CHECK_FAIL:Record an unsuccessful result for a check.
+
+When recording a check result, the command repeats the message from the most recently started check for which no result has yet been reported, then some separator characters and then the message text provided after the CHECK_PASS or CHECK_FAIL keyword. Check messages are always reported at STATUS log level.
+
+Checks may be nested and every CHECK_START should have exactly one matching CHECK_PASS or CHECK_FAIL. The CMAKE_MESSAGE_INDENT variable can also be used to add indenting to nested checks if desired. For example:
+#+BEGIN_SRC c++
+message(CHECK_START "Finding my things")
+list(APPEND CMAKE_MESSAGE_INDENT "  ")
+unset(missingComponents)
+
+message(CHECK_START "Finding partA")
+# ... do check, assume we find A
+message(CHECK_PASS "found")
+
+message(CHECK_START "Finding partB")
+# ... do check, assume we don't find B
+list(APPEND missingComponents B)
+message(CHECK_FAIL "not found")
+
+list(POP_BACK CMAKE_MESSAGE_INDENT)
+if(missingComponents)
+  message(CHECK_FAIL "missing components: ${missingComponents}")
+else()
+  message(CHECK_PASS "all components found")
+endif()
+#+END_SRC
+Output from the above would appear something like the following:
+#+BEGIN_EXAMPLE
+-- Finding my things
+--   Finding partA
+--   Finding partA - found
+--   Finding partB
+--   Finding partB - not found
+-- Finding my things - missing components: B
+#+END_EXAMPLE
 * 二重指针
 char**是二重指针，bai也就是指向指针变量的指针。 而char*是一维指针，即指向zhi字符变量的指针。
 
@@ -1090,4 +1441,803 @@ cout << f() << endl; // prints 42
 Here, we’ve defined f as a callable object that takes no arguments and returns 42.
 
 
+* std::hex
+Sets the basefield format flag for the str stream to hex.
 
+When basefield is set to hex, integer values inserted into the stream are expressed in hexadecimal base (i.e., radix 16). For input streams, extracted values are also expected to be expressed in hexadecimal base when this flag is set.
+
+The basefield format flag can take any of the following values (each with its own manipulator):
+
+| flag value | effect when set                                          |
+|------------+----------------------------------------------------------|
+| dec        | read/write integer values using decimal base format.     |
+| hex        | read/write integer values using hexadecimal base format. |
+| oct        | read/write integer values using octal base format.       |
+
+example:
+#+BEGIN_SRC c++
+// modify basefield
+#include <iostream>     // std::cout, std::dec, std::hex, std::oct
+
+int main () {
+  int n = 70;
+  std::cout << std::dec << n << '\n';
+  std::cout << std::hex << n << '\n';
+  std::cout << std::oct << n << '\n';
+  return 0;
+}
+#+END_SRC
+#+BEGIN_EXAMPLE
+Output:
+70
+46
+106
+
+#+END_EXAMPLE
+* std::boolalpha
+Sets the boolalpha format flag for the str stream.
+
+When the boolalpha format flag is set, bool values are inserted/extracted by their textual representation: either true or false, instead of integral values.
+
+example:
+#+BEGIN_SRC c++
+// modify boolalpha flag
+#include <iostream>     // std::cout, std::boolalpha, std::noboolalpha
+
+int main () {
+  bool b = true;
+  std::cout << std::boolalpha << b << '\n';
+  std::cout << std::noboolalpha << b << '\n';
+  return 0;
+}
+#+END_SRC
+#+BEGIN_EXAMPLE
+Output:
+true
+1
+#+END_EXAMPLE
+* std::optional
+
+** 例子 
+场景：如果有这样一个函数，通过返回值来判断计算结果是否有效，如果结果有效，才能使用结果 。
+
+例如：计算a、b相除。b有可能为0，所以需要考虑相除结果是否有效。
+#+BEGIN_SRC c++
+bool div_int(int a, int b, int &result) {
+    if (b == 0) {
+        return false;
+    }
+    result = a / b;
+    return true;
+}
+
+TEST_F(before_optional) {
+    int result = 0; // 接收结果
+    auto ret = div_int(2, 1, result);
+    ASSERT(ret);
+    ASSERT_EQ(2, result); // 如果返回值为true, 结果才有效
+
+    auto b = div_int(2, 0, result);
+    ASSERT(!b);
+}
+#+END_SRC
+这样的使用方式很不方便，需要两个变量来描述结果。这种场景下应该使用c++17中的std::optional。我们用std::optional改写上面这个例子：
+#+BEGIN_SRC c++
+//div_int可以通过optional优化：optional中，结果是否有效和结果都保存在其中
+std::optional<int> div_int(int a, int b) {
+    if (b != 0) {
+        return std::make_optional<int>(a / b);
+    }
+    return {};
+}
+
+TEST_F(optional) {
+    auto ret = div_int(2, 1);
+    ASSERT(ret);
+    ASSERT_EQ(2, ret.value()); // 如果ret为true, 直接从ret中获取结果
+
+    auto ret2 = div_int(2, 0);
+    ASSERT(!ret2); // 结果无效
+
+    // 如果ret2为false，获取访问value将会 抛出异常
+    try {
+        ret2.value();
+    } catch (std::exception e) {
+        std::cout << e.what() << std::endl;
+    }
+}
+#+END_SRC
+如果开发项目中没有支持到c++17可以用boost库中的optional。
+* C++ STL vector添加元素（push_back()和emplace_back()）详解
+emplace_back() 和 push_back() 的区别，就在于底层实现的机制不同。push_back() 向容器尾部添加元素时，首先会创建这个元素，然后再将这个元素拷贝或者移动到容器中（如果是拷贝的话，事后会自行销毁先前创建的这个元素）；而 emplace_back() 在实现时，则是直接在容器尾部创建这个元素，省去了拷贝或移动元素的过程。
+* STL容器底层数据结构总结
+** vector
+vector是我们用到最多的数据结构，其底层数据结构是数组，由于数组的特点，vector也具有以下特性：
+1、O(1)时间的快速访问；
+2、顺序存储，所以插入到非尾结点位置所需时间复杂度为O(n)，删除也一样；
+3、扩容规则：
+当我们新建一个vector的时候，会首先分配给他一片连续的内存空间，如std::vector<int> vec，当通过push_back向其中增加元素时，如果初始分配空间已满，就会引起vector扩容，其扩容规则在gcc下以2倍方式完成：
+首先重新申请一个2倍大的内存空间；
+然后将原空间的内容拷贝过来；
+最后将原空间内容进行释放，将内存交还给操作系统；
+
+测试代码如下：
+#+BEGIN_SRC c++
+#include<iostream>
+#include<vector>
+using namespace std;
+
+void mycapacity(const vector<int>& vec)
+{
+    cout << "分配总空间大小为：" << vec.capacity() << endl;
+}
+
+void mysize(const vector<int>& vec)
+{
+    cout << "已用空间大小为：" << vec.size() << endl;
+}
+
+void myprint(const vector<int>& vec)
+{
+    for (int i = 0; i < vec.size(); ++i)
+        cout << vec[i] << ",";
+    cout << endl;
+}
+
+
+int main()
+{
+    vector<int> vec;
+    cout << "起始状态：" << endl;
+    mycapacity(vec);
+    mysize(vec);
+    cout << "========================" << endl;
+
+    for (int i = 0; i < 10; ++i) {
+        vec.push_back(i);
+        cout << "压入第" << i+1 << "个元素之后：" << endl;
+        myprint(vec);
+        mycapacity(vec);
+        mysize(vec);
+        cout << "========================" << endl;
+    }
+
+    return 0;
+}
+#+END_SRC
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-04-11_10-52-03.png @ 2021-04-11 10:54:14
+[[file:STL%E5%AE%B9%E5%99%A8%E5%BA%95%E5%B1%82%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E6%80%BB%E7%BB%93/2021-04-11_10-54-14_Snipaste_2021-04-11_10-52-03.png]]
+
+从输出结果中的三个红色箭头可以看出vector的扩容规则。
+
+4、注意事项：
+根据vector的插入和删除特性，以及扩容规则，我们在使用vector的时候要注意，在插入位置和删除位置之后的所有迭代器和指针引用都会失效，同理，扩容之后的所有迭代器指针和引用也都会失效。
+** map & multimap & unordered_map & unordered_multimap
+*** map与multimap底层数据结构
+map与multimap是STL中的关联容器、提供一对一key-value的数据处理能力； map与multimap的区别在于，multimap允许关键字重复，而map不允许重复。
+
+这两个关联容器的底层数据结构均为红黑树,根据红黑树的原理，map与multimap可以实现O(lgn)的查找，插入和删除。
+*** unordered_map 与unordered_multimap底层数据结构
+unordered_map与unordered_multimap 对比map与multimap两种map在于map与multimap中的两个容器实现了以key为序排列，也就是说map与multimap为有序的。
+
+而unordered_map与unordered_multimap中key为无序排列，其底层实现为hash table，因此其查找时间复杂度理论上达到了O(n)，之所以说理论上是因为在理想无碰撞的情况下，而真实情况未必如此。
+** set & multiset & unordered_set & unordered_multiset
+以上四种容器也都是关联容器，set系与map系的区别在于map中存储的是<key-value>，而set可以理解为关键字即值，即只保存关键字的容器。
+*** set & multiset底层数据结构
+set与multiset有序存储元素，这两种容器的底层实现与map一样都是红黑树，所以能实现O(lgn)的查找，插入，删除操作。
+
+set与multiset的区别在于是否允许重复；
+*** unordered_set & unordered_multiset
+与unordered_map & unordered_multimap相同，其底层实现为hash table；
+** priority_queue
+priority_queue
+优先级队列相当于一个有权值的单向队列queue，在这个队列中，所有元素是按照优先级排列的。
+
+priority_queue根据堆的处理规则来调整元素之间的位置，根据堆的特性，优先级队列实现了取出最大最小元素时间复杂度为O(1),对于插入和删除，其最坏情况为O(lgn)。
+** list
+list的底层数据结构为双向链表，特点是支持快速的增删。
+* STL容器迭代器失效情况分析、总结
+[[https://ivanzz1001.github.io/records/post/cplusplus/2018/03/14/cpluscplus_stl_iterator#31-%25E4%25BD%25BF%25E7%2594%25A8%25E8%25BF%25AD%25E4%25BB%25A3%25E5%2599%25A8%25E9%2581%258D%25E5%258E%2586%25E4%25B8%258D%25E5%2590%258C%25E7%259A%2584%25E5%25AE%25B9%25E5%2599%25A8][参考文献]]
+** 迭代器失效
+当使用一个容器的insert或者erase函数通过迭代器插入或删除元素可能会导致迭代器失效，因此我们为了避免危险，应该获取insert或者erase返回的迭代器，以便用重新获取的新的有效的迭代器进行正确的操作：
+#+BEGIN_SRC c++
+iter = vec.insert(iter);
+
+iter = vec.erase(iter);
+#+END_SRC
+迭代器失效类型：
+- 由于插入元素，使得容器元素整体迁移导致存放原容器元素的空间不再有效，从而使得指向原空间的迭代器失效；
+- 由于删除元素，使得某些元素次序发生变化导致原本指向某元素的迭代器不再指向期望指向的元素。
+
+*** vector迭代器失效
+- 当插入(push_back)一个元素后，end操作返回的迭代器肯定失效；
+- 当插入(push_back)一个元素后，如果vector的capacity发生了改变，则需要重新加载整个容器，此时first和end操作返回的迭代器都会失效；
+- 当进行删除操作(erase,pop_back)后，指向删除点的迭代器全部失效，指向删除点后面的元素的迭代器也将全部失效；
+
+参看如下示例：
+#+BEGIN_SRC c++
+#include <iostream>
+#include <vector>
+using namespace std;
+
+
+int main(int argc, char *argv[])
+{
+	vector<int> vec;
+	
+	vec.push_back(100);
+	vec.push_back(300);
+	vec.push_back(400);
+	vec.push_back(500);
+	
+	vector<int>::iterator iter;
+	
+	for(iter = vec.begin(); iter != vec.end(); iter++)
+	{
+		if(*iter == 300){
+			iter = vec.erase(iter);			//此时iter指向400
+			cout<<"next iter: " << *iter << endl;
+		}
+	}
+	
+	for(iter = vec.begin(); iter != vec.end(); iter++)
+		cout<<*iter << "  ";
+	
+	cout<<endl;	
+	return 0x0;
+}
+#+END_SRC
+编译运行：
+#+BEGIN_EXAMPLE
+# gcc -o vector_iterator vector_iterator.cpp -lstdc++
+# ./vector_iterator 
+next iter: 400
+100  400  500 
+#+END_EXAMPLE
+
+*** list迭代器失效
+- 插入操作(insert)和接合操作(splice)不会造成原有的list迭代器失效，这在vector中是不成立的，因为vector的插入操作可能造成记忆体重新配置，导致所有的迭代器全部失效；
+- list的删除操作(erase)也只有指向被删元素的那个迭代器失效，其他迭代器不受影响。（list目前只发现这一种失效情况）
+*** deque迭代器失效
+- 在deque容器首部或者尾部插入元素，不会使得任何迭代器失效；
+注： 通过vs2012测试，不管前端插入还是后端插入，都会使迭代器失效
+- 在deque容器的首部或者尾部删除元素，只会使指向被删元素的迭代器失效；
+- 在deque容器的任何其他位置进行插入或删除操作都将使指向该容器元素的所有迭代器失效；
+*** set和map迭代器失效
+与list相同，当对其进行insert或者erase操作时，操作之前的所有迭代器，在操作完成之后都依然有效，但被删除元素的迭代器失效。
+** C++标准模板库(STL)迭代器的原理及实现
+迭代器(iterator)是一种抽象的设计理念，通过迭代器可以在不了解容器内部原理的情况下遍历容器。除此之外，STL中迭代器一个最重要的作用就是作为容器(vector、list等)与STL算法的粘结剂，只要容器提供迭代器的接口，同一套算法代码可以利用在完全不同的容器中，这是抽象思想的经典应用。
+*** 使用迭代器遍历不同的容器
+如下所示的代码演示了迭代器是如何将容器和算法结合在一起的，其中使用了3种不同的容器，.begin()和.end()方法返回一个指向容器第一个元素和一个指向容器最后一个元素后面一个位置的迭代器，也就是说begin()和end()返回的迭代器是一个前闭后开的，一般用[begin, end) 表示。对于不同的容器，我们都使用同一个accumulate()函数，原因就在于acccumulate()函数的实现无需考虑容器的种类，只需要容器传入的begin()和end()迭代器能够完成标准迭代器的要求即可。
+#+BEGIN_SRC c++
+std::vector<int> vec{1,2,3};
+std::list<int> lst{4,5,6};
+std::deque<int> deq{7,8,9};
+
+std::cout<<std::accumulate(vec.begin(), vec.end(), 0) << std::endl;
+std::cout<<std::accumulate(lst.begin(), lst.end(), 0) << std::endl;
+std::cout<<std::accumulate(deq.begin(), deq.end(), 0) << std::endl;
+#+END_SRC
+*** 迭代器的实现
+迭代器的作用就是提供一个遍历容器内部所有元素的接口，因此迭代器的内部必须保存一个与容器相关联的指针，然后重载各种运算操作来方便遍历，其中最重要的就是* 运算符和-> 运算符，以及++、--等可能需要的运算符重载。实际上这和C++标准库的智能指针(smart pointer)很像，智能指针也是将一个指针封装，然后通过引用计数或是其他方法完成自动释放内存的功能，为了达到和原有指针一样的功能，也需要对*、->等运算符进行重载。下面参照智能指针实现一个简单vector迭代器，其中几个typedef暂时不用管，我们后面会提到。vecIter主要作用就是包裹一个指针，不同容器内部数据结构不相同，因此迭代器操作符重载的实现也会不同。比如++操作符。对于线性分配内存的数组来说，直接对指针执行++操作即可； 但是如果容器是List就需要采用元素内部的方法，比如ptr->next()之类的方法访问下一个元素。因此，STL容器都实现了自己的专属迭代器。
+
+下面我们给出一个普通数组的迭代器的实现(array_iterator.cpp)：
+#+BEGIN_SRC c++
+#include <iostream>
+#include <numeric>
+
+template<class Item>
+class vecIter{
+	Item *ptr;
+	
+public:
+	typedef std::forward_iterator_tag iterator_category;
+	typedef Item value_type;
+	typedef Item *pointer;
+	typedef Item &reference;
+	typedef std::ptrdiff_t difference_type;
+	
+public:
+	vecIter(Item *p = 0):ptr(p){}
+	
+	Item & operator*() const{
+		return *ptr;
+	}
+	
+	Item * operator->() const{
+		return ptr;
+	}
+	
+	//pre
+	vecIter &operator++(){
+		++ptr;
+		
+		return *this;
+	}
+	
+	vecIter operator++(int){
+		vecIter tmp = *this;
+		++*this;
+		
+		return tmp;
+	}
+	
+	bool operator==(const vecIter &iter){
+		return ptr == iter.ptr;
+	}
+	
+	bool operator!=(const vecIter &iter){
+		return !(*this == iter);
+	}
+};
+
+int main(int argc, char *argv[])
+{
+	int a[] = {1,2,3,4};
+	
+	std::cout<<std::accumulate(vecIter<int>(a), vecIter<int>(a+4), 0)<<std::endl;
+	
+	return 0x0;
+}
+#+END_SRC
+#+BEGIN_EXAMPLE
+编译运行：
+
+# gcc -o array_iterator array_iterator.cpp -lstdc++
+# ./array_iterator 
+10
+#+END_EXAMPLE
+*** 迭代器的相应型别
+我们都知道type_traits可以萃取出类型的型别，根据不同的型别可以执行不同的处理流程。那么对于迭代器来说，是否有针对不同特性迭代器的优化方法呢？ 答案是肯定的。拿一个STL算法库中的distance()函数来说，distance函数接受两个迭代器参数，然后计算两者之间的距离。显然，对于不同的迭代器计算效率差别很大。比如对于vector容器来说，由于内存是连续分配的，因此指针直接相减即可获得两者的距离；而list容器是链表结构，内存一般都不是连续分配，因此只能通过一级一级调用next()或者其他函数，每调用一次再判断迭代器是否相等来计算距离。vector迭代器计算distance的效率为O(1)，而list则为O(n)，n为距离的大小。
+
+因此，根据迭代器不同的特性，将迭代器分为5类：
+- Input Iterator: 这种迭代器所指的对象为只读的
+- Output Iterator: 所指的对象只能进行写入操作
+- Forward Iterator: 该类迭代器可以在一个正确的区间中进行读写操作，它拥有Input Iterator的所有特性，和Output Iterator的部分特性，以及单步向前迭代元素的能力
+- Bidirectional Iterator: 该类迭代器是在Forward Iterator的基础上提供了单步向后迭代元素的能力，从而使得可以双向移动
+- Random Access Iterator： 前4种迭代器只提供部分指针算术能力（前3种支持++运算符，后一种还支持--运算符)，而本迭代器则支持所有指针的算术运算，包括p+n、p-n、p[n]、p1-p2、p1<p2
+
+上述5种迭代器的继承关系如下图所示：
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-04-11_14-30-22.png @ 2021-04-11 14:30:26
+[[file:STL%E5%AE%B9%E5%99%A8%E8%BF%AD%E4%BB%A3%E5%99%A8%E5%A4%B1%E6%95%88%E6%83%85%E5%86%B5%E5%88%86%E6%9E%90%E3%80%81%E6%80%BB%E7%BB%93/2021-04-11_14-30-26_Snipaste_2021-04-11_14-30-22.png]]
+了解了迭代器的类型，我们就能解释vector的迭代器和list迭代器的区别了。显然，vector迭代器具有所有指针算术运算能力，而list由于是双向链表，因此只有双向读写不能随机访问元素。故vector的迭代器种类为Random Access Iterator，而list的迭代器种类为Bidirectional Iterator。我们只需要根据不同的迭代器种类，利用traits编程技巧萃取出迭代器型别，然后由C++重载机制就能够对不同型别的迭代器采用不同的处理流程了。为此，对于每个迭代器都必须定义型别iterator_category，也就是上文代码中的typedef std:forward_iterator_tag iterator_category，实际上可以直接继承STL中定义的iterator模板，模板后三个参数都有默认值，因此继承时只需要指定前两个模板参数即可。如下所示，STL定义了5个空类型作为迭代器的标签：
+#+BEGIN_SRC c++
+template<class Category,class T,class Distance = ptrdiff_t,class Pointer=T*,class Reference=T&>
+class iterator{
+    typedef Category iterator_category;
+    typedef T        value_type;
+    typedef Distance difference_type;
+    typedef Pointer  pointer;
+    typedef Reference reference;
+};
+
+struct input_iterator_tag{};
+struct output_iterator_tag{};
+struct forward_iterator_tag:public input_iterator_tag{};
+struct bidirectional_iterator_tag:public forward_iterator_tag{};
+struct random_access_iterator_tag:public bidirectional_iterator_tag{};
+#+END_SRC
+*** 利用迭代器种类更有效的实现distance函数
+回到distance函数，有了前面的基础，我们可以根据不同迭代器种类实现distance函数（distance.cpp)：
+#+BEGIN_SRC c++
+#include <iostream>
+#include <vector>
+#include <list>
+
+# if 0
+template <class _InputIterator, class _Distance>
+inline void __distance(_InputIterator __first, _InputIterator __last,
+                       _Distance& __n, std::input_iterator_tag)
+{
+  while (__first != __last) { ++__first; ++__n; }
+}
+
+template <class _RandomAccessIterator, class _Distance>
+inline void __distance(_RandomAccessIterator __first, 
+                       _RandomAccessIterator __last, 
+                       _Distance& __n, std::random_access_iterator_tag)
+{
+  __n += __last - __first;
+}
+
+template <class _InputIterator, class _Distance>
+inline void distance(_InputIterator __first, 
+                     _InputIterator __last, _Distance& __n)
+{
+ typedef typename std::iterator_traits<_InputIterator>::iterator_category _Category;
+  __distance(__first, __last, __n, _Category());
+}
+#else
+//注： 这里需要放在一个新的namespace中，否则可能会与STL中的相冲突	
+namespace DT{
+template<class InputIterator>
+inline typename std::iterator_traits<InputIterator>::difference_type distance(InputIterator first, InputIterator last){
+	typedef typename std::iterator_traits<InputIterator>::iterator_category _Category;
+	return __distance(first, last, _Category());
+}
+template<class InputIterator>
+inline typename std::iterator_traits<InputIterator>::difference_type __distance(InputIterator first, InputIterator last, std::input_iterator_tag){
+	typename std::iterator_traits<InputIterator>::difference_type n = 0;
+	while (first != last){
+		++first; ++n;
+	}
+	return n;
+}
+
+template<class InputIterator>
+inline typename std::iterator_traits<InputIterator>::difference_type \
+__distance(InputIterator first, InputIterator last, std::random_access_iterator_tag){
+	return last - first;
+}
+}	
+#endif
+
+
+int main(int argc, char *argv[])
+{
+
+	int a[] = {1,2,3,4};
+	std::vector<int> vec;
+	vec.push_back(1);
+	vec.push_back(2);
+	vec.push_back(3);
+	vec.push_back(4);
+	
+	std::list<int> lst;
+	lst.push_back(1);
+	lst.push_back(2);
+	lst.push_back(3);
+	lst.push_back(4);
+	
+
+	# if 0
+		int vec_distance = 0, lst_distance = 0, carr_distance = 0;
+		distance(vec.begin(), vec.end(), vec_distance);
+		distance(lst.begin(), lst.end(), lst_distance);
+		distance(a, a + sizeof(a)/sizeof(*a), carr_distance);
+		
+		std::cout<<"vec distance:"<<vec_distance<<std::endl;
+		std::cout<<"lst distance:"<<lst_distance<<std::endl;
+		std::cout<<"c-array distance:"<<carr_distance<<std::endl;
+	#else
+		std::cout<<"vec distance:"<<DT::distance(vec.begin(), vec.end())<<std::endl;
+		std::cout<<"lst distance:"<<DT::distance(lst.begin(), lst.end())<<std::endl;
+		std::cout<<"c-array distance:"<<DT::distance(a, a + sizeof(a)/sizeof(*a))<<std::endl;
+	#endif
+	
+}
+#+END_SRC
+编译运行：
+#+BEGIN_EXAMPLE
+# gcc -o distance distance.cpp -lstdc++
+# ./distance 
+vec distance:4
+lst distance:4
+c-array distance:4
+#+END_EXAMPLE
+上面通过STL定义的iterator_traits模板可以萃取不同种类的迭代器特性，iterator_traits还对指针和常量指针有特化版本，因此也可以萃取原生指针的特性。具体实现如下：
+#+BEGIN_SRC c++
+template <class _Tp, class _Distance> struct input_iterator {
+  typedef input_iterator_tag iterator_category;
+  typedef _Tp                value_type;
+  typedef _Distance          difference_type;
+  typedef _Tp*               pointer;
+  typedef _Tp&               reference;
+};
+
+struct output_iterator {
+  typedef output_iterator_tag iterator_category;
+  typedef void                value_type;
+  typedef void                difference_type;
+  typedef void                pointer;
+  typedef void                reference;
+};
+
+template <class _Tp, class _Distance> struct forward_iterator {
+  typedef forward_iterator_tag iterator_category;
+  typedef _Tp                  value_type;
+  typedef _Distance            difference_type;
+  typedef _Tp*                 pointer;
+  typedef _Tp&                 reference;
+};
+
+
+template <class _Tp, class _Distance> struct bidirectional_iterator {
+  typedef bidirectional_iterator_tag iterator_category;
+  typedef _Tp                        value_type;
+  typedef _Distance                  difference_type;
+  typedef _Tp*                       pointer;
+  typedef _Tp&                       reference;
+};
+
+template <class _Tp, class _Distance> struct random_access_iterator {
+  typedef random_access_iterator_tag iterator_category;
+  typedef _Tp                        value_type;
+  typedef _Distance                  difference_type;
+  typedef _Tp*                       pointer;
+  typedef _Tp&                       reference;
+};
+
+template <class _Iterator>
+struct iterator_traits {
+  typedef typename _Iterator::iterator_category iterator_category;
+  typedef typename _Iterator::value_type        value_type;
+  typedef typename _Iterator::difference_type   difference_type;
+  typedef typename _Iterator::pointer           pointer;
+  typedef typename _Iterator::reference         reference;
+};
+
+template <class _Tp>
+struct iterator_traits<_Tp*> {
+  typedef random_access_iterator_tag iterator_category;
+  typedef _Tp                         value_type;
+  typedef ptrdiff_t                   difference_type;
+  typedef _Tp*                        pointer;
+  typedef _Tp&                        reference;
+};
+
+template <class _Tp>
+struct iterator_traits<const _Tp*> {
+  typedef random_access_iterator_tag iterator_category;
+  typedef _Tp                         value_type;
+  typedef ptrdiff_t                   difference_type;
+  typedef const _Tp*                  pointer;
+  typedef const _Tp&                  reference;
+};
+#+END_SRC
+
+*** 3.5 小结
+STL使用迭代器算法和容器结合，利用迭代器型别可以针对不同迭代器编写更加高效的算法，这一点很重要的思想就是： 利用C++重载机制和参数推导机制将运行期决议问题提前到编译期决议，也就是说，我们不需要在运行时判断迭代器的类型，而是在编译期就已经决定。这很符合C++模板编程的理念。在后续STL学习中，我们会实现自己的各种容器，也必须实现各种各样的迭代器，因此迭代器的学习还远没有停止。
+** C++中模板使用时候typename和class的区别
+在C++ Template中很多地方都用到了typename与class这两个关键字，而且好像可以替换，是不是这两个关键字完全一样呢？ 相信学习C++的人对class这个关键字都非常明白，class用于定义类，在C++中引入模板后，最初定义模板的方法为：
+#+BEGIN_EXAMPLE
+template<class T>....
+#+END_EXAMPLE
+在这里class关键字表明T是一个类型，后来为了避免class在这两个地方的使用可能给人带来混淆，所以引入typename这个关键字，它的作用同class一样表明后面的符号为一个类型，这样在定义模板的时候就可以使用下面的方式了：
+#+BEGIN_EXAMPLE
+template<typename T>...
+#+END_EXAMPLE
+在模板定义语法中关键字class与typename的作用完全一样。
+
+typename难道仅仅在模板定义中起作用吗？ 其实不是这样，typename另外一个作用为： 使用嵌套依赖类型(nested depended name), 如下所示
+#+BEGIN_SRC c++
+class MyArray{
+public:
+	typedef int LengthType;
+	....
+};
+
+template<class T>
+void MyMethod(T myarr){
+	typedef typename T::LengthType LengthType;
+	LengthType length = myarr.GetLength();
+}
+#+END_SRC
+这个时候typename的作用就是告诉C++编译器，typename后面的字符串为一个类型名称，而不是成员函数或者成员变量。这个时候如果前面没有typename，编译器没有任何办法知道T::LengthType是一个类型还是一个成员名称(静态数据成员或者静态函数），所以编译不能够通过。
+
+* set自定义去重和排序函数
+** 方法一：使用std::set内置的less比较函数（直接定义内置类型的set对象）
+
+这种方法适用于：1）比较int、char等内置类型。2）只能针对某一个内置类型去重和排序：如果想通过id（int）去重，并通过hot(int)排序，该种方法就束手无策了。代码如下：
+#+BEGIN_SRC c++
+#include <iostream>
+#include <set>
+using namespace std;
+void main()
+{
+    std::set<int> mySet;    // 直接定义内置类型set集合
+    mySet.insert(10);       // 默认比较函数为less
+    mySet.insert(20);       // 从小到大排序
+    for(auto it:mySet)
+    {
+        std::cout<<it<<std::endl;
+    }
+    std::cout<<"end"<<std::endl;
+
+}
+#+END_SRC
+#+BEGIN_EXAMPLE
+结果如下：
+output：
+            10
+            20
+            end
+#+END_EXAMPLE
+
+** 方法二：自定义类（结构体）比较函数
+
+前文提到：直接定义内置类型的set对象，即使用std::set内置的默认的less比较函数，可能不能满足我们的实际需求。例如：现在有一批结构体对象，需要将其插入set集合，并按照id去重，按照热度hot进行排序。这个时候，就需要重新自定义比较函数了。有两种方法可以自定义比较函数：
+*** 重载<操作符
+甚么要重载<运算符呢？能不能重载"<="或者">="运算符？答案是不可以。几乎所有的方法或容器都需要排序来满足数学意义上的标准严格弱序化，否则这些方法或容器的行为将不可预知。假设f(x,y)是一个比较函数。 如果该函数满足如下条件则它是严格弱序化的。
+1. f(x,x) = false; 
+2. if f(x,y) then !f(y,x)
+3. if f(x,y) and f(y,z) then f(x,z)
+4. if !f(x,y)&&!f(y,x) then x==y; if x==y and y==z then x==z;
+
+看上去有点晕乎，不过不用担心，只要你的比较方法能够满足对相等元素永远返回false（记住一个准则：永远让比较函数对相同元素返回false），那你的方法就满足要求了。
+
+其实，set容器在判定已有元素a和新插入元素b是否相等时，是这么做的：
+1. 将a作为左操作数，b作为有操作数，调用比较函数，并返回比较值  
+2. 将b作为左操作数，a作为有操作数，再调用一次比较函数，并返回比较值。如果1、2两步的返回值都是false，则认为a、b是相等的，则b不会被插入set容器中；
+
+如果1、2两步的返回值都是true，则可能发生未知行为，因此，记住一个准则：永远让比较函数对相同元素返回false。
+#+BEGIN_SRC c++
+#include <iostream>
+#include <set>
+using namespace std;
+struct song
+{
+    int m_id;
+    int m_hot;
+    song(int id,int hot)
+    {
+
+        this->m_id = id;
+        this->m_hot = hot;
+    }
+    bool operator<(const struct song & right)const   //重载<运算符
+    {
+        if(this->m_id == right.m_id)     //根据id去重
+            return false;
+        else
+        {
+            if(this->m_hot != right.m_hot)
+            {
+                return this->m_hot > right.m_hot;      //降序
+            }
+            else
+            {
+                return this->m_id > right.m_id;     
+            }
+        }
+    }
+};
+void main()
+{
+    std::set<song> mySet;
+    song s1(10,100);
+    song s2(20,200);
+    song s3(20,300);
+    song s4(30,200);
+    mySet.insert(s1);    //插入s1
+    mySet.insert(s2);    //插入s2
+    mySet.insert(s3);    //s3和s2的id相同，不插入
+    mySet.insert(s4);    //插入s4
+    for(auto it:mySet)
+    {
+        std::cout<<"id:"<<it.m_id<<",hot:"<<it.m_hot<<std::endl;
+    }
+    std::cout<<"end"<<std::endl;
+;}
+#+END_SRC
+#+BEGIN_EXAMPLE
+结果如下：
+id：30，hot ： 200
+id：20，hot ： 200
+id：10，hot ： 100
+end
+#+END_EXAMPLE
+*** 重载（）运算符
+具体代码如下：
+#+BEGIN_SRC c++
+#include <iostream>
+#include <set>
+using namespace std;
+struct song
+{
+    int m_id;
+    int m_hot;
+    song(int id,int hot)
+    {
+
+        this->m_id = id;
+        this->m_hot = hot;
+    }
+    /*
+    bool operator<(const struct song & right)const   //重载<运算符
+    {
+        if(this->m_id == right.m_id)     //根据id去重
+            return false;
+        else
+        {
+            if(this->m_hot != right.m_hot)
+            {
+                return this->m_hot > right.m_hot;      //降序
+            }
+            else
+            {
+                return this->m_id > right.m_id;
+            }
+        }
+    }
+    */
+};
+struct comp
+{
+    bool operator()(struct song left,struct song  right)  //重载（）运算符
+    {
+
+        if(left.m_id == right.m_id)     //根据id去重
+            return false;
+        else
+        {
+            if(left.m_hot != right.m_hot)
+            {
+                return left.m_hot > right.m_hot;      //降序
+            }
+            else
+            {
+                return left.m_id > right.m_id;
+            }
+
+        }
+    }
+
+};
+void main()
+{
+    std::set<song,comp> mySet;      //写法和2.1中的的区别
+    song s1(10,100);
+    song s2(20,200);
+    song s3(20,300);
+    song s4(30,200);
+    mySet.insert(s1);    //插入s1
+    mySet.insert(s2);    //插入s2
+    mySet.insert(s3);    //s3和s2的id相同，不插入
+    mySet.insert(s4);    //插入s4
+    for(auto it:mySet)
+    {
+        std::cout<<"id:"<<it.m_id<<",hot:"<<it.m_hot<<std::endl;
+    }
+    std::cout<<"end"<<std::endl;
+};
+#+END_SRC
+#+BEGIN_EXAMPLE
+结果如下：
+id：30，hot ： 200
+id：20，hot ： 200
+id：10，hot ： 100
+end
+#+END_EXAMPLE
+* std::string_view使用介绍
+C++中与字符串有两种风格，分别是C风格的字符串、std::string字符串。C风格的字符串性能更高，但是也不方便操作使用。如下示例：
+#+BEGIN_SRC c++
+#include <iostream>
+#include <string>
+ 
+int main()
+{
+    //C风格字符串总是以null结尾
+    char cstr1[] = { 'y', 'a', 'n', 'g', NULL};
+    char cstr2[5];
+    strcpy(cstr1, cstr2);
+    std::cout << cstr2 << std::endl;
+ 
+    //C++风格的字符串操作更方便，但是性能不如C风格字符串
+    std::string str = "yang";
+    std::string str2 = str;
+}
+#+END_SRC
+
+C++17中我们可以使用std::string_view来获取一个字符串的视图，字符串视图并不真正的创建或者拷贝字符串，而只是拥有一个字符串的查看功能。std::string_view比std::string的性能要高很多，因为每个std::string都独自拥有一份字符串的拷贝，而std::string_view只是记录了自己对应的字符串的指针和偏移位置。当我们在只是查看字符串的函数中可以直接使用std::string_view来代替std::string。
+#+BEGIN_SRC c++
+#include <iostream>
+#include <string>
+#include <string_view>
+ 
+int main()
+{
+ 
+    const char* cstr = "yangxunwu";
+    std::string_view stringView1(cstr);
+    std::string_view stringView2(cstr, 4);
+    std::cout << "stringView1: " << stringView1 << ", stringView2: " << stringView2 << std::endl;
+ 
+    std::string str = "yangxunwu";
+    std::string_view stringView3(str.c_str());
+    std::string_view stringView4(str.c_str(), 4);
+    std::cout << "stringView3: " << stringView1 << ", stringView4: " << stringView2 << std::endl;
+}
+#+END_SRC
+输出

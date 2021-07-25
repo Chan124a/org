@@ -1,11 +1,17 @@
 * 优先队列
 1046题
+
+priority_queue<Type, Container, Functional>
+
+Type 就是数据类型，Container 就是容器类型（Container必须是用数组实现的容器，比如vector,deque等等，但不能用 list。STL里面默认用的是vector），Functional 就是比较的方式。
 #+BEGIN_SRC c++
 #include <queue>
 //升序队列
 priority_queue <int,vector<int>,greater<int> > q;
 //降序队列
 priority_queue <int,vector<int>,less<int> >q;
+
+//greater和less是std实现的两个仿函数（就是使一个类的使用看上去像一个函数。其实现就是类中实现一个operator()，这个类就有了类似函数的行为，就是一个仿函数类了）
 #+END_SRC
 * 多维数组的定义
 #+BEGIN_SRC c++
@@ -580,8 +586,6 @@ public:
 };
 #+END_SRC
 
-
-
 * 由vector创建set
 217. 存在重复元素
 
@@ -619,3 +623,71 @@ public:
 #+END_SRC
 * 取中点避免溢出的技巧
 二分查找中，计算 mid 时需要防止溢出，代码中 left + (right - left) / 2 就和 (left + right) / 2 的结果相同，但是有效防止了 left 和 right 太大直接相加导致溢出。
+* 异或运算
+异或运算有以下三个性质。
+- 任何数和 0 做异或运算，结果仍然是原来的数
+- 任何数和其自身做异或运算，结果是 0 .
+- 异或运算满足交换律和结合律.
+
+
+* 一个包含所有c++的头文件的头文件
+
+#include<bits/stdc++.h>包含了目前c++所包含的所有头文件
+* pair
+337题 打家劫舍III
+
+在上次打劫完一条街道之后和一圈房屋后，小偷又发现了一个新的可行窃的地区。这个地区只有一个入口，我们称之为“根”。 除了“根”之外，每栋房子有且只有一个“父“房子与之相连。一番侦察之后，聪明的小偷意识到“这个地方的所有房屋的排列类似于一棵二叉树”。 如果两个直接相连的房子在同一天晚上被打劫，房屋将自动报警。
+
+计算在不触动警报的情况下，小偷一晚能够盗取的最高金额。
+
+示例 1:
+
+输入: [3,2,3,null,3,null,1]
+
+     3
+    / \
+   2   3
+    \   \ 
+     3   1
+
+输出: 7 
+解释: 小偷一晚能够盗取的最高金额 = 3 + 3 + 1 = 7.
+示例 2:
+
+输入: [3,4,5,1,3,null,1]
+
+     3
+    / \
+   4   5
+  / \   \ 
+ 1   3   1
+
+输出: 9
+解释: 小偷一晚能够盗取的最高金额 = 4 + 5 = 9.
+
+
+创建元组：
+#+BEGIN_EXAMPLE
+make_pair(0,0);
+pair<int, int> left = helper(root->left);
+#+END_EXAMPLE
+
+
+
+#+BEGIN_SRC c++
+#include <pair>
+class Solution {
+public:
+    pair<int, int> helper(TreeNode* root) {
+        if (root == NULL)return make_pair(0,0);
+        pair<int, int> left = helper(root->left);
+        pair<int, int> right = helper(root->right);
+
+        return make_pair(root->val + left.second + right.second, max(left.first, left.second) + max(right.first, right.second));
+    }
+    int rob(TreeNode* root) {
+        pair<int, int> ans = helper(root);
+        return max(ans.first, ans.second);
+    }
+};
+#+END_SRC
