@@ -506,6 +506,85 @@ The ssh package is a meta-package which installs both the client and the server.
 
 如果有输出 sshd 证明已经开启ssh服务
 
+* ubuntu开启SSH服务远程登录
+SSH分客户端openssh-client和openssh-server
+
+如果你只是想登陆别的机器的SSH只需要安装openssh-client（ubuntu有默认安装，如果没有则sudo apt-get install openssh-client），如果要使本机开放SSH服务就需要安装openssh-server。
+
+ 查看当前的ubuntu是否安装了ssh-server服务。默认只安装ssh-client服务
+dpkg -l | grep ssh
+
+安装ssh-server服务
+sudo apt-get install openssh-server
+
+再次查看安装的服务：
+dpkg -l | grep ssh
+
+然后确认ssh-server是否启动了：
+
+ps -e | grep ssh
+
+如果看到sshd那说明ssh-server已经启动了。
+如果没有则可以这样启动：sudo /etc/init.d/ssh start或sudo service ssh start
+配置相关：
+ssh-server配置文件位于/etc/ssh/sshd_config，在这里可以定义SSH的服务端口，默认端口是22，你可以自己定义成其他端口号，如222。（或把配置文件中的”PermitRootLogin without-password”加一个”#”号,把它注释掉，再增加一句”PermitRootLogin yes”）
+然后重启SSH服务：
+sudo /etc/init.d/ssh stop
+sudo /etc/init.d/ssh start
+
+* SSH、SCP和SFTP
+** SSH、SCP和SFTP都是SSH软件包的组成部分
+SSH 是 Secure Shell 的缩写，由 IETF 的网络小组（Network Working Group）所制定；SSH 为建立在应用层基础上的安全协议。SSH 是目前广泛采用的安全登录协议，专为远程登录会话和其他网络服务提供安全性的协议，替代以前不安全的Telnet协议。利用 SSH 协议可以有效防止远程管理过程中的信息泄露问题。
+
+SSH包括二个部分，服务端的SSHD（Secure Shell Daemon）和SSH客户端。我们通常所说的用SSH登录到某某主机，指的是用SSH客户端远程登录到某台主机（该主机运行了SSHD服务端程序）。
+
+SSH最初是UNIX系统上的一个程序，后来又迅速扩展到其他操作平台，目前几乎所有UNIX平台—包括HP-UX、Linux、AIX、Solaris、Digital UNIX、Irix，以及其他系统平台，都可运行SSH。
+** SCP和SFTP
+SCP是Secure Copy的简称，是用来与远程主机之间进行数据传输的协议，相当于经过加密的Copy命令。SCP数据传输使用 ssh协议，并且和ssh 使用相同的认证方式，提供相同的安全保证 。 根据实际需要，scp进行验证时会要求你输入密码或口令。
+
+SFTP=SSH File Transfer Protocol ，有时也被称作 Secure File Transfer Protocol 。SFTP是用SSH封装过的FTP协议，相当于经过加密的FTP协议，功能与FTP一样，只是传输数据经过加密。
+
+SFTP也有二个部分，服务端的SFTP-Server及SFTP Client。通常所说的用SFTP登录到某台主机，指的是用SFTP客户端登录到某台主机（该主机运行了SFTP-Server服务端程序）。
+*** SCP和SFTP异同：
+
+不管SCP还是SFTP，都是SSH的功能之一，也都是使用SSH协议来传输文件的。
+
+不只是登录时的用户信息，相互传输的文件内容也是经过SSH加密的，所以说SCP和SFTP实现了安全的文件传输。
+
+SCP和CP命令相似，SFTP和FTP的使用方法也类似。SCP和SFTP的共同之处在于「使用SSH将文件加密才传输的」
+
+使用「WinSCP」或者「FileZilla」之类的客户端，还可以和Windows之间进行文件传输。
+
+SCP和SFTP的不同之处，首先就是之前提到的，SCP使用「SCP命令」，SFTP则类似「FTP处理文件」的使用方式。
+
+它们的不同之处还不止如此，还有「SCP比较简单，是轻量级的，SFTP的功能则比较多」。
+
+虽然还有很多不同之处，但二者的最大不同之处在于「SFTP在文件传输过程中中断的话，连接后还可以继续传输，但SCP不行」。
+
+由于各种原因导致的文件传输中断是经常讨论的话题，所以这个区别（SFTP支持断点续传，SCP则不支持）被认为是最大的区别。
+** 常见的SSH客户端
+*** 图形化客户端：
+WinSCP，是一个Windows环境下使用SSH的开源图形化SFTP客户端。同时支持FTP、SCP、webdav协议。它的主要功能就是在本地与远程计算机间安全的复制文件。
+
+Xftp，是一个基于 MS windows 平台的功能强大的SFTP、FTP 文件传输软件。使用了 Xftp 以后，MS windows 用户能安全地在 UNIX/Linux 和 Windows PC 之间传输文件。
+
+FileZilla是一个免费开源的FTP软件，分为客户端版本和服务器版本，具备所有的FTP软件功能。支持FTP，SFTP(SSH File Transfer Protocol)， FTPS(FTP over SSL/TLS)等多种协议。
+
+*** 终端工具类：
+PuTTY是一个Telnet、SSH、rlogin、纯TCP以及串行接口连接软件。PuTTY是一款开放源代码软件，使用MIT licence授权。
+
+Xshell 是一个强大的安全终端模拟软件，它支持SSH1, SSH2, SFTP以及Microsoft Windows 平台的TELNET 协议。
+* 设置合上笔记本盖子不休眠的方法
+编辑下列文件：sudo gedit /etc/systemd/logind.conf
+#+BEGIN_EXAMPLE
+#HandlePowerKey按下电源键后的行为，默认power off
+#HandleSleepKey 按下挂起键后的行为，默认suspend
+#HandleHibernateKey按下休眠键后的行为，默认hibernate
+#HandleLidSwitch合上笔记本盖后的行为，默认suspend（改为ignore；即合盖不休眠）在原文件中，还要去掉前面的#
+#+END_EXAMPLE
+最后重启服务
+
+service systemd-logind restart
 * cuda
 ** 如何查看显卡支持的CUDA版本
 1. 在开始中找到并打开NVIDIA控制面板，如下图所示。
@@ -888,12 +967,376 @@ systemctl set-default graphical.target由命令行模式更改为图形界面模
 systemctl set-default multi-user.target由图形界面模式更改为命令行模式
 
 跟以前使用的linux版本一样，编辑 vi /etc/inittab 文件，修改系统初始化方式
-* gdb安装
+* gdb
+** gdb安装
 打开终端，在终端里输入以下指令：
 #+BEGIN_SRC bash
 apt-get update
 apt-get install  gdb
 #+END_SRC
+** 调试信息
+一般来说GDB主要调试的是C/C++的程序。要调试C/C++的程序，首先在编译时，我们必须要把调试信息加到可执行文件中。使用编译器（cc/gcc/g++）的 -g 参数可以做到这一点。如：
+#+begin_src bash
+> gcc -g hello.c -o hello
+
+> g++ -g hello.cpp -o hello
+#+END_SRC
+如果没有-g，你将看不见程序的函数名、变量名，所代替的全是运行时的内存地址。
+** 启动gdb方式
+1、gdb program
+program 也就是你的执行文件，一般在当前目录下。
+
+2、gdb program core
+用gdb同时调试一个运行程序和core文件，core是程序非法执行后core dump后产生的文件。
+
+3、gdb program 1234
+如果你的程序是一个服务程序，那么你可以指定这个服务程序运行时的进程ID。gdb会自动attach上去，并调试他。program应该在PATH环境变量中搜索得到。
+
+GDB启动时，可以加上一些GDB的启动开关，详细的开关可以用gdb -help查看。下面只列举一些比较常用的参数：
+
+--symbols=SYMFILE
+从指定文件中读取符号表。
+
+--se=FILE
+从指定文件中读取符号表信息，并把他用在可执行文件中。
+
+--core=COREFILE
+调试时core dump的core文件。
+
+--directory=DIR
+加入一个源文件的搜索路径。默认搜索路径是环境变量中PATH所定义的路径。
+** GDB 的命令概貌
+启动gdb后，就进入gdb的调试环境中，就可以使用gdb的命令开始调试程序了，gdb的命令可以使用help命令来查看，如下所示：
+#+begin_src bash
+root@linux:/home/benben# gdb
+GNU gdb 5.1.1
+Copyright 2002 Free Software Foundation, Inc.
+GDB is free software, covered by the GNU General Public License, and you are
+welcome to change it and/or distribute copies of it under certain conditions.
+Type "show copying" to see the conditions.
+There is absolutely no warranty for GDB. Type "show warranty" for details.
+This GDB was configured as "i386-suse-linux".
+(gdb) help
+List of classes of commands:
+ 
+aliases -- Aliases of other commands
+breakpoints -- Making program stop at certain points
+data -- Examining data
+files -- Specifying and examining files
+internals -- Maintenance commands
+obscure -- Obscure features
+running -- Running the program
+stack -- Examining the stack
+status -- Status inquiries
+support -- Support facilities
+tracepoints -- Tracing of program execution without stopping the program
+user-defined -- User-defined commands
+ 
+Type "help" followed by a class name for a list of commands in that class.
+Type "help" followed by command name for full documentation.
+Command name abbreviations are allowed if unambiguous.
+(gdb)
+#+END_SRC
+gdb的命令很多，gdb把之分成许多个种类。help命令只是例出gdb的命令种类，如果要看种类中的命令，可以使用 help 命令，如：help breakpoints，查看设置断点的所有命令。也可以直接help 来查看命令的帮助。
+
+gdb中，输入命令时，可以不用打全命令，只用打命令的前几个字符就可以了，当然，命令的前几个字符应该要标志着一个唯一的命令，在Linux下，你可以敲击两次TAB键来补齐命令的全称，如果有重复的，那么gdb会把其列出来。
+
+示例一： 在进入函数func时，设置一个断点。可以敲入break func，或是直接就是b func
+#+begin_src bash
+(gdb) b func
+Breakpoint 1 at 0x8048458: file hello.c, line 10.
+#+END_SRC
+示例二： 敲入b按两次TAB键，你会看到所有b打头的命令：
+#+begin_src bash
+(gdb) b
+backtrace break bt
+#+END_SRC
+示例三： 只记得函数的前缀，可以这样：
+#+begin_src bash
+(gdb) b make_ <按TAB键>
+（再按下一次TAB键，你会看到:）
+make_a_section_from_file make_environ
+make_abs_section make_function_type
+make_blockvector make_pointer_type
+make_cleanup make_reference_type
+make_command make_symbol_completion_list
+#+END_SRC
+GDB把所有make开头的函数全部例出来给你查看。
+
+要退出gdb时，只用发quit或命令简称q就行了。
+** GDB 中运行UNIX的shell程序
+在gdb环境中，你可以执行UNIX的shell的命令，使用gdb的shell命令来完成：
+#+begin_src bash
+shell
+#+END_SRC
+调用UNIX的shell来执行，环境变量SHELL中定义的UNIX的shell将会被用来执行，如果SHELL没有定义，那就使用UNIX的标准shell：/bin/sh。
+
+退出用exit命令，回到gdb提示符
+
+还有一个gdb命令是make：
+#+begin_src bash
+make
+#+END_SRC
+可以在gdb中执行make命令来重新build自己的程序。这个命令等价于“shell make ”。
+** 在GDB中运行程序
+当以 gdb 方式启动gdb后，gdb会在PATH路径和当前目录中搜索源文件。如要确认gdb是否读到源文件，可使用l或list命令，看看gdb是否能列出源代码。
+
+在gdb中，运行程序使用r或是run命令。程序的运行，你有可能需要设置下面四方面的事。
+1. 程序运行参数。
+#+BEGIN_EXAMPLE
+set args 可指定运行时参数。（如：set args 10 20 30 40 50 ）
+show args 命令可以查看设置好的运行参数。
+#+END_EXAMPLE
+2. 运行环境。
+#+BEGIN_EXAMPLE
+path  可设定程序的运行路径。
+show paths 查看程序的运行路径。
+set env environmentVarname=value 设置环境变量。如：set env USER=benben
+show env [varname] 查看环境变量，不带varname，打印出当前所有环境变量。
+#+END_EXAMPLE
+3. 工作目录。
+#+BEGIN_EXAMPLE
+cd 相当于shell的cd命令。
+pwd 显示当前的所在目录。
+#+END_EXAMPLE
+4. 程序的输入输出。
+#+BEGIN_EXAMPLE
+info terminal 显示你程序用到的终端的模式。
+使用重定向控制程序输出。如：run > outfile
+tty命令可以设置输入输出使用的终端设备。如：tty /dev/tty1
+#+END_EXAMPLE
+** 调试已运行的程序
+两种方法：
+1. 在UNIX下用ps查看正在运行的程序的PID（进程ID），然后用gdb PID process-id 格式挂接正在运行的程序。
+2. 先用gdb 关联上源代码，并进行gdb，在gdb中用attach process-id 命令来挂接进程的PID。并用detach来取消挂接的进程。
+** 暂停 / 恢复程序运行
+调试程序中，暂停程序运行是必须的，GDB可以方便地暂停程序的运行。你可以设置程序的在哪行停住，在什么条件下停住，在收到什么信号时停往等等。以便于你查看运行时的变量，以及运行时的流程。
+
+当进程被gdb停住时，你可以使用info program 来查看程序的是否在运行，进程号，被暂停的原因。
+
+在gdb中，我们可以有以下几种暂停方式：断点（BreakPoint）、观察点（WatchPoint）、捕捉点（CatchPoint）、信号（Signals）、线程停止（Thread Stops）。如果要恢复程序运行，可以使用c或是continue命令。
+*** 设置断点（BreakPoint）
+我们用break命令来设置断点。正面有几点设置断点的方法：
+#+BEGIN_EXAMPLE
+break function
+在进入指定函数时停住。C++中可以使用class::function或function(type,type)格式来指定函数名。
+
+break linenum
+在指定行号停住。
+
+break +offset
+break -offset
+在当前行号的前面或后面的offset行停住。offset为自然数。
+
+break filename:linenum
+在源文件filename的linenum行处停住。
+
+break filename:function
+在源文件filename的function函数的入口处停住。
+
+break *address
+在程序运行的内存地址处停住。
+
+break
+break命令没有参数时，表示在下一条指令处停住。
+
+break ... if cond
+...可以是上述的参数，condition表示条件，在条件成立时停住。比如在循环境体中，可以设置break if i=100，表示当i为100时停住程序。
+#+END_EXAMPLE
+查看断点时，可使用info命令，如下所示：（注：n表示断点号）
+#+BEGIN_EXAMPLE
+info breakpoints [n]
+info break [n]
+info watchpoints [n]
+#+END_EXAMPLE
+*** 设置观察点（WatchPoint）
+观察点一般来观察某个表达式（变量也是一种表达式）的值是否有变化了，如果有变化，马上停住程序。我们有下面的几种方法来设置观察点：
+#+BEGIN_EXAMPLE
+watch expr
+为表达式（变量）expr设置一个观察点。一量表达式值有变化时，马上停住程序。
+
+rwatch expr
+当表达式（变量）expr被读时，停住程序。
+
+awatch expr
+当表达式（变量）的值被读或被写时，停住程序。
+
+info watchpoints
+查看观察点、断点和捕捉点信息，同info break 一样.
+#+END_EXAMPLE
+*** 设置捕捉点（CatchPoint）
+
+你可设置捕捉点来补捉程序运行时的一些事件。如：载入共享库（动态链接库）或是C++的异常。设置捕捉点的格式为：
+#+BEGIN_EXAMPLE
+catch event
+#+END_EXAMPLE
+当event发生时，停住程序。event可以是下面的内容：
+- throw 一个C++抛出的异常。（throw为关键字）
+- catch 一个C++捕捉到的异常。（catch为关键字）
+- exec 调用系统调用exec时。（exec为关键字，目前此功能只在HP-UX下有用）
+- fork 调用系统调用fork时。（fork为关键字，目前此功能只在HP-UX下有用）
+- vfork 调用系统调用vfork时。（vfork为关键字，目前此功能只在HP-UX下有用）
+- load 或 load 载入共享库（动态链接库）时。（load为关键字，目前此功能只在HP-UX下有用）
+- unload 或 unload 卸载共享库（动态链接库）时。（unload为关键字，目前此功能只在HP-UX下有用）
+
+#+BEGIN_EXAMPLE
+tcatch event
+只设置一次捕捉点，当程序停住以后，应点被自动删除。
+#+END_EXAMPLE
+*** 维护停止点
+上面说了如何设置程序的停止点，GDB中的停止点也就是上述的三类。在GDB中，如果你觉得已定义好的停止点没有用了，你可以使用delete、clear、disable、enable这几个命令来进行维护。
+#+BEGIN_EXAMPLE
+clear
+清除所有的已定义的停止点。
+
+clear function
+清除所有设置在函数上的停止点。
+
+clear linenum
+清除所有设置在指定行上的停止点。
+clear filename:linenum
+清除所有设置在指定文件：指定行上的停止点。
+
+delete [breakpoints] [range...]
+删除指定的断点，breakpoints为断点号。如果不指定断点号，则表示删除所有的断点。range 表示断点号的范围（如：3-7）。其简写命令为d。
+
+比删除更好的一种方法是disable停止点，disable了的停止点，GDB不会删除，当你还需要时，enable即可，就好像回收站一样。
+
+disable [breakpoints] [range...]
+disable所指定的停止点，breakpoints为停止点号。如果什么都不指定，表示disable所有的停止点。简写命令是dis.
+
+enable [breakpoints] [range...]
+enable所指定的停止点，breakpoints为停止点号。
+
+enable [breakpoints] once range...
+enable所指定的停止点一次，当程序停止后，该停止点马上被GDB自动disable。
+
+enable [breakpoints] delete range...
+enable所指定的停止点一次，当程序停止后，该停止点马上被GDB自动删除。
+#+END_EXAMPLE
+*** 停止条件维护
+前面在说到设置断点时，我们提到过可以设置一个条件，当条件成立时，程序自动停止，这是一个非常强大的功能，这里，我想专门说说这个条件的相关维护命令。一般来说，为断点设置一个条件，我们使用if关键词，后面跟其断点条件。并且，条件设置好后，我们可以用condition命令来修改断点的条件。（只有 break和watch命令支持if，catch目前暂不支持if）
+#+BEGIN_EXAMPLE
+condition bnum expression
+修改断点号为bnum的停止条件为expression。
+
+condition bnum
+清除断点号为bnum的停止条件。
+#+END_EXAMPLE
+还有一个比较特殊的维护命令ignore，你可以指定程序运行时，忽略停止条件几次。
+#+BEGIN_EXAMPLE
+ignore bnum count
+表示忽略断点号为bnum的停止条件count次。
+#+END_EXAMPLE
+*** 为停止点设定运行命令
+我们可以使用GDB提供的command命令来设置停止点的运行命令。也就是说，当运行的程序在被停止住时，我们可以让其自动运行一些别的命令，这很有利行自动化调试。对基于GDB的自动化调试是一个强大的支持。
+#+BEGIN_EXAMPLE
+commands [bnum]
+... command-list ...
+end
+#+END_EXAMPLE
+为断点号bnum指写一个命令列表。当程序被该断点停住时，gdb会依次运行命令列表中的命令。
+
+例如：
+#+BEGIN_EXAMPLE
+break foo if x>0
+commands
+printf "x is %d ",x
+continue
+end
+#+END_EXAMPLE
+断点设置在函数foo中，断点条件是x>0，如果程序被断住后，也就是，一旦x的值在foo函数中大于0，GDB会自动打印出x的值，并继续运行程序。
+
+如果你要清除断点上的命令序列，那么只要简单的执行一下commands命令，并直接在打个end就行了。
+*** 断点菜单
+在C++中，可能会重复出现同一个名字的函数若干次（函数重载），在这种情况下，break 不能告诉GDB要停在哪个函数的入口。当然，你可以使用break 也就是把函数的参数类型告诉GDB，以指定一个函数。否则的话，GDB会给你列出一个断点菜单供你选择你所需要的断点。你只要输入你菜单列表中的编号就可以了。如：
+#+begin_src bash
+(gdb) b String::after
+[0] cancel
+[1] all
+[2] file:String.cc; line number:867
+[3] file:String.cc; line number:860
+[4] file:String.cc; line number:875
+[5] file:String.cc; line number:853
+[6] file:String.cc; line number:846
+[7] file:String.cc; line number:735
+> 2 4 6
+Breakpoint 1 at 0xb26c: file String.cc, line 867.
+Breakpoint 2 at 0xb344: file String.cc, line 875.
+Breakpoint 3 at 0xafcc: file String.cc, line 846.
+Multiple breakpoints were set.
+Use the "delete" command to delete unwanted breakpoints.
+(gdb)
+#+END_SRC
+*** 恢复程序运行和单步调试
+当程序被停住了，你可以用continue命令恢复程序的运行直到程序结束，或下一个断点到来。也可以使用step或next命令单步跟踪程序。
+#+BEGIN_EXAMPLE
+continue [ignore-count]
+c [ignore-count]
+fg [ignore-count]
+#+END_EXAMPLE
+恢复程序运行，直到程序结束，或是下一个断点到来。ignore-count表示忽略其后的断点次数。continue，c，fg三个命令都是一样的意思。
+#+BEGIN_EXAMPLE
+step [count]
+单步跟踪，如果有函数调用，他会进入该函数。进入函数的前提是，此函数被编译有debug信息。很像VC等工具中的step in。后面可以加count也可以不加，不加表示一条条地执行，加表示执行后面的count条指令，然后再停住。
+
+next [count]
+同样单步跟踪，如果有函数调用，他不会进入该函数。很像VC等工具中的step over。后面可以加count也可以不加，不加表示一条条地执行，加表示执行后面的count条指令，然后再停住。
+
+set step-mode on
+打开step-mode模式，于是，在进行单步跟踪时，程序会因为没有debug信息而停住。这个参数有很利于查看机器码。
+
+set step-mod off
+关闭step-mode模式。This is the default.
+
+show step-mode
+Show whether gdb will stop in or step over functions without source line debug information.
+
+finish
+运行程序，直到当前函数完成返回。并打印函数返回时的堆栈地址和返回值及参数值等信息。
+
+until 或 u
+当你厌倦了在一个循环体内单步跟踪时，这个命令可以运行程序直到退出循环体。
+
+until location
+u location
+Continue running your program until either the specified location is reached,or the current stack frame returns. location is any of the forms of argument acceptable to break. This form of the command uses breakpoints, and hence is quicker than until without an argument. The specified location is actually reached only if it is in the current frame. This implies that until can be used to skip over recursive function invocations.
+#+END_EXAMPLE
+For instance in the code below, if the current location is line 96, issuing until 99 will execute the program up to 
+#+BEGIN_SRC 
+int factorial (int value)
+{
+if (value &gt; 1) {
+value *= factorial (value - 1);
+}
+return (value);
+}
+#+END_SRC
+#+BEGIN_EXAMPLE
+stepi 或 si 或 stepi repeatCount
+
+单步跟踪一条机器指令！一条程序代码有可能由数条机器指令完成，stepi可以单步执行机器指令。It is often useful to do ‘display/i $pc’ when stepping by machine instructions. This makes gdb automatically display the next instruction to be executed, each time your program stops.
+
+An argument is a repeat count, as in step.
+
+nexti
+nexti repeatCount
+ni
+Execute one machine instruction, but if it is a function call, proceed until the function returns.An argument is a repeat count, as in next.
+#+END_EXAMPLE
+
+** 函数的调用
+#+begin_src bash
+call name 调用和执行一个函数
+(gdb) call gen_and_sork( 1234,1,0 )
+(gdb) call printf(“abcd”)
+#+END_SRC
+
+** 寄存器的标准名字
+- $pc 程序计数器
+- $fp 帧指针（当前堆栈帧）
+- $sp 栈指针
+- $ps 处理器状态
 * Linux 命令行快捷键
 涉及在linux命令行下进行快速移动光标、命令编辑、编辑后执行历史命令、Bang(!)命令、控制命令等。让basher更有效率。
 
@@ -1405,6 +1848,26 @@ This is line number 2.
 This is line number 0.
 #+END_SRC
 使用 q 命令之后，sed 命令会在匹配到 number 1 时，将其替换成 number 0，然后直接退出。
+*** sed n 将下一行内容移入缓存空间，替换当前内容
+n 选项可以将下一行内容移入缓存空降，替换掉当前缓存空间的内容；而N 选项是将下一行内容添加进当前缓存空间，原有的缓存空间内容并不会清空
+#+begin_src bash
+cs144@cs144vm:~/test$ cat mysed.txt 
+Beijing 2003
+Beijing 2004
+Beijing 2005
+Beijing 2006
+Beijing 2007
+cs144@cs144vm:~/test$ sed -n '/200/{n;y/eijing/EIIJNG/;p}' mysed.txt 
+BEIIING 2004
+BEIIING 2006
+cs144@cs144vm:~/test$ sed -n '/200/{N;y/eijing/EIIJNG/;p}' mysed.txt 
+BEIIING 2003
+BEIIING 2004
+BEIIING 2005
+BEIIING 2006
+
+#+END_SRC
+
 ** sed 脚本命令的寻址方式
 前面在介绍各个脚本命令时，我们一直忽略了对 address 部分的介绍。对各个脚本命令来说，address 用来表明该脚本命令作用到文本中的具体行。
 
@@ -1788,3 +2251,97 @@ This is a test to, remove, commas.
 This is a test to remove, commas.
 This is a test to remove commas.
 #+END_SRC
+* awk
+** 简介
+awk是一个强大的文本分析工具，相对于grep的查找，sed的编辑，awk在其对数据分析并生成报告时，显得尤为强大。简单来说awk就是把文件逐行的读入，以空格为默认分隔符将每行切片，切开的部分再进行各种分析处理。
+
+awk有3个不同版本: awk、nawk和gawk，未作特别说明，一般指gawk，gawk 是 AWK 的 GNU 版本。
+
+awk其名称得自于它的创始人 Alfred Aho 、Peter Weinberger 和 Brian Kernighan 姓氏的首个字母。实际上 AWK 的确拥有自己的语言： AWK 程序设计语言 ， 三位创建者已将它正式定义为“样式扫描和处理语言”。它允许您创建简短的程序，这些程序读取输入文件、为数据排序、处理数据、对输入执行计算以及生成报表，还有无数其他的功能。
+** 使用方法
+#+begin_src bash
+awk '{pattern + action}' {filenames}
+#+END_SRC
+尽管操作可能会很复杂，但语法总是这样，其中 pattern 表示 AWK 在数据中查找的内容，而 action 是在找到匹配内容时所执行的一系列命令。花括号（{}）不需要在程序中始终出现，但它们用于根据特定的模式对一系列指令进行分组。 pattern就是要表示的正则表达式，用斜杠括起来。
+
+awk语言的最基本功能是在文件或者字符串中基于指定规则浏览和抽取信息，awk抽取信息后，才能进行其他文本操作。完整的awk脚本通常用来格式化文本文件中的信息。
+
+通常，awk是以文件的一行为处理单位的。awk每接收文件的一行，然后执行相应的命令，来处理文本。
+** 三种调用方式
+1. 命令行方式
+dawk [-F  field-separator]  'commands'  input-file(s)
+
+其中，commands 是真正awk命令，[-F域分隔符]是可选的。 input-file(s) 是待处理的文件。
+
+在awk中，文件的每一行中，由域分隔符分开的每一项称为一个域。通常，在不指名-F域分隔符的情况下，默认的域分隔符是空格。
+
+2. shell脚本方式
+将所有的awk命令插入一个文件，并使awk程序可执行，然后awk命令解释器作为脚本的首行，一遍通过键入脚本名称来调用。
+
+相当于shell脚本首行的：#!/bin/sh
+
+可以换成：#!/bin/awk
+
+3. 将所有的awk命令插入一个单独文件，然后调用：
+
+awk -f awk-script-file input-file(s)
+
+其中，-f选项加载awk-script-file中的awk脚本，input-file(s)跟上面的是一样的。
+* 设置Linux在未登录账号情况下自动连接wifi
+期望机器能在通电进入系统后，即使没有登录账号也能自动连接wifi。可以使用Linux的网络管理工具的命令：
+
+nmctl device wifi connect [ssid wifi名字] password [wifi密码]
+* 使用git建立远程仓库，让别人git clone下来
+首先, 如果你的ssh没有安装的话，要安装ssh服务端。ubuntu是很简单
+sudo apt-get install openssh-server
+1，建立你的git 目录。
+
+ourunix@ubuntu:~$ mkdir testgit
+ourunix@ubuntu:~$ cd testgit/
+2,建立你的git仓库。
+ourunix@ubuntu:~/testgit$ git init
+Initialized empty Git repository in /home/wlp/testgit/.git/
+3，添加你的需要的项目初始文件，这里我就只添加一张文档了。
+ourunix@ubuntu:~/testgit$ echo "hello,git" > sayhi.txt
+4，跟踪及提交到仓库。
+ourunix@ubuntu:~/testgit$ git add sayhi.txt
+ourunix@ubuntu:~/testgit$ git commit -m "2011.4.13" sayhi.txt
+[master (root-commit) b87b535] 2011.4.13
+1 files changed, 1 insertions(+), 0 deletions(-)
+create mode 100644 sayhi.txt
+5.在本地的git仓库"添加一个远程仓库",当然这个远程仓库还是你自己的这个目录。
+ourunix@ubuntu:~/testgit$ git remote add origin ssh://你的用户名@你的IP/~/testgit/.git
+这时候,本地的 .git/config 应该会改变
+6.将本地的 master分支 ，跟踪到远程的分支
+ourunix@ubuntu:~/testgit$ git push origin master
+7,显示远程信息
+ourunix@ubuntu:~/testgit$git remote show origin
+8,利用其他局域网的电脑测试你的仓库
+ourunix@ubuntu:~/test$ git clone ssh://你的用户名@你的IP/home/～/testgit/.git
+Initialized empty Git repository in /home/wlp/test/git/.git/
+xxx‘s password:
+remote: Counting objects: 3, done.
+Receiving objects: 100% (3/3), done.
+remote: Total 3 (delta 0), reused 0 (delta 0)
+
+9，大功告成
+10. 修改远程分支地址
+git remote set-url origin remote_git_address
+
+http://blog.chinaunix.net/uid-22028680-id-3040436.html
+* dpkg
+* dpkg,rpm和yum以及apt-get的区别
+一般来说著名的 Linux 系统基本上分两大类：
+- RedHat 系列：Redhat、Centos、Fedora 等
+- Debian 系列：Debian、Ubuntu 等
+
+Dpkg (Debian系)：Ubuntu 
+RPM (Red Hat系)：CentOS、Fedora
+** RedHat 系列
+- 常见的安装包格式 rpm 包，安装rpm包的命令是“rpm -参数”
+- 包管理工具 yum
+- 支持 tar 包
+** Debian系列
+- 常见的安装包格式 deb 包，安装 deb 包的命令是“dpkg -参数”
+- 包管理工具 apt-get
+- 支持 tar 包

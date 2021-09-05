@@ -1,21 +1,22 @@
 * 命令
 #+BEGIN_SRC bash
 docker ps  #可以用来查看当前正在运行的容器
+docker ps -a #查看所有容器，包括已停止运行的
 docker images #可以查看docker registry上已有的镜像
 docker run [OPTIONS] IMAGE [COMMAND] [ARG...]
 #用于创建容器,参数使用方法可参考[官方文档](https://docs.docker.com/engine/reference/commandline/run/)
+docker run busybox echo "111"  #用镜像busybox创建容器，然后执行命令echo，然后退出容器
 
 docker exec -u root -t -i cpd /bin/bash #用于以root身份进入容器
 #需要注意的是，在容器内以root身份安装软件将会导致宿主机也安装软件
 
 docker attach 容器名 #用于进入容器
 #+END_SRC
-* 命令参数的解释
-** docker run命令
+* docker run
 #+BEGIN_SRC bash
 docker run --rm --shm-size=32G --runtime=nvidia -it -p 8000:8888 --user 1036:1036 -v /etc/group:/etc/group:ro -v /etc/passwd:/etc/passwd:ro -v /home/yangliu/:/home/yangliu --name 容器名 镜像名称 /bin/bash
 #+END_SRC
-- -rm,当容器退出时,自动将容器移除.
+- --rm,当容器退出时,自动删除容器.
 - –shm-size:分配/dev/shm/文件夹的大小./dev/shm/是linux下一个非常有用的目录，因为这个目录不在硬盘上，而是在内存里。
 - –runtime指容器运行时.容器运行时是管理容器和容器镜像的程序,有各种不同的标准.用nvidia-docker才能启用GPU
 - -it: -t让docker分配一个伪终端并绑定到容器的标准输入上, -i则让容器的标准输入保持打开.
@@ -25,6 +26,36 @@ docker run --rm --shm-size=32G --runtime=nvidia -it -p 8000:8888 --user 1036:103
 - -v:将 host 上已存在的目录或文件挂载(mount)到容器.挂载后的目录或文件使得宿主机和容器可以同步修改文件。 路径映射 /a : /b将主机的/a路径映射到容器的/b 。-v也可用–mount来代替.
 - –name:可以指定容器的名字
 - /bin/bash 启动镜像后执行的命令
+- d:后台执行
+** 例子
+用镜像busybox创建容器，然后执行命令echo，然后退出容器
+#+begin_src bash
+$ docker run busybox echo "hello from busybox"  
+hello from busybox
+#+END_SRC
+用交互式tty执行容器，如果不加-it参数，该命令创建容器后直接退出容器
+#+BEGIN_EXAMPLE
+#+begin_src bash
+$ docker run -it busybox sh
+$ ls
+bin   dev   etc   home  proc  root  sys   tmp   usr   var
+$ uptime
+ 05:45:21 up  5:58,  0 users,  load average: 0.00, 0.01, 0.04
+#+END_SRC
+#+END_EXAMPLE
+
+* docker rm
+#+begin_src bash
+$ docker rm 305297d7a235 ff0a5c3750b9
+305297d7a235
+ff0a5c3750b9
+# 一次性删除全部stuatus=exited的容器
+$ docker rm $(docker ps -a -q -f status=exited)   #-q表示只返回IDs,-f表示过滤条件
+#+END_SRC
+* docker container prune
+删除所有已停止的容器
+* docker rmi
+删除镜像
 * Docker 退出容器但不关闭当前容器
 方法一：如果要正常退出不关闭容器，请按Ctrl+P+Q进行退出容器
 
@@ -33,6 +64,73 @@ docker run --rm --shm-size=32G --runtime=nvidia -it -p 8000:8888 --user 1036:103
 使用docker restart命令重启容器
 使用docker attach命令进入容器
 重启httpd（service httpd restart）和radosgw(/etc/init.d/ceph-radosgw restart)，并且使用wget验证是否将radosgw重启成功(wget http://127.0.0.1)
+* Dockerfile
+#+BEGIN_EXAMPLE
+# syntax=docker/dockerfile:1
+FROM node:12-alpine
+RUN apk add --no-cache python g++ make
+WORKDIR /app
+COPY . .
+RUN yarn install --production
+CMD ["node", "src/index.js"]
+#+END_EXAMPLE
+
+#+begin_src bash
+# -t 表示设置镜像名，下面命令镜像名为getting-started
+docker build -t getting-started .
+#+END_SRC
+* docker exec
+docker exec <container-id> cat /data.txt
+* SSH远程登录连接docker容器
+环境：
+- 计算机A为本机计算机；
+- 计算机B上创建docker容器；
+
+目的：
+在A上ssh远程登录B上的docker容器：
+
+计算机B上创建docker容器步骤：
+
+1. 在ubuntu镜像中创建容器：
+docker run -it ubuntu:16.04 /bin/bash
+
+2. 进入容器，设置容器root密码
+修改容器的root密码：passwd
+密码设置为：123456
+
+3. 修改ssh配置,允许root登录
+vi /etc/ssh/sshd_config
+将PermitRootLogin的值从withoutPassword改为yes
+
+下面是可选设置
+#+BEGIN_EXAMPLE
+RSAAuthentication yes #启用 RSA 认证
+PubkeyAuthentication yes #启用公钥私钥配对认证方式 
+AuthorizedKeysFile .ssh/authorized_keys #公钥文件路径（和上面生成的文件同）
+PermitRootLogin yes #root能使用ssh登录
+#+END_EXAMPLE
+
+4. 重启ssh服务
+service ssh start
+
+5. 将新的镜像启动，并将docker服务器的50001端口映射到容器的22端口上
+docker run -it -p 50001:22 ubuntu-ssh /bin/bash
+
+6. 在计算机A上ssh远程登录上述B创建的容器：
+#+begin_src bash
+ssh root@192.168.1.249 -p 50001
+192.168.1.249为B的ip地址
+
+ww@NiandeMacBook-Pro  ~  ssh root@192.168.1.249 -p 50001
+The authenticity of host '[192.168.1.249]:50001 ([192.168.1.249]:50001)' can't be established.
+ECDSA key fingerprint is SHA256:/i5usXixuOlLTjQO49xbMQEqE/Zj88UsnRmgKlZZ7Rc.
+Are you sure you want to continue connecting (yes/no)? yes
+Warning: Permanently added '[192.168.1.249]:50001' (ECDSA) to the list of known hosts.
+root@192.168.1.249's password:
+#+END_SRC
+此时输入的密码是当时在容器中所设置修改的root密码，123456
+
+
 * 参考文档:
 1. [官方文档](https://docs.docker.com/engine/reference/commandline)
 2. [Docker 参数 -i -t 的作用](https://blog.csdn.net/upHailin/article/details/80892505)

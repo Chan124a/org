@@ -506,6 +506,85 @@ The ssh package is a meta-package which installs both the client and the server.
 
 如果有输出 sshd 证明已经开启ssh服务
 
+* ubuntu开启SSH服务远程登录
+SSH分客户端openssh-client和openssh-server
+
+如果你只是想登陆别的机器的SSH只需要安装openssh-client（ubuntu有默认安装，如果没有则sudo apt-get install openssh-client），如果要使本机开放SSH服务就需要安装openssh-server。
+
+ 查看当前的ubuntu是否安装了ssh-server服务。默认只安装ssh-client服务
+dpkg -l | grep ssh
+
+安装ssh-server服务
+sudo apt-get install openssh-server
+
+再次查看安装的服务：
+dpkg -l | grep ssh
+
+然后确认ssh-server是否启动了：
+
+ps -e | grep ssh
+
+如果看到sshd那说明ssh-server已经启动了。
+如果没有则可以这样启动：sudo /etc/init.d/ssh start或sudo service ssh start
+配置相关：
+ssh-server配置文件位于/etc/ssh/sshd_config，在这里可以定义SSH的服务端口，默认端口是22，你可以自己定义成其他端口号，如222。（或把配置文件中的”PermitRootLogin without-password”加一个”#”号,把它注释掉，再增加一句”PermitRootLogin yes”）
+然后重启SSH服务：
+sudo /etc/init.d/ssh stop
+sudo /etc/init.d/ssh start
+
+* SSH、SCP和SFTP
+** SSH、SCP和SFTP都是SSH软件包的组成部分
+SSH 是 Secure Shell 的缩写，由 IETF 的网络小组（Network Working Group）所制定；SSH 为建立在应用层基础上的安全协议。SSH 是目前广泛采用的安全登录协议，专为远程登录会话和其他网络服务提供安全性的协议，替代以前不安全的Telnet协议。利用 SSH 协议可以有效防止远程管理过程中的信息泄露问题。
+
+SSH包括二个部分，服务端的SSHD（Secure Shell Daemon）和SSH客户端。我们通常所说的用SSH登录到某某主机，指的是用SSH客户端远程登录到某台主机（该主机运行了SSHD服务端程序）。
+
+SSH最初是UNIX系统上的一个程序，后来又迅速扩展到其他操作平台，目前几乎所有UNIX平台—包括HP-UX、Linux、AIX、Solaris、Digital UNIX、Irix，以及其他系统平台，都可运行SSH。
+** SCP和SFTP
+SCP是Secure Copy的简称，是用来与远程主机之间进行数据传输的协议，相当于经过加密的Copy命令。SCP数据传输使用 ssh协议，并且和ssh 使用相同的认证方式，提供相同的安全保证 。 根据实际需要，scp进行验证时会要求你输入密码或口令。
+
+SFTP=SSH File Transfer Protocol ，有时也被称作 Secure File Transfer Protocol 。SFTP是用SSH封装过的FTP协议，相当于经过加密的FTP协议，功能与FTP一样，只是传输数据经过加密。
+
+SFTP也有二个部分，服务端的SFTP-Server及SFTP Client。通常所说的用SFTP登录到某台主机，指的是用SFTP客户端登录到某台主机（该主机运行了SFTP-Server服务端程序）。
+*** SCP和SFTP异同：
+
+不管SCP还是SFTP，都是SSH的功能之一，也都是使用SSH协议来传输文件的。
+
+不只是登录时的用户信息，相互传输的文件内容也是经过SSH加密的，所以说SCP和SFTP实现了安全的文件传输。
+
+SCP和CP命令相似，SFTP和FTP的使用方法也类似。SCP和SFTP的共同之处在于「使用SSH将文件加密才传输的」
+
+使用「WinSCP」或者「FileZilla」之类的客户端，还可以和Windows之间进行文件传输。
+
+SCP和SFTP的不同之处，首先就是之前提到的，SCP使用「SCP命令」，SFTP则类似「FTP处理文件」的使用方式。
+
+它们的不同之处还不止如此，还有「SCP比较简单，是轻量级的，SFTP的功能则比较多」。
+
+虽然还有很多不同之处，但二者的最大不同之处在于「SFTP在文件传输过程中中断的话，连接后还可以继续传输，但SCP不行」。
+
+由于各种原因导致的文件传输中断是经常讨论的话题，所以这个区别（SFTP支持断点续传，SCP则不支持）被认为是最大的区别。
+** 常见的SSH客户端
+*** 图形化客户端：
+WinSCP，是一个Windows环境下使用SSH的开源图形化SFTP客户端。同时支持FTP、SCP、webdav协议。它的主要功能就是在本地与远程计算机间安全的复制文件。
+
+Xftp，是一个基于 MS windows 平台的功能强大的SFTP、FTP 文件传输软件。使用了 Xftp 以后，MS windows 用户能安全地在 UNIX/Linux 和 Windows PC 之间传输文件。
+
+FileZilla是一个免费开源的FTP软件，分为客户端版本和服务器版本，具备所有的FTP软件功能。支持FTP，SFTP(SSH File Transfer Protocol)， FTPS(FTP over SSL/TLS)等多种协议。
+
+*** 终端工具类：
+PuTTY是一个Telnet、SSH、rlogin、纯TCP以及串行接口连接软件。PuTTY是一款开放源代码软件，使用MIT licence授权。
+
+Xshell 是一个强大的安全终端模拟软件，它支持SSH1, SSH2, SFTP以及Microsoft Windows 平台的TELNET 协议。
+* 设置合上笔记本盖子不休眠的方法
+编辑下列文件：sudo gedit /etc/systemd/logind.conf
+#+BEGIN_EXAMPLE
+#HandlePowerKey按下电源键后的行为，默认power off
+#HandleSleepKey 按下挂起键后的行为，默认suspend
+#HandleHibernateKey按下休眠键后的行为，默认hibernate
+#HandleLidSwitch合上笔记本盖后的行为，默认suspend（改为ignore；即合盖不休眠）在原文件中，还要去掉前面的#
+#+END_EXAMPLE
+最后重启服务
+
+service systemd-logind restart
 * cuda
 ** 如何查看显卡支持的CUDA版本
 1. 在开始中找到并打开NVIDIA控制面板，如下图所示。
@@ -2208,3 +2287,121 @@ dawk [-F  field-separator]  'commands'  input-file(s)
 awk -f awk-script-file input-file(s)
 
 其中，-f选项加载awk-script-file中的awk脚本，input-file(s)跟上面的是一样的。
+* 设置Linux在未登录账号情况下自动连接wifi
+期望机器能在通电进入系统后，即使没有登录账号也能自动连接wifi。可以使用Linux的网络管理工具的命令：
+
+nmctl device wifi connect [ssid wifi名字] password [wifi密码]
+* 使用git建立远程仓库，让别人git clone下来
+首先, 如果你的ssh没有安装的话，要安装ssh服务端。ubuntu是很简单
+sudo apt-get install openssh-server
+1，建立你的git 目录。
+
+ourunix@ubuntu:~$ mkdir testgit
+ourunix@ubuntu:~$ cd testgit/
+2,建立你的git仓库。
+ourunix@ubuntu:~/testgit$ git init
+Initialized empty Git repository in /home/wlp/testgit/.git/
+3，添加你的需要的项目初始文件，这里我就只添加一张文档了。
+ourunix@ubuntu:~/testgit$ echo "hello,git" > sayhi.txt
+4，跟踪及提交到仓库。
+ourunix@ubuntu:~/testgit$ git add sayhi.txt
+ourunix@ubuntu:~/testgit$ git commit -m "2011.4.13" sayhi.txt
+[master (root-commit) b87b535] 2011.4.13
+1 files changed, 1 insertions(+), 0 deletions(-)
+create mode 100644 sayhi.txt
+5.在本地的git仓库"添加一个远程仓库",当然这个远程仓库还是你自己的这个目录。
+ourunix@ubuntu:~/testgit$ git remote add origin ssh://你的用户名@你的IP/~/testgit/.git
+这时候,本地的 .git/config 应该会改变
+6.将本地的 master分支 ，跟踪到远程的分支
+ourunix@ubuntu:~/testgit$ git push origin master
+7,显示远程信息
+ourunix@ubuntu:~/testgit$git remote show origin
+8,利用其他局域网的电脑测试你的仓库
+ourunix@ubuntu:~/test$ git clone ssh://你的用户名@你的IP/home/～/testgit/.git
+Initialized empty Git repository in /home/wlp/test/git/.git/
+xxx‘s password:
+remote: Counting objects: 3, done.
+Receiving objects: 100% (3/3), done.
+remote: Total 3 (delta 0), reused 0 (delta 0)
+
+9，大功告成
+10. 修改远程分支地址
+git remote set-url origin remote_git_address
+
+http://blog.chinaunix.net/uid-22028680-id-3040436.html
+* dpkg
+* dpkg,rpm和yum以及apt-get的区别
+一般来说著名的 Linux 系统基本上分两大类：
+- RedHat 系列：Redhat、Centos、Fedora 等
+- Debian 系列：Debian、Ubuntu 等
+
+Dpkg (Debian系)：Ubuntu 
+RPM (Red Hat系)：CentOS、Fedora
+** RedHat 系列
+- 常见的安装包格式 rpm 包，安装rpm包的命令是“rpm -参数”
+- 包管理工具 yum
+- 支持 tar 包
+** Debian系列
+- 常见的安装包格式 deb 包，安装 deb 包的命令是“dpkg -参数”
+- 包管理工具 apt-get
+- 支持 tar 包
+* Linux 查看端口占用情况
+Linux 查看端口占用情况可以使用 lsof 和 netstat 命令。
+** lsof
+lsof(list open files)是一个列出当前系统打开文件的工具。
+
+lsof 查看端口占用语法格式：
+#+BEGIN_EXAMPLE
+lsof -i:端口号
+#+END_EXAMPLE
+
+*** 实例
+查看服务器 8000 端口的占用情况：
+#+begin_src bash
+/:lsof -i:8000
+
+COMMAND   PID USER   FD   TYPE   DEVICE SIZE/OFF NODE NAME
+nodejs  26993 root   10u  IPv4 37999514      0t0  TCP *:8000 (LISTEN)
+#+END_SRC
+可以看到 8000 端口已经被轻 nodejs 服务占用。
+
+lsof -i 需要 root 用户的权限来执行，如下图：
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-09-03_15-42-19.png @ 2021-09-03 16:14:42
+[[file:Linux_%E6%9F%A5%E7%9C%8B%E7%AB%AF%E5%8F%A3%E5%8D%A0%E7%94%A8%E6%83%85%E5%86%B5/2021-09-03_16-14-42_Snipaste_2021-09-03_15-42-19.png]]
+更多 lsof 的命令如下：
+#+begin_src bash
+lsof -i:8080：查看8080端口占用
+lsof abc.txt：显示开启文件abc.txt的进程
+lsof -c abc：显示abc进程现在打开的文件
+lsof -c -p 1234：列出进程号为1234的进程所打开的文件
+lsof -g gid：显示归属gid的进程情况
+lsof +d /usr/local/：显示目录下被进程开启的文件
+lsof +D /usr/local/：同上，但是会搜索目录下的目录，时间较长
+lsof -d 4：显示使用fd为4的进程
+lsof -i -U：显示所有打开的端口和UNIX domain文件
+#+END_SRC
+
+** netstat
+netstat -tunlp 用于显示 tcp，udp 的端口和进程等相关情况。
+
+netstat 查看端口占用语法格式：
+#+begin_src bash
+netstat -tunlp | grep 端口号
+#+END_SRC
+-t (tcp) 仅显示tcp相关选项
+-u (udp)仅显示udp相关选项
+-n 拒绝显示别名，能显示数字的全部转化为数字
+-l 仅列出在Listen(监听)的服务状态
+-p 显示建立相关链接的程序名
+
+例如查看 8000 端口的情况，使用以下命令：
+#+begin_src bash
+/:netstat -tunlp | grep 8000
+tcp        0      0 0.0.0.0:8000            0.0.0.0:*               LISTEN      26993/nodejs   
+#+END_SRC
+更多命令：
+#+begin_src bash
+netstat -ntlp   //查看当前所有tcp端口
+netstat -ntulp | grep 80   //查看所有80端口使用情况
+netstat -ntulp | grep 3306   //查看所有3306端口使用情况
+#+END_SRC
