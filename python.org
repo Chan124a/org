@@ -56,6 +56,44 @@ print(str3)
  ['Google', 'Runoob#Taobao#Facebook']
  #+END_SRC
 
+*** strip()方法
+Python strip() 方法用于移除字符串头尾指定的字符（默认为空格或换行符）或字符序列。
+
+注意：该方法只能删除开头或是结尾的字符，不能删除中间部分的字符。
+
+str.strip([chars]);
+
+参数：
+chars -- 移除字符串头尾指定的字符序列。
+
+#+BEGIN_SRC python
+#!/usr/bin/python
+# -*- coding: UTF-8 -*-
+ 
+str = "00000003210Runoob01230000000"; 
+print str.strip( '0' );  # 去除首尾字符 0
+ 
+ 
+str2 = "   Runoob      ";   # 去除首尾空格
+print str2.strip();
+#+END_SRC
+
+#+BEGIN_EXAMPLE
+以上实例输出结果如下：
+
+3210Runoob0123
+Runoob
+#+END_EXAMPLE
+*** join() 方法
+使用哈希字符作为分隔符，将元组中的所有项目连接到字符串中：
+#+BEGIN_SRC python
+myTuple = ("Bill", "Steve", "Elon")
+
+x = "#".join(myTuple)
+
+print(x)  # Bill#Steve#Elon
+#+END_SRC
+
 ** 布尔值
 python中可以直接用 True、False 表示布尔值（请注意大小写），也可以通过布尔运算计算出来。
 ** 空值
@@ -212,6 +250,22 @@ print "列表现在为 : ", list1
 删除的项为 : Runoob
 列表现在为 :  ['Google', 'Taobao']
 #+END_SRC
+
+*** extend()
+extend() 函数用于在列表末尾一次性追加另一个序列中的多个值（用新列表扩展原来的列表）。
+#+BEGIN_SRC python
+#!/usr/bin/python
+
+aList = [123, 'xyz', 'zara', 'abc', 123];
+bList = [2009, 'manni'];
+aList.extend(bList)
+
+print "Extended List : ", aList ;
+#+END_SRC
+以上实例输出结果如下：
+#+BEGIN_EXAMPLE
+Extended List :  [123, 'xyz', 'zara', 'abc', 123, 2009, 'manni']
+#+END_EXAMPLE
 
 ** 字典(Dictionary)
 *** items()方法
@@ -485,6 +539,97 @@ getattr() 函数用于返回一个对象属性值。
 []
 >>> range(1, 0)
 []
+#+END_SRC
+** filter() 
+filter() 函数用于过滤序列，过滤掉不符合条件的元素，返回由符合条件元素组成的新列表。
+
+该接收两个参数，第一个为函数，第二个为序列，序列的每个元素作为参数传递给函数进行判断，然后返回 True 或 False，最后将返回 True 的元素放到新列表中。
+
+注意: Python2.7 返回列表，Python3.x 返回迭代器对象，具体内容可以查看：Python3 filter() 函数
+
+以下是 filter() 方法的语法:
+
+filter(function, iterable)
+
+参数
+- function -- 判断函数, 如果参数为None的话，则默认会去除序列中所有值为假的元素
+- iterable -- 可迭代对象。
+
+#+BEGIN_EXAMPLE
+在 Python中，认为以下值为假:
+
+None       # None值
+False       # False值
+0              # 数值零不管它是int,float还是complex类型
+'',(),[]        # 任何一个空的序列
+{}             # 空的集合
+#+END_EXAMPLE
+
+返回值：
+返回列表
+
+关于filter()方法, python3和python2有一点不同
+
+Python2.x 中返回的是过滤后的列表, 而 Python3 中返回到是一个 filter 类。
+
+filter 类实现了 __iter__ 和 __next__ 方法, 可以看成是一个迭代器, 有惰性运算的特性, 相对 Python2.x 提升了性能, 可以节约内存。
+#+BEGIN_SRC python
+a = filter(lambda x: x % 2 == 0, range(10))
+print(a)
+#+END_SRC
+输出
+#+BEGIN_EXAMPLE
+<filter object at 0x0000022EC66BB128>
+#+END_EXAMPLE
+
+*** 实例
+以下展示了使用 filter 函数的实例：
+
+过滤出列表中的所有奇数：
+#+BEGIN_SRC python
+#!/usr/bin/python
+# -*- coding: UTF-8 -*-
+ 
+def is_odd(n):
+    return n % 2 == 1
+ 
+newlist = filter(is_odd, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+print(newlist)
+#+END_SRC
+输出结果 ：
+#+BEGIN_EXAMPLE
+[1, 3, 5, 7, 9]
+#+END_EXAMPLE
+
+过滤出1~100中平方根是整数的数：
+#+BEGIN_SRC python
+#!/usr/bin/python
+# -*- coding: UTF-8 -*-
+ 
+import math
+def is_sqr(x):
+    return math.sqrt(x) % 1 == 0
+ 
+newlist = filter(is_sqr, range(1, 101))
+print(newlist)
+#+END_SRC
+输出结果 ：
+#+BEGIN_EXAMPLE
+[1, 4, 9, 16, 25, 36, 49, 64, 81, 100]
+#+END_EXAMPLE
+
+** any()
+any() 函数用于判断给定的可迭代参数 iterable 是否全部为 False，则返回 False，如果有一个为 True，则返回 True。
+
+元素除了是 0、空、FALSE 外都算 TRUE。
+
+函数等价于：
+#+begin_src python
+def any(iterable):
+    for element in iterable:
+        if element:
+            return True
+    return False
 #+END_SRC
 
 * 条件语句
@@ -841,6 +986,32 @@ class Student(object):
 student=Student("Hugh",99) #实例化
 #+END_SRC
 
+** classmethod 修饰符
+classmethod 修饰符对应的函数不需要实例化，不需要 self 参数，但第一个参数需要是表示自身类的 cls 参数，可以来调用类的属性，类的方法，实例化对象等。
+
+以下实例展示了 classmethod 的使用方法：
+#+BEGIN_SRC python
+#!/usr/bin/python
+# -*- coding: UTF-8 -*-
+ 
+class A(object):
+    bar = 1
+    def func1(self):  
+        print ('foo') 
+    @classmethod
+    def func2(cls):
+        print ('func2')
+        print (cls.bar)
+        cls().func1()   # 调用 foo 方法
+ 
+A.func2()   
+#+END_SRC
+
+#+BEGIN_EXAMPLE
+func2
+1
+foo
+#+END_EXAMPLE
 * 模块与包
 ** 模块简介
 在 Python 中，一个 =.py= 文件就称之为一个模块（Module）
@@ -1284,7 +1455,86 @@ lambda的主体是一个单个的表达式，而不是一个代码块。（lambd
 
 它的设计理念为：lambda是一个为编写简单的函数而设计的，而def用来处理更大的任务。（lambda is designed for coding simple functions, and def handles larger tasks.）
 
+* __dict__属性
+在 Python 类的内部，无论是类属性还是实例属性，都是以字典的形式进行存储的，其中属性名作为键，而值作为该键对应的值。
 
+为了方便用户查看类中包含哪些属性，Python 类提供了 __dict__ 属性。需要注意的一点是，该属性可以用类名或者类的实例对象来调用，用类名直接调用 __dict__，会输出该由类中所有类属性组成的字典；而使用类的实例对象调用 __dict__，会输出由类中所有实例属性组成的字典。
+
+举个例子：
+#+BEGIN_SRC python 
+class CLanguage:
+    a = 1
+    b = 2
+    def __init__ (self):
+        self.name = "C语言中文网"
+        self.add = "http://c.biancheng.net"
+#通过类名调用__dict__
+print(CLanguage.__dict__)
+
+#通过类实例对象调用 __dict__
+clangs = CLanguage()
+print(clangs.__dict__)
+#+END_SRC
+程序输出结果为：
+#+BEGIN_EXAMPLE
+{'__module__': '__main__', 'a': 1, 'b': 2, '__init__': <function CLanguage.__init__ at 0x0000022C69833E18>, '__dict__': <attribute '__dict__' of 'CLanguage' objects>, '__weakref__': <attribute '__weakref__' of 'CLanguage' objects>, '__doc__': None}
+{'name': 'C语言中文网', 'add': 'http://c.biancheng.net'}
+#+END_EXAMPLE
+不仅如此，对于具有继承关系的父类和子类来说，父类有自己的 __dict__，同样子类也有自己的 __dict__，它不会包含父类的 __dict__。例如：
+#+BEGIN_SRC python
+class CLanguage:
+    a = 1
+    b = 2
+    def __init__ (self):
+        self.name = "C语言中文网"
+        self.add = "http://c.biancheng.net"
+       
+class CL(CLanguage):
+    c = 1
+    d = 2
+    def __init__ (self):
+        self.na = "Python教程"
+        self.ad = "http://c.biancheng.net/python"
+#父类名调用__dict__
+print(CLanguage.__dict__)
+#子类名调用__dict__
+print(CL.__dict__)
+#父类实例对象调用 __dict__
+clangs = CLanguage()
+print(clangs.__dict__)
+#子类实例对象调用 __dict__
+cl = CL()
+print(cl.__dict__)
+#+END_SRC
+运行结果为：
+#+BEGIN_EXAMPLE
+{'__module__': '__main__', 'a': 1, 'b': 2, '__init__': <function CLanguage.__init__ at 0x000001721A853E18>, '__dict__': <attribute '__dict__' of 'CLanguage' objects>, '__weakref__': <attribute '__weakref__' of 'CLanguage' objects>, '__doc__': None}
+{'__module__': '__main__', 'c': 1, 'd': 2, '__init__': <function CL.__init__ at 0x000001721CD15510>, '__doc__': None}
+{'name': 'C语言中文网', 'add': 'http://c.biancheng.net'}
+{'na': 'Python教程', 'ad': 'http://c.biancheng.net/python'}
+#+END_EXAMPLE
+显然，通过子类直接调用的 __dict__ 中，并没有包含父类中的 a 和 b 类属性；同样，通过子类对象调用的 __dict__，也没有包含父类对象拥有的 name 和 add 实例属性。
+
+除此之外，借助由类实例对象调用 __dict__ 属性获取的字典，可以使用字典的方式对其中实例属性的值进行修改，例如：
+#+BEGIN_SRC python
+class CLanguage:
+    a = "aaa"
+    b = 2
+    def __init__ (self):
+        self.name = "C语言中文网"
+        self.add = "http://c.biancheng.net"
+#通过类实例对象调用 __dict__
+clangs = CLanguage()
+print(clangs.__dict__)
+clangs.__dict__['name'] = "Python教程"
+print(clangs.name)
+#+END_SRC
+程序运行结果为：
+#+BEGIN_EXAMPLE
+{'name': 'C语言中文网', 'add': 'http://c.biancheng.net'}
+Python教程
+#+END_EXAMPLE
+注意，无法通过类似的方式修改类变量的值。
 * 异常处理
 ** 什么是异常？
 异常即是一个事件，该事件会在程序执行过程中发生，影响了程序的正常执行。
@@ -1397,6 +1647,166 @@ def function():
     # 在Python3.x的时候pass可以写或不写
     pass
 #+END_SRC
+
+* __init__.py的用法
+0、__init__.py
+在Python工程里，当python检测到一个目录下存在__init__.py文件时，python就会把它当成一个模块(module)。Module跟C＋＋的命名空间和Java的Package的概念很像，都是为了科学地组织化工程，管理命名空间。
+
+__init__.py可以是一个空文件，也可以有非常丰富的内容。本文将举一个非常简单的例子，来介绍__init__.py的用法；在本文的最后，我将会再简单介绍__init__.py的设计理念。
+
+1、一个普通的四则运算模块
+在不利用__init__.py的情况下，我们来看一个四则运算的例子。我们的工程目录结构如下图所示：
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-10-08_17-01-47.png @ 2021-10-08 17:02:18
+[[file:__init__.py%E7%9A%84%E7%94%A8%E6%B3%95/2021-10-08_17-02-18_Snipaste_2021-10-08_17-01-47.png]]
+如上图，其中，main.py是程序入口，我们用了不同的方式来import四则运算的各个子模块。arithmetic模块实现四则运算；为了展示需要，我们将加减乘除四种运算分别放在不同的代码中。
+
+每个文件的代码如下:
+#+BEGIN_SRC python
+#
+# @file main.py
+#
+
+import arithmetic.add
+import arithmetic.sub as sub
+
+from arithmetic.mul import mul
+from arithmetic import dev
+
+def letscook(x, y, oper):
+    r = 0
+    if oper == "+":
+        r = arithmetic.add.add(x, y)
+    elif oper == "-":
+        r = sub.sub(x, y)
+    elif oper == "*":
+        r = mul(x, y)
+    else:
+        r = dev.dev(x, y)
+
+    print("{} {} {} = {}".format(x, oper, y, r))
+
+x, y = 3, 8
+
+letscook(x, y, "+")
+letscook(x, y, "-")
+letscook(x, y, "*")
+letscook(x, y, "/")
+#+END_SRC
+
+#+begin_src python
+#
+# @file add.py
+#
+
+def add(a, b):
+    return a + b
+
+#+END_SRC
+#+begin_src python
+#
+# @file sub.py
+#
+
+def sub(a, b):
+    return a - b
+#+END_SRC
+#+begin_src python
+#
+# @file mul.py
+# 
+
+def mul(a, b):
+    return a * b
+#+END_SRC
+#+begin_src python
+#
+# @file dev.py
+#
+
+def dev(a, b):
+    return a / b
+#+END_SRC
+从代码可以看出，为了使用arithmetic中的某个子模块（main.py中我们展示了四种不同的方式），我们必须使用非常繁琐的import语句；在使用的时候，也有可能需要使用非常繁琐的表达式。如果我们在不同的地方使用arithmetic的子模块，都需要写这么繁琐的import或者使用表达式，你可能会觉得心累。这就是为什么我们需要利用__init__.py来简化我们的使用。
+2、利用__init__.py
+还是第1小节中的工程目录结构，实现同样的功能，我们在__init__.py中编写了一些代码；同样，我们对main.py进行了一些适当的修改。
+
+修改后__init__.py和main.py的代码如下：
+#+begin_src python
+#
+# @file main.py
+#
+
+import arithmetic as a4
+
+def letscook(x, y, oper):
+    r = 0
+    if oper == "+":
+        r = a4.add(x, y)
+    elif oper == "-":
+        r = a4.sub(x, y)
+    elif oper == "*":
+        r = a4.mul(x, y)
+    else:
+        r = a4.dev(x, y)
+
+    print("{} {} {} = {}".format(x, oper, y, r))
+
+x, y = 3, 8
+
+letscook(x, y, "+")
+letscook(x, y, "-")
+letscook(x, y, "*")
+letscook(x, y, "/")
+#+END_SRC
+#+begin_src python
+#
+# @file __init__.py
+#
+
+import arithmetic.add
+import arithmetic.sub
+import arithmetic.mul
+import arithmetic.dev
+
+add = arithmetic.add.add
+sub = arithmetic.sub.sub
+mul = arithmetic.mul.mul
+dev = arithmetic.dev.dev
+#+END_SRC
+
+在__init__.py中， 我们import了arithmetic下的所有子模块，并在__init__.py中给各个子模块的核心功能取了新的名字，作为arithmetic模块的变量。所以我们在main.py中import了arithmetic模块之后，就可以直接进行使用了。如果你使用from arithmetic import * 语句，那么我们就可以使用add、sub、mul、dev，连a4都省了。
+
+3、__init__.py的设计原则
+
+__init__.py的原始使命是声明一个模块，所以它可以是一个空文件。在__init__.py中声明的所有类型和变量，就是其代表的模块的类型和变量，第2小节就是利用这个原理，为四则运算的4个子模块声明了新的变量。我们在利用__init__.py时，应该遵循如下几个原则：
+
+A、不要污染现有的命名空间。模块一个目的，是为了避免命名冲突，如果你在种用__init__.py时违背这个原则，是反其道而为之，就没有必要使用模块了。
+
+B、利用__init__.py对外提供类型、变量和接口，对用户隐藏各个子模块的实现。一个模块的实现可能非常复杂，你需要用很多个文件，甚至很多子模块来实现，但用户可能只需要知道一个类型和接口。就像我们的arithmetic例子中，用户只需要知道四则运算有add、sub、mul、dev四个接口，却并不需要知道它们是怎么实现的，也不想去了解arithmetic中是如何组织各个子模块的。由于各个子模块的实现有可能非常复杂，而对外提供的类型和接口有可能非常的简单，我们就可以通过这个方式来对用户隐藏实现，同时提供非常方便的使用。
+
+C、只在__init__.py中导入有必要的内容，不要做没必要的运算。像我们的例子，import arithmetic语句会执行__ini__.py中的所有代码。如果我们在__init__.py中做太多事情，每次import都会有额外的运算，会造成没有必要的开销。一句话，__init__.py只是为了达到B中所表述的目的，其它事情就不要做啦。
+
+* 查看当前导入(引入)模块信息
+使用不带参的dir函数dir()
+
+例如小编这里导入以下几个模块。
+
+import sys,os,re,time,wmi
+
+导入这4个模块。
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-10-16_16-12-57.png @ 2021-10-16 21:12:58
+[[file:%E6%9F%A5%E7%9C%8B%E5%BD%93%E5%89%8D%E5%AF%BC%E5%85%A5(%E5%BC%95%E5%85%A5)%E6%A8%A1%E5%9D%97%E4%BF%A1%E6%81%AF/2021-10-16_21-12-58_Snipaste_2021-10-16_16-12-57.png]]
+此时我们要查看导入的模块信息——使用不带参的dir函数。
+
+dir()
+
+可以看到，没有_开头和结尾的数据，就是我们导入的模块，其实_开头和结尾的也是模块，只不过是python解释器导入的模块。
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-10-16_21-13-20.png @ 2021-10-16 21:13:25
+[[file:%E6%9F%A5%E7%9C%8B%E5%BD%93%E5%89%8D%E5%AF%BC%E5%85%A5(%E5%BC%95%E5%85%A5)%E6%A8%A1%E5%9D%97%E4%BF%A1%E6%81%AF/2021-10-16_21-13-25_Snipaste_2021-10-16_21-13-20.png]]
+
+
 
 * numpy库 
 ** numpy.fromfile
@@ -3278,6 +3688,12 @@ class torch.utils.data.DataLoader(dataset, batch_size=1, shuffle=False, sampler=
 - collate_fn (callable, optional) – 用来处理不同情况下的输入dataset的封装，一般采用默认即可，除非你自定义的数据读取输出非常少见。
 - pin_memory (bool, optional) – If True, the data loader will copy tensors into CUDA pinned memory before returning them
 - drop_last (bool, optional) – 如果数据集大小不能被batch size整除，则设置为True后可删除最后一个不完整的batch。如果设为False并且数据集的大小不能被batch size整除，则最后一个batch将更小。(默认: False)
+
+
+***** collate_fn
+通过collate_fn函数可以对这些样本做进一步的处理(任何你想要的处理)，原则上返回值应当是一个有结构的batch。而DataLoader每次迭代的返回值就是collate_fn的返回值。实现自定义的batch输出
+
+
 *** ImageFolder
 #+BEGIN_SRC python
 ImageFolder(root,transform=None,target_transform=None,loader=default_loader)
@@ -4100,6 +4516,271 @@ tensor([[ 1,  1],
  2  2
  4  3
 
+#+END_SRC
+
+** .cuda()方法和torch.cuda.set_device()
+我们还可以使用.cuda()[包括model.cuda()/loss.cuda()/tensor.cuda()]方法和torch.cuda.set_device()来把模型和数据加载到对应的gpu上。
+
+*** .cuda()
+
+以model.cuda()为例，加载方法为：
+#+begin_src python
+model.cuda(gpu_id) # gpu_id为int类型变量，只能指定一张显卡
+model.cuda('cuda:'+str(gpu_ids)) #输入参数为str类型，可指定多张显卡
+model.cuda('cuda:1,2') #指定多张显卡的一个示例
+#+END_SRC
+
+*** torch.cuda.set_device()
+
+使用torch.cuda.set_device()可以更方便地将模型和数据加载到对应GPU上, 直接定义模型之前加入一行代码即可
+#+begin_src python
+torch.cuda.set_device(gpu_id) #单卡
+torch.cuda.set_device('cuda:'+str(gpu_ids)) #可指定多卡
+#+END_SRC
+
+但是这种写法的优先级低，如果model.cuda()中指定了参数，那么torch.cuda.set_device()会失效，而且pytorch的官方文档中明确说明，不建议用户使用该方法。
+
+第1节和第2节所说的方法同时使用是并不会冲突，而是会叠加。比如在运行代码时使用
+#+begin_src python
+CUDA_VISIBLE_DEVICES=2,3,4,5 python3 train.py
+#+END_SRC
+
+而在代码内部又指定
+#+begin_src python
+model.cuda(1)
+loss.cuda(1)
+tensor.cuda(1)
+#+END_SRC
+
+那么代码会在GPU3上运行。原理是CUDA_VISIBLE_DEVICES使得只有GPU2,3,4,5可见，那么这4张显卡，程序就会把它们看成GPU0,1,2,3，.cuda(1)把模型/loss/数据都加载到了程序所以为的GPU1上，则实际使用的显卡是GPU3。
+
+如果利用.cuda()或torch.cuda.set_device()把模型加载到多个显卡上，而实际上只使用一张显卡运行程序的话，那么程序会把模型加载到第一个显卡上，比如如果在代码中指定了
+#+begin_src python
+model.cuda('cuda:2,1')
+#+END_SRC
+在运行代码时使用
+#+begin_src python
+CUDA_VISIBLE_DEVICES=2,3,4,5 python3 train.py
+#+END_SRC
+
+这一指令，那么程序最终会在GPU4上运行。
+** Sampler
+*** Sampler
+首先需要知道的是所有的采样器都继承自Sampler这个类，如下：
+
+可以看到主要有三种方法：分别是：
+- __init__: 这个很好理解，就是初始化
+- __iter__: 这个是用来产生迭代索引值的，也就是指定每个step需要读取哪些数据
+- __len__: 这个是用来返回每次迭代器的长度
+#+begin_src python
+class Sampler(object):
+    r"""Base class for all Samplers.
+    Every Sampler subclass has to provide an __iter__ method, providing a way
+    to iterate over indices of dataset elements, and a __len__ method that
+    returns the length of the returned iterators.
+    """
+    # 一个 迭代器 基类
+    def __init__(self, data_source):
+        pass
+
+    def __iter__(self):
+        raise NotImplementedError
+
+    def __len__(self):
+        raise NotImplementedError
+#+END_SRC
+*** 子类Sampler
+介绍完父类后我们看看Pytorch给我们提供了哪些采样器
+
+**** SequentialSampler
+这个看名字就很好理解，其实就是按顺序对数据集采样。
+
+其原理是首先在初始化的时候拿到数据集data_source，之后在__iter__方法中首先得到一个和data_source一样长度的range可迭代器。每次只会返回一个索引值。
+#+begin_src python
+class SequentialSampler(Sampler):
+    r"""Samples elements sequentially, always in the same order.
+    Arguments:
+        data_source (Dataset): dataset to sample from
+    """
+   # 产生顺序 迭代器
+    def __init__(self, data_source):
+        self.data_source = data_source
+
+    def __iter__(self):
+        return iter(range(len(self.data_source)))
+
+    def __len__(self):
+        return len(self.data_source)
+#+END_SRC
+
+使用示例：
+#+begin_src python
+a = [1,5,78,9,68]
+b = torch.utils.data.SequentialSampler(a)
+for x in b:
+    print(x)
+    
+>>> 0
+    1
+    2
+    3
+    4
+#+END_SRC
+
+**** RandomSampler
+参数作用：
+- data_source: 同上
+- num_samples: 指定采样的数量，默认是所有。
+- replacement: 
+
+若为True，则表示可以重复采样，即同一个样本可以重复采样，这样可能导致有的样本采样不到。所以此时我们可以设置num_samples来增加采样数量使得每个样本都可能被采样到。
+#+begin_src python
+class RandomSampler(Sampler):
+    r"""Samples elements randomly. If without replacement, then sample from a shuffled dataset.
+    If with replacement, then user can specify ``num_samples`` to draw.
+    Arguments:
+        data_source (Dataset): dataset to sample from
+        num_samples (int): number of samples to draw, default=len(dataset)
+        replacement (bool): samples are drawn with replacement if ``True``, default=False
+    """
+
+    def __init__(self, data_source, replacement=False, num_samples=None):
+        self.data_source = data_source
+        self.replacement = replacement
+        self.num_samples = num_samples
+
+        if self.num_samples is not None and replacement is False:
+            raise ValueError("With replacement=False, num_samples should not be specified, "
+                             "since a random permute will be performed.")
+
+        if self.num_samples is None:
+            self.num_samples = len(self.data_source)
+
+        if not isinstance(self.num_samples, int) or self.num_samples <= 0:
+            raise ValueError("num_samples should be a positive integeral "
+                             "value, but got num_samples={}".format(self.num_samples))
+        if not isinstance(self.replacement, bool):
+            raise ValueError("replacement should be a boolean value, but got "
+                             "replacement={}".format(self.replacement))
+
+    def __iter__(self):
+        n = len(self.data_source)
+        if self.replacement:
+            return iter(torch.randint(high=n, size=(self.num_samples,), dtype=torch.int64).tolist())
+        return iter(torch.randperm(n).tolist())
+
+    def __len__(self):
+        return len(self.data_source)
+#+END_SRC
+
+**** SubsetRandomSampler
+#+begin_src python
+class SubsetRandomSampler(Sampler):
+    r"""Samples elements randomly from a given list of indices, without replacement.
+    Arguments:
+        indices (sequence): a sequence of indices
+    """
+
+    def __init__(self, indices):
+        self.indices = indices
+
+    def __iter__(self):
+        return (self.indices[i] for i in torch.randperm(len(self.indices)))
+
+    def __len__(self):
+        return len(self.indices)
+#+END_SRC
+这个采样器常见的使用场景是将训练集划分成训练集和验证集，示例如下：
+#+begin_src python
+n_train = len(train_dataset)
+split = n_train // 3
+indices = random.shuffle(list(range(n_train)))
+train_sampler = torch.utils.data.sampler.SubsetRandomSampler(indices[split:])
+valid_sampler = torch.utils.data.sampler.SubsetRandomSampler(indices[:split])
+train_loader = DataLoader(..., sampler=train_sampler, ...)
+valid_loader = DataLoader(..., sampler=valid_sampler, ...)
+#+END_SRC
+
+**** WeightedRandomSampler
+参数作用同上面的RandomSampler，不再赘述。
+#+begin_src python
+class WeightedRandomSampler(Sampler):
+    r"""Samples elements from [0,..,len(weights)-1] with given probabilities (weights).
+    Arguments:
+        weights (sequence)   : a sequence of weights, not necessary summing up to one
+        num_samples (int): number of samples to draw
+        replacement (bool): if ``True``, samples are drawn with replacement.
+            If not, they are drawn without replacement, which means that when a
+            sample index is drawn for a row, it cannot be drawn again for that row.
+    """
+
+    def __init__(self, weights, num_samples, replacement=True):
+        if not isinstance(num_samples, _int_classes) or isinstance(num_samples, bool) or \
+                num_samples <= 0:
+            raise ValueError("num_samples should be a positive integeral "
+                             "value, but got num_samples={}".format(num_samples))
+        if not isinstance(replacement, bool):
+            raise ValueError("replacement should be a boolean value, but got "
+                             "replacement={}".format(replacement))
+        self.weights = torch.tensor(weights, dtype=torch.double)
+        self.num_samples = num_samples
+        self.replacement = replacement
+
+    def __iter__(self):
+        return iter(torch.multinomial(self.weights, self.num_samples, self.replacement).tolist())
+
+    def __len__(self):
+        return self.num_samples  ## 指的是一次一共采样的样本的数量
+#+END_SRC
+
+**** BatchSampler
+前面的采样器每次都只返回一个索引，但是我们在训练时是对批量的数据进行训练，而这个工作就需要BatchSampler来做。也就是说BatchSampler的作用就是将前面的Sampler采样得到的索引值进行合并，当数量等于一个batch大小后就将这一批的索引值返回。
+#+begin_src python
+class BatchSampler(Sampler):
+    r"""Wraps another sampler to yield a mini-batch of indices.
+    Args:
+        sampler (Sampler): Base sampler.
+        batch_size (int): Size of mini-batch.
+        drop_last (bool): If ``True``, the sampler will drop the last batch if
+            its size would be less than ``batch_size``
+    Example:
+        >>> list(BatchSampler(SequentialSampler(range(10)), batch_size=3, drop_last=False))
+        [[0, 1, 2], [3, 4, 5], [6, 7, 8], [9]]
+        >>> list(BatchSampler(SequentialSampler(range(10)), batch_size=3, drop_last=True))
+        [[0, 1, 2], [3, 4, 5], [6, 7, 8]]
+    """
+# 批次采样
+    def __init__(self, sampler, batch_size, drop_last):
+        if not isinstance(sampler, Sampler):
+            raise ValueError("sampler should be an instance of "
+                             "torch.utils.data.Sampler, but got sampler={}"
+                             .format(sampler))
+        if not isinstance(batch_size, _int_classes) or isinstance(batch_size, bool) or \
+                batch_size <= 0:
+            raise ValueError("batch_size should be a positive integeral value, "
+                             "but got batch_size={}".format(batch_size))
+        if not isinstance(drop_last, bool):
+            raise ValueError("drop_last should be a boolean value, but got "
+                             "drop_last={}".format(drop_last))
+        self.sampler = sampler
+        self.batch_size = batch_size
+        self.drop_last = drop_last
+
+    def __iter__(self):
+        batch = []
+        for idx in self.sampler:
+            batch.append(idx)
+            if len(batch) == self.batch_size:
+                yield batch
+                batch = []
+        if len(batch) > 0 and not self.drop_last:
+            yield batch
+
+    def __len__(self):
+        if self.drop_last:
+            return len(self.sampler) // self.batch_size
+        else:
+            return (len(self.sampler) + self.batch_size - 1) // self.batch_size
 #+END_SRC
 
 * torchvision
@@ -5548,8 +6229,95 @@ The format to use to read the file. By default imageio selects the appropriate f
 - kwargs:…
 Further keyword arguments are passed to the reader. See help() to see what arguments are available for a particular format.
 
+* urlparse 模块
+urlparse模块主要是用于解析url中的参数对url按照一定格式进行拆分或拼接 
 
+urlparse.urlparse
 
+将url分为6个部分，返回一个包含6个字符串项目的元组：协议、位置、路径、参数、查询、片段。
+#+BEGIN_SRC python
+import urlparse
+url_change = urlparse.urlparse('https://i.cnblogs.com/EditPosts.aspx?opt=1')
+print url_change
+#+END_SRC
+输出结果为：
+#+BEGIN_EXAMPLE
+ParseResult(scheme='https', netloc='i.cnblogs.com', path='/EditPosts.aspx', params='', query='opt=1', fragment='')
+#+END_EXAMPLE
+其中 scheme 是协议  netloc 是域名服务器  path 相对路径  params是参数，query是查询的条件
+
+urlparse.parse_qs(urlparse.urlparse(url).query)
+
+这个是获取urlparse分割后元祖中的某一项  urlparse.urlparse(url).query   获取查询条件
+
+parse_qs 有几种实现
+
+urlparse.parse_qs 返回字典
+urlparse.parse_qsl 返回列表
+
+* json
+** json.dumps()
+json.dumps将一个Python数据结构转换为JSON
+#+BEGIN_SRC python
+import json
+data = {
+    'name' : 'myname',
+    'age' : 100,
+}
+json_str = json.dumps(data)
+#+END_SRC
+** json库的一些用法
+| 方法                            | 作用                                                         |
+|---------------------------------+--------------------------------------------------------------|
+| json.dumps()                    | 将python对象编码成Json字符串                                 |
+| json.loads()                    | 将Json字符串解码成python对象                                 |
+| json.dump()                     | 将python中的对象转化成json储存到文件中                       |
+| json.load()                     | 将文件中的json的格式转化成python对象提取出来                 |
+| json.dump()和json.dumps()的区别 |                                                              |
+| json.dumps()                    | 是把python对象转换成json对象的一个过程，生成的是字符串。     |
+| json.dump()                     | 是把python对象转换成json对象生成一个fp的文件流，和文件相关。 |
+** json参数
+#+BEGIN_SRC 
+json.dumps(obj, skipkeys=False, ensure_ascii=True, check_circular=True, allow_nan=True, cls=None, indent=None, separators=None, encoding="utf-8", default=None, sort_keys=False, **kw)
+#+END_SRC
+- obj:转化成json的对象。
+- sort_keys =True:是告诉编码器按照字典排序(a到z)输出。如果是字典类型的python对象，就把关键字按照字典排序。
+- indent:参数根据数据格式缩进显示，读起来更加清晰。
+- separators:是分隔符的意思，参数意思分别为不同dict项之间的分隔符和dict项内key和value之间的分隔符，把：和，后面的空格都除去了。
+
+#+BEGIN_SRC python
+import json
+
+x = {'name':'你猜','age':19,'city':'四川'}
+#用dumps将python编码成json字符串
+y = json.dumps(x)
+print(y)
+i = json.dumps(x,separators=(',',':'))
+print(i)
+# 输出结果
+{"name": "\u4f60\u731c", "age": 19, "city": "\u56db\u5ddd"}
+{"name":"\u4f60\u731c","age":19,"city":"\u56db\u5ddd"}
+#+END_SRC
+- skipkeys：默认值是False，如果dict的keys内的数据不是python的基本类型(str,unicode,int,long,float,bool,None)，设置为False时，就会报TypeError的错误。此时设置成True，则会跳过这类key 。
+- ensure_ascii=True：默认输出ASCLL码，如果把这个该成False,就可以输出中文。
+- check_circular：如果check_circular为false，则跳过对容器类型的循环引用检查，循环引用将导致溢出错误(或更糟的情况)。
+- allow_nan：如果allow_nan为假，则ValueError将序列化超出范围的浮点值(nan、inf、-inf)，严格遵守JSON规范，而不是使用JavaScript等价值(nan、Infinity、-Infinity)。
+- default：default(obj)是一个函数，它应该返回一个可序列化的obj版本或引发类型错误。默认值只会引发类型错误。
+
+* unicodedata 
+分类小分队
+unicodedata.category(chr)
+unicodedata.bidirectional(chr)
+unicodedata.east_asian_width(chr)
+
+在 unicode 中，有多种分类标准，字符在各个分类标准中都有自己的的分类定位。以上三个函数是查询字符分别在三种分类标准下的分类名称。
+
+参数:
+    chr: str，字符
+返回值:
+    str，分类名称
+
+unicodedata.category(chr) 可以获取指定字符在常规分类中所属的分类名称，unicodedata.bidirectional(chr) 可以获取指定字符的双向字符类型名称，unicodedata.east_asian_width(chr)可以获取指定字符的字符宽度分类名称。
 * 问题集锦
 ** python3 报错TypeError: 'range' object does not support item assignment
 尝试使用range() 创建整数列表（导致“TypeError: ‘range’ object does not support item assignment”）有时你想要得到一个有序的整数列表，所以range() 看上去是生成此列表的不错方式。然而，你需要记住range() 返回的是“range object”，而不是实际的list 值。

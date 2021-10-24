@@ -130,7 +130,133 @@ root@192.168.1.249's password:
 #+END_SRC
 此时输入的密码是当时在容器中所设置修改的root密码，123456
 
+* VScode + docker进行代码调试
+首先docker容器要打开ssh服务，使得可以用ssh连接到docker容器里。
 
+配置VS Code：
+
+打开VS code，在扩展栏（或者按ctr+shift+X）查找安装Remote Development
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-10-16_21-17-12.png @ 2021-10-16 21:17:25
+[[file:VScode_+_docker%E8%BF%9B%E8%A1%8C%E4%BB%A3%E7%A0%81%E8%B0%83%E8%AF%95/2021-10-16_21-17-25_Snipaste_2021-10-16_21-17-12.png]]
+安装完成后需要reload一下，然后按ctr+shift+p，打开查找栏，输入remote-ssh，选择open Configuration file
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-10-16_21-17-36.png @ 2021-10-16 21:17:44
+[[file:VScode_+_docker%E8%BF%9B%E8%A1%8C%E4%BB%A3%E7%A0%81%E8%B0%83%E8%AF%95/2021-10-16_21-17-44_Snipaste_2021-10-16_21-17-36.png]]
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-10-16_21-17-50.png @ 2021-10-16 21:17:54
+[[file:VScode_+_docker%E8%BF%9B%E8%A1%8C%E4%BB%A3%E7%A0%81%E8%B0%83%E8%AF%95/2021-10-16_21-17-54_Snipaste_2021-10-16_21-17-50.png]]
+Host随便起名字，这里我用AutoML_docker命名。在HostName的地方输入服务器的ip，注意端口Port是我们之前docker映射到服务器上的端口号。
+配置成功后左边会多出一个远程浏览的标签，点开就可以看到刚才配置的远程连接了。点击之后要输入密码，即我们创建docker后修改的root密码。
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-10-16_21-18-16.png @ 2021-10-16 21:18:21
+[[file:VScode_+_docker%E8%BF%9B%E8%A1%8C%E4%BB%A3%E7%A0%81%E8%B0%83%E8%AF%95/2021-10-16_21-18-21_Snipaste_2021-10-16_21-18-16.png]]
+
+配置vscode debugger:
+菜单查看-扩展或者Ctrl + Shift + X，在商店中搜索“Python”，找到“适Python extension for Visual Studio Code”安装在服务器docker中，然后重启VSCode。
+之后，菜单查看-命令面板或者Ctrl + Shift + P，输入“python: select interpreter”,点击选择解析器，稍等几秒钟，就会列出在系统中找到的Python环境（Python环境要加入环境变量才能被找到），点击需要的python解析器即可。
+打开debug选项卡，选择Add configuration
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-10-16_21-19-03.png @ 2021-10-16 21:19:08
+[[file:VScode_+_docker%E8%BF%9B%E8%A1%8C%E4%BB%A3%E7%A0%81%E8%B0%83%E8%AF%95/2021-10-16_21-19-08_Snipaste_2021-10-16_21-19-03.png]]
+编辑launch.json文件如下：
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-10-16_21-19-22.png @ 2021-10-16 21:19:27
+[[file:VScode_+_docker%E8%BF%9B%E8%A1%8C%E4%BB%A3%E7%A0%81%E8%B0%83%E8%AF%95/2021-10-16_21-19-27_Snipaste_2021-10-16_21-19-22.png]]
+launch.json常用的调试配置有：
+- “Python: Current File (Integrated Terminal)”：该配置表示在VSCode内置的命令行中直接执行当前激活的Python文件。如果需要制定要执行的文件，可以修改"program": "${file}"中的${file}宏为需要的文件。
+- “Python: Current File (External Terminal)”：该配置功能和上面的相同，区别是不使用VSCode内置命令行，而新打开一个命令行。
+- “Python: Attach”：该配置是附件到另外一个进程的调试方式。
+
+* docker 拷贝镜像文件
+** 概述
+
+我们制作好镜像后，有时需要将镜像复制到另一台服务器使用。
+
+能达到以上目的有两种方式，一种是上传镜像到仓库中（本地或公共仓库），但是另一台服务器很肯能只是与当前服务器局域网想通而没有公网的，所以如果使用仓库的方式，只能自己搭建私有仓库，这会在另一篇文章中介绍。
+
+如果我们仅仅是要复制到另外少数的服务器，搭建私有仓库显然没有这个必要，而将镜像保存为文件上传到其他服务器再从文件中载入镜像也是一个不错的选择。
+
+可以使用Docker save和Docker load命令来存储和载入镜像。
+
+** 保存镜像为文件
+
+如果要讲镜像保存为本地文件，可以使用Docker save命令。
+
+命令格式：
+docker save -o 要保存的文件名  要保存的镜像
+
+首先查看当前的镜像列表：
+
+docker images
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-10-11_15-50-43.png @ 2021-10-11 23:07:40
+[[file:docker_%E6%8B%B7%E8%B4%9D%E9%95%9C%E5%83%8F%E6%96%87%E4%BB%B6/2021-10-11_23-07-40_Snipaste_2021-10-11_15-50-43.png]]
+
+比如这里,我们将java8的镜像保存为文件：
+
+docker save -o java8.tar lwieske/java-8
+
+完成后通过 ls 命令即可看到文件。 
+
+** 从文件载入镜像
+
+从文件载入镜像可以使用Docker load命令。
+
+命令格式：
+
+docker load --input 文件
+
+或者
+
+docker load < 文件名
+
+此时会导入镜像以及相关的元数据信息等。
+
+首先使用SSH工具将文件上传到另一台服务器。
+
+然后通过命令载入镜像：
+
+
+docker load < java8.tar
+
+导入后可以使用docker images命令查看:
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-10-11_23-08-30.png @ 2021-10-11 23:08:52
+[[file:docker_%E6%8B%B7%E8%B4%9D%E9%95%9C%E5%83%8F%E6%96%87%E4%BB%B6/2021-10-11_23-08-52_Snipaste_2021-10-11_23-08-30.png]]
+
+* docker commit 
+docker commit :从容器创建一个新的镜像。
+
+语法
+
+docker commit [OPTIONS] CONTAINER [REPOSITORY[:TAG]]
+
+OPTIONS说明：
+
+-a :提交的镜像作者；
+
+-c :使用Dockerfile指令来创建镜像；
+
+-m :提交时的说明文字；
+
+-p :在commit时，将容器暂停。
+
+** 实例
+将容器a404c6c174a2 保存为新的镜像,并添加提交人信息和说明信息。
+#+BEGIN_SRC bash
+runoob@runoob:~$ docker commit -a "runoob.com" -m "my apache" a404c6c174a2  mymysql:v1 
+sha256:37af1236adef1544e8886be23010b66577647a40bc02c0885a6600b33ee28057
+runoob@runoob:~$ docker images mymysql:v1
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+mymysql             v1                  37af1236adef        15 seconds ago      329 MB
+#+END_SRC
+
+* 镜像改名命令格式：
+命令格式：
+
+ docker  tag  镜像id  仓库：标签
+ 
+或：
+ 
+ docker  tag  旧镜像名  新镜像名
 * 参考文档:
 1. [官方文档](https://docs.docker.com/engine/reference/commandline)
 2. [Docker 参数 -i -t 的作用](https://blog.csdn.net/upHailin/article/details/80892505)

@@ -102,6 +102,14 @@ docker run -it ubuntu:16.04 /bin/bash
 vi /etc/ssh/sshd_config
 将PermitRootLogin的值从withoutPassword改为yes
 
+下面是可选设置
+#+BEGIN_EXAMPLE
+RSAAuthentication yes #启用 RSA 认证
+PubkeyAuthentication yes #启用公钥私钥配对认证方式 
+AuthorizedKeysFile .ssh/authorized_keys #公钥文件路径（和上面生成的文件同）
+PermitRootLogin yes #root能使用ssh登录
+#+END_EXAMPLE
+
 4. 重启ssh服务
 service ssh start
 
@@ -122,7 +130,98 @@ root@192.168.1.249's password:
 #+END_SRC
 此时输入的密码是当时在容器中所设置修改的root密码，123456
 
+* docker 拷贝镜像文件
+** 概述
 
+我们制作好镜像后，有时需要将镜像复制到另一台服务器使用。
+
+能达到以上目的有两种方式，一种是上传镜像到仓库中（本地或公共仓库），但是另一台服务器很肯能只是与当前服务器局域网想通而没有公网的，所以如果使用仓库的方式，只能自己搭建私有仓库，这会在另一篇文章中介绍。
+
+如果我们仅仅是要复制到另外少数的服务器，搭建私有仓库显然没有这个必要，而将镜像保存为文件上传到其他服务器再从文件中载入镜像也是一个不错的选择。
+
+可以使用Docker save和Docker load命令来存储和载入镜像。
+
+** 保存镜像为文件
+
+如果要讲镜像保存为本地文件，可以使用Docker save命令。
+
+命令格式：
+docker save -o 要保存的文件名  要保存的镜像
+
+首先查看当前的镜像列表：
+
+docker images
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-10-11_15-50-43.png @ 2021-10-11 23:07:40
+[[file:docker_%E6%8B%B7%E8%B4%9D%E9%95%9C%E5%83%8F%E6%96%87%E4%BB%B6/2021-10-11_23-07-40_Snipaste_2021-10-11_15-50-43.png]]
+
+比如这里,我们将java8的镜像保存为文件：
+
+docker save -o java8.tar lwieske/java-8
+
+完成后通过 ls 命令即可看到文件。 
+
+** 从文件载入镜像
+
+从文件载入镜像可以使用Docker load命令。
+
+命令格式：
+
+docker load --input 文件
+
+或者
+
+docker load < 文件名
+
+此时会导入镜像以及相关的元数据信息等。
+
+首先使用SSH工具将文件上传到另一台服务器。
+
+然后通过命令载入镜像：
+
+
+docker load < java8.tar
+
+导入后可以使用docker images命令查看:
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-10-11_23-08-30.png @ 2021-10-11 23:08:52
+[[file:docker_%E6%8B%B7%E8%B4%9D%E9%95%9C%E5%83%8F%E6%96%87%E4%BB%B6/2021-10-11_23-08-52_Snipaste_2021-10-11_23-08-30.png]]
+
+* docker commit 
+docker commit :从容器创建一个新的镜像。
+
+语法
+
+docker commit [OPTIONS] CONTAINER [REPOSITORY[:TAG]]
+
+OPTIONS说明：
+
+-a :提交的镜像作者；
+
+-c :使用Dockerfile指令来创建镜像；
+
+-m :提交时的说明文字；
+
+-p :在commit时，将容器暂停。
+
+** 实例
+将容器a404c6c174a2 保存为新的镜像,并添加提交人信息和说明信息。
+#+BEGIN_SRC bash
+runoob@runoob:~$ docker commit -a "runoob.com" -m "my apache" a404c6c174a2  mymysql:v1 
+sha256:37af1236adef1544e8886be23010b66577647a40bc02c0885a6600b33ee28057
+runoob@runoob:~$ docker images mymysql:v1
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+mymysql             v1                  37af1236adef        15 seconds ago      329 MB
+#+END_SRC
+
+* 镜像改名命令格式：
+命令格式：
+
+ docker  tag  镜像id  仓库：标签
+ 
+或：
+ 
+ docker  tag  旧镜像名  新镜像名
 * 参考文档:
 1. [官方文档](https://docs.docker.com/engine/reference/commandline)
 2. [Docker 参数 -i -t 的作用](https://blog.csdn.net/upHailin/article/details/80892505)

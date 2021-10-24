@@ -65,21 +65,60 @@ deb-src http://mirrors.aliyun.com/ubuntu/ bionic-backports main restricted unive
 #+END_EXAMPLE
 清华源
 #+BEGIN_EXAMPLE
+Q# 默认注释了源码镜像以提高 apt update 速度，如有需要可自行取消注释
+# 若出现no longer has a Release file错误，把https该成http即可
 deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic main restricted universe multiverse
-deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic main restricted universe multiverse
+# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic main restricted universe multiverse
 deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-updates main restricted universe multiverse
-deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-updates main restricted universe multiverse
+# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-updates main restricted universe multiverse
 deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-backports main restricted universe multiverse
-deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-backports main restricted universe multiverse
+# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-backports main restricted universe multiverse
 deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-security main restricted universe multiverse
-deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-security main restricted universe multiverse
-deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-proposed main restricted universe multiverse
-deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-proposed main restricted universe multiverse
+# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-security main restricted universe multiverse
+
 #+END_EXAMPLE
 4、更新源
  
 更新软件包列表
 sudo apt-get update
+*** no longer has a Release file错误的解决方法
+把软件源里的https改成http就行了
+
+今天我sudo apt-get update遇到了一个
+#+BEGIN_SRC bash
+Hit:1 http://packages.microsoft.com/repos/code stable InRelease
+Ign:2 http://mirrors.tuna.tsinghua.edu.cn/ros/ubuntu bionic InRelease          
+Ign:3 https://mirrors.tuna.tsinghua.edu.cn/ubuntu bionic InRelease             
+Hit:4 http://mirrors.tuna.tsinghua.edu.cn/ros/ubuntu bionic Release            
+Hit:5 http://dl.google.com/linux/chrome/deb stable InRelease                   
+Ign:6 https://mirrors.tuna.tsinghua.edu.cn/ubuntu bionic-updates InRelease     
+Ign:8 https://mirrors.tuna.tsinghua.edu.cn/ubuntu bionic-backports InRelease   
+Ign:9 https://mirrors.tuna.tsinghua.edu.cn/ubuntu bionic-security InRelease    
+Err:10 https://mirrors.tuna.tsinghua.edu.cn/ubuntu bionic Release              
+  Certificate verification failed: The certificate is NOT trusted. The certificate chain uses expired certificate.  Could not handshake: Error in the certificate verification. [IP: 101.6.15.130 443]
+Err:11 https://mirrors.tuna.tsinghua.edu.cn/ubuntu bionic-updates Release  
+  Certificate verification failed: The certificate is NOT trusted. The certificate chain uses expired certificate.  Could not handshake: Error in the certificate verification. [IP: 101.6.15.130 443]
+Hit:12 http://archive.ubuntu.com/ubuntu bionic InRelease
+Hit:13 http://ppa.launchpad.net/videolan/master-daily/ubuntu bionic InRelease  
+Err:14 https://mirrors.tuna.tsinghua.edu.cn/ubuntu bionic-backports Release    
+  Certificate verification failed: The certificate is NOT trusted. The certificate chain uses expired certificate.  Could not handshake: Error in the certificate verification. [IP: 101.6.15.130 443]
+Err:15 https://mirrors.tuna.tsinghua.edu.cn/ubuntu bionic-security Release     
+  Certificate verification failed: The certificate is NOT trusted. The certificate chain uses expired certificate.  Could not handshake: Error in the certificate verification. [IP: 101.6.15.130 443]
+Reading package lists... Done                                
+E: The repository 'https://mirrors.tuna.tsinghua.edu.cn/ubuntu bionic Release' no longer has a Release file.
+N: Updating from such a repository can't be done securely, and is therefore disabled by default.
+N: See apt-secure(8) manpage for repository creation and user configuration details.
+E: The repository 'https://mirrors.tuna.tsinghua.edu.cn/ubuntu bionic-updates Release' no longer has a Release file.
+N: Updating from such a repository can't be done securely, and is therefore disabled by default.
+N: See apt-secure(8) manpage for repository creation and user configuration details.
+E: The repository 'https://mirrors.tuna.tsinghua.edu.cn/ubuntu bionic-backports Release' no longer has a Release file.
+N: Updating from such a repository can't be done securely, and is therefore disabled by default.
+N: See apt-secure(8) manpage for repository creation and user configuration details.
+E: The repository 'https://mirrors.tuna.tsinghua.edu.cn/ubuntu bionic-security Release' no longer has a Release file.
+N: Updating from such a repository can't be done securely, and is therefore disabled by default.
+N: See apt-secure(8) manpage for repository creation and user configuration details.
+#+END_SRC
+
 * Vmware虚拟机
 NAT模式下，多个虚拟机都是连接到同一个网关地址
 ** ubuntu终端放大缩小
@@ -491,89 +530,397 @@ make工具可以看成是一个智能的批处理工具，它本身并没有编�
 12.cmake是make maker，生成各种可以直接控制编译过程的控制器的配置文件，比如makefile、各种IDE的配置文件。
 13.make是一个简单的通过文件时间戳控制自动过程、处理依赖关系的软件，这个自动过程可以是编译一个项目。
 
-* ssh Connection refused的解决方法
-没装openssh_server 或者openssh_client，解决方法:sudo apt-get install openssh_server openssh_client
+* ssh 相关
+** ssh Connection refused的解决方法
+ 没装openssh_server 或者openssh_client，解决方法:sudo apt-get install openssh_server openssh_client
+ #+BEGIN_EXAMPLE
+ The ssh binary, the SSH client, is provided by the openssh-client package, which is installed on your system.
+
+ The ssh service runs the SSH server, provided by the openssh-server package, which isn’t installed on your system.
+
+ The ssh package is a meta-package which installs both the client and the server.
+ #+END_EXAMPLE
+ 开启openssh服务: sudo /etc/init.d/ssh start
+
+ 验证是否开启服务: ps -e | grep ssh
+
+ 如果有输出 sshd 证明已经开启ssh服务
+
+** ubuntu开启SSH服务远程登录
+ SSH分客户端openssh-client和openssh-server
+
+ 如果你只是想登陆别的机器的SSH只需要安装openssh-client（ubuntu有默认安装，如果没有则sudo apt-get install openssh-client），如果要使本机开放SSH服务就需要安装openssh-server。
+
+  查看当前的ubuntu是否安装了ssh-server服务。默认只安装ssh-client服务
+ dpkg -l | grep ssh
+
+ 安装ssh-server服务
+ sudo apt-get install openssh-server
+
+ 再次查看安装的服务：
+ dpkg -l | grep ssh
+
+ 然后确认ssh-server是否启动了：
+
+ ps -e | grep ssh
+
+ 如果看到sshd那说明ssh-server已经启动了。
+ 如果没有则可以这样启动：sudo /etc/init.d/ssh start或sudo service ssh start
+ 配置相关：
+ ssh-server配置文件位于/etc/ssh/sshd_config，在这里可以定义SSH的服务端口，默认端口是22，你可以自己定义成其他端口号，如222。（或把配置文件中的”PermitRootLogin without-password”加一个”#”号,把它注释掉，再增加一句”PermitRootLogin yes”）
+ 然后重启SSH服务：
+ sudo /etc/init.d/ssh stop
+ sudo /etc/init.d/ssh start
+*** Unable to locate package openssh-server
+  给一个docker的ubuntu容器安装openssh-server出现了这个问题
+ #+BEGIN_SRC bash
+ root@1c3148b444e2:/# apt-get install openssh-server
+ Reading package lists... Done
+ Building dependency tree       
+ Reading state information... Done
+ E: Unable to locate package openssh-server
+ #+END_SRC
+ 原因解释：因为软件源出问题，导致无法找到或者下载软件，一般原因是刚安装的Ubuntu后没有更新软件源或者更新后但是没有sudo apt-get update，导致找不到软件。
+
+ 1 sudo apt-get update 
+ （更新软件源）执行安装操作，如果不成功，执行2 
+
+ 2  sudo apt-get upgrade 
+ （继续更新软件源）执行安装操作，应该能成功 
+ 最后执行sudo apt-get install -y openssh-server
+
+** SSH、SCP和SFTP
+*** SSH、SCP和SFTP都是SSH软件包的组成部分
+ SSH 是 Secure Shell 的缩写，由 IETF 的网络小组（Network Working Group）所制定；SSH 为建立在应用层基础上的安全协议。SSH 是目前广泛采用的安全登录协议，专为远程登录会话和其他网络服务提供安全性的协议，替代以前不安全的Telnet协议。利用 SSH 协议可以有效防止远程管理过程中的信息泄露问题。
+
+ SSH包括二个部分，服务端的SSHD（Secure Shell Daemon）和SSH客户端。我们通常所说的用SSH登录到某某主机，指的是用SSH客户端远程登录到某台主机（该主机运行了SSHD服务端程序）。
+
+ SSH最初是UNIX系统上的一个程序，后来又迅速扩展到其他操作平台，目前几乎所有UNIX平台—包括HP-UX、Linux、AIX、Solaris、Digital UNIX、Irix，以及其他系统平台，都可运行SSH。
+*** SCP和SFTP
+ SCP是Secure Copy的简称，是用来与远程主机之间进行数据传输的协议，相当于经过加密的Copy命令。SCP数据传输使用 ssh协议，并且和ssh 使用相同的认证方式，提供相同的安全保证 。 根据实际需要，scp进行验证时会要求你输入密码或口令。
+
+ SFTP=SSH File Transfer Protocol ，有时也被称作 Secure File Transfer Protocol 。SFTP是用SSH封装过的FTP协议，相当于经过加密的FTP协议，功能与FTP一样，只是传输数据经过加密。
+
+ SFTP也有二个部分，服务端的SFTP-Server及SFTP Client。通常所说的用SFTP登录到某台主机，指的是用SFTP客户端登录到某台主机（该主机运行了SFTP-Server服务端程序）。
+**** SCP和SFTP异同：
+
+ 不管SCP还是SFTP，都是SSH的功能之一，也都是使用SSH协议来传输文件的。
+
+ 不只是登录时的用户信息，相互传输的文件内容也是经过SSH加密的，所以说SCP和SFTP实现了安全的文件传输。
+
+ SCP和CP命令相似，SFTP和FTP的使用方法也类似。SCP和SFTP的共同之处在于「使用SSH将文件加密才传输的」
+
+ 使用「WinSCP」或者「FileZilla」之类的客户端，还可以和Windows之间进行文件传输。
+
+ SCP和SFTP的不同之处，首先就是之前提到的，SCP使用「SCP命令」，SFTP则类似「FTP处理文件」的使用方式。
+
+ 它们的不同之处还不止如此，还有「SCP比较简单，是轻量级的，SFTP的功能则比较多」。
+
+ 虽然还有很多不同之处，但二者的最大不同之处在于「SFTP在文件传输过程中中断的话，连接后还可以继续传输，但SCP不行」。
+
+ 由于各种原因导致的文件传输中断是经常讨论的话题，所以这个区别（SFTP支持断点续传，SCP则不支持）被认为是最大的区别。
+*** 常见的SSH客户端
+**** 图形化客户端：
+ WinSCP，是一个Windows环境下使用SSH的开源图形化SFTP客户端。同时支持FTP、SCP、webdav协议。它的主要功能就是在本地与远程计算机间安全的复制文件。
+
+ Xftp，是一个基于 MS windows 平台的功能强大的SFTP、FTP 文件传输软件。使用了 Xftp 以后，MS windows 用户能安全地在 UNIX/Linux 和 Windows PC 之间传输文件。
+
+ FileZilla是一个免费开源的FTP软件，分为客户端版本和服务器版本，具备所有的FTP软件功能。支持FTP，SFTP(SSH File Transfer Protocol)， FTPS(FTP over SSL/TLS)等多种协议。
+
+**** 终端工具类：
+ PuTTY是一个Telnet、SSH、rlogin、纯TCP以及串行接口连接软件。PuTTY是一款开放源代码软件，使用MIT licence授权。
+
+ Xshell 是一个强大的安全终端模拟软件，它支持SSH1, SSH2, SFTP以及Microsoft Windows 平台的TELNET 协议。
+** SSH 密钥
+ 基于密钥的验证机制使用了密码学中的公钥，我们只需要向服务器证明客户端持有对应的私钥，而不需要公开其私钥。
+ 这样您就可以避免每次登录都输入密码的麻烦了秘密就可以登录。
+ 不过，私钥(通常是 ~/.ssh/id_rsa 或者 ~/.ssh/id_ed25519) 等效于您的密码，所以一定要好好保存它。
+
+ ssh秘钥登录特点：1.安全；2.免输密码。
+
+ 对于安全级别较高的服务器，建议配好ssh登录后禁掉密码登录。
+
+ 缺点：略繁琐。如果你的只是临时登录一次，那么还是密码吧。
+
+*** 生成秘钥
+ 秘钥对需要在你自己的机器上生成，然后把公钥放到服务器相应用户的~/.ssh目录
+
+ 使用 ssh-keygen 命令可以生成一对密钥
+
+ 执行下面命令,默认生成位置是~/.ssh
+
+ ~ssh-keygen~
+
+ 系统会询问你文件名和秘钥密码，可以一路回车过去，会生成两个文件：
+ - id_rsa 私钥
+ - id_rsa.pub 公钥
+ 默认使用rsa算法，你也可以用比较详细的指令，如
+ ~ssh-keygen -t rsa -b 1024 -f yourkeyname -C "备注"~
+
+ | 参数   | 解释                                                  |
+ |--------+-------------------------------------------------------|
+ | -b     | 采用长度1024bit的密钥对,b=bits,最长4096，不过没啥必要 |
+ | -t rsa | 采用rsa加密方式,t=type                                |
+ | -f     | 生成文件名(文件路径),f=output_keyfiles                     |
+ | -C     | 备注，C=comment                                       |
+
+ 更多参数可运行 man ssh-keygen
+
+ 您可以为密钥设置密码，防止有人持有您的私钥并使用它访问您的服务器。
+ 您可以使用 ssh-agent 或 gpg-agent ，这样就不需要每次都输入该密码了。
+*** 在服务器上安装秘钥
+ ssh 会查询 .ssh/authorized_keys 来确认那些用户可以被允许登录。
+
+ 把上一步生成的公钥发送到服务器(scp,FillZilla等)上，然后在服务器上执行下面命令
+
+ cat id_rsa.pub >> ~/.ssh/authorized_keys
+
+
+ 或者直接在本地机器上执行命令： ~cat .ssh/id_rsa.pub | ssh foobar@remote 'cat >> ~/.ssh/authorized_keys'~
+
+ 如果支持 ssh-copy-id 的话，可以使用下面这种更简单的解决方案：
+
+ ~ssh-copy-id -i .ssh/id_rsa.pub foobar@remote~
+
+ 如此便完成了公钥安装，有个小坑值得一提：authenrized_keys的权限必须是600或更小，否则会连接失败。
+
+ 保险起见，执行下面命令
+ #+BEGIN_SRC bash
+ chmod 600 ~/.ssh/authorized_keys
+ chmod 700 ~/.ssh
+ #+END_SRC
+ 另外，.ssh目录的owner必须是ssh登录用户，不能是root
+
+*** 服务器ssh配置
+ 修改服务器上的ssh配置文件，位置：/etc/ssh/sshd_config
+ #+BEGIN_EXAMPLE
+ RSAAuthentication yes
+ PubkeyAuthentication yes
+
+ PermitRootLogin no //禁止root登录
+ PasswordAuthentication yes //允许密码登录，根据你的情况设置
+ #+END_EXAMPLE
+ 然后重启ssh服务
+
+ service sshd restart
+
+** SSH执行命令
+ ssh 的一个经常被忽视的特性是它可以直接远程执行命令。
+
+ ssh foobar@server ls 可以直接在用foobar的命令下执行 ls 命令。 
+
+ 想要配合管道来使用也可以， ssh foobar@server ls | grep PATTERN 会在本地查询远端 ls 的输出而 ls | ssh foobar@server grep PATTERN 会在远端对本地 ls 输出的结果进行查询。
+** 通过 SSH 复制文件
+ 使用 ssh 复制文件有很多方法：
+ - ssh+tee, 最简单的方法是执行 ssh 命令，然后通过这样的方法利用标准输入实现 cat localfile | ssh remote_server tee serverfile。回忆一下，tee 命令会将标准输出写入到一个文件；
+ - scp ：当需要拷贝大量的文件或目录时，使用scp 命令则更加方便，因为它可以方便的遍历相关路径。语法如下：scp path/to/local_file remote_host:path/to/remote_file；
+ - rsync 对 scp 进行了改进，它可以检测本地和远端的文件以防止重复拷贝。它还可以提供一些诸如符号连接、权限管理等精心打磨的功能。甚至还可以基于 --partial标记实现断点续传。rsync 的语法和scp类似；
+** SSH 端口转发
+SSH 端口转发功能能够将其他 TCP 端口的网络数据通过 SSH 链接来转发，并且自动提供了相应的加密及解密服务。其实这一技术就是我们常常听说的隧道(tunnel)技术，原因是 SSH 为其他 TCP 链接提供了一个安全的通道来进行传输。
+
+SSH端口转发也被称作SSH隧道(SSH Tunnel)，因为它们都是通过SSH登陆之后，在SSH客户端与SSH服务端之间建立了一个隧道，从而进行通信。
+
+我们知道，FTP 协议是以明文来传递数据的。但是我们可以让 FTP 客户端和服务器通过 SSH 隧道传输数据，从而实现安全的 FTP 数据传输。
+
+更常见的情况是我们的应用经常被各种防火墙限制。常见的有禁止访问某些网站、禁用某类软件，同时你的所有网络行为都被监控并分析！同样的通过 SSH 隧道技术我们完全可以规避这些限制。
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-10-19_15-42-53.png @ 2021-10-19 15:43:34
+[[file:ssh_%E7%9B%B8%E5%85%B3/2021-10-19_15-43-34_Snipaste_2021-10-19_15-42-53.png]]
+如上图所示，通过 SSH 的端口转发， 应用程序的客户端和应用程序的服务器端不再直接通讯，而是转发到了 SSH 客户端及 SSH 服务端来通讯。这样就可以同时实现两个目的：数据的加密传输和穿透防火墙！
+在具体的使用场景中，端口转发又被细分为本地端口转发、远程端口转发、动态端口转发等。
+*** 本地端口转发
+[[https://unix.stackexchange.com/questions/115897/whats-ssh-port-forwarding-and-whats-the-difference-between-ssh-local-and-remot][StackOverflow 文章示意图]]：
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-10-19_16-38-33.png @ 2021-10-19 16:38:37
+[[file:ssh_%E7%9B%B8%E5%85%B3/2021-10-19_16-38-37_Snipaste_2021-10-19_16-38-33.png]]
+
+顾名思义，本地端口转发是将应用【application client】对于本地主机A指定端口X的访问请求转发给主机B，交由主机B对另一指定主机C的指定端口Z发起访问。
+
+命令如下：
+#+begin_src bash
+ssh -L 主机A端口X:主机C:主机C端口Z username@hostname
+# 简单理解为：将对A:X的访问转变成对C:Z的访问
+#+END_SRC
+客户端在执行端口转发命令的同时，实际上也执行了基本的连接命令。多出来的部分中，「-L」旗标表示使用「本地端口转发」选项，之后是用冒号分隔开的三个需要指定的项。原理上，主机C可以是任何能够被主机B识别到的设备，也可以是主机B自身。
+
+当主机C在其某端口提供某服务【application server】，主机A需要使用该服务却无法直接访问主机C或该端口时，如果发现有SSH：A→B的连接，且主机B能够直接访问主机C的该端口，本地端口转发就派上用场。
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-10-19_15-48-49.png @ 2021-10-19 15:48:54
+[[file:ssh_%E7%9B%B8%E5%85%B3/2021-10-19_15-48-54_Snipaste_2021-10-19_15-48-49.png]]
+
+此时，访问请求在主机A一侧发生，可以来自于主机A自身，也可以是其他与A连接的设备。图中Host A或Host B的阴影指代主机A或主机B一侧的网络系统。
+
+实际上ssh本地端口转发命令的「-L」旗标后可以填写四个参数，完整格式为：
+#+begin_src bash
+ssh -L [收听接口:]收听端口:目标主机:目标端口 username@hostname
+#+END_SRC
+username@hostname 是 SSH 服务器所在的主机
+
+命令中方括号内的部分，即第一个参数可以不写；它的默认值一般是0.0.0.0，意味着SSH隧道会收听所有接口，接受来自任何地址的应用访问请求并进行转发。而如果在此处填写了绑定地址（bind address），SSH隧道连接就会只处理来自绑定地址的应用请求，而对其他地址发来的请求置之不理；如同在（真实世界的）隧道入口设立哨卡，只对白名单牌号的车辆放行。例如在此处填写127.0.0.1，即可实现只有来自主机A本机的应用请求才被SSH隧道转发的效果。
+
+需留意，收听接口是站在主机A的视角上去规定允许与A连接的设备，解决「能够使用SSH端口转发的应用请求从何处来」的问题，类似防火墙的入站；收听端口则依旧是主机A上的那个端口X，不能够跑到别的主机上去。
+
+类似地，远程端口转发和动态端口转发也具有「收听接口」这一可不指明的参数，下文不再赘述。从安全或控制流量的角度，规定绑定地址是一项实用的功能。
+**** 实例场景
+***** 场景1 
+主机B与主机C处于同一内网中，主机B能够与外界联系而主机C不能。这时不处于内网中的主机A如果想要访问主机C，就可以通过SSH连接主机B＋端口转发来进行。
+
+台式机B上运行着虚拟机C，虚拟机使用虚拟机软件搭建的虚拟网络与宿主主机B相连接，但在主机B以外无法直接访问该虚拟网络。想要通过SSH，用与台式机B处于同一WiFi下的笔记本A来远程控制虚拟机C，（在A上）执行端口转发命令：
+#+begin_src bash
+ssh -L 22022:10.0.2.15:22 desktop_user@192.168.1.11	# cmd.1-1
+#+END_SRC
+其中，22022号端口是随便选的一个没被占用的端口；192.168.1.11是台式机B在WiFi中的IP；desktop_user是主机B上的用户名；10.0.2.15是虚拟机C在主机B为其搭建的虚拟网络中的IP；22号端口是默认的SSH端口。已知virtual_user是虚拟机C上的用户名，这时在笔记本A上执行应用的访问请求命令：
+#+begin_src bash
+ssh -p 22022 virtual_user@localhost	# cmd.1-2
+#+END_SRC
+我们在笔记本A上以SSH协议访问本机（localhost）的22022号端口，这个请求就像通过了隧道（SSH隧道）一样抵达台式机B，台式机B则把这个请求变为对虚拟机C的22号端口的访问，并为A返回结果。其中，使用「-p」旗标是为了访问主机A的特定端口而不是SSH默认的22号端口；由于我们在主机A上执行命令，A管自己叫localhost，假如在其他主机上执行则需相应地改为主机A的域名或IP等他们对A的称呼。
+
+cmd.1-2中我们是将SSH当作普通应用使用的。参考Fig.1，cmd.1-1在A与B之间建立SSH隧道，此时A上的SSH客户端和B上的SSH服务器对应图中的SSH Client和SSH Server；cmd.1-2则表达应用的访问请求，此时A上的SSH客户端和C上的SSH服务器对应图中的application client和application server。
+
+以上cmd.1-1和cmd.1-2合起来实际是想（在A上）进行：
+#+begin_src bash
+ssh -p 22 virtual_user@10.0.2.15	# cmd.1-3
+#+END_SRC
+当然，如果这cmd.1-3能被成功执行的话，就不需要端口转发了。
+***** 场景2
+防火墙阻止了主机A对主机B一些端口的连接，但主机B仍有部分端口是对主机A开放的。这时主机A如果需要访问主机B上被防火墙阻挡的端口，就可以通过SSH连接主机B＋端口转发来进行。需注意，这时所谓的主机C就是主机B。
+某某云的云服务器B默认的防火墙设置仅开放了22号端口，其他入方向的访问都被屏蔽了。我们为云服务器B安装了桌面环境，现在想要在自己的计算机A上，通过VNC远程控制云服务器B的桌面。（在A上）执行端口转发命令：
+
+ssh -L 5920:localhost:5901 cloud_user@server.example.com	# cmd.2-1
+因为C就是B自己，所以C的位置填localhost；5920随便选；5901是云服务器B上VNC服务进程收听的端口；cloud_user是B上的用户名；http://server.example.com 是B的域名，换成公网IP也行。
+
+下面在计算机A上打开RealVNC VNC Viewer（VNC客户端），输入VNC服务器地址：
+#+begin_src bash
+localhost:20
+#+END_SRC
+20=5920−5900，这是采用5901到5999之间端口时RealVNC的特殊设定。开始使用优雅（或许吧）的GUI来操作云服务器吧！
+
+*** 远程端口转发
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-10-19_16-44-15.png @ 2021-10-19 16:44:19
+[[file:ssh_%E7%9B%B8%E5%85%B3/2021-10-19_16-44-19_Snipaste_2021-10-19_16-44-15.png]]
+当主机C在其某端口提供某服务，主机B需要使用该服务却无法直接访问主机C或该端口时，如果发现有SSH：A→B的连接，且主机A能够直接访问主机C的该端口，远程端口转发就派上用场。
+
+远程端口转发的结构如下图所示：
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-10-19_16-45-42.png @ 2021-10-19 16:45:46
+[[file:ssh_%E7%9B%B8%E5%85%B3/2021-10-19_16-45-46_Snipaste_2021-10-19_16-45-42.png]]
+
+需注意，此时访问请求在主机B一侧发生，而SSH连接的方向却没有变化，仍是由A到B的。因此「本地与远程端口转发互为镜像」的说法并不完全准确；严格意义上的镜像，SSH连接也要变为由B到A，那时则应该是在B上采用本地端口转发。可以看出，采取哪种端口转发主要取决于SSH连接建立的方向。
+
+与本地端口转发的流动方向相反，远程端口转发是将对于远程主机B指定端口Y的访问请求转发给主机A，交由主机A对另一指定主机C的指定端口Z发起访问。命令如下：
+#+begin_src bash
+ssh -R 主机B端口Y:主机C:主机C端口Z username@hostname
+# 简单理解为：将对B:Y的访问转变成对C:Z的访问
+#+END_SRC
+username@hostname不变，因为我们仍然以从主机A对主机B发起SSH连接为基础；「-R」旗标表示使用「远程端口转发」选项，之后是用冒号分隔开的三个需要指定的项。原理上，主机C可以是任何能够被主机A识别到的设备，也可以是主机A自身。
+
+**** 示例场景
+
+***** 场景1
+主机A与主机C处于同一内网中，主机A能够与外界联系而主机C不能。这时（在主机A上）如果想让不处于内网中的主机B访问主机C，就可以通过SSH连接主机B＋端口转发来进行。
+台式机A上运行着虚拟机C，虚拟机使用虚拟机软件搭建的虚拟网络与宿主主机A相连接，但在主机A以外无法直接访问该虚拟网络。想要通过SFTP，用与台式机A处于同一WiFi下的笔记本B来向虚拟机C传输文件，（在A上）执行端口转发命令：
+#+begin_src bash
+ssh -R 22122:10.0.2.16:22 laptop_user@192.168.1.233	# cmd.3-1
+#+END_SRC
+其中，22122号端口是随便选的一个没被占用的端口；192.168.1.233是笔记本B在WiFi中的IP；laptop_user是主机B上的用户名；10.0.2.16是虚拟机C在主机A为其搭建的虚拟网络中的IP；22号端口是默认的SFTP端口。已知virtual_user是虚拟机C上的用户名，这时在笔记本B上执行应用的访问请求命令：
+#+begin_src bash
+sftp -P 22122 virtual_user@localhost	# cmd.3-2
+#+END_SRC
+请注意这是一条运行在B上的应用命令；B上的SFTP客户端这时充当Fig.2中的application client。此处localhost是主机B对自己的称呼。对B的22122号端口的访问被转发至A，A访问C，即10.0.2.16的22号端口并将结果返回给B。于是B就通过远程端口转发成功访问了C上的SFTP服务器。
+
+以上cmd.3-1和cmd.3-2合起来实际是想（在B上）进行：
+#+begin_src bash
+sftp -P 22 virtual_user@10.0.2.15	# cmd.3-3
+#+END_SRC
+当然，这cmd.3-3也是不能被直接成功执行的。
+
+***** 场景2
+处于内网之中的主机A可以访问公网，但不具有公网IP；公网中的主机B无法找到A，但为A开放各个端口的访问（A可以直接连接B，反之则不行）。这时A想要让B访问自己，就可以通过SSH连接主机B＋端口转发来进行。需注意，这时所谓的主机C就是主机A。
+
+注意：OpenSSH服务器对于远程端口转发的设定，默认只接受远程主机B本机上的应用发起的请求。想要从其他连接到B的设备发起请求，需将「sshd_config」文件中「GatewayPorts」选项后的「no」修改为「yes」。
+
+手头上计算机A运行着http服务，但A没有公网IP，其他设备不能使用该服务。恰好云服务器B有公网IP（甚至域名），便于被访问。在不将http服务迁移至云服务器B的前提下，可以使用SSH端口转发使其他设备通过访问B的方式访问A上的http服务。（在A上）执行端口转发命令：
+#+begin_src bash
+ssh -R 80:localhost:80 cloud_user@server.example.com	# cmd.4-1
+#+END_SRC
+
+这时C便是A自己（localhost）；80号端口是http默认端口，为简便两个都用默认；cloud_user还是B上的用户名；http://server.example.com 还是B的域名。
+
+接下来在其他设备上打开浏览器，输入地址：
 #+BEGIN_EXAMPLE
-The ssh binary, the SSH client, is provided by the openssh-client package, which is installed on your system.
-
-The ssh service runs the SSH server, provided by the openssh-server package, which isn’t installed on your system.
-
-The ssh package is a meta-package which installs both the client and the server.
+http://server.example.com/
 #+END_EXAMPLE
-开启openssh服务: sudo /etc/init.d/ssh start
+于是大家可以通过访问 http://server.example.com 来访问本地计算机A提供的http服务了。
 
-验证是否开启服务: ps -e | grep ssh
+*** 动态端口转发
+动态端口转发可以把本地主机A上运行的SSH客户端转变成一个SOCKS代理服务器；实际上它是一种特殊的本地端口转发，或者说叫它「动态本地端口转发」更科学。这个动态，就动在这种转发不规定目标地址（主机C）和目标端口（端口Z），而是去读取应用发起的请求，从请求中获取目标信息。
+#+begin_src bash
+ssh -D 主机A端口X username@hostname
+#+END_SRC
+好像很强，但有一个问题：之前使用固定的端口转发时，应用的访问请求都是指向被转发的那个端口X的，但现在应用的访问请求必须指向目标，以指定动态端口转发的目标。可如果不指向端口X，如何让数据走SSH隧道呢？这就要求我们在系统或应用（浏览器等）中设置一个使用SOCKS5协议、服务器为localhost、端口为X的代理，利用代理使请求走端口X。
 
-如果有输出 sshd 证明已经开启ssh服务
+这样应用的请求就从X进入隧道，抵达B后其中的目标信息被解析出来，B访问目标后再将结果通过隧道返回给A。比如在开启代理的A上的浏览器中访问http://zhihu.com ，经过端口转发，相当于是B在帮A访问 http://zhihu.com。 
 
-* ubuntu开启SSH服务远程登录
-SSH分客户端openssh-client和openssh-server
+**** 端口转发的停止
+SSH端口转发完全基于基本的SSH连接，因此，通过在远程终端上执行exit命令、暴力关闭本地终端窗口、远程主机B关机、本地主机A关机等可以切断SSH连接的方式，即可停止SSH端口转发。就是这样。
+** SSH config
+SSH config是Linux系统下针对SSH客户端的一个参数配置方案，可以将一些关于SSH命令的参数放到配置文件中去，执行ssh命令的时候从文件中读取，简化命令行的操作。这篇短博客记录ssh config相关的配置问题和使用方法。
 
-如果你只是想登陆别的机器的SSH只需要安装openssh-client（ubuntu有默认安装，如果没有则sudo apt-get install openssh-client），如果要使本机开放SSH服务就需要安装openssh-server。
+SSH 参数配置有3个层次：
+- 命令行参数，如-p 10086, -i /path/to/identity_file 等选项来设置SSH的端口号或认证证书位置
+- 针对某个用户的配置文件，所在路径为~/.ssh/config，默认是不存在的，需要手动创建
+- 针对系统所有用户的配置文件，，所在路径为/etc/ssh/ssh_config
 
- 查看当前的ubuntu是否安装了ssh-server服务。默认只安装ssh-client服务
-dpkg -l | grep ssh
+参数重要性的顺序也是1>2>3，即越近的配置重要性越高。这里主要讲述第2种情况下的配置方式，即针对~/.ssh/config文件的写法进行说明。
 
-安装ssh-server服务
-sudo apt-get install openssh-server
+一个示例的文件如下：
+#+BEGIN_EXAMPLE
+# configuration 1
+Host cluster
+	HostName 192.168.11.11
+	User tom
 
-再次查看安装的服务：
-dpkg -l | grep ssh
 
-然后确认ssh-server是否启动了：
+# configuration 2
+Host=aliyun
+	Hostname=202.44.2.2
+	User tom
+#+END_EXAMPLE
+主要的规则如下：
+- 每项配置都是参数名 参数值或参数值=参数名的形式，其中参数名不区分大小写，而参数值区分大小写，如上面的参数名HostName和Hostname是同一个参数
+- 不同主机的配置通过Host参数来区分，一个配置文件里面可以有针对多个Host的配置
+- 以#开头的是注释，会被忽略
+- 同一个Host的配置内部，参数名 参数值和参数值=参数名的形式可以混用，如上例#2配置所示
 
-ps -e | grep ssh
+下面详细展开常见的参数类型。
+** 常见参数类型
+参数可以在命令行通过man ssh_config来查看
+*** Host
+类似昵称，用于标识某个特定的配置，在ssh命令中使用，例如我们想要ssh连接到上例中的#1配置的主机，则在命令行执行如下命令即可：
 
-如果看到sshd那说明ssh-server已经启动了。
-如果没有则可以这样启动：sudo /etc/init.d/ssh start或sudo service ssh start
-配置相关：
-ssh-server配置文件位于/etc/ssh/sshd_config，在这里可以定义SSH的服务端口，默认端口是22，你可以自己定义成其他端口号，如222。（或把配置文件中的”PermitRootLogin without-password”加一个”#”号,把它注释掉，再增加一句”PermitRootLogin yes”）
-然后重启SSH服务：
-sudo /etc/init.d/ssh stop
-sudo /etc/init.d/ssh start
+ssh cluster
 
-* SSH、SCP和SFTP
-** SSH、SCP和SFTP都是SSH软件包的组成部分
-SSH 是 Secure Shell 的缩写，由 IETF 的网络小组（Network Working Group）所制定；SSH 为建立在应用层基础上的安全协议。SSH 是目前广泛采用的安全登录协议，专为远程登录会话和其他网络服务提供安全性的协议，替代以前不安全的Telnet协议。利用 SSH 协议可以有效防止远程管理过程中的信息泄露问题。
 
-SSH包括二个部分，服务端的SSHD（Secure Shell Daemon）和SSH客户端。我们通常所说的用SSH登录到某某主机，指的是用SSH客户端远程登录到某台主机（该主机运行了SSHD服务端程序）。
+一个最有用的场景是使用scp在不同主机间传数据。没有配置之间，你得写很长的参数，如
 
-SSH最初是UNIX系统上的一个程序，后来又迅速扩展到其他操作平台，目前几乎所有UNIX平台—包括HP-UX、Linux、AIX、Solaris、Digital UNIX、Irix，以及其他系统平台，都可运行SSH。
-** SCP和SFTP
-SCP是Secure Copy的简称，是用来与远程主机之间进行数据传输的协议，相当于经过加密的Copy命令。SCP数据传输使用 ssh协议，并且和ssh 使用相同的认证方式，提供相同的安全保证 。 根据实际需要，scp进行验证时会要求你输入密码或口令。
+scp a.txt tom@192.168.11.11:~/
 
-SFTP=SSH File Transfer Protocol ，有时也被称作 Secure File Transfer Protocol 。SFTP是用SSH封装过的FTP协议，相当于经过加密的FTP协议，功能与FTP一样，只是传输数据经过加密。
 
-SFTP也有二个部分，服务端的SFTP-Server及SFTP Client。通常所说的用SFTP登录到某台主机，指的是用SFTP客户端登录到某台主机（该主机运行了SFTP-Server服务端程序）。
-*** SCP和SFTP异同：
+尤其是IP地址记忆起来好麻烦啊。配置过上例中的文件后，这个任务可以简化成这样：
 
-不管SCP还是SFTP，都是SSH的功能之一，也都是使用SSH协议来传输文件的。
+scp a.txt cluster:~/
 
-不只是登录时的用户信息，相互传输的文件内容也是经过SSH加密的，所以说SCP和SFTP实现了安全的文件传输。
 
-SCP和CP命令相似，SFTP和FTP的使用方法也类似。SCP和SFTP的共同之处在于「使用SSH将文件加密才传输的」
+省略了用户名和IP地址，方便多了。
+*** HostName
+需要ssh连接过去的主机名，一般是IP地址，也可以用%h来替代命令行参数
+*** User
+登录主机的用户名
+*** IdentityFile
+认证证书文件，默认位置是~/.ssh/id_rsa, ~/ssh/id_dsa等，如果采用默认的证书，可以不用设置此参数，除非你的证书放在某个自定义的目录，那么你就需要设置该参数来指向你的证书
+*** Port
+SSH访问主机的端口号，默认是22端口，同上，只有在非默认情况下才需要设置该值
 
-使用「WinSCP」或者「FileZilla」之类的客户端，还可以和Windows之间进行文件传输。
-
-SCP和SFTP的不同之处，首先就是之前提到的，SCP使用「SCP命令」，SFTP则类似「FTP处理文件」的使用方式。
-
-它们的不同之处还不止如此，还有「SCP比较简单，是轻量级的，SFTP的功能则比较多」。
-
-虽然还有很多不同之处，但二者的最大不同之处在于「SFTP在文件传输过程中中断的话，连接后还可以继续传输，但SCP不行」。
-
-由于各种原因导致的文件传输中断是经常讨论的话题，所以这个区别（SFTP支持断点续传，SCP则不支持）被认为是最大的区别。
-** 常见的SSH客户端
-*** 图形化客户端：
-WinSCP，是一个Windows环境下使用SSH的开源图形化SFTP客户端。同时支持FTP、SCP、webdav协议。它的主要功能就是在本地与远程计算机间安全的复制文件。
-
-Xftp，是一个基于 MS windows 平台的功能强大的SFTP、FTP 文件传输软件。使用了 Xftp 以后，MS windows 用户能安全地在 UNIX/Linux 和 Windows PC 之间传输文件。
-
-FileZilla是一个免费开源的FTP软件，分为客户端版本和服务器版本，具备所有的FTP软件功能。支持FTP，SFTP(SSH File Transfer Protocol)， FTPS(FTP over SSL/TLS)等多种协议。
-
-*** 终端工具类：
-PuTTY是一个Telnet、SSH、rlogin、纯TCP以及串行接口连接软件。PuTTY是一款开放源代码软件，使用MIT licence授权。
-
-Xshell 是一个强大的安全终端模拟软件，它支持SSH1, SSH2, SFTP以及Microsoft Windows 平台的TELNET 协议。
 * 设置合上笔记本盖子不休眠的方法
 编辑下列文件：sudo gedit /etc/systemd/logind.conf
 #+BEGIN_EXAMPLE
@@ -2287,6 +2634,118 @@ dawk [-F  field-separator]  'commands'  input-file(s)
 awk -f awk-script-file input-file(s)
 
 其中，-f选项加载awk-script-file中的awk脚本，input-file(s)跟上面的是一样的。
+* split
+split 的作用很好描述，就是将文件按照一定规则进行拆分。一般情况下，我们可以按照文件大小来进行拆分，如果是文本文件的话，还可以按照行数来进行拆分，默认是 1000 行作为一个拆分单位。
+
+默认情况下，分割后的文件的名称会以 x 作为前缀，以 aa、ab、ac 这样的双字母格式作为后缀，形成 xaa、xab 这样的名称格式。
+
+我们来一起看看 split 的命令格式：
+~split [-b ][-C ][-][-l ][要切割的文件][输出文件名前缀][-a ]~
+
+最常用的选项，都在这里了：
+- -b<字节>：指定按多少字节进行拆分，也可以指定 K、M、G、T 等单位。
+- -<行数>或-l<行数>：指定每多少行要拆分成一个文件。
+- 输出文件名前缀：设置拆分后的文件的名称前缀，split 会自动在前缀后加上编号，默认从 aa 开始。
+- -a<后缀长度>：默认的后缀长度是 2，也就是按 aa、ab、ac 这样的格式依次编号。
+** 例子
+闲言少叙，我们现在就来介绍拆分的方法。先使用 dd 命令来生成一个 700MB 文件来作为我们的拆分对象：
+#+BEGIN_SRC bash
+[root@roclinux ~]$ dd if=/dev/zero bs=1024 count=700000 of=king_of_ring.avi
+700000+0 records in
+700000+0 records out
+716800000 bytes (717 MB) copied, 12.9189 s, 55.5 MB/s
+ 
+[root@roclinux ~]$  ls -l king_of_ring.avi
+-rw-r--r-- 1 root root 716800000 Apr 12 13:01 king_of_ring.avi
+#+END_SRC
+美国大片的文件大小是 700MB，而我手边仅有的两个优盘，都是 512MB 大小的。我打算把文件以 400MB 作为一个拆分单位，来进行拆分。这里使用到了 split 的-b选项，来指定每个拆分文件的大小：
+#+BEGIN_SRC bash
+[root@roclinux ~]$ split -b 400M king_of_ring.avi
+ 
+[root@roclinux ~]$ ls -l
+total 1400008
+-rw-r--r-- 1 root root 716800000 Apr 12 13:01 king_of_ring.avi
+-rw-r--r-- 1 root root 419430400 Apr 12 13:04 xaa
+-rw-r--r-- 1 root root 297369600 Apr 12 13:04 xab
+#+END_SRC
+看！分身完毕！咦，怎么多出了 xaa 和 xab 两个文件，这么奇怪的名字？
+
+是的，你没看错，在没有明确指定拆分后文件的命名方式的情况下，split 会默认采用 x 字符作为文件前缀，采用类似 aa、ab、ac 的字符串依次作为文件后缀。于是，就出现了我们上面看到的 xaa、xab 了。
+
+从文件大小来看，如我们所愿，电影文件的确被切割成了一个 400MB 的文件、一个 300MB 的文件，终于可以装到两个优盘里了。
+** 切分后的合并
+使用 cat 命令将拆分文件 xaa 和 xab 合并成一个文件，可以看出合并后的文件和源文件的大小是一致的：
+#+BEGIN_SRC bash
+[root@roclinux ~]$ cat xaa xab > king_of_ring_merge.avi
+ 
+[root@roclinux ~]$ ls -l
+total 2100012
+-rw-r--r-- 1 root root 716800000 Apr 12 13:01 king_of_ring.avi
+-rw-r--r-- 1 root root 716800000 Apr 12 13:07 king_of_ring_merge.avi
+-rw-r--r-- 1 root root 419430400 Apr 12 13:04 xaa
+-rw-r--r-- 1 root root 297369600 Apr 12 13:04 xab
+#+END_SRC
+对了，如果是在 Windows 下的话，我们要先运行 cmd，然后用 copy 命令来进行文件的合并：
+#+BEGIN_SRC bash
+copy /b xaa + xab king_of_ring.avi
+#+END_SRC
+格式上和 Linux 有些区别，但原理是一样的。
+** 设置拆分文件的名称前缀
+上面例子中，我们没有指定拆分文件的名称前缀，结果拆分后的文件名都是 aa、ab 这样的名称，这样的名称既不达意也不美观。
+
+下面的例子，我们尝试以 king_of_ring_part_ 作为拆分后文件的名称前缀：
+#+BEGIN_SRC bash
+#我们指定了king_of_ring_part_前缀
+
+[root@roclinux ~]$ split -b 400m king_of_ring.avi king_of_ring_part_
+ 
+#可以看到, 文件名的可读性提高了很多
+[root@roclinux ~]$ ls -l king*
+-rw-r--r-- 1 root root 716800000 Feb 25 18:29 king_of_ring.avi
+-rw-r--r-- 1 root root 419430400 Feb 25 19:24 king_of_ring_part_aa
+-rw-r--r-- 1 root root 297369600 Feb 25 19:24 king_of_ring_part_ab
+#+END_SRC
+
+文件名的可读性是不是提高了不少，从文件名称就可以看出来是美国大片的拆分文件啦。
+** 设置数字后缀
+如果大家看不惯以 aa、ab 这种字母作为文件后缀，我们还可以通过-d选项来指定数字形式的文件后缀：
+#+BEGIN_SRC bash
+#使用了-d选项
+[root@roclinux ~]$ split -b 400m -d king_of_ring.avi king_of_ring_part_
+ 
+#后缀从原来的aa、ab变成了00、01
+[root@roclinux ~]$ ls -l king*
+-rw-r--r-- 1 root root 716800000 Feb 25 18:29 king_of_ring.avi
+-rw-r--r-- 1 root root 419430400 Feb 25 19:24 king_of_ring_part_00
+-rw-r--r-- 1 root root 297369600 Feb 25 19:24 king_of_ring_part_01
+#+END_SRC
+** 按照行数进行拆分
+前面我们讲的是按照文件大小（如 400MB）进行文件拆分的方法，但是并非所有情况都适合于用文件大小作为拆分单元。比如，我们希望把 /etc/passwd 文件按照一个文件 10 行记录的方式进行拆分，又该怎么操作呢？
+#+BEGIN_SRC bash
+#使用-N来指定拆分的行数,本例中为-10
+[root@roclinux ~]$ split -d -10 /etc/passwd my_passwd_
+ 
+#可以看到拆分成功
+[root@roclinux ~]$ wc -l my_passwd_*
+  10 my_passwd_00
+  10 my_passwd_01
+   5 my_passwd_02
+  25 total
+#+END_SRC
+** 合并后的校验
+需要注意的是，在通过网络来传输大文件，或者在设备之间复制大文件的时候，可能会出现传输前后数据不一致的情况。
+
+使用 split 来拆分大文件仅仅是故事的开始，操作完毕后化零为整、完璧归赵才是完美的结局。因此需要在合并文件后进行文件的完整性校验，推荐使用 md5sum 来计算和比对前后两个大文件的 md5 值。
+#+BEGIN_SRC bash
+#对原先的文件计算md5值
+[root@roclinux ~]$ md5sum king_of_ring.avi
+eacff27bf2db99c7301383b7d8c1c07c  king_of_ring.avi
+ 
+#对合并后的文件计算md5值, 并与原值进行比较
+[root@roclinux ~]$ md5sum king_of_ring_merge.avi
+eacff27bf2db99c7301383b7d8c1c07c  king_of_ring_merge.avi
+#+END_SRC
+如果前后一致，那么恭喜你，文件合并成功！
 * 设置Linux在未登录账号情况下自动连接wifi
 期望机器能在通电进入系统后，即使没有登录账号也能自动连接wifi。可以使用Linux的网络管理工具的命令：
 
@@ -2405,3 +2864,259 @@ netstat -ntlp   //查看当前所有tcp端口
 netstat -ntulp | grep 80   //查看所有80端口使用情况
 netstat -ntulp | grep 3306   //查看所有3306端口使用情况
 #+END_SRC
+* netstat
+Linux netstat 命令用于显示网络状态。
+
+利用 netstat 指令可让你得知整个 Linux 系统的网络情况。
+
+语法：netstat [-acCeFghilMnNoprstuvVwx][-A<网络类型>][--ip]
+
+- -a或--all 显示所有连线中的Socket。
+- -A<网络类型>或--<网络类型> 列出该网络类型连线中的相关地址。
+- -c或--continuous 持续列出网络状态。
+- -C或--cache 显示路由器配置的快取信息。
+- -e或--extend 显示网络其他相关信息。
+- -F或--fib 显示路由缓存。
+- -g或--groups 显示多重广播功能群组组员名单。
+- -h或--help 在线帮助。
+- -i或--interfaces 显示网络界面信息表单。
+- -l或--listening 显示监控中的服务器的Socket。
+- -M或--masquerade 显示伪装的网络连线。
+- -n或--numeric 直接使用IP地址，而不通过域名服务器。
+- -N或--netlink或--symbolic 显示网络硬件外围设备的符号连接名称。
+- -o或--timers 显示计时器。
+- -p或--programs 显示正在使用Socket的程序识别码和程序名称。
+- -r或--route 显示Routing Table。
+- -s或--statistics 显示网络工作信息统计表。
+- -t或--tcp 显示TCP传输协议的连线状况。
+- -u或--udp 显示UDP传输协议的连线状况。
+- -v或--verbose 显示指令执行过程。
+- -V或--version 显示版本信息。
+- -w或--raw 显示RAW传输协议的连线状况。
+- -x或--unix 此参数的效果和指定"-A unix"参数相同。
+- --ip或--inet 此参数的效果和指定"-A inet"参数相同。
+
+** 实例
+*** 显示详细的网络状况
+# netstat -a
+*** 显示当前户籍UDP连接状况
+# netstat -nu
+*** 显示UDP端口号的使用情况
+# netstat -apu
+Active Internet connections (servers and established)
+Proto Recv-Q Send-Q Local Address        Foreign Address       State    PID/Program name  
+udp    0   0 *:32768           *:*                   -          
+udp    0   0 *:nfs            *:*                   -          
+udp    0   0 *:641            *:*                   3006/rpc.statd   
+udp    0   0 192.168.0.3:netbios-ns   *:*                   3537/nmbd      
+udp    0   0 *:netbios-ns        *:*                   3537/nmbd      
+udp    0   0 192.168.0.3:netbios-dgm   *:*                   3537/nmbd      
+udp    0   0 *:netbios-dgm        *:*                   3537/nmbd      
+udp    0   0 *:tftp           *:*                   3346/xinetd     
+udp    0   0 *:999            *:*                   3366/rpc.rquotad  
+udp    0   0 *:sunrpc          *:*                   2986/portmap    
+udp    0   0 *:ipp            *:*                   6938/cupsd     
+udp    0   0 *:1022           *:*                   3392/rpc.mountd   
+udp    0   0 *:638            *:*                   3006/rpc.statd
+*** 显示网卡列表
+# netstat -i
+Kernel Interface table
+Iface    MTU Met  RX-OK RX-ERR RX-DRP RX-OVR  TX-OK TX-ERR TX-DRP TX-OVR Flg
+eth0    1500  0  181864   0   0   0  141278   0   0   0 BMRU
+lo    16436  0   3362   0   0   0   3362   0   0   0 LRU
+*** 显示组播组的关系
+# netstat -g
+IPv6/IPv4 Group Memberships
+Interface    RefCnt Group
+--------------- ------ ---------------------
+lo       1   ALL-SYSTEMS.MCAST.NET
+eth0      1   ALL-SYSTEMS.MCAST.NET
+lo       1   ff02::1
+eth0      1   ff02::1:ff0a:b0c
+eth0      1   ff02::1
+*** 显示网络统计信息
+# netstat -s
+Ip:
+  184695 total packets received
+  0 forwarded
+  0 incoming packets discarded
+  184687 incoming packets delivered
+  143917 requests sent out
+  32 outgoing packets dropped
+  30 dropped because of missing route
+Icmp:
+  676 ICMP messages received
+  5 input ICMP message failed.
+  ICMP input histogram:
+    destination unreachable: 44
+    echo requests: 287
+    echo replies: 345
+  304 ICMP messages sent
+  0 ICMP messages failed
+  ICMP output histogram:
+    destination unreachable: 17
+    echo replies: 287
+Tcp:
+  473 active connections openings
+  28 passive connection openings
+  4 failed connection attempts
+  11 connection resets received
+  1 connections established
+  178253 segments received
+  137936 segments send out
+  29 segments retransmited
+  0 bad segments received.
+  336 resets sent
+Udp:
+  5714 packets received
+  8 packets to unknown port received.
+  0 packet receive errors
+  5419 packets sent
+TcpExt:
+  1 resets received for embryonic SYN_RECV sockets
+  ArpFilter: 0
+  12 TCP sockets finished time wait in fast timer
+  572 delayed acks sent
+  3 delayed acks further delayed because of locked socket
+  13766 packets directly queued to recvmsg prequeue.
+  1101482 packets directly received from backlog
+  19599861 packets directly received from prequeue
+  46860 packets header predicted
+  14541 packets header predicted and directly queued to user
+  TCPPureAcks: 12259
+  TCPHPAcks: 9119
+  TCPRenoRecovery: 0
+  TCPSackRecovery: 0
+  TCPSACKReneging: 0
+  TCPFACKReorder: 0
+  TCPSACKReorder: 0
+  TCPRenoReorder: 0
+  TCPTSReorder: 0
+  TCPFullUndo: 0
+  TCPPartialUndo: 0
+  TCPDSACKUndo: 0
+  TCPLossUndo: 0
+  TCPLoss: 0
+  TCPLostRetransmit: 0
+  TCPRenoFailures: 0
+  TCPSackFailures: 0
+  TCPLossFailures: 0
+  TCPFastRetrans: 0
+  TCPForwardRetrans: 0
+  TCPSlowStartRetrans: 0
+  TCPTimeouts: 29
+  TCPRenoRecoveryFail: 0
+  TCPSackRecoveryFail: 0
+  TCPSchedulerFailed: 0
+  TCPRcvCollapsed: 0
+  TCPDSACKOldSent: 0
+  TCPDSACKOfoSent: 0
+  TCPDSACKRecv: 0
+  TCPDSACKOfoRecv: 0
+  TCPAbortOnSyn: 0
+  TCPAbortOnData: 1
+  TCPAbortOnClose: 0
+  TCPAbortOnMemory: 0
+  TCPAbortOnTimeout: 3
+  TCPAbortOnLinger: 0
+  TCPAbortFailed: 3
+  TCPMemoryPressures: 0
+*** 显示监听的套接口
+# netstat -l
+Active Internet connections (only servers)
+Proto Recv-Q Send-Q Local Address        Foreign Address       State   
+tcp    0   0 *:32769           *:*             LISTEN   
+tcp    0   0 *:nfs            *:*             LISTEN   
+tcp    0   0 *:644            *:*             LISTEN   
+tcp    0   0 *:1002           *:*             LISTEN   
+tcp    0   0 *:netbios-ssn        *:*             LISTEN   
+tcp    0   0 *:sunrpc          *:*             LISTEN   
+tcp    0   0 vm-dev:ipp         *:*             LISTEN   
+tcp    0   0 *:telnet          *:*             LISTEN   
+tcp    0   0 *:601            *:*             LISTEN   
+tcp    0   0 *:microsoft-ds       *:*             LISTEN   
+tcp    0   0 *:http           *:*             LISTEN   
+tcp    0   0 *:ssh            *:*             LISTEN   
+tcp    0   0 *:https           *:*             LISTEN   
+udp    0   0 *:32768           *:*                   
+udp    0   0 *:nfs            *:*                   
+udp    0   0 *:641            *:*                   
+udp    0   0 192.168.0.3:netbios-ns   *:*                   
+udp    0   0 *:netbios-ns        *:*                   
+udp    0   0 192.168.0.3:netbios-dgm   *:*                   
+udp    0   0 *:netbios-dgm        *:*                   
+udp    0   0 *:tftp           *:*                   
+udp    0   0 *:999            *:*                   
+udp    0   0 *:sunrpc          *:*                   
+udp    0   0 *:ipp            *:*                   
+udp    0   0 *:1022           *:*                   
+udp    0   0 *:638            *:*                   
+Active UNIX domain sockets (only servers)
+Proto RefCnt Flags    Type    State     I-Node Path
+unix 2   [ ACC ]   STREAM   LISTENING   10621 @/tmp/fam-root-
+unix 2   [ ACC ]   STREAM   LISTENING   7096  /var/run/acpid.socket
+unix 2   [ ACC ]   STREAM   LISTENING   9792  /tmp/.gdm_socket
+unix 2   [ ACC ]   STREAM   LISTENING   9927  /tmp/.X11-unix/X0
+unix 2   [ ACC ]   STREAM   LISTENING   10489 /tmp/ssh-lbUnUf4552/agent.4552
+unix 2   [ ACC ]   STREAM   LISTENING   10558 /tmp/ksocket-root/kdeinit__0
+unix 2   [ ACC ]   STREAM   LISTENING   10560 /tmp/ksocket-root/kdeinit-:0
+unix 2   [ ACC ]   STREAM   LISTENING   10570 /tmp/.ICE-unix/dcop4664-1270815442
+unix 2   [ ACC ]   STREAM   LISTENING   10843 /tmp/.ICE-unix/4735
+unix 2   [ ACC ]   STREAM   LISTENING   10591 /tmp/ksocket-root/klauncherah3arc.slave-socket
+unix 2   [ ACC ]   STREAM   LISTENING   7763  /var/run/iiim/.iiimp-unix/9010
+unix 2   [ ACC ]   STREAM   LISTENING   11047 /tmp/orbit-root/linc-1291-0-1e92c8082411
+unix 2   [ ACC ]   STREAM   LISTENING   11053 /tmp/orbit-root/linc-128e-0-dc070659cbb3
+unix 2   [ ACC ]   STREAM   LISTENING   8020  /var/run/dbus/system_bus_socket
+unix 2   [ ACC ]   STREAM   LISTENING   58927 /tmp/mcop-root/vm-dev-2c28-4beba75f
+unix 2   [ ACC ]   STREAM   LISTENING   7860  /tmp/.font-unix/fs7100
+unix 2   [ ACC ]   STREAM   LISTENING   7658  /dev/gpmctl
+unix 2   [ ACC ]   STREAM   LISTENING   10498 @/tmp/dbus-s2MLJGO5Ci
+* vs code的sftp
+ps：SFTP目前不能处理中文文件
+** SFTP原理
+SFTP原理是这样的：首先本地要有一个项目文件夹，同时远程也有一个项目文件夹，然后通过配置文件来同步二者。
+SFTP可以查看远程项目所有文件，但不能直接操作，必须操作本地项目文件，再同步到远程项目。
+
+现在我们本地和远程均有一个文件夹“sftpFolder”，用VsCode打开本地文件夹“sftpFolder”，然后执行 ctrl+shift+p ，搜索 SFTP:Config ，回车后，会生成一个“.vscode/sftp.json”，这个就是配置文件。
+同时，如下图左侧会多了一个“远程目录”。
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-10-13_10-46-50.png @ 2021-10-13 10:47:31
+[[file:vs_code%E7%9A%84sftp/2021-10-13_10-47-31_Snipaste_2021-10-13_10-46-50.png]]
+** SFTP配置
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-10-13_10-47-59.png @ 2021-10-13 10:48:26
+[[file:vs_code%E7%9A%84sftp/2021-10-13_10-48-26_Snipaste_2021-10-13_10-47-59.png]]
+配置文件不能写注释，所以这里说明一下其中几个属性：
+- uploadOnSave：本地更新文件保存会自动同步到远程文件（不会同步重命名文件和删除文件）
+- downloadOnOpen：从远程服务器下载打开的文件
+- ignore：忽略的文件（匹配的文件不会同步）
+- watcher：监听器（可以重命名文件和删除文件）
+    - autoUpload：文件变更会自动同步（修改和重命名）
+    - autoDelete：文件删除会自动同步
+
+* rz和sz命令使用
+rz命令是方便从windows传文件到Linux，在windows下通过连接工具进入linux系统，cd到自己需要的目录，命令行输入rz，然后回车，之后会弹出一个选择框，选择我们需要上传的文件，然后add，最后上传就好了。
+
+#: rz 
+
+sz命令反过来，是从Linux传输文件到windows，同样Linux下我们需要传的文件所在目录，命令行输入sz，后面跟上需要传输的文件命，可以是一个文件，也可以跟多个文件名，同时传多个文件，然后回车，就可以传文件了。默认情况文件传到windows的用户下载目录下。
+
+#: sz filename1 filename2 filename3
+
+这两个命令传输传输小文件很方便也很快，但是遇到大文件经常需要很久，甚至传了一部分然后中断了，这时就需要nc命令出场了，传输大文件也非常快。
+
+* Linux命令行连接WiFi
+1. 安装nmcli
+sudo apt-get install nmcli
+
+2. 查看网络设备
+sudo nmcli dev
+
+3. 开启wifi
+sudo nmcli r wifi on
+
+4. 扫描wifi
+sudo nmcli dev wifi
+
+5. 连接wifi
+sudo nmcli dev wifi connect "wifi名" password "密码"

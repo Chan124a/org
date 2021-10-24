@@ -629,7 +629,56 @@ public:
 - 任何数和其自身做异或运算，结果是 0 .
 - 异或运算满足交换律和结合律.
 
+* stol用法
+std::stol()：此函数将参数提供的字符串转换为long long。它解析str并将其内容解释为指定基数的整数，并将其作为long long类型的值返回。
 
+Convert string to long long
+
+Parses str interpreting its content as an integral number of the specified base, which is returned as a value of type long long.
+
+If idx is not a null pointer, the function also sets the value of idx to the position of the first character in str after the number.
+
+The function uses strtoll (or wcstoll) to perform the conversion (see strtol for more details on the process).
+#+BEGIN_SRC c++
+long long stoll (const string&  str, size_t* idx = 0, int base = 10);
+long long stoll (const wstring& str, size_t* idx = 0, int base = 10);
+#+END_SRC
+参数：
+- str
+String object with the representation of an integral number.
+- idx
+Pointer to an object of type size_t, whose value is set by the function to position of the next character in str after the numerical value.
+This parameter can also be a null pointer, in which case it is not used.
+- base
+Numerical base (radix) that determines the valid characters and their interpretation.
+If this is 0, the base used is determined by the format in the sequence (see strtol for details). Notice that by default this argument is 10, not 0.
+
+#+BEGIN_SRC c++
+// stoll example
+#include <iostream>   // std::cout
+#include <string>     // std::string, std::stoll
+
+int main ()
+{
+  std::string str = "8246821 0xffff 020";
+
+  std::string::size_type sz = 0;   // alias of size_t
+
+  while (!str.empty()) {
+    long long ll = std::stoll (str,&sz,0);
+    std::cout << str.substr(0,sz) << " interpreted as " << ll << '\n';
+    str = str.substr(sz);
+  }
+
+  return 0;
+}
+#+END_SRC
+
+#+BEGIN_EXAMPLE
+8246821 interpreted as 8246821
+ 0xffff interpreted as 65535
+ 020 interpreted as 16
+#+END_EXAMPLE
 * 一个包含所有c++的头文件的头文件
 
 #include<bits/stdc++.h>包含了目前c++所包含的所有头文件
