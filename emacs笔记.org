@@ -352,10 +352,25 @@ Emacs 是一个富文档编辑器（Self document, extensible editor）而下面
 
 可用let和prog定义局部变量。
 
-这是let的语法：
-(let ((var1  val1) (var2  val2).. (varn  valn))<s-expressions>)
+To define local variables, use let. The form is:
+(let (var1 var2 …) body)
+#+BEGIN_EXAMPLE
+(let (a b)
+ (setq a 3)
+ (setq b 4)
+ (+ a b)
+) ;  7
+#+END_EXAMPLE
+where body is (one or more) lisp expressions. The body's last expression's value is returned.
 
-其中var1, var2, ..varn 是变量名，val1, val2, .. valn是分配给相应的变量的初始值，<s-expressions>是S式。
+Another form of let is this:
+(let ((var1 val1) (var2 val2) …) body)
+#+BEGIN_EXAMPLE
+(let ((a 3) (b 4))
+ (+ a b)
+) ;  7
+#+END_EXAMPLE
+This form lets you set values to variable without using many setq in the body. This form is convenient if you just have a few simple local vars with known values.
 ** 列表
 ** 引号
 quote 操作符接受一个实参，并完封不动地返回它。
@@ -364,7 +379,75 @@ quote 操作符接受一个实参，并完封不动地返回它。
 #+END_SRC
 
 #+RESULTS:
+** If Then Else
+The form for “if” expression is:
 
+(if test body)
+
+or
+
+(if test true_body false_body)
+#+BEGIN_EXAMPLE
+(if (< 3 2)
+    7
+  8) ; 8
+
+;; no false expression, return nil
+(if (< 3 2)
+    (message "yes")) ; nil
+#+END_EXAMPLE
+If you do not need a “else” part, you should use the function when instead, because it is more clear. The form is:
+
+(when test expr1 expr2 …)
+
+Its meaning is the same as
+
+(if test (progn expr1 expr2 …))
+** Block of Expressions
+Sometimes you need to group several expressions together as one single expression. This can be done with progn.
+#+BEGIN_EXAMPLE
+(progn
+  (message "a")
+  (message "b"))
+
+;; is equivalent to
+(message "a")
+(message "b")
+#+END_EXAMPLE
+
+The purpose of (progn …) is similar to a block of code {…} in C-like languages. It is used to group together a bunch of expressions into one single parenthesized expression. Most of the time it's used inside “if”.
+#+BEGIN_EXAMPLE
+(if something
+    (progn ; true
+      ;; code here
+      )
+  (progn ; else
+    ;; code here
+    ))
+#+END_EXAMPLE
+progn returns the last expression in its body.
+#+BEGIN_EXAMPLE
+(progn 3 4 ) ; 4
+#+END_EXAMPLE
+** Loop
+Most basic loop in elisp is with while.
+
+(while test body)
+
+, where body is one or more lisp expressions.
+#+BEGIN_EXAMPLE
+(setq x 0)
+
+(while (< x 4)
+  (print (format "number is %d" x))
+  (setq x (1+ x)))
+;; inserts Unicode chars 32 to 126
+(let ((x 32))
+  (while (< x 127)
+    (insert-char x)
+    (setq x (+ x 1))))
+#+END_EXAMPLE
+Usually it's better to use dolist or dotimes.
 * emacs配置文件
 
 Emacs 的配置文件默认保存在 =~/.emacs.d/init.el= 文件中。（如果其不存在可自行创建，
@@ -1417,6 +1500,10 @@ imenu 可以显示当前缓冲区的所有函数列表，下面的配置可以�
 ** iedit
 
 iedit 是一个可以同时编辑多个区域的插件，它类似 Sublime Text 中的多光标编辑。它的 GitHub 仓库在[[https://github.com/victorhge/iedit][这里]]。
+
+
+asdf
+
 
 我们将其绑定快捷键以便更快捷的使用这个模式（ =C-;= 为默认快捷键），
 
