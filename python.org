@@ -1,3 +1,4 @@
+
 #+OPTIONS: ^:nil
 
 * 基本数据类型
@@ -93,6 +94,46 @@ x = "#".join(myTuple)
 
 print(x)  # Bill#Steve#Elon
 #+END_SRC
+*** in
+in这个词在字符串操作中是一个布尔操作符，它读取两个字符串，如果前者的字符串为后者所包含，就返回真，否则为假，看例子：
+#+begin_src python
+>>> 'a' in 'banana'
+
+True
+
+>>> 'app' in 'banana'
+
+False
+#+END_SRC
+*** startswith()方法
+startswith() 方法用于检查字符串是否是以指定子字符串开头，如果是则返回 True，否则返回 False。如果参数 beg 和 end 指定值，则在指定范围内检查。
+
+~str.startswith(str, beg=0,end=len(string))~
+
+参数：
+- str -- 检测的字符串。
+- strbeg -- 可选参数用于设置字符串检测的起始位置。
+- strend -- 可选参数用于设置字符串检测的结束位置。
+
+返回值：
+如果检测到字符串则返回True，否则返回False。
+
+**** 例子
+#+begin_src python
+#!/usr/bin/python
+
+str = "this is string example....wow!!!";
+print str.startswith( 'this' );
+print str.startswith( 'is', 2, 4 );
+print str.startswith( 'this', 2, 4 );
+#+END_SRC
+
+以上实例输出结果如下：
+#+BEGIN_EXAMPLE
+True
+True
+False
+#+END_EXAMPLE
 
 ** 布尔值
 python中可以直接用 True、False 表示布尔值（请注意大小写），也可以通过布尔运算计算出来。
@@ -515,7 +556,21 @@ getattr() 函数用于返回一个对象属性值。
 *** 返回值
 返回对象属性值。
 *** 例子
-
+#+begin_src bash
+>>>class A(object):
+...     bar = 1
+... 
+>>> a = A()
+>>> getattr(a, 'bar')        # 获取属性 bar 值
+1
+>>> getattr(a, 'bar2')       # 属性 bar2 不存在，触发异常
+Traceback (most recent call last):
+  File "<stdin>", line 1, in <module>
+AttributeError: 'A' object has no attribute 'bar2'
+>>> getattr(a, 'bar2', 3)    # 属性 bar2 不存在，但设置了默认值
+3
+>>>
+#+END_SRC
 ** range()
 ~range(start, stop[, step])~
 
@@ -940,7 +995,6 @@ H []
 #+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/v2-74c0f1151574fc5bbafa12b9c375ca41_720w.jpg @ 2020-11-08 18:49:42
 [[file:asdf/2020-11-08_18-49-42_v2-74c0f1151574fc5bbafa12b9c375ca41_720w.jpg]]
 
-
 * 类
 Python的类提供了面向对象编程的所有标准特性：类继承机制允许多个基类，派生类可以覆盖它基类的任何方法，一个方法可以调用基类中相同名称的的方法。对象可以包含任意数量和类型的数据。和模块一样，类也拥有 Python 天然的动态特性：它们在运行时创建，可以在创建后修改。
 ** 类的定义
@@ -1012,6 +1066,338 @@ func2
 1
 foo
 #+END_EXAMPLE
+* cls含义及使用方法
+** cls含义
+python中cls代表的是类的本身，相对应的self则是类的一个实例对象。
+** cls用法
+
+cls可以在静态方法中使用，并通过cls()方法来实例化一个对象。
+#+begin_src python
+class Person(object):
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+        print('self:', self)
+
+    # 定义一个build方法，返回一个person实例对象，这个方法等价于Person()。
+    @classmethod
+    def build(cls):
+        # cls()等于Person()
+        p = cls("Tom", 18)
+        print('cls:', cls)
+        return p
+
+
+if __name__ == '__main__':
+    person = Person.build()
+    print(person, person.name, person.age)
+#+END_SRC
+输出结果
+#+BEGIN_EXAMPLE
+self: <__main__.Person object at 0x000001FE88E4A280>
+cls: <class '__main__.Person'>
+<__main__.Person object at 0x000001FE88E4A280> Tom 18
+#+END_EXAMPLE
+* 函数修饰符@
+Python函数修饰符，“@”，与其说是修饰函数倒不如说是引用、调用它修饰的函数。
+
+举个栗子，下面的一段代码，里面两个函数，没有被调用，也会有输出结果：
+#+begin_src python
+def test(f):
+    print "before ..."
+    f()
+    print "after ..."
+ 
+@test
+def func():
+    print "func was called"
+#+END_SRC
+直接运行，输出结果：
+#+BEGIN_EXAMPLE
+before ...
+func was called
+after ...
+#+END_EXAMPLE
+上面代码可以看出来，只定义了两个函数： test和func。没有地方调用它们。如果没有“@test”，运行应该是没有任何输出的。
+
+但是，Python解释器读到函数修饰符“@”的时候，后面步骤会是这样了：
+1. 去调用 test函数，test函数的入口参数就是那个叫“func”的函数；
+2. test函数被执行，入口参数的（也就是func函数）会被调用（执行）；
+
+换言之，修饰符带的那个函数的入口参数，就是下面的那个整个的函数。有点儿类似JavaScript里面的 function a (function () { ... });
+
+再来看一个例子：
+#+begin_src python
+def test(func):
+    func()
+    print "call test"
+ 
+def test1(f):
+    f()
+    print "call test1"
+     
+def main():
+    @test
+    def fun():
+        print "call fun"
+        @test1
+        def fun1():
+            print "call fun1"
+main()
+#+END_SRC
+输出结果：
+#+BEGIN_EXAMPLE
+call fun
+call fun1
+call test1
+call test
+#+END_EXAMPLE
+需要注意的：
+1. 函数先定义，再修饰它；反之会编译器不认识；
+2. 修饰符“@”后面必须是之前定义的某一个函数；
+3. 每个函数可以有多个修饰符。
+* @修饰符用法
+** @property
+先来看下一般情况下class类函数，定义一个Student类，stu实例化对象，输出结果显示xiaoming字样。
+#+begin_src python
+class Student():
+    def __init__(self, name):
+        self._name = name
+    def sname(self):
+        return self._name
+stu = Student('xiaoming')
+print(stu.sname())
+#+END_SRC
+增加@property之后，输出结果也显示xiaoming字样，与上面输出结果一致，但调用的时候，stu.sname后面省了一个括号@property可以使类方法转化成属性，直接通过方法名来访问方法
+#+begin_src python
+class Student():
+    def __init__(self, name):
+        self._name = name
+    @property
+    def sname(self):
+        return self._name
+stu = Student('xiaoming')
+print(stu.sname)  //注意这里sname后面不用带括号
+#+END_SRC
+如果这时你想修改sname属性，使用下面语句，你会发现报错
+#+begin_src python
+stu.sname='zhangsan'
+
+Traceback (most recent call last):
+  File "D:/pythonstudy/data_ap/test.py", line 120, in <module>
+    stu.sname='zhangsan'
+AttributeError: can't set attribute
+#+END_SRC
+但是这时如果使用@函数名.setter，可以重新设置属性值
+#+begin_src python
+class Student():
+    def __init__(self, name):
+        self._name = name
+    @property
+    def sname(self):
+        return self._name
+    @sname.setter
+    def sname(self, value):
+        self._sname = value
+stu = Student('xiaoming')
+stu.sname='zhangsan'
+print(stu.sname)
+#+END_SRC
+** @classmethod
+@classmethod将对象方法转化成类方法，并注意类方法函数参数写法上需要加上cls作为参数，但调用的时候不用加参数。
+#+begin_src python
+class MyClass():
+    @classmethod
+    def thisIsClassMethod(cls,parameter):
+        print("this is a class method")
+        print(cls.__name__)
+        print(type(cls)) #打印类型为classobj
+if __name__ == "__main__":
+    MyClass.thisIsClassMethod(None) 
+    print(type(MyClass))
+'''
+this is a class method
+MyClass
+<class 'type'>
+<class 'type'>
+'''
+#+END_SRC
+** @staticmethod
+这时将对象方法转化成静态方法，可以被类直接调用
+#+begin_src python
+class MyClass:
+    @staticmethod
+    def thisIsStaticMethod():
+        print("This is static method")
+if __name__ == "__main__":
+    MyClass.thisIsStaticMethod()
+
+#This is static method
+#+END_SRC
+** 保护核心代码
+func是核心代码，不能更改，但想要在该代码基础上扩展功能。这时重新定义一个两层函数，内层函数的输出是一个函数对象，并在func函数前面增加@deco进行修饰
+#+begin_src python
+import time
+def deco(func):
+    def wrapper():
+        startTime = time.time()
+        func()
+        endTime = time.time()
+        msecs = (endTime - startTime)*1000
+        print("time is %d ms" %msecs)
+    return wrapper
+@deco
+def func():
+    print("hello")
+    time.sleep(1)
+    print("world")
+if __name__ == '__main__':
+    f = func
+    f()
+'''
+hello
+time is 1000 ms
+world
+'''
+#+END_SRC
+
+如果核心代码带参数，只需要在内层函数中增加参数即可
+#+begin_src python
+def deco(func):
+    def wrapper(a,b):
+        startTime = time.time()
+        func(a,b)
+        endTime = time.time()
+        msecs = (endTime - startTime)*1000
+        print("time is %d ms" %msecs)
+    return wrapper
+@deco
+def func(a,b):
+    print("hello")
+    time.sleep(1)
+    print("result is %d" % (a + b))
+if __name__ == '__main__':
+    f = func
+    f(2,4)
+'''
+hello
+result is 6
+time is 1000 ms
+'''
+#+END_SRC
+如果参数的个数不确定的情况下，使用*args，可以理解为一个数组，**kwargs可以理解为一个键值对
+
+如果参数的个数不确定的:
+#+begin_src python
+    def wrapper(*args, **kwargs):
+        startTime = time.time()
+        func(*args, **kwargs)
+        endTime = time.time()
+        msecs = (endTime - startTime)*1000
+        print("time is %d ms" %msecs)
+    return wrapper
+@deco
+def func(a,b):
+    print("hello，here is a func for add :")
+    time.sleep(1)
+    print("result is %d" %(a+b))
+@deco
+def func2(a,b,c):
+    print("hello，here is a func for add :")
+    time.sleep(1)
+    print("result is %d" %(a+b+c))
+if __name__ == '__main__':
+    f = func
+    func2(3,4,5)
+    f(3,4)
+'''
+hello，here is a func for add :
+result is 12
+time is 1000 ms
+hello，here is a func for add :
+result is 7
+time is 1000 ms
+'''
+#+END_SRC
+
+** 类装饰器
+[[https://zhuanlan.zhihu.com/p/93846887][参考文档]]
+
+类也可以作为装饰器，使用起来可能比函数装饰器更方便。首先看下面一个简单的例子：
+#+begin_src python
+class myDecorator(object):
+    def __init__(self, f):
+        print("inside myDecorator.__init__()")
+        f() # Prove that function definition has completed
+    def __call__(self):
+        print("inside myDecorator.__call__()")
+​
+@myDecorator
+def aFunction():
+    print("inside aFunction()")
+​
+print("Finished decorating aFunction()")
+​
+aFunction()
+#+END_SRC
+例子中函数aFunction()就使用了类myDecorator作为装饰器修饰。例子的输出结果如下：
+#+BEGIN_EXAMPLE
+inside myDecorator.__init__()
+inside aFunction()
+Finished decorating aFunction()
+inside myDecorator.__call__()
+#+END_EXAMPLE
+可以看出，在aFunction()函数声明处进入了类myDecorator的__init__()方法，但要注意，从第2个输出可以看出，此时函数aFunction()的定义已经完成了，在__init__()中调用的输入参数f()，实际上是调用了aFunction()函数。至此aFunction()函数的声明完成，包括装饰器声明的部分，然后输出了第3个输出。最后执行aFunction()时，可以看出实际上是执行了类myDecorator的__call__()方法（定义了__call__()方法的类的对象可以像函数一样被调用，此时调用的是对象的__call__()方法）。
+
+这个例子其实不难理解，因为根据装饰器语法的含义，下面的代码：
+#+begin_src python
+@myDecorator
+def aFunction():
+    # 。。。
+#+END_SRC
+
+等价于
+#+begin_src python
+def aFunction():
+    # 。。。
+
+aFunction = myDecorator(aFunction)
+#+END_SRC
+因此被装饰后的函数aFunction()实际上已经是类myDecorator的对象。当再调用aFunction()函数时，实际上就是调用类myDecorator的对象，因此会调用到类myDecorator的__call__()方法。
+
+因此使用类作为装饰器装饰函数来对函数添加一些额外的属性或功能时，一般会在类的__init__()方法中记录传入的函数，再在__call__()调用修饰的函数及其它额外处理。
+
+下面是一个简单的例子：
+#+begin_src python
+class entryExit(object):
+    def __init__(self, f):
+        self.f = f
+    def __call__(self):
+        print("Entering", self.f.__name__)
+        self.f()
+        print("Exited", self.f.__name__)
+​
+@entryExit
+def func1():
+    print("inside func1()")
+​
+@entryExit
+def func2():
+    print("inside func2()")
+​
+func1()
+func2()
+#+END_SRC
+例子的输出：
+#+BEGIN_EXAMPLE
+Entering func1
+inside func1()
+Exited func1
+Entering func2
+inside func2()
+Exited func2
+#+END_EXAMPLE
+
 * 模块与包
 ** 模块简介
 在 Python 中，一个 =.py= 文件就称之为一个模块（Module）
@@ -1807,7 +2193,149 @@ dir()
 [[file:%E6%9F%A5%E7%9C%8B%E5%BD%93%E5%89%8D%E5%AF%BC%E5%85%A5(%E5%BC%95%E5%85%A5)%E6%A8%A1%E5%9D%97%E4%BF%A1%E6%81%AF/2021-10-16_21-13-25_Snipaste_2021-10-16_21-13-20.png]]
 
 
+* Optional和带默认值的参数
+** 带默认值的参数
+在Python中的类或者函数中，若参数在声明时附带了它的默认值，则在实例化或调用时，可以选择性地为该参数赋值，例如：
+#+begin_src python
+#默认值参数
+def foo_v1(a: int, b: int = 1):
+    print(a + b)
+#未给b传入实参时，采用默认值    
+foo_v1(2)
 
+# 输出
+# >>> 3
+#+END_SRC
+【 注意： 规定默认值时，不一定要声明变量所属的类型（说到底Python中的对象、变量名只是一个指针或者说地址罢了），Python是一门动态语言，它总会在Python解释器进程运行的时候去动态地判定一个变量赋值的类型，而之所以在代码中声明静态类型则是为了减少人为错误而提供相应的类型或错误提示，但并不会影响Python的运行！】
+** Typing.Optional类
+可选类型，作用几乎和带默认值的参数等价，不同的是使用Optional会告诉你的IDE或者框架：这个参数除了给定的默认值外还可以是None，而且使用有些静态检查工具如mypy时，对 a: int =None这样类似的声明可能会提示报错，但使用a :Optional[int] = None不会。
+
+以下为Python Documents对它的解释：
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-11-08_22-54-30.png @ 2021-11-11 16:12:46
+[[file:Optional%E5%92%8C%E5%B8%A6%E9%BB%98%E8%AE%A4%E5%80%BC%E7%9A%84%E5%8F%82%E6%95%B0/2021-11-11_16-12-46_Snipaste_2021-11-08_22-54-30.png]]
+
+Optional[X]等价于Union[X, None]
+
+看个例子：
+#+begin_src python
+#Optional
+from typing import Optional
+
+def foo_v2(a: int, b: Optional[int] = None):
+    if b:
+        print(a + b)
+    else:
+        print("parameter b is a NoneType!")
+
+#只传入a位置的实参
+foo_v2(2)
+
+# 输出
+>>> parameter b is a NoneType!
+#+END_SRC
+当你给Optional参数的默认值不为None时，看看Optional为IDE的带来的提示：
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-11-11_16-13-21.png @ 2021-11-11 16:13:26
+[[file:Optional%E5%92%8C%E5%B8%A6%E9%BB%98%E8%AE%A4%E5%80%BC%E7%9A%84%E5%8F%82%E6%95%B0/2021-11-11_16-13-26_Snipaste_2021-11-11_16-13-21.png]]
+这意味着在这个函数中b是一个可选参数,并且提示你它的默认值可以为None。
+
+* field
+field 在 dataclasses 里面是比较重要的功能， 用于初处理定义的参数非常有用
+在 PEP 557 中是这样描述 field 的
+
+Field objects describe each defined field. These objects are created internally, and are returned by the fields() module-level method (see below). Users should never instantiate a Field object directly.
+大致意思就是 Field 对象是用于描述定义的字段的，这些对象是内部定义好了的。然后由 field() 方法返回，用户不用直接实例化 Field。
+我们先看看 field 是如何使用的
+#+begin_src python
+from dataclasses import dataclass, field
+
+
+@dataclass
+class A:
+    a: str = field(default="123")
+#+END_SRC
+可以用于设立默认值，和 a: str = "123" 一个效果，那为什么我们还需要 field 呢？
+因为 field 的功能远不止这一个设置默认值，他还有很多有用的功能
+
+1. 设置是否加载到 __init__ 里面去
+#+begin_src python
+@dataclass
+class A:
+    a: int
+    b: int = field(default=10, init=False)
+a = A(1) # 注意，实例化 A 的时候只需要一个参数，赋给 a 的
+
+#+END_SRC
+等价于:
+#+begin_src python
+class A:
+    b = 10
+    def __init__(self, a: int):
+        self.a = a
+#+END_SRC
+
+2. 设置是否成为 __repr__ 返回参数
+我们在之前实例化 A 的时候，把实例化对象打印出来的话，是这样的：
+
+A(a=1, b=10)
+
+那如果我们不想把特定的对象打印出来，可以这样写:
+#+begin_src python
+@dataclass
+class A:
+    a: int
+    b: int = field(default=1, repr=False)
+
+a = A(1)
+print(a)
+#+END_SRC
+
+这时候，打印的结果为 A(a=1)
+
+3. 设置是否计算 hash 的对象之一
+#+begin_src python
+a: int = field(hash=False)
+#+END_SRC
+
+4. 设置是否成为和其他类进行对比的值之一
+#+begin_src python
+a: int = field(compare=False)
+#+END_SRC
+
+5. 定义 field 信息
+#+begin_src python
+from dataclasses import field, dataclass, fields
+@dataclass
+class A:
+    a: int = field(metadata={"name": "a"}) # metadata 需要接受一个映射对象，也就是 python 的字典
+
+metadata = fields(A)
+print(metadata)
+#+END_SRC
+打印的结果是
+#+BEGIN_EXAMPLE
+(Field(name='a',type=<class 'int'>,default=<dataclasses._MISSING_TYPE object at 0x10f2fe748>,default_factory=<dataclasses._MISSING_TYPE object at 0x10f2fe748>,init=True,repr=True,hash=None,compare=True,metadata=mappingproxy({'name': 'a'}),_field_type=_FIELD),)
+#+END_EXAMPLE
+是一个 tuple，第一个即是 a 字段的 field 定义
+
+可以通过 metadata[0].metadata["name"] 获取值
+
+6. 自定义处理定义的参数
+
+有些字段需要我们进行一些预处理，不用传递初始值，由其他函数返回
+
+我们可以这么写
+#+begin_src python
+def value():
+    return "123"
+
+@dataclass
+class A:
+    a: str = field(default_factory=value)
+
+print(A().a) # 实例化 A 的时候已经可以不传递值了
+#+END_SRC
+打印的结果是 '123'
 * numpy库 
 ** numpy.fromfile
 由一个text或者binary文件创建数组
@@ -4783,6 +5311,19 @@ class BatchSampler(Sampler):
             return (len(self.sampler) + self.batch_size - 1) // self.batch_size
 #+END_SRC
 
+** PyTorch中的contiguous
+Tensor多维数组底层实现是使用一块连续内存的1维数组（行优先顺序存储，下文描述），Tensor在元信息里保存了多维数组的形状，在访问元素时，通过多维度索引转化成1维数组相对于数组起始位置的偏移量即可找到对应的数据。某些Tensor操作（如transpose、permute、narrow、expand）与原Tensor是共享内存中的数据，不会改变底层数组的存储，但原来在语义上相邻、内存里也相邻的元素在执行这样的操作后，在语义上相邻，但在内存不相邻，即不连续了（is not contiguous）。
+
+如果想要变得连续使用contiguous方法，如果Tensor不是连续的，则会重新开辟一块内存空间保证数据是在内存中是连续的，如果Tensor是连续的，则contiguous无操作。
+
+transpose、permute 操作虽然没有修改底层一维数组，但是新建了一份Tensor元信息，并在新的元信息中的 重新指定 stride。torch.view 方法约定了不修改数组本身，只是使用新的形状查看数据。如果我们在 transpose、permute 操作后执行 view，Pytorch 会抛出以下错误：
+#+BEGIN_EXAMPLE
+invalid argument 2: view size is not compatible with input tensor's size and stride (at least one dimension 
+spans across two contiguous subspaces). Call .contiguous() before .view(). 
+at /Users/soumith/b101_2/2019_02_08/wheel_build_dirs/wheel_3.6/pytorch/aten/src/TH/generic/THTens
+#+END_EXAMPLE
+
+[[https://zhuanlan.zhihu.com/p/64551412][参考文章]]
 * torchvision
 torchvision包是服务于pytorch深度学习框架的,用来生成图片,视频数据集,和一些流行的模型类和预训练模型.
 [[https://pytorch-cn.readthedocs.io/zh/latest/torchvision/torchvision/][中文文档]]、[[https://pytorch.org/docs/stable/torchvision/index.html][英文文档]]
@@ -4978,6 +5519,19 @@ os.path.getsize("dog.jpeg")
 18335
 #+END_SRC
 
+*** getcwd()
+
+#+begin_src python
+print os.getcwd() #获取当前工作目录路径
+#+END_SRC
+*** abspath
+
+#+begin_src python
+print os.path.abspath('.') #获取当前工作目录路径
+print os.path.abspath('test.txt') #获取当前目录文件下的工作目录路径
+print os.path.abspath('..') #获取当前工作的父目录 ！注意是父目录路径
+print os.path.abspath(os.curdir) #获取当前工作目录路径
+#+END_SRC
 ** 目录操作
 *** listdir(path='.')
 返回一个列表。列表为给定目录下所有文件和子目录.列表是任意顺序的。它不包括特殊条目’.‘ 和’..‘，即使它们存在于目录中。
@@ -5041,6 +5595,35 @@ with open("dog.jpeg", "rb") as f:
 # 删除文件
 os.remove("dog.copy.jpeg")
 #+END_SRC
+* sys库
+** sys.path.append()
+
+当我们导入一个模块时：import  xxx，默认情况下python解析器会搜索当前目录、已安装的内置模块和第三方模块，搜索路径存放在sys模块的path中：
+#+begin_src python
+>>> import sys
+>>> sys.path
+['', 'C:\\Python352\\Lib\\idlelib', 'C:\\Python352\\python35.zip', 'C:\\Python352\\DLLs', 'C:\\Python352\\lib', 'C:\\Python352', 'C:\\Python352\\lib\\site-packages', 'C:\\Python352\\lib\\site-packages\\setuptools-28.6.1-py3.5.egg', 'C:\\Python352\\lib\\site-packages\\pip-8.1.2-py3.5.egg', 'C:\\Python352\\lib\\site-packages\\requests-2.11.1-py3.5.egg', 'C:\\Python352\\lib\\site-packages\\xlutils-2.0.0-py3.5.egg', 'C:\\Python352\\lib\\site-packages\\xlwt-1.1.2-py3.5.egg', 'C:\\Python352\\lib\\site-packages\\pymongo-3.3.1-py3.5-win-amd64.egg', 'C:\\Python352\\lib\\site-packages\\pytz-2016.7-py3.5.egg', 'C:\\Python352\\lib\\site-packages\\zope.interface-4.3.3-py3.5-win-amd64.egg']
+#+END_SRC
+
+sys.path 返回的是一个列表！
+
+该路径已经添加到系统的环境变量了，当我们要添加自己的搜索目录时，可以通过列表的append()方法；
+
+对于模块和自己写的脚本不在同一个目录下，在脚本开头加sys.path.append('xxx')：
+#+begin_src python
+import sys
+sys.path.append(’引用模块的地址')
+#+END_SRC
+
+这种方法是运行时修改，脚本运行后就会失效的。
+** sys.stdout.encoding
+查看系统环境编码
+#+begin_src python
+>>> import sys
+>>> sys.stdout.encoding
+'US-ASCII'
+#+END_SRC
+
 * time库
 time库是Python中处理时间的标准库
 ** time()
@@ -6067,6 +6650,197 @@ tf.clip_by_value(grad, min_value, max_value)
 tf.clip_by_average_norm(grad, clip_norm)
 tf.clip_by_global_norm(grad, clip_norm)
 #+END_SRC
+* transformers
+** HfArgumentParser的使用
+HfArgumentParser是Transformer框架中的命令行解析工具，它是ArgumentParser的子类。用于从类对象中创建解析对象。
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-11-11_21-53-58.png @ 2021-11-11 21:54:17
+[[file:transformers/2021-11-11_21-54-17_Snipaste_2021-11-11_21-53-58.png]]
+在python中，我们习惯于将有关联的一些参数放在一个类当中，HfArgumentParser可以将类对象中的实例属性转换成转换为解析参数。必须注意的是，这里的类对象必须是通过@dataclass()创建的类对象。并且通过HfArgumentParser创建的解析参数，都是可选参数。一个简单的例子如下：
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-11-11_21-54-07.png @ 2021-11-11 21:54:39
+[[file:transformers/2021-11-11_21-54-39_Snipaste_2021-11-11_21-54-07.png]]
+
+终端输入：
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-11-11_22-04-13.png @ 2021-11-11 22:04:17
+[[file:transformers/2021-11-11_22-04-17_Snipaste_2021-11-11_22-04-13.png]]
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-11-11_22-04-31.png @ 2021-11-11 22:04:36
+[[file:transformers/2021-11-11_22-04-36_Snipaste_2021-11-11_22-04-31.png]]
+
+* transformers使用
+transformers 内置了 17 种以 transformer 结构为基础的神经网络：
+- T5 model
+- DistilBERT model
+- ALBERT model
+- CamemBERT model
+- XLM-RoBERTa model
+- Longformer model
+- RoBERTa model
+- Reformer model
+- Bert model
+- OpenAI GPT model
+- OpenAI GPT-2 model
+- Transformer-XL model
+- XLNet model
+- XLM model
+- CTRL model
+- Flaubert model
+- ELECTRA model
+
+这些模型的参数、用法大同小异。默认框架为 PyTorch，使用 TensorFlow 框架在类的前面加上 'TF" 即可。
+
+每种模型都有至少一个预训练模型，限于篇幅，这里仅仅列举 Bert 的常用预训练模型：
+| 模型                         | 模型细节                                                                                                                    |
+|------------------------------+-----------------------------------------------------------------------------------------------------------------------------|
+| bert-base-uncased            | 12-layer, 768-hidden, 12-heads, 110M parameters. Trained on lower-cased English text.                                       |
+| bert-large-uncased           | 24-layer, 1024-hidden, 16-heads, 340M parameters. Trained on lower-cased English text.                                      |
+| bert-base-cased              | 12-layer, 768-hidden, 12-heads, 110M parameters. Trained on cased English text.                                             |
+| bert-large-cased             | 24-layer, 1024-hidden, 16-heads, 340M parameters. Trained on cased English text.                                            |
+| bert-base-multilingual-cased | 12-layer, 768-hidden, 12-heads, 110M parameters. Trained on cased text in the top 104 languages with the largest Wikipedias |
+| bert-base-chinese            | 12-layer, 768-hidden, 12-heads, 110M parameters. Trained on cased Chinese Simplified and Traditional text.                  |
+完整的预训练模型列表可以在 transformers 官网上找到。
+
+使用 transformers 库有三种方法：
+- 使用 pipeline；
+- 指定预训练模型；
+- 使用 AutoModels 加载预训练模型。
+** transformers.pipeline
+这个管线函数包含三个部分：
+- Tokenizer；
+- 一个模型实例；
+- 其它增强模型输出的功能。
+它只有一个必需参数 task，接受如下变量之一：
+- ”feature-extraction”
+- ”sentiment-analysis”
+- ”ner”
+- ”question-answering”
+- ”fill-mask”
+- ”summarization”
+- ”translation_xx_to_yy”
+- ”text-generation”
+这个函数还有其它可选参数
+
+例子：
+#+begin_src python
+>>> from transformers import pipeline
+
+>>> nlp = pipeline("sentiment-analysis")
+
+>>> print(nlp("I hate you"))
+[{'label': 'NEGATIVE', 'score': 0.9991129040718079}]
+
+>>> print(nlp("I love you"))
+[{'label': 'POSITIVE', 'score': 0.9998656511306763}]
+#+END_SRC
+** 指定预训练模型
+这里我们以 Bert 为例。
+
+*** 配置 Bert 模型（可选，推荐不使用）transformers.BertConfig
+transformers.BertConfig 可以自定义 Bert 模型的结构，以下参数都是可选的：
+- vocab_size：词汇数，默认 30522；
+- hidden_size：编码器内隐藏层神经元数量，默认 768；
+- num_hidden_layers：编码器内隐藏层层数，默认 12；
+- num_attention_heads：编码器内注意力头数，默认 12；
+- intermediate_size：编码器内全连接层的输入维度，默认 3072；
+- hidden_act：编码器内激活函数，默认 ‘gelu’，还可为 ‘relu’、‘swish’ 或 ‘gelu_new’
+- hidden_dropout_prob：词嵌入层或编码器的 dropout，默认为 0.1；
+- attention_probs_dropout_prob：注意力的 dropout，默认为 0.1；
+- max_position_embeddings：模型使用的最大序列长度，默认为 512；
+- type_vocab_size：词汇表类别，默认为 2；
+- initializer_range：神经元权重的标准差，默认为 0.02；
+- layer_norm_eps：layer normalization 的 epsilon 值，默认为 1e-12.
+
+使用方法：
+#+begin_src python
+configuration = BertConfig() # 进行模型的配置，变量为空即使用默认参数
+
+model = BertModel(configuration) # 使用自定义配置实例化 Bert 模型
+
+configuration = model.config # 查看模型参数
+#+END_SRC
+
+*** 分词 transformers.BertTokenizer
+所有的 tokenizer 都继承自 transformers.PreTrainedTokenizer 基类，因此有共同的参数和方法实例化的参数有：
+- model_max_length：可选参数，最大输入长度，默认为 1e30；
+- padding_side：可选参数，填充的方向，应为 ‘left’ 或 ‘right’；
+- bos_token：可选参数，每句话的起始标记，默认为 ‘’；
+- eos_token：可选参数，每句话的结束标记，默认为 ‘’；
+- unk_token：可选参数，未知的标记，默认为 ‘’；
+- sep_token：可选参数，分隔标记，默认为 ‘’；
+- pad_token：可选参数，填充标记，默认为 ‘’；
+- cls_token：可选参数，分类标记，默认为 ‘’；
+- mask_token：可选参数，遮盖标记，默认为 ‘<MASK’。
+
+为了演示，我们先实例化一个 BertTokenizer。
+#+begin_src python
+tokenizer = BertTokenizer.from_pretrained('bert-base-cased')
+#+END_SRC
+常用的方法有：
+- from_pretrained(model)：载入预训练词汇表；
+- tokenizer.tokenize(str)：分词；
+#+begin_src python
+>>> tokenizer.tokenize('Hello word!')
+['Hello', 'word', '!']
+#+END_SRC
+encode(text, ...)：将文本分词后编码为包含对应 id 的列表；
+#+begin_src python
+>>> tokenizer.encode('Hello word!')
+[101, 8667, 1937, 106, 102]
+#+END_SRC
+encode_plus(text, ...)：将文本分词后创建一个包含对应 id，token 类型及是否遮盖的词典；
+#+begin_src python
+tokenizer.encode_plus('Hello world!')
+{'input_ids': [101, 8667, 1937, 106, 102], 'token_type_ids': [0, 0, 0, 0, 0], 'attention_mask': [1, 1, 1, 1, 1]}
+#+END_SRC
+convert_ids_to_tokens(ids, skip_special_tokens)：将 id 映射为 token；
+#+begin_src python
+>>> tokenizer.convert_ids_to_tokens(tokens)
+['[CLS]', 'Hello', 'word', '!', '[SEP]']
+#+END_SRC
+decode(token_ids)：将 id 解码；
+#+begin_src python
+>>> tokenizer.decode(tokens)
+'[CLS] Hello word! [SEP]'
+#+END_SRC
+convert_tokens_to_ids(tokens)：将 token 映射为 id。
+#+begin_src python
+>>> tokenizer.convert_tokens_to_ids(['[CLS]', 'Hello', 'word', '!', '[SEP]'])
+[101, 8667, 1937, 106, 102]
+#+END_SRC
+
+*** 使用预训练模型
+根据任务的需要，既可以选择没有为指定任务 finetune 的模型如 transformers.BertModel，也可以选择为指定任务 finetune 之后的模型如 transformers.BertForSequenceClassification。一共有 6 个指定的任务类型：
+- transformers.BertForMaskedLM：语言模型；
+- transformers.BertForNextSentencePrediction：判断下一句话是否与上一句有关；
+- transformers.BertForSequenceClassification：序列分类如 GLUE；
+- transformers.BertForMultipleChoice：文本分类；
+- transformers.BertForTokenClassification：token 分类如 NER，
+- transformers.BertForQuestionAnswering；问答。
+** 使用 AutoModels
+使用 AutoModels 与上面的指定模型进行预训练大同小异，只不过是另一种方式加载模型而已。
+
+*** 加载自动配置 transformers.AutoConfig
+使用类方法 from_pretrained 加载模型配置，参数既可以为模型名称，也可以为具体文件。
+#+begin_src python
+config = AutoConfig.from_pretrained('bert-base-uncased')
+# 或者直接加载模型文件
+config = AutoConfig.from_pretrained('./test/bert_saved_model/')
+#+END_SRC
+
+*** 加载分词器 transformers.AutoTokenizer
+与上面的 BertTokenizer 非常相似，也是使用 from_pretrained 类方法加载预训练模型。
+#+begin_src python
+tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
+# 或者直接加载模型文件
+tokenizer = AutoTokenizer.from_pretrained('./test/bert_saved_model/')
+#+END_SRC
+
+*** 加载模型 transformers.AutoModel
+可以使用 from_pretrained 加载预训练模型：
+#+begin_src python
+model = AutoModel.from_pretrained('bert-base-uncased')
+# 或者直接加载模型文件
+model = AutoModel.from_pretrained('./test/bert_model/') 
+#+END_SRC
+选好了预训练模型以后，只需要给模型接一个全连接层，这个神经网络就搭好了（当然可以根据需要添加更复杂的结构）。
 * Keras
 ** tf.layers
 *** tf.keras.layers.Embedding
@@ -6209,6 +6983,620 @@ Arguments file, fix_imports, encoding, errors, strict and buffers have the same 
 
 Changed in version 3.8: The buffers argument was added.
 
+* PyAutoGUI库
+** PyAutoGUI简介
+pywin32直接包装了几乎所有的Windows API，可以方便地从Python直接调用，把Windows API按照功能分了一些大类，每一个大类作为一个模块，常见如win32api、win32gui、win32com等，其中win32com使用微软独门的COM接口技术进行进程间通信，可以实现控制GUI程序。但前提是，这些程序得支持COM接口。win32api则更加原始，完全通过Win32 API调用获得/生成窗口句柄、发送消息事件，十分繁琐。
+
+PyAutoGUI的思路与此完全不同，它是接管了鼠标、键盘使用权，基本上完全照搬人的操作，底层不必套牢在Windows系统，没错，它是跨平台的。官网地址：https://github.com/asweigart/pyautogui。原本，这类GUI自动化工具的初衷是给GUI程序自动化测试用，产生点击鼠标、敲击键盘的行为，在日志中记录下消息事件和GUI程序的响应结果，事后分析GUI程序可能存在的bug。不过，既然能产生点击鼠标、敲击键盘的行为，我们就可以用来控制GUI程序批量完成文件编辑、保存工作。
+
+按照官方的说法，PyAutoGUI给人类用的GUI自动化神器，简单高效、函数分类清晰，它被awesome-python、awesome-python-cn收录。
+
+PyAutoGUI设计简洁，相关符号经过内部import之后，被封装在pyautogui单个模块中，因此Python程序中只要import pyautogui之后便可通过.符号访问pyautogui中的函数、变量。
+
+pyautogui中函数大致分为通用功能、鼠标控制、键盘控制、消息窗口、截图5大类。
+** 通用功能
+#+begin_src python
+In [1]: import pyautogui
+
+In [2]: pyautogui.size()  # 获取屏幕尺寸（分辨率×分辨率）
+Out[2]: Size(width=1920, height=1080)
+
+In [3]: pyautogui.position() # 获取鼠标当前位置
+Out[3]: Point(x=846, y=437)
+
+In [4]: pyautogui.onScreen(100,200) # 判断坐标是否在屏幕范围内
+Out[4]: True
+
+In [5]: pyautogui.onScreen(100,2000) # 判断坐标是否在屏幕范围内
+Out[5]: False
+#+END_SRC
+坐标体系至关重要，后续鼠标位置、图片大小都根据这套体系定义。PyAutoGUI沿用了传统的坐标体系，并未重新定义，如下图所示。x的取值范围是[0, 宽度分辨率-1]，y的取值范围是[0, 高度分辨率-1]。
+
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-11-08_22-51-31.png @ 2021-11-08 22:51:39
+[[file:PyAutoGUI%E5%BA%93/2021-11-08_22-51-39_Snipaste_2021-11-08_22-51-31.png]]
+** 鼠标控制
+鼠标移动，包括绝对位置移动和相对位置移动。
+
+#+begin_src python
+In [7]: sizex,sizey=pyautogui.size() # 保存屏幕尺寸
+
+# 绝对位置移动，移动至屏幕正中心，鼠标移动过渡时间duration设为1秒
+In [9]: pyautogui.moveTo(sizex/2,sizey/2,duration=1)
+
+# 相对位置移动，向右100、向上200，鼠标移动过渡时间duration设为0.5秒
+In [10]: pyautogui.moveRel(100, -200, duration=0.5)
+#+END_SRC
+鼠标点击，一个click()函数把点鼠标的活包干，过程也可分解为mouseDown()、mouseUp()；另有在click()之上封装的rightClick()、middleClick()、doubleClick()、tripleClick()等函数。鼠标点击之前允许指定要移动的目标位置，若目标位置不在运行当前Python程序的终端/IDE范围内，则可能对其他GUI程序触发鼠标点击事件，从而引起其响应，即焦点移动至其他GUI程序。
+#+begin_src python
+# 移动至屏幕中心点击一下左键，过渡时间0.5秒
+In [16]: pyautogui.click(sizex/2,sizey/2, duration=0.5)
+
+# 不指定x、y，在当前位置点击一下右键
+In [17]: pyautogui.click(button='right')
+
+# 移动至(100,100)点击3次左键，点击间隔0.1s，鼠标移动过渡时间0.5秒
+In [18]: pyautogui.click(100,100, clicks=3,interval=0.1,duration=0.5)
+
+# 移动至(100,100)点击2次右键，点击间隔0.5s，鼠标移动过渡时间0.2秒
+In [19]: pyautogui.click(100,100, clicks=2,interval=0.5,button='right',duration=0.2)
+#+END_SRC
+滚动鼠标滚轮。
+#+begin_src python
+# 鼠标位置不动，向上回滚2个单位，项目文档对滚动量参数说明不详
+In [22]: pyautogui.scroll(2)
+
+# 鼠标移动至(1000,700)，前下滚动10个单位
+# 运行发现鼠标并没有动
+In [26]: pyautogui.scroll(-10,1000,700)
+#+END_SRC
+鼠标拖曳，指从当前位置按下鼠标，移动至目标位置再释放的过程，指定目标位置同样有绝对位置和相对位置两种方式，和移动鼠标函数很像。另外，试用下来，未发现drag()函数和dragRel()的差异。
+#+begin_src python
+# 将鼠标从当前位置拖至屏幕中心，默认左键
+In [32]: pyautogui.dragTo(sizex/2,sizey/2)
+
+# 将鼠标从当前位置向左100像素、向右200像素拖动，过渡时间0.5秒，指定右键
+In [33]: pyautogui.dragRel(-100,200,duration=0.5,button='right')
+#+END_SRC
+** 键盘控制
+
+控制按键，也是一个press()函数基本把活包干，按键动作往细分解包含keyDown()和keyUp()两个过程；在此基础上封装，有typewrite()和hotkey()两个高阶一点的函数，分别用于输入字符串和按快捷键。
+#+begin_src python
+# 键名用字符串表示，支持的所有键名，存在pyautogui.KEYBOARD_KEYS变量中，包括26个字母、数字、符号、F1~F20、方向等等所有按键
+In [4]: pyautogui.press('a') # 按字母A键，字母支持大小写
+
+# 程序向终端输入了字符a，若程序运行时输入法为中文状态，由于没有继续输入空格或回车，输入法仅列出候选字，并不会输入到终端
+In [5]: a 
+
+# 传入键名列表（按键p、按键y、空格），按键之间间隔0.1秒（默认0）
+In [6]: pyautogui.press(['p','y','space'], interval=0.1)
+
+# 运行前将输入法切换到中文状态，往终端直接输入了“培养”
+In [7]: 培养
+
+# typewrite方式一：传入字符串，不支持中文字符，因为函数无法知道输入法需要什么按键才能得到中文字符
+In [9]: pyautogui.typewrite('hello, PyAutoGUI!\n')
+
+# 程序把字符串"'hello, PyAutoGUI!"和换行符输入到了终端
+In [10]: hello, PyAutoGUI!
+    ...:
+
+# typewrite方式二：传入键名列表，按键之间间隔0.1秒（默认0）
+In [11]: pyautogui.typewrite(['s','r','f','space'], interval=0.1)
+
+# 运行前将输入法切换到中文状态，往终端直接输入了“输入法”3个字
+In [12]: 输入法
+
+# 大小写字母是自动支持的，仍然尝试一次切换到大写
+In [13]: pyautogui.typewrite(['capslock','p','y'])
+
+# CapsLock按键灯被点亮，程序往终端输入了"PY"
+In [14]: PY
+
+# hotkey屏蔽了需要反复keyDown、keyUp的细节，参数是任意个键名，而非列表
+In [18]: pyautogui.hotkey('ctrl', 'shift', 'esc') #调出任务管理器
+
+In [19]:pyautogui.hotkey('alt','ctrl','delete') # 并未调出重启界面
+#+END_SRC
+** 消息窗口
+
+PyAutoGUI利用pymsgbox的功能，以JavaScript风格函数提供消息框功能，包括alert()、confirm()、prompt() 、password()，连参数都是一致的，熟悉JavaScript的朋友不会陌生。
+#+begin_src python
+In [24]: pyautogui.alert(text='警告',title='PyAutoGUI消息框',button='OK')
+Out[24]: 'OK' # 点击的按键被返回
+
+In [28]: pyautogui.confirm(text='请选择',title='PyAutoGUI消息框',buttons=['1','2'
+    ...: ,'3'])
+Out[28]: '2' # 点击的按键被返回
+
+In [30]: pyautogui.prompt(text='请输入',title='PyAutoGUI消息框',default='请输入')
+Out[30]: 'input by 伪码人' # 点OK按钮后返回输入内容
+
+In [32]: pyautogui.password(text='输入密码',title='PyAutoGUI消息框',default='',mask='*')
+Out[32]: 'We_Coder' # 点OK按钮后返回输入内容
+#+END_SRC
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-11-08_22-53-51.png @ 2021-11-08 22:53:56
+[[file:PyAutoGUI%E5%BA%93/2021-11-08_22-53-56_Snipaste_2021-11-08_22-53-51.png]]
+** 截图相关
+
+PyAutoGUI提供了screenshot()函数进行屏幕截图，返回是Image对象，这是在Pillow库中定义的，因此需要安装Pillow库才能正常工作。
+#+begin_src python
+# imageFilename参数，截图要保存的文件全路径名，默认`None`，不保存；
+# region参数，截图区域，由左上角坐标、宽度、高度4个值确定，如果指定区域超出了屏幕范围，超出部分会被黑色填充，默认`None`,截全屏
+In [41]: pyautogui.screenshot('shot.png',region=(1000,600,600,400))
+Out[41]: <PIL.Image.Image image mode=RGB size=600x400 at 0x20C87497390>
+#+END_SRC
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-11-08_22-54-30.png @ 2021-11-08 22:54:35
+[[file:PyAutoGUI%E5%BA%93/2021-11-08_22-54-35_Snipaste_2021-11-08_22-54-30.png]]
+
+PyAutoGUI还有个图片匹配功能，它是在屏幕按像素匹配，定位图片在屏幕上的坐标位置，locateOnScreen()函数返回region对象,即左上角坐标、宽度、高度4个值组成的元组，再用center()函数计算出中心坐标，locateCenterOnScreen()函数则一步到位，返回中心坐标。如果把需要点击的菜单、按钮事先保存成图片，可以用来自动查找菜单、按钮位置，再交由click()函数控制鼠标去点击。
+#+begin_src python
+loc = pyautogui.locateCenterOnScreen("icon_xx.png", region=(0, 0,sizex/2, sizey/10) ) # region参数限制查找范围，加快查找速度
+pyautogui.moveTo(*loc, duration=0.5) # 移动鼠标
+pyautogui.click(clicks=1) #点击
+#+END_SRC
+** 参考文档
+[[https://zhuanlan.zhihu.com/p/302592540][Python自动操作GUI神器PyAutoGUI]]
+* selenium 库
+** 下载浏览器驱动
+Firefox浏览器驱动：[[https://github.com/mozilla/geckodriver/releases][geckodriver]]
+
+Chrome浏览器驱动：[[https://sites.google.com/a/chromium.org/chromedriver/home][chromedriver]] ,[[https://link.zhihu.com/?target=https%253A//npm.taobao.org/mirrors/chromedriver][taobao备用地址]]
+
+IE浏览器驱动：[[https://link.zhihu.com/?target=http%253A//selenium-release.storage.googleapis.com/index.html][IEDriverServer]]
+
+Edge浏览器驱动：[[https://link.zhihu.com/?target=https%253A//developer.microsoft.com/en-us/microsoft-edge/tools/webdriver][MicrosoftWebDriver]]
+
+Opera浏览器驱动：[[https://link.zhihu.com/?target=https%253A//github.com/operasoftware/operachromiumdriver/releases][operadriver]]
+
+PhantomJS浏览器驱动：[[https://link.zhihu.com/?target=http%253A//phantomjs.org/][phantomjs]]
+
+需要把浏览器驱动放入系统路径中，或者直接告知selenuim的驱动路径
+
+另外启动浏览器，可以设置一些参数，比如无界面之类的，详细参考：[[https://zhuanlan.zhihu.com/p/60852696][selenium启动Chrome配置参数问题]]
+补充上面一个参数，添加代理：options.add_argument("--proxy-server=http://XXXXX.com:80")
+可以测试是否正常使用，以下代码：
+#+begin_src python
+from selenium import webdriver
+
+
+driver = webdriver.Firefox()   # Firefox浏览器
+# driver = webdriver.Firefox("驱动路径")
+
+driver = webdriver.Chrome()    # Chrome浏览器
+
+driver = webdriver.Ie()        # Internet Explorer浏览器
+
+driver = webdriver.Edge()      # Edge浏览器
+
+driver = webdriver.Opera()     # Opera浏览器
+
+driver = webdriver.PhantomJS()   # PhantomJS
+
+# 打开网页
+driver.get(url) # 打开url网页 比如 driver.get("http://www.baidu.com")
+#+END_SRC
+** 用selenium 登录新版的edge方法
+
+首先，安装pip install msedge-selenium-tools
+
+接下来，使用以下代码：
+#+begin_src python
+from selenium import webdriver
+from msedge.selenium_tools import Edge, EdgeOptions
+options = EdgeOptions()
+options.use_chromium = True
+options.binary_location = r"C:\xx\Microsoft\EdgeCore\93.0.926.0\msedge.exe" # 浏览器的位置
+driver = Edge(options=options, executable_path=r"D:\xx\Desktop\edgedriver_win64\msedgedriver.exe") # 相应的浏览器的驱动位置
+​
+driver.get("www.baidu.com")
+#+END_SRC
+在element变成elements就是找所有满足的条件，返回数组。
+
+一般我都自己采用 xpath 获取元素的，复制即可
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-11-05_15-01-12.png @ 2021-11-05 15:01:51
+[[file:selenium_%E5%BA%93/2021-11-05_15-01-51_Snipaste_2021-11-05_15-01-12.png]]
+关于获取对象的api查找：[[https://www.selenium.dev/selenium/docs/api/py/webdriver_remote/selenium.webdriver.remote.webelement.html][selenium.webdriver.remote.webelement]]
+
+** 导入Selenium库
+# 导入Selenium驱动
+from selenium import webdriver
+** 创建浏览器对象
+即：打开一个浏览器。
+#+begin_src python
+# 语法：driver = webdriver.xxx()
+driver = webdriver.Chrome()
+# 使用dir(driver)查看浏览器对象的操作
+print(dir(driver))
+#+END_SRC
+** 浏览器窗口大小设置
+#+begin_src python
+# 1.设置浏览器尺寸
+# 宽480、高800(最好根据显示器分别调整)
+driver.set_window_size(480, 800)
+# 2.获取浏览器尺寸
+driver.get_window_size()		
+# 3.浏览器窗口最大化（很常用）
+driver.maximize_window()
+#+END_SRC
+
+示例：
+
+1.学习目标
+    掌握selenium中控制浏览器窗口大小的方法
+2.操作步骤（方法）
+    2.1设置浏览器窗口大小，宽度，高度
+        driver.set_window_size（宽，高）
+    2.2 获取浏览器窗口大小
+        driver.get_window_size()
+    2.3将浏览器窗口最大化
+        driver.maximize_window）
+3.需求
+    使用selenium实现对浏览器窗口大小的设置
+#+begin_src python
+# 1.导入seleniun
+from selenium import webdriver
+from time import sleep
+# 2.打开谷歌浏览器（获取浏览器操作对象）
+driver = webdriver.Chrome()
+# 3.设置浏览器窗口大小
+# 3.1 将窗口设置为宽100，高200
+# (windowHandle参数为窗口句柄，以后再说)
+driver.set_window_size(100, 200)
+sleep(3)
+# 3.2 获取浏览器窗口大小
+window_size = driver.get_window_size()
+print(window_size)
+# 3.3 窗口最大化
+driver.maximize_window()
+# 4.关闭浏览器
+driver.quit()
+
+#+END_SRC
+输出结果：
+#+BEGIN_EXAMPLE
+{'width': 516, 'height': 200}
+#+END_EXAMPLE
+** 浏览器位置设置
+#+begin_src python
+# 1.获取浏览器位置
+driver.get_window_position()		
+# 2.设置浏览器位置
+driver.set_window_position(x,y)		
+#+END_SRC
+注：显示器以左上角为(0,0)，所有的位置操作都是相对于显示器左上角展开的位移操作，单位是像素。
+
+示例：
+
+1.学习目标
+    掌握selenium中控制浏览器窗口位置的方法
+2.操作步骤（方法）
+    2.1 设置浏览器窗口位置（横纵坐标）
+        set_window_position(横坐标，纵坐标)
+    2.2 获取浏览器窗口位置
+        driver.get_window_position()
+3.需求
+    使用selenium实现对浏览器窗口位置的设置
+#+begin_src python
+# 1.导入seleniun
+from selenium import webdriver
+from time import sleep
+# 2.打开谷歌浏览器（获取浏览器操作对象）
+driver = webdriver.Chrome()
+# 3.设置浏览器位置
+# 3.1 将窗口的位置设置为100，300
+driver.set_window_position(100, 300)
+sleep(2)
+# 3.2 获取浏览器窗口位置
+window_position = driver.get_window_position()
+print(window_position)
+# 4.关闭浏览器
+driver.quit()
+#+END_SRC
+输出结果：
+#+BEGIN_EXAMPLE
+{'x': 100, 'y': 300}
+#+END_EXAMPLE
+** 请求访问网址
+#+begin_src python
+# 请求某个url
+# 语法：driver.get(url)	
+# 工作中写法
+url = "http://www.baidu.com"
+driver.get(url)
+#+END_SRC
+
+示例：
+
+1.学习目标
+    掌握selenium中控制浏览器访问指定网站的操作
+2.操作步骤（方法）
+    请求某个url
+    语法：driver.get(url)
+3.需求
+    使用selenium实现对浏览器访问指定网站的操作
+#+begin_src python
+# 1.导入seleniun
+from selenium import webdriver
+from time import sleep
+# 2.打开谷歌浏览器（获取浏览器操作对象）
+driver = webdriver.Chrome()
+# 3.访问网站
+url = "http://www.baidu.com"
+driver.get(url)
+sleep(2)
+# 4.关闭浏览器
+driver.quit()
+#+END_SRC
+** 浏览器页面前进、后退和刷新
+#+begin_src python
+# 1.页面前进
+driver.forward()
+# 2.页面后退
+driver.back()
+# 3.页面刷新
+driver.refresh()
+#+END_SRC
+
+示例：
+
+1.学习目标
+    掌握selenium控制浏览器的前进，后退，刷新
+2.操作步骤（语法）
+    2.1前进
+        driver.forward（）
+    2.2后退
+        driver.back（）
+    2.3刷新
+        driver.refresh（）
+3.需求
+    使用谷歌浏览器分别打开百度，京东，淘宝，使用前进，后退，刷新方法
+#+begin_src python
+# 1.导入selenium
+from selenium import webdriver
+from time import sleep
+# 2.打开浏览器---谷歌浏览器
+driver = webdriver.Chrome()
+# 3.窗口最大化
+driver.maximize_window()
+sleep(2)
+# 4.输入网址百度，京东，淘宝
+driver.get("http://www.baidu.com")
+sleep(2)
+driver.get("http://www.jd.com")
+sleep(2)
+driver.get("http://www.taobao.com")
+sleep(2)
+# 5.使用前进，后退，刷新命令
+# 前进
+driver.back()  # 后退到京东
+sleep(2)
+driver.back()  # 后退到百度
+sleep(2)
+# 后退
+driver.forward()  # 前进到京东
+sleep(2)
+driver.forward()  # 前进到淘宝
+sleep(2)
+# 刷新
+driver.refresh()  # 保持在淘宝页面
+sleep(2)
+# 6.关闭浏览器
+driver.quit()
+#+END_SRC
+** 元素定位
+#+BEGIN_EXAMPLE
+find_element_by_id()
+find_element_by_name()
+find_element_by_class_name()
+find_element_by_tag_name()
+find_element_by_link_text()
+find_element_by_partial_link_text()
+find_element_by_xpath()
+find_element_by_css_selector()
+#+END_EXAMPLE
+** Webelement常用方法
+点击和输入
+#+begin_src python
+driver.find_element_by_id("kw").clear() # 清楚文本 driver.find_element_by_id("kw").send_keys("selenium") # 模拟按键输入 driver.find_element_by_id("su").click() # 单机元素
+#+END_SRC
+
+提交
+
+可以在搜索框模拟回车操作
+#+begin_src python
+search_text = driver.find_element_by_id('kw') search_text.send_keys('selenium') search_text.submit()
+#+END_SRC
+
+其他
+
+size： 返回元素的尺寸。
+
+text： 获取元素的文本。
+
+get_attribute(name)： 获得属性值。
+
+is_displayed()： 设置该元素是否用户可见。
+** 鼠标操作
+在 WebDriver 中， 将这些关于鼠标操作的方法封装在 ActionChains 类提供。
+
+ActionChains 类提供了鼠标操作的常用方法：
+- perform()： 执行所有 ActionChains 中存储的行为；
+- context_click()： 右击；
+- double_click()： 双击；
+- drag_and_drop()： 拖动；
+- move_to_element()： 鼠标悬停。
+
+举个例子：
+#+begin_src python
+from selenium import webdriver
+# 引入 ActionChains 类
+from selenium.webdriver.common.action_chains import ActionChains
+
+driver = webdriver.Chrome()
+driver.get("https://www.baidu.cn")
+
+# 定位到要悬停的元素
+above = driver.find_element_by_link_text("设置")
+# 对定位到的元素执行鼠标悬停操作
+ActionChains(driver).move_to_element(above).perform()
+#+END_SRC
+** 键盘事件
+以下为常用的键盘操作：
+- send_keys(Keys.BACK_SPACE) 删除键（BackSpace）
+- send_keys(Keys.SPACE) 空格键(Space)
+- send_keys(Keys.TAB) 制表键(Tab)
+- send_keys(Keys.ESCAPE) 回退键（Esc）
+- send_keys(Keys.ENTER) 回车键（Enter）
+- send_keys(Keys.CONTROL,'a') 全选（Ctrl+A）
+- send_keys(Keys.CONTROL,'c') 复制（Ctrl+C）
+- send_keys(Keys.CONTROL,'x') 剪切（Ctrl+X）
+- send_keys(Keys.CONTROL,'v') 粘贴（Ctrl+V）
+- send_keys(Keys.F1) 键盘 F1
+- ……
+- send_keys(Keys.F12) 键盘 F12
+#+begin_src python
+# 输入框输入内容
+driver.find_element_by_id("kw").send_keys("seleniumm")
+
+# 删除多输入的一个 m
+driver.find_element_by_id("kw").send_keys(Keys.BACK_SPACE)
+#+END_SRC
+** 获取断言信息
+#+begin_src python
+title = driver.title # 打印当前页面title
+now_url = driver.current_url # 打印当前页面URL
+user = driver.find_element_by_class_name('nums').text # # 获取结果数目
+#+END_SRC
+** 等待页面加载完成
+*** 显示等待
+显式等待使WebdDriver等待某个条件成立时继续执行，否则在达到最大时长时抛出超时异常（TimeoutException）。
+#+begin_src python
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+driver = webdriver.Firefox()
+driver.get("http://www.baidu.com")
+
+element = WebDriverWait(driver, 5, 0.5).until(
+                      EC.presence_of_element_located((By.ID, "kw"))
+                      )
+element.send_keys('selenium')
+driver.quit()
+#+END_SRC
+WebDriverWait类是由WebDirver 提供的等待方法。在设置时间内，默认每隔一段时间检测一次当前页面元素是否存在，如果超过设置时间检测不到则抛出异常。具体格式如下：
+
+WebDriverWait(driver, timeout, poll_frequency=0.5, ignored_exceptions=None)
+
+- driver ：浏览器驱动。
+- timeout ：最长超时时间，默认以秒为单位。
+- poll_frequency ：检测的间隔（步长）时间，默认为0.5S。
+- ignored_exceptions ：超时后的异常信息，默认情况下抛NoSuchElementException异常。
+- WebDriverWait()一般由until()或until_not()方法配合使用，下面是until()和until_not()方法的说明。
+- until(method, message=‘’) 调用该方法提供的驱动程序作为一个参数，直到返回值为True。
+- until_not(method, message=‘’) 调用该方法提供的驱动程序作为一个参数，直到返回值为False。
+
+在本例中，通过as关键字将expected_conditions 重命名为EC，并调用presence_of_element_located()方法判断元素是否存在。
+*** 隐式等待
+如果某些元素不是立即可用的，隐式等待是告诉WebDriver去等待一定的时间后去查找元素。 默认等待时间是0秒，一旦设置该值，隐式等待是设置该WebDriver的实例的生命周期。
+#+begin_src python
+from selenium import webdriver
+driver = webdriver.Firefox()    
+driver.implicitly_wait(10) # seconds    
+driver.get("http://somedomain/url_that_delays_loading")    
+myDynamicElement = driver.find_element_by_id("myDynamicElement") 
+#+END_SRC
+** 在不同的窗口和框架之间移动
+#+begin_src python
+driver.switch_to_window("windowName")
+driver.switch_to_frame("frameName")
+#+END_SRC
+
+以直接取表单的id 或name属性。如果iframe没有可用的id和name属性，则可以通过下面的方式进行定位。
+#+begin_src python
+#先通过xpth定位到iframe
+xf = driver.find_element_by_xpath('//*[@id="x-URS-iframe"]')
+
+#再将定位对象传给switch_to_frame()方法
+driver.switch_to_frame(xf)
+#+END_SRC
+一旦我们完成了frame中的工作，我们可以这样返回父frame:
+#+begin_src python
+driver.switch_to_default_content()
+#+END_SRC
+** 警告框处理
+#+begin_src python
+alert = driver.switch_to_alert()
+text：返回 alert/confirm/prompt 中的文字信息。
+accept()：接受现有警告框。
+dismiss()：解散现有警告框。
+send_keys(keysToSend)：发送文本至警告框。keysToSend：将文本发送至警告框。
+#+END_SRC
+** 下拉框选择
+#+begin_src python
+from selenium import webdriver
+from selenium.webdriver.support.select import Select
+from time import sleep
+
+driver = webdriver.Chrome()
+driver.implicitly_wait(10)
+driver.get('http://www.baidu.com')
+sel = driver.find_element_by_xpath("//select[@id='nr']")
+Select(sel).select_by_value('50')  # 显示50条
+#+END_SRC
+** 文件上传
+#+begin_src python
+driver.find_element_by_name("file").send_keys('D:\\upload_file.txt')  
+# 定位上传按钮，添加本地文件
+#+END_SRC
+** cookie操作
+WebDriver操作cookie的方法：
+#+begin_src python
+get_cookies()： 获得所有cookie信息。
+get_cookie(name)： 返回字典的key为“name”的cookie信息。
+add_cookie(cookie_dict) ： 添加cookie。“cookie_dict”指字典对象，必须有name 和value 值。
+delete_cookie(name,optionsString)：删除cookie信息。“name”是要删除的cookie的名称，“optionsString”是该cookie的选项，目前支持的选项包括“路径”，“域”。
+delete_all_cookies()： 删除所有cookie信息
+#+END_SRC
+** 调用JavaScript代码
+#+begin_src python
+js="window.scrollTo(100,450);"
+driver.execute_script(js) # 通过javascript设置浏览器窗口的滚动条位置
+#+END_SRC
+通过execute_script()方法执行JavaScripts代码来移动滚动条的位置。
+** 窗口截图
+#+begin_src python
+driver.get_screenshot_as_file("D:\\baidu_img.jpg") 
+# 截取当前窗口，并指定截图图片的保存位置
+#+END_SRC
+** 直接用cookie登录方法
+链接：https://www.jianshu.com/p/773c58406bdb
+
+1. 手动获取网页的cookie，将其序列化并存储在本地
+2. 写入代码
+#+begin_src python
+for item in cookies:
+    driver.add_cookie(item)
+#+END_SRC
+
+** 关闭浏览器
+（1）关闭当前窗口
+#+begin_src python
+# 只关闭当前浏览器窗口
+driver.close()
+#+END_SRC
+
+（2）退出驱动并关闭所有关联的窗口
+#+begin_src python
+# 即关闭浏览器窗口，同时关闭浏览器驱动
+driver.quit()
+#+END_SRC
+
 * imageio库
 IMAIO是一个Python库，它提供了一个简单的接口来读取和写入大量的图像数据，包括动画图像、体积数据和科学格式。它是跨平台的，运行在Python 2 .x和3。x上，并且易于安装。
 
@@ -6323,4 +7711,510 @@ unicodedata.category(chr) 可以获取指定字符在常规分类中所属的分
 尝试使用range() 创建整数列表（导致“TypeError: ‘range’ object does not support item assignment”）有时你想要得到一个有序的整数列表，所以range() 看上去是生成此列表的不错方式。然而，你需要记住range() 返回的是“range object”，而不是实际的list 值。
 
 ~nums = range(5)改为nums = list(range(5))~
+** Python读取中文文件：解决: 'ascii' codec can't decode byte 0xe6 in position 2: ordinal not in range(128)
+利用iO的open函数读取中文文件，在read或readline这一步直接会报’ascii’ codec can’t decode byte 0xe6 in position 2: ordinal not in range(128)错误
+所以Python3 利用IO的open读取中文文件如果卡在这一步，可以用如下方法
+
+第一种：open函数指名encoding
+#+begin_src python
+open('stopwords.txt', encoding = 'utf-8')
+#+END_SRC
+
+
+第二种：codecs调用open 指名 encoding
+#+begin_src python
+f = codecs.open('文件路径','r+',encoding=编码格式)
+text = f.readline()
+f.close()
+#+END_SRC
+
+** 怎么把整个网页爬取下来并保存为pdf
+*** 准备工作
+**** 软件安装
+由于我们是要把html转为pdf，所以需要手动wkhtmltopdf 。Windows平台直接在 http://wkhtmltopdf.org/downloads.html 下载稳定版的 wkhtmltopdf 进行安装，安装完成之后把该程序的执行路径加入到系统环境 $PATH 变量中，否则 pdfkit 找不到 wkhtmltopdf 就出现错误 “No wkhtmltopdf executable found”。Ubuntu 和 CentOS 可以直接用命令行进行安装
+#+begin_src bash
+$ sudo apt-get install wkhtmltopdf  # ubuntu
+$ sudo yum intsall wkhtmltopdf      # centos
+#+END_SRC
+**** 库安装
+#+begin_src bash
+pip install requests # 用于网络请求
+pip install beautifulsoup4 # 用于操作html
+pip install pdfkit # wkhtmltopdf 的Python封装包
+pip install PyPDF2 # 用于合并pdf
+#+END_SRC
+*** 爬取内容
+本文的目标网址为：http://python3-cookbook.readthedocs.io/zh_CN/latest/ 。
+**** 获取教程名称
+页面的左边一栏为目录，按F12调出开发者工具并按以下步骤定位到目录元素：
+1. 点击开发者工具左上角"选取页面元素"按钮；
+2. 用鼠标点击左上角教程名称处。
+
+通过以上步骤即可定位到目录元素，用图说明：
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-11-23_16-46-51.png @ 2021-11-23 16:46:57
+[[file:%E9%97%AE%E9%A2%98%E9%9B%86%E9%94%A6/2021-11-23_16-46-57_Snipaste_2021-11-23_16-46-51.png]]
+
+从图看到我们需要的教程名称包含在<div class="wy-side-nav-search"></div>之间的a标签里。假设我们已经获取到了网页内容为html，可以使用以下代码获取该内容：
+#+begin_src python
+book_name = soup.find('div', class_='wy-side-nav-search').a.text
+#+END_SRC
+**** 获取目录及对应网址
+使用相同的步骤来获取：
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-11-23_16-47-38.png @ 2021-11-23 16:47:43
+[[file:%E9%97%AE%E9%A2%98%E9%9B%86%E9%94%A6/2021-11-23_16-47-43_Snipaste_2021-11-23_16-47-38.png]]
+
+从图看到我们需要的目录包含在<div class="section"></div>之间，<li class="toctree-l1"></li>标签里为一级目录及网址；<li class="toctree-l2"></li>标签里为二级目录及网址。当然这个url是相对的url，前面还要拼接http://python3-cookbook.readthedocs.io/zh_CN/latest/。
+
+使用BeautifulSoup进行数据的提取：
+#+begin_src python
+# 全局变量
+base_url = 'http://python3-cookbook.readthedocs.io/zh_CN/latest/'
+book_name = ''
+chapter_info = []
+
+def parse_title_and_url(html):
+    """
+    解析全部章节的标题和url
+    :param html: 需要解析的网页内容
+    :return None
+    """
+    soup = BeautifulSoup(html, 'html.parser')
+
+    # 获取书名
+    book_name = soup.find('div', class_='wy-side-nav-search').a.text
+    menu = soup.find_all('div', class_='section')
+    chapters = menu[0].div.ul.find_all('li', class_='toctree-l1')
+    for chapter in chapters:
+        info = {
+    }
+        # 获取一级标题和url
+        # 标题中含有'/'和'*'会保存失败
+        info['title'] = chapter.a.text.replace('/', '').replace('*', '')
+        info['url'] = base_url + chapter.a.get('href')
+        info['child_chapters'] = []
+
+        # 获取二级标题和url
+        if chapter.ul is not None:
+            child_chapters = chapter.ul.find_all('li')
+            for child in child_chapters:
+                url = child.a.get('href')
+                # 如果在url中存在'#'，则此url为页面内链接，不会跳转到其他页面
+                # 所以不需要保存
+                if '#' not in url:
+                    info['child_chapters'].append({
+    
+                        'title': child.a.text.replace('/', '').replace('*', ''),
+                        'url': base_url + child.a.get('href'),
+                    })
+
+        chapter_info.append(info)
+#+END_SRC
+代码中定义了两个全局变量来保存信息。章节内容保存在chapter_info列表里，里面包含了层级结构，大致结构为：
+#+BEGIN_EXAMPLE
+[
+    {
+    
+        'title': 'first_level_chapter',
+        'url': 'www.xxxxxx.com',
+        'child_chapters': [
+            {
+    
+                'title': 'second_level_chapter',
+            	'url': 'www.xxxxxx.com',
+            }
+            ...            
+        ]
+    }
+    ...
+]
+#+END_EXAMPLE
+**** 获取章节内容
+还是同样的方法定位章节内容：
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-11-23_16-48-55.png @ 2021-11-23 16:56:34
+[[file:%E9%97%AE%E9%A2%98%E9%9B%86%E9%94%A6/2021-11-23_16-56-34_Snipaste_2021-11-23_16-48-55.png]]
+
+代码中我们通过itemprop这个属性来定位，好在一级目录内容的元素位置和二级目录内容的元素位置相同，省去了不少麻烦。
+#+begin_src python
+html_template = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+{content}
+</body>
+</html>
+"""
+
+def get_content(url):
+    """
+    解析URL，获取需要的html内容
+    :param url: 目标网址
+    :return: html
+    """
+    html = get_one_page(url)
+    soup = BeautifulSoup(html, 'html.parser')
+    content = soup.find('div', attrs={
+    'itemprop': 'articleBody'})
+    html = html_template.format(content=content)
+    return html
+#+END_SRC
+**** 保存pdf
+#+begin_src python
+def save_pdf(html, filename):
+    """
+    把所有html文件保存到pdf文件
+    :param html:  html内容
+    :param file_name: pdf文件名
+    :return:
+    """
+    options = {
+    
+        'page-size': 'Letter',
+        'margin-top': '0.75in',
+        'margin-right': '0.75in',
+        'margin-bottom': '0.75in',
+        'margin-left': '0.75in',
+        'encoding': "UTF-8",
+        'custom-header': [
+            ('Accept-Encoding', 'gzip')
+        ],
+        'cookie': [
+            ('cookie-name1', 'cookie-value1'),
+            ('cookie-name2', 'cookie-value2'),
+        ],
+        'outline-depth': 10,
+    }
+
+    pdfkit.from_string(html, filename, options=options)
+
+def parse_html_to_pdf():
+    """
+    解析URL，获取html，保存成pdf文件
+    :return: None
+    """
+    try:
+        for chapter in chapter_info:
+            ctitle = chapter['title']
+            url = chapter['url']
+            # 文件夹不存在则创建（多级目录）
+            dir_name = os.path.join(os.path.dirname(__file__), 'gen', ctitle)
+            if not os.path.exists(dir_name):
+                os.makedirs(dir_name)
+
+            html = get_content(url)
+
+            padf_path = os.path.join(dir_name, ctitle + '.pdf')
+            save_pdf(html, os.path.join(dir_name, ctitle + '.pdf'))
+
+            children = chapter['child_chapters']
+            if children:
+                for child in children:
+                    html = get_content(child['url'])
+                    pdf_path = os.path.join(dir_name, child['title'] + '.pdf')
+                    save_pdf(html, pdf_path)
+
+    except Exception as e:
+        print(e)
+#+END_SRC
+**** 合并pdf
+经过上一步，所有章节的pdf都保存下来了，最后我们希望留一个pdf，就需要合并所有pdf并删除单个章节pdf。
+#+begin_src python
+from PyPDF2 import PdfFileReader, PdfFileWriter
+
+def merge_pdf(infnList, outfn):
+    """
+    合并pdf
+    :param infnList: 要合并的PDF文件路径列表
+    :param outfn: 保存的PDF文件名
+    :return: None
+    """
+    pagenum = 0
+    pdf_output = PdfFileWriter()
+
+    for pdf in infnList:
+        # 先合并一级目录的内容
+        first_level_title = pdf['title']
+        dir_name = os.path.join(os.path.dirname(
+            __file__), 'gen', first_level_title)
+        padf_path = os.path.join(dir_name, first_level_title + '.pdf')
+
+        pdf_input = PdfFileReader(open(padf_path, 'rb'))
+        # 获取 pdf 共用多少页
+        page_count = pdf_input.getNumPages()
+        for i in range(page_count):
+            pdf_output.addPage(pdf_input.getPage(i))
+
+        # 添加书签
+        parent_bookmark = pdf_output.addBookmark(
+            first_level_title, pagenum=pagenum)
+
+        # 页数增加
+        pagenum += page_count
+
+        # 存在子章节
+        if pdf['child_chapters']:
+            for child in pdf['child_chapters']:
+                second_level_title = child['title']
+                padf_path = os.path.join(dir_name, second_level_title + '.pdf')
+
+                pdf_input = PdfFileReader(open(padf_path, 'rb'))
+                # 获取 pdf 共用多少页
+                page_count = pdf_input.getNumPages()
+                for i in range(page_count):
+                    pdf_output.addPage(pdf_input.getPage(i))
+
+                # 添加书签
+                pdf_output.addBookmark(
+                    second_level_title, pagenum=pagenum, parent=parent_bookmark)
+                # 增加页数
+                pagenum += page_count
+
+    # 合并
+    pdf_output.write(open(outfn, 'wb'))
+    # 删除所有章节文件
+    shutil.rmtree(os.path.join(os.path.dirname(__file__), 'gen'))
+#+END_SRC
+本来PyPDF2库中有一个类PdfFileMerger专门用来合并pdf，但是在合并过程中会抛出异常，网上有人也遇到同样的问题，解决办法是修改库源码，本着“不动库源码”的理念，毅然选择了上面这种比较笨的办法，代码还是比较好理解的。
+
+经过以上几个步骤，我们想要的pdf文件已经生成.
+
+*** 完整代码
+
+#+begin_src python
+# -*- coding: utf-8 -*-
+
+import os
+import shutil
+import requests
+from requests.exceptions import RequestException
+from bs4 import BeautifulSoup
+import pdfkit
+from PyPDF2 import PdfFileReader, PdfFileWriter
+
+html_template = """
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+{content}
+</body>
+</html>
+"""
+
+base_url = 'http://python3-cookbook.readthedocs.io/zh_CN/latest/'
+book_name = ''
+chapter_info = []
+
+def get_one_page(url):
+    """
+    获取网页html内容并返回
+    :param url: 目标网址
+    :return html
+    """
+    # headers可用可不用
+    # headers = {
+    #     'User-Agent': """Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36(KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36"""
+    # }
+
+    try:
+        # 获取网页内容，返回html格式数据
+        # response = requests.get(url, headers=headers) #需要headers时用到
+        response = requests.get(url) #不需要headers时用到
+        # 通过状态码判断是否获取成功
+        if response.status_code == 200:
+            # 指定编码，否则中文出现乱码
+            response.encoding = 'utf-8'
+            return response.text
+        return None
+    except RequestException as e:
+        return None
+# 这个get_one_page代码比较少，也是可以用的        
+# def get_one_page(url):
+#     return requests.get(url).content
+
+
+def parse_title_and_url(html):
+    """
+    解析全部章节的标题和url
+    :param html: 需要解析的网页内容
+    :return None
+    """
+    soup = BeautifulSoup(html, 'html.parser')
+
+    # 获取书名
+    global book_name
+    book_name = soup.find('div', class_='wy-side-nav-search').a.text.strip()
+    menu = soup.find_all('div', class_='section')
+    chapters = menu[0].div.ul.find_all('li', class_='toctree-l1')
+    for chapter in chapters:
+        info = {
+    }
+        # 获取一级标题和url
+        # 标题中含有'/'和'*'会保存失败
+        info['title'] = chapter.a.text.replace('/', '').replace('*', '')
+        info['url'] = base_url + chapter.a.get('href')
+        info['child_chapters'] = []
+
+        # 获取二级标题和url
+        if chapter.ul is not None:
+            child_chapters = chapter.ul.find_all('li')
+            for child in child_chapters:
+                url = child.a.get('href')
+                # 如果在url中存在'#'，则此url为页面内链接，不会跳转到其他页面
+                # 所以不需要保存
+                if '#' not in url:
+                    info['child_chapters'].append({
+    
+                        'title': child.a.text.replace('/', '').replace('*', ''),
+                        'url': base_url + child.a.get('href'),
+                    })
+
+        chapter_info.append(info)
+
+
+def save_pdf(html, filename):
+    """
+    把所有html文件保存到pdf文件
+    :param html:  html内容
+    :param file_name: pdf文件名
+    :return:
+    """
+    options = {
+    
+        'page-size': 'Letter',
+        'margin-top': '0.75in',
+        'margin-right': '0.75in',
+        'margin-bottom': '0.75in',
+        'margin-left': '0.75in',
+        'encoding': "UTF-8",
+        'custom-header': [
+            ('Accept-Encoding', 'gzip')
+        ],
+        'cookie': [
+            ('cookie-name1', 'cookie-value1'),
+            ('cookie-name2', 'cookie-value2'),
+        ],
+        'outline-depth': 10,
+    }
+
+    pdfkit.from_string(html, filename, options=options)
+
+
+def get_content(url):
+    """
+    解析URL，获取需要的html内容
+    :param url: 目标网址
+    :return: html
+    """
+    html = get_one_page(url)
+    soup = BeautifulSoup(html, 'html.parser')
+    content = soup.find('div', attrs={
+    'itemprop': 'articleBody'})
+    html = html_template.format(content=content)
+    return html
+
+
+def parse_html_to_pdf():
+    """
+    解析URL，获取html，保存成pdf文件
+    :return: None
+    """
+    try:
+        for chapter in chapter_info:
+            ctitle = chapter['title']
+            url = chapter['url']
+            # 文件夹不存在则创建（多级目录）
+            dir_name = os.path.join(os.path.dirname(__file__), 'gen', ctitle)
+            if not os.path.exists(dir_name):
+                os.makedirs(dir_name)
+
+            html = get_content(url)
+
+            print('保存章节：', ctitle)
+            save_pdf(html, os.path.join(dir_name, ctitle + '.pdf'))
+
+            children = chapter['child_chapters']
+            if children:
+                for child in children:
+                    html = get_content(child['url'])
+                    pdf_path = os.path.join(dir_name, child['title'] + '.pdf')
+                    save_pdf(html, pdf_path)
+        print('====== 本章保存完毕')
+    except Exception as e:
+        print(e)
+
+
+def merge_pdf(infnList, outfn):
+    """
+    合并pdf
+    :param infnList: 要合并的PDF文件路径列表
+    :param outfn: 保存的PDF文件名
+    :return: None
+    """
+    pagenum = 0
+    pdf_output = PdfFileWriter()
+
+    for pdf in infnList:
+        # 先合并一级目录的内容
+        first_level_title = pdf['title']
+        dir_name = os.path.join(os.path.dirname(
+            __file__), 'gen', first_level_title)
+        padf_path = os.path.join(dir_name, first_level_title + '.pdf')
+
+        pdf_input = PdfFileReader(open(padf_path, 'rb'))
+        # 获取 pdf 共用多少页
+        page_count = pdf_input.getNumPages()
+        for i in range(page_count):
+            pdf_output.addPage(pdf_input.getPage(i))
+
+        # 添加书签
+        parent_bookmark = pdf_output.addBookmark(
+            first_level_title, pagenum=pagenum)
+
+        # 页数增加
+        pagenum += page_count
+
+        # 存在子章节
+        if pdf['child_chapters']:
+            for child in pdf['child_chapters']:
+                second_level_title = child['title']
+                padf_path = os.path.join(dir_name, second_level_title + '.pdf')
+
+                pdf_input = PdfFileReader(open(padf_path, 'rb'))
+                # 获取 pdf 共用多少页
+                page_count = pdf_input.getNumPages()
+                for i in range(page_count):
+                    pdf_output.addPage(pdf_input.getPage(i))
+
+                # 添加书签
+                pdf_output.addBookmark(
+                    second_level_title, pagenum=pagenum, parent=parent_bookmark)
+                # 增加页数
+                pagenum += page_count
+
+    # 合并
+    pdf_output.write(open(outfn, 'wb'))
+    # 删除所有章节文件.这里会报错，我不知道为什么，所以注释掉了
+    # shutil.rmtree(os.path.join(os.path.dirname(__file__), 'gen'))
+
+def main():
+    html = get_one_page(base_url)
+    parse_title_and_url(html)
+    parse_html_to_pdf()
+    merge_pdf(chapter_info, os.path.join(
+        os.path.dirname(__file__), book_name + '.pdf'))
+
+if __name__ == '__main__':
+    main()
+#+END_SRC
+*** 参考文章
+[[https://www.cxyzjd.com/article/yaoyefengchen/79949284][Python爬虫：爬取在线教程生成pdf_C与Python实战-程序员宅基地]]
+[[https://lhchen74.github.io/2020/11/01/python-html2pdf/][Python HTML2PDF]]
 

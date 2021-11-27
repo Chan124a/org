@@ -1295,6 +1295,64 @@ $ git stash pop
 # 生成一个可供发布的压缩包
 $ git archive
 #+END_SRC
+* git clone 远程服务器目录代码
+* git如何设置使用代理
+使用命令直接设定socks或者http代理即可。
+
+socks代理：
+
+git config --global http.proxy 'socks5://127.0.0.1:1080'
+
+git config --global https.proxy 'socks5://127.0.0.1:1080'
+
+
+
+也可以直接修改~/.gitconfig文件。
+
+vi ~/.gitconfig
+
+新建或修改这两项配置
+
+[http]
+
+proxy = socks5://127.0.0.1:1080
+
+[https]
+
+proxy = socks5://127.0.0.1:1080
+
+
+
+http/https代理
+
+git config --global http.proxy http://127.0.0.1:8080
+
+git config --global https.proxy https://127.0.0.1:8080
+
+
+
+然后再git clone等命令就会自动走代理了。
+
+
+
+如果要取消代理：
+
+
+
+git config --global --unset http.proxy
+
+git config --global --unset https.proxy
+
+
+
+这里要说明一下，带参数是临时的，修改配置文件是永久变更，修改后最好重启所有 git bash 保证设置生效。
+
+
+
+查看配置信息：
+
+git config -l --global
+
 * 问题集锦
 ** warning: LF will be replaced by CRLF in ** 的原因及解决办法
 今天在使用git add 命令的时候，弹出了一个警告 warning: LF will be replaced by CRLF in ******（具体的一个文件）

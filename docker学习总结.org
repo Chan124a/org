@@ -130,6 +130,7 @@ root@192.168.1.249's password:
 #+END_SRC
 此时输入的密码是当时在容器中所设置修改的root密码，123456
 
+7. 如果需要免密登录，需要把公钥添加到容器里的authorized_keys，而不是宿主机的authorized_keys文件
 * VScode + docker进行代码调试
 首先docker容器要打开ssh服务，使得可以用ssh连接到docker容器里。
 
@@ -177,7 +178,7 @@ launch.json常用的调试配置有：
 可以使用Docker save和Docker load命令来存储和载入镜像。
 
 ** 保存镜像为文件
-
+*** docker save
 如果要讲镜像保存为本地文件，可以使用Docker save命令。
 
 命令格式：
@@ -195,9 +196,32 @@ docker images
 docker save -o java8.tar lwieske/java-8
 
 完成后通过 ls 命令即可看到文件。 
+*** docker expory
+**** Description
+Export a container’s filesystem as a tar archive
+**** Usage
+#+begin_src bash
+ docker export [OPTIONS] CONTAINER
+#+END_SRC
+**** Extended description
+The docker export command does not export the contents of volumes associated with the container. If a volume is mounted on top of an existing directory in the container, docker export will export the contents of the underlying directory, not the contents of the volume.
+
+Refer to Backup, restore, or migrate data volumes in the user guide for examples on exporting data in a volume.
+
+For example uses of this command, refer to the examples section below.
+**** Options
+| Name, shorthand | Default | Description                        |
+|-----------------+---------+------------------------------------|
+| --output , -o   |         | Write to a file, instead of STDOUT |
+**** Examples
+Each of these commands has the same result.
+#+begin_src bash
+docker export red_panda > latest.tar
+docker export --output="latest.tar" red_panda
+#+END_SRC
 
 ** 从文件载入镜像
-
+*** docker load 
 从文件载入镜像可以使用Docker load命令。
 
 命令格式：
@@ -221,7 +245,53 @@ docker load < java8.tar
 
 #+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-10-11_23-08-30.png @ 2021-10-11 23:08:52
 [[file:docker_%E6%8B%B7%E8%B4%9D%E9%95%9C%E5%83%8F%E6%96%87%E4%BB%B6/2021-10-11_23-08-52_Snipaste_2021-10-11_23-08-30.png]]
+*** docker import
+**** Description
+Import the contents from a tarball to create a filesystem image
+**** Usage
+#+begin_src bash
+docker import [OPTIONS] file|URL|- [REPOSITORY[:TAG]]
+#+END_SRC
+**** Extended description
+You can specify a URL or - (dash) to take data directly from STDIN. The URL can point to an archive (.tar, .tar.gz, .tgz, .bzip, .tar.xz, or .txz) containing a filesystem or to an individual file on the Docker host. If you specify an archive, Docker untars it in the container relative to the / (root). If you specify an individual file, you must specify the full path within the host. To import from a remote location, specify a URI that begins with the http:// or https:// protocol.
 
+The --change option will apply Dockerfile instructions to the image that is created. Supported Dockerfile instructions: CMD|ENTRYPOINT|ENV|EXPOSE|ONBUILD|USER|VOLUME|WORKDIR
+
+For example uses of this command, refer to the examples section below.
+**** Options
+| Name, shorthand | Default | Description                                                 |
+|-----------------+---------+-------------------------------------------------------------|
+| --change , -c   |         | Apply Dockerfile instruction to the created image           |
+| --message , -m  |         | Set commit message for imported image                       |
+| --platform      |         | API 1.32+  Set platform if server is multi-platform capable |
+**** Examples
+***** Import from a remote location
+This will create a new untagged image.
+#+begin_src bash
+ docker import https://example.com/exampleimage.tgz
+#+END_SRC
+***** Import from a local file
+Import to docker via pipe and STDIN.
+#+begin_src bash
+ cat exampleimage.tgz | docker import - exampleimagelocal:new
+#+END_SRC
+***** Import with a commit message.
+#+begin_src bash
+ cat exampleimage.tgz | docker import --message "New image imported from tarball" - exampleimagelocal:new
+#+END_SRC
+***** Import to docker from a local archive.
+#+begin_src bash
+ docker import /path/to/exampleimage.tgz
+#+END_SRC
+***** Import from a local directory
+#+begin_src bash
+ sudo tar -c . | docker import - exampleimagedir
+#+END_SRC
+***** Import from a local directory with new configurations
+#+begin_src bash
+ sudo tar -c . | docker import --change "ENV DEBUG=true" - exampleimagedir
+#+END_SRC
+Note the sudo in this example – you must preserve the ownership of the files (especially root ownership) during the archiving with tar. If you are not root (or the sudo command) when you tar, then the ownerships might not get preserved.
 * docker commit 
 docker commit :从容器创建一个新的镜像。
 
@@ -257,6 +327,17 @@ mymysql             v1                  37af1236adef        15 seconds ago      
 或：
  
  docker  tag  旧镜像名  新镜像名
+* docker save与docker export的区别
+docker save和docker export的区别:
+- docker save保存的是镜像（image），docker export保存的是容器（container）；
+- docker load用来载入镜像包，docker import用来载入容器包，但两者都会恢复为镜像；
+- docker load不能对载入的镜像重命名，而docker import可以为镜像指定新名称。
+
+docker export的应用场景主要用来制作基础镜像，比如你从一个ubuntu镜像启动一个容器，然后安装一些软件和进行一些设置后，使用docker export保存为一个基础镜像。然后，把这个镜像分发给其他人使用，比如作为基础的开发环境。
+
+docker save的应用场景是，如果你的应用是使用docker-compose.yml编排的多个镜像组合，但你要部署的客户服务器并不能连外网。这时，你可以使用docker save将用到的镜像打个包，然后拷贝到客户服务器上使用docker load载入。
+
+导出后再导入(exported-imported)的镜像会丢失所有的历史，而保存后再加载（saveed-loaded）的镜像没有丢失历史和层(layer)。这意味着使用导出后再导入的方式，你将无法回滚到之前的层(layer)，同时，使用保存后再加载的方式持久化整个镜像，就可以做到层回滚（可以执行docker tag <LAYER ID> <IMAGE NAME>来回滚之前的层）。
 * 参考文档:
 1. [官方文档](https://docs.docker.com/engine/reference/commandline)
 2. [Docker 参数 -i -t 的作用](https://blog.csdn.net/upHailin/article/details/80892505)

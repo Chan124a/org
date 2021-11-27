@@ -1296,6 +1296,57 @@ $ git stash pop
 $ git archive
 #+END_SRC
 * git clone 远程服务器目录代码
+* git如何设置使用代理
+使用命令直接设定socks或者http代理即可。
+
+socks代理：
+#+begin_src bash
+git config --global http.proxy 'socks5://127.0.0.1:1080'
+git config --global https.proxy 'socks5://127.0.0.1:1080'
+#+END_SRC
+
+也可以直接修改~/.gitconfig文件。
+#+begin_src bash
+vi ~/.gitconfig
+#+END_SRC
+新建或修改这两项配置
+#+BEGIN_EXAMPLE
+[http]
+proxy = socks5://127.0.0.1:1080
+
+[https]
+proxy = socks5://127.0.0.1:1080
+#+END_EXAMPLE
+
+
+下面这是cad实验室的代理设置：
+#+BEGIN_EXAMPLE
+[http]
+        proxy = socks5://proxy.in.zjulearning.org:7070
+[https]
+        proxy = socks5://proxy.in.zjulearning.org:7070
+#+END_EXAMPLE
+
+
+http/https代理
+#+begin_src bash
+git config --global http.proxy http://127.0.0.1:8080
+git config --global https.proxy https://127.0.0.1:8080
+#+END_SRC
+然后再git clone等命令就会自动走代理了。
+
+如果要取消代理：
+#+begin_src bash
+git config --global --unset http.proxy
+git config --global --unset https.proxy
+#+END_SRC
+这里要说明一下，带参数是临时的，修改配置文件是永久变更，修改后最好重启所有 git bash 保证设置生效。
+
+查看配置信息：
+#+begin_src bash
+git config -l --global
+#+END_SRC
+
 
 * 问题集锦
 ** warning: LF will be replaced by CRLF in ** 的原因及解决办法
@@ -1318,3 +1369,14 @@ git config core.autocrlf false (仅对当前git仓库有效）
 git config --global core.autocrlf false (全局有效）
 #+END_SRC
 然后重新提交代码即可。
+
+** 解决GitHub密码授权访问即将失效的问题
+在提交GitHub的项目时，出现了如下的问题：
+#+BEGIN_EXAMPLE
+remote: Support for password authentication was removed on August 13, 2021. Please use a personal access token instead.
+remote: Please see https://github.blog/2020-12-15-token-authentication-requirements-for-git-operations/ for more information.
+fatal: Authentication failed for 'https://github.com/Chan124a/emacs.git/'
+#+END_EXAMPLE
+通过查看网站 https://github.blog/2020-12-15-token-authentication-requirements-for-git-operations/ ，得知Git 基于密码授权的访问方式已经废弃，强制要求使用基于令牌的认证机制。
+
+通过[[https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token][官方教程：获取个人token]]的操作，使用token登录即可
