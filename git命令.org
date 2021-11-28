@@ -1063,7 +1063,7 @@ $ git add .
 # 对于同一个文件的多处变化，可以实现分次提交
 $ git add -p
 
-# 删除工作区文件，并且将这次删除放入暂存区
+# 删除工作区文件，并且将这次删除放入暂存区，加上-n参数，可以列出要删除的文件，但并不会进行删除操作
 $ git rm [file1] [file2] ...
 
 # 停止追踪指定文件，但该文件会保留在工作区
@@ -1072,6 +1072,18 @@ $ git rm --cached [file]
 # 改名文件，并且将这个改名放入暂存区
 $ git mv [file-original] [file-renamed]
 #+END_SRC
+*** git 删除远程分支文件
+#+begin_src bash
+#仅删除远程仓库文件，不删除本地
+git rm --cached file 
+#仅删除远程仓库文件夹！！文件夹，不删除本地
+git rm -r --cached file
+#删除远程仓库文件，同时删除本地文件   (区别在于 --cached)
+git rm file
+#删除远程仓库文件夹！！文件夹，同时删除本地
+git rm -r file
+#+END_SRC
+删除后commit并push即可
 ** 代码提交
 #+BEGIN_SRC bash 
 # 提交暂存区到仓库区

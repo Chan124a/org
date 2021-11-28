@@ -3224,6 +3224,26 @@ company-etags 不能对所有的 mode 进行补全, 例如在 org-mode 中默认
 在该变量中定义了可以使用 company-etags 的 mode, 将 org-mode 加入该变量的值中即可在 org-mode 使用 company-etags 进行补全.
 
 ctags 支持上百种语言, 学会使用 ctags 能够提交效率.
+* org-download的使用
+** window
+*** 截图并直接插入当前文件的方法
+安装软件IrfanView
+
+org-download配置如下：
+#+BEGIN_SRC emacs-lisp :results output
+(use-package org-download
+  :after org
+  :defer nil
+  :custom
+  (org-download-method 'directory)
+  (org-download-image-dir "e:/org/images")  ;;这个是设置图片的保存路径
+  (org-download-screenshot-method "e:/IrfanView/i_view64.exe /capture=4 /convert=\"%s\"") ;;路径e:/IrfanView/i_view64.exe表示截屏软件的位置，将其替换为你自己的IrfanView位置即可.注意后面的/capture=4 /convert=\"%s\"也要写上去，不能缺少
+  :bind
+  ("C-S-y" . org-download-screenshot) ;;这个是设置截屏的快捷键为Ctrl+Shift+y
+  :config
+  (require 'org-download))
+#+END_SRC
+
 * 问题集锦
 ** emacs中文环境下的卡顿问题
 *** 解决方法一
