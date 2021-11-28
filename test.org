@@ -1,24 +1,52 @@
-* Top level headline
-** Second level
-*** 3rd level
- aa   some text
-*** 3rd level
-    more text
-asfadfadf
-*** 
+* test1
+#+BEGIN_SRC emacs-lisp :results output
+(org-download-get-heading 2)
+#+END_SRC
+** 1.1
 
-* Another top level headline
-** 22
-** 33
-*** 44
+*** 1.1.1
+#+BEGIN_SRC emacs-lisp :results output
+(org-current-level)
+(org-download--dir-1)
+(org-download--dir-2)
+(org-download--dir)
+(princ default-directory)
+(let* ((part1 (org-download--dir-1))
+       (part2 (org-download--dir-2))
+       (dir (if part2
+                (expand-file-name part2 part1)
+                    part1)))
+        dir)
+(princ org-download-screenshot-file) 
+(org-download-get-heading 2)
+(org-up-heading-all 3)
+(file-name-directory "e:/org/test/")
+(princ default-directory)
+(princ buffer-file-name)
+(file-name-base buffer-file-name)
+(princ buffer-file-name)
+(abbreviate-file-name buffer-file-name)
+#+END_SRC
 
-** load of the rings
-   My favorite scenes are (in this order)
-   1. The attack of the Rohirrim
-   2. Eowyn's fight with the witch king
-      1. this was already my favorite scene in the book
-      2. I really like Miranda Otto.
-   Important actors in this film are:
-   - Elijah Wood :: He plays Frodo
-   - Sean Austin :: He plays Sam, Frodo's friend.
-   - [ ]  :: 
+#+RESULTS:
+: e:/org/
+
+** 1.2
+#+BEGIN_SRC emacs-lisp :results output
+(org-download-get-heading 2)
+(buffer-file-name (other-buffer))
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp :results output
+(defun test-dir ()
+  (let* (
+          (file-name-dir buffer-file-name)
+          (file-name (file-name-base file-name-dir))
+	  (org-download-image-dir "e:/org/images")
+          (dir-1 (expand-file-name file-name (or org-download-image-dir "."))))
+	  dir-1))
+(test-dir)
+#+END_SRC
+
+#+DOWNLOADED: screenshot @ 2021-11-28 10:12:43
+[[file:images/test/test1/2021-11-28_10-12-43_screenshot.png]]
