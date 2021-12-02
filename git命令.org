@@ -1359,6 +1359,99 @@ git config --global --unset https.proxy
 git config -l --global
 #+END_SRC
 
+* git bash 命令拓展
+** 什么是 GitBash
+GitBash 是 Windows 系统安装 Git 时默认集成的命令行工具,提供运行 Git 命令的集成环境.
+
+如果不熟悉命令行操作的话, GitBash 还有个双胞胎兄弟叫做 GitGUI,默认情况下两兄弟应该会同时安装(除非你特意更改了安装 Git 时的配置项).
+
+如果选中文件右键没有弹出 GitBashHere 和 GItGUIHere 选项的话,很可能安装 Git 时并没有集成这两个工具,请检查安装 Git 时下图是否已经勾选!
+
+#+DOWNLOADED: screenshot @ 2021-11-30 09:49:31
+[[file:images/git%E5%91%BD%E4%BB%A4/git_bash_%E5%91%BD%E4%BB%A4%E6%8B%93%E5%B1%95/2021-11-30_09-49-31_screenshot.png]]
+** 在gitbash中使用cmd命令
+git bash 命令行内置终端是 mintty ,而 mintty 终端模拟器并不能完全取代 cmd 命令行.
+
+#+DOWNLOADED: screenshot @ 2021-11-30 09:52:38
+[[file:images/git%E5%91%BD%E4%BB%A4/git_bash_%E5%91%BD%E4%BB%A4%E6%8B%93%E5%B1%95/2021-11-30_09-52-38_screenshot.png]]
+
+#+BEGIN_EXAMPLE
+可以在 git bash 命令行终端内右键依次选择 Options>About 就可以查看 git bash 的庐山真面目啦!
+
+Mintty works on all Windows versions from Windows XP onwards. Similarly to other Cygwin/MSYS terminals based on pseudo terminal ("pty") devices, however, mintty is not a full replacement for the Windows Console window(by default running the Windows Command Processor / command prompt / cmd.exe). While native console programs with simple text output usually work fine, interactive programs often have problems, although sometimes there are workarounds. See the Wiki section about Input/Output interaction for hints, especially on the winpty wrapper.
+
+以上摘抄自 https://mintty.github.io/ 官网.
+#+END_EXAMPLE
+既然 git bash 终端模拟器是 mintty,所以直接输入 mintty--help 命令也可以查看 mintty 的帮助信息.
+
+#+DOWNLOADED: screenshot @ 2021-11-30 09:57:21
+[[file:images/git%E5%91%BD%E4%BB%A4/git_bash_%E5%91%BD%E4%BB%A4%E6%8B%93%E5%B1%95/2021-11-30_09-57-21_screenshot.png]]
+
+如果想要在 git bash 命令行中调用 cmd 程序必须借助 winpty 包装器.
+
+#+DOWNLOADED: screenshot @ 2021-11-30 09:55:18
+[[file:images/git%E5%91%BD%E4%BB%A4/git_bash_%E5%91%BD%E4%BB%A4%E6%8B%93%E5%B1%95/2021-11-30_09-55-18_screenshot.png]]
+*** 什么是 winpty 包装器
+winpty 是一种提供与 cmd 通信的软件包,详情请参考 https://github.com/rprichard/winpty
+*** 如何使用 winpty 包装器
+git bash 命令行内没有 tree 命令而 cmd 命令行却有 tree 命令.
+
+只不过 cmd 命令中的 tree 命令实际上是 tree.com 并不是 tree.exe 文件.
+
+#+DOWNLOADED: screenshot @ 2021-11-30 09:58:25
+[[file:images/git%E5%91%BD%E4%BB%A4/git_bash_%E5%91%BD%E4%BB%A4%E6%8B%93%E5%B1%95/2021-11-30_09-58-25_screenshot.png]]
+git bash 本身是没有 tree 命令,如果想要调用 tree 命令应该是调用 cmd 的 tree 命令,所以这里需要指明命令的全称: tree.com
+
+#+DOWNLOADED: screenshot @ 2021-11-30 09:59:04
+[[file:images/git%E5%91%BD%E4%BB%A4/git_bash_%E5%91%BD%E4%BB%A4%E6%8B%93%E5%B1%95/2021-11-30_09-59-04_screenshot.png]]
+
+如果直接调用 cmd 的 tree.com 命令会出现中文乱码,此时加上 winpty 包装器后再次调用就不会出现乱码现象了,也能顺利调用命令.
+
+此外,还有一些交互性命令也是需要借助 winpty 包装器才能正常传递给 cmd 命令行处理,否则的话,无法进行正常的交互.
+
+总之, git bash 命令行中想要调用 cmd 的命令,最好加上在命令的开头加上 winpty 或者直接在 cmd 中操作也行.
+** 将命令放入usr/bin目录
+git安装目录下的usr/bin目录存放着Git bash 所有可执行的命令文件
+
+#+DOWNLOADED: screenshot @ 2021-11-30 10:12:16
+[[file:images/git%E5%91%BD%E4%BB%A4/git_bash_%E5%91%BD%E4%BB%A4%E6%8B%93%E5%B1%95/2021-11-30_10-12-16_screenshot.png]]
+
+将对应命令的exe文件放入该目录，然后就可以在git bash中使用该命令了
+** 各种软件安装方法
+*** tmux安装
+参考网站：https://github.com/hongwenjun/tmux_for_windows
+
+下载 [[https://github.com/hongwenjun/tmux_for_windows/raw/master/tmux_for_git-bash.zip][tmux_for_git-bash.zip]]
+
+释放文件到 D:\Git\usr
+
+实际可执行文件在 D:\Git\usr\bin\tmux.exe
+
+如果要启用tmux 鼠标操作,则在~/.tmux.conf配置文件中进行下面的配置：
+#+BEGIN_EXAMPLE
+# https://www.youtube.com/watch?v=xTplsyQaGFs
+# tmux 启用鼠标操作
+setw -g mouse
+set-option -g history-limit 20000
+set-option -g mouse on
+bind -n WheelUpPane select-pane -t= \; copy-mode -e \; send-keys -M
+bind -n WheelDownPane select-pane -t= \; send-keys -M
+#+END_EXAMPLE
+*** rsync
+[[https://links.jianshu.com/go?to=https%253A%252F%252Fblog.tiger-workshop.com%252Fadd-rsync-to-git-bash-for-windows%252F][Tiger Fok]]在他的博客上告诉了我们一个非常好用的方法，那就是使用[[http://www2.futureware.at/~nickoe/msys2-mirror/msys/][pacman]]库中的rsync程序，里面i686代表32位系统，x86_64代表64位系统
+
+下面这个是参考文章里的作者提供的下载链接：
+#+BEGIN_EXAMPLE
+32位rsync下载
+http://mysoft.6h5.cn/win/rsync.32.zip
+64位rsync下载
+http://mysoft.6h5.cn/win/rsync.64.zip
+#+END_EXAMPLE
+下载完成后，用7Zip解压两次，找到rsync.exe，把这个文件拷贝到Git Bash目录C:\Program Files\Git\usr\bin即可在Git Bash上使用了。
+**** 参考文章 
+[[https://www.jianshu.com/p/e3f17590c7d4][如何在Windows环境的Git Bash下使用rsync？]]
+** 参考文章
+[[https://mp.weixin.qq.com/s?__biz=MjM5NTY1MjY0MQ==&mid=2650746018&idx=2&sn=2e0a1aed5a680c379bb052f34731bd2d&chksm=befeb9ec898930fac4c36f321cc16abce7da10b4b8a41dd245ff53c1065bb5e01131fa085ebe&scene=21#wechat_redirect][三招教你轻松扩展 git bash 命令]]
 
 * 问题集锦
 ** warning: LF will be replaced by CRLF in ** 的原因及解决办法

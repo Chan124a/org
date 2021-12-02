@@ -614,6 +614,59 @@ RPM (Red Hat系)：CentOS、Fedora
 - 常见的安装包格式 deb 包，安装 deb 包的命令是“dpkg -参数”
 - 包管理工具 apt-get
 - 支持 tar 包
+* dos2unix和unix2dos
+dos2unix是将Windows格式文件转换为Unix、Linux格式的实用命令。Windows格式文件的换行符为\r\n ,而Unix&Linux文件的换行符为\n. dos2unix命令其实就是将文件中的\r\n 转换为\n。
+
+而unix2dos则是和dos2unix互为孪生的一个命令，它是将Linux&Unix格式文件转换为Windows格式文件的命令。
+
+命令语法：
+#+begin_src bash
+dos2unix [options] [-c convmode] [-o file ...] [-n infile outfile ...]
+unix2dos [options] [-c convmode] [-o file ...] [-n infile outfile ...]
+#+END_SRC
+dos2unix 可以一次转换多个文件:
+dos2unix filename1 filename2 filename3
+** 命令参数
+此命令参数是Red Hat Enterprise Linux Server release 5.7下dos2unix命令参数，不同版本Linux的dos2nnix命令参数有可能不同。
+
+
+参数 描叙
+-h 显示命令dos2unix联机帮助信息。
+-k 保持文件时间戳不变
+-q 静默模式，不输出转换结果信息等
+-V 显示命令版本信息
+-c 转换模式
+-o 在源文件转换，默认参数
+-n 保留原本的旧档，将转换后的内容输出到新档案.默认都会直接在原来的文件上修改，如果需要保留源文件，那么可以使用参数-n,格式为dos2unix -n oldfilename newfilename
+** 示例
+将Windows格式文本转换为Unix&Linux格式文件
+#+begin_src bash
+[root@DB-Server myscript]# cat -v test.sh 
+. /home/oracle/.bash_profile^M
+echo ' '^M
+date^M
+echo ' '^M
+^M
+sqlplus test/test @/home/oracle/scripts/test.sql^M
+^M
+echo ' '^M
+date^M
+echo ' '^M
+[root@DB-Server myscript]# dos2unix test.sh 
+dos2unix: converting file test.sh to UNIX format ...
+[root@DB-Server myscript]# cat -v test.sh 
+. /home/oracle/.bash_profile
+echo ' '
+date
+echo ' '
+ 
+sqlplus test/test @/home/oracle/scripts/test.sql
+ 
+echo ' '
+date
+echo ' '
+#+END_SRC
+
 * export 命令
 Linux export 命令用于设置或显示环境变量。
 
@@ -1552,6 +1605,50 @@ pip install opencv-contrib-python #安装opencv的contrib扩展包
 conda search opencv #查询一下conda里面可以安装的opencv
 conda install opencv=3.1.0 #根据你想要安装的opencv版本（以3.1.0为例），输入指令
 #+END_SRC
+* od 命令
+od（Octal Dump）命令用于将指定文件内容以八进制、十进制、十六进制、浮点格式或 ASCII 编码字符方式显示，通常用于显示或查看文件中不能直接显示在终端的字符。od 命令系统默认的显示方式是八进制。
+
+常见的文件为文本文件和二进制文件。od 命令主要用来查看保存在二进制文件中的值，按照指定格式解释文件中的数据并输出，不管是 IEEE754 格式的浮点数还是 ASCII 码，od 命令都能按照需求输出它们的值。
+
+命令格式: od [OPTION]... [FILE]...
+
+参数：
+#+BEGIN_EXAMPLE
+-A RADIX
+--address-radix=RADIX
+	选择以何种基数表示地址偏移
+-j BYTES
+--skip-bytes=BYTES
+	跳过指定数目的字节
+-N BYTES
+--read-bytes=BYTES
+	输出指定字节数
+-S [BYTES]
+--strings[=BYTES]
+	输出长度不小于指定字节数的字符串，BYTES 缺省为 3
+-v
+--output-duplicates
+	输出时不省略重复的数据
+-w [BYTES]
+--width[=BYTES]
+	设置每行显示的字节数，BYTES 缺省为 32 字节
+-t TYPE
+--format=TYPE
+	指定输出格式，格式包括 a、c、d、f、o、u 和 x，各含义如下：
+  	a：具名字符；比如换行符显示为 nl
+  	c：可打印字符或反斜杠表示的转义字符；比如换行符显示为 \n
+ 	d[SIZE]：SIZE 字节组成一个有符号十进制整数。SIZE 缺省为 sizeof(int)
+ 	f[SIZE]：SIZE 字节组成一个浮点数。SIZE 缺省为 sizeof(double)
+  	o[SIZE]：SIZE 字节组成一个八进制整数。SIZE 缺省为 sizeof(int)
+  	u[SIZE]：SIZE 字节组成一个无符号十进制整数。SIZE 缺省为 sizeof(int)
+  	x[SIZE]：SIZE 字节组成一个十六进制整数。SIZE 缺省为 sizeof(int)
+  	SIZE 可以为数字，也可以为大写字母。如果 TYPE 是 [doux] 中的一个，那么 SIZE 可以为 C  = sizeof(char)，S = sizeof(short)，I = sizeof(int)，L = sizeof(long)。如果 TYPE 是 f，那么 SIZE 可以为 F = sizeof(float)，D = sizeof(double) ，L = sizeof(long double)
+--help
+	在线帮助
+--version
+	显示版本信息
+#+END_EXAMPLE
+
 * Pytorch安装
 首先安装Anaconda.
 
@@ -1720,6 +1817,248 @@ xiongdan 200 lihaihui 233 lymlrl 231
 #+END_EXAMPLE
 
 注意：参数"-s"只是将testfile文件的内容调整显示方式，并不会改变原文件的内容格式。
+* rsync
+** 简介
+rsync 是一个常用的 Linux 应用程序，用于文件同步。
+
+它可以在本地计算机与远程计算机之间，或者两个本地目录之间同步文件（但不支持两台远程计算机之间的同步）。它也可以当作文件复制工具，替代cp和mv命令。
+
+它名称里面的r指的是 remote，rsync 其实就是"远程同步"（remote sync）的意思。与其他文件传输工具（如 FTP 或 scp）不同，rsync 的最大特点是会检查发送方和接收方已有的文件，仅传输有变动的部分（默认规则是文件大小或修改时间有变动）。
+** 安装方法
+如果本机或者远程计算机没有安装 rsync，可以用下面的命令安装。
+#+begin_src bash
+# Debian
+$ sudo apt-get install rsync
+
+# Red Hat
+$ sudo yum install rsync
+
+# Arch Linux
+$ sudo pacman -S rsync
+#+END_SRC
+注意，传输的双方都必须安装 rsync。
+** 参数
+-a、--archive参数表示存档模式，保存所有的元数据，比如修改时间（modification time）、权限、所有者等，并且软链接也会同步过去。
+
+--append参数指定文件接着上次中断的地方，继续传输。
+
+--append-verify参数跟--append参数类似，但会对传输完成后的文件进行一次校验。如果校验失败，将重新发送整个文件。
+
+-b、--backup参数指定在删除或更新目标目录已经存在的文件时，将该文件更名后进行备份，默认行为是删除。更名规则是添加由--suffix参数指定的文件后缀名，默认是~。
+
+--backup-dir参数指定文件备份时存放的目录，比如--backup-dir=/path/to/backups。
+
+--bwlimit参数指定带宽限制，默认单位是 KB/s，比如--bwlimit=100。
+
+-c、--checksum参数改变rsync的校验方式。默认情况下，rsync 只检查文件的大小和最后修改日期是否发生变化，如果发生变化，就重新传输；使用这个参数以后，则通过判断文件内容的校验和，决定是否重新传输。
+
+--delete参数删除只存在于目标目录、不存在于源目标的文件，即保证目标目录是源目标的镜像。
+
+-e参数指定使用 SSH 协议传输数据。
+
+--exclude参数指定排除不进行同步的文件，比如--exclude="*.iso"。
+
+--exclude-from参数指定一个本地文件，里面是需要排除的文件模式，每个模式一行。
+
+--existing、--ignore-non-existing参数表示不同步目标目录中不存在的文件和目录。
+
+-h参数表示以人类可读的格式输出。
+
+-h、--help参数返回帮助信息。
+
+-i参数表示输出源目录与目标目录之间文件差异的详细情况。
+
+--ignore-existing参数表示只要该文件在目标目录中已经存在，就跳过去，不再同步这些文件。
+
+--include参数指定同步时要包括的文件，一般与--exclude结合使用。
+
+--link-dest参数指定增量备份的基准目录。
+
+-m参数指定不同步空目录。
+
+--max-size参数设置传输的最大文件的大小限制，比如不超过200KB（--max-size='200k'）。
+
+--min-size参数设置传输的最小文件的大小限制，比如不小于10KB（--min-size=10k）。
+
+-n参数或--dry-run参数模拟将要执行的操作，而并不真的执行。配合-v参数使用，可以看到哪些内容会被同步过去。
+
+-P参数是--progress和--partial这两个参数的结合。
+
+--partial参数允许恢复中断的传输。不使用该参数时，rsync会删除传输到一半被打断的文件；使用该参数后，传输到一半的文件也会同步到目标目录，下次同步时再恢复中断的传输。一般需要与--append或--append-verify配合使用。
+
+--partial-dir参数指定将传输到一半的文件保存到一个临时目录，比如--partial-dir=.rsync-partial。一般需要与--append或--append-verify配合使用。
+
+--progress参数表示显示进展。
+
+-r参数表示递归，即包含子目录。
+
+--remove-source-files参数表示传输成功后，删除发送方的文件。
+
+--size-only参数表示只同步大小有变化的文件，不考虑文件修改时间的差异。
+
+--suffix参数指定文件名备份时，对文件名添加的后缀，默认是~。
+
+-u、--update参数表示同步时跳过目标目录中修改时间更新的文件，即不同步这些有更新的时间戳的文件。
+
+-v参数表示输出细节。-vv表示输出更详细的信息，-vvv表示输出最详细的信息。
+
+--version参数返回 rsync 的版本。
+
+-z参数指定同步时压缩数据。
+** 参数详解
+*** -r
+本机使用 rsync 命令时，可以作为cp和mv命令的替代方法，将源目录同步到目标目录。
+#+begin_src bash
+$ rsync -r source destination
+#+END_SRC
+上面命令中，-r表示递归，即包含子目录。注意，-r是必须的，否则 rsync 运行不会成功。source目录表示源目录，destination表示目标目录。
+
+如果有多个文件或目录需要同步，可以写成下面这样。
+#+begin_src bash
+$ rsync -r source1 source2 destination
+#+END_SRC
+上面命令中，source1、source2都会被同步到destination目录。
+*** -a 参数
+-a参数可以替代-r，除了可以递归同步以外，还可以同步元信息（比如修改时间、权限等）。由于 rsync 默认使用文件大小和修改时间决定文件是否需要更新，所以-a比-r更有用。下面的用法才是常见的写法。
+#+begin_src bash
+$ rsync -a source destination
+#+END_SRC
+目标目录destination如果不存在，rsync 会自动创建。执行上面的命令后，源目录source被完整地复制到了目标目录destination下面，即形成了destination/source的目录结构。
+
+如果只想同步源目录source里面的内容到目标目录destination，则需要在源目录后面加上斜杠。
+#+begin_src bash
+$ rsync -a source/ destination
+#+END_SRC
+上面命令执行后，source目录里面的内容，就都被复制到了destination目录里面，并不会在destination下面创建一个source子目录。
+*** -n 参数
+如果不确定 rsync 执行后会产生什么结果，可以先用-n或--dry-run参数模拟执行的结果。
+#+begin_src bash
+$ rsync -anv source/ destination
+#+END_SRC
+上面命令中，-n参数模拟命令执行的结果，并不真的执行命令。
+*** -v
+-v参数是将结果输出到终端，这样就可以看到哪些内容会被同步。
+*** --delete 参数
+默认情况下，rsync 只确保源目录的所有内容（明确排除的文件除外）都复制到目标目录。它不会使两个目录保持相同，并且不会删除文件。如果要使得目标目录成为源目录的镜像副本，则必须使用--delete参数，这将删除只存在于目标目录、不存在于源目录的文件。
+#+begin_src bash
+$ rsync -av --delete source/ destination
+#+END_SRC
+上面命令中，--delete参数会使得destination成为source的一个镜像。
+*** --exclude 参数
+有时，我们希望同步时排除某些文件或目录，这时可以用--exclude参数指定排除模式。
+#+begin_src bash
+$ rsync -av --exclude='*.txt' source/ destination
+# 或者
+$ rsync -av --exclude '*.txt' source/ destination
+#+END_SRC
+上面命令排除了所有 TXT 文件。
+
+注意，rsync 会同步以"点"开头的隐藏文件，如果要排除隐藏文件，可以这样写--exclude=".*"。
+
+如果要排除某个目录里面的所有文件，但不希望排除目录本身，可以写成下面这样。
+#+begin_src bash
+$ rsync -av --exclude 'dir1/*' source/ destination
+#+END_SRC
+多个排除模式，可以用多个--exclude参数。
+#+begin_src bash
+$ rsync -av --exclude 'file1.txt' --exclude 'dir1/*' source/ destination
+#+END_SRC
+多个排除模式也可以利用 Bash 的大扩号的扩展功能，只用一个--exclude参数。
+#+begin_src bash
+$ rsync -av --exclude={'file1.txt','dir1/*'} source/ destination
+#+END_SRC
+如果排除模式很多，可以将它们写入一个文件，每个模式一行，然后用--exclude-from参数指定这个文件。
+#+begin_src bash
+$ rsync -av --exclude-from='exclude-file.txt' source/ destination
+#+END_SRC
+*** --include 参数
+--include参数用来指定必须同步的文件模式，往往与--exclude结合使用。
+#+begin_src bash
+$ rsync -av --include="*.txt" --exclude='*' source/ destination
+#+END_SRC
+上面命令指定同步时，排除所有文件，但是会包括 TXT 文件。
+** 远程同步
+*** SSH 协议
+rsync 除了支持本地两个目录之间的同步，也支持远程同步。它可以将本地内容，同步到远程服务器。
+#+begin_src bash
+$ rsync -av source/ username@remote_host:destination
+#+END_SRC
+也可以将远程内容同步到本地。
+#+begin_src bash
+$ rsync -av username@remote_host:source/ destination
+#+END_SRC
+rsync 默认使用 SSH 进行远程登录和数据传输。
+
+由于早期 rsync 不使用 SSH 协议，需要用-e参数指定协议，后来才改的。所以，下面-e ssh可以省略。
+#+begin_src bash
+$ rsync -av -e ssh source/ user@remote_host:/destination
+#+END_SRC
+但是，如果 ssh 命令有附加的参数，则必须使用-e参数指定所要执行的 SSH 命令。
+#+begin_src bash
+$ rsync -av -e 'ssh -p 2234' source/ user@remote_host:/destination
+#+END_SRC
+上面命令中，-e参数指定 SSH 使用2234端口。
+*** rsync 协议
+除了使用 SSH，如果另一台服务器安装并运行了 rsync 守护程序，则也可以用rsync://协议（默认端口873）进行传输。具体写法是服务器与目标目录之间使用双冒号分隔::。
+#+begin_src bash
+$ rsync -av source/ 192.168.122.32::module/destination
+#+END_SRC
+注意，上面地址中的module并不是实际路径名，而是 rsync 守护程序指定的一个资源名，由管理员分配。
+
+如果想知道 rsync 守护程序分配的所有 module 列表，可以执行下面命令。
+#+begin_src bash
+$ rsync rsync://192.168.122.32
+#+END_SRC
+rsync 协议除了使用双冒号，也可以直接用rsync://协议指定地址。
+#+begin_src bash
+$ rsync -av source/ rsync://192.168.122.32/module/destination
+#+END_SRC
+
+** 增量备份
+rsync 的最大特点就是它可以完成增量备份，也就是默认只复制有变动的文件。
+
+除了源目录与目标目录直接比较，rsync 还支持使用基准目录，即将源目录与基准目录之间变动的部分，同步到目标目录。
+
+具体做法是，第一次同步是全量备份，所有文件在基准目录里面同步一份。以后每一次同步都是增量备份，只同步源目录与基准目录之间有变动的部分，将这部分保存在一个新的目标目录。这个新的目标目录之中，也是包含所有文件，但实际上，只有那些变动过的文件是存在于该目录，其他没有变动的文件都是指向基准目录文件的硬链接。
+
+--link-dest参数用来指定同步时的基准目录。
+#+begin_src bash
+$ rsync -a --delete --link-dest /compare/path /source/path /target/path
+#+END_SRC
+上面命令中，--link-dest参数指定基准目录/compare/path，然后源目录/source/path跟基准目录进行比较，找出变动的文件，将它们拷贝到目标
+
+目录/target/path。那些没变动的文件则会生成硬链接。这个命令的第一次备份时是全量备份，后面就都是增量备份了。
+
+下面是一个脚本示例，备份用户的主目录。
+#+begin_src bash
+#!/bin/bash
+
+# A script to perform incremental backups using rsync
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
+readonly SOURCE_DIR="${HOME}"
+readonly BACKUP_DIR="/mnt/data/backups"
+readonly DATETIME="$(date '+%Y-%m-%d_%H:%M:%S')"
+readonly BACKUP_PATH="${BACKUP_DIR}/${DATETIME}"
+readonly LATEST_LINK="${BACKUP_DIR}/latest"
+
+mkdir -p "${BACKUP_DIR}"
+
+rsync -av --delete \
+  "${SOURCE_DIR}/" \
+  --link-dest "${LATEST_LINK}" \
+  --exclude=".cache" \
+  "${BACKUP_PATH}"
+
+rm -rf "${LATEST_LINK}"
+ln -s "${BACKUP_PATH}" "${LATEST_LINK}"
+#+END_SRC
+上面脚本中，每一次同步都会生成一个新目录${BACKUP_DIR}/${DATETIME}，并将软链接${BACKUP_DIR}/latest指向这个目录。下一次备份时，就将${BACKUP_DIR}/latest作为基准目录，生成新的备份目录。最后，再将软链接${BACKUP_DIR}/latest指向新的备份目录。
+** 参考文章
+[[https://www.ruanyifeng.com/blog/2020/08/rsync.html][rsync 用法教程]]
 * sed
 sed采用的是流编辑模式，最明显的特点是，在 sed 处理数据之前，需要预先提供一组规则，sed 会按照此规则来编辑数据。
 
@@ -2626,6 +2965,33 @@ eacff27bf2db99c7301383b7d8c1c07c  king_of_ring.avi
 eacff27bf2db99c7301383b7d8c1c07c  king_of_ring_merge.avi
 #+END_SRC
 如果前后一致，那么恭喜你，文件合并成功！
+* script（记录终端输出）
+script这个命令很强大，可以记录终端的所有输出到相应的文件中
+
+执行script就是启动了一个子shell，所以用exit即可退出script
+
+看例子:
+#+begin_src bash
+[lhd@hongdi ~]$ script
+Script. started, file is typescript
+[lhd@hongdi ~]$ ls
+1.gtkrc-2.0 c.tar kmess-2.0alpha2.tar.gz secpanel-0.5.3-1.noarch.rpm
+2009 DownZipAction.php kmesslog secpanel-0.5.4-2.noarch.rpm
+[lhd@hongdi ~]$ exit
+exit
+Script. done, file is typescript
+ 
+ 
+[lhd@hongdi ~]$ cat typescript
+Script. started on 2009年02月08日 星期日 18时56分52秒
+[lhd@hongdi ~]$ ls
+1.gtkrc-2.0 c.tar kmess-2.0alpha2.tar.gz secpanel-0.5.3-1.noarch.rpm
+2009 DownZipAction.php kmesslog secpanel-0.5.4-2.noarch.rpm
+[lhd@hongdi ~]$ exit
+exit
+Script. done on 2009年02月08日 星期日 18时57分00秒
+#+END_SRC
+我们在启动script时没有指定文件名，它会自动记录到当前目录下一个名为 typescript的文件中。也可以用 -a参数 指定文件名
 * ssh 相关
 ** ssh Connection refused的解决方法
  没装openssh_server 或者openssh_client，解决方法:sudo apt-get install openssh_server openssh_client
@@ -2728,6 +3094,29 @@ H服务远程登录
  PuTTY是一个Telnet、SSH、rlogin、纯TCP以及串行接口连接软件。PuTTY是一款开放源代码软件，使用MIT licence授权。
 
  Xshell 是一个强大的安全终端模拟软件，它支持SSH1, SSH2, SFTP以及Microsoft Windows 平台的TELNET 协议。
+** 基本用法
+ssh 最常见的用途就是登录服务器，这要求服务器安装并正在运行 SSH 服务器软件。
+
+ssh 登录服务器的命令如下。
+#+begin_src bash
+$ ssh hostname
+#+END_SRC
+上面命令中，hostname是主机名，它可以是域名，也可能是 IP 地址或局域网内部的主机名。不指定用户名的情况下，将使用客户端的当前用户名，作为远程服务器的登录用户名。如果要指定用户名，可以采用下面的语法。
+#+begin_src bash
+$ ssh user@hostname
+#+END_SRC
+上面的命令中，用户名和主机名写在一起了，之间使用@分隔。
+
+用户名也可以使用ssh的-l参数指定，这样的话，用户名和主机名就不用写在一起了。
+#+begin_src bash
+$ ssh -l username host
+#+END_SRC
+ssh 默认连接服务器的22端口，-p参数可以指定其他端口。
+#+begin_src bash
+$ ssh -p 8821 foo.com
+#+END_SRC
+上面命令连接服务器foo.com的8821端口。
+
 ** SSH 密钥
  基于密钥的验证机制使用了密码学中的公钥，我们只需要向服务器证明客户端持有对应的私钥，而不需要公开其私钥。
  这样您就可以避免每次登录都输入密码的麻烦了秘密就可以登录。
@@ -2740,31 +3129,66 @@ H服务远程登录
  缺点：略繁琐。如果你的只是临时登录一次，那么还是密码吧。
 
 *** 生成秘钥
- 秘钥对需要在你自己的机器上生成，然后把公钥放到服务器相应用户的~/.ssh目录
+秘钥对需要在你自己的机器上生成，然后把公钥放到服务器相应用户的~/.ssh目录
 
- 使用 ssh-keygen 命令可以生成一对密钥
+使用 ssh-keygen 命令可以生成一对密钥
 
- 执行下面命令,默认生成位置是~/.ssh
+执行下面命令,默认生成位置是~/.ssh
 
- ~ssh-keygen~
+~ssh-keygen~
 
- 系统会询问你文件名和秘钥密码，可以一路回车过去，会生成两个文件：
- - id_rsa 私钥
- - id_rsa.pub 公钥
- 默认使用rsa算法，你也可以用比较详细的指令，如
- ~ssh-keygen -t rsa -b 1024 -f yourkeyname -C "备注"~
+系统会询问你文件名和秘钥密码，可以一路回车过去，会生成两个文件：
+- id_rsa 私钥
+- id_rsa.pub 公钥
+默认使用rsa算法，你也可以用比较详细的指令，如
+~ssh-keygen -t rsa -b 1024 -f yourkeyname -C "备注"~
 
- | 参数   | 解释                                                  |
- |--------+-------------------------------------------------------|
- | -b     | 采用长度1024bit的密钥对,b=bits,最长4096，不过没啥必要 |
- | -t rsa | 采用rsa加密方式,t=type                                |
- | -f     | 生成文件名(文件路径),f=output_keyfiles                     |
- | -C     | 备注，C=comment                                       |
+| 参数   | 解释                                                  |
+|--------+-------------------------------------------------------|
+| -b     | 采用长度1024bit的密钥对,b=bits,最长4096，不过没啥必要 |
+| -t rsa | 采用rsa加密方式,t=type                                |
+| -f     | 生成文件名(文件路径),f=output_keyfiles                     |
+| -C     | 备注，C=comment                                       |
 
- 更多参数可运行 man ssh-keygen
 
- 您可以为密钥设置密码，防止有人持有您的私钥并使用它访问您的服务器。
- 您可以使用 ssh-agent 或 gpg-agent ，这样就不需要每次都输入该密码了。
+更多参数可运行 man ssh-keygen
+
+输入上面的命令以后，ssh-keygen会要求用户回答一些问题。
+#+begin_src bash
+$ ssh-keygen -t dsa
+Generating public/private dsa key pair.
+Enter file in which to save the key (/home/username/.ssh/id_dsa):  press ENTER
+Enter passphrase (empty for no passphrase): ********
+Enter same passphrase again: ********
+Your identification has been saved in /home/username/.ssh/id_dsa.
+Your public key has been saved in /home/username/.ssh/id_dsa.pub.
+The key fingerprint is:
+14:ba:06:98:a8:98:ad:27:b5:ce:55:85:ec:64:37:19 username@shell.isp.com
+#+END_SRC
+上面示例中，执行ssh-keygen命令以后，会出现第一个问题，询问密钥保存的文件名，默认是~/.ssh/id_dsa文件，这个是私钥的文件名，对应的公钥文件~/.ssh/id_dsa.pub是自动生成的。用户的密钥一般都放在主目录的.ssh目录里面。
+
+如果选择rsa算法，生成的密钥文件默认就会是~/.ssh/id_rsa（私钥）和~/.ssh/id_rsa.pub（公钥）。
+
+接着，就会是第二个问题，询问是否要为私钥文件设定密码保护（passphrase）。这样的话，即使入侵者拿到私钥，还是需要破解密码。如果为了方便，不想设定密码保护，可以直接按回车键，密码就会为空。后面还会让你再输入一次密码，两次输入必须一致。注意，这里“密码”的英文单词是 passphrase，这是为了避免与 Linux 账户的密码单词 password 混淆，表示这不是用户系统账户的密码。
+
+最后，就会生成私钥和公钥，屏幕上还会给出公钥的指纹，以及当前的用户名和主机名作为注释，用来识别密钥的来源。
+
+公钥文件和私钥文件都是文本文件，可以用文本编辑器看一下它们的内容。公钥文件的内容类似下面这样。
+#+BEGIN_EXAMPLE
+ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAIEAvpB4lUbAaEbh9u6HLig7amsfywD4fqSZq2ikACIUBn3GyRPfeF93l/
+weQh702ofXbDydZAKMcDvBJqRhUotQUwqV6HJxqoqPDlPGUUyo8RDIkLUIPRyq
+ypZxmK9aCXokFiHoGCXfQ9imUP/w/jfqb9ByDtG97tUJF6nFMP5WzhM= username@shell.isp.com
+#+END_EXAMPLE
+上面示例中，末尾的username@shell.isp.com是公钥的注释，用来识别不同的公钥，表示这是哪台主机（shell.isp.com）的哪个用户（username）的公钥，不是必需项。
+
+注意，公钥只有一行。因为它太长了，所以上面分成三行显示。
+
+生成密钥以后，建议修改它们的权限，防止其他人读取。
+#+begin_src bash
+$ chmod 600 ~/.ssh/id_rsa
+$ chmod 600 ~/.ssh/id_rsa.pub
+#+END_SRC
+您可以使用 ssh-agent 或 gpg-agent ，这样就不需要每次都输入该密码了。
 *** 在服务器上安装秘钥
 ssh 会查询 .ssh/authorized_keys 来确认那些用户可以被允许登录。
 
@@ -2824,6 +3248,17 @@ HOST w231
  ssh foobar@server ls 可以直接在用foobar的命令下执行 ls 命令。 
 
  想要配合管道来使用也可以， ssh foobar@server ls | grep PATTERN 会在本地查询远端 ls 的输出而 ls | ssh foobar@server grep PATTERN 会在远端对本地 ls 输出的结果进行查询。
+
+采用这种语法执行命令时，ssh 客户端不会提供互动式的 Shell 环境，而是直接将远程命令的执行结果输出在命令行。但是，有些命令需要互动式的 Shell 环境，这时就要使用-t参数。
+#+begin_src bash
+# 报错
+$ ssh remote.server.com emacs
+emacs: standard input is not a tty
+
+# 不报错
+$ ssh -t server.example.com emacs
+#+END_SRC
+上面代码中，emacs命令需要一个互动式 Shell，所以报错。只有加上-t参数，ssh 才会分配一个互动式 Shell。
 ** 通过 SSH 复制文件
  使用 ssh 复制文件有很多方法：
  - ssh+tee, 最简单的方法是执行 ssh 命令，然后通过这样的方法利用标准输入实现 cat localfile | ssh remote_server tee serverfile。回忆一下，tee 命令会将标准输出写入到一个文件；
@@ -2977,7 +3412,161 @@ ssh -D 主机A端口X username@hostname
 
 **** 端口转发的停止
 SSH端口转发完全基于基本的SSH连接，因此，通过在远程终端上执行exit命令、暴力关闭本地终端窗口、远程主机B关机、本地主机A关机等可以切断SSH连接的方式，即可停止SSH端口转发。就是这样。
-** SSH config
+** ssh 命令行配置项
+ssh 命令有很多配置项，修改它的默认行为。
+*** -c
+-c参数指定加密算法。
+#+begin_src bash
+$ ssh -c blowfish,3des server.example.com
+# 或者
+$ ssh -c blowfish -c 3des server.example.com
+#+END_SRC
+上面命令指定使用加密算法blowfish或3des。
+
+*** -C
+-C参数表示压缩数据传输。
+#+begin_src bash
+$ ssh -C server.example.com
+#+END_SRC
+
+*** -D
+-D参数指定本机的 Socks 监听端口，该端口收到的请求，都将转发到远程的 SSH 主机，又称动态端口转发，详见《端口转发》一章。
+#+begin_src bash
+$ ssh -D 1080 server
+#+END_SRC
+上面命令将本机 1080 端口收到的请求，都转发到服务器server。
+
+*** -f
+-f参数表示 SSH 连接在后台运行。
+
+*** -F
+-F参数指定配置文件。
+#+begin_src bash
+$ ssh -F /usr/local/ssh/other_config
+#+END_SRC
+上面命令指定使用配置文件other_config。
+
+*** -i
+-i参数用于指定私钥，意为“identity_file”，默认值为~/.ssh/id_dsa（DSA 算法）和~/.ssh/id_rsa（RSA 算法）。注意，对应的公钥必须存放到服务器，详见《密钥登录》一章。
+#+begin_src bash
+$ ssh -i my-key server.example.com
+#+END_SRC
+*** -l
+-l参数指定远程登录的账户名。
+#+begin_src bash
+$ ssh -l sally server.example.com
+# 等同于
+$ ssh sally@server.example.com
+#+END_SRC
+*** -L
+-L参数设置本地端口转发，详见《端口转发》一章。
+#+begin_src bash
+$ ssh  -L 9999:targetServer:80 user@remoteserver
+#+END_SRC
+上面命令中，所有发向本地9999端口的请求，都会经过remoteserver发往 targetServer 的 80 端口，这就相当于直接连上了 targetServer 的 80 端口。
+
+*** -m
+-m参数指定校验数据完整性的算法（message authentication code，简称 MAC）。
+#+begin_src bash
+$ ssh -m hmac-sha1,hmac-md5 server.example.com
+#+END_SRC
+上面命令指定数据校验算法为hmac-sha1或hmac-md5。
+
+*** -N
+-N参数用于端口转发，表示建立的 SSH 只用于端口转发，不能执行远程命令，这样可以提供安全性，详见《端口转发》一章。
+
+*** -o
+-o参数用来指定一个配置命令。
+#+begin_src bash
+$ ssh -o "Keyword Value"
+#+END_SRC
+举例来说，配置文件里面有如下内容。
+#+BEGIN_EXAMPLE
+User sally
+Port 220
+#+END_EXAMPLE
+通过-o参数，可以把上面两个配置命令从命令行传入。
+#+begin_src bash
+$ ssh -o "User sally" -o "Port 220" server.example.com
+#+END_SRC
+使用等号时，配置命令可以不用写在引号里面，但是等号前后不能有空格。
+#+begin_src bash
+$ ssh -o User=sally -o Port=220 server.example.com
+#+END_SRC
+
+*** -p
+-p参数指定 SSH 客户端连接的服务器端口。
+#+begin_src bash
+$ ssh -p 2035 server.example.com
+#+END_SRC
+上面命令连接服务器的2035端口。
+
+*** -q
+
+-q参数表示安静模式（quiet），不向用户输出任何警告信息。
+#+begin_src bash
+$ ssh –q foo.com
+root’s password:
+#+END_SRC
+上面命令使用-q参数，只输出要求用户输入密码的提示。
+
+*** -R
+
+-R参数指定远程端口转发，详见《端口转发》一章。
+
+$ ssh -R 9999:targetServer:902 local
+
+上面命令需在跳板服务器执行，指定本地计算机local监听自己的 9999 端口，所有发向这个端口的请求，都会转向 targetServer 的 902 端口。
+
+*** -t
+
+-t参数在 ssh 直接运行远端命令时，提供一个互动式 Shell。
+
+$ ssh -t server.example.com emacs
+
+*** -v
+
+-v参数显示详细信息。
+
+$ ssh -v server.example.com
+
+-v可以重复多次，表示信息的详细程度，比如-vv和-vvv。
+
+$ ssh -vvv server.example.com
+# 或者
+$ ssh -v -v -v server.example.com
+上面命令会输出最详细的连接信息。
+
+*** -V
+
+-V参数输出 ssh 客户端的版本。
+
+$ ssh –V
+ssh: SSH Secure Shell 3.2.3 (non-commercial version) on i686-pc-linux-gnu
+
+*** -X
+
+-X参数表示打开 X 窗口转发。
+
+$ ssh -X server.example.com
+
+*** -1，-2
+
+-1参数指定使用 SSH 1 协议。
+
+-2参数指定使用 SSH 2 协议。
+
+$ ssh -2 server.example.com
+
+*** -4，-6
+
+-4指定使用 IPv4 协议，这是默认值。
+
+$ ssh -4 server.example.com
+-6指定使用 IPv6 协议。
+
+$ ssh -6 server.example.com
+** SSH 客户端config
 SSH config是Linux系统下针对SSH客户端的一个参数配置方案，可以将一些关于SSH命令的参数放到配置文件中去，执行ssh命令的时候从文件中读取，简化命令行的操作。这篇短博客记录ssh config相关的配置问题和使用方法。
 
 SSH 参数配置有3个层次：
@@ -2985,75 +3574,93 @@ SSH 参数配置有3个层次：
 - 针对某个用户的配置文件，所在路径为~/.ssh/config，默认是不存在的，需要手动创建
 - 针对系统所有用户的配置文件，，所在路径为/etc/ssh/ssh_config
 
-参数重要性的顺序也是1>2>3，即越近的配置重要性越高。这里主要讲述第2种情况下的配置方式，即针对~/.ssh/config文件的写法进行说明。
+参数重要性的顺序也是1>2>3，即越近的配置重要性越高。
+
+除了配置文件，~/.ssh目录还有一些用户个人的密钥文件和其他文件。下面是其中一些常见的文件。
+- ~/.ssh/id_ecdsa：用户的 ECDSA 私钥。
+- ~/.ssh/id_ecdsa.pub：用户的 ECDSA 公钥。
+- ~/.ssh/id_rsa：用于 SSH 协议版本2 的 RSA 私钥。
+- ~/.ssh/id_rsa.pub：用于SSH 协议版本2 的 RSA 公钥。
+- ~/.ssh/identity：用于 SSH 协议版本1 的 RSA 私钥。
+- ~/.ssh/identity.pub：用于 SSH 协议版本1 的 RSA 公钥。
+- ~/.ssh/known_hosts：包含 SSH 服务器的公钥指纹。
+
+这里针对~/.ssh/config文件的写法进行说明。
 
 一个示例的文件如下：
 #+BEGIN_EXAMPLE
 # configuration 1
-Host cluster
-	HostName 192.168.11.11
-	User tom
-
+Host *
+     Port 2222
 
 # configuration 2
+Host remoteserver
+     HostName remote.example.com
+     User neo
+     Port 2112
+
+
+# configuration 3
 Host=aliyun
-	Hostname=202.44.2.2
-	User tom
+     Hostname=202.44.2.2
+     User tom
 #+END_EXAMPLE
 主要的规则如下：
-- 每项配置都是参数名 参数值或参数值=参数名的形式，其中参数名不区分大小写，而参数值区分大小写，如上面的参数名HostName和Hostname是同一个参数
 - 不同主机的配置通过Host参数来区分，一个配置文件里面可以有针对多个Host的配置
 - 以#开头的是注释，会被忽略
 - 同一个Host的配置内部，参数名 参数值和参数值=参数名的形式可以混用，如上例#2配置所示
 
-下面详细展开常见的参数类型。
-*** 常见参数类型
+Host命令的值可以使用通配符，比如Host *表示对所有主机都有效的设置，Host *.edu表示只对一级域名为.edu的主机有效的设置。它们的设置都可以被单个主机的设置覆盖。
+
+上面代码中，Host *表示对所有主机生效，后面的Port 2222表示所有主机的默认连接端口都是2222，这样就不用在登录时特别指定端口了。这里的缩进并不是必需的，只是为了视觉上，易于识别针对不同主机的设置。
+
+后面的Host remoteserver表示，下面的设置只对主机remoteserver生效。remoteserver只是一个别名，具体的主机由HostName命令指定，User和Port这两项分别表示用户名和端口。这里的Port会覆盖上面Host *部分的Port设置。
+
+以后，登录remote.example.com时，只要执行ssh remoteserver命令，就会自动套用 config 文件里面指定的参数。
+
+*** config文件常见参数
 参数可以在命令行通过man ssh_config来查看
-**** Host
- 类似昵称，用于标识某个特定的配置，在ssh命令中使用，例如我们想要ssh连接到上例中的#1配置的主机，则在命令行执行如下命令即可：
-
- ssh cluster
-
-
- 一个最有用的场景是使用scp在不同主机间传数据。没有配置之间，你得写很长的参数，如
-
- scp a.txt tom@192.168.11.11:~/
-
-
- 尤其是IP地址记忆起来好麻烦啊。配置过上例中的文件后，这个任务可以简化成这样：
-
- scp a.txt cluster:~/
-
-
- 省略了用户名和IP地址，方便多了。
-**** HostName
- 需要ssh连接过去的主机名，一般是IP地址，也可以用%h来替代命令行参数
-**** User
- 登录主机的用户名
-**** IdentityFile
- 认证证书文件，默认位置是~/.ssh/id_rsa, ~/ssh/id_dsa等，如果采用默认的证书，可以不用设置此参数，除非你的证书放在某个自定义的目录，那么你就需要设置该参数来指向你的证书
-**** Port
- SSH访问主机的端口号，默认是22端口，同上，只有在非默认情况下才需要设置该值
-
-*** /etc/ssh/ssh_config配置文件
 #+BEGIN_EXAMPLE
-选项参数                              说明
-Host *                                    选项“Host”只对能够匹配后面字串的计算机有效。“*”表示所有的计算机。
+AddressFamily inet：表示只使用 IPv4 协议。如果设为inet6，表示只使用 IPv6 协议。
+BindAddress 192.168.10.235：指定本机的 IP 地址（如果本机有多个 IP 地址）。
+BatchMode no                              如果设为“yes”，passphrase/password（交互式输入口令）的提示将被禁止。当不能交互式输入口令的时候，这个选项对脚本文件和批处理任务十分有用
+CheckHostIP yes：检查 SSH 服务器的 IP 地址是否跟公钥数据库吻合。
+Ciphers blowfish,3des：指定加密算法。
+Compression yes：是否压缩传输信号。
+ConnectionAttempts 10：客户端进行连接时，最大的尝试次数。
+ConnectTimeout 60：客户端进行连接时，服务器在指定秒数内没有回复，则中断连接尝试。
+DynamicForward 1080：指定动态转发端口。
+EscapeChar ~                              设置escape字符
 ForwardAgent no                           设置连接是否经过验证代理（如果存在）转发给远程计算机。
 ForwardX11 no                             设置X11连接是否被自动重定向到安全的通道和显示集（DISPLAY set）
+FallBackToRsh no                      设置如果用ssh连接出现错误是否自动使用rsh
+GlobalKnownHostsFile /users/smith/.ssh/my_global_hosts_file：指定全局的公钥数据库文件的位置。
+Host server.example.com：指定连接的域名或 IP 地址，也可以是别名，支持通配符。Host命令后面的所有配置，都是针对该主机的，直到下一个Host命令为止。“*”表示所有的计算机。
+HostKeyAlgorithms ssh-dss,ssh-rsa：指定密钥算法，优先级从高到低排列。
+HostName myserver.example.com：在Host命令使用别名的情况下，HostName指定域名或 IP 地址。
+IdentityFile keyfile：指定私钥文件。 默认位置是~/.ssh/id_rsa,~/ssh/id_dsa等，如果采用默认的证书，可以不用设置此参数，除非你的证书放在某个自定义的目录，那么你就需要设置该参数来指向你的证书
+LocalForward 2001 localhost:143：指定本地端口转发。
+LogLevel QUIET：指定日志详细程度。如果设为QUIET，将不输出大部分的警告和提示。
+MACs hmac-sha1,hmac-md5：指定数据校验算法。
+NumberOfPasswordPrompts 2：密码登录时，用户输错密码的最大尝试次数。
+PasswordAuthentication no：指定是否支持密码登录。不过，这里只是客户端禁止，真正的禁止需要在 SSH 服务器设置。
+Port 2035：指定客户端连接的 SSH 服务器端口。
+PreferredAuthentications publickey,hostbased,password：指定各种登录方法的优先级。
+Protocol 2：支持的 SSH 协议版本，多个版本之间使用逗号分隔。默认是22端口，同上，只有在非默认情况下才需要设置该值
+PubKeyAuthentication yes：是否支持密钥登录。这里只是客户端设置，还需要在 SSH 服务器进行相应设置。
+RemoteForward 2001 server:143：指定远程端口转发。
 RhostsAuthentication no                   设置是否使用基于rhosts的安全验证
 RhostsRSAAuthentication no            设置是否使用用RSA算法的基于rhosts的安全验证
 RSAAuthentication yes                     设置是否使用RSA算法进行安全验证
-PasswordAuthentication yes            设置是否使用口令验证
-FallBackToRsh no                      设置如果用ssh连接出现错误是否自动使用rsh
+SendEnv COLOR：SSH 客户端向服务器发送的环境变量名，多个环境变量之间使用空格分隔。环境变量的值从客户端当前环境中拷贝。
+ServerAliveCountMax 3：如果没有收到服务器的回应，客户端连续发送多少次keepalive信号，才断开连接。该项默认值为3。
+ServerAliveInterval 300：客户端建立连接后，如果在给定秒数内，没有收到服务器发来的消息，客户端向服务器发送keepalive消息。如果不希望客户端发送，这一项设为0。
+StrictHostKeyChecking yes：yes表示严格检查，服务器公钥为未知或发生变化，则拒绝连接。no表示如果服务器公钥未知，则加入客户端公钥数据库，如果公钥发生变化，不改变客户端公钥数据库，输出一条警告，依然允许连接继续进行。ask（默认值）表示询问用户是否继续进行。
+TCPKeepAlive yes：客户端是否定期向服务器发送keepalive信息。
+User userName：指定远程登录的账户名。
+UserKnownHostsFile /users/smith/.ssh/my_local_hosts_file：指定当前用户的known_hosts文件（服务器公钥指纹列表）的位置。
 UseRsh no                             设置是否在这台计算机上使用“rlogin/rsh”
-BatchMode no                              如果设为“yes”，passphrase/password（交互式输入口令）的提示将被禁止。当不能交互式输入口令的时候，这个选项对脚本文件和批处理任务十分有用
-CheckHostIP yes                           设置ssh是否查看连接到服务器的主机的IP地址以防止DNS欺骗。建议设置为“yes”
-StrictHostKeyChecking no              如果设置成“yes”，ssh就不会自动把计算机的密匙加入“$HOME/.ssh/known_hosts”文件，并且一旦计算机的密匙发生了变化，就拒绝连接
-IdentityFile ~/.ssh/identity              设置从哪个文件读取用户的RSA安全验证标识
-Port 22                                   设置连接到远程主机的端口
-Cipher blowfish                           设置加密用的密码
-EscapeChar ~                              设置escape字符
+VerifyHostKeyDNS yes：是否通过检查 SSH 服务器的 DNS 记录，确认公钥指纹是否与known_hosts文件保存的一致。
 #+END_EXAMPLE
 
 *** /etc/ssh/sshd_config配置文件
@@ -3125,10 +3732,101 @@ sudo systemctl disable ssh
 
 这段话的意思是，无法确认host主机的真实性，只知道它的公钥指纹，问你还想继续连接吗？
 
+在上面这段文字后面，输入yes，就可以将当前服务器的指纹也储存在本机~/.ssh/known_hosts文件中，并显示下面的提示。以后再连接的时候，就不会再出现警告了。
+
+#+BEGIN_EXAMPLE
+Warning: Permanently added 'foo.com (192.168.121.111)' (RSA) to the list of known hosts
+#+END_EXAMPLE
+
 所谓"公钥指纹"，是指公钥长度较长（这里采用RSA算法，长达1024位），很难比对，所以对其进行MD5计算，将它变成一个128位的指纹。上例中是20:42:b3:d6:79:dc:79:ec:26:1a:54:8c:72:b7:a7:e3，再进行比较，就容易多了。
 
 很自然的一个问题就是，用户怎么知道远程主机的公钥指纹应该是多少？回答是没有好办法，远程主机必须在自己的网站上贴出公钥指纹，以便用户自行核对。
 
+下面的命令可以查看某个公钥的指纹:
+#+begin_src bash
+$ ssh-keygen -l -f /etc/ssh/ssh_host_ecdsa_key.pub
+256 da:24:43:0b:2e:c1:3f:a1:84:13:92:01:52:b4:84:ff   (ECDSA)
+#+END_SRC
+上面的例子中，ssh-keygen -l -f命令会输出公钥/etc/ssh/ssh_host_ecdsa_key.pub的指纹。
+
+ssh 会将本机连接过的所有服务器公钥的指纹，都储存在本机的~/.ssh/known_hosts文件中。每次连接服务器时，通过该文件判断是否为陌生主机（陌生公钥）。
+
+服务器指纹可以防止有人恶意冒充远程主机。如果服务器的密钥发生变更（比如重装了 SSH 服务器），客户端再次连接时，就会发生公钥指纹不吻合的情况。这时，客户端就会中断连接，并显示一段警告信息。
+#+BEGIN_EXAMPLE
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!     @
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+IT IS POSSIBLE THAT SOMEONE IS DOING SOMETHING NASTY!
+Someone could be eavesdropping on you right now (man-in-the-middle attack)!
+It is also possible that the RSA host key has just been changed.
+The fingerprint for the RSA key sent by the remote host is
+77:a5:69:81:9b:eb:40:76:7b:13:04:a9:6c:f4:9c:5d.
+Please contact your system administrator.
+Add correct host key in /home/me/.ssh/known_hosts to get rid of this message.
+Offending key in /home/me/.ssh/known_hosts:36
+#+END_EXAMPLE
+上面这段文字的意思是，该主机的公钥指纹跟~/.ssh/known_hosts文件储存的不一样，必须处理以后才能连接。这时，你需要确认是什么原因，使得公钥指纹发生变更，到底是恶意劫持，还是管理员变更了 SSH 服务器公钥。
+
+如果新的公钥确认可以信任，需要继续执行连接，你可以执行下面的命令，将原来的公钥指纹从~/.ssh/known_hosts文件删除。
+#+begin_src bash
+$ ssh-keygen -R hostname
+#+END_SRC
+上面命令中，hostname是发生公钥变更的主机名。
+
+除了使用上面的命令，你也可以手工修改known_hosts文件，将公钥指纹删除。
+
+删除了原来的公钥指纹以后，重新执行 ssh 命令连接远程服务器，将新的指纹加入known_hosts文件，就可以顺利连接了。
+** ssh-keygen命令：生成密钥
+密钥登录时，首先需要生成公钥和私钥。OpenSSH 提供了一个工具程序ssh-keygen命令，用来生成密钥。
+
+ssh-keygen的命令行配置项，主要有下面这些。
+
+*** -b
+
+-b参数指定密钥的二进制位数。这个参数值越大，密钥就越不容易破解，但是加密解密的计算开销也会加大。
+
+一般来说，-b至少应该是1024，更安全一些可以设为2048或者更高。
+
+*** -C
+
+-C参数可以为密钥文件指定新的注释，格式为username@host。
+
+下面命令生成一个4096位 RSA 加密算法的密钥对，并且给出了用户名和主机名。
+
+$ ssh-keygen -t rsa -b 4096 -C "your_email@domain.com"
+
+*** -f
+
+-f参数指定生成的私钥文件。
+
+$ ssh-keygen -t dsa -f mykey
+上面命令会在当前目录生成私钥文件mykey和公钥文件mykey.pub。
+
+*** -F
+
+-F参数检查某个主机名是否在known_hosts文件里面。
+
+$ ssh-keygen -F example.com
+
+*** -N
+
+-N参数用于指定私钥的密码（passphrase）。
+
+$ ssh-keygen -t dsa -N secretword
+
+*** -p
+
+-p参数用于重新指定私钥的密码（passphrase）。它与-N的不同之处在于，新密码不在命令中指定，而是执行后再输入。ssh 先要求输入旧密码，然后要求输入两遍新密码。
+
+*** -R
+
+-R参数将指定的主机公钥指纹移出known_hosts文件。
+
+$ ssh-keygen -R example.com
+
+*** -t
+
+-t参数用于指定生成密钥的加密算法，一般为dsa或rsa
 ** known_hosts文件
 当远程主机的公钥被接受以后，它就会被保存在文件$HOME/.ssh/known_hosts之中。下次再连接这台主机，系统就会认出它的公钥已经保存在本地了，从而跳过警告部分，直接提示输入密码。
 
@@ -3136,6 +3834,71 @@ sudo systemctl disable ssh
 
 ** authorized_keys文件
 远程主机将用户的公钥，保存在登录后的用户主目录的$HOME/.ssh/authorized_keys文件中。公钥就是一段字符串，只要把它追加在authorized_keys文件的末尾就行了。
+** 加密参数
+SSH 连接的握手阶段，客户端必须跟服务端约定加密参数集（cipher suite）。
+
+加密参数集包含了若干不同的加密参数，它们之间使用下划线连接在一起，下面是一个例子。
+#+BEGIN_EXAMPLE
+TLS_RSA_WITH_AES_128_CBC_SHA
+#+END_EXAMPLE
+它的含义如下。
+#+BEGIN_EXAMPLE
+TLS：加密通信协议
+RSA：密钥交换算法
+AES：加密算法
+128：加密算法的强度
+CBC：加密算法的模式
+SHA：数字签名的 Hash 函数
+#+END_EXAMPLE
+下面是一个例子，客户端向服务器发出的握手信息。
+#+BEGIN_EXAMPLE
+Handshake protocol: ClientHello
+    Version: TLS 1.2
+    Random
+        Client time: May 22, 2030 02:43:46 GMT
+        Random bytes: b76b0e61829557eb4c611adfd2d36eb232dc1332fe29802e321ee871
+    Session ID: (empty)
+    Cipher Suites
+        Suite: TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256”
+        Suite: TLS_DHE_RSA_WITH_AES_128_GCM_SHA256
+        Suite: TLS_RSA_WITH_AES_128_GCM_SHA256
+        Suite: TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA
+        Suite: TLS_DHE_RSA_WITH_AES_128_CBC_SHA
+        Suite: TLS_RSA_WITH_AES_128_CBC_SHA
+        Suite: TLS_RSA_WITH_3DES_EDE_CBC_SHA
+        Suite: TLS_RSA_WITH_RC4_128_SHA
+    Compression methods
+        Method: null
+    Extensions
+        Extension: server_name
+            Hostname: www.feistyduck.com
+        Extension: renegotiation_info
+        Extension: elliptic_curves
+            Named curve: secp256r1
+            Named curve: secp384r1
+        Extension: signature_algorithms
+            Algorithm: sha1/rsa
+            Algorithm: sha256/rsa
+            Algorithm: sha1/ecdsa
+            Algorithm: sha256/ecdsa”
+#+END_EXAMPLE
+上面的握手信息（ClientHello）之中，Cipher Suites字段就是客户端列出可选的加密参数集，服务器在其中选择一个自己支持的参数集。
+
+服务器选择完毕之后，向客户端发出回应。
+#+BEGIN_EXAMPLE
+Handshake protocol: ServerHello
+    Version: TLS 1.2
+    Random
+        Server time: Mar 10, 2059 02:35:57 GMT”
+        Random bytes: 8469b09b480c1978182ce1b59290487609f41132312ca22aacaf5012
+    Session ID: 4cae75c91cf5adf55f93c9fb5dd36d19903b1182029af3d527b7a42ef1c32c80
+    Cipher Suite: TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+    Compression method: null
+    Extensions
+        Extension: server_name
+        Extension: renegotiation_info”
+#+END_EXAMPLE
+上面的回应信息（ServerHello）中，Cipher Suite字段就是服务器最终选定的加密参数。
 ** 配置vscode 远程开发+ 免密登录
 1. 先在window上安装ssh，然后在cmd上用命令ssh-keygen生成密钥对
 
@@ -3156,6 +3919,7 @@ sudo systemctl disable ssh
 
 ** 参考文章
 [[https://www.jianshu.com/p/1e793e386beb][ssh配置文件详解]]
+[[https://wangdoc.com/ssh/client.html][ssh教程]]
 * TensorFlow
 用pip命令
 #+BEGIN_SRC bash
@@ -3186,6 +3950,8 @@ exit 退出会话
 <C-b> [ 开始往回卷动屏幕。您可以按下空格键来开始选择，回车键复制选中的部分
 <C-b> <空格> 在不同的面板排布间切换
 exit or <C-b> d 退出面板
+** 自动保存tmux会话 关机重启再也不怕
+参考文章：https://zhuanlan.zhihu.com/p/146544540
 * tee命令
 Linux tee命令用于读取标准输入的数据，并将其内容输出成文件。
 
@@ -3334,12 +4100,176 @@ DNS服务器可以设置114.114.114.144 8.8.8.8 等。
 *** 五、这时候基本就可以进行网络连接了，打开网页试一下，如果还连接不上，查看是否是哪一步没有设置对，在就重新启动虚拟计算机的网络。
 ** 修改时区和时间
 ~timedatectl set-timezone Asia/Shanghai~
-* xargs
+* vim
+[[https://vim.rtorr.com/lang/zh_cn][Vim Cheat Sheet]]
+** 移动光标
+h 或 向左箭头键(←) 光标向左移动一个字符
+j 或 向下箭头键(↓) 光标向下移动一个字符
+k 或 向上箭头键(↑) 光标向上移动一个字符
+l 或 向右箭头键(→) 光标向右移动一个字符
+[Ctrl] + [f] 屏幕『向下』移动一页，相当于 [Page Down]按键 (常用)
+[Ctrl] + [b] 屏幕『向上』移动一页，相当于 [Page Up] 按键 (常用)
+[Ctrl] + [d] 屏幕『向下』移动半页
+[Ctrl] + [u] 屏幕『向上』移动半页
++ 光标移动到非空格符的下一列
+- 光标移动到非空格符的上一列
+n<space> 那个 n 表示『数字』，例如 20 。按下数字后再按空格键，光标会向右移动这一列的 n个字符。例如 20<space> 则光标会向后面移动 20 个字符距离。
+0 或功能键[Home] 这是数字『 0 』：移动到这一列的最前面字符处 (常用)
+$ 或功能键[End] 移动到这一列的最后面字符处(常用)
+H 光标移动到这个屏幕的最上方那一列的第一个字符
+M 光标移动到这个屏幕的中央那一列的第一个字符
+L 光标移动到这个屏幕的最下方那一列的第一个字符
+G 移动到这个文件的最后一列(常用)
+nG n 为数字。移动到这个文件的第 n 列。例如 20G 则会移动到这个文件的第 20 列(可配合 :set nu)
+gg 移动到这个文件的第一列，相当于 1G 啊！ (常用)
+n<Enter> n 为数字。光标向下移动 n 列(常用)
+** 搜寻与替换
+r, R 进入取代模式(Replace mode)：r 只会取代光标所在的那一个字符一次；R 会一直取代光标所在的文字，直到按下 ESC为止；(常用)
+/word 向光标之下寻找一个名称为 word 的字符串。例如要在文件内搜寻 vbird 这个字符串，就输入 /vbird 即可！ (常用)
+?word 向光标之上寻找一个字符串名称为 word 的字符串。
+n 这个 n 是英文按键。代表『重复前一个搜寻的动作』。举例来说， 如果刚刚我们执行/vbird 去向下搜寻 vbird 这个字符串，则按下 n 后，会向下继续搜寻下一个名称为vbird 的字符串。如果是执行 ?vbird 的话，那么按下 n 则会向上继续搜寻名称为vbird 的字符串！
+N 这个 N 是英文按键。与 n 刚好相反，为『反向』进行前一个搜寻动作。 例如 /vbird后，按下 N 则表示『向上』搜寻 vbird 。使用 /word 配合 n 及 N 是非常有帮助的！可以让你重复的找到一些你搜寻的关键词！
+:n1,n2s/word1/word2/g n1 与 n2 为数字。在第 n1 与 n2 行之间寻找 word1 这个字符串，并将该字符串取代为 word2 ！举例来说，在 100 到 200 行之间搜寻 vbird 并取代为 VBIRD 则：『:100,200s/vbird/VBIRD/g』。(常用)
+:1,$s/word1/word2/g 从第一行到最后一行寻找 word1 字符串，并将该字符串取代为 word2 ！(常用)。这个1和$都可以空着的，例如,$表示从当前行到最后一行
+:1,$s/word1/word2/gc 从第一行到最后一行寻找 word1 字符串，并将该字符串取代为 word2 ！且在取代前显示提示字符给用户确认 (confirm) 是否需要取代！(常用)
+:%s/word1/word2/g 全文替换
+*** 关于替换\n换行符的问题
+详细内容可参考文章:https://vim.fandom.com/wiki/Search_and_replace
+
+字符串查找时，”\n” 是换行，”\r” 是回车，也就是经常会看到的 ^M。
+
+字符串替换时，”\r” 是换行，’\n” 是空字符（0x00）。
+
+When searching:
+#+BEGIN_EXAMPLE
+., *, \, [, ^, and $ are metacharacters.
++, ?, |, &, {, (, and ) must be escaped to use their special function.
+\/ is / (use backslash + forward slash to search for forward slash)
+\t is tab, \s is whitespace (space or tab)
+\n is newline, \r is CR (carriage return = Ctrl-M = ^M)
+After an opening [, everything until the next closing ] specifies a /collection. Character ranges can be represented with a -; for example a letter a, b, c, or the number 1 can be matched with [1a-c]. Negate the collection with [^ instead of [; for example [^1a-c] matches any character except a, b, c, or 1.
+\{#\} is used for repetition. /foo.\{2\} will match foo and the two following characters. The \ is not required on the closing } so /foo.\{2} will do the same thing.
+\(foo\) makes a backreference to foo. Parenthesis without escapes are literally matched. Here the \ is required for the closing \).
+#+END_EXAMPLE
+When replacing:
+#+BEGIN_EXAMPLE
+\r is newline, \n is a null byte (0x00).
+\& is ampersand (& is the text that matches the search pattern).
+\0 inserts the text matched by the entire pattern
+\1 inserts the text of the first backreference. \2 inserts the second backreference, and so on.
+#+END_EXAMPLE
+
+**** 参考文章
+[[http://www.leakon.com/archives/830/comment-page-1][VIM 替换 \n 换行符]]
+** 删除、复制与粘贴
+x, X 在一列字当中，x 为向后删除一个字符 (相当于 [del] 按键)， X 为向前删除一个字符(相当于 [backspace] 亦即是退格键) (常用)
+nx n 为数字，连续向后删除 n 个字符。举例来说，我要连续删除 10 个字符， 『10x』。
+dd 删除游标所在的那一整列(常用)
+ndd n 为数字。删除光标所在的向下 n 列，例如 20dd 则是删除 20 列 (常用)
+d1G 删除光标所在到第一列的所有数据
+dG 删除光标所在到最后一列的所有数据
+d$ 删除游标所在处，到该列的最后一个字符
+d0 那个是数字的 0 ，删除游标所在处，到该列的最前面一个字符
+yy 复制游标所在的那一列(常用)
+nyy n 为数字。复制光标所在的向下 n 列，例如 20yy 则是复制 20 列(常用)
+y1G 复制光标所在列到第一列的所有数据
+yG 复制光标所在列到最后一列的所有数据
+y0 复制光标所在的那个字符到该列行首的所有数据
+y$ 复制光标所在的那个字符到该列行尾的所有数据
+p, P p 为将已复制的数据在光标下一列贴上，P 则为贴在游标上一列！ 举例来说，我目前光标在第 20 列，且已经复制了 10 列数据。则按下 p 后， 那 10 列数据会贴在原本的 20列之后，亦即由 21 列开始贴。但如果是按下 P 呢？ 那么原本的第 20 列会被推到变成 30 列。 (常用)
+J 将光标所在列与下一列的数据结合成同一列
+c 重复删除多个数据，例如向下删除 10 列，[ 10cj ]
+** 重复撤销
+u 复原前一个动作。(常用)
+[Ctrl]+r 重做上一个动作。(常用)
+. 不要怀疑！这就是小数点！意思是重复前一个动作的意思。 如果你想要重复删除、重复贴上等等动作，按下小数点『.』就好了！ (常用)
+** 插入
+i, I 进入插入模式(Insert mode)：i 为『从目前光标所在处插入』， I 为『在目前所在列的第一个非空格符处开始插入』。(常用)
+a, A 进入插入模式(Insert mode)：a 为『从目前光标所在的下一个字符处开始插入』， A 为『从光标所在列的最后一个字符处开始插入』。(常用)
+o, O 进入插入模式(Insert mode)：这是英文字母 o 的大小写。o 为『在目前光标所在的下一列处插入新的一列』； O 为在目前光标所在处的上一列插入新的一列！(常用)
+** 指令列模式的储存、离开等指令
+:w 将编辑的数据写入硬盘文件中(常用)
+:w! 若文件属性为『只读』时，强制写入该文件。不过，到底能不能写入， 还是跟你对该文件的文件权限有关啊！
+:q 离开 vi (常用)
+:q! 若曾修改过文件，又不想储存，使用 ! 为强制离开不储存文件。
+:wq 储存后离开，若为 :wq! 则为强制储存后离开 (常用)
+ZZ 这是大写的 Z 喔！若文件没有更动，则不储存离开，若文件已经被更动过，则储存后离开！
+:w [filename] 将编辑的数据储存成另一个文件（类似另存新档）
+:r [filename] 在编辑的数据中，读入另一个文件的数据。亦即将 『filename』 这个文件内容加到游标所在列后面
+:n1,n2 w [filename] 将 n1 到 n2 的内容储存成 filename 这个文件。
+:! command 暂时离开 vi 到指令列模式下执行 command 的显示结果！例如『:! ls /home』即可在 vi 当中察看 /home 底下以 ls 输出的文件信息！
+** vim 环境的变更
+:set nu 显示行号，设定之后，会在每一列的前缀显示该列的行号
+:set nonu 与 set nu 相反，为取消行号！
+** 区块选择(Visual Block)
+v 字符选择，会将光标经过的地方反白选择！
+V 列选择，会将光标经过的列反白选择！
+[Ctrl]+v 区块选择，可以用长方形的方式选择资料
+y 将反白的地方复制起来
+d 将反白的地方删除掉
+p 将刚刚复制的区块，在游标所在处贴上！
+** 环境设定
+vim 的环境设定参数有很多，如果你想要知道目前的设定值，可以在一般指令模式时输入:set all  来查阅
+
+:set nu与:set nonu 就是设定与取消行号啊！
+:set hlsearch与:set nohlsearch hlsearch 就是 high light search(高亮度搜寻)。 这个就是设定是否将搜寻的字符串反白的设定值。默认值是 hlsearch
+:set autoindent与:set noautoindent 是否自动缩排？autoindent 就是自动缩排。
+:set backup 是否自动储存备份档？一般是 nobackup 的， 如果设定 backup 的话，那么当你更动任何一个文件时，则源文件会被另存成一个档名为 filename~ 的文件。 举例来说，我们编辑 hosts ，设定 :set backup ，那么当更动 hosts 时，在同目录下，就会产生 hosts~文件名的文件，记录原始的 hosts 文件内容
+:set ruler 还记得我们提到的右下角的一些状态栏说明吗？ 这个 ruler 就是在显示或不显示该设定值的啦！
+:set showmode 这个则是，是否要显示 --INSERT-- 之类的字眼在左下角的状态栏。
+:set backspace=(012) 一般来说， 如果我们按下 i 进入编辑模式后，可以利用退格键 (backspace) 来删除任意字符的。 但是，某些 distribution 则不许如此。此时，我们就可以透过 backspace来设定啰～ 当 backspace 为 2 时，就是可以删除任意值；0 或 1 时，仅可删除刚刚输入的字符，而无法删除原本就已经存在的文字了！
+:set all 显示目前所有的环境参数设定值。
+:set 显示与系统默认值不同的设定参数， 一般来说就是你有自行变动过的设定参数啦！
+:syntax on与:syntax off 是否依据程序相关语法显示不同颜色？ 举例来说，在编辑一个纯文本档时，如果开头是以 # 开始，那么该列就会变成蓝色。 如果你懂得写程序，那么这个 :syntax on 还会主动的帮你除错呢！但是， 如果你仅是编写纯文本文件，要避免颜色对你的屏幕产生的干扰，则可以取消这个设定 。
+:set bg=dark与:set bg=light 可用以显示不同的颜色色调，预设是『 light 』。如果你常常发现批注的字体深蓝色实在很不容易看， 那么这里可以设定为 dark 喔！试看看，会有不同的样式呢！
+** 让Vim显示dos下的^M符号
+参考文章：[[https://stackoverflow.com/questions/21228946/why-does-vim-sometimes-show-m-and-sometimes-not-even-if-they-are-there][Why does vim sometimes show ^M and sometimes not (even if they are there)?]]
+
+When opening a file, vim tries to detect if it's a MS-DOS/Windows or a unix file. If all lines are terminated by \r\n, it's probably a DOS file, if only some of them are, vim may assume unix as well. If the file format is set to DOS, vim ignores \r when reading the file, and shows [dos] in the status line directly after reading the file.
+
+我的理解是vim将文件当做dos文件，所以将\r\n作为换行符显示。在这里，vim正确地显示了文件的内容，但是其他的软件未必会正确地将\r\n为换行符，所以用其他的软件读取改文件，就会出现错误。为了能让vim将^M显示出来，只要将文件编码格式设置为unix即可。
+
+vim中键入： :e ++ff=unix 即可让vim显示^M
+
+设置文件编码格式:set ff=unix 然后保存:wq ，即可去除^M
+
+The :e ++ff=unix command tells Vim to read the file again, forcing unix file format. 
+
+To learn about ff, execute ":help ff"
+* xargs（用来给命令传递参数）
+xargs（英文全拼： eXtended ARGuments）是给命令传递参数的一个过滤器，也是组合多个命令的一个工具。
+
+xargs 可以将管道或标准输入（stdin）数据转换成命令行参数，也能够从文件的输出中读取数据。
+
+xargs 也可以将单行或多行文本输入转换为其他格式，例如多行变单行，单行变多行。
+
+xargs 默认的命令是 echo，这意味着通过管道传递给 xargs 的输入将会包含换行和空白，不过通过 xargs 的处理，换行和空白将被空格取代。
+
+xargs 是一个强有力的命令，它能够捕获一个命令的输出，然后传递给另外一个命令。
+
+之所以能用到这个命令，关键是由于很多命令不支持|管道来传递参数，而日常工作中有有这个必要，所以就有了 xargs 命令，例如：
+#+begin_src bash
+find /sbin -perm +700 |ls -l       #这个命令是错误的
+find /sbin -perm +700 |xargs ls -l   #这样才是正确的
+#+END_SRC
+
+命令格式：
+somecommand |xargs -item  command
 ** 参数
+-a file 从文件中读入作为 stdin
+-e flag ，注意有的时候可能会是-E，flag必须是一个以空格分隔的标志，当xargs分析到含有flag这个标志的时候就停止。
+-p 当每次执行一个argument的时候询问一次用户。
+-n num 后面加次数，表示命令在执行的时候一次用的argument的个数，默认是用所有的。
+-t 表示先打印命令，然后再执行。
+-i 或者是-I，这得看linux支持了，将xargs的每项名称，一般是一行一行赋值给 {}，可以用 {} 代替。
+-r no-run-if-empty 当xargs的输入为空的时候则停止xargs，不用再去执行了。
+-s num 命令行的最大字符数，指的是 xargs 后面那个命令的最大命令行字符数。
+-L num 从标准输入一次读取 num 行送给 command 命令。
+-l 同 -L。
+-d delim 分隔符，默认的xargs分隔符是回车，argument的分隔符是空格，这里修改的是xargs的分隔符。
+-x exit的意思，主要是配合-s使用。。
+-P 修改最大的进程数，默认是1，为0时候为as many as it can ，这个例子我没有想到，应该平时都用不到的吧。
 -0 不仅可以将分隔符从默认的空格变成 NULL，还会将单引号、双引号、反斜线等统统默认为是普通字符
--d delim 分隔符，默认的xargs分隔符是回车，argument的分隔符是空格，这里修改的是xargs的分隔符
--p 当每次执行一个argument的时候询问一次用户
--n num 每次处理num个参数
 ** 参数使用例子
 *** -E
 我们正在处理一份日志文件 country.list 中的内容，将日志文件中的字符以空行作为分隔符依次 echo 出来，一旦遇到 korea 便终止退出：
@@ -4056,3 +4986,33 @@ file /sbin/init
 
 ** 参考文章
 [[https://www.sysgeek.cn/find-out-linux-system-32-or-64-bit/][查看Linux系统架构类型的5条常用命令]]
+* 解决 Windows 传入 linux 出现的 ^M 问题
+通过查询得知，其问题根源是windows和linux换行符不同造成，二者区别如下表（外加了mac book）
+
+|        | windows | linux | MacBook |
+|--------+---------+-------+---------|
+| 换行符 | \r\n    | \n    | \r      |
+| ASCII  | 0x0d0a  | 0x0a  | 0x0d    |
+
+其中：
+- "\r"在ASCII中表示“换行（LF）”
+- "\n"在ASCII中表示“回车（CR）”
+
+Dos、Windows 格式的文件，用 0D 0A (CR+LF)作为换行符，而Unix 的则是以0A(LF) 作为换行符，所以dos 底下的文本文件到了unix的话，换行符就会多出来一个 0D(CR) 显示为 ^M
+
+解决方法如下：
+
+1. 使用命令dos2unix对文件进行转换
+
+2. 使用vi的替换功能。启动vi，进入命令模式，输入以下命令:
+#+BEGIN_EXAMPLE
+:%s/^M$//g         # 去掉行尾的^M,注意^M 不是shift ^ +M 而是ctrl+v 加上ctrl+m,此命令必须是手动打上，不可复制
+:%s/^M//g          # 去掉所有的^M
+:%s/^M/[ctrl-v]+[enter]/g        # 将^M替换成回车
+:%s/^M/\r/g                      # 将^M替换成回车
+#+END_EXAMPLE
+
+3. 使用sed命令：
+#+begin_src bash
+$ sed -e‘s/^M/\n/g’upgrade.sh
+#+END_SRC
