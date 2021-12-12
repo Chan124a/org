@@ -6,5 +6,270 @@ N-Gram是一种基于统计语言模型的算法。它的基本思想是将文�
 
 该模型基于这样一种假设，第N个词的出现只与前面N-1个词相关，而与其它任何词都不相关，整句的概率就是各个词出现概率的乘积。这些概率可以通过直接从语料中统计N个词同时出现的次数得到。常用的是二元的Bi-Gram和三元的Tri-Gram。
 
+** 平滑技术
 ** 参考文章
 [[https://zhuanlan.zhihu.com/p/32829048][自然语言处理中N-Gram模型介绍]]
+* 梯度累加(Gradient Accumulation)
+
+#+DOWNLOADED: screenshot @ 2021-12-05 19:13:38
+[[file:images/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/%E6%A2%AF%E5%BA%A6%E7%B4%AF%E5%8A%A0(Gradient_Accumulation)/2021-12-05_19-13-38_screenshot.png]]
+ 上图也是某种意义上的梯度累加：一般是直接加总或者取平均，这样操作是scale了，其实影响不大，只是确保loss计算时的value不至于太大。batchsize超过64的情况不多(batchsize太大会有副作用)，这时候优化的粒度没那么细，scale操作适当又做了惩罚。可能在某些时候比不加收敛更快
+
+我们在训练神经网络的时候，超参数batch size的大小会对最终的模型效果产生很大的影响。一定条件下，batch size设置的越大，模型就会越稳定。batch size的值通常设置在 8-32 之间，但是当我们做一些计算量需求大的任务(例如语义分割、GAN等)或者输入图片尺寸太大的时候，我们的batch size往往只能设置为2或者4，否则就会出现 “CUDA OUT OF MEMORY” 的不可抗力报错。
+
+贫穷是促进人类进步的阶梯，如何在有限的计算资源的条件下，训练时采用更大的batch size呢？这就是梯度累加(Gradient Accumulation)技术了。
+
+我们以Pytorch为例，一个神经网络的训练过程通常如下：
+
+#+begin_src bash
+for i, (inputs, labels) in enumerate(trainloader):
+    optimizer.zero_grad()                   # 梯度清零
+    outputs = net(inputs)                   # 正向传播
+    loss = criterion(outputs, labels)       # 计算损失
+    loss.backward()                         # 反向传播，计算梯度
+    optimizer.step()                        # 更新参数
+    if (i+1) % evaluation_steps == 0:
+        evaluate_model()
+#+END_SRC
+  从代码中可以很清楚地看到神经网络是如何做到训练的：
+1.将前一个batch计算之后的网络梯度清零
+2.正向传播，将数据传入网络，得到预测结果
+3.根据预测结果与label，计算损失值
+4.利用损失进行反向传播，计算参数梯度
+5.利用计算的参数梯度更新网络参数
+
+  下面来看梯度累加是如何做的：
+#+begin_src bash
+for i, (inputs, labels) in enumerate(trainloader):
+    outputs = net(inputs)                   # 正向传播
+    loss = criterion(outputs, labels)       # 计算损失函数
+    loss = loss / accumulation_steps        # 损失标准化
+    loss.backward()                         # 反向传播，计算梯度
+    if (i+1) % accumulation_steps == 0:
+        optimizer.step()                    # 更新参数
+        optimizer.zero_grad()               # 梯度清零
+        if (i+1) % evaluation_steps == 0:
+            evaluate_model()
+#+END_SRC
+1.正向传播，将数据传入网络，得到预测结果
+2.根据预测结果与label，计算损失值
+3.利用损失进行反向传播，计算参数梯度
+4.重复1-3，不清空梯度，而是将梯度累加
+5.梯度累加达到固定次数之后，更新参数，然后将梯度清零
+
+  总结来讲，梯度累加就是每计算一个batch的梯度，不进行清零，而是做梯度的累加，当累加到一定的次数之后，再更新网络参数，然后将梯度清零。
+
+  通过这种参数延迟更新的手段，可以实现与采用大batch size相近的效果。在平时的实验过程中，我一般会采用梯度累加技术，大多数情况下，采用梯度累加训练的模型效果，要比采用小batch size训练的模型效果要好很多。
+** 参考资料
+[[https://www.cnblogs.com/sddai/p/14598018.html][梯度累加(Gradient Accumulation)]]
+* 相关技术方案参考
+1. 达观的解决方案：http://www.datagrand.com/blog/search-query.html
+方法：基于字之间书写过程中的“距离”，搜索可能的正确词语；基于语言模型修正。
+数据：爬虫系统爬取优质词条词典、拼音纠错词典、从检索结果是否很差推测是否有错，不需要标注语料。
+
+2. 百度AI提及的解决方案：https://mp.weixin.qq.com/s/r0kWgPHKthPgGqTbVc3lKw
+将错误分为3类：用词错误，音近、词近；文法/句法错误；知识性错误
+技术：基于机器翻译的方法，主要思想是把纠错看成同种语言中错误句子翻译为正确句子的过程，大规模训练语言模型后，以机器翻译任务形式进行微调训练，需要标注语料。
+纠错系统：ECNet框架，线下挖掘句对、词对齐、phrase抽取，线上检测后候选排序。Restricted-V NEC，端到端机器翻译。
+
+3. 腾讯内部搜索平台部提及的解决方案：https://cloud.tencent.com/developer/article/1030059
+分为召回层和决策层，召回层包含不同领域的错字检测模块，决策层基于用户、字形字音等分类，需要标注语料。
+
+4. 开源方案：https://github.com/shibing624/pycorrector
+基于规则：先用外部分词工具分词，若某个字的语言模型得分或某个词不在词典中，则判定错误，再基于词典、字典替换该字，使用语言模型判断最好的替换。
+
+5. 基于深度模型：
+RNN-CRF：阿里巴巴2016中文语法纠错比赛CGED2018第一名方案
+conv_seq2seq：NLPCC-2018第三名方案
+BERT：基于MASK输出获得错词判断。
+* 文本表示方法
+** 传统
+*** one-hot
+*** IF-IDF
+** 分布式
+1. 基于共现矩阵的分布式词向量
+2. 基于聚类的分布式词向量
+3. 基于神经网络进行词嵌入
+
+*** word2vec
+
+**** CBOW 
+
+**** Skip-Gram
+** Glove词嵌入
+
+* 子词切分技术
+未知词问题
+** 基于拷贝的方法
+** 基于子词单元的方法
+* 数据集
+** NLPCC 2018 GEC
+** 中文维基百科语料
+** HSK动态作文语料库
+** SIGHAN 2013 CSC语料
+** CoNLL-2003数据集
+CoNLL-2003命名实体数据集[下载]是用于CoNLL-2003共享任务，由八个文件组成，涵盖两种语言:英语和德语。
+
+每种语言都包含：训练集、开发集、测试集、无标签数据；
+1. 训练集：用于模型学习训练
+2. 开发集：用于模型学习过程中调参
+3. 测试集：用于结果的测试
+
+注意：其中无标签数据较大【未标注数据包含1700万个token(英语)和1400万个token(德语)】，其他数据集都比较小
+
+英文数据取自Reuters Corpus，该数据集由路透社从1996年8月到1997年8月的新闻故事组成；
+
+具体的数据详细信息如下：
+
+（1）个数据集中的文章、句子、词语数量
+|        | 文章数 | 句子数 | 词语数 |
+| 训练集 |    946 |  14987 | 203621 |
+| 开发集 |    216 |   3466 |  51362 |
+| 测试集 |    231 |   3684 |  46435 |
+（2）各数据集中的实体数量分布情况
+
+|        | 地名 | 人名 | 组织名 | 其他实体 |
+| 训练集 | 7140 | 6600 |   6321 |     3438 |
+| 开发集 | 1837 | 1842 |   1341 |      922 |
+| 测试集 | 1668 | 1617 |   1661 |      702 |
+数据样例如下（假设实体没有循环和交叉）：
+#+BEGIN_EXAMPLE
+词       词性   词块   实体
+U.N.     NNP   I-NP  I-ORG
+official NN    I-NP  O
+Ekeus    NNP   I-NP  I-PER
+heads    VBZ   I-VP  O
+for      IN    I-PP  O
+Baghdad  NNP   I-NP  I-LOC
+. . O O
+#+END_EXAMPLE
+这是其训练集中某个部分。
+
+通过其官网介绍，可知改数据集第一例是单词，第二列是词性，第三列是语法快，第四列是实体标签。在NER任务中，只关心第一列和第四列。实体类别标注采用BIO标注法，前面博客介绍这种标注法。
+
+*** 参考文章
+[[https://blog.csdn.net/Elvira521yan/article/details/118028020][【NLP公开数据集】 CoNLL-2003数据集]]
+[[https://blog.csdn.net/StarLib/article/details/107350559][命名实体识别学习-数据集介绍-conll03]]
+* 并行数据
+指的是一句错误的语句和一句纠正的语句
+* 论文调研
+** 基于Transformer增强架构的中文语法纠错方法_王辰成
+
+动态残差结构：在transformer模型的encoder和decoder分别加入残差模块
+
+基于腐化语料的单语数据增强算法：在语料中按照不同的概率添加多种类型的语料错误，以此创建更多的平行语料
+
+
+** Overview of NLPTEA-2020 Shared Task for Chinese Grammatical Error Diagnosis
+
+像bert之类的预训练模型取得了很好的效果，取代了CGED2017、2018的standard pipe-line以及biLSTM+CRF方法。
+
+像resnet之类的图像卷积方法第一次出现在该任务。
+
+大多的组都用了数据增强的方法（Hybrid methods based on pre-trained model）
+
+* 序列标注（Sequence Tagging）
+[[https://zhuanlan.zhihu.com/p/268579769][序列标注]]里有很多相关链接
+
+序列标注（Sequence Tagging）是NLP中最基础的任务，应用十分广泛，如分词、词性标注（POS tagging）、命名实体识别（Named Entity Recognition，NER）、关键词抽取、语义角色标注（Semantic Role Labeling）、槽位抽取（Slot Filling）等实质上都属于序列标注的范畴。
+
+序列标注一般可以分为两类：
+1. 原始标注（Raw labeling）：每个元素都需要被标注为一个标签。
+2. 联合标注（Joint segmentation and labeling）：所有的分段被标注为同样的标签。
+
+token级别的分类任务通常指的是为文本中的每一个token预测一个标签结果。比如命名实体识别任务：
+#+DOWNLOADED: screenshot @ 2021-12-09 09:50:48
+[[file:images/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/%E5%BA%8F%E5%88%97%E6%A0%87%E6%B3%A8%EF%BC%88Sequence_Tagging%EF%BC%89/2021-12-09_09-50-48_screenshot.png]]
+常见的token级别分类任务:
+- NER (Named-entity recognition 名词-实体识别) 分辨出文本中的名词和实体 (person人名, organization组织机构名, location地点名...).
+- POS (Part-of-speech tagging词性标注) 根据语法对token进行词性标注 (noun名词, verb动词, adjective形容词...)
+- Chunk (Chunking短语组块) 将同一个短语的tokens组块放在一起。
+
+举个NER和联合标注的例子。一个句子为：Yesterday , George Bush gave a speech. 其中包括一个命名实体：George Bush。我们希望将标签“人名”标注到整个短语“George Bush”中，而不是将两个词分别标注。这就是联合标注。
+** 简介
+序列标注问题可以认为是分类问题的一个推广，或者是更复杂的结构预测（structure prediction）问题的简单形式。
+
+序列标注问题的输入是一个观测序列，输出是一个标记序列或状态序列。问题的目标在于学习一个模型，使它能够对观测序列给出标记序列作为预测。
+
+首先给定一个训练集
+#+DOWNLOADED: screenshot @ 2021-12-08 21:59:27
+[[file:images/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/%E5%BA%8F%E5%88%97%E6%A0%87%E6%B3%A8%EF%BC%88Sequence_Tagging%EF%BC%89/2021-12-08_21-59-27_screenshot.png]]
+** 标签方案
+标签方案给出了标记的定义方式，常用的标签方案可以参考这篇文章，这里我们介绍一下其中的“BIO”方案。
+
+B，即Begin，表示开始；I，即Intermediate，表示中间；O，即Other，表示其它，用于标记无关字符。
+
+以NER问题为例，对于命名实体“ORG（组织名）”，在BIO标签方案下的标记集合为B_ORG、I_ORG、O。
+*** BIO标注
+解决联合标注问题的最简单的方法，就是将其转化为原始标注问题。标准做法就是使用BIO标注。
+
+BIO标注：将每个元素标注为“B-X”、“I-X”或者“O”。其中，“B-X”表示此元素所在的片段属于X类型并且此元素在此片段的开头，“I-X”表示此元素所在的片段属于X类型并且此元素在此片段的中间位置，“O”表示不属于任何类型。
+
+比如，我们将 X 表示为名词短语（Noun Phrase, NP），则BIO的三个标记为：
+1. B-NP：名词短语的开头
+2. I-NP：名词短语的中间
+3. O：不是名词短语
+
+因此可以将一段话划分为如下结果;
+#+DOWNLOADED: screenshot @ 2021-12-08 22:13:23
+[[file:images/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/%E5%BA%8F%E5%88%97%E6%A0%87%E6%B3%A8%EF%BC%88Sequence_Tagging%EF%BC%89/2021-12-08_22-13-23_screenshot.png]]
+我们可以进一步将BIO应用到NER中，来定义所有的命名实体（人名、组织名、地点、时间等），那么我们会有许多 B 和 I 的类别，如 B-PERS、I-PERS、B-ORG、I-ORG等。然后可以得到以下结果：
+
+#+DOWNLOADED: screenshot @ 2021-12-08 22:15:36
+[[file:images/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/%E5%BA%8F%E5%88%97%E6%A0%87%E6%B3%A8%EF%BC%88Sequence_Tagging%EF%BC%89/2021-12-08_22-15-36_screenshot.png]]
+*** 举例：命名实体识别 
+一段待标注的序列X=x1,x2,...,xn
+- B - Begin，表示开始
+- I - Intermediate，为中间字
+- E - End，表示结尾
+- S - Single，表示单个字符
+- O - Other，表示其他，用于标记无关字符
+
+常见标签方案通常为三标签或者五标签法：
+
+IOB - 对于文本块的第一个字符用B标注，文本块的其它字符用I标注，非文本块字符用O标注
+
+IOBES：
+- B，即Begin，表示开始
+- I，即Intermediate，表示中间
+- E，即End，表示结尾
+- S，即Single，表示单个字符
+- O，即Other，表示其他，用于标记无关字符
+
+这样的tag并不是固定的，根据任务不同还可以对标签有一系列灵活的变化或扩展。对于分词任务，我们可以用同样的标注方式来标注每一个词的开头、结尾，或单字。如词性标注中，我们可以将标签定义为：n、v、adj...而对于更细类别的命名实体识别任务，我们在定义的标签之后加上一些后缀，如：B-Person、B-Location...这都可以根据你的实际任务来自行选择。
+
+处理序列标注问题的常用模型包括隐马尔可夫模型（HMM）、条件随机场（CRF）、BiLSTM + CRF。
+** 建模方式
+解决序列标注问题的方式大体可分为两种，一种是概率图模型，另一种是深度学习模型。
+*** 概率图模型
+从发展时间和应用效果来看，依次是HMM、MEMM、CRF。
+**** HMM
+**** MEMM
+**** CRF
+*** 深度学习模型
+**** DNN
+按照前面所说的，可以把序列标注问题当作分类问题来解，此时相当于对输入观测序列的每个token进行一次多分类，DNN自然可以派上用场。大致流程如下图所示：
+
+#+DOWNLOADED: screenshot @ 2021-12-08 22:03:24
+[[file:images/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/%E5%BA%8F%E5%88%97%E6%A0%87%E6%B3%A8%EF%BC%88Sequence_Tagging%EF%BC%89/2021-12-08_22-03-24_screenshot.png]]
+
+这里的DNN，通常采用LSTM、GRU、Transformer等。
+**** DNN+CRF
+仅用DNN的情况下会存在一个问题，由于每个输出标记的预测是独立的，可能会导致出现类似“B_PER I_LOC”的标记序列。因此，考虑引入CRF学习标记之间的约束关系，（也可以采用其它的方式，如beam search解码，但是CRF将标记序列作为整体看待，效果更好）。大致流程如下图所示：
+
+#+DOWNLOADED: screenshot @ 2021-12-08 22:04:20
+[[file:images/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/%E5%BA%8F%E5%88%97%E6%A0%87%E6%B3%A8%EF%BC%88Sequence_Tagging%EF%BC%89/2021-12-08_22-04-20_screenshot.png]]
+在这里，DNN的输出是当前时刻对所有标记的打分，对应CRF打分函数中的 [公式] ，打分函数中的另一项 [公式] 则作为CRF层的参数进行学习（随机初始化），由此可以通过最大化似然概率进行模型训练，训练完成后，使用Viterbi算法即可完成预测。
+
+序列标注模型的框架基本上可以分为特征提取层和序列标注层。在DNN+CRF模型中，DNN是特征提取层，CRF是序列标注层；而在仅用CRF的传统机器学习模型中，特征提取层由人工模板特征来替代，因此它的特点是task-specific，较之于DNN而言，不利于迁移和泛化。
+
+当然，随着BERT这种大规模语料pretrain模型的出现，DNN能够抽取的特征变得丰富，完全能够捕捉到标记序列间的依赖关系，CRF层也就非必需了
+** BERT中进行NER为什么没有使用CRF
+BERT中进行NER为什么没有使用CRF，我们使用DL进行序列标注问题的时候CRF是必备么？
+
+之所以在序列标注模型中引入CRF，是为了建模标注序列内部的依赖或约束，常见的任务就是NER了。以IOBES标注方案为例，显然一个B标注后面不能紧跟着一个S标注或者O标注。如果直接在神经网络上层用softmax为每个词产生一个标注，那么很可能产出的标注序列是invalid的。所以一种方案就是在得到神经网络上层表示后，作每个标注决策时“偷看”一下前面的标注，也就是套用一个可学习的CRF层来获得整个序列上最大似然的结果（与之相对的是为每个单词独立作决策）。但是标注序列的依赖不一定需要CRF这样显式的模型。如果神经网络的结构够强，CRF可能是不必要的，甚至表现要更差。需要看到的是：如果结构合理，神经网络是具有捕捉标注序列中的依赖的潜能的；CRF中的马尔科夫假设对决策过程是有影响/限制的；Viterbi解码计算复杂度不低，所以CRF训练起来计算量不小。总而言之，如果有结构合理的神经网络，nn+CRF的模式就不是必需。可以参考一下西湖大学张岳老师发在EMNLP2019的这篇Hierarchically-Refined Label Attention Network for Sequence Labeling
+*** 参考文章
+[[https://www.zhihu.com/question/358892919][BERT中进行NER为什么没有使用CRF，我们使用DL进行序列标注问题的时候CRF是必备么？]]
+** 参考文章
+[[https://zhuanlan.zhihu.com/p/268579769][序列标注]]
+[[https://www.cnblogs.com/shona/p/12121473.html][NLP | 序列标注 总结]]

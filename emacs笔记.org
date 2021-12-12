@@ -85,6 +85,8 @@
 
 =replace-string= 命令会将所有匹配都替换，即暴力替换。暴力替换的正则表达式版本是 =replace-regexp=
 
+替换时可用C-q C-j表示换行符
+
 [[rmail:https://www.cnblogs.com/robertzml/archive/2010/03/03/1675870.html][参考文章]]
 ** 标记
 - =C-<spc>= 或 =C-@= 会显示Mark set，可以片选文字

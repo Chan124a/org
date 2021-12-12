@@ -687,6 +687,35 @@ def any(iterable):
     return False
 #+END_SRC
 
+** zip()
+zip() 函数用于将可迭代的对象作为参数，将对象中对应的元素打包成一个个元组，然后返回由这些元组组成的列表。
+
+如果各个迭代器的元素个数不一致，则返回列表长度与最短的对象相同，利用 * 号操作符，可以将元组解压为列表。
+#+BEGIN_EXAMPLE
+zip 方法在 Python 2 和 Python 3 中的不同：在 Python 3.x 中为了减少内存，zip() 返回的是一个对象。如需展示列表，需手动 list() 转换。
+
+如果需要了解 Python3 的应用，可以参考 Python3 zip()。
+#+END_EXAMPLE
+
+zip 语法：
+zip([iterable, ...])
+
+参数说明：
+iterabl -- 一个或多个迭代器;
+*** 实例
+以下实例展示了 zip 的使用方法：
+#+begin_src bash
+>>>a = [1,2,3]
+>>> b = [4,5,6]
+>>> c = [4,5,6,7,8]
+>>> zipped = zip(a,b)     # 打包为元组的列表
+[(1, 4), (2, 5), (3, 6)]
+>>> zip(a,c)              # 元素个数与最短的列表一致
+[(1, 4), (2, 5), (3, 6)]
+>>> zip(*zipped)          # 与 zip 相反，*zipped 可理解为解压，返回二维矩阵式
+[(1, 2, 3), (4, 5, 6)]
+#+END_SRC
+
 * 条件语句
 ** if
 #+BEGIN_SRC python
@@ -1429,6 +1458,21 @@ import sys
 print(sys.path)
 #+END_SRC
 
+导入整个模块时，也可以为模块指定别名。例如如下程序：
+#+begin_src bash
+# 导入sys整个模块，并指定别名为s
+import sys as s
+# 使用s模块别名作为前缀来访问模块中的成员
+print(s.argv[0])
+#+END_SRC
+在导入多个模块的同时，也可以为模块指定别名，例如如下程序：
+#+begin_src bash
+# 导入sys、os两个模块，并为sys指定别名s，为os指定别名o
+import sys as s,os as o
+# 使用模块别名作为前缀来访问模块中的成员
+print(s.argv[0])
+print(o.sep)
+#+END_SRC
 
 *** from ... import
 from ... import 可以直接导入某个模块中的属性和方法
@@ -1436,6 +1480,27 @@ from ... import 可以直接导入某个模块中的属性和方法
 语法如下:
 #+BEGIN_SRC python
 直接导入某个模块中的属性和方法
+#+END_SRC
+导入模块成员时，也可以为成员指定别名，例如如下程序：
+#+begin_src bash
+# 导入sys模块的argv成员，并为其指定别名v
+from sys import argv as v
+# 使用导入成员（并指定别名）的语法，直接使用成员的别名访问
+print(v[0])
+#+END_SRC
+form...import 导入模块成员时，支持一次导入多个成员，一次导入多个模块成员时，也可指定别名，同样使用 as 关键字为成员指定别名,例如如下程序：
+#+begin_src bash
+# 导入sys模块的argv,winver成员
+from sys import argv, winver
+# 使用导入成员的语法，直接使用成员名访问
+print(argv[0])
+print(winver)
+
+# 导入sys模块的argv,winver成员，并为其指定别名v、wv
+from sys import argv as v, winver as wv
+# 使用导入成员（并指定别名）的语法，直接使用成员的别名访问
+print(v[0])
+print(wv)
 #+END_SRC
 
 *** *** from ··· import *
@@ -1447,7 +1512,108 @@ from sys import *
 print(version)
 print(executable)
 #+END_SRC
+需要说明的是，一般不推荐使用“from 模块 import”这种语法导入指定模块内的所有成员，因为它存在潜在的风险。比如同时导入 module1 和 module2 内的所有成员，假如这两个模块内都有一个 foo() 函数，那么当在程序中执行如下代码时：
+#+begin_src bash
+foo()
+#+END_SRC
+上面调用的这个 foo() 函数到底是 module1 模块中的还是 module2 模块中的？因此，这种导入指定模块内所有成员的用法是有风险的。
 
+但如果换成如下两种导入方式：
+#+begin_src bash
+import module1
+import module2 as m2
+#+END_SRC
+接下来要分别调用这两个模块中的 foo() 函数就非常清晰。程序可使用如下代码：
+#+begin_src bash
+#使用模块module1 的模块名作为前缀调用foo()函数
+module1.foo()
+#使用module2 的模块别名作为前缀调用foo()函数
+m2.foo()
+#+END_SRC
+或者使用 from...import 语句也是可以的：
+#+begin_src bash
+#导入module1 中的foo 成员，并指定其别名为foo1
+from module1 import foo as fool
+#导入module2 中的foo 成员，并指定其别名为foo2
+from module2 import foo as foo2
+#+END_SRC
+此时通过别名将 module1 和 module2 两个模块中的 foo 函数很好地进行了区分，接下来分别调用两个模块中 foo() 函数就很清晰：
+#+begin_src bash
+foo1() #调用module1 中的foo()函数
+foo2() #调用module2 中的foo()函数
+#+END_SRC
+
+** 搜索路径
+当你导入一个模块，Python 解析器对模块位置的搜索顺序是：
+1. 当前目录
+2. 如果不在当前目录，Python 则搜索在 shell 变量 PYTHONPATH 下的每个目录。
+3. 如果都找不到，Python会察看默认路径。UNIX下，默认路径一般为/usr/local/lib/python/。
+
+模块搜索路径存储在 system 模块的 sys.path 变量中。变量里包含当前目录，PYTHONPATH和由安装过程决定的默认目录。
+** 关于包
+包是一个分层次的文件目录结构，它定义了一个由模块及子包，和子包下的子包等组成的 Python 的应用环境。
+
+简单来说，包就是文件夹，但该文件夹下必须存在 __init__.py 文件, 该文件的内容可以为空。__init__.py 用于标识当前文件夹是一个包。
+
+考虑一个在 package_runoob 目录下的 runoob1.py、runoob2.py、__init__.py 文件，test.py 为测试调用包的代码，目录结构如下：
+#+BEGIN_EXAMPLE
+test.py
+package_runoob
+|-- __init__.py
+|-- runoob1.py
+|-- runoob2.py
+#+END_EXAMPLE
+源代码如下：
+
+package_runoob/runoob1.py
+#+begin_src bash
+#!/usr/bin/python
+# -*- coding: UTF-8 -*-
+ 
+def runoob1():
+   print "I'm in runoob1"
+#+END_SRC
+package_runoob/runoob2.py
+#+begin_src bash
+#!/usr/bin/python
+# -*- coding: UTF-8 -*-
+ 
+def runoob2():
+   print "I'm in runoob2"
+#+END_SRC
+现在，在 package_runoob 目录下创建 __init__.py：
+package_runoob/__init__.py
+#+begin_src bash
+#!/usr/bin/python
+# -*- coding: UTF-8 -*-
+ 
+if __name__ == '__main__':
+    print '作为主程序运行'
+else:
+    print 'package_runoob 初始化'
+#+END_SRC
+然后我们在 package_runoob 同级目录下创建 test.py 来调用 package_runoob 包
+
+test.py
+#+begin_src bash
+#!/usr/bin/python
+# -*- coding: UTF-8 -*-
+ 
+# 导入 Phone 包
+from package_runoob.runoob1 import runoob1
+from package_runoob.runoob2 import runoob2
+ 
+runoob1()
+runoob2()
+#+END_SRC
+以上实例输出结果：
+#+BEGIN_EXAMPLE
+package_runoob 初始化
+I'm in runoob1
+I'm in runoob2
+#+END_EXAMPLE
+
+如上，为了举例，我们只在每个文件里放置了一个函数，但其实你可以放置许多函数。你也可以在这些文件里定义Python的类，然后为这些类建一个包。
 * Python中的with-as用法
 ** 介绍
 有一些任务，可能事先需要设置，事后做清理工作。对于这种场景，Python的with语句提供了一种非常方便的处理方式。一个很好的例子是文件处理，你需要获取一个文件句柄，从文件中读取数据，然后关闭文件句柄。
@@ -2192,6 +2358,20 @@ dir()
 #+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-10-16_21-13-20.png @ 2021-10-16 21:13:25
 [[file:%E6%9F%A5%E7%9C%8B%E5%BD%93%E5%89%8D%E5%AF%BC%E5%85%A5(%E5%BC%95%E5%85%A5)%E6%A8%A1%E5%9D%97%E4%BF%A1%E6%81%AF/2021-10-16_21-13-25_Snipaste_2021-10-16_21-13-20.png]]
 
+* 使用c语言代码
+python中有三种方法可以调用c函数：
+1. ctypes
+2. SWIG
+3. Python/C API
+** CTypes
+** SWIG
+** Python/C API
+这是最常用的方法。
+
+This method requires your C code to be specifically written for interfacing with Python code. All Python objects are represented as a PyObject struct and the Python.h header file provides various functions to manipulate it. For example if the PyObject is also a PyListType (basically a list), then we can use the PyList_Size() function on the struct to get the length of the list. This is equivalent to calling len(list) in python. Most of the basic functions/opertions that are there for native Python objects are made available in C via the Python.h header.
+
+** 参考文章
+[[https://book.pythontips.com/en/latest/python_c_extension.html][22. Python C extensions]]
 
 * Optional和带默认值的参数
 ** 带默认值的参数
@@ -5324,6 +5504,85 @@ at /Users/soumith/b101_2/2019_02_08/wheel_build_dirs/wheel_3.6/pytorch/aten/src/
 #+END_EXAMPLE
 
 [[https://zhuanlan.zhihu.com/p/64551412][参考文章]]
+** 权值初始化
+*** Xavier均匀分布
+torch.nn.init.xavier_uniform_(tensor, gain=1)
+
+xavier初始化方法中服从均匀分布U(−a,a) ，分布的参数a = gain * sqrt(6/fan_in+fan_out)，
+
+这里有一个gain，增益的大小是依据激活函数类型来设定
+
+eg：nn.init.xavier_uniform_(w, gain=nn.init.calculate_gain('relu'))
+
+PS：上述初始化方法，也称为Glorot initialization
+*** Xavier正态分布
+torch.nn.init.xavier_normal_(tensor, gain=1)
+
+xavier初始化方法中服从正态分布，
+
+mean=0,std = gain * sqrt(2/fan_in + fan_out)
+
+
+
+kaiming初始化方法，论文在《 Delving deep into rectifiers: Surpassing human-level performance on ImageNet classification》，公式推导同样从“方差一致性”出法，kaiming是针对xavier初始化方法在relu这一类激活函数表现不佳而提出的改进，详细可以参看论文。
+*** kaiming均匀分布
+torch.nn.init.kaiming_uniform_(tensor, a=0, mode='fan_in', nonlinearity='leaky_relu')
+
+此为均匀分布，U～（-bound, bound）, bound = sqrt(6/(1+a^2)*fan_in)
+
+其中，a为激活函数的负半轴的斜率，relu是0
+
+mode- 可选为fan_in 或 fan_out, fan_in使正向传播时，方差一致; fan_out使反向传播时，方差一致
+
+nonlinearity- 可选 relu 和 leaky_relu ，默认值为 。 leaky_relu
+
+nn.init.kaiming_uniform_(w, mode='fan_in', nonlinearity='relu')
+*** kaiming正态分布
+torch.nn.init.kaiming_normal_(tensor, a=0, mode='fan_in', nonlinearity='leaky_relu')
+
+此为0均值的正态分布，N～ (0,std)，其中std = sqrt(2/(1+a^2)*fan_in)
+
+其中，a为激活函数的负半轴的斜率，relu是0
+
+mode- 可选为fan_in 或 fan_out, fan_in使正向传播时，方差一致;fan_out使反向传播时，方差一致
+
+nonlinearity- 可选 relu 和 leaky_relu ，默认值为 。 leaky_relu
+
+nn.init.kaiming_normal_(w, mode='fan_out', nonlinearity='relu')
+
+2.其他
+*** 均匀分布初始化
+torch.nn.init.uniform_(tensor, a=0, b=1)
+
+使值服从均匀分布U(a,b)
+*** 正态分布初始化
+torch.nn.init.normal_(tensor, mean=0, std=1)
+
+使值服从正态分布N(mean, std)，默认值为0，1
+*** 常数初始化
+torch.nn.init.constant_(tensor, val)
+
+使值为常数val nn.init.constant_(w, 0.3)
+*** 单位矩阵初始化
+torch.nn.init.eye_(tensor)
+
+将二维tensor初始化为单位矩阵（the identity matrix）
+*** 正交初始化
+torch.nn.init.orthogonal_(tensor, gain=1)
+
+使得tensor是正交的，论文:Exact solutions to the nonlinear dynamics of learning in deep linear neural networks” - Saxe, A. et al. (2013)
+*** 稀疏初始化
+torch.nn.init.sparse_(tensor, sparsity, std=0.01)
+
+从正态分布N～（0. std）中进行稀疏化，使每一个column有一部分为0
+
+sparsity- 每一个column稀疏的比例，即为0的比例
+
+nn.init.sparse_(w, sparsity=0.1)
+*** 计算增益
+torch.nn.init.calculate_gain(nonlinearity, param=None)
+*** 参考文章
+[[https://zhuanlan.zhihu.com/p/53712833][PyTorch 学习笔记（四）：权值初始化的十种方法]]
 * torchvision
 torchvision包是服务于pytorch深度学习框架的,用来生成图片,视频数据集,和一些流行的模型类和预训练模型.
 [[https://pytorch-cn.readthedocs.io/zh/latest/torchvision/torchvision/][中文文档]]、[[https://pytorch.org/docs/stable/torchvision/index.html][英文文档]]
@@ -5532,6 +5791,16 @@ print os.path.abspath('test.txt') #获取当前目录文件下的工作目录路
 print os.path.abspath('..') #获取当前工作的父目录 ！注意是父目录路径
 print os.path.abspath(os.curdir) #获取当前工作目录路径
 #+END_SRC
+*** expanduser(path)
+在linux下面，一般如果你自己使用系统的时候，是可以用~来代表＂/home/你的名字/＂这个路径的．但是python是不认识~这个符号的，如果你写路径的时候直接写＂~/balabala＂，程序是跑不动的．所以如果你要用~，你就应该用这个os.path.expanduser把~展开．
+
+在 Unix 和 Windows 上，将参数中开头部分的 ~ 或 ~user 替换为当前 用户 的家目录并返回。
+
+在 Unix 上，开头的 ~ 会被环境变量 HOME 代替，如果变量未设置，则通过内置模块 pwd 在 password 目录中查找当前用户的主目录。以 ~user 开头则直接在 password 目录中查找。
+
+在 Windows 上，如果 USERPROFILE 已设置将会被使用，否则 HOMEPATH 和 HOMEDRIVE 将被组合起来使用。 初始的 ~user 会通过检查当前用户的家目录中匹配 USERNAME 的最后一部分目录名并执行替换来处理。
+
+如果展开路径失败，或者路径不是以波浪号开头，则路径将保持不变。
 ** 目录操作
 *** listdir(path='.')
 返回一个列表。列表为给定目录下所有文件和子目录.列表是任意顺序的。它不包括特殊条目’.‘ 和’..‘，即使它们存在于目录中。
