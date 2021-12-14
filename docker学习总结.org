@@ -11,6 +11,11 @@ docker exec -u root -t -i cpd /bin/bash #用于以root身份进入容器
 #需要注意的是，在容器内以root身份安装软件将会导致宿主机也安装软件
 
 docker attach 容器名 #用于进入容器
+
+docker search 镜像名 #查找镜像
+
+docker rm 容器名 #删除容器
+docker rmi 镜像名 # 删除镜像
 #+END_SRC
 * 基本概念
 ** 镜像
@@ -99,8 +104,6 @@ $ docker rm $(docker ps -a -q -f status=exited)   #-q表示只返回IDs,-f表示
 #+END_SRC
 * docker container prune
 删除所有已停止的容器
-* docker rmi
-删除镜像
 * Docker 退出容器但不关闭当前容器
 方法一：如果要正常退出不关闭容器，请按Ctrl+P+Q进行退出容器
 

@@ -486,6 +486,8 @@ aria2c --max-download-limit=300K -s10 -x10 'http://xx.com/xx'
 
 aria2c --max-overall-download-limit=300k -s10 -x10 'http://xx.com/xx'
 这些基本都是常用的几个命令，更多的可以使用man aria2c和aria2c -h查看。
+* Axel
+这是wget的出色替代者，是一款轻量级下载实用工具。它实际上是个加速器，因为它打开了多路http连接，可下载独立文件片段，因而文件下载起来更快速。
 * bash脚本
 ** 判断表达式
 *** 文件判断
@@ -1030,6 +1032,68 @@ declare -x USER=“root“
 declare -x XDG_SESSION_COOKIE=“93b5d3d03e032c0cf892a4474bebda9f-1273864738.954257-340206484“
 #+END_SRC
 
+* emacs 安装
+源码下载地址：http://mirrors.ocf.berkeley.edu/gnu/emacs/
+
+编译安装：
+#+begin_src bash
+./configure --prefix=/opt/emacs/
+#+END_SRC
+如果出现以下错误：
+#+begin_src bash
+checking for libXaw... configure: error: No X toolkit could be found.
+If you are sure you want Emacs compiled without an X toolkit, pass
+  --with-x-toolkit=no
+to configure.  Otherwise, install the development libraries for the toolkit
+that you want to use (e.g. Gtk+) and re-run configure.
+#+END_SRC
+解决方案：
+
+安装依赖：
+#+begin_src bash
+sudo apt-get install build-essential texinfo libx11-dev libxpm-dev libjpeg-dev libpng-dev libgif-dev libtiff-dev libgtk2.0-dev libgtk-3-dev libncurses-dev libxpm-dev automake autoconf
+#+END_SRC
+如果出现以下错误：
+#+begin_src bash
+configure: error: The following required libraries were not found:
+     gnutls
+Maybe some development libraries/packages are missing?
+If you don't want to link with them give
+     --with-gnutls=no
+as options to configure
+#+END_SRC
+解决方案：
+#+begin_src bash
+sudo apt-get install gnutls-dev
+# 或者
+./configure --with-gnutls=ifavailable
+#+END_SRC
+如果出现以下警告：
+#+begin_src bash
+configure: WARNING: This configuration installs a 'movemail' program
+that does not retrieve POP3 email.  By default, Emacs 25 and earlier
+installed a 'movemail' program that retrieved POP3 email via only
+insecure channels, a practice that is no longer recommended but that
+you can continue to support by using './configure --with-pop'.
+configure: You might want to install GNU Mailutils
+<https://mailutils.org> and use './configure --with-mailutils'.
+#+END_SRC
+解决方案：
+#+begin_src bash
+./configure --prefix=/opt/emacs/ --with-mailutils --with-pop
+#+END_SRC
+最后：
+#+begin_src bash
+make && make install
+#+END_SRC
+添加软连接
+#+begin_src bash
+ln -s /opt/emacs/bin/emacs /usr/bin/emacs
+#+END_SRC
+
+** 参考文章
+[[https://www.cnblogs.com/felixwang2/p/10281092.html][emacs源码安装]]
+[[https://stackoverflow.com/questions/52722096/build-emacs-and-gnutls-not-found/52722866][build emacs and gnutls not found]]
 * gcc、make、cmake的关系和区别
 1.gcc是GNU Compiler Collection（就是GNU编译器套件），也可以简单认为是编译器，它可以编译很多种编程语言（括C、C++、Objective-C、Fortran、Java等等）。
 
@@ -5779,6 +5843,9 @@ My Linux                        #提示用户输入数据
 My Linux                        #输出数据，进行输出反馈  
 #+END_EXAMPLE
 此时，可以分别打开文件"file1"和"file2"，查看其内容是否均是"My Linux"即可判断指令"tee"是否执行成功。
+* tar命令
+** gz
+tar -zxvf xxx
 * Vmware虚拟机
 NAT模式下，多个虚拟机都是连接到同一个网关地址
 ** ubuntu终端放大缩小
@@ -6115,6 +6182,18 @@ japan.txt
 hello beijing
 hello tokyo
 #+END_SRC
+* xmodmap
+First, generate the current keycode map:
+
+xmodmap -pke > .Xmodmap
+
+To detect what the keycode is for specific key, use command:
+$ xev -event keyboard
+
+Now save the file, and activate the key map:
+$ xmodmap .Xmodmap
+
+[[https://dev.to/0xbf/remap-keys-in-the-keyboard-in-ubuntu-5a36][Remap keys in the keyboard in Ubuntu]]
 * zsh
 ** 安装zsh
 如果你用 Redhat Linux，执行：sudo yum install zsh
@@ -6764,7 +6843,6 @@ unset  http_proxy
 unset https_proxy
 #+END_SRC
 
-
 ** 方法二 ：
 这个办法的好处是把代理服务器永久保存了，下次就可以直接用了
 
@@ -6954,3 +7032,135 @@ Dos、Windows 格式的文件，用 0D 0A (CR+LF)作为换行符，而Unix 的�
 #+begin_src bash
 $ sed -e‘s/^M/\n/g’upgrade.sh
 #+END_SRC
+* 设置X11转发
+** 服务器（X client）设置
+首先要确保服务器的sshd打开X11转发功能
+
+打开 /etc/sshd_config 确保下面的配置设置正确：
+#+begin_src bash
+X11Forwarding yes
+X11DisplayOffset 10
+X11UseLocalhost no
+#+END_SRC
+然后重启ssh服务：
+#+begin_src bash
+# If you are using CentOS 7, you should use
+systemctl restart sshd.service
+# If you are on CentOS 6, you should use the following command instead:
+service sshd restart
+#+END_SRC
+** X server设置
+*** 安装X server
+**** windows
+安装vcxsrv
+#+BEGIN_EXAMPLE
+In order to use X11 forwarding, you also need to install a X server on your Windows computer. You can choose to install xming or vcxsrv. Vcxsrv is better since it is updated frequently and is free, while latest version of xming requires a license. 
+#+END_EXAMPLE
+之后打开xlaunch启动vcxsrv
+
+#+DOWNLOADED: screenshot @ 2021-12-12 23:00:43
+[[file:images/linux%E7%AC%94%E8%AE%B0/%E8%AE%BE%E7%BD%AEX11%E8%BD%AC%E5%8F%91/2021-12-12_23-00-43_screenshot.png]]
+*** 配置ssh
+设置变量DISPLAY：
+#+begin_src bash
+export DISPLAY=localhost:0.0
+#+END_SRC
+可以将该设置添加到用户目录下的.bash_profile文件里，这样以后每次连接服务器就会自动设置好该变量。
+
+使用带-X选项的ssh连接：
+#+begin_src bash
+# -v选项可以显示连接的详细信息
+ssh -X -v <user>@<server_addresss>
+#+END_SRC
+这里可能会出现下面的警告：
+#+BEGIN_EXAMPLE
+Warning: untrusted X11 forwarding setup failed: xauth key data not generated
+#+END_EXAMPLE
+如果这时候打开GUI程序，比如xclock，将会出现下面的报错：
+#+BEGIN_EXAMPLE
+Error: Can’t open display:
+#+END_EXAMPLE
+如果出现该错误，则选择用带-Y选项的ssh连接：
+#+begin_src bash
+ssh -Y -v <user>@<server_addresss>
+#+END_SRC
+运行下面的命令：
+#+begin_src bash
+xclock &
+#+END_SRC
+可以看到下面的图像：
+#+DOWNLOADED: screenshot @ 2021-12-12 23:07:10
+[[file:images/linux%E7%AC%94%E8%AE%B0/%E8%AE%BE%E7%BD%AEX11%E8%BD%AC%E5%8F%91/2021-12-12_23-07-10_screenshot.png]]
+
+** termux设置方法
+先安装VNC Viewer
+*** Enabling the X11 Repository
+X11 packages are available in a separate APT repository. You can enable it by running the following command:
+#+begin_src bash
+pkg install x11-repo
+#+END_SRC
+It will automatically add appropriate sources.list file and PGP key.
+
+To disable this repository, you need to uninstall package x11-repo.
+*** Setting up VNC
+Server
+If you decided to use VNC for graphical output, follow these instructions for properly setting up VNC server.
+
+1. Install package `tigervnc`:
+#+begin_src bash
+pkg install tigervnc
+#+END_SRC
+2. After installation, execute this:
+#+begin_src bash
+vncserver -localhost
+#+END_SRC
+At first time, you will be prompted for setting up passwords:
+
+You will require a password to access your desktops.
+#+begin_src bash
+Password:
+Verify:
+Would you like to enter a view-only password (y/n)? n
+#+END_SRC
+Note that passwords are not visible when you are typing them and maximal password length is 8 characters.
+
+3. If everything is okay, you will see this message:
+#+begin_src bash
+New 'localhost:1 ()' desktop is localhost:1
+
+Creating default startup script /data/data/com.termux/files/home/.vnc/xstartup
+Creating default config /data/data/com.termux/files/home/.vnc/config
+Starting applications specified in /data/data/com.termux/files/home/.vnc/xstartup
+Log file is /data/data/com.termux/files/home/.vnc/localhost:1.log
+#+END_SRC
+It means that X (vnc) server is available on display 'localhost:1'.
+
+4. Finally, to make programs do graphical output to the display 'localhost:1', set environment variable like shown here (yes, without specifying 'localhost'):
+#+begin_src bash
+export DISPLAY=":1"
+#+END_SRC
+You may even put this variable to your bashrc or profile so you don't have to always set it manually unless display address will be changed.
+*** Client
+Here will be assumed that you use this Android VNC client: VNC Viewer (developed by RealVNC Limited).
+
+1. Determine port number on which VNC server listens. It can be calculated like this: 5900 + {display number}. So for display 'localhost:1' the port will be 5901.
+
+2. Now open the VNC Viewer application and create a new connection with the following information (assuming that VNC port is 5901):
+#+BEGIN_EXAMPLE
+Address:
+127.0.0.1:5901
+
+Name:
+Termux
+#+END_EXAMPLE
+
+#+DOWNLOADED: screenshot @ 2021-12-12 23:11:40
+[[file:images/linux%E7%AC%94%E8%AE%B0/%E8%AE%BE%E7%BD%AEX11%E8%BD%AC%E5%8F%91/2021-12-12_23-11-40_screenshot.png]]
+
+If you are using VNC client on a computer using the same network as the phone does, make sure you correctly start a VNC session and know the IP address of the device.
+
+3. Now launch it. You will be prompted for password that you entered on first launch of 'vncserver'. Depending on packages you installed, you may see either entirely black screen or terminal prompt (only if 'aterm' is installed).
+*** 参考文章
+[[https://wiki.termux.com/wiki/Graphical_Environment#Enabling_the_X11_Repository][Graphical Environment]]
+** 参考文章
+[[https://jdhao.github.io/2018/03/02/Windows-connect-server-x11-with-gitbash/][Set up X11 Forwarding with Git for Windows (git-bash)]]

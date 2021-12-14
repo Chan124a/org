@@ -145,7 +145,78 @@ Baghdad  NNP   I-NP  I-LOC
 #+END_EXAMPLE
 这是其训练集中某个部分。
 
-通过其官网介绍，可知改数据集第一例是单词，第二列是词性，第三列是语法快，第四列是实体标签。在NER任务中，只关心第一列和第四列。实体类别标注采用BIO标注法，前面博客介绍这种标注法。
+通过其官网介绍，可知改数据集第一例是单词，第二列是词性，第三列是语法快，第四列是实体标签。在NER任务中，只关心第一列和第四列。实体类别标注采用BIO标注法，
+
+该数据的加载方式在transformers库中进行了封装，我们可以通过以下语句进行数据加载：
+#+begin_src bash
+from datasets import load_dataset
+datasets = load_dataset("conll2003")
+#+END_SRC
+给定一个数据切分的key（train、validation或者test）和下标即可查看数据。
+#+begin_src bash
+datasets["train"][0]
+#{'chunk_tags': [11, 21, 11, 12, 21, 22, 11, 12, 0],
+# 'id': '0',
+# 'ner_tags': [3, 0, 7, 0, 0, 0, 7, 0, 0],
+# 'pos_tags': [22, 42, 16, 21, 35, 37, 16, 21, 7],
+# 'tokens': ['EU',
+#  'rejects',
+#  'German',
+#  'call',
+#  'to',
+#  'boycott',
+#  'British',
+#  'lamb',
+#  '.']}
+#+END_SRC
+所有的数据标签都已经被编码成了整数，可以直接被预训练transformer模型使用。这些整数的编码所对应的实际类别储存在features中。
+#+begin_src bash
+datasets["train"].features[f"ner_tags"]
+#Sequence(feature=ClassLabel(num_classes=9, names=['O', 'B-PER', 'I-PER', 'B-ORG', 'I-ORG', 'B-LOC', 'I-LOC', 'B-MISC', 'I-MISC'], names_file=None, id=None), length=-1, id=None)
+#+END_SRC
+以NER任务为例，0对应的标签类别是”O“， 1对应的是”B-PER“等等。
+
+”O“表示没有特别实体（no special entity/other）。本例包含4种有价值实体类别分别是（PER、ORG、LOC，MISC），每一种实体类别又分别有B-（实体开始的token）前缀和I-（实体中间的token）前缀。
+- PER for person
+- ORG for organization
+- LOC for location
+- MISC for miscellaneous
+#+begin_src bash
+label_list = datasets["train"].features[f"{task}_tags"].feature.names
+label_list
+#['O', 'B-PER', 'I-PER', 'B-ORG', 'I-ORG', 'B-LOC', 'I-LOC', 'B-MISC', 'I-MISC']
+#+END_SRC
+下面的函数将从数据集里随机选择几个例子进行展示：
+#+begin_src bash
+from datasets import ClassLabel, Sequence
+import random
+import pandas as pd
+from IPython.display import display, HTML
+
+def show_random_elements(dataset, num_examples=4):
+    assert num_examples <= len(dataset), "Can't pick more elements than there are in the dataset."
+    picks = []
+    for _ in range(num_examples):
+        pick = random.randint(0, len(dataset)-1)
+        while pick in picks:
+            pick = random.randint(0, len(dataset)-1)
+        picks.append(pick)
+    
+    df = pd.DataFrame(dataset[picks])
+    for column, typ in dataset.features.items():
+        if isinstance(typ, ClassLabel):
+            df[column] = df[column].transform(lambda i: typ.names[i])
+        elif isinstance(typ, Sequence) and isinstance(typ.feature, ClassLabel):
+            df[column] = df[column].transform(lambda x: [typ.feature.names[i] for i in x])
+    display(HTML(df.to_html()))
+#+END_SRC
+#+begin_src bash
+show_random_elements(datasets["train"])
+#+END_SRC
+
+#+DOWNLOADED: screenshot @ 2021-12-13 15:06:03
+[[file:images/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/%E6%95%B0%E6%8D%AE%E9%9B%86/2021-12-13_15-06-03_screenshot.png]]
+
 
 *** 参考文章
 [[https://blog.csdn.net/Elvira521yan/article/details/118028020][【NLP公开数据集】 CoNLL-2003数据集]]
@@ -273,3 +344,4 @@ BERT中进行NER为什么没有使用CRF，我们使用DL进行序列标注问�
 ** 参考文章
 [[https://zhuanlan.zhihu.com/p/268579769][序列标注]]
 [[https://www.cnblogs.com/shona/p/12121473.html][NLP | 序列标注 总结]]
+* fp16
