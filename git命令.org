@@ -1034,6 +1034,10 @@ $ git init [project-name]
 
 # 下载一个项目和它的整个代码历史
 $ git clone [url]
+
+# 更改默认远程仓库名为name
+git clone -o <name> [url]
+
 #+END_SRC
 ** 配置
 Git的设置文件为.gitconfig，它可以在用户主目录下（全局配置），也可以在项目目录下（项目配置）。
@@ -1172,6 +1176,15 @@ $ git tag -d [tag]
 
 # 删除远程tag
 $ git push origin :refs/tags/[tagName]
+
+# 查看最新的commit
+git show
+
+# 查看指定commit hashID 的所有修改：
+git show commitId
+
+#查看某次commit中具体某个文件的修改：
+git show commitId fileName
 
 # 查看tag信息
 $ git show [tag]
@@ -1465,6 +1478,39 @@ http://mysoft.6h5.cn/win/rsync.64.zip
 下载完成后，用7Zip解压两次，找到rsync.exe，把这个文件拷贝到Git Bash目录C:\Program Files\Git\usr\bin即可在Git Bash上使用了。
 **** 参考文章 
 [[https://www.jianshu.com/p/e3f17590c7d4][如何在Windows环境的Git Bash下使用rsync？]]
+*** zsh
+在下面的网站可以下载到最新的 zsh 安装包：
+https://packages.msys2.org/package/zsh?repo=msys&variant=x86_64
+
+
+#+DOWNLOADED: screenshot @ 2021-12-21 22:53:09
+[[file:images/git%E5%91%BD%E4%BB%A4/git_bash_%E5%91%BD%E4%BB%A4%E6%8B%93%E5%B1%95/2021-12-21_22-53-09_screenshot.png]]
+下载完成后，如果格式为zst，可以使用软件peazip解压
+
+解压后，可以看到文件如下。
+#+DOWNLOADED: screenshot @ 2021-12-21 23:01:28
+[[file:images/git%E5%91%BD%E4%BB%A4/git_bash_%E5%91%BD%E4%BB%A4%E6%8B%93%E5%B1%95/2021-12-21_23-01-28_screenshot.png]]
+将这些文件直接解压到 Git 的安装目录下，与之前的文件进行合并，可以理解为把 zsh 当作 git bash 的一个补充安装包。
+
+完成后的效果如下图所示。
+#+DOWNLOADED: screenshot @ 2021-12-21 23:02:46
+[[file:images/git%E5%91%BD%E4%BB%A4/git_bash_%E5%91%BD%E4%BB%A4%E6%8B%93%E5%B1%95/2021-12-21_23-02-46_screenshot.png]]
+
+将/usr/bin/下面的zsh删掉（zsh.exe 文件大小为0，感觉可能是个链接/快捷方式啥的），然后把/usr/bin/下面的 zsh-5.8.exe 更名为 zsh.exe。
+
+在git bash里输入zsh即可启动zsh
+**** 配置 zsh 为 bash 默认终端
+编辑 ~/.bashrc，或者是 D:\Program Files\Git\etc\bash.bashrc，加入下面的几行。
+#+begin_src bash
+# Launch Zsh
+if [ -t 1 ]; then
+exec zsh
+fi
+#+END_SRC
+
+而后重启 git bash 即可自动以 zsh 启动。
+**** 参考文章
+[[https://miaotony.xyz/2020/12/13/Server_Terminal_gitbash_zsh/][Install Terminal + git-bash + zsh + oh-my-zsh on Windows 10]]
 ** 参考文章
 [[https://mp.weixin.qq.com/s?__biz=MjM5NTY1MjY0MQ==&mid=2650746018&idx=2&sn=2e0a1aed5a680c379bb052f34731bd2d&chksm=befeb9ec898930fac4c36f321cc16abce7da10b4b8a41dd245ff53c1065bb5e01131fa085ebe&scene=21#wechat_redirect][三招教你轻松扩展 git bash 命令]]
 
@@ -1516,7 +1562,50 @@ git lfs install
 ** 参考文章
 [[https://www.jianshu.com/p/493b81544f80][Git LFS的使用]]
 
+* git clone 远程目录
+主要是利用下面这条命令：
+#+begin_src bash
+ourunix@ubuntu:~/test$ git clone ssh://你的用户名@你的IP/home/～/testgit/.git
+#+END_SRC
 
+
+首先, 如果你的ssh没有安装的话，要安装ssh服务端。ubuntu是很简单
+sudo apt-get install openssh-server
+1，建立你的git 目录。
+
+ourunix@ubuntu:~$ mkdir testgit
+ourunix@ubuntu:~$ cd testgit/
+2,建立你的git仓库。
+ourunix@ubuntu:~/testgit$ git init
+Initialized empty Git repository in /home/wlp/testgit/.git/
+3，添加你的需要的项目初始文件，这里我就只添加一张文档了。
+ourunix@ubuntu:~/testgit$ echo "hello,git" > sayhi.txt
+4，跟踪及提交到仓库。
+ourunix@ubuntu:~/testgit$ git add sayhi.txt
+ourunix@ubuntu:~/testgit$ git commit -m "2011.4.13" sayhi.txt
+[master (root-commit) b87b535] 2011.4.13
+1 files changed, 1 insertions(+), 0 deletions(-)
+create mode 100644 sayhi.txt
+5.在本地的git仓库"添加一个远程仓库",当然这个远程仓库还是你自己的这个目录。
+ourunix@ubuntu:~/testgit$ git remote add origin ssh://你的用户名@你的IP/~/testgit/.git
+这时候,本地的 .git/config 应该会改变
+6.将本地的 master分支 ，跟踪到远程的分支
+ourunix@ubuntu:~/testgit$ git push origin master
+7,显示远程信息
+ourunix@ubuntu:~/testgit$git remote show origin
+8,利用其他局域网的电脑测试你的仓库
+ourunix@ubuntu:~/test$ git clone ssh://你的用户名@你的IP/home/～/testgit/.git
+Initialized empty Git repository in /home/wlp/test/git/.git/
+xxx‘s password:
+remote: Counting objects: 3, done.
+Receiving objects: 100% (3/3), done.
+remote: Total 3 (delta 0), reused 0 (delta 0)
+
+9，大功告成
+10. 修改远程分支地址
+git remote set-url origin remote_git_address
+
+http://blog.chinaunix.net/uid-22028680-id-3040436.html
 * 问题集锦
 ** warning: LF will be replaced by CRLF in ** 的原因及解决办法
 今天在使用git add 命令的时候，弹出了一个警告 warning: LF will be replaced by CRLF in ******（具体的一个文件）

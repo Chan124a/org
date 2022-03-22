@@ -14,3 +14,94 @@ CTEX 套装和TEX Live 都已经预装了DVI 文件和PostScript 文件的阅读
 * 数学公式
 ** 插入方式
 行内
+* newcommand 自定义命令
+** Simple commands
+#+BEGIN_SRC latex
+\newcommand{\R}{\mathbb{R}}
+
+The set of real numbers are usually represented 
+by a blackboard bold capital r: \( \R \).
+#+END_SRC
+
+#+DOWNLOADED: screenshot @ 2022-03-01 20:10:54
+[[file:images/latex%E7%AC%94%E8%AE%B0/newcommand_%E8%87%AA%E5%AE%9A%E4%B9%89%E5%91%BD%E4%BB%A4/2022-03-01_20-10-54_screenshot.png]]
+The statement \newcommand{\R}{\mathbb{R}} has two parameters that define a new command
+
+\R
+This is the name of the new command.
+
+\mathbb{R}
+This is what the new command does. In this case the letter R will be written in blackboard boldface style. (to use \mathbb the package amssymb is needed)
+
+After the command definition you can see how the command is used in the text. Even tough in this example the new command is defined right before the paragraph where it's used, good practice is to put all your user-defined commands in the preamble of your document.
+** Commands with parameters
+It is also possible to create new commands that accept some parameters.
+#+BEGIN_SRC latex
+\newcommand{\bb}[1]{\mathbb{#1}}
+
+Other numerical systems have similar notations. 
+The complex numbers \( \bb{C} \), the rational 
+numbers \( \bb{Q} \) and the integer numbers \( \bb{Z} \).
+#+END_SRC
+
+
+#+DOWNLOADED: screenshot @ 2022-03-01 20:12:15
+[[file:images/latex%E7%AC%94%E8%AE%B0/newcommand_%E8%87%AA%E5%AE%9A%E4%B9%89%E5%91%BD%E4%BB%A4/2022-03-01_20-12-15_screenshot.png]]
+
+The line \newcommand{\bb}[1]{\mathbb{#1}} defines a new command that takes one parameter.
+
+\bb
+This is the name of the new command.
+
+[1]
+The number of parameters the new command will take.
+
+\mathbb{#1}
+This is what the command actually does. In this case the parameter, referenced as #1, will be written using blackboard boldface characters. If the defined new command needs more than one parameter, you can refer each parameter by #1, #2 and so on, up to 9 parameters are supported.
+** Commands with optional parameters
+User-defined commands are even more flexible than the examples shown above. You can define commands that take optional parameters:
+#+BEGIN_SRC latex
+\newcommand{\plusbinomial}[3][2]{(#2 + #3)^#1}
+
+To save some time when writing too many expressions 
+with exponents is by defining a new command to make simpler:
+
+\[ \plusbinomial{x}{y} \]
+
+And even the exponent can be changed
+
+\[ \plusbinomial[4]{y}{y} \]
+#+END_SRC
+
+
+#+DOWNLOADED: screenshot @ 2022-03-01 20:13:52
+[[file:images/latex%E7%AC%94%E8%AE%B0/newcommand_%E8%87%AA%E5%AE%9A%E4%B9%89%E5%91%BD%E4%BB%A4/2022-03-01_20-13-52_screenshot.png]]
+
+Let's analyse the syntax of the line \newcommand{\plusbinomial}[3][2]{(#2 + #3)^#1}:
+
+\plusbinomial
+This is the name of the new command.
+
+[3]
+The number of parameters the command will take, in this case 3.
+
+[2]
+Is the default value for the first parameter. This is what makes the first parameter optional, if not passed it will use this default value.
+
+(#2 + #3)^#1
+This is what the command does. In this case it will put the second and third parameters in a "binomial format" to the power represented by the first parameter.
+** Overwriting existing commands
+If you define a command that has the same name as an already existing LATEX command you will see an error message in the compilation of your document and the command you defined will not work. If you really want to override an existing command this can be accomplished by \renewcommand:
+#+BEGIN_SRC latex
+\renewcommand{\S}{\mathbb{S}}
+
+The Riemann sphere (the complex numbers plus $\infty$) is 
+sometimes represented by \( \S \)
+#+END_SRC
+
+#+DOWNLOADED: screenshot @ 2022-03-01 20:15:19
+[[file:images/latex%E7%AC%94%E8%AE%B0/newcommand_%E8%87%AA%E5%AE%9A%E4%B9%89%E5%91%BD%E4%BB%A4/2022-03-01_20-15-19_screenshot.png]]
+
+In this example the command \S (see the example in the commands section) is overwritten to print a blackboard bold S.
+
+\renewcommand uses the same syntax as \newcommand.

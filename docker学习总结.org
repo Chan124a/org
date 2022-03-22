@@ -16,6 +16,11 @@ docker search 镜像名 #查找镜像
 
 docker rm 容器名 #删除容器
 docker rmi 镜像名 # 删除镜像
+
+# 从容器拷贝文件到宿主机
+docker cp mycontainer:/opt/testnew/file.txt /opt/test/
+# 从宿主机拷贝文件到容器
+docker cp /opt/test/file.txt mycontainer:/opt/testnew/
 #+END_SRC
 * 基本概念
 ** 镜像
@@ -129,6 +134,9 @@ docker build -t getting-started .
 #+END_SRC
 * docker exec
 docker exec <container-id> cat /data.txt
+
+用root进入容器：
+docker exec -it --user root <container id> /bin/bash
 * SSH远程登录连接docker容器
 环境：
 - 计算机A为本机计算机；
@@ -340,6 +348,17 @@ Import to docker via pipe and STDIN.
  sudo tar -c . | docker import --change "ENV DEBUG=true" - exampleimagedir
 #+END_SRC
 Note the sudo in this example – you must preserve the ownership of the files (especially root ownership) during the archiving with tar. If you are not root (or the sudo command) when you tar, then the ownerships might not get preserved.
+** docker save与docker export的区别
+docker save和docker export的区别:
+- docker save保存的是镜像（image），docker export保存的是容器（container）；
+- docker load用来载入镜像包，docker import用来载入容器包，但两者都会恢复为镜像；
+- docker load不能对载入的镜像重命名，而docker import可以为镜像指定新名称。
+
+docker export的应用场景主要用来制作基础镜像，比如你从一个ubuntu镜像启动一个容器，然后安装一些软件和进行一些设置后，使用docker export保存为一个基础镜像。然后，把这个镜像分发给其他人使用，比如作为基础的开发环境。
+
+docker save的应用场景是，如果你的应用是使用docker-compose.yml编排的多个镜像组合，但你要部署的客户服务器并不能连外网。这时，你可以使用docker save将用到的镜像打个包，然后拷贝到客户服务器上使用docker load载入。
+
+导出后再导入(exported-imported)的镜像会丢失所有的历史，而保存后再加载（saveed-loaded）的镜像没有丢失历史和层(layer)。这意味着使用导出后再导入的方式，你将无法回滚到之前的层(layer)，同时，使用保存后再加载的方式持久化整个镜像，就可以做到层回滚（可以执行docker tag <LAYER ID> <IMAGE NAME>来回滚之前的层）。
 * docker commit 
 docker commit :从容器创建一个新的镜像。
 
@@ -375,17 +394,7 @@ mymysql             v1                  37af1236adef        15 seconds ago      
 或：
  
  docker  tag  旧镜像名  新镜像名
-* docker save与docker export的区别
-docker save和docker export的区别:
-- docker save保存的是镜像（image），docker export保存的是容器（container）；
-- docker load用来载入镜像包，docker import用来载入容器包，但两者都会恢复为镜像；
-- docker load不能对载入的镜像重命名，而docker import可以为镜像指定新名称。
 
-docker export的应用场景主要用来制作基础镜像，比如你从一个ubuntu镜像启动一个容器，然后安装一些软件和进行一些设置后，使用docker export保存为一个基础镜像。然后，把这个镜像分发给其他人使用，比如作为基础的开发环境。
-
-docker save的应用场景是，如果你的应用是使用docker-compose.yml编排的多个镜像组合，但你要部署的客户服务器并不能连外网。这时，你可以使用docker save将用到的镜像打个包，然后拷贝到客户服务器上使用docker load载入。
-
-导出后再导入(exported-imported)的镜像会丢失所有的历史，而保存后再加载（saveed-loaded）的镜像没有丢失历史和层(layer)。这意味着使用导出后再导入的方式，你将无法回滚到之前的层(layer)，同时，使用保存后再加载的方式持久化整个镜像，就可以做到层回滚（可以执行docker tag <LAYER ID> <IMAGE NAME>来回滚之前的层）。
 * linux docker 中实现某些程序段开机自启动
 将服务添加到启动文件bashrc中即可
 
@@ -397,6 +406,53 @@ vim /root/.bashrc
 #+begin_src bash
 service ssh start >>/root/startup_run.log
 #+END_SRC
+* docker删除<none>镜像
+以下是搜到的几种方案
+http://blog.51yip.com/cloud/1859.html
+#+begin_src bash
+# 停止docker
+docker stop $(docker ps -a | grep "Exited" | awk '{print $1 }')
+# 删除docker
+docker rm $(docker ps -a | grep "Exited" | awk '{print $1 }')
+# 删除images
+docker rmi $(docker images | grep "none" | awk '{print $3}')
+#+END_SRC
+
+或者 http://blog.csdn.net/u014221090/article/details/53186313
+#+begin_src bash
+docker ps -a | grep "Exited" | awk '{print $1 }'|xargs docker stop
+docker ps -a | grep "Exited" | awk '{print $1 }'|xargs docker rm
+docker images|grep none|awk '{print $3 }'|xargs docker rmi
+#+END_SRC
+或者 http://blog.csdn.net/goflyfreely/article/details/53149894
+#+BEGIN_EXAMPLE
+好的<none>:<none>镜像的产生
+例如从镜像仓库里拿一个fedora 镜像。如图虽然docker images 只显示fedora:latest，但是
+docker images -a 显示了两个镜像fedora:latest 和<none>:<none>.
+原来docker中镜像是有垂直父子关系的，层级关系可以在/var/lib/docker/graph中看到。docker pull fedora执行的时候呢，就会每次下载一个镜像。
+可以通过查看/var/lib/docker/graph的json查看父子关系。这些镜像都不会引起存储空间占用的问题。
+#+END_EXAMPLE
+#+begin_src bash
+root@xxxx:/var/lib/docker/graph# more ff0e2b608af6b1901d8ad9e9556e9e8ffe91b4c5386039e32bdf087df6157f65/json
+{"container_config":{"Hostname":"","Domainname":"","User":"","AttachStdin":false,"AttachStdout":false,"AttachStderr":false,"Tty":fal
+se,"OpenStdin":false,"StdinOnce":false,"Env":null,"Cmd":["/bin/sh -c echo 'export PATH=$ORACLE_HOME/bin:$PATH' \u003e\u003e /etc/bas
+h.bashrc"],"Image":"","Volumes":null,"WorkingDir":"","Entrypoint":null,"OnBuild":null,"Labels":null},"created":"2016-04-20T10:29:03.
+276290831Z","layer_id":"sha256:a5d9cef8ef2a0ffd19fea965e22924c2717bdcec82f628344111ae5aeec3ec13","parent_id":"sha256:c74e9fd53a7e49d
+4d4cd562a69aa8ccc094ee17aedb7cc26a161af2903af8f68"}
+#+END_SRC
+#+BEGIN_EXAMPLE
+坏的<none>:<none>镜像的产生
+而docker build 或是 pull 命令就会产生临时镜像。如果我们用dockerfile创建一个helloworld镜像后，因为版本更新需要重新创建，那么以前那个版本的镜像就会
+成为临时镜像。这个是需要删除的。
+#+END_EXAMPLE
+删除命令见下。
+#+begin_src bash
+sudo docker rmi $(docker images -f "dangling=true" -q)
+#+END_SRC
+
+
+** 参考文章
+[[https://www.jianshu.com/p/d06830de219f][docker删除<none>镜像]]
 * 端口映射
 ** 启动容器后
 容器除了在启动时添加端口映射关系，还可以通过宿主机的iptables进行nat转发，将宿主机的端口映射到容器的内部端口上，这种方式适用于容器启动时没有指定端口映射的情况！

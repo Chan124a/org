@@ -1,40 +1,54 @@
-* 远程主机
-** 互传文件
-scp 本地用户名@IP地址:文件名1 远程用户名@IP地址:文件名2 
+* apt
+** 查看已安装软件
+apt-get 命令 没有类似列出已安装软件包的简单的选项，但是 apt 有一个这样的命令：
+#+begin_src bash
+apt list --installed
+#+END_SRC
+这个会显示使用 apt 命令安装的所有的软件包。同时也会包含由于依赖而被安装的软件包。也就是说不仅会包含你曾经安装的程序，而且会包含大量库文件和间接安装的软件包。
 
-#[本地用户名@IP地址:]可以不输入
+apt 和 apt-get 命令都是基于 dpkg。也就是说用 dpkg 命令可以列出 Debian 系统的所有已经安装的软件包。
+#+begin_src bash
+dpkg-query -l
+#+END_SRC
+*** 参考文章
+[[https://zhuanlan.zhihu.com/p/57472336][https://zhuanlan.zhihu.com/p/57472336]]
+** apt-cache
+1.apt-cache showpkg
+显示软件包的一些常规信息
+例: apt-cache showpkg openssh
 
-scp -r file username@ip:filepath #参数-r用于传文件夹
 
-1. 从服务器复制文件到本地：
+2.apt-cache stats
+显示相关的统计信息顯示相關的統計資訊
 
-scp root@×××.×××.×××.×××:/data/test.txt /home/myfile/
+3.apt-cache dump
+显示缓存中的每个软件包的简要描述信息
 
-root@×××.×××.×××.×××   root是目标服务器（有你需要拷贝文件的服务器）的用户名，×××.×××.×××.×××是IP地址，如192.168.1.100，后面紧跟的：不要忘记，/data/test.txt是目标服务器中你要拷贝文件的地址，接一个空格，后面的/home/myfile/是本地接收文件的地址。
+4.apt-cache unmet
+显示不符合一致性的依赖关系
 
-2. 从服务器复制文件夹到本地：
+5.apt-cache show
+显示指定软件包的记录信息。类似于rpm -qi
 
-scp -r root@×××.×××.×××.×××:/data/ /home/myfile/
+6.apt-cache search
+查找软件包，类似于rpm -qa|grep package_name
+例: apt-cache search openssh
 
-只需在前面加-r即可，就可以拷贝整个文件夹。
+7.apt-cache depends
+显示软件包的依赖性关系
 
-3. 从本地复制文件到服务器：
-
-scp /home/myfile/test.txt root@192.168.1.100:/data/
-
-4. 从本地复制文件夹到服务器：
-
-scp -r /home/myfile/ root@192.168.1.100:/data/
-* apt-get
-*** 修改源
+8.apt-cache pkgnames
+列出所有的软件包
+** apt-get
+**** 修改源
 1、原文件备份
- 
+
 sudo cp /etc/apt/sources.list /etc/apt/sources.list.bak
- 
+
 2、编辑源列表文件
- 
+
 sudo vim /etc/apt/sources.list
- 
+
 3、将原来的列表删除，添加如下内容
 
 阿里云源
@@ -49,9 +63,8 @@ deb-src http://mirrors.aliyun.com/ubuntu/ bionic-security main restricted univer
 deb-src http://mirrors.aliyun.com/ubuntu/ bionic-updates main restricted universe multiverse
 deb-src http://mirrors.aliyun.com/ubuntu/ bionic-proposed main restricted universe multiverse
 deb-src http://mirrors.aliyun.com/ubuntu/ bionic-backports main restricted universe multiverse
-
 #+END_EXAMPLE
-清华源
+清华源 ubuntu18.04
 #+BEGIN_EXAMPLE
 # 默认注释了源码镜像以提高 apt update 速度，如有需要可自行取消注释
 # 若出现no longer has a Release file错误，把https该成http即可
@@ -63,50 +76,110 @@ deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-backports main restricte
 # deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-backports main restricted universe multiverse
 deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-security main restricted universe multiverse
 # deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ bionic-security main restricted universe multiverse
-
 #+END_EXAMPLE
+清华源 ubuntu 20.04 LTS
+#+BEGIN_EXAMPLE
+# 默认注释了源码镜像以提高 apt update 速度，如有需要可自行取消注释
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal main restricted universe multiverse
+# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal main restricted universe multiverse
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-updates main restricted universe multiverse
+# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-updates main restricted universe multiverse
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-backports main restricted universe multiverse
+# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-backports main restricted universe multiverse
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-security main restricted universe multiverse
+# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-security main restricted universe multiverse
+
+# 预发布软件源，不建议启用
+# deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-proposed main restricted universe multiverse
+# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-proposed main restricted universe multiverse
+#+END_EXAMPLE
+
 4、更新源
- 
+
 更新软件包列表
 sudo apt-get update
-*** no longer has a Release file错误的解决方法
-把软件源里的https改成http就行了
+**** no longer has a Release file错误的解决方法
+ 把软件源里的https改成http就行了
 
-今天我sudo apt-get update遇到了一个
-#+BEGIN_SRC bash
-Hit:1 http://packages.microsoft.com/repos/code stable InRelease
-Ign:2 http://mirrors.tuna.tsinghua.edu.cn/ros/ubuntu bionic InRelease          
-Ign:3 https://mirrors.tuna.tsinghua.edu.cn/ubuntu bionic InRelease             
-Hit:4 http://mirrors.tuna.tsinghua.edu.cn/ros/ubuntu bionic Release            
-Hit:5 http://dl.google.com/linux/chrome/deb stable InRelease                   
-Ign:6 https://mirrors.tuna.tsinghua.edu.cn/ubuntu bionic-updates InRelease     
-Ign:8 https://mirrors.tuna.tsinghua.edu.cn/ubuntu bionic-backports InRelease   
-Ign:9 https://mirrors.tuna.tsinghua.edu.cn/ubuntu bionic-security InRelease    
-Err:10 https://mirrors.tuna.tsinghua.edu.cn/ubuntu bionic Release              
-  Certificate verification failed: The certificate is NOT trusted. The certificate chain uses expired certificate.  Could not handshake: Error in the certificate verification. [IP: 101.6.15.130 443]
-Err:11 https://mirrors.tuna.tsinghua.edu.cn/ubuntu bionic-updates Release  
-  Certificate verification failed: The certificate is NOT trusted. The certificate chain uses expired certificate.  Could not handshake: Error in the certificate verification. [IP: 101.6.15.130 443]
-Hit:12 http://archive.ubuntu.com/ubuntu bionic InRelease
-Hit:13 http://ppa.launchpad.net/videolan/master-daily/ubuntu bionic InRelease  
-Err:14 https://mirrors.tuna.tsinghua.edu.cn/ubuntu bionic-backports Release    
-  Certificate verification failed: The certificate is NOT trusted. The certificate chain uses expired certificate.  Could not handshake: Error in the certificate verification. [IP: 101.6.15.130 443]
-Err:15 https://mirrors.tuna.tsinghua.edu.cn/ubuntu bionic-security Release     
-  Certificate verification failed: The certificate is NOT trusted. The certificate chain uses expired certificate.  Could not handshake: Error in the certificate verification. [IP: 101.6.15.130 443]
-Reading package lists... Done                                
-E: The repository 'https://mirrors.tuna.tsinghua.edu.cn/ubuntu bionic Release' no longer has a Release file.
-N: Updating from such a repository can't be done securely, and is therefore disabled by default.
-N: See apt-secure(8) manpage for repository creation and user configuration details.
-E: The repository 'https://mirrors.tuna.tsinghua.edu.cn/ubuntu bionic-updates Release' no longer has a Release file.
-N: Updating from such a repository can't be done securely, and is therefore disabled by default.
-N: See apt-secure(8) manpage for repository creation and user configuration details.
-E: The repository 'https://mirrors.tuna.tsinghua.edu.cn/ubuntu bionic-backports Release' no longer has a Release file.
-N: Updating from such a repository can't be done securely, and is therefore disabled by default.
-N: See apt-secure(8) manpage for repository creation and user configuration details.
-E: The repository 'https://mirrors.tuna.tsinghua.edu.cn/ubuntu bionic-security Release' no longer has a Release file.
-N: Updating from such a repository can't be done securely, and is therefore disabled by default.
-N: See apt-secure(8) manpage for repository creation and user configuration details.
+ 今天我sudo apt-get update遇到了一个
+ #+BEGIN_SRC bash
+ Hit:1 http://packages.microsoft.com/repos/code stable InRelease
+ Ign:2 http://mirrors.tuna.tsinghua.edu.cn/ros/ubuntu bionic InRelease          
+ Ign:3 https://mirrors.tuna.tsinghua.edu.cn/ubuntu bionic InRelease             
+ Hit:4 http://mirrors.tuna.tsinghua.edu.cn/ros/ubuntu bionic Release            
+ Hit:5 http://dl.google.com/linux/chrome/deb stable InRelease                   
+ Ign:6 https://mirrors.tuna.tsinghua.edu.cn/ubuntu bionic-updates InRelease     
+ Ign:8 https://mirrors.tuna.tsinghua.edu.cn/ubuntu bionic-backports InRelease   
+ Ign:9 https://mirrors.tuna.tsinghua.edu.cn/ubuntu bionic-security InRelease    
+ Err:10 https://mirrors.tuna.tsinghua.edu.cn/ubuntu bionic Release              
+   Certificate verification failed: The certificate is NOT trusted. The certificate chain uses expired certificate.  Could not handshake: Error in the certificate verification. [IP: 101.6.15.130 443]
+ Err:11 https://mirrors.tuna.tsinghua.edu.cn/ubuntu bionic-updates Release  
+   Certificate verification failed: The certificate is NOT trusted. The certificate chain uses expired certificate.  Could not handshake: Error in the certificate verification. [IP: 101.6.15.130 443]
+ Hit:12 http://archive.ubuntu.com/ubuntu bionic InRelease
+ Hit:13 http://ppa.launchpad.net/videolan/master-daily/ubuntu bionic InRelease  
+ Err:14 https://mirrors.tuna.tsinghua.edu.cn/ubuntu bionic-backports Release    
+   Certificate verification failed: The certificate is NOT trusted. The certificate chain uses expired certificate.  Could not handshake: Error in the certificate verification. [IP: 101.6.15.130 443]
+ Err:15 https://mirrors.tuna.tsinghua.edu.cn/ubuntu bionic-security Release     
+   Certificate verification failed: The certificate is NOT trusted. The certificate chain uses expired certificate.  Could not handshake: Error in the certificate verification. [IP: 101.6.15.130 443]
+ Reading package lists... Done                                
+ E: The repository 'https://mirrors.tuna.tsinghua.edu.cn/ubuntu bionic Release' no longer has a Release file.
+ N: Updating from such a repository can't be done securely, and is therefore disabled by default.
+ N: See apt-secure(8) manpage for repository creation and user configuration details.
+ E: The repository 'https://mirrors.tuna.tsinghua.edu.cn/ubuntu bionic-updates Release' no longer has a Release file.
+ N: Updating from such a repository can't be done securely, and is therefore disabled by default.
+ N: See apt-secure(8) manpage for repository creation and user configuration details.
+ E: The repository 'https://mirrors.tuna.tsinghua.edu.cn/ubuntu bionic-backports Release' no longer has a Release file.
+ N: Updating from such a repository can't be done securely, and is therefore disabled by default.
+ N: See apt-secure(8) manpage for repository creation and user configuration details.
+ E: The repository 'https://mirrors.tuna.tsinghua.edu.cn/ubuntu bionic-security Release' no longer has a Release file.
+ N: Updating from such a repository can't be done securely, and is therefore disabled by default.
+ N: See apt-secure(8) manpage for repository creation and user configuration details.
+ #+END_SRC
+**** Ubuntu换源后，更新提示GPG error缺少公钥
+#+BEGIN_EXAMPLE
+W: GPG error: http://mirrors.aliyun.com trusty-security InRelease: The following signatures couldn't be verified because the public key is not available: NO_PUBKEY 40976EAF437D05B5 NO_PUBKEY 3B4FE6ACC0B21F32
+W: GPG error: http://mirrors.aliyun.com trusty-updates InRelease: The following signatures couldn't be verified because the public key is not available: NO_PUBKEY 40976EAF437D05B5 NO_PUBKEY 3B4FE6ACC0B21F32
+W: GPG error: http://mirrors.aliyun.com trusty-proposed InRelease: The following signatures couldn't be verified because the public key is not available: NO_PUBKEY 40976EAF437D05B5 NO_PUBKEY 3B4FE6ACC0B21F32
+W: GPG error: http://mirrors.aliyun.com trusty-backports InRelease: The following signatures couldn't be verified because the public key is not available: NO_PUBKEY 40976EAF437D05B5 NO_PUBKEY 3B4FE6ACC0B21F32
+W: GPG error: http://mirrors.aliyun.com trusty Release: The following signatures couldn't be verified because the public key is not available: NO_PUBKEY 40976EAF437D05B5 NO_PUBKEY 3B4FE6ACC0B21F32
+#+END_EXAMPLE
+Solution
+#+begin_src bash
+apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 3B4FE6ACC0B21F32
 #+END_SRC
 
+**** apt-get彻底卸载软件包
+apt-get的卸载相关的命令有remove/purge/autoremove/clean/autoclean等。具体来说：
+
+apt-get purge / apt-get --purge remove
+删除已安装包（不保留配置文件)。
+如软件包a，依赖软件包b，则执行该命令会删除a，而且不保留配置文件
+
+apt-get autoremove
+删除为了满足依赖而安装的，但现在不再需要的软件包（包括已安装包），保留配置文件。
+
+apt-get remove
+删除已安装的软件包（保留配置文件），不会删除依赖软件包，且保留配置文件。
+
+apt-get autoclean
+APT的底层包是dpkg, 而dpkg 安装Package时, 会将 *.deb 放在 /var/cache/apt/archives/中，apt-get autoclean 只会删除 /var/cache/apt/archives/ 已经过期的deb。
+
+apt-get clean
+使用 apt-get clean 会将 /var/cache/apt/archives/ 的 所有 deb 删掉，可以理解为 rm /var/cache/apt/archives/*.deb。
+
+那么如何彻底卸载软件呢？
+
+具体来说可以运行如下命令：
+#+begin_src bash
+# 删除软件及其配置文件
+apt-get --purge remove <package>
+# 删除没用的依赖包
+apt-get autoremove <package>
+# 此时dpkg的列表中有“rc”状态的软件包，可以执行如下命令做最后清理：
+dpkg -l |grep ^rc|awk '{print $2}' |sudo xargs dpkg -P
+#+END_SRC
+***** 参考文章
+[[https://blog.csdn.net/get_set/article/details/51276609][Ubuntu apt-get彻底卸载软件包]]
 * Anaconda
 Anaconda（官方网站）就是可以便捷获取包且对包能够进行管理，同时对环境可以统一管理的发行版本。Anaconda包含了conda、Python在内的超过180个科学包及其依赖项。如果日常工作或学习并不必要使用1,000多个库，那么可以考虑安装Miniconda
 ** Anaconda、conda、pip、virtualenv的区别
@@ -333,6 +406,32 @@ conda批量安装requirements.txt文件中包含的组件依赖
 conda install --yes --file requirements.txt
 #+END_SRC
 
+*** 安装requirement.txt指定的依赖包
+1. 生成requirement.txt文件
+#+begin_src python
+pip freeze > requirements.txt
+#+END_SRC
+安装requirement.txt文件依赖
+#+begin_src python
+pip install -r requirements.txt
+#+END_SRC
+2. 除了使用pip命令来生成及安装requirement.txt文件以外，也可以使用conda命令来安装。
+#+begin_src python
+conda install --yes --file requirements.txt
+#+END_SRC
+但是这里存在一个问题，如果requirements.txt中的包不可用，则会抛出“无包错误”。
+
+使用下面这个命令可以解决这个问题
+#+begin_src bash
+$ while read requirement; do conda install --yes $requirement; done < requirements.txt
+#+END_SRC
+如果想要在conda命令无效时使用pip命令来代替，那么使用如下命令：
+#+begin_src bash
+$ while read requirement; do conda install --yes $requirement || pip install $requirement; done < requirements.txt
+#+END_SRC
+
+**** 参考文章
+[[https://blog.csdn.net/Mao_Jonah/article/details/89502380][使用conda安装requirement.txt指定的依赖包]]
 ** 使用国内镜像源安装pytorch
 先设置镜像源，如清华的conda镜像
 #+BEGIN_SRC python
@@ -751,76 +850,6 @@ $ chsh -s /bin/csh //改变当前设置为 /bin/csh
 Changing shell for root.
 Shell not changed.
 #+END_SRC
-
-* dpkg
-* dpkg,rpm和yum以及apt-get的区别
-一般来说著名的 Linux 系统基本上分两大类：
-- RedHat 系列：Redhat、Centos、Fedora 等
-- Debian 系列：Debian、Ubuntu 等
-
-Dpkg (Debian系)：Ubuntu 
-RPM (Red Hat系)：CentOS、Fedora
-** RedHat 系列
-- 常见的安装包格式 rpm 包，安装rpm包的命令是“rpm -参数”
-- 包管理工具 yum
-- 支持 tar 包
-** Debian系列
-- 常见的安装包格式 deb 包，安装 deb 包的命令是“dpkg -参数”
-- 包管理工具 apt-get
-- 支持 tar 包
-* dos2unix和unix2dos
-dos2unix是将Windows格式文件转换为Unix、Linux格式的实用命令。Windows格式文件的换行符为\r\n ,而Unix&Linux文件的换行符为\n. dos2unix命令其实就是将文件中的\r\n 转换为\n。
-
-而unix2dos则是和dos2unix互为孪生的一个命令，它是将Linux&Unix格式文件转换为Windows格式文件的命令。
-
-命令语法：
-#+begin_src bash
-dos2unix [options] [-c convmode] [-o file ...] [-n infile outfile ...]
-unix2dos [options] [-c convmode] [-o file ...] [-n infile outfile ...]
-#+END_SRC
-dos2unix 可以一次转换多个文件:
-dos2unix filename1 filename2 filename3
-** 命令参数
-此命令参数是Red Hat Enterprise Linux Server release 5.7下dos2unix命令参数，不同版本Linux的dos2nnix命令参数有可能不同。
-
-
-参数 描叙
--h 显示命令dos2unix联机帮助信息。
--k 保持文件时间戳不变
--q 静默模式，不输出转换结果信息等
--V 显示命令版本信息
--c 转换模式
--o 在源文件转换，默认参数
--n 保留原本的旧档，将转换后的内容输出到新档案.默认都会直接在原来的文件上修改，如果需要保留源文件，那么可以使用参数-n,格式为dos2unix -n oldfilename newfilename
-** 示例
-将Windows格式文本转换为Unix&Linux格式文件
-#+begin_src bash
-[root@DB-Server myscript]# cat -v test.sh 
-. /home/oracle/.bash_profile^M
-echo ' '^M
-date^M
-echo ' '^M
-^M
-sqlplus test/test @/home/oracle/scripts/test.sql^M
-^M
-echo ' '^M
-date^M
-echo ' '^M
-[root@DB-Server myscript]# dos2unix test.sh 
-dos2unix: converting file test.sh to UNIX format ...
-[root@DB-Server myscript]# cat -v test.sh 
-. /home/oracle/.bash_profile
-echo ' '
-date
-echo ' '
- 
-sqlplus test/test @/home/oracle/scripts/test.sql
- 
-echo ' '
-date
-echo ' '
-#+END_SRC
-
 * declare命令
 Linux declare命令用于声明 shell 变量。
 
@@ -941,6 +970,175 @@ declare -f func_a func_b
 declare -F func_a func_b
 # 最好不要让函数名和变量名相同。
 #+END_SRC
+* DISPLAY环境变量的作用
+在Linux/Unix 类操作系统上, DISPLAY用来设置将图形显示到何处. 
+直接登陆图形界面或者登陆命令行界面后使用startx启动图形, DISPLAY环境变量将自动设置为:0.0, 此时可以打开终端, 输出图形程序的名称(比如xclock)来启动程序, 图形将显示在本地窗口上
+
+在终端上输入printenv查看当前环境变量, 输出结果中有如下内容: DISPLAY=:0.0
+
+使用xdpyinfo可以查看到当前显示的更详细的信息。
+
+DISPLAY 环境变量格式如下host:NumA.NumB, 
+- host指Xserver所在的主机主机名或者ip地址, 图形将显示在这一机器上, 可以是启动了图形界面的Linux/Unix机器, 也可以是安装了Exceed, - X-Deep/32等Windows平台运行的Xserver的Windows机器. 如果Host为空, 则表示Xserver运行于本机, 并且图形程序(Xclient)使用unix socket方式连接到Xserver, 而不是TCP方式. 
+- 使用TCP方式连接时, NumA为连接的端口减去6000的值, 如果NumA为0, 则表示连接到6000端口; 使用unix socket方式连接时则表示连接的unix socket的路径, 如果为0, 则表示连接到/tmp/.X11-unix/X0 . 
+- NumB则几乎总是0.
+
+Xserver默认情况下不允许别的用户的图形程序的图形显示在当前屏幕上. 
+
+如果使用su username或者su - username切换到别的用户, 并且使用命令
+#+begin_src bash
+export DISPLAY=:0.0
+#+END_SRC
+设置DISPLAY环境变量, 运行图形程序(如xclock)时会收到如下错误:
+#+BEGIN_EXAMPLE
+Xlib: connection to ":0.0" refused by server Xlib: No protocol specified Error: Can't open display: :0.0
+#+END_EXAMPLE
+如果需要别的用户的图形显示在当前屏幕上, 则应以当前登陆的用户, 也就是切换身份前的用户执行如下命令：
+#+begin_src bash
+xhost +
+#+END_SRC
+这个命令将允许别的用户启动的图形程序将图形显示在当前屏幕上。
+
+* dos2unix和unix2dos
+dos2unix是将Windows格式文件转换为Unix、Linux格式的实用命令。Windows格式文件的换行符为\r\n ,而Unix&Linux文件的换行符为\n. dos2unix命令其实就是将文件中的\r\n 转换为\n。
+
+而unix2dos则是和dos2unix互为孪生的一个命令，它是将Linux&Unix格式文件转换为Windows格式文件的命令。
+
+命令语法：
+#+begin_src bash
+dos2unix [options] [-c convmode] [-o file ...] [-n infile outfile ...]
+unix2dos [options] [-c convmode] [-o file ...] [-n infile outfile ...]
+#+END_SRC
+dos2unix 可以一次转换多个文件:
+dos2unix filename1 filename2 filename3
+** 命令参数
+此命令参数是Red Hat Enterprise Linux Server release 5.7下dos2unix命令参数，不同版本Linux的dos2nnix命令参数有可能不同。
+
+
+参数 描叙
+-h 显示命令dos2unix联机帮助信息。
+-k 保持文件时间戳不变
+-q 静默模式，不输出转换结果信息等
+-V 显示命令版本信息
+-c 转换模式
+-o 在源文件转换，默认参数
+-n 保留原本的旧档，将转换后的内容输出到新档案.默认都会直接在原来的文件上修改，如果需要保留源文件，那么可以使用参数-n,格式为dos2unix -n oldfilename newfilename
+** 示例
+将Windows格式文本转换为Unix&Linux格式文件
+#+begin_src bash
+[root@DB-Server myscript]# cat -v test.sh 
+. /home/oracle/.bash_profile^M
+echo ' '^M
+date^M
+echo ' '^M
+^M
+sqlplus test/test @/home/oracle/scripts/test.sql^M
+^M
+echo ' '^M
+date^M
+echo ' '^M
+[root@DB-Server myscript]# dos2unix test.sh 
+dos2unix: converting file test.sh to UNIX format ...
+[root@DB-Server myscript]# cat -v test.sh 
+. /home/oracle/.bash_profile
+echo ' '
+date
+echo ' '
+ 
+sqlplus test/test @/home/oracle/scripts/test.sql
+ 
+echo ' '
+date
+echo ' '
+#+END_SRC
+
+* dpkg
+* dpkg,rpm和yum以及apt-get的区别
+一般来说著名的 Linux 系统基本上分两大类：
+- RedHat 系列：Redhat、Centos、Fedora 等
+- Debian 系列：Debian、Ubuntu 等
+
+Dpkg (Debian系)：Ubuntu 
+RPM (Red Hat系)：CentOS、Fedora
+** RedHat 系列
+- 常见的安装包格式 rpm 包，安装rpm包的命令是“rpm -参数”
+- 包管理工具 yum
+- 支持 tar 包
+** Debian系列
+- 常见的安装包格式 deb 包，安装 deb 包的命令是“dpkg -参数”
+- 包管理工具 apt-get
+- 支持 tar 包
+* du命令：查看文件夹和文件的磁盘占用情况
+du 命令，全称是 disk usage，用来展示磁盘使用量的统计信息。
+
+语法:
+#+begin_src bash
+du [-abcDhHklmsSx][-L <符号连接>][-X <文件>][--block-size][--exclude=<目录或文件>][--max-depth=<目录层数>][--help][--version][目录或文件]
+#+END_SRC
+** 参数
+- -a或-all 显示目录中个别文件的大小。
+- -b或-bytes 显示目录或文件大小时，以byte为单位。
+- -c或--total 除了显示个别目录或文件的大小外，同时也显示所有目录或文件的总和。
+- -D或--dereference-args 显示指定符号连接的源文件大小。
+- -h或--human-readable 以K，M，G为单位，提高信息的可读性。
+- -H或--si 与-h参数相同，但是K，M，G是以1000为换算单位。
+- -k或--kilobytes 以1024 bytes为单位。
+- -l或--count-links 重复计算硬件连接的文件。
+- -L<符号连接>或--dereference<符号连接> 显示选项中所指定符号连接的源文件大小。
+- -m或--megabytes 以1MB为单位。
+- -s或--summarize 仅显示总计。
+- -S或--separate-dirs 显示个别目录的大小时，并不含其子目录的大小。
+- -x或--one-file-xystem 以一开始处理时的文件系统为准，若遇上其它不同的文件系统目录则略过。
+- -X<文件>或--exclude-from=<文件> 在<文件>指定目录或文件。
+- --exclude=<目录或文件> 略过指定的目录或文件。
+- --max-depth=<目录层数> 超过指定层数的目录后，予以忽略。
+- --help 显示帮助。
+- --version 显示版本信息。
+** 实例
+显示目录或者文件所占空间:
+#+begin_src bash
+>>> du
+608     ./test6
+308     ./test4
+4       ./scf/lib
+4       ./scf/service/deploy/product
+4       ./scf/service/deploy/info
+12      ./scf/service/deploy
+16      ./scf/service
+4       ./scf/doc
+4       ./scf/bin
+32      ./scf
+8       ./test3
+1288    .
+#+END_SRC
+只显示当前目录下面的子目录的目录大小和当前目录的总的大小，最下面的1288为当前目录的总大小
+
+显示指定文件所占空间:
+#+begin_src bash
+>>> du log2012.log 
+300     log2012.log
+#+END_SRC
+
+方便阅读的格式显示test目录所占空间情况：
+#+begin_src bash
+>>> du -h test
+608K    test/test6
+308K    test/test4
+4.0K    test/scf/lib
+4.0K    test/scf/service/deploy/product
+4.0K    test/scf/service/deploy/info
+12K     test/scf/service/deploy
+16K     test/scf/service
+4.0K    test/scf/doc
+4.0K    test/scf/bin
+32K     test/scf
+8.0K    test/test3
+1.3M    test
+#+END_SRC
+
+** 参考文章
+[[https://www.runoob.com/linux/linux-comm-du.html][菜鸟教程]]
+
 * export 命令
 Linux export 命令用于设置或显示环境变量。
 
@@ -1478,6 +1676,18 @@ ni
 Execute one machine instruction, but if it is a function call, proceed until the function returns.An argument is a repeat count, as in next.
 #+END_EXAMPLE
 
+** 打印所有全局变量和局部变量
+#+begin_src bash
+#查看全局和静态变量
+info variables
+
+#查看当前stack frame局部变量
+info locals
+
+#查看当前stack frame参数
+info args
+#+END_SRC
+
 ** 函数的调用
 #+begin_src bash
 call name 调用和执行一个函数
@@ -1490,6 +1700,83 @@ call name 调用和执行一个函数
 - $fp 帧指针（当前堆栈帧）
 - $sp 栈指针
 - $ps 处理器状态
+** 查看当前位置 - where
+** layout的使用
+layout用于分割窗口，可以一边查看代码，一边测试。主要有以下几种用法：
+- layout src：显示源代码窗口
+- layout asm：显示汇编窗口
+- layout regs：显示源代码/汇编和寄存器窗口
+- layout split：显示源代码和汇编窗口
+- layout next：显示下一个layout
+- layout prev：显示上一个layout
+- Ctrl + L：刷新窗口
+- Ctrl + x，再按1：单窗口模式，显示一个窗口
+- Ctrl + x，再按2：双窗口模式，显示两个窗口
+- Ctrl + x，再按a：回到传统模式，即退出layout，回到执行layout之前的调试窗口。
+
+** print和display命令：查看变量的值
+*** print
+打印变量或者表达式的值，print 命令可以缩写为 p
+*** display
+使用 display 命令查看变量或表达式的值，每当程序暂停执行（例如单步执行）时，GDB 调试器都会自动帮我们打印出来，而 print 命令则不会。
+
+display 命令没有缩写形式，常用的语法格式如下 2 种：
+#+begin_src bash
+(gdb) display expr
+(gdb) display/fmt expr
+#+END_SRC
+其中，expr 表示要查看的目标变量或表达式；参数 fmt 用于指定输出变量或表达式的格式，下表罗列了常用的一些 fmt 参数。
+| /fmt | 功 能                                |
+|------+--------------------------------------|
+| /x   | 以十六进制的形式打印出整数。         |
+| /d   | 以有符号、十进制的形式打印出整数。   |
+| /u   | 以无符号、十进制的形式打印出整数。   |
+| /o   | 以八进制的形式打印出整数。           |
+| /t   | 以二进制的形式打印出整数。           |
+| /f   | 以浮点数的形式打印变量或表达式的值。 |
+| /c   | 以字符形式打印变量或表达式的值。     |
+
+注意，display 命令和 /fmt 之间不要留有空格。以 /x 为例，应写为 (gdb)display/x expr。
+*** 参考文章
+[[http://c.biancheng.net/view/8238.html][GDB print和display命令：查看变量的值]]
+* grep命令
+Linux grep 命令用于查找文件里符合条件的字符串。
+
+grep 指令用于查找内容包含指定的范本样式的文件，如果发现某文件的内容符合所指定的范本样式，预设 grep 指令会把含有范本样式的那一列显示出来。若不指定任何文件名称，或是所给予的文件名为 -，则 grep 指令会从标准输入设备读取数据。
+
+语法：
+#+begin_src bash
+grep [-abcEFGhHilLnqrsvVwxy][-A<显示行数>][-B<显示列数>][-C<显示列数>][-d<进行动作>][-e<范本样式>][-f<范本文件>][--help][范本样式][文件或目录...]
+#+END_SRC
+参数：
+- -a 或 --text : 不要忽略二进制的数据。
+- -A<显示行数> 或 --after-context=<显示行数> : 除了显示符合范本样式的那一列之外，并显示该行之后的内容。
+- -b 或 --byte-offset : 在显示符合样式的那一行之前，标示出该行第一个字符的编号。
+- -B<显示行数> 或 --before-context=<显示行数> : 除了显示符合样式的那一行之外，并显示该行之前的内容。
+- -c 或 --count : 计算符合样式的列数。
+- -C<显示行数> 或 --context=<显示行数>或-<显示行数> : 除了显示符合样式的那一行之外，并显示该行之前后的内容。
+- -d <动作> 或 --directories=<动作> : 当指定要查找的是目录而非文件时，必须使用这项参数，否则grep指令将回报信息并停止动作。
+- -e<范本样式> 或 --regexp=<范本样式> : 指定字符串做为查找文件内容的样式。
+- -E 或 --extended-regexp : 将样式为延伸的正则表达式来使用。
+- -f<规则文件> 或 --file=<规则文件> : 指定规则文件，其内容含有一个或多个规则样式，让grep查找符合规则条件的文件内容，格式为每行一个规则样式。
+- -F 或 --fixed-regexp : 将样式视为固定字符串的列表。
+- -G 或 --basic-regexp : 将样式视为普通的表示法来使用。
+- -h 或 --no-filename : 在显示符合样式的那一行之前，不标示该行所属的文件名称。
+- -H 或 --with-filename : 在显示符合样式的那一行之前，表示该行所属的文件名称。
+- -i 或 --ignore-case : 忽略字符大小写的差别。
+- -l 或 --file-with-matches : 列出文件内容符合指定的样式的文件名称。
+- -L 或 --files-without-match : 列出文件内容不符合指定的样式的文件名称。
+- -n 或 --line-number : 在显示符合样式的那一行之前，标示出该行的列数编号。
+- -o 或 --only-matching : 只显示匹配PATTERN 部分。
+- -q 或 --quiet或--silent : 不显示任何信息。
+- -r 或 --recursive : 此参数的效果和指定"-d recurse"参数相同。
+- -s 或 --no-messages : 不显示错误信息。
+- -v 或 --invert-match : 显示不包含匹配文本的所有行。
+- -V 或 --version : 显示版本信息。
+- -w 或 --word-regexp : 只显示全字符合的列。
+- -x --line-regexp : 只显示全列符合的列。
+- -y : 此参数的效果和指定"-i"参数相同。
+
 * jupyter notebook
 ** 使用Anaconda安装
 #+BEGIN_SRC bash
@@ -1629,7 +1916,7 @@ Out[2]: 'sha1:67c9e60bb8b6:9ffede0825894254b2e042ea597d771089e11aed'
 
 4. [[https://zhuanlan.zhihu.com/p/64524822][如何设置远程访问的Jupyter Notebook服务器-04（服务器篇）]]
 
-* Linux任务前后台的切换
+* Linux 任务前后台的切换
 Shell支持作用控制，有以下命令实现前后台切换：
 1. command& 让进程在后台运行
 2. jobs 查看后台运行的进程
@@ -1748,66 +2035,136 @@ Ctrl – z ：挂起命令
 
 ** 重复执行操作动作
 M – 操作次数 操作动作 ： 指定操作次数，重复执行指定的操作。
-* Linux 查看端口占用情况
-Linux 查看端口占用情况可以使用 lsof 和 netstat 命令。
-** lsof
-lsof(list open files)是一个列出当前系统打开文件的工具。
+* Linux 命令行连接WiFi
+1. 安装nmcli
+sudo apt-get install nmcli
 
-lsof 查看端口占用语法格式：
+2. 查看网络设备
+sudo nmcli dev
+
+3. 开启wifi
+sudo nmcli r wifi on
+
+4. 扫描wifi
+sudo nmcli dev wifi
+
+5. 连接wifi
+sudo nmcli dev wifi connect "wifi名" password "密码"
+* Linux 让终端走代理的几种方法
+参看文章：
+[[https://zhuanlan.zhihu.com/p/46973701][Linux 让终端走代理的几种方法]]
+
+可以用命令$ curl cip.cc 检查终端是否处于代理状态
+** 方法一：（推荐使用）
+为什么说这个方法推荐使用呢？因为他只作用于当前终端中，不会影响环境，而且命令比较简单
+在终端中直接运行：
+
+export http_proxy=http://proxyAddress:port
+
+如果你是SSR,并且走的http的代理端口是12333，想执行wget或者curl来下载国外的东西，可以使用如下命令：
+
+export http_proxy=http://127.0.0.1:12333
+
+如果是https那么就经过如下命令：
+
+export https_proxy=http://127.0.0.1:12333
+
+下面这是cad实验室的代理设置：
+#+begin_src bash
+export http_proxy="socks5://proxy.in.zjulearning.org:7070"
+export https_proxy="socks5://proxy.in.zjulearning.org:7070"
+#+END_SRC
+
+Linux上代理的临时取消
+#+begin_src bash
+unset  http_proxy
+unset https_proxy
+#+END_SRC
+
+** 方法二 ：
+这个办法的好处是把代理服务器永久保存了，下次就可以直接用了
+
+把代理服务器地址写入shell配置文件.bashrc或者.zshrc 直接在.bashrc或者.zshrc添加下面内容
+#+begin_src bash
+export http_proxy="http://localhost:port"
+export https_proxy="http://localhost:port"
+#+END_SRC
+或者走socket5协议（ss,ssr）的话，代理端口是1080
+#+begin_src bash
+export http_proxy="socks5://127.0.0.1:1080"
+export https_proxy="socks5://127.0.0.1:1080"
+#+END_SRC
+或者干脆直接设置ALL_PROXY
+
+export ALL_PROXY=socks5://127.0.0.1:1080
+
+最后在执行如下命令应用设置
+
+source ~/.bashrc
+
+或者通过设置alias简写来简化操作，每次要用的时候输入setproxy，不用了就unsetproxy。
+#+begin_src bash
+alias setproxy="export ALL_PROXY=socks5://127.0.0.1:1080" 
+alias unsetproxy="unset ALL_PROXY"
+#+END_SRC
+** 方法三:
+改相应工具的配置，比如apt的配置
+
+sudo vim /etc/apt/apt.conf
+
+在文件末尾加入下面这行
+
+Acquire::http::Proxy "http://proxyAddress:port"
+** python走socks5代理的设置
+python如果要使用socks5，除了需要上面的代理外，还要安装pysocks库.
+
+参考文章：[[https://stackoverflow.com/questions/38794015/pythons-requests-missing-dependencies-for-socks-support-when-using-socks5-fro][Python's requests "Missing dependencies for SOCKS support" when using SOCKS5 from Terminal]]
+* Linux 中查看某个软件的安装路径
+** 查看文件安装路径：
+由于软件安装的地方不止一个地方，所有先说查看文件安装的所有路径(地址)。
+
+这里以Oracle为例。比如说我安装了Oracle，但是不知道文件都安装在哪些地方、放在哪些文件夹里，可以用下面的命令查看所有的文件路径
+
+在终端输入：
+#+begin_src bash
+whereis oracle
+#+END_SRC
+
+回车，如果你安装好了Oracle，就会显示文件安装的地址，例如我的显示(安装地址可能会不同)
 #+BEGIN_EXAMPLE
-lsof -i:端口号
+oracle: /usr/bin/oracle /usr/lib/oracle /usr/share/oracle /usr/share/man/man1/oracle.1.gz
 #+END_EXAMPLE
 
-*** 实例
-查看服务器 8000 端口的占用情况：
-#+begin_src bash
-/:lsof -i:8000
+可以看出来，Oracle安装在是个目录里。
 
-COMMAND   PID USER   FD   TYPE   DEVICE SIZE/OFF NODE NAME
-nodejs  26993 root   10u  IPv4 37999514      0t0  TCP *:8000 (LISTEN)
-#+END_SRC
-可以看到 8000 端口已经被轻 nodejs 服务占用。
-
-lsof -i 需要 root 用户的权限来执行，如下图：
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-09-03_15-42-19.png @ 2021-09-03 16:14:42
-[[file:Linux_%E6%9F%A5%E7%9C%8B%E7%AB%AF%E5%8F%A3%E5%8D%A0%E7%94%A8%E6%83%85%E5%86%B5/2021-09-03_16-14-42_Snipaste_2021-09-03_15-42-19.png]]
-更多 lsof 的命令如下：
+如果你没有安装Oracle或者Oracle安装没成功，则不会显示文件路径出来。只提示:
 #+begin_src bash
-lsof -i:8080：查看8080端口占用
-lsof abc.txt：显示开启文件abc.txt的进程
-lsof -c abc：显示abc进程现在打开的文件
-lsof -c -p 1234：列出进程号为1234的进程所打开的文件
-lsof -g gid：显示归属gid的进程情况
-lsof +d /usr/local/：显示目录下被进程开启的文件
-lsof +D /usr/local/：同上，但是会搜索目录下的目录，时间较长
-lsof -d 4：显示使用fd为4的进程
-lsof -i -U：显示所有打开的端口和UNIX domain文件
+oracle:
 #+END_SRC
+** 查询运行文件所在路径：
 
-** netstat
-netstat -tunlp 用于显示 tcp，udp 的端口和进程等相关情况。
+如果你只要查询文件的运行文件所在地址，直接用下面的命令就可以了(还是以Oracle为例)：
+#+begin_src bash
+which oracle
+#+END_SRC
+结果会显示：
+#+BEGIN_EXAMPLE
+/usr/bin/oracle
+#+END_EXAMPLE
 
-netstat 查看端口占用语法格式：
-#+begin_src bash
-netstat -tunlp | grep 端口号
-#+END_SRC
--t (tcp) 仅显示tcp相关选项
--u (udp)仅显示udp相关选项
--n 拒绝显示别名，能显示数字的全部转化为数字
--l 仅列出在Listen(监听)的服务状态
--p 显示建立相关链接的程序名
+* ldd命令
+作用：用来查看程式运行所需的共享库,常用来解决程式因缺少某个库文件而不能运行的一些问题。ldd不是个可执行程式，而只是个shell脚本。
 
-例如查看 8000 端口的情况，使用以下命令：
-#+begin_src bash
-/:netstat -tunlp | grep 8000
-tcp        0      0 0.0.0.0:8000            0.0.0.0:*               LISTEN      26993/nodejs   
-#+END_SRC
-更多命令：
-#+begin_src bash
-netstat -ntlp   //查看当前所有tcp端口
-netstat -ntulp | grep 80   //查看所有80端口使用情况
-netstat -ntulp | grep 3306   //查看所有3306端口使用情况
-#+END_SRC
+格式：
+ldd [选项] 文件
+
+选项：
+- --version：打印ldd的版本号
+- -v --verbose：打印所有信息，例如包括符号的版本信息
+- -d --data-relocs：执行符号重部署，并报告缺少的目标对象（只对ELF格式适用）
+- -r --function-relocs：对目标对象和函数执行重新部署，并报告缺少的目标对象和函数（只对ELF格式适用）
+- --help：用法信息
+
 * less命令
 less 与 more 类似，less 可以随意浏览文件，支持翻页和搜索，支持向上翻页和向下翻页。
 
@@ -1904,7 +2261,529 @@ less log2013.log log2014.log
 说明：
 输入 ：n后，切换到 log2014.log
 输入 ：p 后，切换到log2013.log
+* locale命令
+locale是linux系统中多语言环境的设置接口，Locale根据计算机用户所使用的语言，所在国家或者地区，以及当地的文化传统所定义的一个软件运行时的语言环境。
 
+通过locale来设置程序运行的不同语言环境，locale由ANSI C提供支持。locale的命名规则为<语言>_<地区>.<字符集编码>，如zh_CN.UTF-8，zh代表中文，CN代表大陆地区，UTF-8表示字符集。在locale环境中，有一组变量，代表国际化环境中的不同设置。locale是linux系统中多语言环境的设置接口，Locale根据计算机用户所使用的语言，所在国家或者地区，以及当地的文化传统所定义的一个软件运行时的语言环境。
+
+通过locale来设置程序运行的不同语言环境，locale由ANSI C提供支持。locale的命名规则为<语言>_<地区>.<字符集编码>，如zh_CN.UTF-8，zh代表中文，CN代表大陆地区，UTF-8表示字符集。在locale环境中，有一组变量，代表国际化环境中的不同设置。
+
+语法格式：locale [参数]
+
+常用参数：
+- -a 查看当前系统所有可用locale
+- -m 写入可用字符映射的名称
+- -c 写入选定类别的名称
+- -k 写入选定关键字的名称
+
+** 查看当前locale设置:
+#+begin_src bash
+[root@linuxcool ~]# locale
+LANG=en_US.UTF-8
+LANGUAGE=en_US:en
+LC_CTYPE="en_US.UTF-8"
+LC_NUMERIC=en_US.UTF-8
+LC_TIME=en_US.UTF-8
+LC_COLLATE="en_US.UTF-8"
+LC_MONETARY=en_US.UTF-8
+LC_MESSAGES="en_US.UTF-8"
+LC_PAPER=en_US.UTF-8
+LC_NAME=en_US.UTF-8
+LC_ADDRESS=en_US.UTF-8
+LC_TELEPHONE=en_US.UTF-8
+LC_MEASUREMENT=en_US.UTF-8
+LC_IDENTIFICATION=en_US.UTF-8
+LC_ALL=
+#+END_SRC
+分别介绍下
+#+BEGIN_EXAMPLE
+LANG：LANG的优先级是最低的，它是所有LC_*变量的默认值，下方所有以LC_开头变量（LC_ALL除外）中，如果存在没有设置变量值的变量，那么系统将会使用LANG的变量值来给这个变量进行赋值。如果变量有值，则保持不变
+
+LC_CTYPE：用于字符分类和字符串处理，控制所有字符的处理方式，包括字符编码，字符是单字节还是多字节，如何打印等，非常重要的一个变量。
+LC_NUMERIC：用于格式化非货币的数字显示
+LC_TIME：用于格式化时间和日期
+LC_COLLATE：用于比较和排序
+LC_MONETARY：用于格式化货币单位
+LC_MESSAGES：用于控制程序输出时所使用的语言，主要是提示信息，错误信息，状态信息，标题，标签，按钮和菜单等
+LC_PAPER：默认纸张尺寸大小
+LC_NAME：姓名书写方式
+LC_ADDRESS：地址书写方式
+LC_TELEPHONE：电话号码书写方式
+LC_MEASUREMENT：度量衡表达方式
+LC_IDENTIFICATION：locale对自身包含信息的概述
+
+LC_ALL：它不是环境变量，它是一个宏，它可通过该变量的设置覆盖所有LC_*变量，这个变量设置之后，可以废除LC_*的设置值，使得这些变量的设置值与LC_ALL的值一致，注意LANG变量不受影响。
+
+优先级：LC_ALL > LC_* > LANG
+#+END_EXAMPLE
+
+** 查看可用的语言环境：
+#+begin_src bash
+[root@linuxcool ~]# locale -a
+C
+C.UTF-8
+POSIX
+#+END_SRC
+上面所列的，C是系统默认的locale，POSIX是C的别名，这是标准的C locale ，它所指定的属性和行为由ISO C标准所指定，当我们新安装完一个系统时，默认的locale就是C或POSIX（C就是ASCII编码）
+** 设置系统的locale
+修改/etc/profile文件
+#+begin_src bash
+#在最下面增加
+export LC_ALL=zh_CN.utf8
+export LANG=zh_CN.utf8
+#+END_SRC
+source一下配置文件，使其生效
+
+修改/etc/default/locale
+#+begin_src bash
+LANG=“en_US.UTF-8”
+LANGUAGE=“en_US:en”
+#+END_SRC
+注销一下，使其生效
+
+修改/etc/locale.gen文件
+#+begin_src bash
+...
+#en_SG ISO-8859-1
+en_US.UTF-8 UTF-8
+#en_US ISO-8859-1
+…
+#+END_SRC
+将注释打开即可
+
+修改完成后，执行下locale-gen命令使其生效
+
+命令行模式下修改
+#+begin_src bash
+localectl set-locale LANG=en_US.UTF-8
+#+END_SRC
+
+创建/etc/locale.conf文件
+#+begin_src bash
+LANG=en_AU.UTF-8
+LC_COLLATE=C
+LC_TIME=en_DK.UTF-8
+#+END_SRC
+source使其生效
+** locale 没有en_us的解决方法
+#+begin_src bash
+apt-get update
+
+# Install locales package
+apt-get install -y locales
+
+# Uncomment en_US.UTF-8 for inclusion in generation
+sed -i 's/^# *\(en_US.UTF-8\)/\1/' /etc/locale.gen
+
+# Generate locale
+locale-gen
+
+# Export env vars
+echo "export LC_ALL=en_US.UTF-8" >> ~/.bashrc
+echo "export LANG=en_US.UTF-8" >> ~/.bashrc
+echo "export LANGUAGE=en_US.UTF-8" >> ~/.bashrc
+#+END_SRC
+* ls命令
+-a, –all 列出目录下的所有文件，包括以 . 开头的隐含文件
+
+-A 同-a，但不列出“.”(表示当前目录)和“…”(表示当前目录的父目录)。
+
+-c 配合 -lt：根据 ctime 排序及显示 ctime (文件状态最后更改的时间)配合 -l：显示 ctime 但根据名称排序否则：根据 ctime 排序
+
+-C 每栏由上至下列出项目
+
+–color[=WHEN] 控制是否使用色彩分辨文件。WHEN 可以是’never’、'always’或’auto’其中之一
+
+-d, –directory 将目录象文件一样显示，而不是显示其下的文件。
+
+-D, –dired 产生适合 Emacs 的 dired 模式使用的结果
+
+-f 对输出的文件不进行排序，-aU 选项生效，-lst 选项失效
+
+-g 类似 -l,但不列出所有者
+
+-G, –no-group 不列出任何有关组的信息
+
+-h, –human-readable 以容易理解的格式列出文件大小 (例如 1K 234M 2G)
+
+–si 类似 -h,但文件大小取 1000 的次方而不是 1024
+
+-H, –dereference-command-line 使用命令列中的符号链接指示的真正目的地
+
+–indicator-style=方式 指定在每个项目名称后加上指示符号<方式>：none (默认)，classify (-F)，file-type (-p)
+
+-i, –inode 印出每个文件的 inode 号
+
+-I, –ignore=样式 不印出任何符合 shell 万用字符<样式>的项目
+
+-k 即 –block-size=1K,以 k 字节的形式表示文件的大小。
+
+-l 除了文件名之外，还将文件的权限、所有者、文件大小等信息详细列出来。
+
+-L, –dereference 当显示符号链接的文件信息时，显示符号链接所指示的对象而并非符号链接本身的信息
+
+-m 所有项目以逗号分隔，并填满整行行宽
+
+-o 类似 -l,显示文件的除组信息外的详细信息。
+
+-r, –reverse 依相反次序排列
+
+-R, –recursive 同时列出所有子目录层
+
+-s, –size 以块大小为单位列出所有文件的大小
+
+-S 根据文件大小排序
+** 仅列出目录
+仅列出目录，下面是 4 种不同的方法。
+
+1. 利用 ls 命令的 -d 选项：
+#+begin_src bash
+$ ls -d */
+Desktop/  pic/  shell/  src/
+#+END_SRC
+
+2. 利用 ls 命令的 -F 选项：
+#+begin_src bash
+$ ls -F |grep "/$"
+Desktop/
+pic/
+shell/
+src/
+#+END_SRC
+-F 选项会给输出的不同文件类型加上一个后缀，比如普通文件会在其后加一个 * 符号，管道文件会在其后加上一个 | 符号，而目录则在其后加上一个 / 符号，因此使用上面的方法也可以实现仅列出目录。
+
+3. 利用 ls 命令的 -l 选项：
+#+begin_src bash
+$ls -l |grep "^d"
+drwxr-xr-x 2 root root 4096 2011-05-08 01:46 Desktop
+drwxr-xr-x 2 root root 4096 2012-03-26 10:03 pic
+drwxr-xr-x 2 root root 4096 2012-03-30 17:21 shell
+drwxr-xr-x 3 root root 4096 2012-03-22 22:18 src
+#+END_SRC
+
+
+上面列出了目录的详细信息，如果只想列出目录名本身，那么可以：
+#+begin_src bash
+$ls -l |grep "^d" |awk '{print $8}'
+Desktop
+pic
+shell
+src
+#+END_SRC
+** 只显示隐藏文件
+可以用ls .* 来显示。但是默认情况下，如果是目录，会显示目录包含的文件，此时可以用-d来避免。
+#+begin_src bash
+ls -d .*
+#+END_SRC
+** 基于文件名，大小，时间排序
+linux ls命令中，-f 直接列出结果，而不进行排序（ls默认会以文件名排序）；-S 基于文件大小进行排序；-t 基于文件修改时间进行排序；-r 将排序结果反向输出，例如：原本文件名由小到大，反向则由大到小；
+
+1. 基于文件名排序
+ls -fl
+
+2. 基于文件大小排序
+ls -Sr
+
+3. 基于文件时间排序
+ls -tr 
+* netstat
+Linux netstat 命令用于显示网络状态。
+
+利用 netstat 指令可让你得知整个 Linux 系统的网络情况。
+
+语法：netstat [-acCeFghilMnNoprstuvVwx][-A<网络类型>][--ip]
+
+- -a或--all 显示所有连线中的Socket。
+- -A<网络类型>或--<网络类型> 列出该网络类型连线中的相关地址。
+- -c或--continuous 持续列出网络状态。
+- -C或--cache 显示路由器配置的快取信息。
+- -e或--extend 显示网络其他相关信息。
+- -F或--fib 显示路由缓存。
+- -g或--groups 显示多重广播功能群组组员名单。
+- -h或--help 在线帮助。
+- -i或--interfaces 显示网络界面信息表单。
+- -l或--listening 显示监控中的服务器的Socket。
+- -M或--masquerade 显示伪装的网络连线。
+- -n或--numeric 直接使用IP地址，而不通过域名服务器。
+- -N或--netlink或--symbolic 显示网络硬件外围设备的符号连接名称。
+- -o或--timers 显示计时器。
+- -p或--programs 显示正在使用Socket的程序识别码和程序名称。
+- -r或--route 显示Routing Table。
+- -s或--statistics 显示网络工作信息统计表。
+- -t或--tcp 显示TCP传输协议的连线状况。
+- -u或--udp 显示UDP传输协议的连线状况。
+- -v或--verbose 显示指令执行过程。
+- -V或--version 显示版本信息。
+- -w或--raw 显示RAW传输协议的连线状况。
+- -x或--unix 此参数的效果和指定"-A unix"参数相同。
+- --ip或--inet 此参数的效果和指定"-A inet"参数相同。
+
+** 实例
+*** 显示详细的网络状况
+# netstat -a
+*** 显示当前户籍UDP连接状况
+# netstat -nu
+*** 显示UDP端口号的使用情况
+# netstat -apu
+Active Internet connections (servers and established)
+Proto Recv-Q Send-Q Local Address        Foreign Address       State    PID/Program name  
+udp    0   0 *:32768           *:*                   -          
+udp    0   0 *:nfs            *:*                   -          
+udp    0   0 *:641            *:*                   3006/rpc.statd   
+udp    0   0 192.168.0.3:netbios-ns   *:*                   3537/nmbd      
+udp    0   0 *:netbios-ns        *:*                   3537/nmbd      
+udp    0   0 192.168.0.3:netbios-dgm   *:*                   3537/nmbd      
+udp    0   0 *:netbios-dgm        *:*                   3537/nmbd      
+udp    0   0 *:tftp           *:*                   3346/xinetd     
+udp    0   0 *:999            *:*                   3366/rpc.rquotad  
+udp    0   0 *:sunrpc          *:*                   2986/portmap    
+udp    0   0 *:ipp            *:*                   6938/cupsd     
+udp    0   0 *:1022           *:*                   3392/rpc.mountd   
+udp    0   0 *:638            *:*                   3006/rpc.statd
+*** 显示网卡列表
+# netstat -i
+Kernel Interface table
+Iface    MTU Met  RX-OK RX-ERR RX-DRP RX-OVR  TX-OK TX-ERR TX-DRP TX-OVR Flg
+eth0    1500  0  181864   0   0   0  141278   0   0   0 BMRU
+lo    16436  0   3362   0   0   0   3362   0   0   0 LRU
+*** 显示组播组的关系
+# netstat -g
+IPv6/IPv4 Group Memberships
+Interface    RefCnt Group
+--------------- ------ ---------------------
+lo       1   ALL-SYSTEMS.MCAST.NET
+eth0      1   ALL-SYSTEMS.MCAST.NET
+lo       1   ff02::1
+eth0      1   ff02::1:ff0a:b0c
+eth0      1   ff02::1
+*** 显示网络统计信息
+# netstat -s
+Ip:
+  184695 total packets received
+  0 forwarded
+  0 incoming packets discarded
+  184687 incoming packets delivered
+  143917 requests sent out
+  32 outgoing packets dropped
+  30 dropped because of missing route
+Icmp:
+  676 ICMP messages received
+  5 input ICMP message failed.
+  ICMP input histogram:
+    destination unreachable: 44
+    echo requests: 287
+    echo replies: 345
+  304 ICMP messages sent
+  0 ICMP messages failed
+  ICMP output histogram:
+    destination unreachable: 17
+    echo replies: 287
+Tcp:
+  473 active connections openings
+  28 passive connection openings
+  4 failed connection attempts
+  11 connection resets received
+  1 connections established
+  178253 segments received
+  137936 segments send out
+  29 segments retransmited
+  0 bad segments received.
+  336 resets sent
+Udp:
+  5714 packets received
+  8 packets to unknown port received.
+  0 packet receive errors
+  5419 packets sent
+TcpExt:
+  1 resets received for embryonic SYN_RECV sockets
+  ArpFilter: 0
+  12 TCP sockets finished time wait in fast timer
+  572 delayed acks sent
+  3 delayed acks further delayed because of locked socket
+  13766 packets directly queued to recvmsg prequeue.
+  1101482 packets directly received from backlog
+  19599861 packets directly received from prequeue
+  46860 packets header predicted
+  14541 packets header predicted and directly queued to user
+  TCPPureAcks: 12259
+  TCPHPAcks: 9119
+  TCPRenoRecovery: 0
+  TCPSackRecovery: 0
+  TCPSACKReneging: 0
+  TCPFACKReorder: 0
+  TCPSACKReorder: 0
+  TCPRenoReorder: 0
+  TCPTSReorder: 0
+  TCPFullUndo: 0
+  TCPPartialUndo: 0
+  TCPDSACKUndo: 0
+  TCPLossUndo: 0
+  TCPLoss: 0
+  TCPLostRetransmit: 0
+  TCPRenoFailures: 0
+  TCPSackFailures: 0
+  TCPLossFailures: 0
+  TCPFastRetrans: 0
+  TCPForwardRetrans: 0
+  TCPSlowStartRetrans: 0
+  TCPTimeouts: 29
+  TCPRenoRecoveryFail: 0
+  TCPSackRecoveryFail: 0
+  TCPSchedulerFailed: 0
+  TCPRcvCollapsed: 0
+  TCPDSACKOldSent: 0
+  TCPDSACKOfoSent: 0
+  TCPDSACKRecv: 0
+  TCPDSACKOfoRecv: 0
+  TCPAbortOnSyn: 0
+  TCPAbortOnData: 1
+  TCPAbortOnClose: 0
+  TCPAbortOnMemory: 0
+  TCPAbortOnTimeout: 3
+  TCPAbortOnLinger: 0
+  TCPAbortFailed: 3
+  TCPMemoryPressures: 0
+*** 显示监听的套接口
+# netstat -l
+Active Internet connections (only servers)
+Proto Recv-Q Send-Q Local Address        Foreign Address       State   
+tcp    0   0 *:32769           *:*             LISTEN   
+tcp    0   0 *:nfs            *:*             LISTEN   
+tcp    0   0 *:644            *:*             LISTEN   
+tcp    0   0 *:1002           *:*             LISTEN   
+tcp    0   0 *:netbios-ssn        *:*             LISTEN   
+tcp    0   0 *:sunrpc          *:*             LISTEN   
+tcp    0   0 vm-dev:ipp         *:*             LISTEN   
+tcp    0   0 *:telnet          *:*             LISTEN   
+tcp    0   0 *:601            *:*             LISTEN   
+tcp    0   0 *:microsoft-ds       *:*             LISTEN   
+tcp    0   0 *:http           *:*             LISTEN   
+tcp    0   0 *:ssh            *:*             LISTEN   
+tcp    0   0 *:https           *:*             LISTEN   
+udp    0   0 *:32768           *:*                   
+udp    0   0 *:nfs            *:*                   
+udp    0   0 *:641            *:*                   
+udp    0   0 192.168.0.3:netbios-ns   *:*                   
+udp    0   0 *:netbios-ns        *:*                   
+udp    0   0 192.168.0.3:netbios-dgm   *:*                   
+udp    0   0 *:netbios-dgm        *:*                   
+udp    0   0 *:tftp           *:*                   
+udp    0   0 *:999            *:*                   
+udp    0   0 *:sunrpc          *:*                   
+udp    0   0 *:ipp            *:*                   
+udp    0   0 *:1022           *:*                   
+udp    0   0 *:638            *:*                   
+Active UNIX domain sockets (only servers)
+Proto RefCnt Flags    Type    State     I-Node Path
+unix 2   [ ACC ]   STREAM   LISTENING   10621 @/tmp/fam-root-
+unix 2   [ ACC ]   STREAM   LISTENING   7096  /var/run/acpid.socket
+unix 2   [ ACC ]   STREAM   LISTENING   9792  /tmp/.gdm_socket
+unix 2   [ ACC ]   STREAM   LISTENING   9927  /tmp/.X11-unix/X0
+unix 2   [ ACC ]   STREAM   LISTENING   10489 /tmp/ssh-lbUnUf4552/agent.4552
+unix 2   [ ACC ]   STREAM   LISTENING   10558 /tmp/ksocket-root/kdeinit__0
+unix 2   [ ACC ]   STREAM   LISTENING   10560 /tmp/ksocket-root/kdeinit-:0
+unix 2   [ ACC ]   STREAM   LISTENING   10570 /tmp/.ICE-unix/dcop4664-1270815442
+unix 2   [ ACC ]   STREAM   LISTENING   10843 /tmp/.ICE-unix/4735
+unix 2   [ ACC ]   STREAM   LISTENING   10591 /tmp/ksocket-root/klauncherah3arc.slave-socket
+unix 2   [ ACC ]   STREAM   LISTENING   7763  /var/run/iiim/.iiimp-unix/9010
+unix 2   [ ACC ]   STREAM   LISTENING   11047 /tmp/orbit-root/linc-1291-0-1e92c8082411
+unix 2   [ ACC ]   STREAM   LISTENING   11053 /tmp/orbit-root/linc-128e-0-dc070659cbb3
+unix 2   [ ACC ]   STREAM   LISTENING   8020  /var/run/dbus/system_bus_socket
+unix 2   [ ACC ]   STREAM   LISTENING   58927 /tmp/mcop-root/vm-dev-2c28-4beba75f
+unix 2   [ ACC ]   STREAM   LISTENING   7860  /tmp/.font-unix/fs7100
+unix 2   [ ACC ]   STREAM   LISTENING   7658  /dev/gpmctl
+unix 2   [ ACC ]   STREAM   LISTENING   10498 @/tmp/dbus-s2MLJGO5Ci
+* Node.js安装
+在Ubuntu系统上安装nodejs有很多种方法，分别为：apt-get在线安装，下载Node.js源码自己编译安装，下载编译好的文件，使用npm安装等方式。
+
+** 在线安装
+在线安装并不推荐，比较坑的一点是安装后node命令不可用，nondejs命令可用。使用在线安装步骤为：在我们安装 nodejs 之前，推荐你将系统更新到最新的补丁和升级包，所以请登录到系统中使用超级用户运行如下命令：
+
+apt-get update，之后apt-get install nodejs。
+
+此外在Node.js官网提供了一种在线安装的方式，我们可以通过
+
+curl -sL https://deb.nodesource.com/setup_7.x | sudo -E bash - 
+
+sudo apt-get install -y nodejs来安装node7.0及以上版本的nodejs。注意：如果在虚拟机上搭建的Linux系统，在执行以上在线安装的命令时网速可能会相当慢，解决办法可以参考这篇文章。
+
+#+DOWNLOADED: screenshot @ 2022-03-07 22:34:16
+[[file:images/linux%E7%AC%94%E8%AE%B0/Node.js%E5%AE%89%E8%A3%85/2022-03-07_22-34-16_screenshot.png]]
+
+** 源码编译安装
+通过源码编译安装。用以下命令来升级系统，并且安装一些Node.js必要的包
+
+apt-get update
+
+apt-get install python gcc make g++
+
+接下来来到Node.js官网下载专区，在下图中红框内选中的标为Source Code的版本上点击鼠标
+
+右键，选择复制下载链接。
+
+#+DOWNLOADED: screenshot @ 2022-03-08 09:52:41
+[[file:images/linux%E7%AC%94%E8%AE%B0/Node.js%E5%AE%89%E8%A3%85/2022-03-08_09-52-41_screenshot.png]]
+执行以下命令：
+
+wget https://nodejs.org/dist/v6.9.2/node-v6.9.2.tar.gz（该地址为Source Code下载地址）
+
+tar -zxvf node-v6.9.2.tar.gz 解压下载的Source Code。
+
+解压完成后依次执行：
+#+begin_src bash
+cd node-v6.9.2
+./configure
+make
+sudo make install
+#+END_SRC
+此外，我们还可以使用git在github上将源码clone下来，同样执行以上命令编译安装。
+
+** 下载编译好的文件进行安装
+下载编译好的文件。简单说就是解压后，bin文件夹中存在node及npm，如果进入到对应文件中执行命令一点问题没有，不过不是全局的。所以设置为全局就可以了。
+
+wget https://nodejs.org/dist/v6.9.2/node-v6.9.2-linux-x64.tar.xz  --下载
+xz -d node-v6.9.2-linux-x64.tar.xz --解压为tar类型
+tar -xvf node-v6.9.2-linux-x64.tar  --解压
+
+解压完成后pwd查看当前下载目录，并执行以下命令设置全局：
+ln -s /home/zlliu/tcl/node-v6.9.2-linux-64/bin/node /usr/local/node
+ln -s /home/zlliu/tcl/node-v6.9.2-linux-64/bin/npm /usr/local/npm
+其中/home/zlliu/tcl/这个路径是我下载nodejs存放的路径，你应该改成自己的存放路径。
+
+** 使用npm安装
+使用npm安装，首先要下载npm。同样可使用apt-get或者下载npm源码进行安装，安装后可使用npm各种命令，如npm ls，npm install <packageName>等等，我们可用npm指定安装nodejs的版本。
+
+* mkdir
+Linux mkdir（英文全拼：make directory）命令用于创建目录。
+
+语法:
+mkdir [-p] dirName
+
+参数说明：
+-p 确保目录名称存在，不存在的就建一个。
+* mount
+#+begin_src bash
+mount [-t vfstype] [-o options] device dir
+#+END_SRC
+1.-t vfstype 指定文件系统的类型，通常不必指定。mount 会自动选择正确的类型。
+常用类型有：
+- 光盘或光盘镜像：iso9660
+- DOS fat16文件系统：msdos
+- Windows 9x fat32文件系统：vfat
+- Windows NT ntfs文件系统：ntfs
+- Mount Windows文件网络共享：smbfs
+- UNIX(LINUX) 文件网络共享：nfs
+
+2.-o options 主要用来描述设备或档案的挂接方式。
+常用的参数有：
+- loop：用来把一个文件当成硬盘分区挂接上系统
+- ro：采用只读方式挂接设备
+- rw：采用读写方式挂接设备
+- iocharset：指定访问文件系统所用字符集
+
+3.device 要挂接(mount)的设备。
+
+4.dir设备在系统上的挂接点(mount point)。
 * OpenCV
 ** C++接口
 先安装依赖
@@ -2044,7 +2923,6 @@ Python 3.6.1
 #+begin_src bash
 sudo apt-get install zlib1g-dev
 #+END_SRC
-
 * pip的用法
 #+BEGIN_SRC bash
 sudo pip3 --no-cache-dir --default-timeout=100 install -i https://pypi.tuna.tsinghua.edu.cn/simple torch
@@ -2055,6 +2933,26 @@ pip install -r requirements.txt
 #+END_SRC
 -r表示从requirements.txt读取安装列表
 浙大内部镜像：http://mirrors.aliyun.com/
+** 换源
+清华源
+
+临时使用
+#+begin_src bash
+pip install -i https://pypi.tuna.tsinghua.edu.cn/simple some-package
+#+END_SRC
+注意，simple 不能少, 是 https 而不是 http
+
+设为默认
+升级 pip 到最新的版本 (>=10.0.0) 后进行配置：
+#+begin_src bash
+pip install pip -U
+pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+#+END_SRC
+如果您到 pip 默认源的网络连接较差，临时使用本镜像站来升级 pip：
+#+begin_src bash
+pip install -i https://pypi.tuna.tsinghua.edu.cn/simple pip -U
+#+END_SRC
+
 ** 安装包
 #+begin_src bash
 pip install SomePackage              # 最新版本
@@ -2154,6 +3052,7 @@ xiongdan 200 lihaihui 233 lymlrl 231
 
 注意：参数"-s"只是将testfile文件的内容调整显示方式，并不会改变原文件的内容格式。
 * PS1设置
+** bash
 #+BEGIN_EXAMPLE
 \d ：代表日期，格式为weekday month date，例如："Mon Aug1"
 \H：完整的主机名称。例如：我的机器名称为：fc4.linux，则这个名称就是fc4.linux
@@ -2168,59 +3067,110 @@ xiongdan 200 lihaihui 233 lymlrl 231
 \# ：下达的第几个命令
 \$ ：提示字符，如果是root时，提示符为：# ，普通用户则为：$
 #+END_EXAMPLE
-** 颜色
-颜色代码格式：\[\e[F;Bm\]，F表示字体颜色，B表示背景颜色
+*** 颜色
+ 颜色代码格式：\[\e[F;Bm\]，F表示字体颜色，B表示背景颜色
 
-We will use the \e special character at the beginning and an m at the end to indicate that what follows is a color sequence.
+ We will use the \e special character at the beginning and an m at the end to indicate that what follows is a color sequence.
 
-For example, the following PS1 will cause the prompt to appear in yellow underlined text with red background:
+ For example, the following PS1 will cause the prompt to appear in yellow underlined text with red background:
+ #+begin_src bash
+ PS1="\e[41;4;33m[\u@\h \W]$ "
+ #+END_SRC
+
+ #+DOWNLOADED: screenshot @ 2021-12-10 16:58:01
+ [[file:images/linux%E7%AC%94%E8%AE%B0/PS1%E8%AE%BE%E7%BD%AE/2021-12-10_16-58-01_screenshot.png]]
+
+ 注意在$符号输出之后，我们还要重置颜色为透明，也就是\[\e[0m\]，这样你输入的命令就不会受之前颜色设置的影响。
+ 例如：PS1="\e[42;0;32m\u@\h:\w\$\e[0m"
+ 颜色表如下：
+ | Text Format        | Foreground (text) color | Background color |
+ |--------------------+-------------------------+------------------|
+ | 0: normal text     | 30: Black               | 40: Black        |
+ | 1: bold            | 31: Red                 | 41: Red          |
+ | 4: Underlined text | 32: Green               | 42: Green        |
+ |                    | 33: Yellow              | 43: Yellow       |
+ |                    | 34: Blue                | 44: Blue         |
+ |                    | 35: Purple              | 45: Purple       |
+ |                    | 36: Cyan                | 46: Cyan         |
+ |                    | 37: White               | 47: White        |
+**** 参考文章
+ [[https://www.tecmint.com/customize-bash-colors-terminal-prompt-linux/][How to Customize Bash Colors and Content in Linux Terminal Prompt]]
+*** What does "${debian_chroot:+($debian_chroot)}" do in my terminal prompt?
+ The important part to answer this question is this snippet from /etc/bash.bashrc:
+ #+begin_src bash
+ if [ -z "$debian_chroot" ] && [ -r /etc/debian_chroot ]; then
+     debian_chroot=$(cat /etc/debian_chroot)
+ fi
+ #+END_SRC
+ It means if the variable $debian_chroot is empty and the file /etc/debian_chroot exists and is readable the variable is set to the content of the file.
+
+ Now what is this for? The file /etc/debian_chroot is when you have a chrooted debian system inside another debian system (ubuntu is based on debian). So this is for a better overview. To distinguish whether you are in the chroot or not.
+
+ When you have a chroot of another system for example in /srv/nfs4/netboot/ you can set a name for this chroot in /srv/nfs4/netboot/etc/debian_chroot (in my case it's a nfs4 pxe netboot drive):
+ #+begin_src bash
+ user@host:~# echo "netboot" >/srv/nfs4/netboot/etc/debian_chroot
+ #+END_SRC
+ And then when you chroot inside:
+ #+begin_src bash
+ chroot /srv/nfs4/netboot/
+ #+END_SRC
+
+ Your prompt looks like this:
+ #+begin_src bash
+ (netboot)user@host:~#
+ #+END_SRC
+
+** zsh
+oh-my-zsh终端用户名设置
+
+先查看一下当前使用的主题：
 #+begin_src bash
-PS1="\e[41;4;33m[\u@\h \W]$ "
+echo $ZSH_THEME
 #+END_SRC
+查看自己主题，我的是robbyrussell
 
-#+DOWNLOADED: screenshot @ 2021-12-10 16:58:01
-[[file:images/linux%E7%AC%94%E8%AE%B0/PS1%E8%AE%BE%E7%BD%AE/2021-12-10_16-58-01_screenshot.png]]
-
-注意在$符号输出之后，我们还要重置颜色为透明，也就是\[\e[0m\]，这样你输入的命令就不会受之前颜色设置的影响。
-例如：PS1="\e[42;0;32m\u@\h:\w\$\e[0m"
-颜色表如下：
-| Text Format        | Foreground (text) color | Background color |
-|--------------------+-------------------------+------------------|
-| 0: normal text     | 30: Black               | 40: Black        |
-| 1: bold            | 31: Red                 | 41: Red          |
-| 4: Underlined text | 32: Green               | 42: Green        |
-|                    | 33: Yellow              | 43: Yellow       |
-|                    | 34: Blue                | 44: Blue         |
-|                    | 35: Purple              | 45: Purple       |
-|                    | 36: Cyan                | 46: Cyan         |
-|                    | 37: White               | 47: White        |
-*** 参考文章
-[[https://www.tecmint.com/customize-bash-colors-terminal-prompt-linux/][How to Customize Bash Colors and Content in Linux Terminal Prompt]]
-** What does "${debian_chroot:+($debian_chroot)}" do in my terminal prompt?
-The important part to answer this question is this snippet from /etc/bash.bashrc:
+之后进入oh-my-zsh的主题目录，修改主题设置
 #+begin_src bash
-if [ -z "$debian_chroot" ] && [ -r /etc/debian_chroot ]; then
-    debian_chroot=$(cat /etc/debian_chroot)
-fi
+cd ~/.oh-my-zsh/themes
+vim robbyrussell.zsh-theme
 #+END_SRC
-It means if the variable $debian_chroot is empty and the file /etc/debian_chroot exists and is readable the variable is set to the content of the file.
-
-Now what is this for? The file /etc/debian_chroot is when you have a chrooted debian system inside another debian system (ubuntu is based on debian). So this is for a better overview. To distinguish whether you are in the chroot or not.
-
-When you have a chroot of another system for example in /srv/nfs4/netboot/ you can set a name for this chroot in /srv/nfs4/netboot/etc/debian_chroot (in my case it's a nfs4 pxe netboot drive):
+可以看到
 #+begin_src bash
-user@host:~# echo "netboot" >/srv/nfs4/netboot/etc/debian_chroot
-#+END_SRC
-And then when you chroot inside:
-#+begin_src bash
-chroot /srv/nfs4/netboot/
-#+END_SRC
+local ret_status="%(?:%{$fg_bold[green]%}➜ :%{$fg_bold[red]%}➜ )"
+PROMPT='${ret_status} %{$fg[cyan]%}%~%{$reset_color%} $(git_prompt_info)'
 
-Your prompt looks like this:
-#+begin_src bash
-(netboot)user@host:~#
+ZSH_THEME_GIT_PROMPT_PREFIX="%{$fg_bold[blue]%}git:(%{$fg[red]%}"
+ZSH_THEME_GIT_PROMPT_SUFFIX="%{$reset_color%} "
+ZSH_THEME_GIT_PROMPT_DIRTY="%{$fg[blue]%}) %{$fg[yellow]%}✗"
+ZSH_THEME_GIT_PROMPT_CLEAN="%{$fg[blue]%})"
 #+END_SRC
+PROMPT就是设置显示的用户名
 
+由于oh_my_zsh时常会有版本更新，为了避免我们修改的跟更新的版本有冲突，建议不要修改robbyrussell.zsh-theme，而是将其拷贝出来，命名为自己的主题文件，比如叫做myrobbyrussell.zsh-theme，然后只对myrobbyrussell.zsh-theme进行修改。
+
+修改后将 ~/.zshrc 中的
+#+begin_src bash
+ZSH_THEME="robbyrussell"
+#+END_SRC
+改为
+#+begin_src bash
+ZSH_THEME="myrobbyrussell"
+#+END_SRC
+这样就能避免冲突了。
+
+#+BEGIN_EXAMPLE
+%T	系统时间（时：分）
+%*	系统时间（时：分：秒）
+%D	系统日期（年-月-日）
+%n	用户名称（即：当前登陆终端的用户的名称，和whami命令输出相同）
+%B - %b	开始到结束使用粗体打印
+%U - %u	开始到结束使用下划线打印
+%d	你当前的工作目录
+%~	你目前的目录相对于～的相对路径
+%M	计算机的主机名
+%m	计算机的主机名（在第一个句号之前截断）
+%l	你当前的tty
+#+END_EXAMPLE
 * rsync
 ** 简介
 rsync 是一个常用的 Linux 应用程序，用于文件同步。
@@ -2463,6 +3413,23 @@ ln -s "${BACKUP_PATH}" "${LATEST_LINK}"
 上面脚本中，每一次同步都会生成一个新目录${BACKUP_DIR}/${DATETIME}，并将软链接${BACKUP_DIR}/latest指向这个目录。下一次备份时，就将${BACKUP_DIR}/latest作为基准目录，生成新的备份目录。最后，再将软链接${BACKUP_DIR}/latest指向新的备份目录。
 ** 参考文章
 [[https://www.ruanyifeng.com/blog/2020/08/rsync.html][rsync 用法教程]]
+* rm
+-f, --force    忽略不存在的文件，从不给出提示。
+-i, --interactive 进行交互式删除
+-r, -R, --recursive   指示rm将参数中列出的全部目录和子目录均递归地删除。
+-v, --verbose    详细显示进行的步骤
+   --help     显示此帮助信息并退出
+   --version  输出版本信息并退出
+* rz和sz命令使用
+rz命令是方便从windows传文件到Linux，在windows下通过连接工具进入linux系统，cd到自己需要的目录，命令行输入rz，然后回车，之后会弹出一个选择框，选择我们需要上传的文件，然后add，最后上传就好了。
+
+#: rz 
+
+sz命令反过来，是从Linux传输文件到windows，同样Linux下我们需要传的文件所在目录，命令行输入sz，后面跟上需要传输的文件命，可以是一个文件，也可以跟多个文件名，同时传多个文件，然后回车，就可以传文件了。默认情况文件传到windows的用户下载目录下。
+
+#: sz filename1 filename2 filename3
+
+这两个命令传输传输小文件很方便也很快，但是遇到大文件经常需要很久，甚至传了一部分然后中断了，这时就需要nc命令出场了，传输大文件也非常快。
 * sed
 sed采用的是流编辑模式，最明显的特点是，在 sed 处理数据之前，需要预先提供一组规则，sed 会按照此规则来编辑数据。
 
@@ -3257,6 +4224,15 @@ This is a test to, remove, commas.
 This is a test to remove, commas.
 This is a test to remove commas.
 #+END_SRC
+** 给文件的行编号
+#+begin_src bash
+# 行号和内容分开
+sed '=' data
+
+# 行号和内容在同一行
+sed '=' data | sed 'N;s/\n/: /'
+#+END_SRC
+
 * split
 split 的作用很好描述，就是将文件按照一定规则进行拆分。一般情况下，我们可以按照文件大小来进行拆分，如果是文本文件的话，还可以按照行数来进行拆分，默认是 1000 行作为一个拆分单位。
 
@@ -3397,21 +4373,6 @@ Script. done on 2009年02月08日 星期日 18时57分00秒
 #+END_SRC
 我们在启动script时没有指定文件名，它会自动记录到当前目录下一个名为 typescript的文件中。也可以用 -a参数 指定文件名
 * ssh 相关
-** ssh Connection refused的解决方法
- 没装openssh_server 或者openssh_client，解决方法:sudo apt-get install openssh_server openssh_client
- #+BEGIN_EXAMPLE
- The ssh binary, the SSH client, is provided by the openssh-client package, which is installed on your system.
-
- The ssh service runs the SSH server, provided by the openssh-server package, which isn’t installed on your system.
-
- The ssh package is a meta-package which installs both the client and the server.
- #+END_EXAMPLE
- 开启openssh服务: sudo /etc/init.d/ssh start
-
- 验证是否开启服务: ps -e | grep ssh
-
- 如果有输出 sshd 证明已经开启ssh服务
-
 ** ubuntu开启SS
 H服务远程登录
  SSH分客户端openssh-client和openssh-server
@@ -3455,7 +4416,6 @@ H服务远程登录
  2  sudo apt-get upgrade 
  （继续更新软件源）执行安装操作，应该能成功 
  最后执行sudo apt-get install -y openssh-server
-
 ** SSH、SCP和SFTP
 *** SSH、SCP和SFTP都是SSH软件包的组成部分
  SSH 是 Secure Shell 的缩写，由 IETF 的网络小组（Network Working Group）所制定；SSH 为建立在应用层基础上的安全协议。SSH 是目前广泛采用的安全登录协议，专为远程登录会话和其他网络服务提供安全性的协议，替代以前不安全的Telnet协议。利用 SSH 协议可以有效防止远程管理过程中的信息泄露问题。
@@ -3625,11 +4585,11 @@ ssh 会查询 .ssh/authorized_keys 来确认那些用户可以被允许登录。
 cat id_rsa.pub >> ~/.ssh/authorized_keys
 
 
-或者直接在本地机器上执行命令： ~cat ~/.ssh/id_rsa.pub | ssh user@host "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys"~
+或者直接在本地机器上执行命令： cat ~/.ssh/id_rsa.pub | ssh user@host "mkdir -p ~/.ssh && cat >> ~/.ssh/authorized_keys"
 
 如果支持 ssh-copy-id 的话，可以使用下面这种更简单的解决方案：
 
-~ssh-copy-id -i .ssh/id_rsa.pub foobar@remote~
+ssh-copy-id -i .ssh/id_rsa.pub foobar@remote
 
 如果ssh-copy-id不行的话，就打开远程主机的/etc/ssh/sshd_config这个文件，检查下面几行前面"#"注释是否取掉。
 #+BEGIN_EXAMPLE
@@ -3671,7 +4631,6 @@ HOST w231
  然后重启ssh服务
 
  service sshd restart
-
 ** SSH执行命令
  ssh 的一个经常被忽视的特性是它可以直接远程执行命令。
 
@@ -4423,7 +5382,6 @@ $ sshd -p 2222 -p 3333
 -t
 
 -t参数检查配置文件的语法是否正确。
-
 ** SSH 端口转发
 SSH 端口转发功能能够将其他 TCP 端口的网络数据通过 SSH 链接来转发，并且自动提供了相应的加密及解密服务。其实这一技术就是我们常常听说的隧道(tunnel)技术，原因是 SSH 为其他 TCP 链接提供了一个安全的通道来进行传输。
 
@@ -5217,6 +6175,20 @@ root     + pts/1        Aug 14 15:02 00:03       12640 (192.168.0.123)   #登录
 [root@redhat root]# who -a|grep pts/0
 root     + pts/0        Aug 14 14:59   .         12600 (192.168.0.123)   #登录来源IP192.168.0.123
 #+END_SRC
+** ssh Connection refused的解决方法
+ 没装openssh_server 或者openssh_client，解决方法:sudo apt-get install openssh_server openssh_client
+ #+BEGIN_EXAMPLE
+ The ssh binary, the SSH client, is provided by the openssh-client package, which is installed on your system.
+
+ The ssh service runs the SSH server, provided by the openssh-server package, which isn’t installed on your system.
+
+ The ssh package is a meta-package which installs both the client and the server.
+ #+END_EXAMPLE
+ 开启openssh服务: sudo /etc/init.d/ssh start
+
+ 验证是否开启服务: ps -e | grep ssh
+
+ 如果有输出 sshd 证明已经开启ssh服务
 
 ** git bash关于debug1: send_pubkey_test: no mutual signature algorithm 的解决方法
 相关讨论：[[https://github.com/golang/go/issues/37278][x/crypto/ssh: support RSA SHA-2 host key signatures #37278]]
@@ -5230,6 +6202,23 @@ HostkeyAlgorithms +ssh-rsa
 PubkeyAcceptedAlgorithms +ssh-rsa
 #+END_EXAMPLE
 
+** SSH连接报错:Permission denied, please try again.的解决方法
+当使用 SSH 登录云服务器 ECS （Elastic Compute Server） Linux 服务器时，如果是 root 用户，即便正确输入了密码，也会出现类似如下错误信息。
+
+Permission denied, please try again.
+
+SSH 服务器拒绝了密码，请再试一次。
+
+但非root用户可以正常登录，而且root用户通过 管理终端 登录也正常。
+
+这是因为服务端SSH 服务配置了禁止root用户登录策略。
+
+修改/etc/ssh/sshd_config 中:
+PermitRootLogin no
+
+为：PermitRootLogin yes
+
+并重启ssh服务：service sshd restart
 ** 参考文章
 [[https://www.jianshu.com/p/1e793e386beb][ssh配置文件详解]]
 [[https://wangdoc.com/ssh/client.html][ssh教程]]
@@ -5844,8 +6833,252 @@ My Linux                        #输出数据，进行输出反馈
 #+END_EXAMPLE
 此时，可以分别打开文件"file1"和"file2"，查看其内容是否均是"My Linux"即可判断指令"tee"是否执行成功。
 * tar命令
-** gz
-tar -zxvf xxx
+- *.Z compress 程序压缩的文件；
+- *.zip zip 程序压缩的文件；
+- *.gz gzip 程序压缩的文件；
+- *.bz2 bzip2 程序压缩的文件；
+- *.xz xz 程序压缩的文件；
+- *.tar tar 程序打包的数据，并没有压缩过；
+- *.tar.gz tar 程序打包的文件，其中并且经过 gzip 的压缩
+- *.tar.bz2 tar 程序打包的文件，其中并且经过 bzip2 的压缩
+- *.tar.xz tar 程序打包的文件，其中并且经过 xz 的压缩
+
+** 常见的压缩指令
+*** gzip, zcat/zmore/zless/zgrep
+ 目前 gzip 可以解开 compress, zip 与 gzip 等软件所压缩的文件
+
+ 当你使用 gzip 进行压缩时，在预设的状态下原本的文件会被压缩成为 .gz 的档名，源文件就不再存在了。
+*** bzip2, bzcat/bzmore/bzless/bzgrep
+*** xz, xzcat/xzmore/xzless/xzgrep
+
+** 命令格式
+#+begin_src bash
+tar [-z|-j|-J] [cv] [-f 待建立的新檔名] filename... <==打包与压缩
+tar [-z|-j|-J] [tv] [-f 既有的 tar 檔名] <==察看檔名
+tar [-z|-j|-J] [xv] [-f 既有的 tar 檔名] [-C 目录] <==解压缩
+#+END_SRC
+** 选项与参数：
+- -c ：建立打包文件，可搭配 -v 来察看过程中被打包的档名(filename)
+- -t ：察看打包文件的内容含有哪些档名，重点在察看『档名』就是了；
+- -x ：解打包或解压缩的功能，可以搭配 -C (大写) 在特定目录解开。 
+
+特别留意的是， -c, -t, -x 不可同时出现在一串指令列中。
+
+- -z ：透过 gzip 的支持进行压缩/解压缩：此时档名最好为 *.tar.gz
+- -j ：透过 bzip2 的支持进行压缩/解压缩：此时档名最好为 *.tar.bz2
+- -J ：透过 xz 的支持进行压缩/解压缩：此时档名最好为 *.tar.xz。 
+
+特别留意， -z, -j, -J 不可以同时出现在一串指令列中
+
+- -v ：在压缩/解压缩的过程中，将正在处理的文件名显示出来！用-tv 选项查看打包文件时，详细的文件权限/属性都会被列出来。
+- -f filename：-f 后面要立刻接要被处理的档名！建议 -f 单独写一个选项啰！(比较不会忘记) 。如果把-jcvf filename写成-jvfc filename ，会导致产生的档名变成 c 
+- -C 目录 ：指定解压目录。这个选项用在解压缩，若要在特定目录解压缩，可以使用这个选项。
+- -p(小写) ：保留备份数据的原本权限与属性，常用于备份(-c)重要的配置文件
+- -P(大写) ：保留绝对路径，亦即允许备份数据中含有根目录存在之意；
+- --exclude=FILE：在压缩的过程中，不要将 FILE 打包！
+** 仅解开单一文件的方法
+#+begin_src bash
+# 1. 先找到我们要的档名，假设解开 shadow 文件好了：
+[root@study ~]# tar -jtv -f /root/etc.tar.bz2 | grep 'shadow'
+---------- root/root 721 2015-06-17 00:20 etc/gshadow
+---------- root/root 1183 2015-06-17 00:20 etc/shadow-
+---------- root/root 1210 2015-06-17 00:20 etc/shadow <==这是我们要的！
+---------- root/root 707 2015-06-17 00:20 etc/gshadow-
+# 先搜寻重要的档名！其中那个 grep 是『撷取』关键词的功能！我们会在第三篇说明！
+# 这里您先有个概念即可！那个管线 | 配合 grep 可以撷取关键词的意思！
+# 2. 将该文件解开！语法与实际作法如下：
+[root@study ~]# tar -jxv -f 打包檔.tar.bz2 待解开档名
+[root@study ~]# tar -jxv -f /root/etc.tar.bz2 etc/shadow
+etc/shadow
+[root@study ~]# ll etc
+total 4
+----------. 1 root root 1210 Jun 17 00:20 shadow
+# 很有趣！此时只会解开一个文件而已！不过，重点是那个档名！你要找到正确的档名。
+# 在本例中，你不能写成 /etc/shadow ！因为记录在 etc.tar.bz2 内的并没有 / 之故！
+#+END_SRC
+** tar命令解压时去除目录结构
+指定去除目录结构，使用--strip-components N
+
+如：压缩文件 file.tar 中文件信息为 three/two/one/file.txt
+
+1、（去除第一层目录 three）运行以下命令：
+tar -xvf file.tar --strip-components 1
+
+最终结果为：
+two/one/file.txt
+
+2、（去除三层目录 three、two、one、）运行以下命令：
+tar -xvf file.tar --strip-components 3
+
+解压结果为：
+file.txt
+* ubuntu-18.04 设置开机启动python脚本
+关于xxx.service文件的写法，可参考这篇文章：[[https://blog.csdn.net/superjunenaruto/article/details/105890739][ubuntu 18.04 python脚本 开机自启]]
+** 配置开机启动
+ubuntu-18.04没有rc.local，不能通过rc.local来设置开机启动脚本，可以自己建一个。
+
+*** 建立rc-local.service文件
+#+begin_src bash
+sudo vi /etc/systemd/system/rc-local.service
+#+END_SRC
+然后将下面内容复制进去
+#+begin_src bash
+[Unit]
+Description=/etc/rc.local Compatibility
+ConditionPathExists=/etc/rc.local
+ 
+[Service]
+Type=forking
+ExecStart=/etc/rc.local start
+TimeoutSec=0
+StandardOutput=tty
+RemainAfterExit=yes
+SysVStartPriority=99
+ 
+[Install]
+WantedBy=multi-user.target
+#+END_SRC
+ 
+*** 创建文件rc.local
+sudo vi /etc/rc.local
+
+然后将下面内容复制进去
+#+begin_src bash
+#!/bin/sh -e
+#
+# rc.local
+#
+# This script is executed at the end of each multiuser runlevel.
+# Make sure that the script will "exit 0" on success or any other
+# value on error.
+#
+# In order to enable or disable this script just change the execution
+# bits.
+#
+# By default this script does nothing.
+#后台启动python工程，结果重定向到log.txt
+/usr/bin/nohup /usr/bin/python start_person.py > log.txt 2>&1 &
+exit 0
+#+END_SRC
+
+*** 给rc.local加上权限
+
+sudo chmod +x /etc/rc.local
+
+重启看看日志就可以.
+** 解决python启动无法导入第三方模块问题
+看日志发现导入模块失败，但是本地直接执行脚本没有任何问题
+
+如 ImportError: No module named torch
+
+分析
+
+1. 在本地进入python交互环境，查看python搜索路径
+#+begin_src bash
+nvidia@nvidia-desktop:~/data/projects/dt_product$ python
+Python 2.7.15+ (default, Nov 27 2018, 23:36:35)
+[GCC 7.3.0] on linux2
+Type "help", "copyright", "credits" or "license" for more information.
+>>> import sys
+>>> sys.path
+['', '/home/nvidia/.local/lib/python2.7/site-packages', '/home/nvidia/data/projects/dt_product', '/usr/lib/python2.7', '/usr/lib/python2.7/plat-aarch64-linux-gnu', '/usr/lib/python2.7/lib-tk', '/usr/lib/python2.7/lib-old', '/usr/lib/python2.7/lib-dynload', '/usr/local/lib/python2.7/dist-packages', '/usr/lib/python2.7/dist-packages', '/usr/lib/python2.7/dist-packages/gtk-2.0']
+>>>
+#+END_SRC
+2. 新建一个python脚本设置为开机启动，在此脚本中获取python搜索路径
+#+begin_src python
+!test.py
+
+import sys
+print sys.path
+#+END_SRC
+重新启动环境查看启动重定向得日志 log.txt ：
+#+BEGIN_EXAMPLE
+['/home/nvidia/data/projects/dt_product', '/usr/lib/python2.7', '/usr/lib/python2.7/plat-aarch64-linux-gnu', '/usr/lib/python2.7/lib-tk', '/usr/lib/python2.7/lib-old', '/usr/lib/python2.7/lib-dynload', '/usr/local/lib/python2.7/dist-packages', '/usr/lib/python2.7/dist-packages', '/usr/lib/python2.7/dist-packages/gtk-2.0']
+#+END_EXAMPLE
+
+解决方法：
+
+一种是安装时注意下路径，一种是把这个路径加到环境变量中。
+
+加入环境变量网上搜有几种，但是试了都不行，因为启动python项目时改环境变量未生效，所以最简单得就是在启动python项目前加入该变量。
+
+打开刚才创建得启动python项目得文件，启动前加入环境变量
+
+~sudo vi /etc/rc.local~
+
+#+begin_src bash
+#!/bin/sh -e
+#
+# rc.local
+#
+# This script is executed at the end of each multiuser runlevel.
+# Make sure that the script will "exit 0" on success or any other
+# value on error.
+#
+# In order to enable or disable this script just change the execution
+# bits.
+#
+# By default this script does nothing.
+
+#加入环境变量
+export PYTHONPATH=/home/nvidia/.local/lib/python2.7/site-packages:$PYTHONPATH
+
+#后台启动python工程，结果重定向到log.txt
+/usr/bin/nohup /usr/bin/python start_person.py > log.txt 2>&1 &
+exit 0
+#+END_SRC
+
+* ubuntu 设置root默认密码（初始密码）
+ubuntu安装好后，root初始密码（默认密码）不知道，需要设置。
+
+1、先用安装时候的用户登录进入系统
+
+2、输入：sudo passwd  按回车
+
+3、输入新密码，重复输入密码，最后提示passwd：password updated sucessfully
+
+此时已完成root密码的设置
+
+4、输入：su root
+
+切换用户到root
+* unzip命令
+Linux unzip命令用于解压缩zip文件
+
+语法:
+#+begin_src bash
+unzip [-cflptuvz][-agCjLMnoqsVX][-P <密码>][.zip文件][文件][-d <目录>][-x <文件>] 或 unzip [-Z]
+#+END_SRC
+参数：
+#+BEGIN_EXAMPLE
+-c 将解压缩的结果显示到屏幕上，并对字符做适当的转换。
+-f 更新现有的文件。
+-l 显示压缩文件内所包含的文件。
+-p 与-c参数类似，会将解压缩的结果显示到屏幕上，但不会执行任何的转换。
+-t 检查压缩文件是否正确。
+-u 与-f参数类似，但是除了更新现有的文件外，也会将压缩文件中的其他文件解压缩到目录中。
+-v 执行是时显示详细的信息。
+-z 仅显示压缩文件的备注文字。
+-a 对文本文件进行必要的字符转换。
+-b 不要对文本文件进行字符转换。
+-C 压缩文件中的文件名称区分大小写。
+-j 不处理压缩文件中原有的目录路径。
+-L 将压缩文件中的全部文件名改为小写。
+-M 将输出结果送到more程序处理。
+-n 解压缩时不要覆盖原有的文件。
+-o 不必先询问用户，unzip执行后覆盖原有文件。
+-P<密码> 使用zip的密码选项。
+-q 执行时不显示任何信息。
+-s 将文件名中的空白字符转换为底线字符。
+-V 保留VMS的文件版本信息。
+-X 解压缩时同时回存文件原来的UID/GID。
+[.zip文件] 指定.zip压缩文件。
+[文件] 指定要处理.zip压缩文件中的哪些文件。
+-d<目录> 指定文件解压缩后所要存储的目录。
+-x<文件> 指定不要处理.zip压缩文件中的哪些文件。
+-Z unzip -Z等于执行zipinfo指令。
+#+END_EXAMPLE
+
 * Vmware虚拟机
 NAT模式下，多个虚拟机都是连接到同一个网关地址
 ** ubuntu终端放大缩小
@@ -6106,6 +7339,132 @@ vim中键入： :e ++ff=unix 即可让vim显示^M
 The :e ++ff=unix command tells Vim to read the file again, forcing unix file format. 
 
 To learn about ff, execute ":help ff"
+* vscode 相关
+** vscode的sftp
+ ps：SFTP目前不能处理中文文件
+*** SFTP原理
+ SFTP原理是这样的：首先本地要有一个项目文件夹，同时远程也有一个项目文件夹，然后通过配置文件来同步二者。
+ SFTP可以查看远程项目所有文件，但不能直接操作，必须操作本地项目文件，再同步到远程项目。
+
+ 现在我们本地和远程均有一个文件夹“sftpFolder”，用VsCode打开本地文件夹“sftpFolder”，然后执行 ctrl+shift+p ，搜索 SFTP:Config ，回车后，会生成一个“.vscode/sftp.json”，这个就是配置文件。
+ 同时，如下图左侧会多了一个“远程目录”。
+
+ #+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-10-13_10-46-50.png @ 2021-10-13 10:47:31
+ [[file:vs_code%E7%9A%84sftp/2021-10-13_10-47-31_Snipaste_2021-10-13_10-46-50.png]]
+*** SFTP配置
+
+ #+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-10-13_10-47-59.png @ 2021-10-13 10:48:26
+ [[file:vs_code%E7%9A%84sftp/2021-10-13_10-48-26_Snipaste_2021-10-13_10-47-59.png]]
+ 配置文件不能写注释，所以这里说明一下其中几个属性：
+ - uploadOnSave：本地更新文件保存会自动同步到远程文件（不会同步重命名文件和删除文件）
+ - downloadOnOpen：从远程服务器下载打开的文件
+ - ignore：忽略的文件（匹配的文件不会同步）
+ - watcher：监听器（可以重命名文件和删除文件）
+     - autoUpload：文件变更会自动同步（修改和重命名）
+     - autoDelete：文件删除会自动同步
+** 调试配置文件
+VSCode 内置了对 Node.js 的调试支持，如果你需要调试其他语言如 C++、PHP、Python 等，可以在 VSCode 的插件市场安装对应的插件。
+
+name：调试界面下拉选择项的名称
+
+type：必填项，调试类型，是vscode用于计算调试代码需要用哪个扩展
+
+request，必填项，有两种类型，分别是 launch 和 attach，前者的意思就是 VSCode 会打开这个程序然后进入调试，后者的意思是你已经打开了程序，然后接通程序的内部调试协议进行调试，
+
+program，程序的启动入口
+
+mode：可以设置为auto，debug，remote，test，exeC中的一个
+
+program：调试程序的路径（绝对路径）
+
+env：调试时使用的环境变量。例如：{"ENVNAME"："ENVVALUE"}
+
+envFile：包含环境变量文件的绝对路径，在env中设置的属性会覆盖envFi1e中的配置
+
+args：启动时的命令行参数
+
+showLog：布尔值，是否将调试信息输出
+
+logOutput：配置调试输出的组件（debugger，gdbwire，lldbout，debuglineerr，rpc），使用,分隔，showLog设置为true时}此项配置生效
+
+buildFlags：构建go程序时传给go编译器的标志
+
+remotePath：远程调试程序的绝对路径，当mode设置为remote时有效
+
+runtimeExecutable，使用什么命令启动
+*** Variables Reference
+**** Predefined variables
+The following predefined variables are supported:
+- ${workspaceFolder} - the path of the folder opened in VS Code
+- ${workspaceFolderBasename} - the name of the folder opened in VS Code without any slashes (/)
+- ${file} - the current opened file
+- ${fileWorkspaceFolder} - the current opened file's workspace folder
+- ${relativeFile} - the current opened file relative to workspaceFolder
+- ${relativeFileDirname} - the current opened file's dirname relative to workspaceFolder
+- ${fileBasename} - the current opened file's basename
+- ${fileBasenameNoExtension} - the current opened file's basename with no file extension
+- ${fileDirname} - the current opened file's dirname
+- ${fileExtname} - the current opened file's extension
+- ${cwd} - the task runner's current working directory on startup
+- ${lineNumber} - the current selected line number in the active file
+- ${selectedText} - the current selected text in the active file
+- ${execPath} - the path to the running VS Code executable
+- ${defaultBuildTask} - the name of the default build task
+- ${pathSeparator} - the character used by the operating system to separate components in file paths
+***** Predefined variables examples#
+Supposing that you have the following requirements:
+1. A file located at /home/your-username/your-project/folder/file.ext opened in your editor;
+2. The directory /home/your-username/your-project opened as your root workspace.
+So you will have the following values for each variable:
+- ${workspaceFolder} - /home/your-username/your-project
+- ${workspaceFolderBasename} - your-project
+- ${file} - /home/your-username/your-project/folder/file.ext
+- ${fileWorkspaceFolder} - /home/your-username/your-project
+- ${relativeFile} - folder/file.ext
+- ${relativeFileDirname} - folder
+- ${fileBasename} - file.ext
+- ${fileBasenameNoExtension} - file
+- ${fileDirname} - /home/your-username/your-project/folder
+- ${fileExtname} - .ext
+- ${lineNumber} - line number of the cursor
+- ${selectedText} - text selected in your code editor
+- ${execPath} - location of Code.exe
+- ${pathSeparator} - / on macOS or linux, \ on Windows
+
+#+BEGIN_EXAMPLE
+Tip: Use IntelliSense inside string values for tasks.json and launch.json to get a full list of predefined variables.
+#+END_EXAMPLE
+
+*** 参考文章
+[[https://www.barretlee.com/blog/2019/03/18/debugging-in-vscode-tutorial/][VSCode 调试中 launch.json 配置不完全指南]]
+* watch命令
+watch是一个非常实用的命令，基本所有的Linux发行版都带有这个小工具，如同名字一样，watch可以帮你监测一个命令的运行结果，省得你一遍遍的手动运行。在Linux下，watch是周期性的执行下个程序，并全屏显示执行结果。你可以拿他来监测你想要的一切命令的结果变化，比如 tail 一个 log 文件，ls 监测某个文件的大小变化。
+
+命令格式：
+watch[参数][命令]
+
+命令参数：
+- -n或--interval  watch缺省每2秒运行一下程序，可以用-n或-interval来指定间隔的时间。
+- -d或--differences  用-d或--differences 选项watch 会高亮显示变化的区域。 而-d=cumulative选项会把变动过的地方(不管最近的那次有没有变动)都高亮显示出来。
+- -t 或-no-title  会关闭watch命令在顶部的时间间隔,命令，当前时间的输出。
+- -h, --help 查看帮助文档
+
+FreeBSD和Linux下watch命令的不同，在Linux下，watch是周期性的执行下个程序，并全屏显示执行结果，如：watch -n 1 -d netstat -ant，而在FreeBSD下的watch命令是查看其它用户的正在运行的操作，watch允许你偷看其它terminal正在做什么，该命令只能让超级用户使用。
+** 实例
+#+begin_src bash
+watch -n 1 -d netstat -ant       # 命令：每隔一秒高亮显示网络链接数的变化情况
+watch -n 1 -d 'pstree|grep http' # 每隔一秒高亮显示http链接数的变化情况。 后面接的命令若带有管道符，需要加''将命令区域归整。
+watch 'netstat -an | grep:21 | \ grep<模拟攻击客户机的IP>| wc -l' # 实时查看模拟攻击客户机建立起来的连接数
+watch -d 'ls -l|grep scf'       # 监测当前目录中 scf' 的文件的变化
+watch -n 10 'cat /proc/loadavg' # 10秒一次输出系统的平均负载
+watch uptime
+watch -t uptime
+watch -d -n 1 netstat -ntlp
+watch -d 'ls -l | fgrep goface'     # 监测goface的文件
+watch -t -differences=cumulative uptime
+watch -n 60 from            # 监控mail
+watch -n 1 "df -i;df"       # 监测磁盘inode和block数目变化情况
+#+END_SRC
 * xargs（用来给命令传递参数）
 xargs（英文全拼： eXtended ARGuments）是给命令传递参数的一个过滤器，也是组合多个命令的一个工具。
 
@@ -6223,7 +7582,34 @@ cp ~/.oh-my-zsh/templates/zshrc.zsh-template ~/.zshrc
 
 #+DOWNLOADED: screenshot @ 2021-12-11 10:04:54
 [[file:images/linux%E7%AC%94%E8%AE%B0/%E5%90%AF%E5%8A%A8%E6%96%87%E4%BB%B6/2021-12-11_10-04-54_screenshot.png]]
+** autojump安装
+安装[[https://github.com/wting/autojump][autojump官网]]的安装方式，先安装autojump
+#+begin_src bash
+# 下载插件autojump到/.oh-my-zsh/custom目录中
+git clone https://gitee.com/null_454_5218/autojump.git
+# 解压缩后进入目录，执行install.py
+./install.py
+#+END_SRC
+配置zshrc文件
+#+begin_src bash
+vi ~/.zshrc
+#在配置结尾处或者参考上面处添加此行命令
+plugins=(
+  git
+  zsh-autosuggestions
+  autojump
+)
+#+END_SRC
 
+除了还要在~/.zshrc中配置plugins，还要将下面这句写到zshrc文件中：
+#+begin_src bash
+[[ -s ~/.autojump/etc/profile.d/autojump.sh ]] && . ~/.autojump/etc/profile.d/autojump.sh
+#+END_SRC
+*** 参考文章
+[[https://zhuanlan.zhihu.com/p/19556676][终极 Shell——ZSH]]
+[[https://my.oschina.net/u/4264517/blog/4522246][搞机： oh-my-zsh + autojump + screen 让你的终端起飞]]
+** 参考文章
+[[https://zhuanlan.zhihu.com/p/19556676][终极 Shell——ZSH]]
 * 统计文件个数
 统计当前文件夹下文件的个数，包括子文件夹里的
 #+BEGIN_SRC bash
@@ -6358,22 +7744,6 @@ g++则是GCC的c++编译器。现在你在编译代码时调用的gcc，已经�
 sudo apt-get install gcc
 sudo apt-get install gcc
 #+END_SRC
-
-* ubuntu 设置root默认密码（初始密码）
-ubuntu安装好后，root初始密码（默认密码）不知道，需要设置。
-
-1、先用安装时候的用户登录进入系统
-
-2、输入：sudo passwd  按回车
-
-3、输入新密码，重复输入密码，最后提示passwd：password updated sucessfully
-
-此时已完成root密码的设置
-
-4、输入：su root
-
-切换用户到root
-
 * 设置合上笔记本盖子不休眠的方法
 编辑下列文件：sudo gedit /etc/systemd/logind.conf
 #+BEGIN_EXAMPLE
@@ -6403,484 +7773,7 @@ systemctl set-default multi-user.target由图形界面模式更改为命令行�
 期望机器能在通电进入系统后，即使没有登录账号也能自动连接wifi。可以使用Linux的网络管理工具的命令：
 
 nmctl device wifi connect [ssid wifi名字] password [wifi密码]
-* 使用git建立远程仓库，让别人git clone下来
-首先, 如果你的ssh没有安装的话，要安装ssh服务端。ubuntu是很简单
-sudo apt-get install openssh-server
-1，建立你的git 目录。
 
-ourunix@ubuntu:~$ mkdir testgit
-ourunix@ubuntu:~$ cd testgit/
-2,建立你的git仓库。
-ourunix@ubuntu:~/testgit$ git init
-Initialized empty Git repository in /home/wlp/testgit/.git/
-3，添加你的需要的项目初始文件，这里我就只添加一张文档了。
-ourunix@ubuntu:~/testgit$ echo "hello,git" > sayhi.txt
-4，跟踪及提交到仓库。
-ourunix@ubuntu:~/testgit$ git add sayhi.txt
-ourunix@ubuntu:~/testgit$ git commit -m "2011.4.13" sayhi.txt
-[master (root-commit) b87b535] 2011.4.13
-1 files changed, 1 insertions(+), 0 deletions(-)
-create mode 100644 sayhi.txt
-5.在本地的git仓库"添加一个远程仓库",当然这个远程仓库还是你自己的这个目录。
-ourunix@ubuntu:~/testgit$ git remote add origin ssh://你的用户名@你的IP/~/testgit/.git
-这时候,本地的 .git/config 应该会改变
-6.将本地的 master分支 ，跟踪到远程的分支
-ourunix@ubuntu:~/testgit$ git push origin master
-7,显示远程信息
-ourunix@ubuntu:~/testgit$git remote show origin
-8,利用其他局域网的电脑测试你的仓库
-ourunix@ubuntu:~/test$ git clone ssh://你的用户名@你的IP/home/～/testgit/.git
-Initialized empty Git repository in /home/wlp/test/git/.git/
-xxx‘s password:
-remote: Counting objects: 3, done.
-Receiving objects: 100% (3/3), done.
-remote: Total 3 (delta 0), reused 0 (delta 0)
-
-9，大功告成
-10. 修改远程分支地址
-git remote set-url origin remote_git_address
-
-http://blog.chinaunix.net/uid-22028680-id-3040436.html
-* netstat
-Linux netstat 命令用于显示网络状态。
-
-利用 netstat 指令可让你得知整个 Linux 系统的网络情况。
-
-语法：netstat [-acCeFghilMnNoprstuvVwx][-A<网络类型>][--ip]
-
-- -a或--all 显示所有连线中的Socket。
-- -A<网络类型>或--<网络类型> 列出该网络类型连线中的相关地址。
-- -c或--continuous 持续列出网络状态。
-- -C或--cache 显示路由器配置的快取信息。
-- -e或--extend 显示网络其他相关信息。
-- -F或--fib 显示路由缓存。
-- -g或--groups 显示多重广播功能群组组员名单。
-- -h或--help 在线帮助。
-- -i或--interfaces 显示网络界面信息表单。
-- -l或--listening 显示监控中的服务器的Socket。
-- -M或--masquerade 显示伪装的网络连线。
-- -n或--numeric 直接使用IP地址，而不通过域名服务器。
-- -N或--netlink或--symbolic 显示网络硬件外围设备的符号连接名称。
-- -o或--timers 显示计时器。
-- -p或--programs 显示正在使用Socket的程序识别码和程序名称。
-- -r或--route 显示Routing Table。
-- -s或--statistics 显示网络工作信息统计表。
-- -t或--tcp 显示TCP传输协议的连线状况。
-- -u或--udp 显示UDP传输协议的连线状况。
-- -v或--verbose 显示指令执行过程。
-- -V或--version 显示版本信息。
-- -w或--raw 显示RAW传输协议的连线状况。
-- -x或--unix 此参数的效果和指定"-A unix"参数相同。
-- --ip或--inet 此参数的效果和指定"-A inet"参数相同。
-
-** 实例
-*** 显示详细的网络状况
-# netstat -a
-*** 显示当前户籍UDP连接状况
-# netstat -nu
-*** 显示UDP端口号的使用情况
-# netstat -apu
-Active Internet connections (servers and established)
-Proto Recv-Q Send-Q Local Address        Foreign Address       State    PID/Program name  
-udp    0   0 *:32768           *:*                   -          
-udp    0   0 *:nfs            *:*                   -          
-udp    0   0 *:641            *:*                   3006/rpc.statd   
-udp    0   0 192.168.0.3:netbios-ns   *:*                   3537/nmbd      
-udp    0   0 *:netbios-ns        *:*                   3537/nmbd      
-udp    0   0 192.168.0.3:netbios-dgm   *:*                   3537/nmbd      
-udp    0   0 *:netbios-dgm        *:*                   3537/nmbd      
-udp    0   0 *:tftp           *:*                   3346/xinetd     
-udp    0   0 *:999            *:*                   3366/rpc.rquotad  
-udp    0   0 *:sunrpc          *:*                   2986/portmap    
-udp    0   0 *:ipp            *:*                   6938/cupsd     
-udp    0   0 *:1022           *:*                   3392/rpc.mountd   
-udp    0   0 *:638            *:*                   3006/rpc.statd
-*** 显示网卡列表
-# netstat -i
-Kernel Interface table
-Iface    MTU Met  RX-OK RX-ERR RX-DRP RX-OVR  TX-OK TX-ERR TX-DRP TX-OVR Flg
-eth0    1500  0  181864   0   0   0  141278   0   0   0 BMRU
-lo    16436  0   3362   0   0   0   3362   0   0   0 LRU
-*** 显示组播组的关系
-# netstat -g
-IPv6/IPv4 Group Memberships
-Interface    RefCnt Group
---------------- ------ ---------------------
-lo       1   ALL-SYSTEMS.MCAST.NET
-eth0      1   ALL-SYSTEMS.MCAST.NET
-lo       1   ff02::1
-eth0      1   ff02::1:ff0a:b0c
-eth0      1   ff02::1
-*** 显示网络统计信息
-# netstat -s
-Ip:
-  184695 total packets received
-  0 forwarded
-  0 incoming packets discarded
-  184687 incoming packets delivered
-  143917 requests sent out
-  32 outgoing packets dropped
-  30 dropped because of missing route
-Icmp:
-  676 ICMP messages received
-  5 input ICMP message failed.
-  ICMP input histogram:
-    destination unreachable: 44
-    echo requests: 287
-    echo replies: 345
-  304 ICMP messages sent
-  0 ICMP messages failed
-  ICMP output histogram:
-    destination unreachable: 17
-    echo replies: 287
-Tcp:
-  473 active connections openings
-  28 passive connection openings
-  4 failed connection attempts
-  11 connection resets received
-  1 connections established
-  178253 segments received
-  137936 segments send out
-  29 segments retransmited
-  0 bad segments received.
-  336 resets sent
-Udp:
-  5714 packets received
-  8 packets to unknown port received.
-  0 packet receive errors
-  5419 packets sent
-TcpExt:
-  1 resets received for embryonic SYN_RECV sockets
-  ArpFilter: 0
-  12 TCP sockets finished time wait in fast timer
-  572 delayed acks sent
-  3 delayed acks further delayed because of locked socket
-  13766 packets directly queued to recvmsg prequeue.
-  1101482 packets directly received from backlog
-  19599861 packets directly received from prequeue
-  46860 packets header predicted
-  14541 packets header predicted and directly queued to user
-  TCPPureAcks: 12259
-  TCPHPAcks: 9119
-  TCPRenoRecovery: 0
-  TCPSackRecovery: 0
-  TCPSACKReneging: 0
-  TCPFACKReorder: 0
-  TCPSACKReorder: 0
-  TCPRenoReorder: 0
-  TCPTSReorder: 0
-  TCPFullUndo: 0
-  TCPPartialUndo: 0
-  TCPDSACKUndo: 0
-  TCPLossUndo: 0
-  TCPLoss: 0
-  TCPLostRetransmit: 0
-  TCPRenoFailures: 0
-  TCPSackFailures: 0
-  TCPLossFailures: 0
-  TCPFastRetrans: 0
-  TCPForwardRetrans: 0
-  TCPSlowStartRetrans: 0
-  TCPTimeouts: 29
-  TCPRenoRecoveryFail: 0
-  TCPSackRecoveryFail: 0
-  TCPSchedulerFailed: 0
-  TCPRcvCollapsed: 0
-  TCPDSACKOldSent: 0
-  TCPDSACKOfoSent: 0
-  TCPDSACKRecv: 0
-  TCPDSACKOfoRecv: 0
-  TCPAbortOnSyn: 0
-  TCPAbortOnData: 1
-  TCPAbortOnClose: 0
-  TCPAbortOnMemory: 0
-  TCPAbortOnTimeout: 3
-  TCPAbortOnLinger: 0
-  TCPAbortFailed: 3
-  TCPMemoryPressures: 0
-*** 显示监听的套接口
-# netstat -l
-Active Internet connections (only servers)
-Proto Recv-Q Send-Q Local Address        Foreign Address       State   
-tcp    0   0 *:32769           *:*             LISTEN   
-tcp    0   0 *:nfs            *:*             LISTEN   
-tcp    0   0 *:644            *:*             LISTEN   
-tcp    0   0 *:1002           *:*             LISTEN   
-tcp    0   0 *:netbios-ssn        *:*             LISTEN   
-tcp    0   0 *:sunrpc          *:*             LISTEN   
-tcp    0   0 vm-dev:ipp         *:*             LISTEN   
-tcp    0   0 *:telnet          *:*             LISTEN   
-tcp    0   0 *:601            *:*             LISTEN   
-tcp    0   0 *:microsoft-ds       *:*             LISTEN   
-tcp    0   0 *:http           *:*             LISTEN   
-tcp    0   0 *:ssh            *:*             LISTEN   
-tcp    0   0 *:https           *:*             LISTEN   
-udp    0   0 *:32768           *:*                   
-udp    0   0 *:nfs            *:*                   
-udp    0   0 *:641            *:*                   
-udp    0   0 192.168.0.3:netbios-ns   *:*                   
-udp    0   0 *:netbios-ns        *:*                   
-udp    0   0 192.168.0.3:netbios-dgm   *:*                   
-udp    0   0 *:netbios-dgm        *:*                   
-udp    0   0 *:tftp           *:*                   
-udp    0   0 *:999            *:*                   
-udp    0   0 *:sunrpc          *:*                   
-udp    0   0 *:ipp            *:*                   
-udp    0   0 *:1022           *:*                   
-udp    0   0 *:638            *:*                   
-Active UNIX domain sockets (only servers)
-Proto RefCnt Flags    Type    State     I-Node Path
-unix 2   [ ACC ]   STREAM   LISTENING   10621 @/tmp/fam-root-
-unix 2   [ ACC ]   STREAM   LISTENING   7096  /var/run/acpid.socket
-unix 2   [ ACC ]   STREAM   LISTENING   9792  /tmp/.gdm_socket
-unix 2   [ ACC ]   STREAM   LISTENING   9927  /tmp/.X11-unix/X0
-unix 2   [ ACC ]   STREAM   LISTENING   10489 /tmp/ssh-lbUnUf4552/agent.4552
-unix 2   [ ACC ]   STREAM   LISTENING   10558 /tmp/ksocket-root/kdeinit__0
-unix 2   [ ACC ]   STREAM   LISTENING   10560 /tmp/ksocket-root/kdeinit-:0
-unix 2   [ ACC ]   STREAM   LISTENING   10570 /tmp/.ICE-unix/dcop4664-1270815442
-unix 2   [ ACC ]   STREAM   LISTENING   10843 /tmp/.ICE-unix/4735
-unix 2   [ ACC ]   STREAM   LISTENING   10591 /tmp/ksocket-root/klauncherah3arc.slave-socket
-unix 2   [ ACC ]   STREAM   LISTENING   7763  /var/run/iiim/.iiimp-unix/9010
-unix 2   [ ACC ]   STREAM   LISTENING   11047 /tmp/orbit-root/linc-1291-0-1e92c8082411
-unix 2   [ ACC ]   STREAM   LISTENING   11053 /tmp/orbit-root/linc-128e-0-dc070659cbb3
-unix 2   [ ACC ]   STREAM   LISTENING   8020  /var/run/dbus/system_bus_socket
-unix 2   [ ACC ]   STREAM   LISTENING   58927 /tmp/mcop-root/vm-dev-2c28-4beba75f
-unix 2   [ ACC ]   STREAM   LISTENING   7860  /tmp/.font-unix/fs7100
-unix 2   [ ACC ]   STREAM   LISTENING   7658  /dev/gpmctl
-unix 2   [ ACC ]   STREAM   LISTENING   10498 @/tmp/dbus-s2MLJGO5Ci
-* vs code的sftp
-ps：SFTP目前不能处理中文文件
-** SFTP原理
-SFTP原理是这样的：首先本地要有一个项目文件夹，同时远程也有一个项目文件夹，然后通过配置文件来同步二者。
-SFTP可以查看远程项目所有文件，但不能直接操作，必须操作本地项目文件，再同步到远程项目。
-
-现在我们本地和远程均有一个文件夹“sftpFolder”，用VsCode打开本地文件夹“sftpFolder”，然后执行 ctrl+shift+p ，搜索 SFTP:Config ，回车后，会生成一个“.vscode/sftp.json”，这个就是配置文件。
-同时，如下图左侧会多了一个“远程目录”。
-
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-10-13_10-46-50.png @ 2021-10-13 10:47:31
-[[file:vs_code%E7%9A%84sftp/2021-10-13_10-47-31_Snipaste_2021-10-13_10-46-50.png]]
-** SFTP配置
-
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-10-13_10-47-59.png @ 2021-10-13 10:48:26
-[[file:vs_code%E7%9A%84sftp/2021-10-13_10-48-26_Snipaste_2021-10-13_10-47-59.png]]
-配置文件不能写注释，所以这里说明一下其中几个属性：
-- uploadOnSave：本地更新文件保存会自动同步到远程文件（不会同步重命名文件和删除文件）
-- downloadOnOpen：从远程服务器下载打开的文件
-- ignore：忽略的文件（匹配的文件不会同步）
-- watcher：监听器（可以重命名文件和删除文件）
-    - autoUpload：文件变更会自动同步（修改和重命名）
-    - autoDelete：文件删除会自动同步
-
-* rz和sz命令使用
-rz命令是方便从windows传文件到Linux，在windows下通过连接工具进入linux系统，cd到自己需要的目录，命令行输入rz，然后回车，之后会弹出一个选择框，选择我们需要上传的文件，然后add，最后上传就好了。
-
-#: rz 
-
-sz命令反过来，是从Linux传输文件到windows，同样Linux下我们需要传的文件所在目录，命令行输入sz，后面跟上需要传输的文件命，可以是一个文件，也可以跟多个文件名，同时传多个文件，然后回车，就可以传文件了。默认情况文件传到windows的用户下载目录下。
-
-#: sz filename1 filename2 filename3
-
-这两个命令传输传输小文件很方便也很快，但是遇到大文件经常需要很久，甚至传了一部分然后中断了，这时就需要nc命令出场了，传输大文件也非常快。
-
-* Linux命令行连接WiFi
-1. 安装nmcli
-sudo apt-get install nmcli
-
-2. 查看网络设备
-sudo nmcli dev
-
-3. 开启wifi
-sudo nmcli r wifi on
-
-4. 扫描wifi
-sudo nmcli dev wifi
-
-5. 连接wifi
-sudo nmcli dev wifi connect "wifi名" password "密码"
-* ubuntu-18.04 设置开机启动python脚本
-关于xxx.service文件的写法，可参考这篇文章：[[https://blog.csdn.net/superjunenaruto/article/details/105890739][ubuntu 18.04 python脚本 开机自启]]
-** 配置开机启动
-ubuntu-18.04没有rc.local，不能通过rc.local来设置开机启动脚本，可以自己建一个。
-
-*** 建立rc-local.service文件
-#+begin_src bash
-sudo vi /etc/systemd/system/rc-local.service
-#+END_SRC
-然后将下面内容复制进去
-#+begin_src bash
-[Unit]
-Description=/etc/rc.local Compatibility
-ConditionPathExists=/etc/rc.local
- 
-[Service]
-Type=forking
-ExecStart=/etc/rc.local start
-TimeoutSec=0
-StandardOutput=tty
-RemainAfterExit=yes
-SysVStartPriority=99
- 
-[Install]
-WantedBy=multi-user.target
-#+END_SRC
- 
-*** 创建文件rc.local
-sudo vi /etc/rc.local
-
-然后将下面内容复制进去
-#+begin_src bash
-#!/bin/sh -e
-#
-# rc.local
-#
-# This script is executed at the end of each multiuser runlevel.
-# Make sure that the script will "exit 0" on success or any other
-# value on error.
-#
-# In order to enable or disable this script just change the execution
-# bits.
-#
-# By default this script does nothing.
-#后台启动python工程，结果重定向到log.txt
-/usr/bin/nohup /usr/bin/python start_person.py > log.txt 2>&1 &
-exit 0
-#+END_SRC
-
-*** 给rc.local加上权限
-
-sudo chmod +x /etc/rc.local
-
-重启看看日志就可以.
-** 解决python启动无法导入第三方模块问题
-看日志发现导入模块失败，但是本地直接执行脚本没有任何问题
-
-如 ImportError: No module named torch
-
-分析
-
-1. 在本地进入python交互环境，查看python搜索路径
-#+begin_src bash
-nvidia@nvidia-desktop:~/data/projects/dt_product$ python
-Python 2.7.15+ (default, Nov 27 2018, 23:36:35)
-[GCC 7.3.0] on linux2
-Type "help", "copyright", "credits" or "license" for more information.
->>> import sys
->>> sys.path
-['', '/home/nvidia/.local/lib/python2.7/site-packages', '/home/nvidia/data/projects/dt_product', '/usr/lib/python2.7', '/usr/lib/python2.7/plat-aarch64-linux-gnu', '/usr/lib/python2.7/lib-tk', '/usr/lib/python2.7/lib-old', '/usr/lib/python2.7/lib-dynload', '/usr/local/lib/python2.7/dist-packages', '/usr/lib/python2.7/dist-packages', '/usr/lib/python2.7/dist-packages/gtk-2.0']
->>>
-#+END_SRC
-2. 新建一个python脚本设置为开机启动，在此脚本中获取python搜索路径
-#+begin_src python
-!test.py
-
-import sys
-print sys.path
-#+END_SRC
-重新启动环境查看启动重定向得日志 log.txt ：
-#+BEGIN_EXAMPLE
-['/home/nvidia/data/projects/dt_product', '/usr/lib/python2.7', '/usr/lib/python2.7/plat-aarch64-linux-gnu', '/usr/lib/python2.7/lib-tk', '/usr/lib/python2.7/lib-old', '/usr/lib/python2.7/lib-dynload', '/usr/local/lib/python2.7/dist-packages', '/usr/lib/python2.7/dist-packages', '/usr/lib/python2.7/dist-packages/gtk-2.0']
-#+END_EXAMPLE
-
-解决方法：
-
-一种是安装时注意下路径，一种是把这个路径加到环境变量中。
-
-加入环境变量网上搜有几种，但是试了都不行，因为启动python项目时改环境变量未生效，所以最简单得就是在启动python项目前加入该变量。
-
-打开刚才创建得启动python项目得文件，启动前加入环境变量
-
-~sudo vi /etc/rc.local~
-
-#+begin_src bash
-#!/bin/sh -e
-#
-# rc.local
-#
-# This script is executed at the end of each multiuser runlevel.
-# Make sure that the script will "exit 0" on success or any other
-# value on error.
-#
-# In order to enable or disable this script just change the execution
-# bits.
-#
-# By default this script does nothing.
-
-#加入环境变量
-export PYTHONPATH=/home/nvidia/.local/lib/python2.7/site-packages:$PYTHONPATH
-
-#后台启动python工程，结果重定向到log.txt
-/usr/bin/nohup /usr/bin/python start_person.py > log.txt 2>&1 &
-exit 0
-#+END_SRC
-* Linux 让终端走代理的几种方法
-参看文章：
-[[https://zhuanlan.zhihu.com/p/46973701][Linux 让终端走代理的几种方法]]
-
-可以用命令$ curl cip.cc 检查终端是否处于代理状态
-** 方法一：（推荐使用）
-为什么说这个方法推荐使用呢？因为他只作用于当前终端中，不会影响环境，而且命令比较简单
-在终端中直接运行：
-
-export http_proxy=http://proxyAddress:port
-
-如果你是SSR,并且走的http的代理端口是12333，想执行wget或者curl来下载国外的东西，可以使用如下命令：
-
-export http_proxy=http://127.0.0.1:12333
-
-如果是https那么就经过如下命令：
-
-export https_proxy=http://127.0.0.1:12333
-
-下面这是cad实验室的代理设置：
-#+begin_src bash
-export http_proxy="socks5://proxy.in.zjulearning.org:7070"
-export https_proxy="socks5://proxy.in.zjulearning.org:7070"
-#+END_SRC
-
-Linux上代理的临时取消
-#+begin_src bash
-unset  http_proxy
-unset https_proxy
-#+END_SRC
-
-** 方法二 ：
-这个办法的好处是把代理服务器永久保存了，下次就可以直接用了
-
-把代理服务器地址写入shell配置文件.bashrc或者.zshrc 直接在.bashrc或者.zshrc添加下面内容
-#+begin_src bash
-export http_proxy="http://localhost:port"
-export https_proxy="http://localhost:port"
-#+END_SRC
-或者走socket5协议（ss,ssr）的话，代理端口是1080
-#+begin_src bash
-export http_proxy="socks5://127.0.0.1:1080"
-export https_proxy="socks5://127.0.0.1:1080"
-#+END_SRC
-或者干脆直接设置ALL_PROXY
-
-export ALL_PROXY=socks5://127.0.0.1:1080
-
-最后在执行如下命令应用设置
-
-source ~/.bashrc
-
-或者通过设置alias简写来简化操作，每次要用的时候输入setproxy，不用了就unsetproxy。
-#+begin_src bash
-alias setproxy="export ALL_PROXY=socks5://127.0.0.1:1080" 
-alias unsetproxy="unset ALL_PROXY"
-#+END_SRC
-** 方法三:
-改相应工具的配置，比如apt的配置
-
-sudo vim /etc/apt/apt.conf
-
-在文件末尾加入下面这行
-
-Acquire::http::Proxy "http://proxyAddress:port"
-** python走socks5代理的设置
-python如果要使用socks5，除了需要上面的代理外，还要安装pysocks库.
-
-参考文章：[[https://stackoverflow.com/questions/38794015/pythons-requests-missing-dependencies-for-socks-support-when-using-socks5-fro][Python's requests "Missing dependencies for SOCKS support" when using SOCKS5 from Terminal]]
 * 查看Linux系统架构类型的方法
 ** uname 命令
 uname -a 命令可以直接显示 Linux 系统架构的命令，安几乎可以工作在所有 Linux/Unix 系统当中。
@@ -7032,8 +7925,22 @@ Dos、Windows 格式的文件，用 0D 0A (CR+LF)作为换行符，而Unix 的�
 #+begin_src bash
 $ sed -e‘s/^M/\n/g’upgrade.sh
 #+END_SRC
-* 设置X11转发
-** 服务器（X client）设置
+* X11转发
+** X 协议原理简介
+#+DOWNLOADED: screenshot @ 2022-03-05 12:48:01
+[[file:images/linux%E7%AC%94%E8%AE%B0/X11%E8%BD%AC%E5%8F%91/2022-03-05_12-48-01_screenshot.png]]
+
+Linux 本身是没有图形化界面的，所谓的图形化界面系统只不过中 Linux 下的应用程序。这一点和 Windows 不一样。Windows 从 Windows 95 开始，图形界面就直接在系统内核中实现了，是操作系统不可或缺的一部分。Linux 的图形化界面，底层都是基于 X 协议。
+
+X 协议由 X server 和 X client 组成：
+
+X server 管理主机上与显示相关的硬件设置（如显卡、硬盘、鼠标等），它负责屏幕画面的绘制与显示，以及将输入设置（如键盘、鼠标）的动作告知 X client。
+
+X client (即 X 应用程序) 则主要负责事件的处理（即程序的逻辑）。
+
+举个例子，如果用户点击了鼠标左键，因为鼠标归 X server 管理，于是 X server 就捕捉到了鼠标点击这个动作，然后它将这个动作告诉 X client，因为 X client 负责程序逻辑，于是 X client 就根据程序预先设定的逻辑（例如画一个圆），告诉 X server 说：“请在鼠标点击的位置，画一个圆”。最后，X server 就响应 X client 的请求，在鼠标点击的位置，绘制并显示出一个圆。
+
+** 服务器x（X client）设置
 首先要确保服务器的sshd打开X11转发功能
 
 打开 /etc/sshd_config 确保下面的配置设置正确：
@@ -7050,47 +7957,73 @@ systemctl restart sshd.service
 service sshd restart
 #+END_SRC
 ** X server设置
-*** 安装X server
-**** windows
-安装vcxsrv
-#+BEGIN_EXAMPLE
-In order to use X11 forwarding, you also need to install a X server on your Windows computer. You can choose to install xming or vcxsrv. Vcxsrv is better since it is updated frequently and is free, while latest version of xming requires a license. 
-#+END_EXAMPLE
-之后打开xlaunch启动vcxsrv
+*** widows下git bash的设置
+**** 安装X server
+***** windows
+ 安装vcxsrv
+ #+BEGIN_EXAMPLE
+ In order to use X11 forwarding, you also need to install a X server on your Windows computer. You can choose to install xming or vcxsrv. Vcxsrv is better since it is updated frequently and is free, while latest version of xming requires a license. 
+ #+END_EXAMPLE
+ 之后打开xlaunch启动vcxsrv
 
-#+DOWNLOADED: screenshot @ 2021-12-12 23:00:43
-[[file:images/linux%E7%AC%94%E8%AE%B0/%E8%AE%BE%E7%BD%AEX11%E8%BD%AC%E5%8F%91/2021-12-12_23-00-43_screenshot.png]]
-*** 配置ssh
-设置变量DISPLAY：
-#+begin_src bash
-export DISPLAY=localhost:0.0
-#+END_SRC
-可以将该设置添加到用户目录下的.bash_profile文件里，这样以后每次连接服务器就会自动设置好该变量。
+ #+DOWNLOADED: screenshot @ 2021-12-12 23:00:43
+ [[file:images/linux%E7%AC%94%E8%AE%B0/%E8%AE%BE%E7%BD%AEX11%E8%BD%AC%E5%8F%91/2021-12-12_23-00-43_screenshot.png]]
+**** 配置ssh
+ 在git bash上设置变量DISPLAY：
+ #+begin_src bash
+ export DISPLAY=localhost:0.0
+ #+END_SRC
+ 可以将该设置添加到用户目录下的.bash_profile文件里，这样以后每次连接服务器就会自动设置好该变量。
 
-使用带-X选项的ssh连接：
+ 使用带-X选项的ssh连接：
+ #+begin_src bash
+ # -v选项可以显示连接的详细信息
+ ssh -X -v <user>@<server_addresss>
+ #+END_SRC
+ 这里可能会出现下面的警告：
+ #+BEGIN_EXAMPLE
+ Warning: untrusted X11 forwarding setup failed: xauth key data not generated
+ #+END_EXAMPLE
+ 如果这时候打开GUI程序，比如xclock，将会出现下面的报错：
+ #+BEGIN_EXAMPLE
+ Error: Can’t open display:
+ #+END_EXAMPLE
+ 如果出现该错误，则选择用带-Y选项的ssh连接：
+ #+begin_src bash
+ ssh -Y -v <user>@<server_addresss>
+ #+END_SRC
+ 运行下面的命令：
+ #+begin_src bash
+ xclock &
+ #+END_SRC
+ 可以看到下面的图像：
+ #+DOWNLOADED: screenshot @ 2021-12-12 23:07:10
+ [[file:images/linux%E7%AC%94%E8%AE%B0/%E8%AE%BE%E7%BD%AEX11%E8%BD%AC%E5%8F%91/2021-12-12_23-07-10_screenshot.png]]
+
+*** linux的设置
+sudo vim /etc/ssh/ssh_config  修改以下配置，保存退出。
 #+begin_src bash
-# -v选项可以显示连接的详细信息
-ssh -X -v <user>@<server_addresss>
+ForwardAgent yes
+ForwardX11 yes
+ForwardX11Trusted yes
 #+END_SRC
-这里可能会出现下面的警告：
-#+BEGIN_EXAMPLE
-Warning: untrusted X11 forwarding setup failed: xauth key data not generated
-#+END_EXAMPLE
-如果这时候打开GUI程序，比如xclock，将会出现下面的报错：
-#+BEGIN_EXAMPLE
-Error: Can’t open display:
-#+END_EXAMPLE
-如果出现该错误，则选择用带-Y选项的ssh连接：
+客服端修改完成后也需要执行对应的命令重启ssh服务
 #+begin_src bash
-ssh -Y -v <user>@<server_addresss>
+sudo systemctl restart ssh.service
 #+END_SRC
-运行下面的命令：
+在客服端C 上执行命令
 #+begin_src bash
-xclock &
+xhost +　　//允许服务器的的x11界面连接过来
+ssh -X tsfh@192.168.0.200　　　　　　//-X参数表示转发X11数据， 把用户名称tsfh 以及服务器S的ip地址替换为你自己的
 #+END_SRC
-可以看到下面的图像：
-#+DOWNLOADED: screenshot @ 2021-12-12 23:07:10
-[[file:images/linux%E7%AC%94%E8%AE%B0/%E8%AE%BE%E7%BD%AEX11%E8%BD%AC%E5%8F%91/2021-12-12_23-07-10_screenshot.png]]
+现在你已经登陆了服务器，而且还有一个终端是连接的状态，和平时ssh连接没有什么区别，除了会转发X11的数据，你可以在终端里面用命令运行你想要运行的gui程序比如：firefox , google-chrome , xclock
+
+现在我以xclock为例演示一下, xclock程序会显示一个图形时钟
+#+begin_src bash
+xclock
+#+END_SRC
+等待一小会儿 你就可以在客服端C 的桌面上看到服务器S 的xclock了
+
 
 ** termux设置方法
 先安装VNC Viewer
@@ -7164,3 +8097,197 @@ If you are using VNC client on a computer using the same network as the phone do
 [[https://wiki.termux.com/wiki/Graphical_Environment#Enabling_the_X11_Repository][Graphical Environment]]
 ** 参考文章
 [[https://jdhao.github.io/2018/03/02/Windows-connect-server-x11-with-gitbash/][Set up X11 Forwarding with Git for Windows (git-bash)]]
+[[https://www.cnblogs.com/tsfh/p/9022170.html][通过ssh X11转发使用远程gui程序]]
+[[https://www.jianshu.com/p/1a296191a122][什么是X11-forwarding？怎么使用？]]
+* 端口
+** 介绍
+传输层协议，如传输控制协议（TCP）与用户资料包协议（UDP），在分组表头中，定义了来源端口号与目的端口号。
+
+一个端口号使用16位无符号整数（unsigned integer）来表示，其范围介于0与65535之间：
+- 在TCP协议中，端口号0是被保留的，不可使用。
+- 1--1023 系统保留，只能由root用户使用。
+- 1024---4999 由客户端程序自由分配。
+- 5000---65535 由服务器端程序自由分配在UDP协议中，来源端口号是可以选择要不要填上，如果设为0，则代表没有来源端口号。
+
+在操作系统中，一个行程可以通过网络套接字将它的输入与输出与一个特定的传输协议、一个端口、一个IP地址关系起来。这个关系动作，称为綁定（binding），在这之后，就可以通过网络提交与接收资料。
+
+在操作系统上运行的网络软件，可以透过操作系统，利用各个不同的端口，将资料发送到网络上；操作系统也可以根据数据包的IP地址以及端口号，将这些数据包转送到符合的行程去。
+
+虽然使用同样传输协议，但是特定的IP地址以及端口的组合，只会被綁定到单一的特定行程上。当使用同样协议的多个程序，尝试着綁定在同一个IP地址下的相同端口，就会产生一个常见的应用程序错误，这个错误有时候被称为端口冲突（port conflicts）。
+** Linux 查看端口占用情况
+ Linux 查看端口占用情况可以使用 lsof 和 netstat 命令。
+*** lsof
+ lsof(list open files)是一个列出当前系统打开文件的工具。
+
+ lsof 查看端口占用语法格式：
+ #+BEGIN_EXAMPLE
+ lsof -i:端口号
+ #+END_EXAMPLE
+
+**** 实例
+ 查看服务器 8000 端口的占用情况：
+ #+begin_src bash
+ /:lsof -i:8000
+
+ COMMAND   PID USER   FD   TYPE   DEVICE SIZE/OFF NODE NAME
+ nodejs  26993 root   10u  IPv4 37999514      0t0  TCP *:8000 (LISTEN)
+ #+END_SRC
+ 可以看到 8000 端口已经被轻 nodejs 服务占用。
+
+ lsof -i 需要 root 用户的权限来执行，如下图：
+ #+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-09-03_15-42-19.png @ 2021-09-03 16:14:42
+ [[file:Linux_%E6%9F%A5%E7%9C%8B%E7%AB%AF%E5%8F%A3%E5%8D%A0%E7%94%A8%E6%83%85%E5%86%B5/2021-09-03_16-14-42_Snipaste_2021-09-03_15-42-19.png]]
+ 更多 lsof 的命令如下：
+ #+begin_src bash
+ lsof -i:8080：查看8080端口占用
+ lsof abc.txt：显示开启文件abc.txt的进程
+ lsof -c abc：显示abc进程现在打开的文件
+ lsof -c -p 1234：列出进程号为1234的进程所打开的文件
+ lsof -g gid：显示归属gid的进程情况
+ lsof +d /usr/local/：显示目录下被进程开启的文件
+ lsof +D /usr/local/：同上，但是会搜索目录下的目录，时间较长
+ lsof -d 4：显示使用fd为4的进程
+ lsof -i -U：显示所有打开的端口和UNIX domain文件
+ #+END_SRC
+
+*** netstat
+ netstat -tunlp 用于显示 tcp，udp 的端口和进程等相关情况。
+
+ netstat 查看端口占用语法格式：
+ #+begin_src bash
+ netstat -tunlp | grep 端口号
+ #+END_SRC
+ -t (tcp) 仅显示tcp相关选项
+ -u (udp)仅显示udp相关选项
+ -n 拒绝显示别名，能显示数字的全部转化为数字
+ -l 仅列出在Listen(监听)的服务状态
+ -p 显示建立相关链接的程序名
+
+ 例如查看 8000 端口的情况，使用以下命令：
+ #+begin_src bash
+ /:netstat -tunlp | grep 8000
+ tcp        0      0 0.0.0.0:8000            0.0.0.0:*               LISTEN      26993/nodejs   
+ #+END_SRC
+ 更多命令：
+ #+begin_src bash
+ netstat -ntlp   //查看当前所有tcp端口
+ netstat -ntulp | grep 80   //查看所有80端口使用情况
+ netstat -ntulp | grep 3306   //查看所有3306端口使用情况
+ #+END_SRC
+* 挂载iso
+mount命令允许你将 ISO 文件挂载到文件夹中的某个指定的挂载点。
+
+本节内容的指定，应该可以在任何 Linux 发行版上正常运行，包括 Ubuntu, Debian, 和 CentOS。
+
+01.开始创建挂载点，它可以是你想要的任何位置：
+#+begin_src bash
+sudo mkdir /media/iso
+#+END_SRC
+
+02.通过mount命令将 ISO 文件挂载到挂载点。
+#+begin_src bash
+sudo mount /path/to/image.iso /media/iso -o loop
+#+END_SRC
+
+这里很重要的一点是-o loop选项。它告诉命令将指定 ISO 文件映射成一个回环设备，并且将这个设备挂载到指定的挂载点。
+
+不要忘记将/path/to/image.iso替换成你自己的 ISO 文件路径。
+
+03.查看 ISO 镜像内容，请使用ls命令
+#+begin_src bash
+ls /media/iso
+#+END_SRC
+
+你也可以在一个文件管理器中，直接打开并浏览 ISO 镜像里面的具体内容。
+
+04.当镜像挂载后，通过umount命令后面加上挂载目录，就可以卸载 ISO 文件。
+#+begin_src bash
+sudo umount /media/iso
+#+END_SRC
+
+如果此时文件系统正在使用中，那么umount将会卸载失败。
+* loop设备
+什么是loop设备？
+loop设备是一种伪设备，是使用文件来模拟块设备的一种技术，文件模拟成块设备后, 就像一个磁盘或光盘一样使用。在使用之前，一个 loop 设备必须要和一个文件进行连接。这种结合方式给用户提供了一个替代块特殊文件的接口。因此，如果这个文件包含有一个完整的文件系统，那么这个文件就可以像一个磁盘设备一样被 mount 起来。之所以叫loop设备（回环），其实是从文件系统这一层来考虑的，因为这种被 mount 起来的镜像文件它本身也包含有文件系统，通过loop设备把它mount起来，它就像是文件系统之上再绕了一圈的文件系统，所以称为 loop。
+
+loop设备的使用
+一般在linux中会有8个loop设备，一般是/dev/loop0~loop7，可用通过losetup -a查看所有的loop设备，如果命令没有输出就说明所有的loop设备都没有被占用，你可以按照以下步骤创建自己的loop设备。
+
+1）创建一个文件
+dd if=/dev/zero of=/var/loop.img bs=1M count=10240
+
+2）使用losetup将文件转化为块设备
+losetup /dev/loop0 /var/loop.img
+
+3）通过lsblk查看刚刚创建的块设备
+lsblk |grep loop0
+losetup -a
+
+4）当然，你也可以将这个块设备格式化并创建其他的文件系统，然后再mount到某个目录，有点多余啊，一般人不这么干。
+
+5）要删除这个loop设备可以执行以下命令
+losetup -d /dev/loop0
+
+作者：ppdjs
+链接：https://www.jianshu.com/p/add423a1f01f
+来源：简书
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+* TexLive安装
+这里以 Ubunt 18.04 LTS 版为例子进行讲解，首先下载镜像文件。然后挂载镜像，或者解压之后进入文件夹。
+
+以root用户执行下面的命令：
+#+begin_src bash
+./install-tl
+#+END_SRC
+这会启动安装进程，如果是 GUI 模式，可以用鼠标点，如果是命令行，命令行会询问你是否安装，根据提示，输入大写的 I 就可以进行自动安装了。
+
+安装过程大概有 12 到 30 分钟，具体的时间视情况而定，带有固态硬盘的电脑可能会快一点。整个过程中，有 3700 左右个包需要安装，请耐心等待。
+
+配置环境变量。 安装完成之后，你需要配置一下环境变量，具体操作(注意，现在还是 root 用户)：
+#+begin_src bash
+echo "export MANPATH=${MANPATH}:/usr/local/texlive/2019/texmf-dist/doc/man" >> ~/.bashrc
+echo "export INFOPATH=${INFOPATH}:/usr/local/texlive/2019/texmf-dist/doc/info" >> ~/.bashrc
+echo "export PATH=${PATH}:/usr/local/texlive/2019/bin/x86_64-linux" >> ~/.bashrc
+#+END_SRC
+以上三句命令就是让系统识别 manual 手册、info 手册以及最最重要的 tex 的编译器所在位置。如果不配置上述三句话，那么你将无法使用texlive。
+
+因为你一般是在普通用户下使用 TeX Live，所以还需要切换到普通用户下，配置一下环境变量。运行以下命令。
+
+在当前终端中，输入 Ctrl + D，退出 root 身份。
+
+在当前终端下，输入以下命令 (这几个命令和上面是一模一样的)：
+#+begin_src bash
+echo "export MANPATH=${MANPATH}:/usr/local/texlive/2019/texmf-dist/doc/man" >> ~/.bashrc
+echo "export INFOPATH=${INFOPATH}:/usr/local/texlive/2019/texmf-dist/doc/info" >> ~/.bashrc
+echo "export PATH=${PATH}:/usr/local/texlive/2019/bin/x86_64-linux" >> ~/.bashrc
+source ~/.bashrc # 令 bashrc 生效
+#+END_SRC
+到此就结束了。
+* 修改主机名
+使用hostname命令就可以查看Linux的主机名
+
+可以使用如下命令来修改主机名
+
+hostnamectl set-hostname eaglezsx
+
+也可以修改其配置文件/etc/hostname里边的内容
+* 设置本地域名解析
+在/etc/hosts文件中添加一句话
+#+BEGIN_EXAMPLE
+192.168.188.1 www.baidu.com
+#+END_EXAMPLE
+
+保存文件后再ping一下www.baidu.com就会连接到192.168.188.1了
+
+每一行为一条记录，分成两部分，第一部分是IP，第二部分是域名。
+- 一个IP后面可以跟多个域名，可以是几十个甚至上百个
+- 每一行只能有一个IP，也就是说一个域名不能对应多个IP
+- 如果有多行中出现相同的域名（对应的ip不一样），会按最前面的记录来解析
+* gitee.com无法访问的临时解决方案
+首先是否ping通: ping gitee.com
+
+如果无法ping，则用临时解决方案：
+
+修改/etc/hosts，添加 153.3.137.123 gitee.com
+
+这个原因大概率是停止域名解析了。所以可以写死ip地址来进行访问
