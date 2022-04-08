@@ -1,0 +1,45 @@
+* 函数指针
+函数名表示的是函数首地址。
+
+所以函数指针的定义方式为：
+函数返回值类型 (* 指针变量名) (函数参数列表);
+
+函数指针变量的声明：
+#+BEGIN_SRC c
+typedef int (*fun_ptr)(int,int); // 声明一个指向同样参数、返回值的函数指针类型
+#+END_SRC
+
+以下实例声明了函数指针变量 p，指向函数 max：
+#+BEGIN_SRC c
+#include <stdio.h>
+ 
+int max(int x, int y)
+{
+    return x > y ? x : y;
+}
+ 
+int main(void)
+{
+    /* p 是函数指针 */
+    int (* p)(int, int) = & max; // &可以省略
+    int a, b, c, d;
+ 
+    printf("请输入三个数字:");
+    scanf("%d %d %d", & a, & b, & c);
+ 
+    /* 与直接调用函数等价，d = max(max(a, b), c) */
+    d = p(p(a, b), c); 
+ 
+    printf("最大的数字是: %d\n", d);
+ 
+    return 0;
+}
+#+END_SRC
+编译执行，输出结果如下：
+#+BEGIN_EXAMPLE
+请输入三个数字:1 2 3
+最大的数字是: 3
+#+END_EXAMPLE
+** 参考文章
+[[https://www.runoob.com/cprogramming/c-fun-pointer-callback.html][C 函数指针与回调函数 - 菜鸟教程]]
+[[http://c.biancheng.net/view/228.html][函数指针及其定义和用法 - C语言中文网]]
