@@ -203,7 +203,8 @@ la(load address),顾名思义，它是一条地址加载指令。
 #+DOWNLOADED: screenshot @ 2022-04-07 15:36:11
 [[file:images/%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80/la%E6%8C%87%E4%BB%A4/2022-04-07_15-36-11_screenshot.png]]
 
-最左一栏是la指令的格式，它将一个内存地址（symbol是一个地址标记）的值加载到rd寄存器中。第二栏是la为指令被翻译成的等价的实际指令，可以看出来，la指令在非位置无关码（non-PIC）和位置无关码（PIC，position independance code）中，具有不同的解释方式
+最左一栏是la指令的格式，它将一个内存地址（symbol是一个地址标记）的值加载到rd寄存器中。
+第二栏是la为指令被翻译成的等价的实际指令，可以看出来，la指令在非位置无关码（non-PIC）和位置无关码（PIC，position independance code）中，具有不同的解释方式
 
 ** 参考文章
 [[https://zhuanlan.zhihu.com/p/367085156][详解risc-v的la指令]]
@@ -214,3 +215,27 @@ la(load address),顾名思义，它是一条地址加载指令。
 li,rd,imm
 #+END_SRC
 它把一个立即数imm加载到rd寄存器中。
+* sd指令
+sb t0, 8(sp)	Stores (dereferences) from register t0 into memory address (sp + 8). sb = store byte, sh = store halfword, sw = store word, sd = store doubleword.
+
+** 参考文章
+[[https://web.eecs.utk.edu/~smarz1/courses/ece356/notes/assembly/][RISC-V Assembly Language - UTK EECS]]
+
+
+#+DOWNLOADED: screenshot @ 2022-05-04 16:38:49
+[[file:images/%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80/sa%E6%8C%87%E4%BB%A4/2022-05-04_16-38-49_screenshot.png]]
+
+* auipc指令
+在Risc-V架构中，要得到当前指令pc（指令在存储器中的位置，instruction program counter)，可以通过AUIPC指令，把它读入到一个通用寄存器中。
+
+auipc rd, immediate    //x[rd] = pc + sext(immediate[31:12] << 12)
+
+PC 加立即数 (Add Upper Immediate to PC). U-type, RV32I and RV64I.
+
+把符号位扩展的 20 位（左移 12 位）立即数加到 pc 上，结果写入 x[rd]。
+
+例子：
+
+0:   0000a297                auipc   x5,0xa
+
+用 auipc x5,0 我们能得到当前的pc值。

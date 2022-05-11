@@ -1,317 +1,3 @@
-* std
-** 介绍
-std::是个名称空间标识符，C++标准库中的函数或者对象都是在命名空间std中定义的，所以我们要使用标准库中的函数或者对象都要用std来限定。
-
-至于为什么将cout放到名字空间std中，是因为象cout这样的对象在实际操作中或许会有好多个，比如说你自己也可能会不小心定义一个对象叫cout，那么这两个cout对象就会产生冲突。
-
-
-一般来说，std都是要调用C++标准库时使用。比如：使用标准库文件iostream时，要写上std;使用非标准库文件iostream.h，不用写。如图引入非标准库iostream.h时，省去了std::
-#+BEGIN_SRC c++
-#include <iostream.h>
-#+END_SRC
-
-当然使用标准库时，也是可以省略的，不过需要进行处理
-
-1. 分别将cout和endl释放出来
-#+BEGIN_SRC c++
-#include <iostream>
-using std::cout;
-using std::endl;
-#+END_SRC
-
-2. 将命名空间释放出来
-
-注：using namespace std 告诉编辑器我们将要使用名字空间std中的函数或者对象，所以cout和endl前面不用注明他们是std这个名字空间中的cout和endl
-#+BEGIN_SRC c++
-#include <iostream>
-using namespace std;
-#+END_SRC
-
-** transform
-transform函数的作用是：将某操作应用于指定范围的每个元素。transform函数有两个重载版本：
-
-transform(first,last,result,op);//first是容器的首迭代器，last为容器的末迭代器，result为存放结果的容器，op为要进行操作的一元函数对象或sturct、class。
-
-transform(first1,last1,first2,result,binary_op);//first1是第一个容器的首迭代 器，last1为第一个容器的末迭代器，first2为第二个容器的首迭代器，result为存放结果的容器，binary_op为要进行操作的二元函数 对象或sturct、class。
-
-注意：第二个重载版本必须要保证两个容器的元素个数相等才行，否则会抛出异常
-*** 例子
-看一个例子：利用transform函数将一个给定的字符串中的小写字母改写成大写字母，并将结果保存在一个叫second的数组里，原字符串内容不变。
-我们只需要使用transform的第一个重载函数，当然我们也可以使用for_each函数来完成再copy几次就行了，现在来看一下代码：
-#+BEGIN_SRC c++
-#include <iostream>
-#include <algorithm>
-using namespace std;
-char op(char ch)
-{
-
-   if(ch>='A'&&ch<='Z')
-        return ch+32;
-    else
-        return ch;
-}
-int main()
-{
-    string first,second;
-    cin>>first;
-    second.resize(first.size());
-    transform(first.begin(),first.end(),second.begin(),op);
-    cout<<second<<endl;
-    return 0;
-}
-#+END_SRC
-
-再看一个例子：给你两个vector向量（元素个数相等），请你利用transform函数将两个vector的每个元素相乘，并输出相乘的结果。
-代码：
-foreach的用法
-#+BEGIN_SRC c++
-#include <iostream>
-#include <algorithm>
-#include <vector>
-using namespace std;
-void print(int &elem){cout<<elem<<" ";}
-int op(int a,int b){return a*b;}
-int main()
-{
-    vector <int> A,B,SUM;
-    int n;
-    cin>>n;
-    for(int i=0;i<n;i++)
-    {
-        int t;
-        cin>>t;
-        A.push_back(t);
-    }
-    for(int i=0;i<n;i++)
-    {
-        int t;
-        cin>>t;
-        B.push_back(t);
-    }
-    SUM.resize(n);
-    transform(A.begin(),A.end(),B.begin(),SUM.begin(),op);
-    for_each(SUM.begin(),SUM.end(),print);
-    return 0;
-}
-#+END_SRC
-** to_string
-** all_of
-all_of() 算法会返回 true，前提是序列中的所有元素都可以使谓词返回 true。
-
-*** 实例
-下面是一段代码，用来展示用 all_of() 检查 ages 容器中的元素： 
-#+BEGIN_SRC c++
-int good_age{100};
-std::cout << (std::all_of(std::begin(ages), std::end(ages),[good_age] (int age) { return age < good_age; }) ? "None": "Some") << " of the people are centenarians." << std::endl;
-#+END_SRC
-这个 lambda 表达式会将 ages 中的元素和 good_age 的值作比较，good_age 的值为 100。所有的元素都小于 100，所以 all_of() 会返回 true，而且输出消息会正确报告没有记录的百岁老人。
-** accumulate
-accumulate定义在#include<numeric>中，作用有两个，一个是累加求和，另一个是自定义类型数据的处理
-
-1. 累加求和
-~int sum = accumulate(vec.begin() , vec.end() , 42);~
-
-accumulate带有三个形参：头两个形参指定要累加的元素范围，第三个形参则是累加的初值。
-
-accumulate函数将它的一个内部变量设置为指定的初始值，然后在此初值上累加输入范围内所有元素的值。accumulate算法返回累加的结果，其返回类型就是其第三个实参的类型。
-
-可以使用accumulate把string型的vector容器中的元素连接起来：
-
-~string sum = accumulate(v.begin() , v.end() , string(" "));~
-
-这个函数调用的效果是：从空字符串开始，把vec里的每个元素连接成一个字符串。
-
-2. 自定义数据类型的处理
-
-C++ STL中有一个通用的数值类型计算函数— accumulate(),可以用来直接计算数组或者容器中C++内置数据类型，例如：
-#+BEGIN_SRC c++
-#include <numeric>  
-int arr[]={10,20,30,40,50};  
-vector<int> va(&arr[0],&arr[5]);  
-int sum=accumulate(va.begin(),va.end(),0);  //sum = 150  
-#+END_SRC
-但是对于自定义数据类型，我们就需要自己动手写一个回调函数来实现自定义数据的处理，然后让它作为accumulate()的第四个参数，accumulate()的原型为
-#+BEGIN_SRC c++
-template<class _InIt, class _Ty,  class _Fn2> 
-inline _Ty _Accumulate(_InIt _First, _InIt _Last, _Ty _Val, _Fn2 _Func)  
-{   // return sum of _Val and all in [_First, _Last), using _Func  
-    for (; _First != _Last; ++_First)  
-        _Val = _Func(_Val, *_First);  
-    return (_Val);  
-}
-#+END_SRC
-下面是例子：
-#+BEGIN_SRC c++
-
-#include <vector>  
-#include <string>  
-using namespace std;  
-  
-struct Grade  
-{  
-    string name;  
-    int grade;  
-};  
-  
-int main()  
-{  
-    Grade subject[3] = {  
-        { "English", 80 },  
-        { "Biology", 70 },  
-        { "History", 90 }  
-    };  
-  
-    int sum = accumulate(subject, subject + 3, 0, [](int a, Grade b){return a + b.grade; });  
-    cout << sum << endl;  
-  
-    system("pause");  
-    return 0;  
-} 
-#+END_SRC
-* 定义抽象数据类型
-#+BEGIN_SRC c++
-struct ListNode {
-    int val;
-    ListNode *next;
-    ListNode() : val(0), next(nullptr) {}
-    ListNode(int x) : val(x), next(nullptr) {}
-    ListNode(int x, ListNode *next) : val(x), next(next) {}
-};
-#+END_SRC
-
-如果调用 ~ListNode(5)~ 那么 ~val=5~ ， ~next~ 指针为空指针
-* 内存泄露
-new 和 delete 是 C++ 用于管理堆内存的两个运算符，对应于C语言中的 malloc 和 free，但是 malloc 和 free 是函数，而new 和 delete 是运算符。除此之外，new 在申请内存的同时，还会调用对象的构造函数，而 malloc 只会申请内存；同样，delete 在释放内存之前，会调用对象的析构函数，而 free 只会释放内存。
-
-new运算符申请内存：将调用相应的 operator new(size_t) 函数动态分配内存，在分配到的动态内存块上 初始化 相应类型的对象（构造函数）并返回其首地址。如果调用构造函数初始化对象时抛出异常，则自动调用 operator delete(void*, void*) 函数释放已经分配到的内存。
-
-delete运算符释放内存：调用相应类型的析构函数，处理类内部可能涉及的资源释放，调用相应的 operator delete(void *) 函数。
-** 内存是如何泄露的
-在 C++ 程序中，主要涉及到的内存就是“栈”和“堆”
-
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/v2-f3189547daa4548bc4ab6fdd13eeea6d_720w.png @ 2020-06-13 19:16:48
-[[file:%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2/2020-06-13_19-16-48_v2-f3189547daa4548bc4ab6fdd13eeea6d_720w.png]]
-
-通常来说，一个线程的栈内存是有限的，通常来说是 8M 左右（取决于运行的环境）。栈上的内存通常是由编译器来自动管理的。当在栈上分配一个新的变量时，或进入一个函数时，栈的指针会下移，相当于在栈上分配了一块内存。我们把一个变量分配在栈上，也就是利用了栈上的内存空间。当这个变量的生命周期结束时，栈的指针会上移，相同于回收了内存。
-
-由于栈上的内存的分配和回收都是由编译器控制的，所以在栈上是不会发生内存泄露的，只会发生栈溢出（Stack Overflow），也就是分配的空间超过了规定的栈大小。
-
-而堆上的内存是由程序直接控制的，程序可以通过 malloc/free 或 new/delete 来分配和回收内存，如果程序中通过 malloc/new 分配了一块内存，但忘记使用 free/delete 来回收内存，就发生了内存泄露。
-
-*** 经验 #1：尽量避免在堆上分配内存
-既然只有堆上会发生内存泄露，那第一原则肯定是避免在堆上面进行内存分配，尽可能的使用栈上的内存，由编译器进行分配和回收，这样当然就不会有内存泄露了。
-
-然而，只在栈上分配内存，在有 IO 的情况下是存在一定局限性的。
-
-举个例子，为了完成一个请求，我们通常会为这个请求构造一个 Context 对象，用于描述和这个请求有关的一些上下文。例如下面一段代码：
-#+BEGIN_SRC c++
-void Foo(Reuqest* req) {
-    RequestContext ctx(req);
-    HandleRequest(&ctx);
-}
-#+END_SRC
-如果 HandleRequest 是一个同步函数，当这个函数返回时，请求就可以被处理完成，那么显然 ctx 是可以被分配在栈上的。
-
-但如果 HandleRequest 是一个异步函数，例如：
-#+BEGIN_SRC c++
-void HandleRequest(RequestContext* ctx, Callback cb);
-#+END_SRC
-那么显然，ctx 是不能被分配在栈上的，因为如果 ctx 被分配在栈上，那么当 Foo 函数推出后，ctx 对象的生命周期也就结束了。而 FooCB 中显然会使用到 ctx 对象。
-#+BEGIN_SRC c++
-void HandleRequest(RequestContext* ctx, Callback cb);
-
-void Foo(Reuqest* req) {
-    auto ctx = new RequestContext(req);
-    HandleRequest(ctx, FooCB);
-}
-
-void FooCB(RequestContext* ctx) {
-    FinishRequest(ctx);
-    delete ctx;
-}
-#+END_SRC
-在这种情况下，如果忘记在 FooCB 中调用 delete ctx，则就会触发内存泄露。尽管我们可以借助一些静态检查工具对代码进行检查，但往往异步程序的逻辑是极其复杂的，一个请求的生命周期中，也需要进行大量的内存分配操作，静态检查工具往往无法发现所有的内存泄露情况。
-
-那么怎么才能避免这种情况的产生呢？引入智能指针显然是一种可行的方法，但引入 shared_ptr 往往引入了额外的性能开销，并不十分理想。
-
-在 SmartX，我们通常采用两种方法来应对这种情况。
-
-*** 经验 #2：使用 Arena
-Arena 是一种统一化管理内存生命周期的方法。所有需要在堆上分配的内存，不通过 malloc/new，而是通过 Arena 的 CreateObject 接口。同时，不需要手动的执行 free/delete，而是在 Arena 被销毁的时候，统一释放所有通过 Arena 对象申请的内存。所以，只需要确保 Arena 对象一定被销毁就可以了，而不用再关心其他对象是否有漏掉的 free/delete。这样显然降低了内存管理的复杂度。
-
-此外，我们还可以将 Arena 的生命周期与 Request 的生命周期绑定，一个 Request 生命周期内的所有内存分配都通过 Arena 完成。这样的好处是，我们可以在构造 Arena 的时候，大概预估出处理完成这个 Request 会消耗多少内存，并提前将会使用到的内存一次性的申请完成，从而减少了在处理一个请求的过程中，分配和回收内存的次数，从而优化了性能。
-
-我们最早看到 Arena 的思想，是在 LevelDB 的代码中。这段代码相当简单，建议大家直接阅读。
-
-*** 经验 #3：使用 Coroutine
-Coroutine 相信大家并不陌生，那 Coroutine 的本质是什么？我认为 Coroutine 的本质，是使得一个线程中可以存在多个上下文，并可以由用户控制在多个上下文之间进行切换。而在上下文中，一个重要的组成部分，就是栈指针。使用 Coroutine，意味着我们在一个线程中，可以创造（或模拟）多个栈。
-
-有了多个栈，意味着当我们要做一个异步处理时，不需要释放当前栈上的内存，而只需要切换到另一个栈上，就可以继续做其他的事情了，当异步处理完成时，可以再切换回到这个栈上，将这个请求处理完成。
-
-还是以刚才的代码为示例:
-#+BEGIN_SRC c++
-void Foo(Reuqest* req) {
-    RequestContext ctx(req);
-    HandleRequest(&ctx);
-}
-
-void HandleRequest(RequestCtx* ctx) {
-    SubmitAsync(ctx);
-    Coroutine::Self()->Yield();
-    CompleteRequest(ctx);
-}
-#+END_SRC
-这里的精髓在于，尽管 Coroutine::Self()->Yield() 被调用时，程序可以跳出 HandleRequest 函数去执行其他代码逻辑，但当前的栈却被保存了下来，所以 ctx 对象是安全的，并没有被释放。
-
-这样一来，我们就可以完全抛弃在堆上申请内存，只是用栈上的内存，就可以完成请求的处理，完全不用考虑内存泄露的问题。然而这种假设过于理想，由于在栈上申请内存存在一定的限制，例如栈大小的限制，以及需要在编译是知道分配内存的大小，所以在实际场景中，我们通常会结合使用 Arena 和 Coroutine 两种技术一起使用。
-
-有人可能会提到，想要多个栈用多个线程不就可以了？然而用多线程实现多个栈的问题在于，线程的创建和销毁的开销极大，且线程间切块，也就是在栈之间进行切换的代销需要经过操作系统，这个开销也是极大的。所以想用线程模拟多个栈的想法在实际场景中是走不通的。
-
-关于 Coroutine 有很多开源的实现方式，大家可以在 github 上找到很多，C++20 标准也会包含 Coroutine 的支持。在 SmartX 内部，我们很早就实现了 Coroutine，并对所有异步 IO 操作进行了封装，示例可参考我们之前的一篇文章 smartx：基于 Coroutine 的异步 RPC 框架示例（C++）
-
-这里需要强调一下，Coroutine 确实会带来一定的性能开销，通常 Coroutine 切换的开销在 20ns 以内，然而我们依然在对性能要求很苛刻的场景使用 Coroutine，一方面是因为 20ns 的性能开销是相对很小的，另一方面是因为 Coroutine 极大的降低了异步编程的复杂度，降低了内存泄露的可能性，使得编写异步程序像编写同步程序一样简单，降低了程序员心智的开销。
-
-*** 经验 #4：善用 RAII
-尽管在有些场景使用了 Coroutine，但还是可能会有在堆上申请内存的需要，而此时有可能 Arena 也并不适用。在这种情况下，善用 RAII（Resource Acquisition Is Initialization）思想会帮助我们解决很多问题。
-
-简单来说，RAII 可以帮助我们将管理堆上的内存，简化为管理栈上的内存，从而达到利用编译器自动解决内存回收问题的效果。此外，RAII 可以简化的还不仅仅是内存管理，还可以简化对资源的管理，例如 fd，锁，引用计数等等。
-
-当我们需要在堆上分配内存时，我们可以同时在栈上面分配一个对象，让栈上面的对象对堆上面的对象进行封装，用时通过在栈对象的析构函数中释放堆内存的方式，将栈对象的生命周期和堆内存进行绑定。
-
-unique_ptr 就是一种很典型的例子。然而 unique_ptr 管理的对象类型只能是指针，对于其他的资源，例如 fd，我们可以通过将 fd 封装成另外一个 FileHandle 对象的方式管理，也可以采用一些更通用的方式。例如，在我们内部的 C++ 基础库中实现了 Defer 类，想法类似于 Go 中 defer。
-#+BEGIN_SRC c++
-void Foo() {
-    int fd = open();
-    Defer d = [=]() { close(fd); }
-    // do something with fd
-}
-#+END_SRC
-
-*** 经验 #5：便于 Debug
-在特定的情况下，我们难免还是要手动管理堆上的内存。然而当我们面临一个正在发生内存泄露线上程序时，我们应该怎么处理呢？
-
-当然不是简单的『重启大法好』，毕竟重启后还是可能会产生泄露，而且最宝贵的现场也被破坏了。最佳的方式，还是利用现场进行 Debug，这就要求程序具有便于 Debug 的能力。
-
-这里不得不提到一个经典而强大的工具 gperftools。gperftools 是 google 开源的一个工具集，包含了 tcmalloc，heap profiler，heap checker，cpu profiler 等等。gperftools 的作者之一，就是大名鼎鼎的 Sanjay Ghemawat，没错，就是与 Jeff Dean 齐名，并和他一起写 MapReduce 的那个 Sanjay。
-
-gperftools 的一些经典用法，我们就不在这里进行介绍了，大家可以自行查看文档。而使用 gperftools 可以在不重启程序的情况下，进行内存泄露检查，这个恐怕是很少有人了解。
-
-实际上我们 Release 版本的 C++ 程序可执行文件在编译时全部都链接了 gperftools。在 gperftools 的 heap profiler 中，提供了 HeapProfilerStart 和 HeapProfilerStop 的接口，使得我们可以在运行时启动和停止 heap profiler。同时，我们每个程序都暴露了 RPC 接口，用于接收控制命令和调试命令。在调试命令中，我们就增加了调用 HeapProfilerStart 和 HeapProfilerStop 的命令。由于链接了 tcmalloc，所以 tcmalloc 可以获取所有内存分配和回收的信息。当 heap profiler 启动后，就会定期的将程序内存分配和回收的行为 dump 到一个临时文件中。
-
-当程序运行一段时间后，你将得到一组 heap profile 文件
-#+BEGIN_SRC bash
-  profile.0001.heap
-  profile.0002.heap
-  ...
-  profile.0100.heap
-#+END_SRC
-每个 profile 文件中都包含了一段时间内，程序中内存分配和回收的记录。如果想要找到内存泄露的线索，可以通过使用
-#+BEGIN_SRC bash
-pprof --base=profile.0001.heap /usr/bin/xxx profile.0100.heap --text
-#+END_SRC
-来进行查看，也可以生成 pdf 文件，会更直观一些。
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/v2-a8eedcc8f07691a31707f5f8921acfa8_720w.png @ 2020-06-13 19:27:10
-[[file:%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2/2020-06-13_19-27-10_v2-a8eedcc8f07691a31707f5f8921acfa8_720w.png]]
 * auto
 ** 静态类型，动态类型和类型推导
 在编程语言分类中，C/C++C常常被认为是静态类型的语言。而有的编程语言则号称是“动态类型”的，比如python。通常情况下，“静”和“动”的区别是非常直观的。我们看看下面这段简单的python代码：   
@@ -508,18 +194,6 @@ cout<<typeid(j).name()<<endl; // This will print int*
 auto& k = a;
 cout<<typeid(k).name()<<endl; // This will print int [9]
 #+END_SRC
-* new创建类对象与不new区别
-#+BEGIN_SRC c++
-A a;
-
-A * a = new a();
-#+END_SRC
-以上两种方式皆可实现类的实例化,区别在于：
-1. 前者在堆栈中分配内存，后者为动态内存分配，在一般应用中是没有什么区别的，但动态内存分配会使对象的可控性增强。
-2. 前者在栈中分配内存，后者在堆中分配内存
-3. 大程序用new，小程序直接申请
-4. new必须delete删除;不用new的方式，系统会自动回收内存
-
 * C++四种类型转换运算符
 隐式类型转换是安全的，显式类型转换是有风险的，C语言之所以增加强制类型转换的语法，就是为了强调风险，让程序员意识到自己在做什么。
 
@@ -667,14 +341,6 @@ int main(){
 
 ** dynamic_cast
 这部分内容我省略没写。
-
-* SFML
-SFML 是多媒体库，它为PC的各个组件提供简单的界面，用来简化游戏和多媒体应用程序的开发。 主要由五个模块组成，分别是：系统，窗口，图形，音频和网络。
-
-SFML 是跨平台的，通过 SFML，你的应用程序可以在最常见的操作系统上进行编译和运行：Windows，Linux，macOS以及Android和iOS。
-
-SFML 支持多种语言，具体可以在官网查看支持的语言。
-
 * cmake
 ** 简介
 什么是cmake
@@ -1388,43 +1054,73 @@ Output from the above would appear something like the following:
 --   Finding partB - not found
 -- Finding my things - missing components: B
 #+END_EXAMPLE
-* 二重指针
-char**是二重指针，bai也就是指向指针变量的指针。 而char*是一维指针，即指向zhi字符变量的指针。
+** include
+include 用于加载makefile文件
 
-其区别在于，指向地址dao所存储的值不同。
+-include 表示当文件不存在时，make不会报错
+*** 参考文章
+[[https://www.gnu.org/software/make/manual/html_node/Include.html][3.3 Including Other Makefiles]]
+[[https://blog.csdn.net/xiaozhi_su/article/details/4202779][Makefile中指示符“include”、“-include”和“sinclude”的区别]]
+[[https://stackoverflow.com/questions/16981464/difference-between-include-and-include-in-a-makefile][Difference between "include" and "-include" in a makefile]]
+** Makefile选项CFLAGS,LDFLAGS,LIBS
+CFLAGS 表示用于 C 编译器的选项，
+CXXFLAGS 表示用于 C++ 编译器的选项。
+这两个变量实际上涵盖了编译和汇编两个步骤。
 
-对于char **p1, *p1的类型为char*型，而**p1的类型才是char型。
+CFLAGS： 指定头文件（.h文件）的路径，如：CFLAGS=-I/usr/include -I/path/include。同样地，安装一个包时会在安装路径下建立一个include目录，当安装过程中出现问题时，试着把以前安装的包的include目录加入到该变量中来。
 
-对于char*类指针p2，*p2就是char 型。
-* 字符串
-** 字符串数组
-#+BEGIN_SRC c++
-char a[] = "hello";   //字符串数组，存放的是字符,a表示字符h的地址
+LDFLAGS：gcc 等编译器会用到的一些优化参数，也可以在里面指定库文件的位置。用法：LDFLAGS=-L/usr/lib -L/path/to/your/lib。每安装一个包都几乎一定的会在安装目录里建立一个lib目录。如果明明安装了某个包，而安装另一个包时，它愣是说找不到，可以抒那个包的lib路径加入的LDFALGS中试一下。
+
+LIBS：告诉链接器要链接哪些库文件，如LIBS = -lpthread -liconv
+
+简单地说，LDFLAGS是告诉链接器从哪里寻找库文件，而LIBS是告诉链接器要链接哪些库文件。不过使用时链接阶段这两个参数都会加上，所以你即使将这两个的值互换，也没有问题。
+
+有时候LDFLAGS指定-L虽然能让链接器找到库进行链接，但是运行时链接器却找不到这个库，如果要让软件运行时库文件的路径也得到扩展，那么我们需要增加这两个库给"-Wl,R"：
+
+LDFLAGS = -L/var/xxx/lib -L/opt/mysql/lib -Wl,R/var/xxx/lib -Wl,R/opt/mysql/lib
+
+如果在执行./configure以前设置环境变量export LDFLAGS="-L/var/xxx/lib -L/opt/mysql/lib -Wl,R/var/xxx/lib -Wl,R/opt/mysql/lib" ，注意设置环境变量等号两边不可以有空格，而且要加上引号（shell的用法）。那么执行configure以后，Makefile将会设置这个选项，链接时会有这个参数，编译出来的可执行程序的库文件搜索路径就得到扩展了。
+*** 参考文章
+[[https://www.cnblogs.com/taskiller/archive/2012/12/14/2817650.html][Makefile选项CFLAGS,LDFLAGS,LIBS - Taskiller - 博客园]]
+** =和:=的区别
+如果使用=，make会将整个makefile展开后，再决定变量的值。也就是说，变量的值将会是整个makefile中最后被指定的值。看例子：
+#+begin_src bash
+x = foo
+y = $(x) bar
+x = xyz
 #+END_SRC
-*** 初始化
-#+BEGIN_SRC c++
-char a[10] ="hello";//字符串以'\0'结尾，这种方式系统会自动在数组未填值的地方添加'\0'
-char b[] = {'h', 'e' , 'l', 'l', '\0'};//类似于初始化整型数组，必须要手动在后面添加'\0'
-#+END_SRC
-** 字符串指针数组
-#+BEGIN_SRC c++
-char *b[] = {"hello", "world"};//字符串指针数组，数组b总共有两个4字节的元素,第一个元素存储字符串"hello"的地址,即指向字符h的指针,第二个元素存储字符串"world"的地址,即指向字符w的指针.
-#+END_SRC
-* 谓词
-A predicate is an expression that can be called and that returns a value that can be used as a condition. The predicates used by library algorithms are either unary predicates (meaning they have a single parameter) or binary predicates (meaning they have two parameters).
 
-The version of sort that takes a binary predicate uses the given predicate in place of < to compare elements.
-
-#+BEGIN_SRC c++
-// comparison function to be used to sort by word length
-bool isShorter(const string &s1, const string &s2)
-C++ Primer, Fifth Edition
-{
-return s1.size() < s2.size();
-}
-// sort on word length, shortest to longest
-sort(words.begin(), words.end(), isShorter);
+在上例中，y的值将会是 xyz bar ，而不是 foo bar 。
+#+begin_src bash
+x := foo
+y := $(x) bar
+x := xyz
 #+END_SRC
+而:=表示变量在赋值时就先设置为该值，而不是整个makefile展开后的最终值，后面如果再有赋值，则会将前面的赋值覆盖，使用新的值。
+
+在上例中，y的值将会是 foo bar ，而不是 xyz bar 了。
+
+#+BEGIN_EXAMPLE
+Simple assignment :=
+A simple assignment expression is evaluated only once, at the very first occurrence. For example, if CC :=${GCC} ${FLAGS} during the first encounter is evaluated to gcc -W then each time ${CC} occurs it will be replaced with gcc -W.
+
+Recursive assignment =
+A Recursive assignment expression is evaluated everytime the variable is encountered in the code. For example, a statement like CC = ${GCC} {FLAGS} will be evaluated only when an action like ${CC} file.c is executed. However, if the variable GCC is reassigned i.e GCC=c++ then the ${CC} will be converted to c++ -W after the reassignment.
+
+Conditional assignment ?=
+Conditional assignment assigns a value to a variable only if it does not have a value
+
+Appending +=
+Assume that CC = gcc then the appending operator is used like CC += -w
+then CC now has the value gcc -W
+#+END_EXAMPLE
+For more check out these [[https://github.com/amjadmajid/Makefile][tutorials]]
+*** 参考文章
+[[https://www.cnblogs.com/wanqieddy/archive/2011/09/21/2184257.html][Makefile 中:= ?= += =的区别- wanqi - 博客园]]
+[[https://www.sunxidong.com/237.html][Makefile中“=”、“:=”、“?=”、“+=”的区别 - 孙希栋的博客]]
+[[https://stackoverflow.com/questions/4879592/whats-the-difference-between-and-in-makefile][What's the difference between := and = in Makefile?]]
+* C++ STL vector添加元素（push_back()和emplace_back()）详解
+emplace_back() 和 push_back() 的区别，就在于底层实现的机制不同。push_back() 向容器尾部添加元素时，首先会创建这个元素，然后再将这个元素拷贝或者移动到容器中（如果是拷贝的话，事后会自行销毁先前创建的这个元素）；而 emplace_back() 在实现时，则是直接在容器尾部创建这个元素，省去了拷贝或移动元素的过程。
 * lambda表达式
 The predicates we pass to an algorithm must have exactly one or two parameters,depending on whether the algorithm takes a unary or binary predicate, respectively.However, sometimes we want to do processing that requires more arguments than the algorithm’s predicate allows.
 
@@ -1439,8 +1135,378 @@ auto f = [] { return 42; };
 cout << f() << endl; // prints 42
 #+END_SRC
 Here, we’ve defined f as a callable object that takes no arguments and returns 42.
+* new创建类对象与不new区别
+#+BEGIN_SRC c++
+A a;
+
+A * a = new a();
+#+END_SRC
+以上两种方式皆可实现类的实例化,区别在于：
+1. 前者在堆栈中分配内存，后者为动态内存分配，在一般应用中是没有什么区别的，但动态内存分配会使对象的可控性增强。
+2. 前者在栈中分配内存，后者在堆中分配内存
+3. 大程序用new，小程序直接申请
+4. new必须delete删除;不用new的方式，系统会自动回收内存
+
+* set自定义去重和排序函数
+** 方法一：使用std::set内置的less比较函数（直接定义内置类型的set对象）
+
+这种方法适用于：1）比较int、char等内置类型。2）只能针对某一个内置类型去重和排序：如果想通过id（int）去重，并通过hot(int)排序，该种方法就束手无策了。代码如下：
+#+BEGIN_SRC c++
+#include <iostream>
+#include <set>
+using namespace std;
+void main()
+{
+    std::set<int> mySet;    // 直接定义内置类型set集合
+    mySet.insert(10);       // 默认比较函数为less
+    mySet.insert(20);       // 从小到大排序
+    for(auto it:mySet)
+    {
+        std::cout<<it<<std::endl;
+    }
+    std::cout<<"end"<<std::endl;
+
+}
+#+END_SRC
+#+BEGIN_EXAMPLE
+结果如下：
+output：
+            10
+            20
+            end
+#+END_EXAMPLE
+
+** 方法二：自定义类（结构体）比较函数
+
+前文提到：直接定义内置类型的set对象，即使用std::set内置的默认的less比较函数，可能不能满足我们的实际需求。例如：现在有一批结构体对象，需要将其插入set集合，并按照id去重，按照热度hot进行排序。这个时候，就需要重新自定义比较函数了。有两种方法可以自定义比较函数：
+*** 重载<操作符
+甚么要重载<运算符呢？能不能重载"<="或者">="运算符？答案是不可以。几乎所有的方法或容器都需要排序来满足数学意义上的标准严格弱序化，否则这些方法或容器的行为将不可预知。假设f(x,y)是一个比较函数。 如果该函数满足如下条件则它是严格弱序化的。
+1. f(x,x) = false; 
+2. if f(x,y) then !f(y,x)
+3. if f(x,y) and f(y,z) then f(x,z)
+4. if !f(x,y)&&!f(y,x) then x==y; if x==y and y==z then x==z;
+
+看上去有点晕乎，不过不用担心，只要你的比较方法能够满足对相等元素永远返回false（记住一个准则：永远让比较函数对相同元素返回false），那你的方法就满足要求了。
+
+其实，set容器在判定已有元素a和新插入元素b是否相等时，是这么做的：
+1. 将a作为左操作数，b作为有操作数，调用比较函数，并返回比较值  
+2. 将b作为左操作数，a作为有操作数，再调用一次比较函数，并返回比较值。如果1、2两步的返回值都是false，则认为a、b是相等的，则b不会被插入set容器中；
+
+如果1、2两步的返回值都是true，则可能发生未知行为，因此，记住一个准则：永远让比较函数对相同元素返回false。
+#+BEGIN_SRC c++
+#include <iostream>
+#include <set>
+using namespace std;
+struct song
+{
+    int m_id;
+    int m_hot;
+    song(int id,int hot)
+    {
+
+        this->m_id = id;
+        this->m_hot = hot;
+    }
+    bool operator<(const struct song & right)const   //重载<运算符
+    {
+        if(this->m_id == right.m_id)     //根据id去重
+            return false;
+        else
+        {
+            if(this->m_hot != right.m_hot)
+            {
+                return this->m_hot > right.m_hot;      //降序
+            }
+            else
+            {
+                return this->m_id > right.m_id;     
+            }
+        }
+    }
+};
+void main()
+{
+    std::set<song> mySet;
+    song s1(10,100);
+    song s2(20,200);
+    song s3(20,300);
+    song s4(30,200);
+    mySet.insert(s1);    //插入s1
+    mySet.insert(s2);    //插入s2
+    mySet.insert(s3);    //s3和s2的id相同，不插入
+    mySet.insert(s4);    //插入s4
+    for(auto it:mySet)
+    {
+        std::cout<<"id:"<<it.m_id<<",hot:"<<it.m_hot<<std::endl;
+    }
+    std::cout<<"end"<<std::endl;
+;}
+#+END_SRC
+#+BEGIN_EXAMPLE
+结果如下：
+id：30，hot ： 200
+id：20，hot ： 200
+id：10，hot ： 100
+end
+#+END_EXAMPLE
+*** 重载（）运算符
+具体代码如下：
+#+BEGIN_SRC c++
+#include <iostream>
+#include <set>
+using namespace std;
+struct song
+{
+    int m_id;
+    int m_hot;
+    song(int id,int hot)
+    {
+
+        this->m_id = id;
+        this->m_hot = hot;
+    }
+    /*
+    bool operator<(const struct song & right)const   //重载<运算符
+    {
+        if(this->m_id == right.m_id)     //根据id去重
+            return false;
+        else
+        {
+            if(this->m_hot != right.m_hot)
+            {
+                return this->m_hot > right.m_hot;      //降序
+            }
+            else
+            {
+                return this->m_id > right.m_id;
+            }
+        }
+    }
+    */
+};
+struct comp
+{
+    bool operator()(struct song left,struct song  right)  //重载（）运算符
+    {
+
+        if(left.m_id == right.m_id)     //根据id去重
+            return false;
+        else
+        {
+            if(left.m_hot != right.m_hot)
+            {
+                return left.m_hot > right.m_hot;      //降序
+            }
+            else
+            {
+                return left.m_id > right.m_id;
+            }
+
+        }
+    }
+
+};
+void main()
+{
+    std::set<song,comp> mySet;      //写法和2.1中的的区别
+    song s1(10,100);
+    song s2(20,200);
+    song s3(20,300);
+    song s4(30,200);
+    mySet.insert(s1);    //插入s1
+    mySet.insert(s2);    //插入s2
+    mySet.insert(s3);    //s3和s2的id相同，不插入
+    mySet.insert(s4);    //插入s4
+    for(auto it:mySet)
+    {
+        std::cout<<"id:"<<it.m_id<<",hot:"<<it.m_hot<<std::endl;
+    }
+    std::cout<<"end"<<std::endl;
+};
+#+END_SRC
+#+BEGIN_EXAMPLE
+结果如下：
+id：30，hot ： 200
+id：20，hot ： 200
+id：10，hot ： 100
+end
+#+END_EXAMPLE
+* SFML
+SFML 是多媒体库，它为PC的各个组件提供简单的界面，用来简化游戏和多媒体应用程序的开发。 主要由五个模块组成，分别是：系统，窗口，图形，音频和网络。
+
+SFML 是跨平台的，通过 SFML，你的应用程序可以在最常见的操作系统上进行编译和运行：Windows，Linux，macOS以及Android和iOS。
+
+SFML 支持多种语言，具体可以在官网查看支持的语言。
+* std
+** 介绍
+std::是个名称空间标识符，C++标准库中的函数或者对象都是在命名空间std中定义的，所以我们要使用标准库中的函数或者对象都要用std来限定。
+
+至于为什么将cout放到名字空间std中，是因为象cout这样的对象在实际操作中或许会有好多个，比如说你自己也可能会不小心定义一个对象叫cout，那么这两个cout对象就会产生冲突。
 
 
+一般来说，std都是要调用C++标准库时使用。比如：使用标准库文件iostream时，要写上std;使用非标准库文件iostream.h，不用写。如图引入非标准库iostream.h时，省去了std::
+#+BEGIN_SRC c++
+#include <iostream.h>
+#+END_SRC
+
+当然使用标准库时，也是可以省略的，不过需要进行处理
+
+1. 分别将cout和endl释放出来
+#+BEGIN_SRC c++
+#include <iostream>
+using std::cout;
+using std::endl;
+#+END_SRC
+
+2. 将命名空间释放出来
+
+注：using namespace std 告诉编辑器我们将要使用名字空间std中的函数或者对象，所以cout和endl前面不用注明他们是std这个名字空间中的cout和endl
+#+BEGIN_SRC c++
+#include <iostream>
+using namespace std;
+#+END_SRC
+
+** transform
+transform函数的作用是：将某操作应用于指定范围的每个元素。transform函数有两个重载版本：
+
+transform(first,last,result,op);//first是容器的首迭代器，last为容器的末迭代器，result为存放结果的容器，op为要进行操作的一元函数对象或sturct、class。
+
+transform(first1,last1,first2,result,binary_op);//first1是第一个容器的首迭代 器，last1为第一个容器的末迭代器，first2为第二个容器的首迭代器，result为存放结果的容器，binary_op为要进行操作的二元函数 对象或sturct、class。
+
+注意：第二个重载版本必须要保证两个容器的元素个数相等才行，否则会抛出异常
+*** 例子
+看一个例子：利用transform函数将一个给定的字符串中的小写字母改写成大写字母，并将结果保存在一个叫second的数组里，原字符串内容不变。
+我们只需要使用transform的第一个重载函数，当然我们也可以使用for_each函数来完成再copy几次就行了，现在来看一下代码：
+#+BEGIN_SRC c++
+#include <iostream>
+#include <algorithm>
+using namespace std;
+char op(char ch)
+{
+
+   if(ch>='A'&&ch<='Z')
+        return ch+32;
+    else
+        return ch;
+}
+int main()
+{
+    string first,second;
+    cin>>first;
+    second.resize(first.size());
+    transform(first.begin(),first.end(),second.begin(),op);
+    cout<<second<<endl;
+    return 0;
+}
+#+END_SRC
+
+再看一个例子：给你两个vector向量（元素个数相等），请你利用transform函数将两个vector的每个元素相乘，并输出相乘的结果。
+代码：
+foreach的用法
+#+BEGIN_SRC c++
+#include <iostream>
+#include <algorithm>
+#include <vector>
+using namespace std;
+void print(int &elem){cout<<elem<<" ";}
+int op(int a,int b){return a*b;}
+int main()
+{
+    vector <int> A,B,SUM;
+    int n;
+    cin>>n;
+    for(int i=0;i<n;i++)
+    {
+        int t;
+        cin>>t;
+        A.push_back(t);
+    }
+    for(int i=0;i<n;i++)
+    {
+        int t;
+        cin>>t;
+        B.push_back(t);
+    }
+    SUM.resize(n);
+    transform(A.begin(),A.end(),B.begin(),SUM.begin(),op);
+    for_each(SUM.begin(),SUM.end(),print);
+    return 0;
+}
+#+END_SRC
+** to_string
+** all_of
+all_of() 算法会返回 true，前提是序列中的所有元素都可以使谓词返回 true。
+
+*** 实例
+下面是一段代码，用来展示用 all_of() 检查 ages 容器中的元素： 
+#+BEGIN_SRC c++
+int good_age{100};
+std::cout << (std::all_of(std::begin(ages), std::end(ages),[good_age] (int age) { return age < good_age; }) ? "None": "Some") << " of the people are centenarians." << std::endl;
+#+END_SRC
+这个 lambda 表达式会将 ages 中的元素和 good_age 的值作比较，good_age 的值为 100。所有的元素都小于 100，所以 all_of() 会返回 true，而且输出消息会正确报告没有记录的百岁老人。
+** accumulate
+accumulate定义在#include<numeric>中，作用有两个，一个是累加求和，另一个是自定义类型数据的处理
+
+1. 累加求和
+~int sum = accumulate(vec.begin() , vec.end() , 42);~
+
+accumulate带有三个形参：头两个形参指定要累加的元素范围，第三个形参则是累加的初值。
+
+accumulate函数将它的一个内部变量设置为指定的初始值，然后在此初值上累加输入范围内所有元素的值。accumulate算法返回累加的结果，其返回类型就是其第三个实参的类型。
+
+可以使用accumulate把string型的vector容器中的元素连接起来：
+
+~string sum = accumulate(v.begin() , v.end() , string(" "));~
+
+这个函数调用的效果是：从空字符串开始，把vec里的每个元素连接成一个字符串。
+
+2. 自定义数据类型的处理
+
+C++ STL中有一个通用的数值类型计算函数— accumulate(),可以用来直接计算数组或者容器中C++内置数据类型，例如：
+#+BEGIN_SRC c++
+#include <numeric>  
+int arr[]={10,20,30,40,50};  
+vector<int> va(&arr[0],&arr[5]);  
+int sum=accumulate(va.begin(),va.end(),0);  //sum = 150  
+#+END_SRC
+但是对于自定义数据类型，我们就需要自己动手写一个回调函数来实现自定义数据的处理，然后让它作为accumulate()的第四个参数，accumulate()的原型为
+#+BEGIN_SRC c++
+template<class _InIt, class _Ty,  class _Fn2> 
+inline _Ty _Accumulate(_InIt _First, _InIt _Last, _Ty _Val, _Fn2 _Func)  
+{   // return sum of _Val and all in [_First, _Last), using _Func  
+    for (; _First != _Last; ++_First)  
+        _Val = _Func(_Val, *_First);  
+    return (_Val);  
+}
+#+END_SRC
+下面是例子：
+#+BEGIN_SRC c++
+
+#include <vector>  
+#include <string>  
+using namespace std;  
+  
+struct Grade  
+{  
+    string name;  
+    int grade;  
+};  
+  
+int main()  
+{  
+    Grade subject[3] = {  
+        { "English", 80 },  
+        { "Biology", 70 },  
+        { "History", 90 }  
+    };  
+  
+    int sum = accumulate(subject, subject + 3, 0, [](int a, Grade b){return a + b.grade; });  
+    cout << sum << endl;  
+  
+    system("pause");  
+    return 0;  
+} 
+#+END_SRC
 * std::hex
 Sets the basefield format flag for the str stream to hex.
 
@@ -1548,8 +1614,47 @@ TEST_F(optional) {
 }
 #+END_SRC
 如果开发项目中没有支持到c++17可以用boost库中的optional。
-* C++ STL vector添加元素（push_back()和emplace_back()）详解
-emplace_back() 和 push_back() 的区别，就在于底层实现的机制不同。push_back() 向容器尾部添加元素时，首先会创建这个元素，然后再将这个元素拷贝或者移动到容器中（如果是拷贝的话，事后会自行销毁先前创建的这个元素）；而 emplace_back() 在实现时，则是直接在容器尾部创建这个元素，省去了拷贝或移动元素的过程。
+* std::string_view使用介绍
+C++中与字符串有两种风格，分别是C风格的字符串、std::string字符串。C风格的字符串性能更高，但是也不方便操作使用。如下示例：
+#+BEGIN_SRC c++
+#include <iostream>
+#include <string>
+ 
+int main()
+{
+    //C风格字符串总是以null结尾
+    char cstr1[] = { 'y', 'a', 'n', 'g', NULL};
+    char cstr2[5];
+    strcpy(cstr1, cstr2);
+    std::cout << cstr2 << std::endl;
+ 
+    //C++风格的字符串操作更方便，但是性能不如C风格字符串
+    std::string str = "yang";
+    std::string str2 = str;
+}
+#+END_SRC
+
+C++17中我们可以使用std::string_view来获取一个字符串的视图，字符串视图并不真正的创建或者拷贝字符串，而只是拥有一个字符串的查看功能。std::string_view比std::string的性能要高很多，因为每个std::string都独自拥有一份字符串的拷贝，而std::string_view只是记录了自己对应的字符串的指针和偏移位置。当我们在只是查看字符串的函数中可以直接使用std::string_view来代替std::string。
+#+BEGIN_SRC c++
+#include <iostream>
+#include <string>
+#include <string_view>
+ 
+int main()
+{
+ 
+    const char* cstr = "yangxunwu";
+    std::string_view stringView1(cstr);
+    std::string_view stringView2(cstr, 4);
+    std::cout << "stringView1: " << stringView1 << ", stringView2: " << stringView2 << std::endl;
+ 
+    std::string str = "yangxunwu";
+    std::string_view stringView3(str.c_str());
+    std::string_view stringView4(str.c_str(), 4);
+    std::cout << "stringView3: " << stringView1 << ", stringView4: " << stringView2 << std::endl;
+}
+#+END_SRC
+输出
 * STL容器底层数据结构总结
 ** vector
 vector是我们用到最多的数据结构，其底层数据结构是数组，由于数组的特点，vector也具有以下特性：
@@ -2015,229 +2120,184 @@ void MyMethod(T myarr){
 }
 #+END_SRC
 这个时候typename的作用就是告诉C++编译器，typename后面的字符串为一个类型名称，而不是成员函数或者成员变量。这个时候如果前面没有typename，编译器没有任何办法知道T::LengthType是一个类型还是一个成员名称(静态数据成员或者静态函数），所以编译不能够通过。
-
-* set自定义去重和排序函数
-** 方法一：使用std::set内置的less比较函数（直接定义内置类型的set对象）
-
-这种方法适用于：1）比较int、char等内置类型。2）只能针对某一个内置类型去重和排序：如果想通过id（int）去重，并通过hot(int)排序，该种方法就束手无策了。代码如下：
+* 定义抽象数据类型
 #+BEGIN_SRC c++
-#include <iostream>
-#include <set>
-using namespace std;
-void main()
-{
-    std::set<int> mySet;    // 直接定义内置类型set集合
-    mySet.insert(10);       // 默认比较函数为less
-    mySet.insert(20);       // 从小到大排序
-    for(auto it:mySet)
-    {
-        std::cout<<it<<std::endl;
-    }
-    std::cout<<"end"<<std::endl;
+struct ListNode {
+    int val;
+    ListNode *next;
+    ListNode() : val(0), next(nullptr) {}
+    ListNode(int x) : val(x), next(nullptr) {}
+    ListNode(int x, ListNode *next) : val(x), next(next) {}
+};
+#+END_SRC
 
+如果调用 ~ListNode(5)~ 那么 ~val=5~ ， ~next~ 指针为空指针
+* 内存泄露
+new 和 delete 是 C++ 用于管理堆内存的两个运算符，对应于C语言中的 malloc 和 free，但是 malloc 和 free 是函数，而new 和 delete 是运算符。除此之外，new 在申请内存的同时，还会调用对象的构造函数，而 malloc 只会申请内存；同样，delete 在释放内存之前，会调用对象的析构函数，而 free 只会释放内存。
+
+new运算符申请内存：将调用相应的 operator new(size_t) 函数动态分配内存，在分配到的动态内存块上 初始化 相应类型的对象（构造函数）并返回其首地址。如果调用构造函数初始化对象时抛出异常，则自动调用 operator delete(void*, void*) 函数释放已经分配到的内存。
+
+delete运算符释放内存：调用相应类型的析构函数，处理类内部可能涉及的资源释放，调用相应的 operator delete(void *) 函数。
+** 内存是如何泄露的
+在 C++ 程序中，主要涉及到的内存就是“栈”和“堆”
+
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/v2-f3189547daa4548bc4ab6fdd13eeea6d_720w.png @ 2020-06-13 19:16:48
+[[file:%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2/2020-06-13_19-16-48_v2-f3189547daa4548bc4ab6fdd13eeea6d_720w.png]]
+
+通常来说，一个线程的栈内存是有限的，通常来说是 8M 左右（取决于运行的环境）。栈上的内存通常是由编译器来自动管理的。当在栈上分配一个新的变量时，或进入一个函数时，栈的指针会下移，相当于在栈上分配了一块内存。我们把一个变量分配在栈上，也就是利用了栈上的内存空间。当这个变量的生命周期结束时，栈的指针会上移，相同于回收了内存。
+
+由于栈上的内存的分配和回收都是由编译器控制的，所以在栈上是不会发生内存泄露的，只会发生栈溢出（Stack Overflow），也就是分配的空间超过了规定的栈大小。
+
+而堆上的内存是由程序直接控制的，程序可以通过 malloc/free 或 new/delete 来分配和回收内存，如果程序中通过 malloc/new 分配了一块内存，但忘记使用 free/delete 来回收内存，就发生了内存泄露。
+
+*** 经验 #1：尽量避免在堆上分配内存
+既然只有堆上会发生内存泄露，那第一原则肯定是避免在堆上面进行内存分配，尽可能的使用栈上的内存，由编译器进行分配和回收，这样当然就不会有内存泄露了。
+
+然而，只在栈上分配内存，在有 IO 的情况下是存在一定局限性的。
+
+举个例子，为了完成一个请求，我们通常会为这个请求构造一个 Context 对象，用于描述和这个请求有关的一些上下文。例如下面一段代码：
+#+BEGIN_SRC c++
+void Foo(Reuqest* req) {
+    RequestContext ctx(req);
+    HandleRequest(&ctx);
 }
 #+END_SRC
-#+BEGIN_EXAMPLE
-结果如下：
-output：
-            10
-            20
-            end
-#+END_EXAMPLE
+如果 HandleRequest 是一个同步函数，当这个函数返回时，请求就可以被处理完成，那么显然 ctx 是可以被分配在栈上的。
 
-** 方法二：自定义类（结构体）比较函数
-
-前文提到：直接定义内置类型的set对象，即使用std::set内置的默认的less比较函数，可能不能满足我们的实际需求。例如：现在有一批结构体对象，需要将其插入set集合，并按照id去重，按照热度hot进行排序。这个时候，就需要重新自定义比较函数了。有两种方法可以自定义比较函数：
-*** 重载<操作符
-甚么要重载<运算符呢？能不能重载"<="或者">="运算符？答案是不可以。几乎所有的方法或容器都需要排序来满足数学意义上的标准严格弱序化，否则这些方法或容器的行为将不可预知。假设f(x,y)是一个比较函数。 如果该函数满足如下条件则它是严格弱序化的。
-1. f(x,x) = false; 
-2. if f(x,y) then !f(y,x)
-3. if f(x,y) and f(y,z) then f(x,z)
-4. if !f(x,y)&&!f(y,x) then x==y; if x==y and y==z then x==z;
-
-看上去有点晕乎，不过不用担心，只要你的比较方法能够满足对相等元素永远返回false（记住一个准则：永远让比较函数对相同元素返回false），那你的方法就满足要求了。
-
-其实，set容器在判定已有元素a和新插入元素b是否相等时，是这么做的：
-1. 将a作为左操作数，b作为有操作数，调用比较函数，并返回比较值  
-2. 将b作为左操作数，a作为有操作数，再调用一次比较函数，并返回比较值。如果1、2两步的返回值都是false，则认为a、b是相等的，则b不会被插入set容器中；
-
-如果1、2两步的返回值都是true，则可能发生未知行为，因此，记住一个准则：永远让比较函数对相同元素返回false。
+但如果 HandleRequest 是一个异步函数，例如：
 #+BEGIN_SRC c++
-#include <iostream>
-#include <set>
-using namespace std;
-struct song
-{
-    int m_id;
-    int m_hot;
-    song(int id,int hot)
-    {
-
-        this->m_id = id;
-        this->m_hot = hot;
-    }
-    bool operator<(const struct song & right)const   //重载<运算符
-    {
-        if(this->m_id == right.m_id)     //根据id去重
-            return false;
-        else
-        {
-            if(this->m_hot != right.m_hot)
-            {
-                return this->m_hot > right.m_hot;      //降序
-            }
-            else
-            {
-                return this->m_id > right.m_id;     
-            }
-        }
-    }
-};
-void main()
-{
-    std::set<song> mySet;
-    song s1(10,100);
-    song s2(20,200);
-    song s3(20,300);
-    song s4(30,200);
-    mySet.insert(s1);    //插入s1
-    mySet.insert(s2);    //插入s2
-    mySet.insert(s3);    //s3和s2的id相同，不插入
-    mySet.insert(s4);    //插入s4
-    for(auto it:mySet)
-    {
-        std::cout<<"id:"<<it.m_id<<",hot:"<<it.m_hot<<std::endl;
-    }
-    std::cout<<"end"<<std::endl;
-;}
+void HandleRequest(RequestContext* ctx, Callback cb);
 #+END_SRC
-#+BEGIN_EXAMPLE
-结果如下：
-id：30，hot ： 200
-id：20，hot ： 200
-id：10，hot ： 100
-end
-#+END_EXAMPLE
-*** 重载（）运算符
-具体代码如下：
+那么显然，ctx 是不能被分配在栈上的，因为如果 ctx 被分配在栈上，那么当 Foo 函数推出后，ctx 对象的生命周期也就结束了。而 FooCB 中显然会使用到 ctx 对象。
 #+BEGIN_SRC c++
-#include <iostream>
-#include <set>
-using namespace std;
-struct song
-{
-    int m_id;
-    int m_hot;
-    song(int id,int hot)
-    {
+void HandleRequest(RequestContext* ctx, Callback cb);
 
-        this->m_id = id;
-        this->m_hot = hot;
-    }
-    /*
-    bool operator<(const struct song & right)const   //重载<运算符
-    {
-        if(this->m_id == right.m_id)     //根据id去重
-            return false;
-        else
-        {
-            if(this->m_hot != right.m_hot)
-            {
-                return this->m_hot > right.m_hot;      //降序
-            }
-            else
-            {
-                return this->m_id > right.m_id;
-            }
-        }
-    }
-    */
-};
-struct comp
-{
-    bool operator()(struct song left,struct song  right)  //重载（）运算符
-    {
+void Foo(Reuqest* req) {
+    auto ctx = new RequestContext(req);
+    HandleRequest(ctx, FooCB);
+}
 
-        if(left.m_id == right.m_id)     //根据id去重
-            return false;
-        else
-        {
-            if(left.m_hot != right.m_hot)
-            {
-                return left.m_hot > right.m_hot;      //降序
-            }
-            else
-            {
-                return left.m_id > right.m_id;
-            }
-
-        }
-    }
-
-};
-void main()
-{
-    std::set<song,comp> mySet;      //写法和2.1中的的区别
-    song s1(10,100);
-    song s2(20,200);
-    song s3(20,300);
-    song s4(30,200);
-    mySet.insert(s1);    //插入s1
-    mySet.insert(s2);    //插入s2
-    mySet.insert(s3);    //s3和s2的id相同，不插入
-    mySet.insert(s4);    //插入s4
-    for(auto it:mySet)
-    {
-        std::cout<<"id:"<<it.m_id<<",hot:"<<it.m_hot<<std::endl;
-    }
-    std::cout<<"end"<<std::endl;
-};
+void FooCB(RequestContext* ctx) {
+    FinishRequest(ctx);
+    delete ctx;
+}
 #+END_SRC
-#+BEGIN_EXAMPLE
-结果如下：
-id：30，hot ： 200
-id：20，hot ： 200
-id：10，hot ： 100
-end
-#+END_EXAMPLE
-* std::string_view使用介绍
-C++中与字符串有两种风格，分别是C风格的字符串、std::string字符串。C风格的字符串性能更高，但是也不方便操作使用。如下示例：
+在这种情况下，如果忘记在 FooCB 中调用 delete ctx，则就会触发内存泄露。尽管我们可以借助一些静态检查工具对代码进行检查，但往往异步程序的逻辑是极其复杂的，一个请求的生命周期中，也需要进行大量的内存分配操作，静态检查工具往往无法发现所有的内存泄露情况。
+
+那么怎么才能避免这种情况的产生呢？引入智能指针显然是一种可行的方法，但引入 shared_ptr 往往引入了额外的性能开销，并不十分理想。
+
+在 SmartX，我们通常采用两种方法来应对这种情况。
+
+*** 经验 #2：使用 Arena
+Arena 是一种统一化管理内存生命周期的方法。所有需要在堆上分配的内存，不通过 malloc/new，而是通过 Arena 的 CreateObject 接口。同时，不需要手动的执行 free/delete，而是在 Arena 被销毁的时候，统一释放所有通过 Arena 对象申请的内存。所以，只需要确保 Arena 对象一定被销毁就可以了，而不用再关心其他对象是否有漏掉的 free/delete。这样显然降低了内存管理的复杂度。
+
+此外，我们还可以将 Arena 的生命周期与 Request 的生命周期绑定，一个 Request 生命周期内的所有内存分配都通过 Arena 完成。这样的好处是，我们可以在构造 Arena 的时候，大概预估出处理完成这个 Request 会消耗多少内存，并提前将会使用到的内存一次性的申请完成，从而减少了在处理一个请求的过程中，分配和回收内存的次数，从而优化了性能。
+
+我们最早看到 Arena 的思想，是在 LevelDB 的代码中。这段代码相当简单，建议大家直接阅读。
+
+*** 经验 #3：使用 Coroutine
+Coroutine 相信大家并不陌生，那 Coroutine 的本质是什么？我认为 Coroutine 的本质，是使得一个线程中可以存在多个上下文，并可以由用户控制在多个上下文之间进行切换。而在上下文中，一个重要的组成部分，就是栈指针。使用 Coroutine，意味着我们在一个线程中，可以创造（或模拟）多个栈。
+
+有了多个栈，意味着当我们要做一个异步处理时，不需要释放当前栈上的内存，而只需要切换到另一个栈上，就可以继续做其他的事情了，当异步处理完成时，可以再切换回到这个栈上，将这个请求处理完成。
+
+还是以刚才的代码为示例:
 #+BEGIN_SRC c++
-#include <iostream>
-#include <string>
- 
-int main()
-{
-    //C风格字符串总是以null结尾
-    char cstr1[] = { 'y', 'a', 'n', 'g', NULL};
-    char cstr2[5];
-    strcpy(cstr1, cstr2);
-    std::cout << cstr2 << std::endl;
- 
-    //C++风格的字符串操作更方便，但是性能不如C风格字符串
-    std::string str = "yang";
-    std::string str2 = str;
+void Foo(Reuqest* req) {
+    RequestContext ctx(req);
+    HandleRequest(&ctx);
+}
+
+void HandleRequest(RequestCtx* ctx) {
+    SubmitAsync(ctx);
+    Coroutine::Self()->Yield();
+    CompleteRequest(ctx);
+}
+#+END_SRC
+这里的精髓在于，尽管 Coroutine::Self()->Yield() 被调用时，程序可以跳出 HandleRequest 函数去执行其他代码逻辑，但当前的栈却被保存了下来，所以 ctx 对象是安全的，并没有被释放。
+
+这样一来，我们就可以完全抛弃在堆上申请内存，只是用栈上的内存，就可以完成请求的处理，完全不用考虑内存泄露的问题。然而这种假设过于理想，由于在栈上申请内存存在一定的限制，例如栈大小的限制，以及需要在编译是知道分配内存的大小，所以在实际场景中，我们通常会结合使用 Arena 和 Coroutine 两种技术一起使用。
+
+有人可能会提到，想要多个栈用多个线程不就可以了？然而用多线程实现多个栈的问题在于，线程的创建和销毁的开销极大，且线程间切块，也就是在栈之间进行切换的代销需要经过操作系统，这个开销也是极大的。所以想用线程模拟多个栈的想法在实际场景中是走不通的。
+
+关于 Coroutine 有很多开源的实现方式，大家可以在 github 上找到很多，C++20 标准也会包含 Coroutine 的支持。在 SmartX 内部，我们很早就实现了 Coroutine，并对所有异步 IO 操作进行了封装，示例可参考我们之前的一篇文章 smartx：基于 Coroutine 的异步 RPC 框架示例（C++）
+
+这里需要强调一下，Coroutine 确实会带来一定的性能开销，通常 Coroutine 切换的开销在 20ns 以内，然而我们依然在对性能要求很苛刻的场景使用 Coroutine，一方面是因为 20ns 的性能开销是相对很小的，另一方面是因为 Coroutine 极大的降低了异步编程的复杂度，降低了内存泄露的可能性，使得编写异步程序像编写同步程序一样简单，降低了程序员心智的开销。
+
+*** 经验 #4：善用 RAII
+尽管在有些场景使用了 Coroutine，但还是可能会有在堆上申请内存的需要，而此时有可能 Arena 也并不适用。在这种情况下，善用 RAII（Resource Acquisition Is Initialization）思想会帮助我们解决很多问题。
+
+简单来说，RAII 可以帮助我们将管理堆上的内存，简化为管理栈上的内存，从而达到利用编译器自动解决内存回收问题的效果。此外，RAII 可以简化的还不仅仅是内存管理，还可以简化对资源的管理，例如 fd，锁，引用计数等等。
+
+当我们需要在堆上分配内存时，我们可以同时在栈上面分配一个对象，让栈上面的对象对堆上面的对象进行封装，用时通过在栈对象的析构函数中释放堆内存的方式，将栈对象的生命周期和堆内存进行绑定。
+
+unique_ptr 就是一种很典型的例子。然而 unique_ptr 管理的对象类型只能是指针，对于其他的资源，例如 fd，我们可以通过将 fd 封装成另外一个 FileHandle 对象的方式管理，也可以采用一些更通用的方式。例如，在我们内部的 C++ 基础库中实现了 Defer 类，想法类似于 Go 中 defer。
+#+BEGIN_SRC c++
+void Foo() {
+    int fd = open();
+    Defer d = [=]() { close(fd); }
+    // do something with fd
 }
 #+END_SRC
 
-C++17中我们可以使用std::string_view来获取一个字符串的视图，字符串视图并不真正的创建或者拷贝字符串，而只是拥有一个字符串的查看功能。std::string_view比std::string的性能要高很多，因为每个std::string都独自拥有一份字符串的拷贝，而std::string_view只是记录了自己对应的字符串的指针和偏移位置。当我们在只是查看字符串的函数中可以直接使用std::string_view来代替std::string。
-#+BEGIN_SRC c++
-#include <iostream>
-#include <string>
-#include <string_view>
- 
-int main()
-{
- 
-    const char* cstr = "yangxunwu";
-    std::string_view stringView1(cstr);
-    std::string_view stringView2(cstr, 4);
-    std::cout << "stringView1: " << stringView1 << ", stringView2: " << stringView2 << std::endl;
- 
-    std::string str = "yangxunwu";
-    std::string_view stringView3(str.c_str());
-    std::string_view stringView4(str.c_str(), 4);
-    std::cout << "stringView3: " << stringView1 << ", stringView4: " << stringView2 << std::endl;
-}
+*** 经验 #5：便于 Debug
+在特定的情况下，我们难免还是要手动管理堆上的内存。然而当我们面临一个正在发生内存泄露线上程序时，我们应该怎么处理呢？
+
+当然不是简单的『重启大法好』，毕竟重启后还是可能会产生泄露，而且最宝贵的现场也被破坏了。最佳的方式，还是利用现场进行 Debug，这就要求程序具有便于 Debug 的能力。
+
+这里不得不提到一个经典而强大的工具 gperftools。gperftools 是 google 开源的一个工具集，包含了 tcmalloc，heap profiler，heap checker，cpu profiler 等等。gperftools 的作者之一，就是大名鼎鼎的 Sanjay Ghemawat，没错，就是与 Jeff Dean 齐名，并和他一起写 MapReduce 的那个 Sanjay。
+
+gperftools 的一些经典用法，我们就不在这里进行介绍了，大家可以自行查看文档。而使用 gperftools 可以在不重启程序的情况下，进行内存泄露检查，这个恐怕是很少有人了解。
+
+实际上我们 Release 版本的 C++ 程序可执行文件在编译时全部都链接了 gperftools。在 gperftools 的 heap profiler 中，提供了 HeapProfilerStart 和 HeapProfilerStop 的接口，使得我们可以在运行时启动和停止 heap profiler。同时，我们每个程序都暴露了 RPC 接口，用于接收控制命令和调试命令。在调试命令中，我们就增加了调用 HeapProfilerStart 和 HeapProfilerStop 的命令。由于链接了 tcmalloc，所以 tcmalloc 可以获取所有内存分配和回收的信息。当 heap profiler 启动后，就会定期的将程序内存分配和回收的行为 dump 到一个临时文件中。
+
+当程序运行一段时间后，你将得到一组 heap profile 文件
+#+BEGIN_SRC bash
+  profile.0001.heap
+  profile.0002.heap
+  ...
+  profile.0100.heap
 #+END_SRC
-输出
+每个 profile 文件中都包含了一段时间内，程序中内存分配和回收的记录。如果想要找到内存泄露的线索，可以通过使用
+#+BEGIN_SRC bash
+pprof --base=profile.0001.heap /usr/bin/xxx profile.0100.heap --text
+#+END_SRC
+来进行查看，也可以生成 pdf 文件，会更直观一些。
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/v2-a8eedcc8f07691a31707f5f8921acfa8_720w.png @ 2020-06-13 19:27:10
+[[file:%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2/2020-06-13_19-27-10_v2-a8eedcc8f07691a31707f5f8921acfa8_720w.png]]
+* 二重指针
+char**是二重指针，bai也就是指向指针变量的指针。 而char*是一维指针，即指向zhi字符变量的指针。
+
+其区别在于，指向地址dao所存储的值不同。
+
+对于char **p1, *p1的类型为char*型，而**p1的类型才是char型。
+
+对于char*类指针p2，*p2就是char 型。
+* 字符串
+** 字符串数组
+#+BEGIN_SRC c++
+char a[] = "hello";   //字符串数组，存放的是字符,a表示字符h的地址
+#+END_SRC
+*** 初始化
+#+BEGIN_SRC c++
+char a[10] ="hello";//字符串以'\0'结尾，这种方式系统会自动在数组未填值的地方添加'\0'
+char b[] = {'h', 'e' , 'l', 'l', '\0'};//类似于初始化整型数组，必须要手动在后面添加'\0'
+#+END_SRC
+** 字符串指针数组
+#+BEGIN_SRC c++
+char *b[] = {"hello", "world"};//字符串指针数组，数组b总共有两个4字节的元素,第一个元素存储字符串"hello"的地址,即指向字符h的指针,第二个元素存储字符串"world"的地址,即指向字符w的指针.
+#+END_SRC
+* 谓词
+A predicate is an expression that can be called and that returns a value that can be used as a condition. The predicates used by library algorithms are either unary predicates (meaning they have a single parameter) or binary predicates (meaning they have two parameters).
+
+The version of sort that takes a binary predicate uses the given predicate in place of < to compare elements.
+
+#+BEGIN_SRC c++
+// comparison function to be used to sort by word length
+bool isShorter(const string &s1, const string &s2)
+C++ Primer, Fifth Edition
+{
+return s1.size() < s2.size();
+}
+// sort on word length, shortest to longest
+sort(words.begin(), words.end(), isShorter);
+#+END_SRC

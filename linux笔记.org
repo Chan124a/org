@@ -1139,6 +1139,399 @@ du [-abcDhHklmsSx][-L <符号连接>][-X <文件>][--block-size][--exclude=<目�
 ** 参考文章
 [[https://www.runoob.com/linux/linux-comm-du.html][菜鸟教程]]
 
+* ELF文件格式
+ELF (Executable and Linkable Format)是一种为可执行文件，目标文件，共享链接库和内核转储(core dumps)准备的标准文件格式。 Linux和很多类Unix操作系统都使用这个格式。 让我们来看一下64位ELF文件格式的结构以及内核源码中有关于它的一些定义。
+
+一个ELF文件由以下三部分组成：
+- ELF头(ELF header) - 描述文件的主要特性：类型，CPU架构，入口地址，现有部分的大小和偏移等等；
+- 节头表(Section header table) - 包含对节(sections)的描述。
+- 程序头表(Program header table) - 列举了所有有效的段(segments)和他们的属性。 程序头表需要加载器将文件中的节加载到虚拟内存段中；
+
+
+#+DOWNLOADED: screenshot @ 2022-05-10 21:51:39
+[[file:images/linux%E7%AC%94%E8%AE%B0/ELF%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F/2022-05-10_21-51-39_screenshot.png]]
+
+注意：段（Segment）与节（Section）的区别：段是程序执行的必要组成，当多个目标文件链接成一个可执行文件时，会将相同权限的节合并到一个段中。相比而言，节的粒度更小。
+** ELF头(ELF header)
+ELF头(ELF header)位于文件的开始位置。 它的主要目的是定位文件的其他部分。 文件头主要包含以下字段：
+- ELF文件鉴定 - 一个字节数组用来确认文件是否是一个ELF文件，并且提供普通文件特征的信息；
+- 文件类型 - 确定文件类型。 这个字段描述文件是一个重定位文件，或可执行文件,或...；
+- 目标结构；
+- ELF文件格式的版本；
+- 程序入口地址；
+- 程序头表的文件偏移；
+- 节头表的文件偏移；
+- ELF头(ELF header)的大小；
+- 程序头表的表项大小；
+- 其他字段...
+
+你可以在内核源码种找到表示ELF64 header的结构体 elf64_hdr：
+#+BEGIN_SRC c
+typedef struct elf64_hdr {
+    unsigned char    e_ident[EI_NIDENT];
+    Elf64_Half e_type;
+    Elf64_Half e_machine;
+    Elf64_Word e_version;
+    Elf64_Addr e_entry;
+    Elf64_Off e_phoff;
+    Elf64_Off e_shoff;
+    Elf64_Word e_flags;
+    Elf64_Half e_ehsize;
+    Elf64_Half e_phentsize;
+    Elf64_Half e_phnum;
+    Elf64_Half e_shentsize;
+    Elf64_Half e_shnum;
+    Elf64_Half e_shstrndx;
+} Elf64_Ehdr;
+#+END_SRC
+这个结构体定义在 [[https://github.com/torvalds/linux/blob/master/include/uapi/linux/elf.h#L312][elf.h]]
+
+我们可以使用readelf工具来查看ELF Header。
+#+begin_src bash
+$ readelf -h hello.o
+
+ELF Header:
+  Magic:   7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00
+  Class:                             ELF64
+  Data:                              2's complement, little endian
+  Version:                           1 (current)
+  OS/ABI:                            UNIX - System V
+  ABI Version:                       0
+  Type:                              REL (Relocatable file)
+  Machine:                           Advanced Micro Devices X86-64
+  Version:                           0x1
+  Entry point address:               0x0
+  Start of program headers:          0 (bytes into file)
+  Start of section headers:          672 (bytes into file)
+  Flags:                             0x0
+  Size of this header:               64 (bytes)
+  Size of program headers:           0 (bytes)
+  Number of program headers:         0
+  Size of section headers:           64 (bytes)
+  Number of section headers:         13
+  Section header string table index: 10
+#+END_SRC
+
+ELF文件结构示意图中定义的Elf_Ehdr的各个成员的含义与readelf具有对应关系。如下所示
+1. e_ident	Magic: 7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00
+Class: ELF32
+Data: 2’s complement, little end
+Version: 1(current)
+OS/ABI: UNIX - System V
+ABI Version: 0
+2. e_type	Type: REL (Relocatable file)
+ELF文件类型
+3. e_machine	Machine: Advanced Micro Devices X86-64
+ELF文件的CPI平台属性
+4. e_version	Version: 0x1
+ELF版本号。一般为常数1
+5. e_entry	Entry point address: 0x0
+入口地址，规定ELF程序的入口虚拟地址，操作系统在加载完该程序后从这个地址开始执行进程的指令。可重定位指令一般没有入口地址，则该值为0
+6. e_phoff	Start of program headers: 0(bytes into file)
+7. e_shoff	Start of section headers: 672 (bytes into file)
+Section Header Table 在文件中的偏移
+8. e_word	Flags: 0x0
+ELF标志位，用来标识一些ELF文件平台相关的属性。
+9. e_ehsize	Size of this header: 64 (bytes)
+ELF Header本身的大小
+10. e_phentsize	Size of program headers: 0 (bytes)
+11. e_phnum	Number of program headers: 0
+12. e_shentsize	Size of section headers: 64 (bytes)
+单个Section Header大小
+13. e_shnum	Number of section headers: 13
+Section Header的数量
+14. e_shstrndx	Section header string table index: 10
+Section Header字符串表在Section Header Table中的索引
+*** ELF魔数
+每种可执行文件的格式的开头几个字节都是很特殊的，特别是开头4个字节，通常被称为魔数（Magic Number）。
+通过对魔数的判断可以确定文件的格式和类型。如：ELF的可执行文件格式的头4个字节为0x7F、e、l、f；Java的可执行文件格式的头4个字节为c、a、f、e；
+如果被执行的是Shell脚本或perl、python等解释型语言的脚本，那么它的第一行往往是#!/bin/sh或#!/usr/bin/perl或#!/usr/bin/python，此时前两个字节#和!就构成了魔数，系统一旦判断到这两个字节，就对后面的字符串进行解析，以确定具体的解释程序路径。
+
+*** ELF文件类型
+ELF文件主要有三种类型，可以通过ELF Header中的e_type成员进行区分。
+- 可重定位文件（Relocatable File）：ETL_REL。一般为.o文件。可以被链接成可执行文件或共享目标文件。静态链接库属于可重定位文件。
+- 可执行文件（Executable File）：ET_EXEC。可以直接执行的程序。
+- 共享目标文件（Shared Object File）：ET_DYN。一般为.so文件。有两种情况可以使用。
+    - 链接器将其与其他可重定位文件、共享目标文件链接成新的目标文件；
+    - 动态链接器将其与其他共享目标文件、结合一个可执行文件，创建进程映像。
+
+
+#+DOWNLOADED: screenshot @ 2022-05-10 22:07:24
+[[file:images/linux%E7%AC%94%E8%AE%B0/ELF%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F/2022-05-10_22-07-24_screenshot.png]]
+
+** 节(Section Header Table)
+所有的数据都存储在ELF文件的节(sections)中。 
+ELF 节头表是一个节头数组。
+每一个节头都描述了其所对应的节的信息，如节名、节大小、在文件中的偏移、读写权限等。编译器、链接器、装载器都是通过节头表来定位和访问各个节的属性的。
+
+我们通过节头表中的索引(index)来确认节(sections)。 节头表表项包含以下字段：
+- 节的名字；
+- 节的类型；
+- 节的属性；
+- 内存地址；
+- 文件中的偏移；
+- 节的大小；
+- 到其他节的链接；
+- 各种各样的信息；
+- 地址对齐；
+- 这个表项的大小，如果有的话；
+
+而且，在linux内核中结构体 elf64_shdr 如下所示:
+#+BEGIN_SRC c
+typedef struct elf64_shdr {
+    Elf64_Word sh_name;
+    Elf64_Word sh_type;
+    Elf64_Xword sh_flags;
+    Elf64_Addr sh_addr;
+    Elf64_Off sh_offset;
+    Elf64_Xword sh_size;
+    Elf64_Word sh_link;
+    Elf64_Word sh_info;
+    Elf64_Xword sh_addralign;
+    Elf64_Xword sh_entsize;
+} Elf64_Shdr;
+#+END_SRC
+我们可以使用readelf工具来查看节头表。
+#+begin_src bash
+$ readelf -S hello.o
+
+There are 13 section headers, starting at offset 0x2a0:
+
+Section Headers:
+  [Nr] Name              Type             Address           Offset
+       Size              EntSize          Flags  Link  Info  Align
+  [ 0]                   NULL             0000000000000000  00000000
+       0000000000000000  0000000000000000           0     0     0
+  [ 1] .text             PROGBITS         0000000000000000  00000040
+       0000000000000015  0000000000000000  AX       0     0     1
+  [ 2] .rela.text        RELA             0000000000000000  000001f0
+       0000000000000030  0000000000000018   I      11     1     8
+  [ 3] .data             PROGBITS         0000000000000000  00000055
+       0000000000000000  0000000000000000  WA       0     0     1
+  [ 4] .bss              NOBITS           0000000000000000  00000055
+       0000000000000000  0000000000000000  WA       0     0     1
+  [ 5] .rodata           PROGBITS         0000000000000000  00000055
+       000000000000000d  0000000000000000   A       0     0     1
+  [ 6] .comment          PROGBITS         0000000000000000  00000062
+       0000000000000035  0000000000000001  MS       0     0     1
+  [ 7] .note.GNU-stack   PROGBITS         0000000000000000  00000097
+       0000000000000000  0000000000000000           0     0     1
+  [ 8] .eh_frame         PROGBITS         0000000000000000  00000098
+       0000000000000038  0000000000000000   A       0     0     8
+  [ 9] .rela.eh_frame    RELA             0000000000000000  00000220
+       0000000000000018  0000000000000018   I      11     8     8
+  [10] .shstrtab         STRTAB           0000000000000000  00000238
+       0000000000000061  0000000000000000           0     0     1
+  [11] .symtab           SYMTAB           0000000000000000  000000d0
+       0000000000000108  0000000000000018          12     9     8
+  [12] .strtab           STRTAB           0000000000000000  000001d8
+       0000000000000013  0000000000000000           0     0     1
+Key to Flags:
+  W (write), A (alloc), X (execute), M (merge), S (strings), l (large)
+  I (info), L (link order), G (group), T (TLS), E (exclude), x (unknown)
+  O (extra OS processing required) o (OS specific), p (processor specific)
+#+END_SRC
+ELF文件结构示意图中定义的Elf_Shdr的各个成员的含义与readelf具有对应关系。如下所示：
+1. sh_name	节名
+节名是一个字符串，保存在一个名为.shstrtab的字符串表（可通过Section Header索引到）。sh_name的值实际上是其节名字符串在.shstrtab中的偏移值
+2. sh_type	节类型
+3. sh_flags	节标志位
+4. sh_addr	节地址：节的虚拟地址
+如果该节可以被加载，则sh_addr为该节被加载后在进程地址空间中的虚拟地址；否则sh_addr为0
+5. sh_offset	节偏移
+如果该节存在于文件中，则表示该节在文件中的偏移；否则无意义，如sh_offset对于BSS 节来说是没有意义的
+6. sh_size	节大小
+7. sh_link、sh_info	节链接信息
+8. sh_addralign	节地址对齐方式
+9. sh_entsize	节项大小
+有些节包含了一些固定大小的项，如符号表，其包含的每个符号所在的大小都一样的，对于这种节，sh_entsize表示每个项的大小。如果为0，则表示该节不包含固定大小的项。
+*** 节类型（sh_type）
+节名是一个字符串，只是在链接和编译过程中有意义，但它并不能真正地表示节的类型。对于编译器和链接器来说，主要决定节的属性是节的类型（sh_type）和节的标志位（sh_flags）。
+
+节的类型相关常量以SHT_开头，上述readelf -S命令执行的结果省略了该前缀。常见的节类型如下表所示：
+| 常量         | 值 | 含义                                 |
+|--------------+----+--------------------------------------|
+| SHT_NULL     |  0 | 无效节                               |
+| SHT_PROGBITS |  1 | 程序节。代码节、数据节都是这种类型。 |
+| SHT_SYMTAB   |  2 | 符号表                               |
+| SHT_STRTAB   |  3 | 字符串表                             |
+| SHT_RELA     |  4 | 重定位表。该节包含了重定位信息。     |
+| SHT_HASH     |  5 | 符号表的哈希表                       |
+| SHT_DYNAMIC  |  6 | 动态链接信息                         |
+| SHT_NOTE     |  7 | 提示性信息                           |
+| SHT_NOBITS   |  8 | 表示该节在文件中没有内容。如.bss节   |
+| SHT_REL      |  9 | 该节包含了重定位信息                 |
+| SHT_SHLIB    | 10 | 保留                                 |
+| SHT_DNYSYM   | 11 | 动态链接的符号表                     |
+*** 节标志位（sh_flag）
+节标志位表示该节在进程虚拟地址空间中的属性。如是否可写、是否可执行等。相关常量以SHF_开头。常见的节标志位如下表所示：
+| 常量          | 值 | 含义                                                                                                       |
+|---------------+----+------------------------------------------------------------------------------------------------------------|
+| SHF_WRITE     |  1 | 表示该节在进程空间中可写                                                                                   |
+| SHF_ALLOC     |  2 | 表示该节在进程空间中需要分配空间。有些包含指示或控制信息的节不需要在进程空间中分配空间，就不会有这个标志。 |
+| SHF_EXECINSTR |  4 | 表示该节在进程空间中可以被执行                                                                             |
+*** 节链接信息（sh_link、sh_info）
+如果节的类型是与链接相关的（无论是动态链接还是静态链接），如重定位表、符号表、等，则sh_link、sh_info两个成员所包含的意义如下所示。其他类型的节，这两个成员没有意义。
+| sh_type     | sh_link                                | sh_info                              |
+|-------------+----------------------------------------+--------------------------------------|
+| SHT_DYNAMIC | 该节所使用的字符串表在节头表中的下标   | 0                                    |
+| SHT_HASH    | 该节所使用的符号表在节头表中的下标     | 0                                    |
+| SHT_REL     | 该节所使用的相应符号表在节头表中的下标 | 该重定位表所作用的节在节头表中的下标 |
+| SHT_RELA    | 该节所使用的相应符号表在节头表中的下标 | 该重定位表所作用的节在节头表中的下标 |
+| SHT_SYMTAB  | 操作系统相关                           | 操作系统相关                         |
+| SHT_DYNSYM  | 操作系统相关                           | 操作系统相关                         |
+| other       | SHN_UNDEF                              | 0                                    |
+** ELF Sections
+*** 节的分类
+.text节
+.text节是保存了程序代码指令的代码节。一段可执行程序，如果存在Phdr，则.text节就会存在于text段中。由于.text节保存了程序代码，所以节类型为SHT_PROGBITS。
+
+.rodata节
+rodata节保存了只读的数据，如一行C语言代码中的字符串。由于.rodata节是只读的，所以只能存在于一个可执行文件的只读段中。因此，只能在text段（不是data段）中找到.rodata节。由于.rodata节是只读的，所以节类型为SHT_PROGBITS。
+
+.plt节（过程链接表）
+.plt节也称为过程链接表（Procedure Linkage Table），其包含了动态链接器调用从共享库导入的函数所必需的相关代码。由于.plt节保存了代码，所以节类型为SHT_PROGBITS。
+
+.data节
+.data节存在于data段中，其保存了初始化的全局变量等数据。由于.data节保存了程序的变量数据，所以节类型为SHT_PROGBITS。
+
+.bss节
+.bss节存在于data段中，占用空间不超过4字节，仅表示这个节本省的空间。.bss节保存了未进行初始化的全局数据。程序加载时数据被初始化为0，在程序执行期间可以进行赋值。由于.bss节未保存实际的数据，所以节类型为SHT_NOBITS。
+
+.got.plt节（全局偏移表-过程链接表）
+.got节保存了全局偏移表。.got节和.plt节一起提供了对导入的共享库函数的访问入口，由动态链接器在运行时进行修改。由于.got.plt节与程序执行有关，所以节类型为SHT_PROGBITS。
+
+.dynsym节（动态链接符号表）
+.dynsym节保存在text段中。其保存了从共享库导入的动态符号表。节类型为SHT_DYNSYM。
+
+.dynstr节（动态链接字符串表）
+.dynstr保存了动态链接字符串表，表中存放了一系列字符串，这些字符串代表了符号名称，以空字符作为终止符。
+
+.rel.*节（重定位表）
+重定位表保存了重定位相关的信息，这些信息描述了如何在链接或运行时，对ELF目标文件的某部分或者进程镜像进行补充或修改。由于重定位表保存了重定位相关的数据，所以节类型为SHT_REL。
+
+.hash节
+.hash节也称为.gnu.hash，其保存了一个用于查找符号的散列表。
+
+.symtab节（符号表）
+.symtab节是一个ElfN_Sym的数组，保存了符号信息。节类型为SHT_SYMTAB。
+
+.strtab节（字符串表）
+.strtab节保存的是符号字符串表，表中的内容会被.symtab的ElfN_Sym结构中的st_name引用。节类型为SHT_STRTAB。
+
+.ctors节和.dtors节
+.ctors（构造器）节和.dtors（析构器）节分别保存了指向构造函数和析构函数的函数指针，构造函数是在main函数执行之前需要执行的代码；析构函数是在main函数之后需要执行的代码。
+*** 符号表
+节的分类中我们介绍了.dynsym节和.symtab节，两者都是符号表。那么它们到底有什么区别呢？存在什么关系呢？
+
+符号是对某些类型的数据或代码（如全局变量或函数）的符号引用，函数名或变量名就是符号名。例如，printf()函数会在动态链接符号表.dynsym中存有一个指向该函数的符号项（以Elf_Sym数据结构表示）。在大多数共享库和动态链接可执行文件中，存在两个符号表。即.dynsym和.symtab。
+
+.dynsym保存了引用来自外部文件符号的全局符号。如printf库函数。.dynsym保存的符号是.symtab所保存符合的子集，.symtab中还保存了可执行文件的本地符号。如全局变量，代码中定义的本地函数等。
+
+既然.dynsym是.symtab的子集，那为何要同时存在两个符号表呢？
+
+通过readelf -S命令可以查看可执行文件的输出，一部分节标志位（sh_flags）被标记为了A（ALLOC）、WA（WRITE/ALLOC）、AX（ALLOC/EXEC）。其中，.dynsym被标记为ALLOC，而.symtab则没有标记。
+
+ALLOC表示有该标记的节会在运行时分配并装载进入内存，而.symtab不是在运行时必需的，因此不会被装载到内存中。.dynsym保存的符号只能在运行时被解析，因此是运行时动态链接器所需的唯一符号。.dynsym对于动态链接可执行文件的执行是必需的，而.symtab只是用来进行调试和链接的。
+
+#+DOWNLOADED: screenshot @ 2022-05-10 22:33:15
+[[file:images/linux%E7%AC%94%E8%AE%B0/ELF%E6%96%87%E4%BB%B6%E6%A0%BC%E5%BC%8F/2022-05-10_22-33-15_screenshot.png]]
+上图所示为通过符号表索引字符串表的示意图。符号表中的每一项都是一个Elf_Sym结构，对应可以在字符串表中索引得到一个字符串。该数据结构中成员的含义如下表所示：
+
+| 成员     | 含义                                                   |
+|----------+--------------------------------------------------------|
+| st_name  | 符号名。该值为该符号名在字符串表中的偏移地址。         |
+| st_value | 符号对应的值。存放符号的值（可能是地址或位置偏移量）。 |
+| st_size  | 符号的大小。                                           |
+| st_other | 0                                                      |
+| st_shndx | 符号所在的节                                           |
+| st_info  | 符号类型及绑定属性                                     |
+使用readelf工具我们也能够看到符号表的相关信息。
+#+begin_src bash
+$ readelf -s hello.o
+
+Symbol table '.symtab' contains 11 entries:
+   Num:    Value          Size Type    Bind   Vis      Ndx Name
+     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND
+     1: 0000000000000000     0 FILE    LOCAL  DEFAULT  ABS hello.c
+     2: 0000000000000000     0 SECTION LOCAL  DEFAULT    1
+     3: 0000000000000000     0 SECTION LOCAL  DEFAULT    3
+     4: 0000000000000000     0 SECTION LOCAL  DEFAULT    4
+     5: 0000000000000000     0 SECTION LOCAL  DEFAULT    5
+     6: 0000000000000000     0 SECTION LOCAL  DEFAULT    7
+     7: 0000000000000000     0 SECTION LOCAL  DEFAULT    8
+     8: 0000000000000000     0 SECTION LOCAL  DEFAULT    6
+     9: 0000000000000000    21 FUNC    GLOBAL DEFAULT    1 main
+    10: 0000000000000000     0 NOTYPE  GLOBAL DEFAULT  UND puts
+#+END_SRC
+*** 字符串表
+类似于符号表，在大多数共享库和动态链接可执行文件中，也存在两个字符串表。即.dynstr和.strtab，分别对应于.dynsym和symtab。此外，还有一个.shstrtab的节头字符串表，用于保存节头表中用到的字符串，可通过sh_name进行索引。
+
+ELF文件中所有字符表的结构基本一致，如上图所示。
+*** 重定位表
+重定位就是将符号定义和符号引用进行连接的过程。可重定位文件需要包含描述如何修改节内容的相关信息，从而使可执行文件和共享目标文件能够保存进程的程序镜像所需要的正确信息。
+
+重定位表是进行重定位的重要依据。我们可以使用objdump工具查看目标文件的重定位表：
+#+begin_src bash
+$ objdump -r hello.o
+
+
+hello.o:     file format elf64-x86-64
+
+RELOCATION RECORDS FOR [.text]:
+OFFSET           TYPE              VALUE
+0000000000000005 R_X86_64_32       .rodata
+000000000000000a R_X86_64_PC32     puts-0x0000000000000004
+
+
+RELOCATION RECORDS FOR [.eh_frame]:
+OFFSET           TYPE              VALUE
+0000000000000020 R_X86_64_PC32     .text
+#+END_SRC
+重定位表是一个Elf_Rel类型的数组结构，每一项对应一个需要进行重定位的项。
+其成员含义如下所示：
+1. r_offset	重定位入口的偏移。
+对于可重定位文件来说，这个值是该重定位入口所要修正的位置的第一个字节相对于节起始的偏移
+对于可执行文件或共享对象文件来说，这个值是该重定位入口所要修正的位置的第一个字节的虚拟地址
+2. r_info	重定位入口的类型和符号
+因为不同处理器的指令系统不一样，所以重定位所要修正的指令地址格式也不一样。每种处理器都有自己的一套重定位入口的类型。
+对于可执行文件和共享目标文件来说，它们的重定位入口是动态链接类型的。
+重定位是目标文件链接成为可执行文件的关键。我们将在后面的进行介绍。
+** 程序头表(Program header table)
+在可执行文件或者共享链接库中所有的节(sections)都被分为多个段(segments)。 程序头是一个结构的数组，每一个结构都表示一个段(segments)。 
+它的结构就像这样：
+#+BEGIN_SRC c
+typedef struct elf64_phdr {
+    Elf64_Word p_type;
+    Elf64_Word p_flags;
+    Elf64_Off p_offset;
+    Elf64_Addr p_vaddr;
+    Elf64_Addr p_paddr;
+    Elf64_Xword p_filesz;
+    Elf64_Xword p_memsz;
+    Elf64_Xword p_align;
+} Elf64_Phdr;
+#+END_SRC
+在内核源码中。
+
+elf64_phdr 定义在相同的 elf.h 文件中.
+
+** 目标文件的格式
+目前，PC平台流行的 可执行文件格式（Executable） 主要包含如下两种，它们都是 COFF（Common File Format） 格式的变种。
+- Windows下的 PE（Portable Executable）
+- Linux下的 ELF（Executable Linkable Format）
+
+目标文件就是源代码经过编译后但未进行连接的那些中间文件（Windows的.obj和Linux的.o），它与可执行文件的格式非常相似，所以一般跟可执行文件格式一起采用同一种格式存储。
+在Windows下采用PE-COFF文件格式；Linux下采用ELF文件格式。
+
+事实上，除了可执行文件外，动态链接库（DDL，Dynamic Linking Library）、静态链接库（Static Linking Library） 均采用可执行文件格式存储。
+它们在Window下均按照PE-COFF格式存储；Linux下均按照ELF格式存储。只是文件名后缀不同而已。
+- 动态链接库：Windows的.dll、Linux的.so
+- 静态链接库：Windows的.lib、Linux的.a
+
+** 参考文章
+[[http://chuquan.me/2018/05/21/elf-introduce/][计算机那些事(4)——ELF文件结构 - 楚权的世界]]
+[[https://xinqiu.gitbooks.io/linux-inside-zh/content/Theory/linux-theory-2.html][ELF 文件格式· Linux Inside 中文版]]
 * export 命令
 Linux export 命令用于设置或显示环境变量。
 
@@ -1230,6 +1623,48 @@ declare -x USER=“root“
 declare -x XDG_SESSION_COOKIE=“93b5d3d03e032c0cf892a4474bebda9f-1273864738.954257-340206484“
 #+END_SRC
 
+* expr命令
+expr命令是一个手工命令行计数器，用于在UNIX/LINUX下求表达式变量的值，一般用于整数值，也可用于字符串。
+
+语法：expr 表达式
+表达式说明:
+- 用空格隔开每个项；
+- 用反斜杠 \ 放在 shell 特定的字符前面；
+- 对包含空格和其他特殊字符的字符串要用引号括起来
+** 实例
+1、计算字串长度
+#+begin_src bash
+> expr length “this is a test”
+ 14
+#+END_SRC
+
+2、抓取字串
+#+begin_src bash
+> expr substr “this is a test” 3 5
+is is
+#+END_SRC
+3、抓取第一个字符数字串出现的位置
+#+begin_src bash
+> expr index "sarasara"  a
+ 2
+#+END_SRC
+4、整数运算
+#+begin_src bash
+> expr 14 % 9
+5
+> expr 10 + 10
+20
+> expr 1000 + 900
+1900
+> expr 30 / 3 / 2
+5
+> expr 30 \* 3 (使用乘号时，必须用反斜线屏蔽其特定含义。因为shell可能会误解显示星号的意义)
+90
+> expr 30 * 3
+expr: Syntax error
+#+END_SRC
+** 参考文章
+[[https://www.runoob.com/linux/linux-comm-expr.html][Linux expr命令 - 菜鸟教程]]
 * emacs 安装
 源码下载地址：http://mirrors.ocf.berkeley.edu/gnu/emacs/
 
@@ -1717,6 +2152,13 @@ layout用于分割窗口，可以一边查看代码，一边测试。主要有�
 ** print和display命令：查看变量的值
 *** print
 打印变量或者表达式的值，print 命令可以缩写为 p
+
+#+begin_src bash
+p *argv    # 打印数组argv首个元素
+p *argv@2  # 打印数组前两个元素
+p *argv@argc  # 打印数组所有元素
+#+END_SRC
+
 *** display
 使用 display 命令查看变量或表达式的值，每当程序暂停执行（例如单步执行）时，GDB 调试器都会自动帮我们打印出来，而 print 命令则不会。
 
@@ -1737,6 +2179,7 @@ display 命令没有缩写形式，常用的语法格式如下 2 种：
 | /c   | 以字符形式打印变量或表达式的值。     |
 
 注意，display 命令和 /fmt 之间不要留有空格。以 /x 为例，应写为 (gdb)display/x expr。
+*** undisplay：取消追踪观察变量
 *** 参考文章
 [[http://c.biancheng.net/view/8238.html][GDB print和display命令：查看变量的值]]
 ** si,ni,s,n的区别
@@ -1748,6 +2191,361 @@ ni/si都是汇编级别的断点定位。si会进入汇编和C函数内部,ni不
 归纳:当要进入没有调试信息的库函数调试的时候，用si是唯一的方法。
 
 当进入有调试信息的函数，用si和s都可以，但是他们不同，si是定位到汇编级别的第一个语句，但是s是进入到C级别的第一个语句
+** 查看函数调用栈
+查看调用栈信息：
+- backtrace：查看函数调用的顺序（函数调用栈的信息），可以用bt缩写
+- backtrace n: 显示程序的调用栈信息，只显示栈顶n桢(frame)
+- backtrace –n: 显示程序的调用栈信息，只显示栈底部n桢(frame)
+- set backtrace limit n: 设置bt显示的最大桢层
+- where, info stack：都是bt的别名，功能一样
+
+查看桢信息：
+- frame n: 查看第n桢的信息，切换到栈编号为n的上下文中,frame可以用f缩写
+- frame addr: 查看pc地址为addr的桢的相关信息
+- up n: 查看当前桢上面第n桢的信息
+- down n: 查看当前桢下面第n桢的信息
+
+查看更加详细的信息：
+- info frame、info frame n或者info frame addr ：查看当前函数调用的栈帧信息数
+- info args：查看当前桢中的参数
+- info locals：查看当前桢中的局部变量
+- info catch：查看当前桢中的异常处理器（exception handlers
+
+** watch：被设置观察点的变量发生修改时，打印显示
+i watch：显示观察点
+** examine命令
+examine命令缩写为x
+
+用于显示内存内容或地址。
+
+格式：
+x/<n/f/u>  <addr>
+
+n:是正整数，表示需要显示的内存单元的个数，即从当前地址向后显示n个内存单元的内容，
+一个内存单元的大小由第三个参数u定义。
+
+f:表示addr指向的内存内容的输出格式，s对应输出字符串，此处需特别注意输出整型数据的格式：
+  x 按十六进制格式显示变量.
+  d 按十进制格式显示变量。
+  u 按十进制格式显示无符号整型。
+  o 按八进制格式显示变量。
+  t 按二进制格式显示变量。
+  a 按十六进制格式显示变量。
+  c 按字符格式显示变量。
+  f 按浮点数格式显示变量。
+
+u:就是指以多少个字节作为一个内存单元-unit,默认为4。u还可以用被一些字符表示:
+  如b=1 byte, h=2 bytes,w=4 bytes,g=8 bytes.
+
+<addr>:表示内存地址。
+
+#+begin_src bash
+>>> x/s argv
+>>> x/d argv+6
+>>> x/d argv+8
+>>> x/2c $a1
+#+END_SRC
+** tui界面
+TUI（TextUser Interface）为GDB调试的文本用户界面，可以方便地显示源代码、汇编和寄存器文本窗口
+
+Tui界面可以通过运行gdbtui或gdb-tui命令进入(其它变种gdb也一样，如arm-none-eabi-gdb-tui)，当然也可以进入gdb界面后使用TUI快捷键打开，如C-x C-a快捷键
+*** TUI Overview
+在TUI模式中，可以显示以下几个窗口：
+- 命令窗口:
+用于 GDB调试时的命令输入和命令结果输出显示，与普通 GDB窗口无异。
+- 源代码窗口:
+用于显示程序源代码，包括当前运行行、中断以中断标识等。
+- 汇编窗口:
+显示当前程序的汇编代码。
+- 寄存器窗口:
+显示处理器的寄存器内容，当寄存器内容发生改变时会高亮显示。
+
+源代码窗口和汇编窗口会高亮显示程序运行位置并以'>'符号标记。有两个特殊标记用于标识断点，第一个标记用于标识断点类型：
+- B:程序至少有一次运行到了该断点
+- b:程序没有运行到过该断点
+- H:程序至少有一次运行到了该硬件断点
+- h:程序没有运行到过该硬件断点 
+
+第二个标记用于标识断点使能与否:
+- +:断点使能 Breakpointis enabled. 
+- -:断点被禁用 Breakpointis disabled. 
+
+在命令窗口上方有一行状态栏，显示效果如下图所示，主要显示内容有：
+#+DOWNLOADED: screenshot @ 2022-05-06 16:28:13
+[[file:images/linux%E7%AC%94%E8%AE%B0/gdb/2022-05-06_16-28-13_screenshot.png]]
+- target:
+Indicates the current GDB target. (see Specifying a Debugging Target).
+
+- process
+Gives the current process or thread number. When no process is being debugged, this field is set to No process.
+
+- function
+Gives the current function name for the selected frame. The name is demangled if demangling is turned on (see Print Settings). When there is no symbol corresponding to the current program counter, the string ?? is displayed.
+
+- line
+Indicates the current line number for the selected frame. When the current line number is not known, the string ?? is displayed.
+
+- pc
+Indicates the current program counter address.
+*** TUI 快捷键
+The following key bindings are installed for both TUI mode and the GDB standard mode.
+
+C-x C-a 或
+C-x a  或
+C-x A (按住Ctrl+x后松开再按a，以下快捷键操作方式相同)
+进入或退出 TUI模式。
+
+C-x 1
+使 TUI只显示一个窗口。 Usea TUI layout with only one window. The layout will either be`source' or `assembly'.When the TUI mode is not active, it will switch to the TUI mode.Think of this key binding as the Emacs C-x 1binding. 
+
+C-x 2
+使TUI显示两个窗口，连接使用此快捷键可在三种窗口组合(只能同时显示两个，共3种组合)中不断切换。
+Usea TUI layout with at least two windows. When the current layoutalready has two windows, the next layout with two windows is used.When a new layout is chosen, one window will always be common to theprevious layout and the new one. Think of it as the Emacs C-x2 binding. 
+
+C-x o
+更换激活窗口
+Changethe active window. The TUI associates several key bindings (likescrolling and arrow keys) with the active window. This command givesthe focus to the next TUI window. Think of it as the Emacs C-xo binding. 
+
+C-x s
+在 TUI模式和 TUISingleKey模式之间切换
+Switchin and out of the TUI SingleKey mode that binds single keys to GDBcommands (see section 22.3TUI Single Key Mode). 
+
+下列快捷键只在TUI模式才能有效：
+
+PgUp
+激活窗口的内容向上滚动一页 Scroll the active window one page up. 
+
+PgDn
+激活窗口的内容向下滚动一页 Scroll the active window one page down. 
+
+Up
+激活窗口的内容向上滚动一行 Scroll the active window one line up. 
+
+Down
+激动窗口的内容向下滚动一行 Scroll the active window one line down. 
+
+Left
+激活窗口的内容向左移动一列 Scroll the active window one column left. 
+
+Right
+激活窗口的内容向右移动一列 Scroll the active window one column right. 
+
+C-L
+更新屏幕 Refresh the screen. 
+
+当源代码和汇编窗口同时显示时，以上快捷键会同步更新两个窗口的内容。
+
+Becausethe arrow keys scroll the active window in the TUI mode, they are notavailable for their normal use by readline unless the command windowhas the focus. When another window is active, you must use otherreadline key bindings such as C-p, C-n,C-b and C-f to control the command window. 
+*** TUI Single Key Mode
+The TUI also provides a SingleKey mode, which binds several frequently used GDB commands to single keys. Type C-x s to switch into this mode, where the following key bindings are used:
+
+c
+continue
+
+d
+down
+
+f
+finish
+
+n
+next
+
+o
+nexti. The shortcut letter ‘o’ stands for “step Over”.
+
+q
+exit the SingleKey mode.
+
+r
+run
+
+s
+step
+
+i
+stepi. The shortcut letter ‘i’ stands for “step Into”.
+
+u
+up
+
+v
+info locals
+
+w
+where
+
+Other keys temporarily switch to the GDB command prompt. The key that was pressed is inserted in the editing buffer so that it is possible to type most GDB commands without interaction with the TUI SingleKey mode. Once the command is entered the TUI SingleKey mode is restored. The only way to permanently leave this mode is by typing q or C-x s.
+
+If GDB was built with Readline 8.0 or later, the TUI SingleKey keymap will be named ‘SingleKey’. This can be used in .inputrc to add additional bindings to this keymap.
+*** TUI-specific Commands 
+TheTUI has specific commands to control the text windows. These commandsare always available, even when GDB is not in the TUI mode. When GDBis in the standard mode, most of these commands will automaticallyswitch to the TUI mode. 当处理GDB标准模式时，下列的大多数命令会自动切换到TUI模式。
+
+tui enable
+Activate TUI mode. The last active TUI window layout will be used if TUI mode has previously been used in the current debugging session, otherwise a default layout is used.
+
+tui disable
+Disable TUI mode, returning to the console interpreter.
+
+info win：显示正在显示的窗口大小信息
+Listand give the size of all displayed windows. 、
+
+tui new-layout name window weight [window weight…]
+#+BEGIN_EXAMPLE
+Create a new TUI layout. The new layout will be named name, and can be accessed using the layout command (see below).
+
+Each window parameter is either the name of a window to display, or a window description. The windows will be displayed from top to bottom in the order listed.
+
+The names of the windows are the same as the ones given to the focus command (see below); additional, the status window can be specified. Note that, because it is of fixed height, the weight assigned to the status window is of no importance. It is conventional to use ‘0’ here.
+
+A window description looks a bit like an invocation of tui new-layout, and is of the form {[-horizontal]window weight [window weight…]}.
+
+This specifies a sub-layout. If -horizontal is given, the windows in this description will be arranged side-by-side, rather than top-to-bottom.
+
+Each weight is an integer. It is the weight of this window relative to all the other windows in the layout. These numbers are used to calculate how much of the screen is given to each window.
+
+For example:
+
+(gdb) tui new-layout example src 1 regs 1 status 0 cmd 1
+Here, the new layout is called ‘example’. It shows the source and register windows, followed by the status window, and then finally the command window. The non-status windows all have the same weight, so the terminal will be split into three roughly equal sections.
+
+Here is a more complex example, showing a horizontal layout:
+
+(gdb) tui new-layout example {-horizontal src 1 asm 1} 2 status 0 cmd 1
+This will result in side-by-side source and assembly windows; with the status and command window being beneath these, filling the entire width of the terminal. Because they have weight 2, the source and assembly windows will be twice the height of the command window.
+#+END_EXAMPLE
+
+layout next：显示下一个窗口
+Displaythe next layout. 
+
+layout prev：显示上一个窗口
+Displaythe previous layout. 
+
+layout src：显示源代码窗口
+Displaythe source window only. 
+
+layout asm：显示汇编窗口
+Displaythe assembly window only. 
+
+layout split：显示源代码和汇编窗口
+Displaythe source and assembly window. 
+
+layout regs：显示寄存器窗口
+Displaythe register window together with the source or assembly window. 
+
+focus next：将一个窗口置为激活状态
+Make the next window active for scrolling. 
+
+focus prev：将上一个窗口置为激活状态
+Make the previous window active for scrolling. 
+
+focus src：将源代码窗口置为激活状态
+Make the source window active for scrolling. 
+
+focus asm：将汇编窗口置为激活状态
+Make the assembly window active for scrolling. 
+
+focus regs：将寄存器窗口置为激活状态
+Make the register window active for scrolling. 
+
+focus cmd：将命令行窗口置为激活状态
+Make the command window active for scrolling. 
+
+refresh：更新窗口，与 C-L快捷键同
+Refresh the screen. This is similar to typing C-L.
+
+tui reg float：寄存器窗口显示内容为浮点寄存器
+Showthe floating point registers in the register window. 
+
+tui reg general：寄存器窗口显示内容为普通寄存器
+Show the general registers in the register window. 
+
+tui reg next：显示下一组寄存器
+Show the next register group. The list of register groups as well astheir order is target specific. The predefined register groups are the following:
+
+ general, float,system, vector,all, save,restore. 
+
+tui reg system ：显示上一组寄存器
+Show the system registers in the register window. 
+
+update ：更新源代码窗口到当前运行点
+Update the source window and the current execution point. 
+
+winheight winname +count：增加指定窗口的高度 
+winheight winname -count：减小指定窗口的高度
+Change the height of the window name by count lines. Positive counts increase the height, while negative counts decrease it. The name parameter can be one of src (the source window), cmd (the command window), asm (the disassembly window), or regs (the register display window).
+*** TUI Configuration Variables
+Several configuration variables control the appearance of TUI windows.
+
+set tui border-kind kind
+Select the border appearance for the source, assembly and register windows. The possible values are the following:
+
+space
+Use a space character to draw the border.
+
+ascii
+Use ASCII characters ‘+’, ‘-’ and ‘|’ to draw the border.
+
+acs
+Use the Alternate Character Set to draw the border. The border is drawn using character line graphics if the terminal supports them.
+
+set tui border-mode mode
+set tui active-border-mode mode
+Select the display attributes for the borders of the inactive windows or the active window. The mode can be one of the following:
+
+normal
+Use normal attributes to display the border.
+
+standout
+Use standout mode.
+
+reverse
+Use reverse video mode.
+
+half
+Use half bright mode.
+
+half-standout
+Use half bright and standout mode.
+
+bold
+Use extra bright or bold mode.
+
+bold-standout
+Use extra bright or bold and standout mode.
+
+set tui tab-width nchars
+Set the width of tab stops to be nchars characters. This setting affects the display of TAB characters in the source and assembly windows.
+
+set tui compact-source [on|off]
+Set whether the TUI source window is displayed in “compact” form. The default display uses more space for line numbers and starts the source text at the next tab stop; the compact display uses only as much space as is needed for the line numbers in the current file, and only a single space to separate the line numbers from the source.
+
+Note that the colors of the TUI borders can be controlled using the appropriate set style commands. See Output Styling.
+*** 参考文章
+[[https://sourceware.org/gdb/onlinedocs/gdb/TUI.html#TUI][25.GDB Text User Interface]]
+[[https://blog.csdn.net/xu415/article/details/19021759][GDB调试之TUI界面 - CSDN博客]]
+** apropos
+apropos regexp命令查找所有符合regexp正则表达式的命令信息：
+#+begin_src bash
+(gdb) apropos set
+awatch -- Set a watchpoint for an expression
+b -- Set breakpoint at specified line or function
+br -- Set breakpoint at specified line or function
+bre -- Set breakpoint at specified line or function
+brea -- Set breakpoint at specified line or function
+......
+#+END_SRC
+
+** 
+代码的虚拟地址是在编译(链接)期生成的，而代码编译后的结果一般是一个ELF(Executable Linkable Format)文件。ELF文件记录了我们代码中每个函数的虚拟地址，此外还会有一些其他有助于我们的信息。
+我们可以使用指令查看一下user/_sleep这个ELF文件的格式。
+新开一个终端，输入命令readelf -a user/_sleep
+
+b *0xde6
+print $pc
+info reg 打印全部32个用户寄存器
+print/x $satp 查看satp寄存器
+x/3i 0xde4
 * grep命令
 Linux grep 命令用于查找文件里符合条件的字符串。
 
@@ -1786,6 +2584,42 @@ grep [-abcEFGhHilLnqrsvVwxy][-A<显示行数>][-B<显示列数>][-C<显示列数
 - -x --line-regexp : 只显示全列符合的列。
 - -y : 此参数的效果和指定"-i"参数相同。
 
+* id命令
+Linux id命令用于显示用户的ID，以及所属群组的ID。
+
+id会显示用户以及所属群组的实际与有效ID。若两个ID相同，则仅显示实际ID。若仅指定用户名称，则显示目前用户的ID。
+
+语法：id [-gGnru][--help][--version][用户名称]
+参数说明：
+- -g或--group 　显示用户所属群组的ID。
+- -G或--groups 　显示用户所属附加群组的ID。
+- -n或--name 　显示用户，所属群组或附加群组的名称。
+- -r或--real 　显示实际ID。
+- -u或--user 　显示用户ID。
+- -help 　显示帮助。
+- -version 　显示版本信息。
+** 实例
+显示当前用户信息
+#+begin_src bash
+>>>id //显示当前用户ID
+uid=0(root) gid=0(root) groups=0(root),1(bin),2(daemon),3(sys),4(adm),6(disk),10(wheel) context=root:system_r:unconfined_t
+#+END_SRC
+显示用户群组的ID
+#+begin_src bash
+>>>id -g
+0
+#+END_SRC
+显示所有群组的ID
+#+begin_src bash
+>>>id -g
+0 1 2 3 4 5 6 10
+#+END_SRC
+显示指定用户信息
+#+begin_src bash
+>>>id hnlinux
+#+END_SRC
+** 参考文章
+[[https://www.runoob.com/linux/linux-comm-id.html][Linux id命令 - 菜鸟教程]]
 * jupyter notebook
 ** 使用Anaconda安装
 #+BEGIN_SRC bash
@@ -2161,6 +2995,42 @@ which oracle
 /usr/bin/oracle
 #+END_EXAMPLE
 
+* Linux shell中2>&1的含义解释
+| 名称                 | 代码 | 操作符           |
+|----------------------+------+------------------|
+| 标准输入(stdin)      |    0 | < 或 <<          |
+| 标准输出(stdout)     |    1 | >, >>, 1> 或 1>> |
+| 标准错误输出(stderr) |    2 | 2> 或 2>>        |
+
+从上表看的出来，我们平时使用的
+#+begin_src bash
+echo "hello" > t.log 
+#+END_SRC
+其实也可以写成
+#+begin_src bash
+echo "hello" 1> t.log
+#+END_SRC
+** 关于2>&1的含义
+1. 含义：将标准错误输出重定向到标准输出
+2. 符号>&是一个整体，不可分开
+3. 2>1的写法其实是将标准错误输出重定向到名为"1"的文件里去了。
+4. 写成2&>1也是不可以的
+
+#+begin_src bash
+# 标准错误输出和标准输出都定向到log中
+nohup java -jar app.jar >log 2>&1 &
+#+END_SRC
+1. 本来1----->屏幕 （1指向屏幕）
+2. 执行>log后， 1----->log (1指向log)
+3. 执行2>&1后， 2----->1 (2指向1，而1指向log,因此2也指向了log)
+
+">log 2>&1"可以有以下两种简写方式
+#+begin_src bash
+&>log
+>&log
+#+END_SRC
+** 参考文章
+[[https://blog.csdn.net/zhaominpro/article/details/82630528][Linux shell中2>&1的含义解释]]
 * ldd命令
 作用：用来查看程式运行所需的共享库,常用来解决程式因缺少某个库文件而不能运行的一些问题。ldd不是个可执行程式，而只是个shell脚本。
 
@@ -6312,12 +7182,115 @@ FTP 的提示符下面，就可以输入各种 FTP 命令了，这部分完全�
 - bye：退出 sftp。
 - quit：退出 sftp。
 - exit：退出 sftp。
+* tar命令
+- *.Z compress 程序压缩的文件；
+- *.zip zip 程序压缩的文件；
+- *.gz gzip 程序压缩的文件；
+- *.bz2 bzip2 程序压缩的文件；
+- *.xz xz 程序压缩的文件；
+- *.tar tar 程序打包的数据，并没有压缩过；
+- *.tar.gz tar 程序打包的文件，其中并且经过 gzip 的压缩
+- *.tar.bz2 tar 程序打包的文件，其中并且经过 bzip2 的压缩
+- *.tar.xz tar 程序打包的文件，其中并且经过 xz 的压缩
+
+** 常见的压缩指令
+*** gzip, zcat/zmore/zless/zgrep
+ 目前 gzip 可以解开 compress, zip 与 gzip 等软件所压缩的文件
+
+ 当你使用 gzip 进行压缩时，在预设的状态下原本的文件会被压缩成为 .gz 的档名，源文件就不再存在了。
+*** bzip2, bzcat/bzmore/bzless/bzgrep
+*** xz, xzcat/xzmore/xzless/xzgrep
+
+** 命令格式
+#+begin_src bash
+tar [-z|-j|-J] [cv] [-f 待建立的新檔名] filename... <==打包与压缩
+tar [-z|-j|-J] [tv] [-f 既有的 tar 檔名] <==察看檔名
+tar [-z|-j|-J] [xv] [-f 既有的 tar 檔名] [-C 目录] <==解压缩
+#+END_SRC
+** 选项与参数：
+- -c ：建立打包文件，可搭配 -v 来察看过程中被打包的档名(filename)
+- -t ：察看打包文件的内容含有哪些档名，重点在察看『档名』就是了；
+- -x ：解打包或解压缩的功能，可以搭配 -C (大写) 在特定目录解开。 
+
+特别留意的是， -c, -t, -x 不可同时出现在一串指令列中。
+
+- -z ：透过 gzip 的支持进行压缩/解压缩：此时档名最好为 *.tar.gz
+- -j ：透过 bzip2 的支持进行压缩/解压缩：此时档名最好为 *.tar.bz2
+- -J ：透过 xz 的支持进行压缩/解压缩：此时档名最好为 *.tar.xz。 
+
+特别留意， -z, -j, -J 不可以同时出现在一串指令列中
+
+- -v ：在压缩/解压缩的过程中，将正在处理的文件名显示出来！用-tv 选项查看打包文件时，详细的文件权限/属性都会被列出来。
+- -f filename：-f 后面要立刻接要被处理的档名！建议 -f 单独写一个选项啰！(比较不会忘记) 。如果把-jcvf filename写成-jvfc filename ，会导致产生的档名变成 c 
+- -C 目录 ：指定解压目录。这个选项用在解压缩，若要在特定目录解压缩，可以使用这个选项。
+- -p(小写) ：保留备份数据的原本权限与属性，常用于备份(-c)重要的配置文件
+- -P(大写) ：保留绝对路径，亦即允许备份数据中含有根目录存在之意；
+- --exclude=FILE：在压缩的过程中，不要将 FILE 打包！
+** 仅解开单一文件的方法
+#+begin_src bash
+# 1. 先找到我们要的档名，假设解开 shadow 文件好了：
+[root@study ~]# tar -jtv -f /root/etc.tar.bz2 | grep 'shadow'
+---------- root/root 721 2015-06-17 00:20 etc/gshadow
+---------- root/root 1183 2015-06-17 00:20 etc/shadow-
+---------- root/root 1210 2015-06-17 00:20 etc/shadow <==这是我们要的！
+---------- root/root 707 2015-06-17 00:20 etc/gshadow-
+# 先搜寻重要的档名！其中那个 grep 是『撷取』关键词的功能！我们会在第三篇说明！
+# 这里您先有个概念即可！那个管线 | 配合 grep 可以撷取关键词的意思！
+# 2. 将该文件解开！语法与实际作法如下：
+[root@study ~]# tar -jxv -f 打包檔.tar.bz2 待解开档名
+[root@study ~]# tar -jxv -f /root/etc.tar.bz2 etc/shadow
+etc/shadow
+[root@study ~]# ll etc
+total 4
+----------. 1 root root 1210 Jun 17 00:20 shadow
+# 很有趣！此时只会解开一个文件而已！不过，重点是那个档名！你要找到正确的档名。
+# 在本例中，你不能写成 /etc/shadow ！因为记录在 etc.tar.bz2 内的并没有 / 之故！
+#+END_SRC
+** tar命令解压时去除目录结构
+指定去除目录结构，使用--strip-components N
+
+如：压缩文件 file.tar 中文件信息为 three/two/one/file.txt
+
+1、（去除第一层目录 three）运行以下命令：
+tar -xvf file.tar --strip-components 1
+
+最终结果为：
+two/one/file.txt
+
+2、（去除三层目录 three、two、one、）运行以下命令：
+tar -xvf file.tar --strip-components 3
+
+解压结果为：
+file.txt
 * TensorFlow
 用pip命令
 #+BEGIN_SRC bash
 pip install tensorflow
 #+END_SRC
+* tee命令
+Linux tee命令用于读取标准输入的数据，并将其内容输出成文件。
 
+tee指令会从标准输入设备读取数据，将其内容输出到标准输出设备，同时保存成文件。
+
+语法：
+tee [-ai][--help][--version][文件...]
+
+参数：
+- -a或--append 　附加到既有文件的后面，而非覆盖它．
+- -i或--ignore-interrupts 　忽略中断信号。
+- --help 　在线帮助。
+- --version 　显示版本信息。
+** 实例
+使用指令"tee"将用户输入的数据同时保存到文件"file1"和"file2"中，输入如下命令：
+#+begin_src bash
+$ tee file1 file2                   #在两个文件中复制内容 
+#+END_SRC
+以上命令执行后，将提示用户输入需要保存到文件的数据，如下所示：
+#+BEGIN_EXAMPLE
+My Linux                        #提示用户输入数据  
+My Linux                        #输出数据，进行输出反馈  
+#+END_EXAMPLE
+此时，可以分别打开文件"file1"和"file2"，查看其内容是否均是"My Linux"即可判断指令"tee"是否执行成功。
 * tmux
 ** sessions, windows and panes介绍
 摘抄 github 上 tmux 项目的 wiki 之 Getting-Started#summary-of-terms 属于解释表，如下：
@@ -6817,110 +7790,100 @@ bind -T copy-mode-vi y send-keys -X copy-selection-and-cancel
 [[http://linuxcommand.org/lc3_adv_termmux.php][Terminal Multiplexers]]
 [[https://www.ruanyifeng.com/blog/2019/10/tmux.html][Tmux 使用教程]]
 [[http://longed.top/index.php/2020/10/11/tmux-tutorial/#fu_zhi_zhan_tie][走进神奇的 TMUX]]
-* tee命令
-Linux tee命令用于读取标准输入的数据，并将其内容输出成文件。
+* tr命令
+Linux tr 命令用于转换或删除文件中的字符。
 
-tee指令会从标准输入设备读取数据，将其内容输出到标准输出设备，同时保存成文件。
+tr 指令从标准输入设备读取数据，经过字符串转译后，将结果输出到标准输出设备。
 
-语法：
-tee [-ai][--help][--version][文件...]
+语法
+#+begin_src bash
+tr [-cdst][--help][--version][第一字符集][第二字符集]  
+tr [OPTION]…SET1[SET2] 
+#+END_SRC
+参数说明：
+- -c, --complement：反选设定字符。也就是符合 SET1 的部份不做处理，不符合的剩余部份才进行转换
+- -d, --delete：删除指令字符
+- -s, --squeeze-repeats：缩减连续重复的字符成指定的单个字符
+- -t, --truncate-set1：削减 SET1 指定范围，使之与 SET2 设定长度相等
+- --help：显示程序用法信息
+- --version：显示程序本身的版本信息
 
-参数：
-- -a或--append 　附加到既有文件的后面，而非覆盖它．
-- -i或--ignore-interrupts 　忽略中断信号。
-- --help 　在线帮助。
-- --version 　显示版本信息。
+字符集合的范围：
+- \NNN 八进制值的字符 NNN (1 to 3 为八进制值的字符)
+- \\ 反斜杠
+- \a Ctrl-G 铃声
+- \b Ctrl-H 退格符
+- \f Ctrl-L 走行换页
+- \n Ctrl-J 新行
+- \r Ctrl-M 回车
+- \t Ctrl-I tab键
+- \v Ctrl-X 水平制表符
+- CHAR1-CHAR2 ：字符范围从 CHAR1 到 CHAR2 的指定，范围的指定以 ASCII 码的次序为基础，只能由小到大，不能由大到小。
+- [CHAR*] ：这是 SET2 专用的设定，功能是重复指定的字符到与 SET1 相同长度为止
+- [CHAR*REPEAT] ：这也是 SET2 专用的设定，功能是重复指定的字符到设定的 REPEAT 次数为止(REPEAT 的数字采 8 进位制计算，以 0 为开始)
+- [:alnum:] ：所有字母字符与数字
+- [:alpha:] ：所有字母字符
+- [:blank:] ：所有水平空格
+- [:cntrl:] ：所有控制字符
+- [:digit:] ：所有数字
+- [:graph:] ：所有可打印的字符(不包含空格符)
+- [:lower:] ：所有小写字母
+- [:print:] ：所有可打印的字符(包含空格符)
+- [:punct:] ：所有标点字符
+- [:space:] ：所有水平与垂直空格符
+- [:upper:] ：所有大写字母
+- [:xdigit:] ：所有 16 进位制的数字
+- [=CHAR=] ：所有符合指定的字符(等号里的 CHAR，代表你可自订的字符)
 ** 实例
-使用指令"tee"将用户输入的数据同时保存到文件"file1"和"file2"中，输入如下命令：
+将文件testfile中的小写字母全部转换成大写字母，此时，可使用如下命令：
 #+begin_src bash
-$ tee file1 file2                   #在两个文件中复制内容 
+cat testfile |tr a-z A-Z 
 #+END_SRC
-以上命令执行后，将提示用户输入需要保存到文件的数据，如下所示：
-#+BEGIN_EXAMPLE
-My Linux                        #提示用户输入数据  
-My Linux                        #输出数据，进行输出反馈  
-#+END_EXAMPLE
-此时，可以分别打开文件"file1"和"file2"，查看其内容是否均是"My Linux"即可判断指令"tee"是否执行成功。
-* tar命令
-- *.Z compress 程序压缩的文件；
-- *.zip zip 程序压缩的文件；
-- *.gz gzip 程序压缩的文件；
-- *.bz2 bzip2 程序压缩的文件；
-- *.xz xz 程序压缩的文件；
-- *.tar tar 程序打包的数据，并没有压缩过；
-- *.tar.gz tar 程序打包的文件，其中并且经过 gzip 的压缩
-- *.tar.bz2 tar 程序打包的文件，其中并且经过 bzip2 的压缩
-- *.tar.xz tar 程序打包的文件，其中并且经过 xz 的压缩
-
-** 常见的压缩指令
-*** gzip, zcat/zmore/zless/zgrep
- 目前 gzip 可以解开 compress, zip 与 gzip 等软件所压缩的文件
-
- 当你使用 gzip 进行压缩时，在预设的状态下原本的文件会被压缩成为 .gz 的档名，源文件就不再存在了。
-*** bzip2, bzcat/bzmore/bzless/bzgrep
-*** xz, xzcat/xzmore/xzless/xzgrep
-
-** 命令格式
+testfile文件中的内容如下：
 #+begin_src bash
-tar [-z|-j|-J] [cv] [-f 待建立的新檔名] filename... <==打包与压缩
-tar [-z|-j|-J] [tv] [-f 既有的 tar 檔名] <==察看檔名
-tar [-z|-j|-J] [xv] [-f 既有的 tar 檔名] [-C 目录] <==解压缩
+$ cat testfile         #testfile原来的内容  
+Linux networks are becoming more and more common, 
+but scurity is often an overlooked  
+issue. Unfortunately, in today’s environment all networks 
+are potential hacker targets,  
+fro0m tp-secret military research networks to small home LANs.  
+Linux Network Securty focuses on securing Linux in a 
+networked environment, where the  
+security of the entire network needs to be considered
+rather than just isolated machines.  
+It uses a mix of theory and practicl techniques to 
+teach administrators how to install and  
+use security applications, as well as how the 
+applcations work and why they are necesary. 
 #+END_SRC
-** 选项与参数：
-- -c ：建立打包文件，可搭配 -v 来察看过程中被打包的档名(filename)
-- -t ：察看打包文件的内容含有哪些档名，重点在察看『档名』就是了；
-- -x ：解打包或解压缩的功能，可以搭配 -C (大写) 在特定目录解开。 
-
-特别留意的是， -c, -t, -x 不可同时出现在一串指令列中。
-
-- -z ：透过 gzip 的支持进行压缩/解压缩：此时档名最好为 *.tar.gz
-- -j ：透过 bzip2 的支持进行压缩/解压缩：此时档名最好为 *.tar.bz2
-- -J ：透过 xz 的支持进行压缩/解压缩：此时档名最好为 *.tar.xz。 
-
-特别留意， -z, -j, -J 不可以同时出现在一串指令列中
-
-- -v ：在压缩/解压缩的过程中，将正在处理的文件名显示出来！用-tv 选项查看打包文件时，详细的文件权限/属性都会被列出来。
-- -f filename：-f 后面要立刻接要被处理的档名！建议 -f 单独写一个选项啰！(比较不会忘记) 。如果把-jcvf filename写成-jvfc filename ，会导致产生的档名变成 c 
-- -C 目录 ：指定解压目录。这个选项用在解压缩，若要在特定目录解压缩，可以使用这个选项。
-- -p(小写) ：保留备份数据的原本权限与属性，常用于备份(-c)重要的配置文件
-- -P(大写) ：保留绝对路径，亦即允许备份数据中含有根目录存在之意；
-- --exclude=FILE：在压缩的过程中，不要将 FILE 打包！
-** 仅解开单一文件的方法
+使用 tr 命令大小写转换后，得到如下输出结果：
 #+begin_src bash
-# 1. 先找到我们要的档名，假设解开 shadow 文件好了：
-[root@study ~]# tar -jtv -f /root/etc.tar.bz2 | grep 'shadow'
----------- root/root 721 2015-06-17 00:20 etc/gshadow
----------- root/root 1183 2015-06-17 00:20 etc/shadow-
----------- root/root 1210 2015-06-17 00:20 etc/shadow <==这是我们要的！
----------- root/root 707 2015-06-17 00:20 etc/gshadow-
-# 先搜寻重要的档名！其中那个 grep 是『撷取』关键词的功能！我们会在第三篇说明！
-# 这里您先有个概念即可！那个管线 | 配合 grep 可以撷取关键词的意思！
-# 2. 将该文件解开！语法与实际作法如下：
-[root@study ~]# tar -jxv -f 打包檔.tar.bz2 待解开档名
-[root@study ~]# tar -jxv -f /root/etc.tar.bz2 etc/shadow
-etc/shadow
-[root@study ~]# ll etc
-total 4
-----------. 1 root root 1210 Jun 17 00:20 shadow
-# 很有趣！此时只会解开一个文件而已！不过，重点是那个档名！你要找到正确的档名。
-# 在本例中，你不能写成 /etc/shadow ！因为记录在 etc.tar.bz2 内的并没有 / 之故！
+$ cat testfile | tr a-z A-Z #转换后的输出  
+LINUX NETWORKS ARE BECOMING MORE AND MORE COMMON, BUT SCURITY IS OFTEN AN OVERLOOKED  
+ISSUE. UNFORTUNATELY, IN TODAY’S ENVIRONMENT ALL NETWORKS ARE POTENTIAL HACKER TARGETS,  
+FROM TP-SECRET MILITARY RESEARCH NETWORKS TO SMALL HOME LANS.  
+LINUX NETWORK SECURTY FOCUSES ON SECURING LINUX IN A NETWORKED ENVIRONMENT, WHERE THE  
+SECURITY OF THE ENTIRE NETWORK NEEDS TO BE CONSIDERED RATHER THAN JUST ISOLATED MACHINES.  
+IT USES A MIX OF THEORY AND PRACTICL TECHNIQUES TO TEACH ADMINISTRATORS HOW TO INSTALL AND  
+USE SECURITY APPLICATIONS, AS WELL AS HOW THE APPLCATIONS WORK AND WHY THEY ARE NECESARY. 
 #+END_SRC
-** tar命令解压时去除目录结构
-指定去除目录结构，使用--strip-components N
-
-如：压缩文件 file.tar 中文件信息为 three/two/one/file.txt
-
-1、（去除第一层目录 three）运行以下命令：
-tar -xvf file.tar --strip-components 1
-
-最终结果为：
-two/one/file.txt
-
-2、（去除三层目录 three、two、one、）运行以下命令：
-tar -xvf file.tar --strip-components 3
-
-解压结果为：
-file.txt
+大小写转换，也可以通过[:lower][:upper]参数来实现。例如使用如下命令：
+#+begin_src bash
+cat testfile |tr [:lower:] [:upper:] 
+#+END_SRC
+输出结果如下：
+#+begin_src bash
+$ cat testfile | tr [:lower:] [:upper:] #转换后的输出  
+LINUX NETWORKS ARE BECOMING MORE AND MORE COMMON, BUT SCURITY IS OFTEN AN OVERLOOKED  
+ISSUE. UNFORTUNATELY, IN TODAY’S ENVIRONMENT ALL NETWORKS ARE POTENTIAL HACKER TARGETS,  
+FROM TP-SECRET MILITARY RESEARCH NETWORKS TO SMALL HOME LANS.  
+LINUX NETWORK SECURTY FOCUSES ON SECURING LINUX IN A NETWORKED ENVIRONMENT, WHERE THE  
+SECURITY OF THE ENTIRE NETWORK NEEDS TO BE CONSIDERED RATHER THAN JUST ISOLATED MACHINES.  
+IT USES A MIX OF THEORY AND PRACTICL TECHNIQUES TO TEACH ADMINISTRATORS HOW TO INSTALL AND  
+USE SECURITY APPLICATIONS, AS WELL AS HOW THE APPLCATIONS WORK AND WHY THEY ARE NECESARY. 
+#+END_SRC
+** 参考文章
+[[https://www.runoob.com/linux/linux-comm-tr.html][Linux tr命令 - 菜鸟教程]]
 * ubuntu-18.04 设置开机启动python脚本
 关于xxx.service文件的写法，可参考这篇文章：[[https://blog.csdn.net/superjunenaruto/article/details/105890739][ubuntu 18.04 python脚本 开机自启]]
 ** 配置开机启动

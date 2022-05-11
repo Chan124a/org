@@ -9,37 +9,247 @@
 typedef int (*fun_ptr)(int,int); // 声明一个指向同样参数、返回值的函数指针类型
 #+END_SRC
 
-以下实例声明了函数指针变量 p，指向函数 max：
+以下实例声明了函数指针变量 p，指向函数 Max：
 #+BEGIN_SRC c
-#include <stdio.h>
- 
-int max(int x, int y)
-{
-    return x > y ? x : y;
-}
- 
+# include <stdio.h>
+int Max(int, int);  //函数声明
 int main(void)
 {
-    /* p 是函数指针 */
-    int (* p)(int, int) = & max; // &可以省略
-    int a, b, c, d;
- 
-    printf("请输入三个数字:");
-    scanf("%d %d %d", & a, & b, & c);
- 
-    /* 与直接调用函数等价，d = max(max(a, b), c) */
-    d = p(p(a, b), c); 
- 
-    printf("最大的数字是: %d\n", d);
- 
+    int(*p)(int, int);  //定义一个函数指针
+    int a, b, c;
+    p = Max;  //把函数Max赋给指针变量p, 使p指向Max函数
+    printf("please enter a and b:");
+    scanf("%d%d", &a, &b);
+    c = (*p)(a, b);  //通过函数指针调用Max函数
+    printf("a = %d\nb = %d\nmax = %d\n", a, b, c);
     return 0;
+}
+int Max(int x, int y)  //定义Max函数
+{
+    int z;
+    if (x > y)
+    {
+        z = x;
+    }
+    else
+    {
+        z = y;
+    }
+    return z;
 }
 #+END_SRC
 编译执行，输出结果如下：
 #+BEGIN_EXAMPLE
-请输入三个数字:1 2 3
-最大的数字是: 3
+please enter a and b:3 4
+a = 3
+b = 4
+max = 4
 #+END_EXAMPLE
+
+函数指针数组的使用例子
+#+BEGIN_SRC c
+#include <stdio.h>
+#include <stdlib.h>
+ 
+int func1(int n)
+{
+    printf("func1: %d\n", n);
+    return n;
+}
+ 
+int func2(int n)
+{
+    printf("func2: %d\n", n);
+    return n;
+}
+ 
+int main()
+{
+    int (*a[2])(int);//定义了保存了两个函数指针的数组
+    a[0] = func1;
+    a[1] = func2;
+    a[0](1);
+    a[1](2);
+ 
+    return 0;
+}
+#+END_SRC
+
 ** 参考文章
 [[https://www.runoob.com/cprogramming/c-fun-pointer-callback.html][C 函数指针与回调函数 - 菜鸟教程]]
 [[http://c.biancheng.net/view/228.html][函数指针及其定义和用法 - C语言中文网]]
+[[https://zhuanlan.zhihu.com/p/136615909][c语言中函数指针数组妙用 - 知乎专栏]]
+* extern
+extern可以置于变量或者函数前，以标示变量或者函数的定义在别的文件中，提示编译器遇到此变量和函数时在其他模块中寻找其定义。
+此外extern也可用来进行链接指定。
+
+现代编译器一般采用按文件编译的方式，因此在编译时，各个文件中定义的全局变量是互相不透明的。
+也就是说，在编译时，全局变量的可见域限制在文件内部。
+
+但是到了链接阶段，要将各个文件的内容“合为一体”.
+因此，如果某些文件中定义的全局变量名相同的话，在这个时候就会出现重复定义的错误。
+
+关于链接指定：当extern与"C"一起连用时，如: extern "C" void fun(int a, int b);则告诉编译器在编译fun这个函数名时按着C的规则去翻译相应的函数名而不是C++的。
+
+** 同一文件里,用于使用后边定义的变量
+#+BEGIN_SRC c
+#include<stdio.h>
+
+int func();
+
+int main()
+{
+    func(); //1
+    printf("%d",num); //2
+    return 0;
+}
+
+int num = 3;
+
+int func()
+{
+    printf("%d\n",num);
+}
+#+END_SRC
+变量num在main函数的后边进行声明和初始化的话，那么在main函数中是不能直接引用num这个变量的，因为当编译器编译到这一句话的时候，找不到num这个变量的声明，
+但是在func函数中是可以正常使用，因为func对num的调用是发生在num的声明和初始化之后。
+
+可以利用extern关键字先声明一下num变量，告诉编译器num这个变量是存在的，但是不是在这之前声明的。
+#+BEGIN_SRC c
+#include<stdio.h>
+
+int func();
+
+int main()
+{
+    func(); //1
+    extern int num;
+    printf("%d",num); //2
+    return 0;
+}
+
+int num = 3;
+
+int func()
+{
+    printf("%d\n",num);
+}
+#+END_SRC
+
+实际上这种使用extern的方法与使用别处文件定义的用法是一样的，因为链接阶段会把所有文件整合到一起，所以其实extern最终都是告诉编译器去别处找定义。
+
+** 引用另一个文件中的变量
+main.c
+#+BEGIN_SRC c
+#include<stdio.h>
+
+int main()
+{
+    extern int num;
+    printf("%d",num);
+    return 0;
+}
+#+END_SRC
+b.c
+#+BEGIN_SRC c
+#include<stdio.h>
+
+int num = 5;
+
+void func()
+{
+    printf("fun in a.c");
+}
+#+END_SRC
+例如，这里b.c中定义了一个变量num，如果main.c中想要引用这个变量，那么可以使用extern这个关键字，
+注意这里num在b.c中是一个全局变量。
+只有当一个变量是一个全局变量时，extern变量才会起作用，向下面这样是不行的：
+mian.c
+#+BEGIN_SRC c
+#include<stdio.h>
+
+int main()
+{
+    extern int num;
+    printf("%d",num);
+    return 0;
+}
+#+END_SRC
+b.c
+#+BEGIN_SRC c
+#include<stdio.h>
+
+void func()
+{
+    int num = 5;
+    printf("fun in a.c");
+}
+#+END_SRC
+extern关键字只需要指明类型和变量名就行了，不能再重新赋值，初始化需要在原文件所在处进行，如果不进行初始化的话，全局变量会被编译器自动初始化为0。像这种写法是不行的。
+#+BEGIN_SRC c
+extern int num=4;
+#+END_SRC
+但是在声明之后就可以使用变量名进行修改了，像这样：
+#+BEGIN_SRC c
+#include<stdio.h>
+
+int main()
+{
+    extern int num;
+    num=1;
+    printf("%d",num);
+    return 0;
+}
+#+END_SRC
+如果不想这个变量被修改可以使用const关键字进行修饰，写法如下：
+mian.c
+#+BEGIN_SRC c
+#include<stdio.h>
+
+int main()
+{
+    extern const int num;
+    printf("%d",num);
+    return 0;
+}
+#+END_SRC
+b.c
+#+BEGIN_SRC c
+#include<stdio.h>
+
+const int num=5;
+void func()
+{
+    printf("fun in a.c");
+}
+#+END_SRC
+使用include将另一个文件全部包含进去可以引用另一个文件中的变量，但是这样做的结果就是，被包含的文件中的所有的变量和方法都可以被这个文件使用，这样就变得不安全，如果只是希望一个文件使用另一个文件中的某个变量还是使用extern关键字更好。
+
+** 引用另一个文件中的函数
+extern除了引用另一个文件中的变量外，还可以引用另一个文件中的函数，引用方法和引用变量相似。
+mian.c
+#+BEGIN_SRC c
+#include<stdio.h>
+
+int main()
+{
+    extern void func();
+    func();
+    return 0;
+}
+#+END_SRC
+b.c
+#+BEGIN_SRC c
+#include<stdio.h>
+
+const int num=5;
+void func()
+{
+    printf("fun in a.c");
+}
+#+END_SRC
+这里main函数中引用了b.c中的函数func。因为所有的函数都是全局的，所以对函数的extern用法和对全局变量的修饰基本相同，需要注意的就是，需要指明返回值的类型和参数。
+** 参考文章
+[[https://blog.csdn.net/w2865673691/article/details/13018563][C/C++学习笔记（十二）extern的详解]]
+[[https://www.cnblogs.com/yc_sunniwell/archive/2010/07/14/1777431.html][C/C++中extern关键字详解]]
+[[https://blog.csdn.net/xingjiarong/article/details/47656339][C语言正确使用extern关键字_xingjiarong的博客]]
