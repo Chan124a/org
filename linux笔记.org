@@ -1760,6 +1760,131 @@ make工具可以看成是一个智能的批处理工具，它本身并没有编�
 apt-get update
 apt-get install  gdb
 #+END_SRC
+** gdb原理
+*** 概述
+为了方便描述，先写一个最最简单的C程序：
+#+begin_src bash
+#include <stdio.h>
+
+int main(int argc, char *argv[])
+{
+    int a = 1;
+    int b = 2;
+    int c = a + b;
+    printf("c = %d \n", c);
+    return 0;
+}
+#+END_SRC
+编译命令:
+#+begin_src bash
+$ gcc -g test.c -o test
+#+END_SRC
+我们对可执行程序 test 进行调试，输入命令：
+#+begin_src bash
+$ gdb ./test
+#+END_SRC
+系统首先会启动gdb进程，这个进程会调用系统函数fork()来创建一个子进程，这个子进程做两件事情： 
+1. 调用系统函数ptrace(PTRACE_TRACEME，[其他参数])； 
+2. 通过execc来加载、执行可执行程序test，那么test程序就在这个子进程中开始执行了。
+
+#+DOWNLOADED: screenshot @ 2022-05-16 15:27:19
+[[file:images/linux%E7%AC%94%E8%AE%B0/gdb/2022-05-16_15-27-19_screenshot.png]]
+*** ptrach
+ptrash函数原型是：
+#+BEGIN_EXAMPLE
+#include <sys/ptrace.h>
+long ptrace(enum __ptrace_request request, pid_t pid, void *addr, void *data);
+#+END_EXAMPLE
+我们先来看一下 man 中对这个函数的简介：
+
+#+DOWNLOADED: screenshot @ 2022-05-16 15:34:35
+[[file:images/linux%E7%AC%94%E8%AE%B0/gdb/2022-05-16_15-34-35_screenshot.png]]
+tracer就是调试程序，可以理解为gdb程序；tracee就是被调试程序，对应于图中的目标程序test。老外一般喜欢用-er和-ee来表示主动和被动的关系，例如：employer就是雇主(老板)，employee就是苦逼的被雇佣者(打工人)。
+
+ptrace系统函数是Linux内核提供的一个用于进程跟踪的系统调用，通过它，一个进程(gdb)可以读写另外一个进程(test)的指令空间、数据空间、堆栈和寄存器的值。而且gdb进程接管了test进程的所有信号，也就是说系统向test进程发送的所有信号，都被gdb进程接收到，这样一来，test进程的执行就被gdb控制了，从而达到调试的目的。
+
+也就是说，如果没有gdb调试，操作系统与目标进程之间是直接交互的；如果使用gdb来调试程序，那么操作系统发送给目标进程的信号就会被gdb截获，gdb根据信号的属性来决定：在继续运行目标程序时是否把当前截获的信号转交给目标程序，如此一来，目标程序就在gdb发来的信号指挥下进行相应的动作。
+*** GDB如何调试已经执行的服务进程
+ptrace系统函数的第一个参数是一个枚举类型的值，其中重要的是2个：PTRACE_TRACEME和PTRACE_ATTACH<。
+
+在上面的讲解中，子进程在调用ptrace系统函数时使用的参数是PTRACE_TRACEME，注意是子进程调用ptrace，相当于子进程对操作系统说：gdb进程是我的爸爸，以后你有任何想发给我的信号，请直接发给gdb进程吧！
+
+如果想对一个已经执行的进程B进行调试，那么就要在gdb这个父进程中调用ptrace(PTRACE_ATTACH,[其他参数])，此时，gdb进程会attach(绑定)到已经执行的进程B，gdb把进程B收养成为自己的子进程，而子进程B的行为等同于它进行了一次 PTRACE_TRACEME操作。此时gdb进程会发送SIGSTO信号给子进程B，子进程B接收到SIGSTOP信号后，就会暂停执行进入TASK_STOPED状态，表示自己准备好被调试了。
+
+#+DOWNLOADED: screenshot @ 2022-05-16 15:39:50
+[[file:images/linux%E7%AC%94%E8%AE%B0/gdb/2022-05-16_15-39-50_screenshot.png]]
+，不论是调试一个新程序，还是调试一个已经处于执行中状态的服务程序，通过ptrace系统调用，最终的结果都是：gdb程序是父进程，被调试程序是子进程，子进程的所有信号都被父进程gdb来接管，并且父进程gdb可查看、修改子进程的内部信息，包括：堆栈、寄存器等。
+*** GDB如何实现断点指令
+#+begin_src bash
+int main(int argc, char *argv[])
+{
+    int a = 1;
+    int b = 2;
+    int c = a + b;
+    printf("c = %d \n", c);
+    return 0;
+}
+#+END_SRC
+来看一下编译出来的反汇编代码是什么样的，编译指令：
+#+begin_src bash
+gcc -S test.c; cat test.S)
+#+END_SRC
+
+#+DOWNLOADED: screenshot @ 2022-05-16 15:40:56
+[[file:images/linux%E7%AC%94%E8%AE%B0/gdb/2022-05-16_15-40-56_screenshot.png]]
+我们把源码和汇编代码放在一起，方便理解：
+#+DOWNLOADED: screenshot @ 2022-05-16 15:41:31
+[[file:images/linux%E7%AC%94%E8%AE%B0/gdb/2022-05-16_15-41-31_screenshot.png]]
+在调试窗口输入设置断点指令“break 5”，此时gdb做2件事情： 1. 对第5行源码所对应的第10行汇编代码存储到断点链表中。 2. 在汇编代码的第10行，插入中断指令INT3，也就是说：汇编代码中的第10行被替换为INT3。
+
+#+DOWNLOADED: screenshot @ 2022-05-16 15:42:21
+[[file:images/linux%E7%AC%94%E8%AE%B0/gdb/2022-05-16_15-42-21_screenshot.png]]
+然后，在调试窗口继续输入执行指令“run”(一直执行，直到遇到断点就暂停)，汇编代码中PC指针(一个内部指针，指向即将执行的那行代码)执行第10行时，发现是INT3指令，于是操作系统就发送一个SIGTRAP信号给test进程。
+
+此刻，第10行汇编代码被执行过了，PC指针就指向第11行了。
+
+#+DOWNLOADED: screenshot @ 2022-05-16 15:42:44
+[[file:images/linux%E7%AC%94%E8%AE%B0/gdb/2022-05-16_15-42-44_screenshot.png]]
+上面已经说过，操作系统发给test的任何信号，都被gdb接管了，也就是说gdb会首先接收到这SIGTRAP个信号，gdb发现当前汇编代码执行的是第10行，于是到断点链表中查找，发现链表中存储了第10行的代码，说明第10行被设置了断点。于是gdb又做了2个操作： 1. 把汇编代码中的第10行"INT3"替换为断点链表中原来的代码。 2. 把 PC 指针回退一步，也即是设置为指向第10 行。
+
+然后，gdb继续等待用户的调试指令。
+#+DOWNLOADED: screenshot @ 2022-05-16 15:43:01
+[[file:images/linux%E7%AC%94%E8%AE%B0/gdb/2022-05-16_15-43-01_screenshot.png]]
+此刻，就相当于下一条执行的指令是汇编代码中的第10行，也就是源码中的第5行。从我们调试者角度看，就是被调试程序在第5行断点处暂停了下来，此时我们可以继续输入其他调试指令来debug，比如：查看变量值、查看堆栈信息、修改局部变量的值等等。
+*** GDB如何实现单步指令next
+假设此时程序停止在源码的第6行，即汇编代码的第11行：
+
+#+DOWNLOADED: screenshot @ 2022-05-16 15:43:49
+[[file:images/linux%E7%AC%94%E8%AE%B0/gdb/2022-05-16_15-43-49_screenshot.png]]
+在调试窗口输入单步执行指令next，我们的目的是执行一行代码，也就是把源码中第6行代码执行完，然后停止在第7行。gdb在接收到next执行时，会计算出第7行源码，应该对应到汇编代码的第14行，于是gdb就控制汇编代码中的PC指针一直执行，直到第13行执行结束，也就是PC指向第14行时，就停止下来，然后继续等待用户输入调试指令。
+
+#+DOWNLOADED: screenshot @ 2022-05-16 15:44:04
+[[file:images/linux%E7%AC%94%E8%AE%B0/gdb/2022-05-16_15-44-04_screenshot.png]]
+*** 参考文章
+[[https://zhuanlan.zhihu.com/p/336922639][原来gdb的底层调试原理这么简单]]
+** 符号表
+A Debugging Symbol Table maps instructions in the compiled binary program to their corresponding variable, function, or line in the source code. This mapping could be something like:
+
+Program instruction --> item name, item type, original file, line number defined.
+
+Symbol tables may be embedded into the program or stored as a separate file. So if you plan to debug your program, then it is required to create a symbol table which will have the required information to debug the program.
+
+We can infer the following facts about symbol tables:
+- A symbol table works for a particular version of the program – if the program changes, a new table must be created.
+- Debug builds are often larger and slower than retail (non-debug) builds; debug builds contain the symbol table and other ancillary information.
+- If you wish to debug a binary program you did not compile yourself, you must get the symbol tables from the author.
+
+To let GDB be able to read all that information line by line from the symbol table, we need to compile it a bit differently. Normally we compile our programs as:
+#+begin_src bash
+gcc hello.cc -o hello 
+#+END_SRC
+Instead of doing this, we need to compile with the -g flag as shown below:
+#+begin_src bash
+gcc -g hello.cc -o hello 
+#+END_SRC
+
+*** 参考文章
+[[https://www.tutorialspoint.com/gnu_debugger/gdb_debugging_symbols.htm][GDB - Debugging Symbols - Tutorialspoint]]
 ** 调试信息
 一般来说GDB主要调试的是C/C++的程序。要调试C/C++的程序，首先在编译时，我们必须要把调试信息加到可执行文件中。使用编译器（cc/gcc/g++）的 -g 参数可以做到这一点。如：
 #+begin_src bash
@@ -3663,6 +3788,168 @@ mount [-t vfstype] [-o options] device dir
 3.device 要挂接(mount)的设备。
 
 4.dir设备在系统上的挂接点(mount point)。
+* objdump
+objdump命令是Linux下的反汇编目标文件或者可执行文件的命令，它以一种可阅读的格式让你更多地了解二进制文件可能带有的附加信息。
+
+参数选项
+
+--archive-headers 
+-a 
+显示档案库的成员信息,类似ls -l将lib*.a的信息列出。 
+
+-b bfdname 
+--target=bfdname 
+指定目标码格式。这不是必须的，objdump能自动识别许多格式，比如： 
+
+objdump -b oasys -m vax -h fu.o 
+显示fu.o的头部摘要信息，明确指出该文件是Vax系统下用Oasys编译器生成的目标文件。objdump -i将给出这里可以指定的目标码格式列表。 
+
+-C 
+--demangle 
+将底层的符号名解码成用户级名字，除了去掉所开头的下划线之外，还使得C++函数名以可理解的方式显示出来。 
+
+--debugging 
+-g 
+显示调试信息。企图解析保存在文件中的调试信息并以C语言的语法显示出来。仅仅支持某些类型的调试信息。有些其他的格式被readelf -w支持。 
+
+-e 
+--debugging-tags 
+类似-g选项，但是生成的信息是和ctags工具相兼容的格式。 
+
+--disassemble 
+-d 
+从objfile中反汇编那些特定指令机器码的section。 
+
+-D 
+--disassemble-all 
+与 -d 类似，但反汇编所有section. 
+
+--prefix-addresses 
+反汇编的时候，显示每一行的完整地址。这是一种比较老的反汇编格式。 
+
+-EB 
+-EL 
+--endian={big|little} 
+指定目标文件的小端。这个项将影响反汇编出来的指令。在反汇编的文件没描述小端信息的时候用。例如S-records.
+
+-f 
+--file-headers 
+显示objfile中每个文件的整体头部摘要信息。 
+
+-h 
+--section-headers 
+--headers 
+显示目标文件各个section的头部摘要信息。 
+
+-H 
+--help 
+简短的帮助信息。 
+
+-i 
+--info 
+显示对于 -b 或者 -m 选项可用的架构和目标格式列表。 
+
+-j name
+--section=name 
+仅仅显示指定名称为name的section的信息 
+
+-l
+--line-numbers 
+用文件名和行号标注相应的目标代码，仅仅和-d、-D或者-r一起使用使用-ld和使用-d的区别不是很大，在源码级调试的时候有用，要求编译时使用了-g之类的调试编译选项。 
+
+-m machine 
+--architecture=machine 
+指定反汇编目标文件时使用的架构，当待反汇编文件本身没描述架构信息的时候(比如S-records)，这个选项很有用。可以用-i选项列出这里能够指定的架构.
+
+--reloc 
+-r 
+显示文件的重定位入口。如果和-d或者-D一起使用，重定位部分以反汇编后的格式显示出来。 
+
+--dynamic-reloc 
+-R 
+显示文件的动态重定位入口，仅仅对于动态目标文件意义，比如某些共享库。 
+
+-s 
+--full-contents 
+显示指定section的完整内容。默认所有的非空section都会被显示。 
+
+-S 
+--source 
+尽可能反汇编出源代码，尤其当编译的时候指定了-g这种调试参数时，效果比较明显。隐含了-d参数。 
+
+--show-raw-insn 
+反汇编的时候，显示每条汇编指令对应的机器码，如不指定--prefix-addresses，这将是缺省选项。 
+
+--no-show-raw-insn 
+反汇编时，不显示汇编指令的机器码，如不指定--prefix-addresses，这将是缺省选项。 
+
+--start-address=address 
+从指定地址开始显示数据，该选项影响-d、-r和-s选项的输出。 
+
+--stop-address=address 
+显示数据直到指定地址为止，该项影响-d、-r和-s选项的输出。 
+
+-t 
+--syms 
+显示文件的符号表入口。类似于nm -s提供的信息 
+
+-T 
+--dynamic-syms 
+显示文件的动态符号表入口，仅仅对动态目标文件意义，比如某些共享库。它显示的信息类似于 nm -D|--dynamic 显示的信息。 
+
+-V 
+--version 
+版本信息 
+
+--all-headers 
+-x 
+显示所可用的头信息，包括符号表、重定位入口。-x 等价于-a -f -h -r -t 同时指定。 
+
+-z 
+--disassemble-zeroes 
+一般反汇编输出将省略大块的零，该选项使得这些零块也被反汇编。 
+
+@file 
+可以将选项集中到一个文件中，然后使用这个@file选项载入。
+
+复制
+关于符号表字段下面直接只介绍部分常用的：
+
+.text：已编译程序的机器代码。
+
+.rodata：只读数据，比如printf语句中的格式串和开关（switch）语句的跳转表。
+
+.data：已初始化的全局C变量。局部C变量在运行时被保存在栈中，既不出现在.data中，也不出现在.bss节中。
+
+.bss：未初始化的全局C变量。在目标文件中这个节不占据实际的空间，它仅仅是一个占位符。目标文件格式区分初始化和未初始化变量是为了空间效率在：在目标文件中，未初始化变量不需要占据任何实际的磁盘空间。
+
+.symtab：一个符号表（symbol table），它存放在程序中被定义和引用的函数和全局变量的信息。一些程序员错误地认为必须通过-g选项来编译一个程序，得到符号表信息。实际上，每个可重定位目标文件在.symtab中都有一张符号表。然而，和编译器中的符号表不同，.symtab符号表不包含局部变量的表目。
+
+.rel.text：当链接噐把这个目标文件和其他文件结合时，.text节中的许多位置都需要修改。一般而言，任何调用外部函数或者引用全局变量的指令都需要修改。另一方面调用本地函数的指令则不需要修改。注意，可执行目标文件中并不需要重定位信息，因此通常省略，除非使用者显式地指示链接器包含这些信息。
+
+.rel.data：被模块定义或引用的任何全局变量的信息。一般而言，任何已初始化全局变量的初始值是全局变量或者外部定义函数的地址都需要被修改。
+
+.debug：一个调试符号表，其有些表目是程序中定义的局部变量和类型定义，有些表目是程序中定义和引用的全局变量，有些是原始的C源文件。只有以-g选项调用编译驱动程序时，才会得到这张表。
+
+.line：原始C源程序中的行号和.text节中机器指令之间的映射。只有以-g选项调用编译驱动程序时，才会得到这张表。
+
+.strtab：一个字符串表，其内容包括.symtab和.debug节中的符号表，以及节头部中的节名字。字符串表就是以null结尾的字符串序列。
+
+使用举例：
+
+反汇编应用程序
+
+objdump -d  main.o  
+
+显示文件头信息 
+
+objdump -f main.o
+
+显示制定section段信息(comment段)
+
+objdump -s -j .comment main.o
+** 参考文献
+[[https://cloud.tencent.com/developer/article/1494510][objdump命令解析- 云+社区 - 腾讯云]]
 * OpenCV
 ** C++接口
 先安装依赖
@@ -9263,3 +9550,411 @@ hostnamectl set-hostname eaglezsx
 修改/etc/hosts，添加 153.3.137.123 gitee.com
 
 这个原因大概率是停止域名解析了。所以可以写死ip地址来进行访问
+* 静态库和动态库
+** 什么是库
+库是写好的现有的，成熟的，可以复用的代码。现实中每个程序都要依赖很多基础的底层库，不可能每个人的代码都从零开始，因此库的存在意义非同寻常。
+
+本质上来说库是一种可执行代码的二进制形式，可以被操作系统载入内存执行。
+
+库有两种：静态库（.a、.lib）和动态库（.so、.dll）。
+
+所谓静态、动态是指链接。回顾一下，将一个程序编译成可执行程序的步骤：
+
+#+DOWNLOADED: screenshot @ 2022-05-16 16:39:28
+[[file:images/linux%E7%AC%94%E8%AE%B0/%E9%9D%99%E6%80%81%E5%BA%93%E5%92%8C%E5%8A%A8%E6%80%81%E5%BA%93/2022-05-16_16-39-28_screenshot.png]]
+** 静态库
+之所以成为【静态库】，是因为在链接阶段，会将汇编生成的目标文件.o与引用到的库一起链接打包到可执行文件中。
+因此对应的链接方式称为静态链接。
+
+试想一下，静态库与汇编生成的目标文件一起链接为可执行文件，那么静态库必定跟.o文件格式相似。
+其实一个静态库可以简单看成是一组目标文件（.o/.obj文件）的集合，即很多目标文件经过压缩打包后形成的一个文件。
+静态库特点总结：
+1. 静态库对函数库的链接是放在编译时期完成的。
+2. 程序在运行时与函数库再无瓜葛，移植方便。
+3. 浪费空间和资源，因为所有相关的目标文件与牵涉到的函数库被链接合成一个可执行文件。
+
+Linux下使用ar工具、Windows下vs使用lib.exe，将目标文件压缩到一起，并且对其进行编号和索引，以便于查找和检索。
+
+一般创建静态库的步骤如图所示：
+
+#+DOWNLOADED: screenshot @ 2022-05-16 16:41:13
+[[file:images/linux%E7%AC%94%E8%AE%B0/%E9%9D%99%E6%80%81%E5%BA%93%E5%92%8C%E5%8A%A8%E6%80%81%E5%BA%93/2022-05-16_16-41-13_screenshot.png]]
+*** Linux下创建与使用静态库
+下面编写一些简单的四则运算C++类，将其编译成静态库给他人用，头文件如下所示：
+
+StaticMath.h头文件
+#+begin_src bash
+#pragma once
+class StaticMath
+{
+public:
+    StaticMath(void);
+    ~StaticMath(void);
+ 
+    static double add(double a, double b);//加法
+    static double sub(double a, double b);//减法
+    static double mul(double a, double b);//乘法
+    static double div(double a, double b);//除法
+    void print();
+};
+#+END_SRC
+
+**** Linux静态库命名规则
+Linux静态库命名规范，必须是"lib[your_library_name].a"：lib为前缀，中间是静态库名，扩展名为.a。
+**** 创建静态库（.a）
+Linux创建静态库过程如下：
+
+首先，将代码文件编译成目标文件.o（StaticMath.o）
+#+begin_src bash
+g++ -c StaticMath.cpp
+#+END_SRC
+注意带参数-c，否则直接编译为可执行文件
+
+然后，通过ar工具将目标文件打包成.a静态库文件
+#+begin_src bash
+ar -crv libstaticmath.a StaticMath.o
+#+END_SRC
+生成静态库libstaticmath.a。
+
+#+DOWNLOADED: screenshot @ 2022-05-16 17:07:02
+[[file:images/linux%E7%AC%94%E8%AE%B0/%E9%9D%99%E6%80%81%E5%BA%93%E5%92%8C%E5%8A%A8%E6%80%81%E5%BA%93/2022-05-16_17-07-02_screenshot.png]]
+大一点的项目会编写makefile文件（CMake等等工程管理工具）来生成静态库，输入多个命令太麻烦了。
+**** 使用静态库
+编写使用上面创建的静态库的测试代码：
+#+begin_src bash
+#include "StaticMath.h"
+#include <iostream>
+using namespace std;
+
+int main(int argc, char* argv[])
+{
+    double a = 10;
+    double b = 2;
+
+    cout << "a + b = " << StaticMath::add(a, b) << endl;
+    cout << "a - b = " << StaticMath::sub(a, b) << endl;
+    cout << "a * b = " << StaticMath::mul(a, b) << endl;
+    cout << "a / b = " << StaticMath::div(a, b) << endl;
+
+    StaticMath sm;
+    sm.print();
+
+    system("pause");
+    return 0;
+}
+#+END_SRC
+Linux下使用静态库，只需要在编译的时候，指定静态库的搜索路径（-L选项）、指定静态库名（不需要lib前缀和.a后缀，-l选项）。
+#+begin_src bash
+g++ TestStaticLibrary.cpp -L../StaticLibrary -lstaticmath
+#+END_SRC
+- -L：表示要连接的库所在目录
+- -l：指定链接时需要的动态库，编译器查找动态连接库时有隐含的命名规则，即在给出的名字前面加上lib，后面加上.a或.so来确定库的名称。
+
+#+DOWNLOADED: screenshot @ 2022-05-16 17:09:14
+[[file:images/linux%E7%AC%94%E8%AE%B0/%E9%9D%99%E6%80%81%E5%BA%93%E5%92%8C%E5%8A%A8%E6%80%81%E5%BA%93/2022-05-16_17-09-14_screenshot.png]]
+*** Windows下创建与使用静态库
+**** 创建静态库（.lib）
+如果是使用VS命令行生成静态库，也是分两个步骤来生成程序：
+
+首先，通过使用带编译器选项 /c 的 Cl.exe 编译代码 (cl /c StaticMath.cpp)，创建名为“StaticMath.obj”的目标文件。
+
+然后，使用库管理器 Lib.exe 链接代码 (lib StaticMath.obj)，创建静态库StaticMath.lib。
+
+当然，我们一般不这么用，使用VS工程设置更方便。创建win32控制台程序时，勾选静态库类型；打开工程“属性面板”è”配置属性”è”常规”，配置类型选择静态库。
+
+#+DOWNLOADED: screenshot @ 2022-05-16 17:14:22
+[[file:images/linux%E7%AC%94%E8%AE%B0/%E9%9D%99%E6%80%81%E5%BA%93%E5%92%8C%E5%8A%A8%E6%80%81%E5%BA%93/2022-05-16_17-14-22_screenshot.png]]
+Build项目即可生成静态库。
+**** 使用静态库
+测试代码Linux下面的一样。有3种使用方法：
+
+方法一：
+在VS中使用静态库方法：
+
+工程“属性面板”è“通用属性”è “框架和引用”è”添加引用”，将显示“添加引用”对话框。 “项目”选项卡列出了当前解决方案中的各个项目以及可以引用的所有库。 在“项目”选项卡中，选择 StaticLibrary。 单击“确定”。
+
+#+DOWNLOADED: screenshot @ 2022-05-16 17:15:04
+[[file:images/linux%E7%AC%94%E8%AE%B0/%E9%9D%99%E6%80%81%E5%BA%93%E5%92%8C%E5%8A%A8%E6%80%81%E5%BA%93/2022-05-16_17-15-04_screenshot.png]]
+添加StaticMath.h 头文件目录，必须修改包含目录路径。打开工程“属性面板”è”配置属性”è “C/C++”è” 常规”，在“附加包含目录”属性值中，键入StaticMath.h 头文件所在目录的路径或浏览至该目录。
+
+#+DOWNLOADED: screenshot @ 2022-05-16 17:15:25
+[[file:images/linux%E7%AC%94%E8%AE%B0/%E9%9D%99%E6%80%81%E5%BA%93%E5%92%8C%E5%8A%A8%E6%80%81%E5%BA%93/2022-05-16_17-15-25_screenshot.png]]
+编译运行OK。
+
+#+DOWNLOADED: screenshot @ 2022-05-16 17:16:47
+[[file:images/linux%E7%AC%94%E8%AE%B0/%E9%9D%99%E6%80%81%E5%BA%93%E5%92%8C%E5%8A%A8%E6%80%81%E5%BA%93/2022-05-16_17-16-47_screenshot.png]]
+如果引用的静态库不是在同一解决方案下的子工程，而是使用第三方提供的静态库lib和头文件，上面的方法设置不了。还有2中方法设置都可行。
+
+方法二：
+打开工程“属性面板”è”配置属性”è “链接器”è”命令行”，输入静态库的完整路径即可。
+
+
+#+DOWNLOADED: screenshot @ 2022-05-16 17:17:36
+[[file:images/linux%E7%AC%94%E8%AE%B0/%E9%9D%99%E6%80%81%E5%BA%93%E5%92%8C%E5%8A%A8%E6%80%81%E5%BA%93/2022-05-16_17-17-36_screenshot.png]]
+方法三：
+- “属性面板”è”配置属性”è “链接器”è”常规”，附加依赖库目录中输入，静态库所在目录；
+- “属性面板”è”配置属性”è “链接器”è”输入”，附加依赖库中输入静态库名StaticLibrary.lib。
+
+
+#+DOWNLOADED: screenshot @ 2022-05-16 17:18:07
+[[file:images/linux%E7%AC%94%E8%AE%B0/%E9%9D%99%E6%80%81%E5%BA%93%E5%92%8C%E5%8A%A8%E6%80%81%E5%BA%93/2022-05-16_17-18-07_screenshot.png]]
+
+** 动态库
+为什么需要动态库，其实也是静态库的特点导致。
+
+空间浪费是静态库的一个问题。
+
+#+DOWNLOADED: screenshot @ 2022-05-16 16:41:30
+[[file:images/linux%E7%AC%94%E8%AE%B0/%E9%9D%99%E6%80%81%E5%BA%93%E5%92%8C%E5%8A%A8%E6%80%81%E5%BA%93/2022-05-16_16-41-30_screenshot.png]]
+
+另一个问题是静态库对程序的更新、部署和发布页会带来麻烦。
+如果静态库liba.lib更新了，所以使用它的应用程序都需要重新编译、发布给用户（对于玩家来说，可能是一个很小的改动，却导致整个程序重新下载，全量更新）。
+
+动态库在程序编译时并不会被连接到目标代码中，而是在程序运行是才被载入。
+不同的应用程序如果调用相同的库，那么在内存里只需要有一份该共享库的实例，规避了空间浪费问题。
+动态库在程序运行是才被载入，也解决了静态库对程序的更新、部署和发布页会带来麻烦。用户只需要更新动态库即可，增量更新。
+
+#+DOWNLOADED: screenshot @ 2022-05-16 16:41:52
+[[file:images/linux%E7%AC%94%E8%AE%B0/%E9%9D%99%E6%80%81%E5%BA%93%E5%92%8C%E5%8A%A8%E6%80%81%E5%BA%93/2022-05-16_16-41-52_screenshot.png]]
+动态库特点总结：
+1. 动态库把对一些库函数的链接载入推迟到程序运行的时期。
+2. 可以实现进程之间的资源共享。（因此动态库也称为共享库）
+3. 将一些程序升级变得简单。
+4. 甚至可以真正做到链接载入完全由程序员在程序代码中控制（显示调用）。
+
+Window与Linux执行文件格式不同，在创建动态库的时候有一些差异。
+
+- 在Windows系统下的执行文件格式是PE格式，动态库需要一个DllMain函数做出初始化的入口，通常在导出函数的声明时需要有_declspec(dllexport)关键字。
+- Linux下gcc编译的执行文件默认是ELF格式，不需要初始化入口，亦不需要函数做特别的声明，编写比较方便。
+
+与创建静态库不同的是，不需要打包工具（ar、lib.exe），直接使用编译器即可创建动态库。
+
+*** Linux下创建与使用动态库
+**** linux动态库的命名规则
+动态链接库的名字形式为 libxxx.so，前缀是lib，后缀名为“.so”。
+
+针对于实际库文件，每个共享库都有个特殊的名字“soname”。在程序启动后，程序通过这个名字来告诉动态加载器该载入哪个共享库。
+
+在文件系统中，soname仅是一个链接到实际动态库的链接。对于动态库而言，每个库实际上都有另一个名字给编译器来用。它是一个指向实际库镜像文件的链接文件（lib+soname+.so）。
+**** 创建动态库（.so）
+编写四则运算动态库代码：
+DynamicMath.h头文件
+#+begin_src bash
+#pragma once
+
+class DynamicMath
+{
+public:
+        DynamicMath(void);
+        ~DynamicMath(void);
+
+        static double add(double a, double b);//¼Ó·¨
+        static double sub(double a, double b);//¼õ·¨
+        static double mul(double a, double b);//³Ë·¨
+        static double div(double a, double b);//³ý·¨
+
+        void print();
+};
+#+END_SRC
+首先，生成目标文件，此时要加编译器选项-fpic
+#+begin_src bash
+g++ -fPIC -c DynamicMath.cpp
+#+END_SRC
+-fPIC 创建与地址无关的编译程序（pic，position independent code），是为了能够在多个应用程序间共享。
+然后，生成动态库，此时要加链接器选项-shared
+#+begin_src bash
+g++ -shared -o libdynmath.so DynamicMath.o
+#+END_SRC
+-shared指定生成动态链接库。
+
+#+DOWNLOADED: screenshot @ 2022-05-16 19:19:24
+[[file:images/linux%E7%AC%94%E8%AE%B0/%E9%9D%99%E6%80%81%E5%BA%93%E5%92%8C%E5%8A%A8%E6%80%81%E5%BA%93/2022-05-16_19-19-24_screenshot.png]]
+其实上面两个步骤可以合并为一个命令：
+#+begin_src bash
+g++ -fPIC -shared -o libdynmath.so DynamicMath.cpp
+#+END_SRC 
+**** 使用动态库
+编写使用动态库的测试代码：
+#+begin_src bash
+#include "../DynamicLibrary/DynamicMath.h"
+#include <iostream>
+
+using namespace std;
+int main(int argc, char* argv[])
+{
+    double a = 10;
+    double b = 2;
+
+    cout << "a + b = " << DynamicMath::add(a, b) << endl;
+    cout << "a - b = " << DynamicMath::sub(a, b) << endl;
+    cout << "a * b = " << DynamicMath::mul(a, b) << endl;
+    cout << "a / b = " << DynamicMath::div(a, b) << endl;
+
+    DynamicMath dyn;
+    dyn.print();
+    return 0;
+}
+#+END_SRC
+引用动态库编译成可执行文件（跟静态库方式一样）：
+#+begin_src bash
+g++ TestDynamicLibrary.cpp -L../DynamicLibrary -ldynmath
+#+END_SRC
+
+在执行的时候是如何定位共享库文件的呢？
+- 当系统加载可执行代码时候，能够知道其所依赖的库的名字，但是还需要知道绝对路径。此时就需要系统动态载入器(dynamic linker/loader)。
+- 对于elf格式的可执行程序，是由ld-linux.so*来完成的，它先后搜索elf文件的 DT_RPATH段—环境变量LD_LIBRARY_PATH—/etc/ld.so.cache文件列表—/lib/,/usr/lib 目录找到库文件后将其载入内存。
+
+如何让系统能够找到它：
+- 如果安装在/lib或者/usr/lib下，那么ld默认能够找到，无需其他操作。
+- 如果安装在其他目录，需要将其添加到/etc/ld.so.cache文件中，步骤如下：
+    - 编辑/etc/ld.so.conf文件，加入库文件所在目录的路径
+    - 运行ldconfig ，该命令会重建/etc/ld.so.cache文件
+
+我们将创建的动态库复制到/usr/lib下面，然后运行测试程序。
+#+DOWNLOADED: screenshot @ 2022-05-16 19:23:15
+[[file:images/linux%E7%AC%94%E8%AE%B0/%E9%9D%99%E6%80%81%E5%BA%93%E5%92%8C%E5%8A%A8%E6%80%81%E5%BA%93/2022-05-16_19-23-15_screenshot.png]]
+*** Windows下创建与使用动态库
+**** 创建动态库（.dll）
+与Linux相比，在Windows系统下创建动态库要稍微麻烦一些。首先，需要一个DllMain函数做出初始化的入口（创建win32控制台程序时，勾选DLL类型会自动生成这个文件）：
+
+dllmain.cpp入口文件
+#+begin_src c++
+// dllmain.cpp : Defines the entry point for the DLL application.
+
+#include "stdafx.h"
+BOOL APIENTRY DllMain( HMODULE hModule,
+                       DWORD  ul_reason_for_call,
+                       LPVOID lpReserved
+                     )
+{
+    switch (ul_reason_for_call)
+    {
+    case DLL_PROCESS_ATTACH:
+    case DLL_THREAD_ATTACH:
+    case DLL_THREAD_DETACH:
+    case DLL_PROCESS_DETACH:
+        break;
+    }
+    return TRUE;
+}
+#+END_SRC
+通常在导出函数的声明时需要有_declspec(dllexport)关键字：
+
+DynamicMath.h头文件
+#+BEGIN_SRC c++
+#pragma once
+
+class DynamicMath
+{
+public:
+    __declspec(dllexport) DynamicMath(void);
+    __declspec(dllexport) ~DynamicMath(void);
+
+    static __declspec(dllexport) double add(double a, double b);//加法
+    static __declspec(dllexport) double sub(double a, double b);//减法
+    static __declspec(dllexport) double mul(double a, double b);//乘法
+    static __declspec(dllexport) double div(double a, double b);//除法
+
+    __declspec(dllexport) void print();
+};
+#+END_SRC
+生成动态库需要设置工程属性，打开工程“属性面板”è”配置属性”è”常规”，配置类型选择动态库。
+
+#+DOWNLOADED: screenshot @ 2022-05-16 19:25:49
+[[file:images/linux%E7%AC%94%E8%AE%B0/%E9%9D%99%E6%80%81%E5%BA%93%E5%92%8C%E5%8A%A8%E6%80%81%E5%BA%93/2022-05-16_19-25-49_screenshot.png]]
+Build项目即可生成动态库。
+**** 使用动态库
+创建win32控制台测试程序：
+TestDynamicLibrary.cpp测试程序
+#+BEGIN_SRC c++
+#include "stdafx.h"
+#include "DynamicMath.h"
+
+#include <iostream>
+using namespace std;
+
+int _tmain(int argc, _TCHAR* argv[])
+{
+    double a = 10;
+    double b = 2;
+
+    cout << "a + b = " << DynamicMath::add(a, b) << endl;
+
+    cout << "a - b = " << DynamicMath::sub(a, b) << endl;
+
+    cout << "a * b = " << DynamicMath::mul(a, b) << endl;
+
+    cout << "a / b = " << DynamicMath::div(a, b) << endl;
+ 
+    DynamicMath dyn;
+    dyn.print();
+
+    system("pause");
+    return 0;
+}
+#+END_SRC
+方法一：
+工程“属性面板”è“通用属性”è “框架和引用”è”添加引用”，将显示“添加引用”对话框。“项目”选项卡列出了当前解决方案中的各个项目以及可以引用的所有库。 在“项目”选项卡中，选择 DynamicLibrary。 单击“确定”。
+
+#+DOWNLOADED: screenshot @ 2022-05-16 19:27:07
+[[file:images/linux%E7%AC%94%E8%AE%B0/%E9%9D%99%E6%80%81%E5%BA%93%E5%92%8C%E5%8A%A8%E6%80%81%E5%BA%93/2022-05-16_19-27-07_screenshot.png]]
+添加DynamicMath.h 头文件目录，必须修改包含目录路径。打开工程“属性面板”è”配置属性”è “C/C++”è” 常规”，在“附加包含目录”属性值中，键入DynamicMath.h 头文件所在目录的路径或浏览至该目录。
+
+#+DOWNLOADED: screenshot @ 2022-05-16 19:27:20
+[[file:images/linux%E7%AC%94%E8%AE%B0/%E9%9D%99%E6%80%81%E5%BA%93%E5%92%8C%E5%8A%A8%E6%80%81%E5%BA%93/2022-05-16_19-27-20_screenshot.png]]
+编译运行OK。
+
+#+DOWNLOADED: screenshot @ 2022-05-16 19:27:29
+[[file:images/linux%E7%AC%94%E8%AE%B0/%E9%9D%99%E6%80%81%E5%BA%93%E5%92%8C%E5%8A%A8%E6%80%81%E5%BA%93/2022-05-16_19-27-29_screenshot.png]]
+方法二：
+“属性面板”è”配置属性”è “链接器”è”常规”，附加依赖库目录中输入，动态库所在目录；
+
+#+DOWNLOADED: screenshot @ 2022-05-16 19:27:45
+[[file:images/linux%E7%AC%94%E8%AE%B0/%E9%9D%99%E6%80%81%E5%BA%93%E5%92%8C%E5%8A%A8%E6%80%81%E5%BA%93/2022-05-16_19-27-45_screenshot.png]]
+“属性面板”è”配置属性”è “链接器”è”输入”，附加依赖库中输入动态库编译出来的DynamicLibrary.lib。
+
+#+DOWNLOADED: screenshot @ 2022-05-16 19:27:55
+[[file:images/linux%E7%AC%94%E8%AE%B0/%E9%9D%99%E6%80%81%E5%BA%93%E5%92%8C%E5%8A%A8%E6%80%81%E5%BA%93/2022-05-16_19-27-55_screenshot.png]]
+这里可能大家有个疑问，动态库怎么还有一个DynamicLibrary.lib文件？即无论是静态链接库还是动态链接库，最后都有lib文件，那么两者区别是什么呢？其实，两个是完全不一样的东西。
+
+#+DOWNLOADED: screenshot @ 2022-05-16 19:28:06
+[[file:images/linux%E7%AC%94%E8%AE%B0/%E9%9D%99%E6%80%81%E5%BA%93%E5%92%8C%E5%8A%A8%E6%80%81%E5%BA%93/2022-05-16_19-28-06_screenshot.png]]
+StaticLibrary.lib的大小为190KB，DynamicLibrary.lib的大小为3KB，静态库对应的lib文件叫静态库，动态库对应的lib文件叫【导入库】。实际上静态库本身就包含了实际执行代码、符号表等等，而对于导入库而言，其实际的执行代码位于动态库中，导入库只包含了地址符号表等，确保程序找到对应函数的一些基本地址信息。
+
+** 动态库的显式调用
+上面介绍的动态库使用方法和静态库类似属于隐式调用，编译的时候指定相应的库和查找路径。其实，动态库还可以显式调用。【在C语言中】，显示调用一个动态库轻而易举！
+
+*** 在Linux下显式调用动态库
+#include <dlfcn.h>，提供了下面几个接口：
+- void * dlopen( const char * pathname, int mode )：函数以指定模式打开指定的动态连接库文件，并返回一个句柄给调用进程。
+- void* dlsym(void* handle,const char* symbol)：dlsym根据动态链接库操作句柄(pHandle)与符号(symbol)，返回符号对应的地址。使用这个函数不但可以获取函数地址，也可以获取变量地址。
+- int dlclose (void *handle)：dlclose用于关闭指定句柄的动态链接库，只有当此动态链接库的使用计数为0时,才会真正被系统卸载。
+- const char *dlerror(void)：当动态链接库操作函数执行失败时，dlerror可以返回出错信息，返回值为NULL时表示操作函数执行成功。
+
+*** 在Windows下显式调用动态库
+应用程序必须进行函数调用以在运行时显式加载 DLL。为显式链接到 DLL，应用程序必须：
+- 调用 LoadLibrary（或相似的函数）以加载 DLL 和获取模块句柄。
+- 调用 GetProcAddress，以获取指向应用程序要调用的每个导出函数的函数指针。由于应用程序是通过指针调用 DLL 的函数，编译器不生成外部引用，故无需与导入库链接。
+- 使用完 DLL 后调用 FreeLibrary。
+
+*** 显式调用C++动态库注意点
+对C++来说，情况稍微复杂。显式加载一个C++动态库的困难一部分是因为C++的name mangling；另一部分是因为没有提供一个合适的API来装载类，在C++中，您可能要用到库中的一个类，而这需要创建该类的一个实例，这不容易做到。
+
+name mangling可以通过extern "C"解决。C++有个特定的关键字用来声明采用C binding的函数：extern "C" 。用 extern "C"声明的函数将使用函数名作符号名，就像C函数一样。因此，只有非成员函数才能被声明为extern "C"，并且不能被重载。尽管限制多多，extern "C"函数还是非常有用，因为它们可以象C函数一样被dlopen动态加载。冠以extern "C"限定符后，并不意味着函数中无法使用C++代码了，相反，它仍然是一个完全的C++函数，可以使用任何C++特性和各种类型的参数。
+** 区别与联系
+二者的不同点在于代码被载入的时刻不同。
+
+静态库的代码在编译过程中已经被载入可执行程序,因此体积比较大。
+
+动态库(共享库)的代码在可执行程序运行时才载入内存，在编译过程中仅简单的引用，因此代码体积比较小。
+
+不同的应用程序如果调用相同的库,那么在内存中只需要有一份该动态库(共享库)的实例。
+
+静态库和动态库的最大区别,静态情况下,把库直接加载到程序中,而动态库链接的时候,它只是保留接口,将动态库与程序代码独立,这样就可以提高代码的可复用度，和降低程序的耦合度。
+
+静态库在程序编译时会被连接到目标代码中，程序运行时将不再需要该静态库。
+
+动态库在程序编译时并不会被连接到目标代码中，而是在程序运行是才被载入，因此在程序运行时还需要动态库存在
+** 参考文章
+[[https://blog.nowcoder.net/n/8e07e78a703c413c916d0f830b8ceda7][浅析静态库和动态库的区别]]
+[[https://www.cnblogs.com/skynet/p/3372855.html][C++静态库与动态库]]
