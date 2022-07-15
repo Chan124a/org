@@ -66,6 +66,53 @@ Docker Registry 公开服务是开放给用户使用、允许用户管理镜像�
 开源的 Docker Registry 镜像只提供了 Docker Registry API 的服务端实现，足以支持 docker 命令，不影响使用。但不包含图形界面，以及镜像维护、用户管理、访问控制等高级功能。
 
 除了官方的 Docker Registry 外，还有第三方软件实现了 Docker Registry API，甚至提供了用户界面以及一些高级功能。比如，Harbor 和 Sonatype Nexus。
+* docker container prune
+删除所有已停止的容器
+* docker commit 
+docker commit :从容器创建一个新的镜像。
+
+语法
+
+docker commit [OPTIONS] CONTAINER [REPOSITORY[:TAG]]
+
+OPTIONS说明：
+
+-a :提交的镜像作者；
+
+-c :使用Dockerfile指令来创建镜像；
+
+-m :提交时的说明文字；
+
+-p :在commit时，将容器暂停。
+
+** 实例
+将容器a404c6c174a2 保存为新的镜像,并添加提交人信息和说明信息。
+#+BEGIN_SRC bash
+runoob@runoob:~$ docker commit -a "runoob.com" -m "my apache" a404c6c174a2  mymysql:v1 
+sha256:37af1236adef1544e8886be23010b66577647a40bc02c0885a6600b33ee28057
+runoob@runoob:~$ docker images mymysql:v1
+REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+mymysql             v1                  37af1236adef        15 seconds ago      329 MB
+#+END_SRC
+* docker exec
+docker exec <container-id> cat /data.txt
+
+用root进入容器：
+docker exec -it --user root <container id> /bin/bash
+
+* docker history
+查看每个镜像中层的大小
+#+begin_src bash
+$ docker history bd09118bcef6
+IMAGE               CREATED             CREATED BY                                      SIZE                COMMENT
+bd09118bcef6        4 minutes ago       /bin/sh -c #(nop) COPY dir:35a7eb158c1504e...   100B                
+d131e0fa2585        3 months ago        /bin/sh -c #(nop)  CMD ["/bin/bash"]            0B                  
+<missing>           3 months ago        /bin/sh -c mkdir -p /run/systemd && echo '...   7B                  
+<missing>           3 months ago        /bin/sh -c sed -i 's/^#\s*\(deb.*universe\...   2.78kB              
+<missing>           3 months ago        /bin/sh -c rm -rf /var/lib/apt/lists/*          0B                  
+<missing>           3 months ago        /bin/sh -c set -xe   && echo '#!/bin/sh' >...   745B                
+<missing>           3 months ago        /bin/sh -c #(nop) ADD file:eef57983bd66e3a...   103MB
+#+END_SRC
 
 * docker run
 #+BEGIN_SRC bash
@@ -98,7 +145,6 @@ $ uptime
  05:45:21 up  5:58,  0 users,  load average: 0.00, 0.01, 0.04
 #+END_SRC
 #+END_EXAMPLE
-
 * docker rm
 #+begin_src bash
 $ docker rm 305297d7a235 ff0a5c3750b9
@@ -107,8 +153,62 @@ ff0a5c3750b9
 # 一次性删除全部stuatus=exited的容器
 $ docker rm $(docker ps -a -q -f status=exited)   #-q表示只返回IDs,-f表示过滤条件
 #+END_SRC
-* docker container prune
-删除所有已停止的容器
+* docker pull
+docker pull : 从镜像仓库中拉取或者更新指定镜像
+
+语法：
+docker pull [OPTIONS] NAME[:TAG|@DIGEST]
+
+OPTIONS说明：
+- -a :拉取所有 tagged 镜像
+- --disable-content-trust :忽略镜像的校验,默认开启
+
+实例：
+从Docker Hub下载java最新版镜像。
+#+begin_src bash
+docker pull java
+#+END_SRC
+从Docker Hub下载REPOSITORY为java的所有镜像。
+#+begin_src bash
+docker pull -a java
+#+END_SRC
+* docker ps
+docker ps -a #查看所有容器，包括已停止运行的
+
+docker ps -s 查看容器的大小。
+- size表示每个容器的可写层使用的大小。
+- virtual size表示容器使用的用于只读镜像的数据的数据量加上容器可写层的大小。多个容器可以共享一些或者所有的只读镜像数据。
+
+因此每个正在运行的容器所使用磁盘总空间大小是virtual size和size的某种组合。如果多个容器从相同的基础镜像开始，所以这些容器在磁盘上的总大小为所有容器的大小size（SUM of all container size)加上一个镜像的大小(virtual size-size)
+* docker images ls
+查看镜像的大小。
+#+begin_src bash
+$ docker image ls
+
+REPOSITORY                         TAG                     IMAGE ID            CREATED             SIZE
+acme/my-final-image                1.0                     dbf995fc07ff        58 seconds ago      103MB
+acme/my-base-image                 1.0                     bd09118bcef6        3 minutes ago       103MB
+#+END_SRC
+* 查找镜像
+从远程仓库上查找镜像有两种方法
+- 一是通过访问 Docker Hub 网站来搜索镜像，Docker Hub 网址为 https://hub.docker.com/
+- 二是通过 docker search 命令来查找镜像
+
+两种方法都好用，一般情况下对于精确的镜像，我们都使用 docker search 命令，比如 nginx 、php 和 python 等，除此之外，我们使用 Docker Hub 网站来查找
+
+比如我们需要一个 httpd 的镜像来作为我们的 web 服务。我们可以通过 docker search 命令搜索 httpd 来寻找适合我们的镜像。
+#+begin_src bash
+runoob@runoob:~$  docker search httpd
+#+END_SRC
+
+#+DOWNLOADED: screenshot @ 2022-07-13 11:32:08
+[[file:images/docker%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/docker_search/2022-07-13_11-32-08_screenshot.png]]
+- NAME: 镜像仓库源的名称
+- DESCRIPTION: 镜像的描述
+- OFFICIAL: 是否 docker 官方发布
+- stars: 类似 Github 里面的 star，表示点赞、喜欢的意思。
+- AUTOMATED: 自动构建。
+
 * Docker 退出容器但不关闭当前容器
 方法一：如果要正常退出不关闭容器，请按Ctrl+P+Q进行退出容器
 
@@ -117,7 +217,145 @@ $ docker rm $(docker ps -a -q -f status=exited)   #-q表示只返回IDs,-f表示
 使用docker restart命令重启容器
 使用docker attach命令进入容器
 重启httpd（service httpd restart）和radosgw(/etc/init.d/ceph-radosgw restart)，并且使用wget验证是否将radosgw重启成功(wget http://127.0.0.1)
-* Dockerfile
+* Docker镜像分层
+** 镜像分层
+Docker镜像是由一系列层来构成的，每层代表Dockerfile中的一条指令，依下面Dockerfile为例：
+#+begin_src bash
+FROM ubuntu:18.04
+COPY . /app
+RUN make /app
+CMD python /app/app.py
+#+END_SRC
+该Dockerfile包含四个命令，每个命令都会新创建一个层。
+FROM语句会从ubuntu:18.04镜像创建一个层。
+COPY指令会从Docker客户端的当前目录下添加一些文件。
+RUN指令使用了make指令来构建。
+最后CMD是在容器中运行命令。
+
+而对于Docker来说，创建新容器时，每一层都会彼此堆叠，可以在基础层的基础上添加新的可写容器层。
+对容器的所做的所有更改都将写入到该可写容器层中。
+
+下图显示了基于Ubuntu 15.04 的容器。对于Image layers都是Read Only的。
+
+#+DOWNLOADED: screenshot @ 2022-07-13 14:26:58
+[[file:images/docker%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/Docker%E9%95%9C%E5%83%8F%E5%88%86%E5%B1%82/2022-07-13_14-26-58_screenshot.png]]
+
+启动镜像的时候，一个新的可写层会加载到镜像的顶部。这一层通常称为“容器层”， 之下是“镜像层”。
+
+容器层可以读写，容器所有发生文件变更写都发生在这一层。镜像层read-only,只允许读取。
+
+#+begin_src bash
+>>> docker history f2b58b1192de
+IMAGE               CREATED             CREATED BY                                      SIZE                COMMENT
+f2b58b1192de        About an hour ago   /bin/sh -c #(nop)  CMD ["/bin/bash"]            0B                  
+17d8c4095dc4        About an hour ago   /bin/sh -c yum install -y httpd                 110MB               
+74bdbea98f73        About an hour ago   /bin/sh -c yum install -y vim                   133MB               
+1e1148e4cc2c        2 months ago        /bin/sh -c #(nop)  CMD ["/bin/bash"]            0B                  
+<missing>           2 months ago        /bin/sh -c #(nop)  LABEL org.label-schema....   0B                  
+<missing>           2 months ago        /bin/sh -c #(nop) ADD file:6f877549795f479...   202MB   
+#+END_SRC
+第一列是imageid, 最上面的id就是我们新创建ryan/httpd:latest. 下面几行都是我们dockerfile里定义的步骤堆栈。由此可以看出，每个步骤都将创建一个imgid, 一直追溯到1e1148e4cc2c正好是我们的base镜像的id。关于<missing>的部分，则不在本机上。
+
+最后一列是每一层的大小。最后一层只是启动bash，所以没有文件变更，大小是0. 我们创建的镜像是在base镜像之上的，并不是完全复制一份base，然后修改，而是共享base的内容。这时候，如果我们新建一个新的镜像，同样也是共享base镜像。
+
+那修改了base镜像，会不会导致我们创建的镜像也被修改呢？ 不会！因为不允许修改历史镜像，只允许修改容器，而容器只可以在最上面的容器层进行写和变更。
+** 容器和层
+对于容器和镜像(container和image)的主要区别就是顶部的可写层(the top writable layer),在容器中添加数据或者修改现有数据的所有读写操作都会存储在此可写层中。
+删除容器后，可写层也会被删除，而基础镜像则保持不变。
+
+每个容器都会有自己的可写层，所有的改变都存储在该容器层中。
+多个容器可以共享对同一基础镜像的访问，但可以拥有自己的数据状态。
+
+#+DOWNLOADED: screenshot @ 2022-07-13 14:28:05
+[[file:images/docker%E5%AD%A6%E4%B9%A0%E6%80%BB%E7%BB%93/Docker%E9%95%9C%E5%83%8F%E5%88%86%E5%B1%82/2022-07-13_14-28-05_screenshot.png]]
+#+BEGIN_EXAMPLE
+如果需要对完全相同的数据的访问权限，需要将该数据存储在Docker volume中并且装入到容器中。
+#+END_EXAMPLE
+** 修改时复制策略 copy-on-write (CoW)
+docker通过一个叫做copy-on-write (CoW) 的策略来保证base镜像的安全性，以及更高的性能和空间利用率。
+#+BEGIN_EXAMPLE
+Copy-on-write is a strategy of sharing and copying files for maximum efficiency. If a file or directory exists in a lower layer within the image, and another layer (including the writable layer) needs read access to it, it just uses the existing file. The first time another layer needs to modify the file (when building the image or running the container), the file is copied into that layer and modified. This minimizes I/O and the size of each of the subsequent layers. These advantages are explained in more depth below.
+
+Copying makes containers efficient
+When you start a container, a thin writable container layer is added on top of the other layers. Any changes the container makes to the filesystem are stored here. Any files the container does not change do not get copied to this writable layer. This means that the writable layer is as small as possible.
+
+When an existing file in a container is modified, the storage driver performs a copy-on-write operation. The specifics steps involved depend on the specific storage driver. For the aufs, overlay, and overlay2 drivers, the copy-on-write operation follows this rough sequence:
+
+Search through the image layers for the file to update. The process starts at the newest layer and works down to the base layer one layer at a time. When results are found, they are added to a cache to speed future operations.
+
+Perform a copy_up operation on the first copy of the file that is found, to copy the file to the container’s writable layer.
+
+Any modifications are made to this copy of the file, and the container cannot see the read-only copy of the file that exists in the lower layer.
+
+Btrfs, ZFS, and other drivers handle the copy-on-write differently. You can read more about the methods of these drivers later in their detailed descriptions.
+
+Containers that write a lot of data consume more space than containers that do not. This is because most write operations consume new space in the container’s thin writable top layer.
+#+END_EXAMPLE
+简单的说，启动容器的时候，最上层容器层是可写层，之下的都是镜像层，只读层。
+
+当容器需要读取文件的时候
+
+从最上层镜像开始查找，往下找，找到文件后读取并放入内存，若已经在内存中了，直接使用。(即，同一台机器上运行的docker容器共享运行时相同的文件)。
+
+当容器需要添加文件的时候
+
+直接在最上面的容器层可写层添加文件，不会影响镜像层。
+
+当容器需要修改文件的时候
+
+从上往下层寻找文件，找到后，复制到容器可写层，然后，对容器来说，可以看到的是容器层的这个文件，看不到镜像层里的文件。容器在容器层修改这个文件。
+
+当容器需要删除文件的时候
+
+从上往下层寻找文件，找到后在容器中记录删除。即，并不会真正的删除文件，而是软删除。这将导致镜像体积只会增加，不会减少。
+
+综上，Docker镜像通过分层实现了资源共享，通过copy-on-write实现了文件隔离。
+
+对于文件只增加不减少问题，我们应当在同一层做增删操作，从而减少镜像体积。
+
+比如，如下测试。
+
+Dockerfile.A: 分层删除文件
+#+begin_src bash
+FROM centos:7
+RUN yum install -y vim
+RUN yum install -y httpd
+WORKDIR /home
+RUN dd if=/dev/zero of=50M.file bs=1M count=50
+#创建大小为50M的测试文件
+RUN rm -rf 50M.file
+CMD ["/bin/bash"]
+#+END_SRC
+构建
+#+begin_src bash
+docker build -t test:a -f Dockerfile.A .
+#+END_SRC
+Dockerfile.B: 同层删除
+#+begin_src bash
+FROM centos:7
+RUN yum install -y vim
+RUN yum install -y httpd
+WORKDIR /home
+RUN dd if=/dev/zero of=50M.file bs=1M count=50 && rm -rf 50M.file
+#+END_SRC
+构建
+#+begin_src bash
+docker build -t test:b -f Dockerfile.B .
+#+END_SRC
+比较二者大小
+#+begin_src bash
+[root@sh-k8s-001 tmp]# docker images | grep test
+test                                                                     a                          ae673aa7db48        9 minutes ago       497MB
+test                                                                     b                          21b2bc49f0bd        12 minutes ago      444MB
+#+END_SRC
+显然，分层删除操作并没有真正删除掉文件。
+** 参考文章
+[[https://zhuanlan.zhihu.com/p/139653646][Docker镜像分层]]
+[[https://www.cnblogs.com/woshimrf/p/docker-container-lawyer.html][理解Docker镜像分层]]
+* Dockerfile构建镜像
+Dockerfile 中的每条指定都会创建镜像层，不过只有 RUN, COPY, ADD 会使镜像的体积增加。
+
+可以通过命令 docker history image_id 来查看每一层的大小。
 #+BEGIN_EXAMPLE
 # syntax=docker/dockerfile:1
 FROM node:12-alpine
@@ -132,11 +370,360 @@ CMD ["node", "src/index.js"]
 # -t 表示设置镜像名，下面命令镜像名为getting-started
 docker build -t getting-started .
 #+END_SRC
-* docker exec
-docker exec <container-id> cat /data.txt
+** 指令
+*** FROM
+ FROM ubuntu:16.04
 
-用root进入容器：
-docker exec -it --user root <container id> /bin/bash
+ 表示使用当前Dockerfile在构建镜像时，是基于哪一个镜像。一般来说，不会从零开始构建镜像，一般都会选择一个已有的镜像作为基础，在上面安装各种软件，然后构建出一个加工过的镜像。
+
+除了选择现有镜像为基础镜像外，Docker 还存在一个特殊的镜像，名为 scratch。这个镜像是虚拟的概念，并不实际存在，它表示一个空白的镜像。
+#+begin_src bash
+FROM scratch
+...
+#+END_SRC
+如果你以 scratch 为基础镜像的话，意味着你不以任何镜像为基础，接下来所写的指令将作为镜像第一层开始存在。
+
+不以任何系统为基础，直接将可执行文件复制进镜像的做法并不罕见，对于 Linux 下静态编译的程序来说，并不需要有操作系统提供运行时支持，所需的一切库都已经在可执行文件里了，因此直接 FROM scratch 会让镜像体积更加小巧。使用 Go 语言 开发的应用很多会使用这种方式来制作镜像，这也是为什么有人认为 Go 是特别适合容器微服务架构的语言的原因之一。
+
+*** MAINTAINER
+ MAINTAINER  beyond ubuntu ”1355036599@qq.com"
+
+ 用来提示用户，这个Dockerfile的作者、以及作者的联系方式
+
+ MAINTAINER 语法: 
+ MAINTAINER <name>
+
+ 指定镜像作者信息，即镜像的Author属性。
+*** RUN
+ RUN apt-get update && apt-get install -y nginx
+
+ RUN用来执行一条Linux命令，执行的时机：在构建镜像的时候。
+
+RUN命令格式有两种：
+- shell 格式：RUN <命令>，就像直接在命令行中输入的命令一样。例如： RUN echo '<h1>Hello, Docker!</h1>' > /usr/share/nginx/html/index.html
+- exec 格式：RUN ["可执行文件", "参数1", "参数2"]，这更像是函数调用中的格式。
+
+执行多条命令应该像下面这样写：
+#+begin_src bash
+FROM debian:stretch
+
+RUN set -x; buildDeps='gcc libc6-dev make wget' \
+    && apt-get update \
+    && apt-get install -y $buildDeps \
+    && wget -O redis.tar.gz "http://download.redis.io/releases/redis-5.0.3.tar.gz" \
+    && mkdir -p /usr/src/redis \
+    && tar -xzf redis.tar.gz -C /usr/src/redis --strip-components=1 \
+    && make -C /usr/src/redis \
+    && make -C /usr/src/redis install \
+    && rm -rf /var/lib/apt/lists/* \
+    && rm redis.tar.gz \
+    && rm -r /usr/src/redis \
+    && apt-get purge -y --auto-remove $buildDeps
+#+END_SRC
+首先，之前所有的命令只有一个目的，就是编译、安装 redis 可执行文件。因此没有必要建立很多层，这只是一层的事情。因此，这里没有使用很多个 RUN 一一对应不同的命令，而是仅仅使用一个 RUN 指令，并使用 && 将各个所需命令串联起来。将之前的 7 层，简化为了 1 层。在撰写 Dockerfile 的时候，要经常提醒自己，这并不是在写 Shell 脚本，而是在定义每一层该如何构建。
+
+并且，这里为了格式化还进行了换行。Dockerfile 支持 Shell 类的行尾添加 \ 的命令换行方式，以及行首 # 进行注释的格式。良好的格式，比如换行、缩进、注释等，会让维护、排障更为容易，这是一个比较好的习惯。
+
+此外，还可以看到这一组命令的最后添加了清理工作的命令，删除了为了编译构建所需要的软件，清理了所有下载、展开的文件，并且还清理了 apt 缓存文件。这是很重要的一步，我们之前说过，镜像是多层存储，每一层的东西并不会在下一层被删除，会一直跟随着镜像。因此镜像构建时，一定要确保每一层只添加真正需要添加的东西，任何无关的东西都应该清理掉。
+*** ADD
+ ADD  ./index.html   /var/www/html/index.html
+
+ 这个命令的作用就是将Dockerfile文件所在目录中的某个文件，添加到要构建的镜像中。
+
+ 如果将Dockerfile所在的环境叫做外部环境，而构建出的镜像成为内部环境的话，ADD命令的作用就是将外部环境中的文件 添加到 内部环境中。
+
+ 注意，目标路径，如果不是以 / 结尾，表示文件；如果以 / 结尾，表示目录
+*** WORKDIR
+ 设置一个工作目录，后面的RUN命令、CMD命令都会在这个工作目录中执行。
+
+ 相当于cd path
+ #+begin_src bash
+ WORKDIR /var/www/html
+ RUN echo "hello docker" > demo.html
+ WORKDIR /root
+ RUN echo "hello root" > hey.txt
+ #+END_SRC
+ 上面的代码表示，在/var/www/html目录下的demo.html中输入内容“hello world”；
+
+ 然后切换工作目录，在/root目录中，在hey.txt中输入内容，“hello root”
+*** ENV
+ 定义环境变量，相当于全局变量
+
+ ENV SELF_DEFINE_ENVIROMENT_VAR "123456789"
+
+ 在镜像中设置一个环境变量，SELF_DEFINE_ENVIROMENT_VAR ，值为123456789
+
+ 之后可以使用$SELF_DEFINE_ENVIROMENT_VAR来使用这个变量
+*** USER
+ 指定启动容器后，是以什么身份来运行，可以同时设置组和用户
+
+ USER root:root
+
+ 表示启动容器后，是以root组的root身份运行
+*** COPY
+ COPY命令和ADD命令功能类似，
+
+ COPY index.html /tmp/test
+ 将外部环境的index.html拷贝到内部环境/tmp目录下，重命名为test。如果是要将index.html拷贝到/tmp/test目录下，即，将test看作是目录，那么，就要在test后面加 / ，即 /tmp/test/
+
+ 注意，目标路径，如果不是以 / 结尾，表示的文件；如果以 / 结尾，表示目录
+*** CMD
+ CMD /bin/bash
+
+ 表示在使用镜像，启动容器的时候，会运行的命令。
+
+ 和RUN的区别：
+ 1. RUN是在构建镜像的时候运行，而CMD是在容器启动的时候运行。可以理解为，RUN命令只是在构建时执行一次，而CMD命令在每次启动容器时，都会执行一次。
+ 2. 一个Dockerfile中可以有多个RUN命令，多个RUN命令都会执行；而CMD命令虽然可以出现多次，但是只有最后一个会被执行。
+ 3. RUN命令只运行一次，所以说不存在命令覆盖的情况，而CMD会出现命令覆盖的情况（即第2点区别），在启动容器时，如果指定了要执行的命令，那么Dockerfile中的CMD命令同样会被覆盖。
+*** EXPOSE
+ EXPOSE 80，表示将容器的80端口，映射到外部环境（宿主机）的某个端口上。
+
+ 可以通过启动容器的时候指定映射到宿主机的哪个端口
+*** ONBUILD 
+格式：ONBUILD <其它指令>。
+
+ONBUILD 是一个特殊的指令，它后面跟的是其它指令，比如 RUN, COPY 等，而这些指令，在当前镜像构建时并不会被执行。只有当以当前镜像为基础镜像，去构建下一级镜像的时候才会被执行。
+** 构建Docker镜像
+使用命令docker build命令即可触发构建操作，但是需要注意，构建时，要指定构建出的镜像名称（使用-t选项）以及tag，以及Dockerfile所在的路径。
+
+一般构建的时候，都是进入到Dockerfile所在的目录
+#+begin_src bash
+#VERSION 0.0.1
+FROM ubuntu:16.04
+MAINTAINER ganlixin ubuntu "1355036599@qq.com"
+RUN apt-get update && apt-get install -y nginx
+RUN apt-get install -y vim
+RUN rm -rf /var/www/html/index.html
+ADD ./index.html /var/www/html/index.html
+WORKDIR /var/www/html
+RUN echo "hello docker" > demo.html
+WORKDIR /root
+RUN echo "hello root" > hey.txt
+ENV SELF_DEFINE_ENVIROMENT_VAR "123456789"
+RUN echo $SELF_DEFINE_ENVIROMENT_VAR > env_var.html
+USER root:root
+COPY index.html /tmp/test
+CMD /bin/bash
+EXPOSE 80
+#+END_SRC
+假设现在使用前面的Dockerfile构建一个镜像，镜像名为beyond/test，标签为v1，则执行如下命令
+#+begin_src bash
+>>> cd TestDockerfile
+>>> docker build -t="beyond/test:v1" .
+            .......等待
+            ........
+            .......构建完成
+>>> docker run -i -t --name first_test beyond/test
+>>> root@38ff683ba587:~#    #进入到容器中
+#+END_SRC
+注意，此时，在运行容器的时候，并没有在后面加上/bin/bash，这是因为Dockerfile中CMD命令已经指定了在启动容器时执行的命令。
+
+build命令最后的 . 代表本次执行的上下文路径，如果不指定该路径，则默认为Dockerfile文件的路径。
+
+可以用 -f ../Dockerfile.php 参数指定某个文件作为 Dockerfile
+*** 上下文路径
+Docker 在运行时分为 Docker 引擎（也就是服务端守护进程）和客户端工具。Docker 的引擎提供了一组 REST API，被称为 Docker Remote API，而如 docker 命令这样的客户端工具，则是通过这组 API 与 Docker 引擎交互，从而完成各种功能。因此，虽然表面上我们好像是在本机执行各种 docker 功能，但实际上，一切都是使用的远程调用形式在服务端（Docker 引擎）完成。也因为这种 C/S 设计，让我们操作远程服务器的 Docker 引擎变得轻而易举。
+
+当我们进行镜像构建的时候，并非所有定制都会通过 RUN 指令完成，经常会需要将一些本地文件复制进镜像，比如通过 COPY 指令、ADD 指令等。而 docker build 命令构建镜像，其实并非在本地构建，而是在服务端，也就是 Docker 引擎中构建的。那么在这种客户端/服务端的架构中，如何才能让服务端获得本地文件呢？
+
+这就引入了上下文的概念。当构建的时候，用户会指定构建镜像上下文的路径，docker build 命令得知这个路径后，会将路径下的所有内容打包，然后上传给 Docker 引擎。这样 Docker 引擎收到这个上下文包后，展开就会获得构建镜像所需的一切文件。
+
+如果在 Dockerfile 中这么写：
+#+begin_src bash
+COPY ./package.json /app/
+#+END_SRC
+这并不是要复制执行 docker build 命令所在的目录下的 package.json，也不是复制 Dockerfile 所在目录下的 package.json，而是复制 上下文（context） 目录下的 package.json。
+
+因此，COPY 这类指令中的源文件的路径都是相对路径。这也是初学者经常会问的为什么 COPY ../package.json /app 或者 COPY /opt/xxxx /app 无法工作的原因，因为这些路径已经超出了上下文的范围，Docker 引擎无法获得这些位置的文件。如果真的需要那些文件，应该将它们复制到上下文目录中去。
+
+现在就可以理解刚才的命令 docker build -t nginx:v3 . 中的这个 .，实际上是在指定上下文的目录，docker build 命令会将该目录下的内容打包交给 Docker 引擎以帮助构建镜像。
+
+如果观察 docker build 输出，我们其实已经看到了这个发送上下文的过程：
+#+begin_src bash
+$ docker build -t nginx:v3 .
+Sending build context to Docker daemon 2.048 kB
+...
+#+END_SRC
+理解构建上下文对于镜像构建是很重要的，避免犯一些不应该的错误。比如有些初学者在发现 COPY /opt/xxxx /app 不工作后，于是干脆将 Dockerfile 放到了硬盘根目录去构建，结果发现 docker build 执行后，在发送一个几十 GB 的东西，极为缓慢而且很容易构建失败。那是因为这种做法是在让 docker build 打包整个硬盘，这显然是使用错误。
+
+一般来说，应该会将 Dockerfile 置于一个空目录下，或者项目根目录下。如果该目录下没有所需文件，那么应该把所需文件复制一份过来。如果目录下有些东西确实不希望构建时传给 Docker 引擎，那么可以用 .gitignore 一样的语法写一个 .dockerignore，该文件是用于剔除不需要作为上下文传递给 Docker 引擎的。
+
+那么为什么会有人误以为 . 是指定 Dockerfile 所在目录呢？这是因为在默认情况下，如果不额外指定 Dockerfile 的话，会将上下文目录下的名为 Dockerfile 的文件作为 Dockerfile。
+
+这只是默认行为，实际上 Dockerfile 的文件名并不要求必须为 Dockerfile，而且并不要求必须位于上下文目录中，比如可以用 -f ../Dockerfile.php 参数指定某个文件作为 Dockerfile。
+
+当然，一般大家习惯性的会使用默认的文件名 Dockerfile，以及会将其置于镜像构建上下文目录中。
+** 多阶段构建
+Docker 17.05版本以后，新增了Dockerfile多阶段构建。所谓多阶段构建，实际上是允许一个Dockerfile 中出现多个 FROM 指令。
+*** 老版本Docker中为什么不支持多个 FROM 指令
+在17.05版本之前的Docker，只允许Dockerfile中出现一个FROM指令，这得从镜像的本质说起。
+
+Dockerfile 中，大多数指令会生成一个层，比如下方的两个例子：
+
+示例一，foo 镜像的Dockerfile
+#+begin_src bash
+# 基础镜像中已经存在若干个层了
+FROM ubuntu:16.04
+
+# RUN指令会增加一层，在这一层中，安装了 git 软件
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends git \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
+#+END_SRC
+示例二，bar 镜像的Dockerfile
+#+begin_src bash
+FROM foo
+
+# RUN指令会增加一层，在这一层中，安装了 nginx
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends nginx \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
+#+END_SRC
+假设基础镜像ubuntu:16.04已经存在5层，使用第一个Dockerfile打包成镜像 foo，则foo有6层，又使用第二个Dockerfile打包成镜像bar，则bar中有7层。
+
+如果ubuntu:16.04 等其他镜像不算，如果系统中只存在 foo 和 bar 两个镜像，那么系统中一共保存了7层，并非13层，这是因为，foo和bar共享了6层。
+
+层的共享机制可以节约大量的磁盘空间和传输带宽，比如你本地已经有了foo镜像，又从镜像仓库中拉取bar镜像时，只拉取本地所没有的最后一层就可以了，不需要把整个bar镜像连根拉一遍。但是层共享是怎样实现的呢？
+
+原来，Docker镜像的每一层只记录文件变更，在容器启动时，Docker会将镜像的各个层进行计算，最后生成一个文件系统，这个被称为 联合挂载。对此感兴趣的话可以进入了解一下 AUFS。
+
+Docker的各个层是有相关性的，在联合挂载的过程中，系统需要知道在什么样的基础上再增加新的文件。那么这就要求一个Docker镜像只能有一个起始层，只能有一个根。所以，Dockerfile中，就只允许一个FROM指令。因为多个FROM 指令会造成多根，则是无法实现的。
+*** 多个 FROM 指令的意义
+17.05 版本以后允许 Dockerfile支持多个 FROM 指令。
+
+多个 FROM 指令并不是为了生成多根的层关系，最后生成的镜像，仍以最后一条 FROM 为准，之前的 FROM 会被抛弃，那么之前的FROM 又有什么意义呢？
+
+每一条 FROM 指令都是一个构建阶段，多条 FROM 就是多阶段构建，虽然最后生成的镜像只能是最后一个阶段的结果，但是，能够将前置阶段中的文件拷贝到后边的阶段中，这就是多阶段构建的最大意义。
+
+最大的使用场景是将编译环境和运行环境分离，比如，之前我们需要构建一个Go语言程序，那么就需要用到go命令等编译环境，我们的Dockerfile可能是这样的：
+#+begin_src bash
+# Go语言环境基础镜像
+FROM golang:1.10.3
+
+# 将源码拷贝到镜像中
+COPY server.go /build/
+
+# 指定工作目录
+WORKDIR /build
+
+# 编译镜像时，运行 go build 编译生成 server 程序
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GOARM=6 go build -ldflags '-w -s' -o server
+
+# 指定容器运行时入口程序 server
+ENTRYPOINT ["/build/server"]
+#+END_SRC
+基础镜像golang:1.10.3是非常庞大的，因为其中包含了所有的Go语言编译工具和库，而运行时候我们仅仅需要编译后的server程序就行了，不需要编译时的编译工具，最后生成的大体积镜像就是一种浪费。
+
+使用脉冲云的解决办法是将程序编译和镜像打包分开，使用脉冲云的编译构建服务，选择增加构Go语言构建工具，然后在构建步骤中编译。
+
+最后将编译接口拷贝到镜像中就行了，那么Dockerfile的基础镜像并不需要包含Go编译环境：
+#+begin_src bash
+# 不需要Go语言编译环境
+FROM scratch
+
+# 将编译结果拷贝到容器中
+COPY server /server
+
+# 指定容器运行时入口程序 server
+ENTRYPOINT ["/server"]
+#+END_SRC
+提示：scratch 是内置关键词，并不是一个真实存在的镜像。 FROM scratch 会使用一个完全干净的文件系统，不包含任何文件。 因为Go语言编译后不需要运行时，也就不需要安装任何的运行库。FROM scratch可以使得最后生成的镜像最小化，其中只包含了 server 程序。
+在 Docker 17.05版本以后，就有了新的解决方案，直接一个Dockerfile就可以解决：
+#+begin_src bash
+# 编译阶段
+FROM golang:1.10.3
+
+COPY server.go /build/
+
+WORKDIR /build
+
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GOARM=6 go build -ldflags '-w -s' -o server
+
+# 运行阶段
+ FROM scratch
+
+# 从编译阶段的中拷贝编译结果到当前镜像中
+COPY --from=0 /build/server /
+
+ENTRYPOINT ["/server"]
+
+#+END_SRC
+
+这个 Dockerfile 的玄妙之处就在于 COPY 指令的--from=0 参数，从前边的阶段中拷贝文件到当前阶段中，多个FROM语句时，0代表第一个阶段。除了使用数字，我们还可以给阶段命名，比如：
+#+begin_src bash
+# 编译阶段 命名为 builder
+FROM golang:1.10.3 as builder
+
+# ... 省略
+
+# 运行阶段
+FROM scratch
+
+# 从编译阶段的中拷贝编译结果到当前镜像中
+COPY --from=builder /build/server /
+更为强大的是，COPY --from 不但可以从前置阶段中拷贝，还可以直接从一个已经存在的镜像中拷贝。比如，
+
+   FROM ubuntu:16.04
+    
+   COPY --from=quay.io/coreos/etcd:v3.3.9 /usr/local/bin/etcd /usr/local/bin/
+
+#+END_SRC
+
+我们直接将etcd镜像中的程序拷贝到了我们的镜像中，这样，在生成我们的程序镜像时，就不需要源码编译etcd了，直接将官方编译好的程序文件拿过来就行了。
+
+有些程序要么没有apt源，要么apt源中的版本太老，要么干脆只提供源码需要自己编译，使用这些程序时，我们可以方便地使用已经存在的Docker镜像作为我们的基础镜像。但是我们的软件有时候可能需要依赖多个这种文件，我们并不能同时将 nginx 和 etcd 的镜像同时作为我们的基础镜像（不支持多根），这种情况下，使用 COPY --from 就非常方便实用了。
+*** 参考文章
+[[https://segmentfault.com/a/1190000016137548][Dockerfile多阶段构建原理和使用场景]]
+** 参考文章
+[[https://www.cnblogs.com/-beyond/p/9687314.html#command][使用Dockerfile来构建镜像]]
+[[https://yeasy.gitbook.io/docker_practice/image/build][使用 Dockerfile 定制镜像]]
+[[https://yeasy.gitbook.io/docker_practice/image/dockerfile/onbuild][Docker从入门到实践]]
+* 其它 docker build 的用法
+** 直接用 Git repo 进行构建
+或许你已经注意到了，docker build 还支持从 URL 构建，比如可以直接从 Git repo 中构建：
+#+begin_src bash
+# $env:DOCKER_BUILDKIT=0
+# export DOCKER_BUILDKIT=0
+
+$ docker build -t hello-world https://github.com/docker-library/hello-world.git#master:amd64/hello-world
+
+Step 1/3 : FROM scratch
+ --->
+Step 2/3 : COPY hello /
+ ---> ac779757d46e
+Step 3/3 : CMD ["/hello"]
+ ---> Running in d2a513a760ed
+Removing intermediate container d2a513a760ed
+ ---> 038ad4142d2b
+Successfully built 038ad4142d2b
+
+#+END_SRC
+
+这行命令指定了构建所需的 Git repo，并且指定分支为 master，构建目录为 /amd64/hello-world/，然后 Docker 就会自己去 git clone 这个项目、切换到指定分支、并进入到指定目录后开始构建。
+** 用给定的 tar 压缩包构建
+#+begin_src bash
+$ docker build http://server/context.tar.gz
+#+END_SRC
+如果所给出的 URL 不是个 Git repo，而是个 tar 压缩包，那么 Docker 引擎会下载这个包，并自动解压缩，以其作为上下文，开始构建。
+** 从标准输入中读取 Dockerfile 进行构建
+#+begin_src bash
+docker build - < Dockerfile
+#+END_SRC
+或
+#+begin_src bash
+cat Dockerfile | docker build -
+#+END_SRC
+如果标准输入传入的是文本文件，则将其视为 Dockerfile，并开始构建。这种形式由于直接从标准输入中读取 Dockerfile 的内容，它没有上下文，因此不可以像其他方法那样可以将本地文件 COPY 进镜像之类的事情。
+** 从标准输入中读取上下文压缩包进行构建
+#+begin_src bash
+$ docker build - < context.tar.gz
+#+END_SRC
+如果发现标准输入的文件格式是 gzip、bzip2 以及 xz 的话，将会使其为上下文压缩包，直接将其展开，将里面视为上下文，并开始构建。
+** 参考文章
+[[https://yeasy.gitbook.io/docker_practice/image/build][使用 Dockerfile 定制镜像]]
 * SSH远程登录连接docker容器
 环境：
 - 计算机A为本机计算机；
@@ -359,33 +946,6 @@ docker export的应用场景主要用来制作基础镜像，比如你从一个u
 docker save的应用场景是，如果你的应用是使用docker-compose.yml编排的多个镜像组合，但你要部署的客户服务器并不能连外网。这时，你可以使用docker save将用到的镜像打个包，然后拷贝到客户服务器上使用docker load载入。
 
 导出后再导入(exported-imported)的镜像会丢失所有的历史，而保存后再加载（saveed-loaded）的镜像没有丢失历史和层(layer)。这意味着使用导出后再导入的方式，你将无法回滚到之前的层(layer)，同时，使用保存后再加载的方式持久化整个镜像，就可以做到层回滚（可以执行docker tag <LAYER ID> <IMAGE NAME>来回滚之前的层）。
-* docker commit 
-docker commit :从容器创建一个新的镜像。
-
-语法
-
-docker commit [OPTIONS] CONTAINER [REPOSITORY[:TAG]]
-
-OPTIONS说明：
-
--a :提交的镜像作者；
-
--c :使用Dockerfile指令来创建镜像；
-
--m :提交时的说明文字；
-
--p :在commit时，将容器暂停。
-
-** 实例
-将容器a404c6c174a2 保存为新的镜像,并添加提交人信息和说明信息。
-#+BEGIN_SRC bash
-runoob@runoob:~$ docker commit -a "runoob.com" -m "my apache" a404c6c174a2  mymysql:v1 
-sha256:37af1236adef1544e8886be23010b66577647a40bc02c0885a6600b33ee28057
-runoob@runoob:~$ docker images mymysql:v1
-REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
-mymysql             v1                  37af1236adef        15 seconds ago      329 MB
-#+END_SRC
-
 * 镜像改名命令格式：
 命令格式：
 
@@ -453,6 +1013,199 @@ sudo docker rmi $(docker images -f "dangling=true" -q)
 
 ** 参考文章
 [[https://www.jianshu.com/p/d06830de219f][docker删除<none>镜像]]
+* 压缩Docker镜像的方法
+** 优化基础镜像
+优化基础镜像的方法就是选用合适的更小的基础镜像，常用的 Linux 系统镜像一般有 Ubuntu、CentOs、Alpine，其中Alpine更推荐使用。大小对比如下：
+#+begin_src bash
+lynzabo@ubuntu ~/s> docker images
+REPOSITORY         TAG             IMAGE ID            CREATED             SIZE
+ubuntu             latest        74f8760a2a8b        8 days ago          82.4MB
+alpine             latest        11cd0b38bc3c        2 weeks ago         4.41MB
+centos               7           49f7960eb7e4        7 weeks ago         200MB
+debian             latest        3bbb526d2608        8 days ago          101MB
+lynzabo@ubuntu ~/s>
+#+END_SRC
+Alpine是一个高度精简又包含了基本工具的轻量级Linux发行版，基础镜像只有4.41M，各开发语言和框架都有基于Alpine制作的基础镜像，强烈推荐使用它。
+
+*** scratch镜像
+scratch是一个空镜像，只能用于构建其他镜像，比如你要运行一个包含所有依赖的二进制文件，如Golang程序，可以直接使用scratch作为基础镜像。现在给大家展示一下上文提到的Google pause镜像Dockerfile：
+#+begin_src bash
+FROM scratch
+ARG ARCH
+ADD bin/pause-${ARCH} /pause
+ENTRYPOINT ["/pause"]
+#+END_SRC
+Google pause镜像使用了scratch作为基础镜像，这个镜像本身是不占空间的，使用它构建的镜像大小几乎和二进制文件本身一样大，所以镜像非常小。当然在我们的Golang程序中也会使用。对于一些Golang/C程序，可能会依赖一些动态库，你可以使用自动提取动态库工具，比如ldd、linuxdeployqt等提取所有动态库，然后将二进制文件和依赖动态库一起打包到镜像中。
+
+*** busybox镜像
+scratch是个空镜像，如果希望镜像里可以包含一些常用的Linux工具，busybox镜像是个不错选择，镜像本身只有1.16M，非常便于构建小镜像。
+
+** 串联 Dockerfile 指令
+大家在定义Dockerfile时，如果太多的使用RUN指令，经常会导致镜像有特别多的层，镜像很臃肿，而且甚至会碰到超出最大层数（127层）限制的问题，遵循 Dockerfile 最佳实践，我们应该把多个命令串联合并为一个 RUN（通过运算符&&和/ 来实现），每一个 RUN 要精心设计，确保安装构建最后进行清理，这样才可以降低镜像体积，以及最大化的利用构建缓存。
+
+下面是一个优化前Dockerfile：
+#+begin_src bash
+FROM ubuntu
+
+ENV VER     3.0.0  
+ENV TARBALL http://download.redis.io/releases/redis-$VER.tar.gz  
+==> Install curl and helper tools...
+RUN apt-get update  
+RUN apt-get install -y  curl make gcc  
+==> Download, compile, and install...
+RUN curl -L $TARBALL | tar zxv  
+WORKDIR  redis-$VER  
+RUN make  
+RUN make install  
+...
+==> Clean up...
+WORKDIR /  
+RUN apt-get remove -y --auto-remove curl make gcc  
+RUN apt-get clean  
+RUN rm -rf /var/lib/apt/lists/*  /redis-$VER  
+...
+CMD ["redis-server"]
+
+#+END_SRC
+
+构建镜像，名称叫 test/test:0.1。
+
+我们对Dockerfile做优化，优化后Dockerfile：
+#+begin_src bash
+FROM ubuntu
+
+ENV VER     3.0.0  
+ENV TARBALL http://download.redis.io/releases/redis-$VER.tar.gz
+
+RUN echo "==> Install curl and helper tools..."  && \  
+apt-get update                      && \
+apt-get install -y  curl make gcc   && \
+echo "==> Download, compile, and install..."  && \
+curl -L $TARBALL | tar zxv  && \
+cd redis-$VER               && \
+make                        && \
+make install                && \
+echo "==> Clean up..."  && \
+apt-get remove -y --auto-remove curl make gcc  && \
+apt-get clean                                  && \
+rm -rf /var/lib/apt/lists/*  /redis-$VER
+...
+CMD ["redis-server"]
+
+#+END_SRC
+
+构建镜像，名称叫 test/test:0.2。
+
+对比两个镜像大小：
+#+begin_src bash
+root@k8s-master:/tmp/iops# docker images
+REPOSITORY       TAG           IMAGE ID            CREATED             SIZE
+test/test        0.2         58468c0222ed        2 minutes ago       98.1MB
+test/test        0.1         e496cf7243f2        6 minutes ago       307MB
+root@k8s-master:/tmp/iops#
+
+#+END_SRC
+
+可以看到，将多条RUN命令串联起来构建的镜像大小是每条命令分别RUN的三分之一。
+
+提示：为了应对镜像中存在太多镜像层，Docker 1.13版本以后，提供了一个压扁镜像功能，即将 Dockerfile 中所有的操作压缩为一层。这个特性还处于实验阶段，Docker默认没有开启，如果要开启，需要在启动Docker时添加-experimental 选项，并在Docker build 构建镜像时候添加 --squash 。我们不推荐使用这个办法，请在撰写 Dockerfile 时遵循最佳实践编写，不要试图用这种办法去压缩镜像。
+
+** 使用多阶段构建
+Dockerfile中每条指令都会为镜像增加一个镜像层，并且你需要在移动到下一个镜像层之前清理不需要的组件。实际上，有一个Dockerfile用于开发（其中包含构建应用程序所需的所有内容）以及一个用于生产的瘦客户端，它只包含你的应用程序以及运行它所需的内容。这被称为“建造者模式”。Docker 17.05.0-ce版本以后支持多阶段构建。使用多阶段构建，你可以在Dockerfile中使用多个FROM语句，每条FROM指令可以使用不同的基础镜像，这样您可以选择性地将服务组件从一个阶段COPY到另一个阶段，在最终镜像中只保留需要的内容。
+
+下面是一个使用COPY --from 和 FROM … AS … 的Dockerfile：
+#+begin_src bash
+# Compile
+FROM golang:1.9.0 AS builder
+WORKDIR /go/src/v9.git...com/.../k8s-monitor
+COPY . .
+WORKDIR /go/src/v9.git...com/.../k8s-monitor
+RUN make build
+RUN mv k8s-monitor /root
+Package
+Use scratch image
+FROM scratch
+WORKDIR /root/
+COPY --from=builder /root .
+EXPOSE 8080
+CMD ["/root/k8s-monitor"] 
+
+#+END_SRC
+
+构建镜像，你会发现生成的镜像只有上面COPY 指令指定的内容，镜像大小只有2M。这样在以前使用两个Dockerfile（一个Dockerfile用于开发和一个用于生产的瘦客户端），现在使用多阶段构建就可以搞定。
+
+** 构建业务服务镜像技巧
+Docker在build镜像的时候，如果某个命令相关的内容没有变化，会使用上一次缓存（cache）的文件层，在构建业务镜像的时候可以注意下面两点：
+不变或者变化很少的体积较大的依赖库和经常修改的自有代码分开；
+因为cache缓存在运行Docker build命令的本地机器上，建议固定使用某台机器来进行Docker build，以便利用cache。
+
+下面是构建Spring Boot应用镜像的例子，用来说明如何分层。其他类型的应用，比如Java WAR包，Nodejs的npm模块等，可以采取类似的方式。
+
+1、在Dockerfile所在目录，解压缩maven生成的jar包。
+$ unzip <path-to-app-jar>.jar -d app
+
+2、Dockerfile我们把应用的内容分成4个部分COPY到镜像里面：其中前面3个基本不变，第4个是经常变化的自有代码。最后一行是解压缩后，启动spring boot应用的方式。
+#+begin_src bash
+FROM openjdk:8-jre-alpine
+
+LABEL maintainer "opl-xws@xiaomi.com"
+COPY app/BOOT-INF/lib/ /app/BOOT-INF/lib/
+COPY app/org /app/org
+COPY app/META-INF /app/META-INF
+COPY app/BOOT-INF/classes /app/BOOT-INF/classes
+EXPOSE 8080
+CMD ["/usr/bin/java", "-cp", "/app", "org.springframework.boot.loader.JarLauncher"]
+
+#+END_SRC
+
+这样在构建镜像时候可大大提高构建速度。
+
+** RUN命令中执行apt、apk或者yum类工具技巧
+如果在RUN命令中执行apt、apk或者yum类工具，可以借助这些工具提供的一些小技巧来减少镜像层数量及镜像大小。举几个例子：
+
+（1）在执行apt-get install -y 时增加选项— no-install-recommends ，可以不用安装建议性（非必须）的依赖，也可以在执行apk add 时添加选项--no-cache 达到同样效果；
+
+（2）执行yum install -y 时候， 可以同时安装多个工具，比如yum install -y gcc gcc-c++ make …。将所有yum install 任务放在一条RUN命令上执行，从而减少镜像层的数量；
+
+（3）组件的安装和清理要串联在一条指令里面，如 apk --update add php7 && rm -rf /var/cache/apk/* ，因为Dockerfile的每条指令都会产生一个文件层，如果将apk add … 和 rm -rf … 命令分开，清理无法减小apk命令产生的文件层的大小。 Ubuntu或Debian可以使用 rm -rf /var/lib/apt/lists/* 清理镜像中缓存文件；CentOS等系统使用yum clean all 命令清理。
+
+** Docker命令压缩镜像
+
+Docker自带的一些命令还能协助压缩镜像，比如export和import。
+#+begin_src bash
+$ docker run -d test/test:0.2
+$ docker export 747dc0e72d13 | docker import - test/test:0.3
+
+#+END_SRC
+
+
+使用这种方式需要先将容器运行起来，而且这个过程中会丢失镜像原有的一些信息，比如：导出端口，环境变量，默认指令。
+
+查看这两个镜像history信息，如下，可以看到test/test:0.3 丢失了所有的镜像层信息：
+#+begin_src bash
+root@k8s-master:/tmp/iops# docker history test/test:0.3
+IMAGE               CREATED             CREATED BY          SIZE                COMMENT
+6fb3f00b7a72        15 seconds ago                          84.7MB              Imported from -
+root@k8s-master:/tmp/iops# docker history test/test:0.2
+IMAGE               CREATED             CREATED BY                                      SIZE                COMMENT
+58468c0222ed        2 hours ago         /bin/sh -c #(nop)  CMD ["redis-server"]         0B       
+1af7ffe3d163        2 hours ago         /bin/sh -c echo "==> Install curl and helper…   15.7MB   
+8bac6e733d54        2 hours ago         /bin/sh -c #(nop)  ENV TARBALL=http://downlo…   0B       
+793282f3ef7a        2 hours ago         /bin/sh -c #(nop)  ENV VER=3.0.0                0B       
+74f8760a2a8b        8 days ago          /bin/sh -c #(nop)  CMD ["/bin/bash"]            0B       
+<missing>           8 days ago          /bin/sh -c mkdir -p /run/systemd && echo 'do…   7B
+<missing>           8 days ago          /bin/sh -c sed -i 's/^#\s*\(deb.*universe\)$…   2.76kB
+<missing>           8 days ago          /bin/sh -c rm -rf /var/lib/apt/lists/*          0B
+<missing>           8 days ago          /bin/sh -c set -xe   && echo '#!/bin/sh' > /…   745B    
+<missing>           8 days ago          /bin/sh -c #(nop) ADD file:5fabb77ea8d61e02d…   82.4MB   
+root@k8s-master:/tmp/iops#
+
+#+END_SRC
+
+社区里还有很多压缩工具，比如Docker-squash ，用起来更简单方便，并且不会丢失原有镜像的自带信息，大家有兴趣可以试试。
+
+** 参考文章
+[[https://dockone.io/article/8163][精简Docker镜像的五种通用方法]]
 * 端口映射
 ** 启动容器后
 容器除了在启动时添加端口映射关系，还可以通过宿主机的iptables进行nat转发，将宿主机的端口映射到容器的内部端口上，这种方式适用于容器启动时没有指定端口映射的情况！

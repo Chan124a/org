@@ -105,3 +105,163 @@ sometimes represented by \( \S \)
 In this example the command \S (see the example in the commands section) is overwritten to print a blackboard bold S.
 
 \renewcommand uses the same syntax as \newcommand.
+* 表格
+首先要介绍的是 tabular 和 array 环境，它们的功能几乎没有差别，也包含了排版表格的核心技术。其主要用法是这样的：
+#+BEGIN_SRC latex
+\begin{tabular}[<垂直对齐选项>]{<列格式说明>}
+A & B & C \\
+D & E & F \\
+\end{tabular}
+#+END_SRC
+** 列格式选项
+列格式说明的基本元素有 l c r 三种，分别表示这一列是靠左、居中还是靠右对齐。在左右两端或基本元素之间可以加上竖线，表示这里是不是需要用线来分隔。举例如下：
+
+#+DOWNLOADED: screenshot @ 2022-05-22 14:13:07
+[[file:images/latex%E7%AC%94%E8%AE%B0/%E8%A1%A8%E6%A0%BC/2022-05-22_14-13-07_screenshot.png]]
+在列格式中还有一些其他的说明符，在此也列举如下：
+- p{<宽度>}，表示本列具有固定的宽度，表格内容在其中可以自动换行（但不能手动用 \\ 进行换行），并可以用 \raggedleft，\centering 等命令进行对齐。
+- @{<内容>}，添加任意内容，不占表项计数，同时取消表列间的距离。例如我们需要某一列的数据按小数点对齐，就可以用 r@{.}l 这样定义两列，分别输入整数部分和小数部分，实现这个效果。
+- *{<计数>}{<列格式说明>}，将部分列格式说明重复多次。
+
+** hline
+可以在其中视需要加入横线进行分隔（\hline）。举例如下：
+#+DOWNLOADED: screenshot @ 2022-05-22 14:13:28
+[[file:images/latex%E7%AC%94%E8%AE%B0/%E8%A1%A8%E6%A0%BC/2022-05-22_14-13-28_screenshot.png]]
+** cline
+如果希望某一行的横线不贯穿整个表格，则可以使用 \cline 命令。\cline{x-y} 可以获得一段从第 x 格到第 y 格的横线，举例如下：
+
+#+DOWNLOADED: screenshot @ 2022-05-22 14:13:44
+[[file:images/latex%E7%AC%94%E8%AE%B0/%E8%A1%A8%E6%A0%BC/2022-05-22_14-13-44_screenshot.png]]
+
+
+** 垂直对齐选项
+垂直对齐选项表示在行内使用时，表格的哪一部分与文字对齐，其参数可以是 t 或者 b，默认条件是居中对齐。举例如下：
+
+与底部对齐：
+
+#+DOWNLOADED: screenshot @ 2022-05-22 14:21:39
+[[file:images/latex%E7%AC%94%E8%AE%B0/%E8%A1%A8%E6%A0%BC/2022-05-22_14-21-39_screenshot.png]]
+居中对齐：
+
+#+DOWNLOADED: screenshot @ 2022-05-22 14:21:57
+[[file:images/latex%E7%AC%94%E8%AE%B0/%E8%A1%A8%E6%A0%BC/2022-05-22_14-21-57_screenshot.png]]
+** 单元格合并
+可以使用 \multicolumn 命令。这一命令的使用方式如下：
+
+\multicolumn{<项数>}{<列格式说明>}{<内容>}
+
+设项数为 n，那么这一命令表示，将此行连着 n 个格子合并，并填入相应的内容。对被合并的 n 个格子，它们之间的对齐符号全部省略不写，但前后的对齐符号不可省略。
+
+如果要合并列，则需要用 multirow 宏包提供的 \multirow 命令，其使用方式如下：
+
+\multirow{<行数>}{<宽度>}{<内容>}
+\multirow{<行数>}*{<内容>}
+
+使用后一种用法就可以不指定宽度，最终其宽度会以内容的宽度为准。将上述两个命令相互嵌套，即可实现多行多列表格的合并。这样的操作其实是非常麻烦的，因此在这里为大家推荐 excel2latex 这个网站，还有同名的 Excel 插件，可以用 Excel 做好表格之后导出成 LaTeX 源码。
+** 长表格与三线表
+
+有的时候我们需要制作的表格，用一整张纸都装不下。这样的话我们在新的一页上需要重新排版一个表头，同时在页面接续处需要有一些文字来说明这个表格是跨页排版的。这个时候我们就需要 longtable 宏包中提供的 longtable 环境。其使用方式如下：
+
+\begin{longtable}[<水平对齐项>]{<列格式说明>}
+<第一页表头>
+\endfirsthead
+<接续处表头>
+\endhead
+<页面连接处表尾>
+\endfoot
+<最后一页表尾>
+\endlastfoot
+<内容>
+\end{longtable}
+具体的使用细节可以参考 longtable 的宏包文档。
+
+在科学论文中，更多使用的是三线表。这样的表格只在顶部、底部和表头下方有三条分隔线，其中顶部和底部的线较粗，表头下方的线较细。这样的线条可以用 booktabs 宏包提供的如下四种命令来实现：
+
+\toprule：画顶部的线
+\midrule：画表头下方的线
+\bottomrule：画底部的线
+\cmidrule：与 \cline 命令类似，可以画出一段短线，它比 \midrule 更细；配合 \morecmidrules 命令可以画出多条分隔线，并且其间有合适的间距
+简明的使用方法如下：
+
+\begin{tabular}[<垂直对齐项>]{<列对齐说明>}
+\toprule 
+<表头>
+\midrule
+<内容> \\
+\bottomrule
+booktabs 宏包没有提供单独的表格环境，只需要在普通的表格中插入新定义的线条即可。详细的使用说明可以看看 booktabs 的文档。下面用一个比较复杂的三线表来回顾一下我们到现在为止讲到的全部内容吧（自己动手之前别忘了需要的宏包噢）。
+#+DOWNLOADED: screenshot @ 2022-05-22 14:34:46
+[[file:images/latex%E7%AC%94%E8%AE%B0/%E8%A1%A8%E6%A0%BC/2022-05-22_14-34-46_screenshot.png]]
+
+** 浮动体与图表标题的制作
+一般情况下，图表都会占据页面中大块的位置，造成分页的困难。放在前面一页位置不够，放在后面一页又会造成前面一页底部有大量空白，非常不美观。
+
+于是 LaTeX 使用浮动体来解决这个问题。也就是说在排版的时候，如果当前位置放不下图表，那就先排版后面的内容，再在后面找合适的地方来放图表。
+
+针对图片和表格，LaTeX 提供了 figure 和 table 两种环境，不仅可以实现浮动，还可以分别编号并生成目录。
+#+BEGIN_SRC latex
+\begin{figure}[<浮动位置>]
+\includegraphics[<选项>]{<文件名>}
+\caption{<图标题>}
+\label{<标签>}
+\end{figure}
+\begin{table}[<浮动位置>]
+\caption{<表标题>}
+\label{<标签>}
+\begin{tabular}{<列对齐说明>}
+...
+\end{tabular}
+\end{table}
+#+END_SRC
+浮动位置有如下四种：
+- h：here，表示放置在当前位置
+- t：top，表示放置在某页顶部
+- b：bottom，表示放置在某页底部
+- p：page，表示独占一页
+
+这四种说明符可以组合使用，自左向右优先级递降。至于最后这个图表出现在哪里，我们就不需要关心了。
+但是可能出现的一种情况是，如果你的浮动体太多而其他内容太少，它们可能会被堆到整个文档的最后一起出现。
+这个时候你可能就需要使用 minipage 等方法手动安排一下它们的位置了。
+
+图表的标题用 \caption 命令来指定。
+需要注意的是，表的标题应该在表的上方，而图的标题应该在图的下方。
+这个是排版中的一个默认的规则。
+图表标题格式的控制可以使用 caption 宏包来实现，细节较多，大家可以阅读 caption 宏包的文档来了解。
+图表同样也可以进行交叉引用，只需要加个一个标签，就可以用 \ref 命令进行引用了。
+
+另外有的时候，我们希望某个浮动体就在我们书写源码的地方。这时我们可以调用 float 宏包，并将浮动位置指定为 H，就可以实现了。
+
+** 表格整体缩放
+
+\scalebox{0.9}{
+\begin{tabular}
+
+......
+
+\end{tabular}}
+
+ 
+
+文章前面需有
+
+\usepackage{graphicx}
+
+
+如果要在外面加table，就这么用
+
+\begin{table}
+
+\caption{表格标题}
+\scalebox{0.9}{
+
+\begin{tabular}
+
+……
+
+\end{tabular}}
+
+\end{table}
+
+** 参考文章
+[[https://zhuanlan.zhihu.com/p/24939492][LaTeX 第六课：图表的排版 - 知乎专栏]]
+[[https://blog.csdn.net/liu3237/article/details/14165993][Latex中修改表格的整体大小 - CSDN博客]]

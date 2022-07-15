@@ -40,6 +40,7 @@ dpkg-query -l
 8.apt-cache pkgnames
 列出所有的软件包
 ** apt-get
+-y：yes，在命令行交互提示中，直接输入 yes
 **** 修改源
 1、原文件备份
 
@@ -93,7 +94,22 @@ deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-security main restricted 
 # deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-proposed main restricted universe multiverse
 # deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ focal-proposed main restricted universe multiverse
 #+END_EXAMPLE
+清华源 ubuntu 22.04
+#+BEGIN_EXAMPLE
+# 默认注释了源码镜像以提高 apt update 速度，如有需要可自行取消注释
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy main restricted universe multiverse
+# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy main restricted universe multiverse
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-updates main restricted universe multiverse
+# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-updates main restricted universe multiverse
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-backports main restricted universe multiverse
+# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-backports main restricted universe multiverse
+deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-security main restricted universe multiverse
+# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-security main restricted universe multiverse
 
+# 预发布软件源，不建议启用
+# deb https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-proposed main restricted universe multiverse
+# deb-src https://mirrors.tuna.tsinghua.edu.cn/ubuntu/ jammy-proposed main restricted universe multiverse
+#+END_EXAMPLE
 4、更新源
 
 更新软件包列表
@@ -147,7 +163,10 @@ Solution
 #+begin_src bash
 apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 3B4FE6ACC0B21F32
 #+END_SRC
+**** ubuntu-ports focal 证书过期
+解决方法：[[https://github.com/tuna/issues/issues/1342]]、[[https://letsencrypt.org/docs/dst-root-ca-x3-expiration-september-2021/]]
 
+先使用 http 源，然后再执行 apt upgrade 更新 ca-certificates 即可解决。
 **** apt-get彻底卸载软件包
 apt-get的卸载相关的命令有remove/purge/autoremove/clean/autoclean等。具体来说：
 
@@ -180,6 +199,23 @@ dpkg -l |grep ^rc|awk '{print $2}' |sudo xargs dpkg -P
 #+END_SRC
 ***** 参考文章
 [[https://blog.csdn.net/get_set/article/details/51276609][Ubuntu apt-get彻底卸载软件包]]
+** apt-key
+apt-key命令用于管理Debian Linux系统中的软件包密钥。
+
+每个发布的deb包，都是通过密钥认证的，apt-key用来管理密钥。
+
+用法：apt-key [--keyring file] [command] [arguments]
+
+参数：
+- apt-key add <file>          - 把下载的key添加到本地trusted数据库中
+- apt-key del <keyid>         - 从本地trusted数据库通过keyid删除key
+- apt-key export <keyid>      - 通过keyid导出key
+- apt-key exportall           - 导出本地trusted数据库中的所有key
+- apt-key update              - 通过key包来更新key,更新本地trusted数据库，删除过期没用的key
+- apt-key net-update          - 通过网络更新key
+- apt-key list                - 列出已保存在系统中key
+- apt-key finger              - 列出所有验证指纹
+- apt-key adv                 - 设置key的高级配置, Pass advanced options to gpg
 * Anaconda
 Anaconda（官方网站）就是可以便捷获取包且对包能够进行管理，同时对环境可以统一管理的发行版本。Anaconda包含了conda、Python在内的超过180个科学包及其依赖项。如果日常工作或学习并不必要使用1,000多个库，那么可以考虑安装Miniconda
 ** Anaconda、conda、pip、virtualenv的区别
@@ -850,6 +886,931 @@ $ chsh -s /bin/csh //改变当前设置为 /bin/csh
 Changing shell for root.
 Shell not changed.
 #+END_SRC
+* cmake
+** 简介
+什么是cmake
+
+你或许听过好几种 Make 工具，例如 GNU Make ，QT 的 qmake ，微软的 MSnmake，BSD Make（pmake），Makepp，等等。这些 Make 工具遵循着不同的规范和标准，所执行的 Makefile 格式也千差万别。这样就带来了一个严峻的问题：如果软件想跨平台，必须要保证能够在不同平台编译。而如果使用上面的 Make 工具，就得为每一种标准写一次 Makefile ，这将是一件让人抓狂的工作。
+
+CMake就是针对上面问题所设计的工具：它首先允许开发者编写一种平台无关的 CMakeList.txt 文件来定制整个编译流程，然后再根据目标用户的平台进一步生成所需的本地化 Makefile 和工程文件，如 Unix 的 Makefile 或 Windows 的 Visual Studio 工程。从而做到“Write once, run everywhere”。显然，CMake 是一个比上述几种 make 更高级的编译配置工具。一些使用 CMake 作为项目架构系统的知名开源项目有 VTK、ITK、KDE、OpenCV、OSG 等。
+
+在 linux 平台下使用 CMake 生成 Makefile 并编译的流程如下：
+- 编写 CMake 配置文件 CMakeLists.txt 。
+- 执行命令 cmake PATH 或者 ccmake PATH 生成 Makefile。其中， PATH 是 CMakeLists.txt 所在的目录。（ccmake 和 cmake 的区别在于前者提供了一个交互式的界面）
+- 使用 make 命令进行编译。
+** 入门案例
+*** 单个源文件
+本节对应的源代码所在目录：Demo1。
+
+对于简单的项目，只需要写几行代码就可以了。例如，假设现在我们的项目中只有一个源文件 main.cc ，该程序的用途是计算一个数的指数幂。
+#+BEGIN_SRC c++
+#include <stdio.h>
+#include <stdlib.h>
+/**
+ * power - Calculate the power of number.
+ * @param base: Base value.
+ * @param exponent: Exponent value.
+ *
+ * @return base raised to the power exponent.
+ */
+double power(double base, int exponent)
+{
+  int result = base;
+  int i;
+  
+  if (exponent == 0) {
+    return 1;
+  }
+  
+  for(i = 1; i < exponent; ++i){
+    result = result * base;
+  }
+  return result;
+}
+int main(int argc, char *argv[])
+{
+  if (argc < 3){
+    printf("Usage: %s base exponent \n", argv[0]);
+    return 1;
+  }
+  double base = atof(argv[1]);
+  int exponent = atoi(argv[2]);
+  double result = power(base, exponent);
+  printf("%g ^ %d is %g\n", base, exponent, result);
+  return 0;
+}
+
+#+END_SRC
+
+首先编写 CMakeLists.txt 文件，并保存在与 main.cc 源文件同个目录下：
+#+BEGIN_SRC c++
+# CMake 最低版本号要求
+cmake_minimum_required(VERSION 2.8)
+# 项目信息
+project(Demo1)
+# 指定生成目标
+add_executable(Demo main.cc)
+#+END_SRC
+CMakeLists.txt 的语法比较简单，由命令、注释和空格组成，其中命令是不区分大小写的。符号 # 后面的内容被认为是注释。命令由命令名称、小括号和参数组成，参数之间使用空格进行间隔。
+
+对于上面的 CMakeLists.txt 文件，依次出现了几个命令：
+- cmake_minimum_required：指定运行此配置文件所需的 CMake 的最低版本；
+- project：参数值是 Demo1，该命令表示项目的名称是 Demo1 。
+- add_executable： 将名为 main.cc 的源文件编译成一个名称为 Demo 的可执行文件。
+
+编译项目:之后，在当前目录执行 cmake . ，得到 Makefile 后再使用 make 命令编译得到 Demo1 可执行文件。
+#+BEGIN_SRC c++
+[ehome@xman Demo1]$ cmake .
+-- The C compiler identification is GNU 4.8.2
+-- The CXX compiler identification is GNU 4.8.2
+-- Check for working C compiler: /usr/sbin/cc
+-- Check for working C compiler: /usr/sbin/cc -- works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working CXX compiler: /usr/sbin/c++
+-- Check for working CXX compiler: /usr/sbin/c++ -- works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/ehome/Documents/programming/C/power/Demo1
+[ehome@xman Demo1]$ make
+Scanning dependencies of target Demo
+[100%] Building C object CMakeFiles/Demo.dir/main.cc.o
+Linking C executable Demo
+[100%] Built target Demo
+[ehome@xman Demo1]$ ./Demo 5 4
+5 ^ 4 is 625
+[ehome@xman Demo1]$ ./Demo 7 3
+7 ^ 3 is 343
+[ehome@xman Demo1]$ ./Demo 2 10
+2 ^ 10 is 1024
+
+#+END_SRC
+*** 多个源文件
+同一目录，多个源文件
+
+本小节对应的源代码所在目录：Demo2。
+
+上面的例子只有单个源文件。现在假如把 power 函数单独写进一个名为MathFunctions.c 的源文件里，使得这个工程变成如下的形式：
+#+BEGIN_EXAMPLE
+./Demo2
+    |
+    +--- main.cc
+    |
+    +--- MathFunctions.cc
+    |
+    +--- MathFunctions.h
+#+END_EXAMPLE
+这个时候，CMakeLists.txt 可以改成如下的形式：
+#+BEGIN_SRC c++
+# CMake 最低版本号要求
+cmake_minimum_required(VERSION 2.8)
+# 项目信息
+project(Demo2)
+# 指定生成目标
+add_executable(Demo main.cc MathFunctions.cc)
+#+END_SRC
+唯一的改动只是在 add_executable 命令中增加了一个 MathFunctions.cc 源文件。这样写当然没什么问题，但是如果源文件很多，把所有源文件的名字都加进去将是一件烦人的工作。更省事的方法是使用 aux_source_directory 命令，该命令会查找指定目录下的所有源文件，然后将结果存进指定变量名。其语法如下：
+#+BEGIN_SRC c++
+aux_source_directory(<dir> <variable>)
+#+END_SRC
+因此，可以修改 CMakeLists.txt 如下：
+#+BEGIN_SRC c++
+# CMake 最低版本号要求
+cmake_minimum_required(VERSION 2.8)
+# 项目信息
+project (Demo2)
+# 查找当前目录下的所有源文件
+# 并将名称保存到 DIR_SRCS 变量
+aux_source_directory(. DIR_SRCS)
+# 指定生成目标
+add_executable(Demo ${DIR_SRCS})
+#+END_SRC
+这样，CMake 会将当前目录所有源文件的文件名赋值给变量 DIR_SRCS ，再指示变量 DIR_SRCS 中的源文件需要编译成一个名称为 Demo 的可执行文件。
+*** 多个目录，多个源文件
+本小节对应的源代码所在目录：Demo3。
+
+现在进一步将 MathFunctions.h 和 MathFunctions.cc 文件移动到 math 目录下。
+#+BEGIN_EXAMPLE
+./Demo3
+    |
+    +--- main.cc
+    |
+    +--- math/
+          |
+          +--- MathFunctions.cc
+          |
+          +--- MathFunctions.h
+#+END_EXAMPLE
+对于这种情况，需要分别在项目根目录 Demo3 和 math 目录里各编写一个 CMakeLists.txt 文件。为了方便，我们可以先将 math 目录里的文件编译成静态库再由 main 函数调用。
+
+根目录中的 CMakeLists.txt ：
+#+BEGIN_SRC c++
+# CMake 最低版本号要求
+cmake_minimum_required(VERSION 2.8)
+# 项目信息
+project(Demo3)
+# 查找当前目录下的所有源文件
+# 并将名称保存到 DIR_SRCS 变量
+aux_source_directory(. DIR_SRCS)
+# 添加 math 子目录
+add_subdirectory(math)
+# 指定生成目标
+add_executable(Demo main.cc)
+# 添加链接库
+target_link_libraries(Demo MathFunctions)
+#+END_SRC
+该文件添加了下面的内容: 第3行，使用命令 add_subdirectory 指明本项目包含一个子目录 math，这样 math 目录下的 CMakeLists.txt 文件和源代码也会被处理 。第6行，使用命令 target_link_libraries 指明可执行文件 main 需要连接一个名为 MathFunctions 的链接库 。
+
+子目录中的 CMakeLists.txt：
+#+BEGIN_SRC c++
+# 查找当前目录下的所有源文件
+# 并将名称保存到 DIR_LIB_SRCS 变量
+aux_source_directory(. DIR_LIB_SRCS)
+# 生成链接库
+add_library (MathFunctions ${DIR_LIB_SRCS})
+#+END_SRC
+在该文件中使用命令 add_library 将 src 目录中的源文件编译为静态链接库。
+*** 自定义编译选项
+本节对应的源代码所在目录：Demo4。
+
+CMake 允许为项目增加编译选项，从而可以根据用户的环境和需求选择最合适的编译方案。
+
+例如，可以将 MathFunctions 库设为一个可选的库，如果该选项为 ON ，就使用该库定义的数学函数来进行运算。否则就调用标准库中的数学函数库。
+
+修改 CMakeLists 文件：我们要做的第一步是在顶层的 CMakeLists.txt 文件中添加该选项： 
+#+BEGIN_SRC c++
+# CMake 最低版本号要求
+cmake_minimum_required(VERSION 2.8)
+# 项目信息
+project(Demo4)
+# 加入一个配置头文件，用于处理 CMake 对源码的设置
+configure_file(
+"${PROJECT_SOURCE_DIR}/config.h.in"
+"${PROJECT_BINARY_DIR}/config.h"
+)
+# 是否使用自己的 MathFunctions 库
+option(USE_MYMATH
+"Use provided math implementation" ON)
+# 是否加入 MathFunctions 库
+if (USE_MYMATH)
+ include_directories("${PROJECT_SOURCE_DIR}/math")
+add_subdirectory(math)
+set (EXTRA_LIBS ${EXTRA_LIBS} MathFunctions)
+endif (USE_MYMATH)
+# 查找当前目录下的所有源文件
+# 并将名称保存到 DIR_SRCS 变量
+aux_source_directory(. DIR_SRCS)
+# 指定生成目标
+add_executable(Demo ${DIR_SRCS})
+target_link_libraries (Demo ${EXTRA_LIBS})
+#+END_SRC
+其中：
+
+第7行的 configure_file 命令用于加入一个配置头文件 config.h ，这个文件由 CMake 从 config.h.in 生成，通过这样的机制，将可以通过预定义一些参数和变量来控制代码的生成。
+
+第13行的 option 命令添加了一个 USE_MYMATH 选项，并且默认值为 ON 。
+
+第17行根据 USE_MYMATH 变量的值来决定是否使用我们自己编写的 MathFunctions 库。
+** 语法的基本原则
+- 变量使用${}方式取值，但是在 IF 控制语句中是直接使用变量名
+- 指令(参数 1 参数 2...) 参数使用括弧括起，参数之间使用空格或分号分开。 
+- 指令是大小写无关的，参数和变量是大小写相关的。推荐全部使用大写指令
+
+** PROJECT
+可以用来指定工程的名字和支持的语言，默认支持所有语言
+
+- PROJECT (HELLO)   指定了工程的名字，并且支持所有语言（建议）
+- PROJECT (HELLO CXX)      指定了工程的名字，并且支持语言是C++
+- PROJECT (HELLO C CXX)      指定了工程的名字，并且支持语言是C和C++
+
+该指定隐式定义了两个CMAKE的变量
+- <projectname>_BINARY_DIR，例如： HELLO_BINARY_DIR
+- <projectname>_SOURCE_DIR，例如： HELLO_SOURCE_DIR
+
+MESSAGE关键字就可以直接使用者两个变量，当前都指向当前的工作目录。
+** set
+set 有三种，分别为: 
+- 设置一般变量(Set Normal Variable) 
+- 设置缓存变量(Set Cache Entry)
+- 设置环境变量(Set Environment Variable)
+#+BEGIN_SRC c++
+// 1. 设置一般变量(Set Normal Variable)
+set(<variable> <value>... [PARENT_SCOPE])
+
+// 2. 设置缓存变量(Set Cache Entry)
+set(<variable> <value>... CACHE <type> <docstring> [FORCE])
+
+// 3. 设置环境变量(Set Environment Variable)
+set(ENV{<variable>} [<value>])
+#+END_SRC
+
+注意：SET(SRC_LIST main.cpp) 可以写成 SET(SRC_LIST “main.cpp”)，
+如果源文件名中含有空格（例如 m ain.cpp），就必须要加双引号
+*** 设置一般变量set(<variable> <value>... [PARENT_SCOPE])
+#+BEGIN_SRC bash
+set(<variable> <value>... [PARENT_SCOPE])
+#+END_SRC
+将一个或者多个值 <value>... 赋值给变量 <variable>， 多个值之间以分号（；）分隔。
+**** 参数
+- PARENT_SCOPE，配置该选项后，表示该变量在父级作用域上有效, 在当前作用域上是无效的;
+**** 例子
+目录结构如下:
+#+BEGIN_EXAMPLE
+rs:cmake-set$ tree
+.
+├── CMakeLists.txt
+├── main.cpp
+└── subdir
+    └── CMakeLists.txt
+#+END_EXAMPLE
+顶层的　CMakeLists.txt
+#+BEGIN_SRC c++
+cmake_minimum_required(VERSION 3.5)
+
+project(DEMO VERSION 10.2.1.3 LANGUAGES CXX C ASM )
+
+# 设置一般变量
+set(PNAME rsenjoyer)
+set(PGRADE 80 85 90 95)
+
+message("top name = ${PNAME}")  # top name = rsenjoyer
+message("top grade = ${PGRADE}") #top grade = 80;85;90;95
+
+add_subdirectory(subdir)
+
+message("top after name = ${PNAME}")  # top name = rsenjoyer
+
+add_executable(DEMO main.cpp)
+#+END_SRC
+子目录的 CMakeLists.txt
+#+BEGIN_SRC c++
+set(PNAME jack)
+message("sub name = ${PNAME}") # sub name = jack
+
+# 仅仅会改变父级的　PNAME，　对当前的变量不会更改
+set(PNAME rose PARENT_SCOPE)
+message("sub name = ${PNAME}") #sub name = jack
+#+END_SRC
+*** 设置缓存变量(Set Cache Entry)
+什么是缓存变量，缓存变量可以理解为当第一次运行cmake时，这些变量缓存到一份文件中(即编译目录下的CMakeCache.txt)。当再次运行cmake时，这些变量会直接使用缓存值，可以利用ccmake或者cmake-gui等工具来重新赋值。缓存变量在整个cmake运行过程中都可以起作用。
+
+当使用CACHE时，且缓存(cache)中没有该变量时，变量被创建并存入缓存(cache)中，如果原缓存(cache)中有该变量，也不会改变原缓存中该变量的值，除非后面使用FORCE。
+#+BEGIN_SRC c++
+set(<variable> <value>... CACHE <type> <docstring> [FORCE])
+#+END_SRC
+作用:
+- 设置变量并缓存到 CMakeCache.txt
+- 默认不会覆盖已缓存(已存在于 CMakeCache.txt )的变量；
+**** 参数
+- 类型 type,必须为以下的一种
+    - BOOL,布尔值(ON/OFF)
+    - FILEPATH,文件路径
+    - PATH,目录路径
+    - STRING,字符串
+    - INTERNAL,单行文字.INTERNAL将变量为内部变量，即cmake-gui不会向用户显示这类变量，而其它类型的缓存变量用户都可以通cmake-gui按照特定的类型改变。
+- 描述字符串 <docstring>: 单行文字,用于 CMAKE-GUI 的时提示用户
+- FORCE 用于是否强制更新缓存里面的值，配置后，每次都会强制更新　CMakeCache.txt 里面的值
+**** 例子
+#+BEGIN_SRC c++
+set(FOO, "x" CACHE <type>)  
+//原缓存中没有FOO则将FOO赋值为x且存入cache中。
+//原缓存中有FOO则不做任何改变，即便原cache中FOO存的不是x。
+set(FOO, "x" CACHE <type><docstring> FORCE) 　　　
+//即便原cache中存在FOO也会创建另一个FOO，官方文档原话(If FORCE is specified, the value of the cache variable 
+//is set, even if the variable is already in the cache.This should normally be avoided, as it will 
+//remove any changes to the cache variable’s value by the user.)，小弟笨拙没有搞懂。
+#+END_SRC
+**** 注意
+1. CACHE与PARENT_SCOPE不能一起使用。
+2. 同一名称(例FOO)的一般变量和缓存变量可以同时存在，但在调用该变量时(${FOO})会在先取一般变量的值，一般变量中没有再取缓存变量的值。
+一些栗子：
+#+BEGIN_EXAMPLE
+set(FOO “x”)　　　　　　　　//设置一般变量FOO，不会触及cache，但是会隐藏cache中的FOO。
+
+set(FOO “x” CACHE ...)　　//忽视相同名称的一般变量，在cache中检查FOO是否存在，
+#+END_EXAMPLE
+3. 当改变cache中的变量时，同名的一般变量会被删除。一般不建议使用相同名称的一般变量和缓存变量。
+
+然而在有些工程中可以很好的借助这一交互例如：
+
+一个工程利用ADD_SUBDIRECTOTY()添加子工程，子工程有它自己的CMakeList.txt。如果在父工程和子工程中都对同一缓存变量赋值，cmake时父工程率先将变量存入cache中，子工程直接在cache中调用该值，保证了父子工程的一致性。当父工程需要改变该变量，而子程序需要利用原值时，可以直接在父工程中设置同名称的一般变量即可。
+
+*** 设置环境变量(Set Environment Variable)
+#+BEGIN_SRC c++
+set(ENV{<variable>} [<value>])
+#+END_SRC
+作用
+- 设置环境变量 <variable>,值为 <value>
+- 如果 <value> 不存在或者为空字符串 表示清除该环境变量
+** SET_TARGET_PROPERTIES
+这条指令可以用来设置输出的名称，对于动态库，还可以用来指定动态库版本和 API 版本。
+cmake 在构建一个新的target 时，会尝试清理掉其他使用这个名字的库。
+
+SET_TARGET_PROPERTIES(hello_static PROPERTIES  OUTPUT_NAME "hello")
+
+** ADD_EXECUTABLE
+生成可执行文件
+
+#+begin_src bash
+ADD_EXECUTABLE(hello ${SRC_LIST})     
+#+END_SRC
+生成的可执行文件名是hello，源文件读取变量SRC_LIST中的内容
+
+也可以直接写 ADD_EXECUTABLE(hello main.cpp) 。
+后缀可以不行，他会自动去找.c和.cpp，最好不要这样写，可能会有这两个文件main.cpp和main
+
+** ADD_SUBDIRECTORY
+#+begin_src bash
+ADD_SUBDIRECTORY(source_dir [binary_dir] [EXCLUDE_FROM_ALL])
+#+END_SRC
+这个指令用于向当前工程添加存放源文件的子目录，并可以指定中间二进制和目标二进制存放的位置。
+
+每个目录下都要有一个CMakeLists.txt
+#+begin_src bash
+[root@localhost cmake]# tree
+.
+├── build
+├── CMakeLists.txt
+└── src
+    ├── CMakeLists.txt
+    └── main.cpp
+#+END_SRC
+外层CMakeLists.txt：
+#+begin_src bash
+PROJECT(HELLO)
+ADD_SUBDIRECTORY(src)
+#+END_SRC
+src下的CMakeLists.txt：
+#+begin_src bash
+ADD_EXECUTABLE(hello main.cpp)
+#+END_SRC
+ADD_SUBDIRECTORY用于将外层的CMakeLists.txt与src目录下的CMakeLists.txt关联起来。
+
+下面的命令将 src 子目录加入工程并指定编译输出(包含编译中间结果)路径为bin 目录
+#+begin_src bash
+ADD_SUBDIRECTORY(src bin)
+#+END_SRC
+如果不进行 bin 目录的指定，那么编译结果(包括中间结果)都将存放在build/src 目录
+
+** ADD_LIBRARY
+ADD_LIBRARY(hello SHARED ${LIBHELLO_SRC})
+
+- hello：就是正常的库名，生成的名字前面会加上lib，最终产生的文件是libhello.so
+- SHARED，动态库    STATIC，静态库
+- ${LIBHELLO_SRC} ：源文件
+
+*** 同时生成动态库与静态库
+在cmake中，同时生成静态库与动态库的时候，需要一些技巧，因为cmake中不能生成同名的静态库和动态库，只能先生成不同名的库之后再把其中一个库的名字改名。
+#+begin_src bash
+# 生成动态库目标
+add_library(MathFunctions SHARED ${srcs})
+# 生成静态库目标
+add_library(MathFunctions_static STATIC ${srcs})
+ 
+# 指定静态库的输出名称
+set_target_properties(MathFunctions_static PROPERTIES OUTPUT_NAME "MathFunctions")
+# 使动态库和静态库同时存在
+set_target_properties(MathFunctions PROPERTIES CLEAN_DIRECT_OUTPUT 1)
+set_target_properties(MathFunctions_static PROPERTIES CLEAN_DIRECT_OUTPUT 1)
+ 
+# 指定动态库版本
+# VERSION 动态库版本
+# SOVERSION API版本
+set_target_properties(person PROPERTIES VERSION 1.0 SOVERSION 1)
+ 
+# 将动态库与动态库同时安装到lib目录中
+install (TARGETS MathFunctions MathFunctions_static DESTINATION lib)
+#+END_SRC
+CLEAN_DIRECT_OUTPUT 部分用于指示在生成具有相同名字的（OUTPUT_NAME）的目标时，是否清理上次生成的内容。由于这时的动态和静态库都使用 hello 这个名字，因此需要设置此不见标志。
+** 变量
+*** 变量的作用域
+- Function Scope: 在函数内部定义,仅仅在当前函数以及所调用的子函数内有效;
+- Directory Scope: 在当前目录的定义的变量,当调用子目录时候,子目录会复制一份父级目录内的变量到子目录中
+- Persistent Cache: 持久化的缓存,一般由CACHE 存储起来.
+*** 变量的搜索路径
+- 在当前 Function Scope 调用内查找,找到后使用,未找到进行下一步;
+- 在当前目录下面查找,找到使用,未找到下一步;
+- 在 CACHE 中寻找,找到使用,未找到,则为空.
+*** Variables for Languages
+**** CMAKE_COMPILER_IS_GNUCXX
+True if the C++ (CXX) compiler is GNU. Use CMAKE_CXX_COMPILER_ID instead
+*** Variables that Change Behavior.
+**** CMAKE_MODULE_PATH
+这个变量用来定义自己的 cmake 模块所在的路径。如果你的工程比较复杂,有可能会自己编写一些 cmake 模块,这些 cmake 模块是随你的工程发布的,为了让 cmake 在处理CMakeLists.txt 时找到这些模块,你需要通过 SET 指令,将自己的 cmake 模块路径设置一下。
+比如 
+#+BEGIN_SRC c++
+SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+#+END_SRC
+这时候你就可以通过 INCLUDE 指令来调用自己的模块了。
+*** Variables that Provide Information
+**** CMAKE_SOURCE_DIR
+#+BEGIN_EXAMPLE
+The path to the top level of the source tree.
+
+This is the full path to the top level of the current CMake source tree. For an in-source build, this would be the same as CMAKE_BINARY_DIR.
+
+When run in -P script mode, CMake sets the variables CMAKE_BINARY_DIR, CMAKE_SOURCE_DIR, CMAKE_CURRENT_BINARY_DIR and CMAKE_CURRENT_SOURCE_DIR to the current working directory.
+#+END_EXAMPLE
+PROJECT_SOURCE_DIR,<projectname>_SOURCE_DIR
+
+这三个变量指代的内容是一致的,不论采用何种编译方式,都是工程顶层目录。
+也就是在 in source 编译时,他跟 CMAKE_BINARY_DIR 等变量一致。
+PROJECT_SOURCE_DIR 跟其他指令稍有区别,现在,你可以理解为他们是一致的。
+
+** STREQUAL
+STREQUAL 用于比较字符串，相同返回 true 。
+** file命令
+#+BEGIN_SRC c++
+file(GLOB <variable>
+     [LIST_DIRECTORIES true|false] [RELATIVE <path>] [CONFIGURE_DEPENDS]
+     [<globbing-expressions>...])
+file(GLOB_RECURSE <variable> [FOLLOW_SYMLINKS]
+     [LIST_DIRECTORIES true|false] [RELATIVE <path>] [CONFIGURE_DEPENDS]
+     [<globbing-expressions>...])
+#+END_SRC
+Generate a list of files that match the <globbing-expressions> and store it into the <variable>. Globbing expressions are similar to regular expressions, but much simpler. If RELATIVE flag is specified, the results will be returned as relative paths to the given path. The results will be ordered lexicographically.
+
+On Windows and macOS, globbing is case-insensitive even if the underlying filesystem is case-sensitive (both filenames and globbing expressions are converted to lowercase before matching). On other platforms, globbing is case-sensitive.
+
+If the CONFIGURE_DEPENDS flag is specified, CMake will add logic to the main build system check target to rerun the flagged GLOB commands at build time. If any of the outputs change, CMake will regenerate the build system.
+
+产生一个匹配 <globbing-expressions> 的文件列表并将它存储到变量 <variable> 中。文件名替代表达式和正则表达式相似，但更简单。如果 RELATIVE 标志位被设定，将返回指定路径的相对路径。结果将按字典顺序排序。
+
+如果 CONFIGURE_DEPENDS 标志位被指定，CMake 将在编译时给主构建系统添加逻辑来检查目标，以重新运行 GLOB 标志的命令。如果任何输出被改变，CMake都将重新生成这个构建系统。
+** include指令
+[[https://blog.csdn.net/qq_38410730/article/details/102677143][参考文章]]
+*** include指令
+include指令一般用于语句的复用，也就是说，如果有一些语句需要在很多CMakeLists.txt文件中使用，为避免重复编写，可以将其写在.cmake文件中，然后在需要的CMakeLists.txt文件中进行include操作就行了。
+
+include指令的结构为：
+#+BEGIN_EXAMPLE
+include(<file|module> [OPTIONAL] [RESULT_VARIABLE <var>]
+                      [NO_POLICY_SCOPE])
+#+END_EXAMPLE
+虽然，有不少的可选参数，但是一般情况下，都是直接写：
+#+BEGIN_EXAMPLE
+include(file|module)
+#+END_EXAMPLE
+
+注意，为了使CMakeLists.txt能够找到该文件，需要指定文件完整路径(绝对路径或相对路径)，当然如果指定了CMAKE_MODULE_PATH，就可以直接include该目录下的.cmake文件了。
+
+.cmake文件里面通常是什么信息呢？
+
+.cmake文件里包含了一些cmake命令和一些宏/函数，当CMakeLists.txt包含该.cmake文件时，当编译运行时，该.cmake里的一些命令就会在该包含处得到执行，并且在包含以后的地方能够调用该.cmake里的一些宏和函数。
+
+什么是宏？什么是函数？
+*** 宏和函数的定义
+先看一下关键字：cmake的宏是MACRO，函数是function。它们的用法是：
+#+BEGIN_SRC c++
+macro(<name> [arg1 [arg2 [arg3 ...]]])
+  COMMAND1(ARGS ...)            # 命令语句
+  COMMAND2(ARGS ...)
+  ...
+endmacro()
+
+function(<name> [arg1 [arg2 [arg3 ...]]])
+  COMMAND1(ARGS ...)            # 命令语句
+  COMMAND2(ARGS ...)
+  ...
+function()
+#+END_SRC
+定义一个名称为name的宏（函数），arg1...是传入的参数。我们除了可以用${arg1}来引用变量以外，系统为我们提供了一些特殊的变量：
+
+| 变量  | 说明                                                 |
+|-------+------------------------------------------------------|
+| argv# | #是一个下标，0指向第一个参数，累加                   |
+| argv  | 所有的定义时要求传入的参数                           |
+| argn  | 定义时要求传入的参数以外的参数                       |
+| argc  | 传入的实际参数的个数，也就是调用函数是传入的参数个数 |
+
+*** 宏和函数的区别
+那么宏和函数之间的区别是什么呢？
+
+其实和C/C++里面宏和函数之间的区别差不多，宏就是字符串替换，函数就是使用变量，在命令中途可以对改变量进行修改。
+
+以StackOverflow的例子来了解一下区别：
+
+首先创建一个CMakeLists.txt：
+#+BEGIN_EXAMPLE
+cmake_minimum_required(VERSION 3.0)
+include(test.cmake)
+#+END_EXAMPLE
+在同目录下创建文件test.cmake：
+#+BEGIN_EXAMPLE
+set(var "ABC")
+
+macro(Moo arg)
+  message("arg = ${arg}")
+  set(arg "abc")
+  message("# After change the value of arg.")
+  message("arg = ${arg}")
+endmacro()
+message("=== Call macro ===")
+Moo(${var})
+
+function(Foo arg)
+  message("arg = ${arg}")
+  set(arg "abc")
+  message("# After change the value of arg.")
+  message("arg = ${arg}")
+endfunction()
+message("=== Call function ===")
+Foo(${var})
+#+END_EXAMPLE
+运行cmake：
+#+BEGIN_SRC bash
+mkdir build && cd build
+cmake ..
+#+END_SRC
+运行后的输出结果是：
+#+BEGIN_EXAMPLE
+-- The C compiler identification is GNU 5.4.0
+-- The CXX compiler identification is GNU 5.4.0
+-- Check for working C compiler: /usr/bin/cc
+-- Check for working C compiler: /usr/bin/cc -- works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Check for working CXX compiler: /usr/bin/c++
+-- Check for working CXX compiler: /usr/bin/c++ -- works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+=== Call macro ===
+arg = ABC
+# After change the value of arg.
+arg = ABC
+=== Call function ===
+arg = ABC
+# After change the value of arg.
+arg = abc
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/yngzmiao/test/build
+#+END_EXAMPLE
+从这里可以看出，宏实现的仅仅是字符串替换，宏定义的过程中是无法进行修改的，而函数却是可以的。
+
+*** 宏和函数参数的差异
+一般情况下，从上面的例子就能看出宏和函数的用法了，但很多情况下，我们自以为的“懂了”都是假懂。比如一不小心，就会出错。
+
+更换test.cmake为下面的内容，并运行：
+#+BEGIN_EXAMPLE
+set(var "ABC")
+
+macro(Moo arg)
+  message("arg = ${arg}")
+  set(arg "abc")
+  message("# After change the value of arg.")
+  message("arg = ${arg}")
+endmacro()
+message("=== Call macro ===")
+Moo(var)
+
+function(Foo arg)
+  message("arg = ${arg}")
+  set(arg "abc")
+  message("# After change the value of arg.")
+  message("arg = ${arg}")
+endfunction()
+message("=== Call function ===")
+Foo(var)
+#+END_EXAMPLE
+运行后的输出结果是：
+#+BEGIN_EXAMPLE
+-- The C compiler identification is GNU 5.4.0
+-- The CXX compiler identification is GNU 5.4.0
+-- Check for working C compiler: /usr/bin/cc
+-- Check for working C compiler: /usr/bin/cc -- works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Check for working CXX compiler: /usr/bin/c++
+-- Check for working CXX compiler: /usr/bin/c++ -- works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+=== Call macro ===
+arg = var
+# After change the value of arg.
+arg = var
+=== Call function ===
+arg = var
+# After change the value of arg.
+arg = abc
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/yngzmiao/test/build
+#+END_EXAMPLE
+对比两段程序可以看出其中的区别：无论是宏还是函数，当调用的时候如果使用的是set出来的变量，都必须通过${}将变量的内容传递进去，而不能只写上变量名。
+
+这是将实参传递给形参时的注意点，但在宏和函数的实现过程中，还有需要注意的内容。
+
+例子：
+#+BEGIN_EXAMPLE
+set(var "ABC")
+
+macro(Moo arg)
+  if (arg STREQUAL "ABC")
+    message("arg1 = ${arg}")
+  endif()
+  if (${arg} STREQUAL "ABC")
+    message("arg2 = ${arg}")
+  endif()
+endmacro()
+message("=== Call macro ===")
+Moo(${var})
+
+function(Foo arg)
+  if (arg STREQUAL "ABC")
+    message("arg1 = ${arg}")
+  endif()
+  if (${arg} STREQUAL "ABC")
+    message("arg2 = ${arg}")
+  endif()
+endfunction()
+message("=== Call function ===")
+Foo(${var})
+#+END_EXAMPLE
+运行后的输出结果是：
+#+BEGIN_EXAMPLE
+-- The C compiler identification is GNU 5.4.0
+-- The CXX compiler identification is GNU 5.4.0
+-- Check for working C compiler: /usr/bin/cc
+-- Check for working C compiler: /usr/bin/cc -- works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Check for working CXX compiler: /usr/bin/c++
+-- Check for working CXX compiler: /usr/bin/c++ -- works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+=== Call macro ===
+arg2 = ABC
+=== Call function ===
+arg1 = ABC
+arg2 = ABC
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/yngzmiao/test/build
+#+END_EXAMPLE
+可以看出，在宏和函数的实现过程中，宏的参数由于不是传统意义上的变量，而是字符串替换，因此需要通过${}取出内容。而函数却不一定需要这样。
+
+也就是说，对于macro宏而言：
+#+BEGIN_EXAMPLE
+if(argv0)                         # 错误用法
+if(${argv0})                      # 正确用法
+if(defined argv0)                 # 错误用法
+if(defined ${argv0})              # 正确用法
+#+END_EXAMPLE
+也就是说，对于宏和函数的参数而言：
+- 当宏和函数调用的时候，如果传递的是经set设置的变量，必须通过${}取出内容；
+- 在宏的定义过程中，对变量进行的操作必须通过${}取出内容，而函数就没有这个必要。
+** install
+install 用于将项目生成的库文件、头文件、可执行文件或相关文件等安装到指定位置（系统目录，或发行包目录）。
+
+INSTALL的安装可以包括：二进制、动态库、静态库以及文件、目录、脚本等
+#+begin_src bash
+install(TARGETS <target>... [...])
+install(IMPORTED_RUNTIME_ARTIFACTS <target>... [...])
+install({FILES | PROGRAMS} <file>... [...])
+install(DIRECTORY <dir>... [...])
+install(SCRIPT <file> [...])
+install(CODE <code> [...])
+install(EXPORT <export-name> [...])
+install(RUNTIME_DEPENDENCY_SET <set-name> [...])
+#+END_SRC
+DESTINATION：
+1. 写绝对路径
+2. 可以写相对路径，相对路径实际路径是：${CMAKE_INSTALL_PREFIX}/<DESTINATION 定义的路径>
+
+CMAKE_INSTALL_PREFIX  默认是在 /usr/local/
+
+cmake -DCMAKE_INSTALL_PREFIX=/usr    在cmake的时候指定CMAKE_INSTALL_PREFIX变量的路径
+
+注意：abc 和 abc/有很大的区别
+- 目录名不以/结尾：这个目录将被安装为目标路径下的
+- 目录名以/结尾：将这个目录中的内容安装到目标路径
+** cmake命令选项
+
+#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-05-01_15-36-45.png @ 2021-05-01 15:36:52
+[[file:cmake/2021-05-01_15-36-52_Snipaste_2021-05-01_15-36-45.png]]
+
+** message
+向终端输出用户自定义的信息
+
+主要包含三种信息：
+- SEND_ERROR，产生错误，生成过程被跳过。
+- SATUS，输出前缀为—的信息。
+- FATAL_ERROR，立即终止所有 cmake 过程.
+*** General messages
+#+BEGIN_SRC c++
+message([<mode>] "message text" ...)
+#+END_SRC
+Record the specified message text in the log. If more than one message string is given, they are concatenated into a single message with no separator between the strings.
+
+The optional <mode> keyword determines the type of message, which influences the way the message is handled:
+
+The CMake command-line tool displays STATUS to TRACE messages on stdout with the message preceded by two hyphens and a space. All other message types are sent to stderr and are not prefixed with hyphens. The CMake GUI displays all messages in its log area. The curses interface shows STATUS to TRACE messages one at a time on a status line and other messages in an interactive pop-up box. The --log-level command-line option to each of these tools can be used to control which messages will be shown.
+
+New in version 3.17: To make a log level persist between CMake runs, the CMAKE_MESSAGE_LOG_LEVEL variable can be set instead. Note that the command line option takes precedence over the cache variable.
+
+New in version 3.16: Messages of log levels NOTICE and below will have each line preceded by the content of the CMAKE_MESSAGE_INDENT variable (converted to a single string by concatenating its list items). For STATUS to TRACE messages, this indenting content will be inserted after the hyphens.
+
+New in version 3.17: Messages of log levels NOTICE and below can also have each line preceded with context of the form [some.context.example]. The content between the square brackets is obtained by converting the CMAKE_MESSAGE_CONTEXT list variable to a dot-separated string. The message context will always appear before any indenting content but after any automatically added leading hyphens. By default, message context is not shown, it has to be explicitly enabled by giving the cmake --log-context command-line option or by setting the CMAKE_MESSAGE_CONTEXT_SHOW variable to true. See the CMAKE_MESSAGE_CONTEXT documentation for usage examples.
+
+CMake Warning and Error message text displays using a simple markup language. Non-indented text is formatted in line-wrapped paragraphs delimited by newlines. Indented text is considered pre-formatted.
+**** mode
+- FATAL_ERROR: CMake Error, stop processing and generation.立即终止所有cmake过程。
+- SEND_ERROR: CMake Error, continue processing, but skip generation.
+- WARNING: CMake Warning, continue processing.
+- AUTHOR_WARNING: CMake Warning (dev), continue processing.
+- DEPRECATION: CMake Deprecation Error or Warning if variable CMAKE_ERROR_DEPRECATED or CMAKE_WARN_DEPRECATED is enabled, respectively, else no message.
+- (none) or NOTICE: Important message printed to stderr to attract user's attention.
+- STATUS： The main interesting messages that project users might be interested in. Ideally these should be concise, no more than a single line, but still informative.产生带前缀 - 的信息。
+- VERBOSE： Detailed informational messages intended for project users. These messages should provide additional details that won't be of interest in most cases, but which may be useful to those building the project when they want deeper insight into what's happening.
+- DEBUG： Detailed informational messages intended for developers working on the project itself as opposed to users who just want to build it. These messages will not typically be of interest to other users building the project and will often be closely related to internal implementation details.
+- TRACE： Fine-grained messages with very low-level implementation details. Messages using this log level would normally only be temporary and would expect to be removed before releasing the project, packaging up the files, etc.
+
+*** Reporting checks
+A common pattern in CMake output is a message indicating the start of some sort of check, followed by another message reporting the result of that check. For example:
+#+BEGIN_SRC c++
+message(STATUS "Looking for someheader.h")
+#... do the checks, set checkSuccess with the result
+if(checkSuccess)
+  message(STATUS "Looking for someheader.h - found")
+else()
+  message(STATUS "Looking for someheader.h - not found")
+endif()
+#+END_SRC
+This can be more robustly and conveniently expressed using the CHECK_... keyword form of the message() command:
+#+BEGIN_SRC c++
+message(<checkState> "message" ...)where <checkState> must be one of the following:
+#+END_SRC
+- CHECK_START:Record a concise message about the check about to be performed.
+- CHECK_PASS:Record a successful result for a check.
+- CHECK_FAIL:Record an unsuccessful result for a check.
+
+When recording a check result, the command repeats the message from the most recently started check for which no result has yet been reported, then some separator characters and then the message text provided after the CHECK_PASS or CHECK_FAIL keyword. Check messages are always reported at STATUS log level.
+
+Checks may be nested and every CHECK_START should have exactly one matching CHECK_PASS or CHECK_FAIL. The CMAKE_MESSAGE_INDENT variable can also be used to add indenting to nested checks if desired. For example:
+#+BEGIN_SRC c++
+message(CHECK_START "Finding my things")
+list(APPEND CMAKE_MESSAGE_INDENT "  ")
+unset(missingComponents)
+
+message(CHECK_START "Finding partA")
+# ... do check, assume we find A
+message(CHECK_PASS "found")
+
+message(CHECK_START "Finding partB")
+# ... do check, assume we don't find B
+list(APPEND missingComponents B)
+message(CHECK_FAIL "not found")
+
+list(POP_BACK CMAKE_MESSAGE_INDENT)
+if(missingComponents)
+  message(CHECK_FAIL "missing components: ${missingComponents}")
+else()
+  message(CHECK_PASS "all components found")
+endif()
+#+END_SRC
+Output from the above would appear something like the following:
+#+BEGIN_EXAMPLE
+-- Finding my things
+--   Finding partA
+--   Finding partA - found
+--   Finding partB
+--   Finding partB - not found
+-- Finding my things - missing components: B
+#+END_EXAMPLE
+** include
+include 用于加载makefile文件
+
+-include 表示当文件不存在时，make不会报错
+*** 参考文章
+[[https://www.gnu.org/software/make/manual/html_node/Include.html][3.3 Including Other Makefiles]]
+[[https://blog.csdn.net/xiaozhi_su/article/details/4202779][Makefile中指示符“include”、“-include”和“sinclude”的区别]]
+[[https://stackoverflow.com/questions/16981464/difference-between-include-and-include-in-a-makefile][Difference between "include" and "-include" in a makefile]]
+** Makefile选项CFLAGS,LDFLAGS,LIBS
+CFLAGS 表示用于 C 编译器的选项，
+CXXFLAGS 表示用于 C++ 编译器的选项。
+这两个变量实际上涵盖了编译和汇编两个步骤。
+
+CFLAGS： 指定头文件（.h文件）的路径，如：CFLAGS=-I/usr/include -I/path/include。同样地，安装一个包时会在安装路径下建立一个include目录，当安装过程中出现问题时，试着把以前安装的包的include目录加入到该变量中来。
+
+LDFLAGS：gcc 等编译器会用到的一些优化参数，也可以在里面指定库文件的位置。用法：LDFLAGS=-L/usr/lib -L/path/to/your/lib。每安装一个包都几乎一定的会在安装目录里建立一个lib目录。如果明明安装了某个包，而安装另一个包时，它愣是说找不到，可以抒那个包的lib路径加入的LDFALGS中试一下。
+
+LIBS：告诉链接器要链接哪些库文件，如LIBS = -lpthread -liconv
+
+简单地说，LDFLAGS是告诉链接器从哪里寻找库文件，而LIBS是告诉链接器要链接哪些库文件。不过使用时链接阶段这两个参数都会加上，所以你即使将这两个的值互换，也没有问题。
+
+有时候LDFLAGS指定-L虽然能让链接器找到库进行链接，但是运行时链接器却找不到这个库，如果要让软件运行时库文件的路径也得到扩展，那么我们需要增加这两个库给"-Wl,R"：
+
+LDFLAGS = -L/var/xxx/lib -L/opt/mysql/lib -Wl,R/var/xxx/lib -Wl,R/opt/mysql/lib
+
+如果在执行./configure以前设置环境变量export LDFLAGS="-L/var/xxx/lib -L/opt/mysql/lib -Wl,R/var/xxx/lib -Wl,R/opt/mysql/lib" ，注意设置环境变量等号两边不可以有空格，而且要加上引号（shell的用法）。那么执行configure以后，Makefile将会设置这个选项，链接时会有这个参数，编译出来的可执行程序的库文件搜索路径就得到扩展了。
+*** 参考文章
+[[https://www.cnblogs.com/taskiller/archive/2012/12/14/2817650.html][Makefile选项CFLAGS,LDFLAGS,LIBS - Taskiller - 博客园]]
+** =和:=的区别
+如果使用=，make会将整个makefile展开后，再决定变量的值。也就是说，变量的值将会是整个makefile中最后被指定的值。看例子：
+#+begin_src bash
+x = foo
+y = $(x) bar
+x = xyz
+#+END_SRC
+
+在上例中，y的值将会是 xyz bar ，而不是 foo bar 。
+#+begin_src bash
+x := foo
+y := $(x) bar
+x := xyz
+#+END_SRC
+而:=表示变量在赋值时就先设置为该值，而不是整个makefile展开后的最终值，后面如果再有赋值，则会将前面的赋值覆盖，使用新的值。
+
+在上例中，y的值将会是 foo bar ，而不是 xyz bar 了。
+
+#+BEGIN_EXAMPLE
+Simple assignment :=
+A simple assignment expression is evaluated only once, at the very first occurrence. For example, if CC :=${GCC} ${FLAGS} during the first encounter is evaluated to gcc -W then each time ${CC} occurs it will be replaced with gcc -W.
+
+Recursive assignment =
+A Recursive assignment expression is evaluated everytime the variable is encountered in the code. For example, a statement like CC = ${GCC} {FLAGS} will be evaluated only when an action like ${CC} file.c is executed. However, if the variable GCC is reassigned i.e GCC=c++ then the ${CC} will be converted to c++ -W after the reassignment.
+
+Conditional assignment ?=
+Conditional assignment assigns a value to a variable only if it does not have a value
+
+Appending +=
+Assume that CC = gcc then the appending operator is used like CC += -w
+then CC now has the value gcc -W
+#+END_EXAMPLE
+For more check out these [[https://github.com/amjadmajid/Makefile][tutorials]]
+*** 参考文章
+[[https://www.cnblogs.com/wanqieddy/archive/2011/09/21/2184257.html][Makefile 中:= ?= += =的区别- wanqi - 博客园]]
+[[https://www.sunxidong.com/237.html][Makefile中“=”、“:=”、“?=”、“+=”的区别 - 孙希栋的博客]]
+[[https://stackoverflow.com/questions/4879592/whats-the-difference-between-and-in-makefile][What's the difference between := and = in Makefile?]]
+** 外部构建方式举例
+外部构建会把生成的临时文件放在build目录下，不会对源文件有任何影响。
+强烈建议使用外部构建方式
+
+1. 建立一个build目录，可以在任何地方，建议在当前目录下
+
+2. 进入build，运行cmake ..    当然..表示上一级目录，你可以写CMakeLists.txt所在的绝对路径，生产的文件都在build目录下了
+
+3. 在build目录下，运行make来构建工程
+
+注意外部构建的两个变量
+1. <projectname>_BINARY_DIR，编译路径 也就是 /root/cmake/bulid
+2. <projectname>_SOURCE_DIR，还是工程路径
+
 * declare命令
 Linux declare命令用于声明 shell 变量。
 
@@ -970,6 +1931,16 @@ declare -f func_a func_b
 declare -F func_a func_b
 # 最好不要让函数名和变量名相同。
 #+END_SRC
+* df 查看磁盘空间
+df -hl：查看磁盘剩余空间
+
+df -h：查看每个根路径的分区大小
+
+du -sh [目录名]：返回该目录的大小
+
+du -sm [文件夹]：返回该文件夹总M数
+
+du -h [目录名]：查看指定文件夹下的所有文件大小（包含子文件夹）
 * DISPLAY环境变量的作用
 在Linux/Unix 类操作系统上, DISPLAY用来设置将图形显示到何处. 
 直接登陆图形界面或者登陆命令行界面后使用startx启动图形, DISPLAY环境变量将自动设置为:0.0, 此时可以打开终端, 输出图形程序的名称(比如xclock)来启动程序, 图形将显示在本地窗口上
@@ -3756,6 +4727,560 @@ ln -s /home/zlliu/tcl/node-v6.9.2-linux-64/bin/npm /usr/local/npm
 
 ** 使用npm安装
 使用npm安装，首先要下载npm。同样可使用apt-get或者下载npm源码进行安装，安装后可使用npm各种命令，如npm ls，npm install <packageName>等等，我们可用npm指定安装nodejs的版本。
+* makefile
+** 语法规则
+#+begin_src bash
+target ... : prerequisites ...
+    command
+    ...
+    ...
+
+#+END_SRC
+或是这样：
+#+begin_src bash
+targets : prerequisites ; command
+    command
+    ...
+#+END_SRC
+这是一个文件的依赖关系，
+也就是说，target这一个或多个的目标文件依赖于prerequisites中的文件，其生成规则定义在command中。
+
+在Makefile中的命令，必须要以 Tab 键开始。
+*** target
+可以是一个object file（目标文件），也可以是一个执行文件，还可以是一个标签（label），以空格分开，可以使用通配符。
+
+
+*** prerequisites
+生成该target所依赖的文件和/或target。
+
+如果其中的某个文件要比目标文件要新，那么，目标就被认为是“过时的”，被认为是需要重生成的。
+*** command
+该target要执行的命令（任意的shell命令）
+
+如果其不与“target:prerequisites”在一行，那么，必须以 Tab 键开头，如果和prerequisites在一行，那么可以用分号做为分隔。
+
+如果命令太长，你可以使用反斜杠（ \ ）作为换行符。make对一行上有多少个字符没有限制。规则告诉make两件事，文件的依赖关系和如何生成目标文件。
+
+一般来说，make会以UNIX的标准Shell，也就是 /bin/sh 来执行命令。
+** make工作方式
+#+begin_src makefile
+edit : main.o kbd.o command.o display.o \
+        insert.o search.o files.o utils.o
+    cc -o edit main.o kbd.o command.o display.o \
+        insert.o search.o files.o utils.o
+
+main.o : main.c defs.h
+    cc -c main.c
+kbd.o : kbd.c defs.h command.h
+    cc -c kbd.c
+command.o : command.c defs.h command.h
+    cc -c command.c
+display.o : display.c defs.h buffer.h
+    cc -c display.c
+insert.o : insert.c defs.h buffer.h
+    cc -c insert.c
+search.o : search.c defs.h buffer.h
+    cc -c search.c
+files.o : files.c defs.h buffer.h command.h
+    cc -c files.c
+utils.o : utils.c defs.h
+    cc -c utils.c
+clean :
+    rm edit main.o kbd.o command.o display.o \
+        insert.o search.o files.o utils.o
+#+END_SRC
+make会在当前目录下找名字叫“Makefile”或“makefile”的文件。
+
+如果找到，它会找文件中的第一个目标文件（target），在上面的例子中，他会找到“edit”这个文件，并把这个文件作为最终的目标文件。
+
+如果edit文件不存在，或是edit所依赖的后面的 .o 文件的文件修改时间要比 edit 这个文件新，那么，他就会执行后面所定义的命令来生成 edit 这个文件。
+
+如果 edit 所依赖的 .o 文件也不存在，那么make会在当前文件中找目标为 .o 文件的依赖性，如果找到则再根据那一个规则生成 .o 文件。（这有点像一个堆栈的过程）
+
+当然，你的C文件和H文件是存在的啦，于是make会生成 .o 文件，然后再用 .o 文件生成make的终极任务，也就是执行文件 edit 了。
+** 变量
+变量的定义：
+#+BEGIN_SRC makefile
+objects = main.o kbd.o command.o display.o \
+     insert.o search.o files.o utils.o
+#+END_SRC
+makefile以 $(objects) 的方式来使用变量。
+
+#+BEGIN_SRC makefile
+objects = main.o kbd.o command.o display.o \
+    insert.o search.o files.o utils.o
+
+edit : $(objects)
+    cc -o edit $(objects)
+main.o : main.c defs.h
+    cc -c main.c
+kbd.o : kbd.c defs.h command.h
+    cc -c kbd.c
+command.o : command.c defs.h command.h
+    cc -c command.c
+display.o : display.c defs.h buffer.h
+    cc -c display.c
+insert.o : insert.c defs.h buffer.h
+    cc -c insert.c
+search.o : search.c defs.h buffer.h
+    cc -c search.c
+files.o : files.c defs.h buffer.h command.h
+    cc -c files.c
+utils.o : utils.c defs.h
+    cc -c utils.c
+clean :
+    rm edit $(objects)
+#+END_SRC
+** make的推导以及文件功能
+只要make看到一个 .o 文件，它就会自动的把 .c 文件加在依赖关系中，
+如果make找到一个 whatever.o ，那么 whatever.c 就会是 whatever.o 的依赖文件。并且 cc -c whatever.c 也会被推导出来
+#+BEGIN_SRC makefile
+objects = main.o kbd.o command.o display.o \
+    insert.o search.o files.o utils.o
+
+edit : $(objects)
+    cc -o edit $(objects)
+
+main.o : defs.h
+kbd.o : defs.h command.h
+command.o : defs.h command.h
+display.o : defs.h buffer.h
+insert.o : defs.h buffer.h
+search.o : defs.h buffer.h
+files.o : defs.h buffer.h command.h
+utils.o : defs.h
+
+.PHONY : clean
+clean :
+    rm edit $(objects)
+#+END_SRC
+这种方法，也就是make的“隐晦规则”。上面文件内容中， .PHONY 表示 clean 是个伪目标文件。
+
+可以用文件功能将上面重复出现的.h文件收拢起来写到一起
+#+BEGIN_SRC makefile
+objects = main.o kbd.o command.o display.o \
+    insert.o search.o files.o utils.o
+
+edit : $(objects)
+    cc -o edit $(objects)
+
+$(objects) : defs.h
+kbd.o command.o files.o : command.h
+display.o insert.o search.o files.o : buffer.h
+
+.PHONY : clean
+clean :
+    rm edit $(objects)
+#+END_SRC
+** 清空目标文件的规则
+每个Makefile中都应该写一个清空目标文件（ .o 和执行文件）的规则，这不仅便于重编译，也很利于保持文件的清洁。
+一般的风格都是：
+#+BEGIN_SRC makefile
+clean:
+    rm edit $(objects)
+#+END_SRC
+更为稳健的做法是：
+#+BEGIN_SRC makefile
+.PHONY : clean
+clean :
+    -rm edit $(objects)
+#+END_SRC
+前面说过， .PHONY 表示 clean 是一个“伪目标”。
+而在 rm 命令前面加了一个小减号的意思就是，也许某些文件出现问题，但不要管，继续做后面的事。
+** Makefile的文件名
+默认的情况下，make命令会在当前目录下按顺序找寻文件名为“GNUmakefile”、“makefile”、“Makefile”的文件，找到了解释这个文件。
+
+可以使用别的文件名来书写Makefile，比如：“Make.Linux”，“Make.Solaris”，“Make.AIX”等，
+
+如果要指定特定的Makefile，你可以使用make的 -f 和 --file 参数，如： make -f Make.Linux 或 make --file Make.AIX 。
+** include
+在Makefile使用 include 关键字可以把别的Makefile包含进来，这很像C语言的 #include ，被包含的文件会原模原样的放在当前文件的包含位置。 
+
+include 的语法是：
+#+begin_src bash
+include <filename>
+#+END_SRC
+filename 可以是当前操作系统Shell的文件模式（可以包含路径和通配符）。
+
+在 include 前面可以有一些空字符，但是绝不能是 Tab 键开始。 
+include 和 <filename> 可以用一个或多个空格隔开。
+举个例子，你有这样几个Makefile： a.mk 、 b.mk 、 c.mk ，还有一个文件叫 foo.make ，以及一个变量 $(bar) ，其包含了 e.mk 和 f.mk ，那么，下面的语句：
+#+begin_src bash
+include foo.make *.mk $(bar)
+#+END_SRC
+等价于：
+#+begin_src bash
+include foo.make a.mk b.mk c.mk e.mk f.mk
+#+END_SRC
+make命令开始时，会找寻 include 所指出的其它Makefile，并把其内容安置在当前的位置。就好像C/C++的 #include 指令一样。
+如果文件都没有指定绝对路径或是相对路径的话，make会在当前目录下首先寻找，
+如果当前目录下没有找到，那么，make还会在下面的几个目录下找：
+- 如果make执行时，有 -I 或 --include-dir 参数，那么make就会在这个参数所指定的目录下去寻找。
+- 如果目录 <prefix>/include （一般是： /usr/local/bin 或 /usr/include ）存在的话，make也会去找。
+
+如果有文件没有找到的话，make会生成一条警告信息，但不会马上出现致命错误。
+它会继续载入其它的文件，一旦完成makefile的读取，make会再重试这些没有找到，或是不能读取的文件，如果还是不行，make才会出现一条致命信息。
+如果你想让make不理那些无法读取的文件，而继续执行，你可以在include前加一个减号“-”。如：
+#+begin_src bash
+-include <filename>
+#+END_SRC
+其表示，无论include过程中出现什么错误，都不要报错继续执行。和其它版本make兼容的相关命令是sinclude，其作用和这一个是一样的。
+** 环境变量MAKEFILES¶
+如果你的当前环境中定义了环境变量 MAKEFILES ，那么，make会把这个变量中的值做一个类似于 include 的动作。
+这个变量中的值是其它的Makefile，用空格分隔。只是，它和 include 不同的是，从这个环境变量中引入的Makefile的“目标”不会起作用，如果环境变量中定义的文件发现错误，make也会不理。
+
+但是在这里我还是建议不要使用这个环境变量，因为只要这个变量一被定义，那么当你使用make时，所有的Makefile都会受到它的影响，这绝不是你想看到的。
+在这里提这个事，只是为了告诉大家，也许有时候你的Makefile出现了怪事，那么你可以看看当前环境中有没有定义这个变量。
+** 通配符
+make支持三个通配符： * ， ? 和 ~ 。
+这和Unix的B-Shell是相同的。
+
+#+begin_src makefile
+objects = *.o
+#+END_SRC
+上面例子中objects的值就是 *.o ，而不是 *.o 展开后的值。
+
+Makefile中的变量其实就是C/C++中的宏。如果你要让通配符在变量中展开，也就是让objects的值是所有 .o 的文件名的集合，那么，你可以这样：
+#+begin_src makefile
+objects := $(wildcard *.o)
+#+END_SRC
+
+另给一个变量使用通配符的例子：
+1. 列出一确定文件夹中的所有 .c 文件。
+#+begin_src makefile
+objects := $(wildcard *.c)
+#+END_SRC
+2. 列出(1)中所有文件对应的 .o 文件，在（3）中我们可以看到它是由make自动编译出的:
+#+begin_src makefile
+$(patsubst %.c,%.o,$(wildcard *.c))
+#+END_SRC
+3. 由(1)(2)两步，可写出编译并链接所有 .c 和 .o 文件
+#+begin_src makefile
+objects := $(patsubst %.c,%.o,$(wildcard *.c))
+foo : $(objects)
+    cc -o foo $(objects)
+#+END_SRC
+这种用法由关键字“wildcard”，“patsubst”指出，
+** VPATH文件寻找
+如果没有指明VPATH变量，make只会在当前的目录中去找寻依赖文件和目标文件。
+
+如果定义了VPATH变量，那么，make就会在当前目录找不到的情况下，到所指定的目录中去找寻文件。
+
+#+begin_src makefile
+VPATH = src:../headers
+#+END_SRC
+上面的定义指定两个目录，“src”和“../headers”，make会按照这个顺序进行搜索。目录由“冒号”分隔。（当然，当前目录永远是最高优先搜索的地方）
+
+另一个设置文件搜索路径的方法是使用make的“vpath”关键字（注意，它是全小写的），这不是变量，这是一个make的关键字，这和上面提到的那个VPATH变量很类似，但是它更为灵活。它可以指定不同的文件在不同的搜索目录中。
+
+这是一个很灵活的功能。它的使用方法有三种：
+#+BEGIN_EXAMPLE
+vpath <pattern> <directories>
+为符合模式<pattern>的文件指定搜索目录<directories>。
+
+vpath <pattern>
+清除符合模式<pattern>的文件的搜索目录。
+
+vpath
+清除所有已被设置好了的文件搜索目录。
+#+END_EXAMPLE
+vpath使用方法中的<pattern>需要包含 % 字符。 
+
+% 的意思是匹配零或若干字符，（需引用 % ，使用 \ ）例如， %.h 表示所有以 .h 结尾的文件。
+
+<pattern>指定了要搜索的文件集，而<directories>则指定了< pattern>的文件集的搜索的目录。例如：
+#+begin_src makefile
+vpath %.h ../headers
+#+END_SRC
+该语句表示，要求make在“../headers”目录下搜索所有以 .h 结尾的文件。（如果某文件在当前目录没有找到的话）
+
+我们可以连续地使用vpath语句，以指定不同搜索策略。
+
+如果连续的vpath语句中出现了相同的<pattern> ，或是被重复了的<pattern>，那么，make会按照vpath语句的先后顺序来执行搜索。如：
+#+begin_src makefile
+vpath %.c foo
+vpath %   blish
+vpath %.c bar
+#+END_SRC
+其表示 .c 结尾的文件，先在“foo”目录，然后是“blish”，最后是“bar”目录。
+#+begin_src makefile
+vpath %.c foo:bar
+vpath %   blish
+#+END_SRC
+而上面的语句则表示 .c 结尾的文件，先在“foo”目录，然后是“bar”目录，最后才是“blish”目录。
+** 伪目标
+伪目标是这样一个目标：它不代表一个真正的文件名，在执行make时可以指定这个目标来执行其所在规则定义的命令，有时我们也可以将一个伪目标称为标签。使用伪目标有两点原因：
+1. 避免在我们的Makefile中定义的只执行命令的的目标（此目标的目的为了执行执行一系列命令，而不需要创建这个目标）和工作目录下的实际文件出现名字冲突。
+2. 提高执行make时的效率.
+
+果我们需要书写这样一个规则：规则所定义的命令不是去创建目标文件，而是使用make指定具体的目标来执一些特定的命令。像下边那样：
+#+begin_src makefile
+clean: 
+rm *.o temp 
+#+END_SRC
+规则中rm不是创建文件clean的命令，只是删除当前目录下的所有.o文件和temp文件。
+
+在工作目录下不存在clean这个文件时，我们输入make clean后，rm *.o temp总会被执行。这是我们的初衷。
+
+但当前工作目录下存在文件clean时情况就不一样了，在我们输入make clean时。
+
+规则没有依赖文件，所以目标被认为是最新的而不去执行规则作定义的命令，命令rm将不会被执行。这并不是我们的初衷。
+
+为了避免这个问题，我们可以将目标clean明确的声明为伪目标。
+
+将一个目标声明为伪目标需要将它作为特殊目标.PHONY的依赖。如下：
+#+begin_src makefile
+.PHONY : clean 
+#+END_SRC
+这样目标clean就是一个伪目标，无论当前目录下是否存在clean这个文件。
+
+当我们输入make clean之后，rm命令都会被执行。
+
+而且，当一个目标被声明为伪目标后，make在执行此规则时不会试图去查找隐含规则来创建这个目标。
+
+这样也提高了make的执行效率，同时我们也不用担心由于目标和文件名重名而使我们的期望失败。
+
+在书写伪目标规则时，首先需要声明目标是一个伪目标，之后才是伪目标的规则定义。
+
+目标clean书写格式应该如下：
+#+begin_src makefile
+.PHONY: clean 
+clean: 
+rm *.o temp 
+#+END_SRC
+伪目标的另外一使用场合在make的并行和递归执行过程中。
+
+此情况下一般存在一个变量，其定义为所有需要make的子目录。
+
+对多个目录进行make的实现方式可以在一个规则中可以使用shell的循环来完成。
+
+如下：
+#+begin_src makefile
+SUBDIRS = foo bar baz 
+subdirs: 
+for dir in $(SUBDIRS); do \ 
+$(MAKE) -C $$dir; \ 
+done 
+#+END_SRC
+但这种实现方法存在以下几个问题。
+
+当子目录执行make出现错误时，make不会退出。
+
+就是说，在对某一个目录执行make失败以后，会继续对其他的目录进行make。
+
+在最终执行失败的情况下，我们很难根据错误的提示定位出具体是是那个目录下的Makefile出现错误。
+
+这给问题定位造成了很大的困难。为了避免这样的问题，我们可以在命令行部分加入错误的监测，在命令执行错误后make退出。
+
+不幸的是，如果在执行make时使用了-k选项，此方式将失效。
+
+另外一个问题就是使用这种shell的循环方式时，没有用到make对目录的并行处理功能，因为规则的命令是一条完整的shell命令，不能被并行的执行。
+
+我们可以通过伪目标方式来克服以上实现方式所存在的两个问题。
+#+begin_src makefile
+SUBDIRS = foo bar baz 
+.PHONY: subdirs $(SUBDIRS) 
+subdirs: $(SUBDIRS) 
+$(SUBDIRS): 
+$(MAKE) -C $@ 
+foo: baz 
+#+END_SRC
+上边的实现中使用了一个没有命令行的规则foo: baz，用来限制子目录的make顺序。
+
+此规则的含义时在处理foo目录之前，需要等待baz目录处理完成。
+
+在书写一个并行执行make的Makefile时，目录的处理顺序是需要特别注意的。
+
+一般情况下，一个伪目标不作为一个另外一个目标文件的依赖。
+
+这是因为当一个目标文件的依赖包含伪目标时，每一次在执行这个规则时伪目标所定义的命令都会被执行（因为它是规则的依赖，重建规则目标文件时需要首先重建它的依赖）。
+
+当伪目标没有作为任何目标（此目标是一个可被创建或者已存在的文件）的依赖时，我们只能通过make的命令行选项明确指定这个伪目标，来执行它所定义的命令。例如我们的make clean。
+
+伪目标一般没有依赖的文件。但是，我们也可以为伪目标指定所依赖的文件。
+
+伪目标同样可以作为“默认目标”，只要将其放在第一个。
+
+一个示例就是，如果你的Makefile需要一口气生成若干个可执行文件，但你只想简单地敲一个make完事，并且，所有的目标文件都写在一个Makefile中，那么你可以使用“伪目标”这个特性,下边就是一个例子：
+#+begin_src makefile
+#sample Makefile 
+all : prog1 prog2 prog3 
+.PHONY : all 
+prog1 : prog1.o utils.o 
+cc -o prog1 prog1.o utils.o 
+prog2 : prog2.o 
+cc -o prog2 prog2.o 
+prog3 : prog3.o sort.o utils.o 
+cc -o prog3 prog3.o sort.o utils.o 
+#+END_SRC
+我们知道，Makefile中的第一个目标会被作为其默认目标。
+
+我们声明了一个“all”的伪目标，其依赖于其它三个目标。
+
+由于默认目标的特性是，总是被执行的，但由于“all”又是一个伪目标，伪目标只是一个标签不会生成文件，所以不会有“all”文件产生。
+
+为了完成对它的更新，make会创建（不存在）或者重建（已存在）目标all的所有依赖文件（prog1、prog2和prog3）。
+
+.PHONY : all 声明了“all”这个目标为“伪目标”。（注：这里的显式“.PHONY : all” 不写的话一般情况也可以正确的执行，这样make可通过隐式规则推导出， “all” 是一个伪目标，执行make不会生成“all”文件，而执行后面的多个目标。建议：显式写出是一个好习惯。）
+
+当需要单独更新某一个程序时，我们可以通过make的命令行选项来明确指定需要重建的程序。（例如： make prog1）。
+
+当一个伪目标作为另外一个伪目标依赖时，make将其作为另外一个伪目标的子例程来处理（可以这样理解：其作为另外一个伪目标的必须执行的部分，就行C语言中的函数调用一样）。
+
+下边的例子就是这种用法：
+#+begin_src makefile
+.PHONY: cleanall cleanobj cleandiff 
+cleanall : cleanobj cleandiff 
+rm program 
+cleanobj : 
+rm *.o 
+cleandiff : 
+rm *.diff
+#+END_SRC
+cleanobj和cleandiff这两个伪目标有点像子程序的意思（执行目标clearall时会触发它们所定义的命令被执行）。
+
+我们可以输入make cleanall和make cleanobj和make cleandiff命令来达到清除不同种类文件的目的。
+
+例子首先通过特殊目标.PHONY声明了多个伪目标，它们之间使用空各分割，之后才是各个伪目标的规则定义。
+
+说明：
+通常在清除文件的伪目标所定义的命令中rm使用选项–f（--force）来防止在缺少删除文件时出错并退出，使make clean过程失败。
+
+也可以在rm之前加上-来防止rm错误退出，这种方式时make会提示错误信息但不会退出。
+
+为了不看到这些讨厌的信息，需要使用上述的第一种方式。
+
+另外make存在一个内嵌隐含变量RM，它被定义为：RM = rm –f。因此在书写clean规则的命令行时可以使用变量$(RM)来代替rm，这样可以免出现一些不必要的麻烦！这是我们推荐的用法。
+*** 参考文献
+[[https://www.zybuluo.com/lishuhuakai/note/210174][Makefile伪目标]]
+** 多目标
+Makefile的规则中的目标可以不止一个，其支持多目标。
+
+有可能我们的多个目标同时依赖于一个文件，并且其生成的命令大体类似。于是我们就能把其合并起来。
+
+当然，多个目标的生成规则的执行命令不是同一个，这可能会给我们带来麻烦，
+
+不过好在我们可以使用一个自动化变量 $@ ，这个变量表示目前规则中所有的目标的集合。
+#+begin_src makefile
+bigoutput littleoutput : text.g
+    generate text.g -$(subst output,,$@) > $@
+#+END_SRC
+上述规则等价于：
+#+begin_src makefile
+bigoutput : text.g
+    generate text.g -big > bigoutput
+littleoutput : text.g
+    generate text.g -little > littleoutput
+#+END_SRC
+其中， -$(subst output,,$@) 中的 $ 表示执行一个Makefile的函数，函数名为subst，后面的为参数。
+
+这里的这个函数是替换字符串的意思， $@ 表示目标的集合，就像一个数组， $@ 依次取出目标，并执于命令。
+** 静态模式
+静态模式可以更加容易地定义多目标的规则，可以让我们的规则变得更加的有弹性和灵活。我们还是先来看一下语法：
+#+begin_src makefile
+<targets ...> : <target-pattern> : <prereq-patterns ...>
+    <commands>
+    ...
+#+END_SRC
+targets定义了一系列的目标文件，可以有通配符。是目标的一个集合。
+
+target-pattern是指明了targets的模式，也就是的目标集模式。
+
+prereq-patterns是目标的依赖模式，它对target-pattern形成的模式再进行一次依赖目标的定义。
+
+如果我们的<target-pattern>定义成 %.o ，意思是我们的<target>;集合中都是以 .o 结尾的，而如果我们的<prereq-patterns>定义成 %.c ，意思是对<target-pattern>所形成的目标集进行二次定义，其计算方法是，取<target-pattern>模式中的 % （也就是去掉了 .o 这个结尾），并为其加上 .c 这个结尾，形成的新集合。
+
+所以，我们的“目标模式”或是“依赖模式”中都应该有 % 这个字符，如果你的文件名中有 % 那么你可以使用反斜杠 \ 进行转义，来标明真实的 % 字符。
+
+看一个例子：
+#+begin_src makefile
+objects = foo.o bar.o
+
+all: $(objects)
+
+$(objects): %.o: %.c
+    $(CC) -c $(CFLAGS) $< -o $@
+#+END_SRC
+上面的例子中，指明了我们的目标从$object中获取， %.o 表明要所有以 .o 结尾的目标，也就是 foo.o bar.o ，也就是变量 $object 集合的模式，而依赖模式 %.c 则取模式 %.o 的 % ，也就是 foo bar ，并为其加下 .c 的后缀，于是，我们的依赖目标就是 foo.c bar.c 。而命令中的 $< 和 $@ 则是自动化变量， $< 表示第一个依赖文件， $@ 表示目标集（也就是“foo.o bar.o”）。于是，上面的规则展开后等价于下面的规则：
+#+begin_src makefile
+foo.o : foo.c
+    $(CC) -c $(CFLAGS) foo.c -o foo.o
+bar.o : bar.c
+    $(CC) -c $(CFLAGS) bar.c -o bar.o
+#+END_SRC
+试想，如果我们的 %.o 有几百个，那么我们只要用这种很简单的“静态模式规则”就可以写完一堆规则，实在是太有效率了。“静态模式规则”的用法很灵活，如果用得好，那会是一个很强大的功能。再看一个例子：
+#+begin_src makefile
+files = foo.elc bar.o lose.o
+
+$(filter %.o,$(files)): %.o: %.c
+    $(CC) -c $(CFLAGS) $< -o $@
+$(filter %.elc,$(files)): %.elc: %.el
+    emacs -f batch-byte-compile $<
+#+END_SRC
+$(filter %.o,$(files))表示调用Makefile的filter函数，过滤“$files”集，只要其中模式为“%.o”的内容。其它的内容，我就不用多说了吧。这个例子展示了Makefile中更大的弹性。
+** 自动生成依赖性
+在Makefile中，我们的依赖关系可能会需要包含一系列的头文件，比如，如果我们的main.c中有一句 #include "defs.h" ，那么我们的依赖关系应该是：
+#+begin_src makefile
+main.o : main.c defs.h
+#+END_SRC
+但是，如果是一个比较大型的工程，你必需清楚哪些C文件包含了哪些头文件，并且，你在加入或删除头文件时，也需要小心地修改Makefile，这是一个很没有维护性的工作。为了避免这种繁重而又容易出错的事情，我们可以使用C/C++编译的一个功能。大多数的C/C++编译器都支持一个“-M”的选项，即自动找寻源文件中包含的头文件，并生成一个依赖关系。例如，如果我们执行下面的命令:
+#+begin_src bash
+cc -M main.c
+#+END_SRC
+其输出是：
+#+begin_src makefile
+main.o : main.c defs.h
+#+END_SRC
+
+于是由编译器自动生成的依赖关系，这样一来，你就不必再手动书写若干文件的依赖关系，而由编译器自动生成了。需要提醒一句的是，如果你使用GNU的C/C++编译器，你得用 -MM 参数，不然， -M 参数会把一些标准库的头文件也包含进来。
+
+gcc -M main.c的输出是:
+#+begin_src makefile
+main.o: main.c defs.h /usr/include/stdio.h /usr/include/features.h \
+    /usr/include/sys/cdefs.h /usr/include/gnu/stubs.h \
+    /usr/lib/gcc-lib/i486-suse-linux/2.95.3/include/stddef.h \
+    /usr/include/bits/types.h /usr/include/bits/pthreadtypes.h \
+    /usr/include/bits/sched.h /usr/include/libio.h \
+    /usr/include/_G_config.h /usr/include/wchar.h \
+    /usr/include/bits/wchar.h /usr/include/gconv.h \
+    /usr/lib/gcc-lib/i486-suse-linux/2.95.3/include/stdarg.h \
+    /usr/include/bits/stdio_lim.h
+#+END_SRC
+gcc -MM main.c的输出则是:
+#+begin_src makefile
+main.o: main.c defs.h
+#+END_SRC
+那么，编译器的这个功能如何与我们的Makefile联系在一起呢。因为这样一来，我们的Makefile也要根据这些源文件重新生成，让 Makefile自已依赖于源文件？这个功能并不现实，不过我们可以有其它手段来迂回地实现这一功能。GNU组织建议把编译器为每一个源文件的自动生成的依赖关系放到一个文件中，为每一个 name.c 的文件都生成一个 name.d 的Makefile文件， .d 文件中就存放对应 .c 文件的依赖关系。
+
+于是，我们可以写出 .c 文件和 .d 文件的依赖关系，并让make自动更新或生成 .d 文件，并把其包含在我们的主Makefile中，这样，我们就可以自动化地生成每个文件的依赖关系了。
+
+这里，我们给出了一个模式规则来产生 .d 文件：
+#+begin_src makefile
+%.d: %.c
+    @set -e; rm -f $@; \
+    $(CC) -M $(CPPFLAGS) $< > $@.$$$$; \
+    sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \
+    rm -f $@.$$$$
+#+END_SRC
+这个规则的意思是，所有的 .d 文件依赖于 .c 文件， rm -f $@ 的意思是删除所有的目标，也就是 .d 文件，第二行的意思是，为每个依赖文件 $< ，也就是 .c 文件生成依赖文件， $@ 表示模式 %.d 文件，如果有一个C文件是name.c，那么 % 就是 name ， $$$$ 意为一个随机编号，第二行生成的文件有可能是“name.d.12345”，第三行使用sed命令做了一个替换，关于sed命令的用法请参看相关的使用文档。第四行就是删除临时文件。
+
+总而言之，这个模式要做的事就是在编译器生成的依赖关系中加入 .d 文件的依赖，即把依赖关系：
+#+begin_src makefile
+main.o : main.c defs.h
+#+END_SRC
+转成：
+#+begin_src makefile
+main.o main.d : main.c defs.h
+#+END_SRC
+于是，我们的 .d 文件也会自动更新了，并会自动生成了，当然，你还可以在这个 .d 文件中加入的不只是依赖关系，包括生成的命令也可一并加入，让每个 .d 文件都包含一个完赖的规则。一旦我们完成这个工作，接下来，我们就要把这些自动生成的规则放进我们的主Makefile中。我们可以使用Makefile的“include”命令，来引入别的Makefile文件（前面讲过），例如：
+#+begin_src makefile
+sources = foo.c bar.c
+
+include $(sources:.c=.d)
+#+END_SRC
+上述语句中的 $(sources:.c=.d) 中的 .c=.d 的意思是做一个替换，把变量 $(sources) 所有 .c 的字串都替换成 .d ，关于这个“替换”的内容，在后面我会有更为详细的讲述。当然，你得注意次序，因为include是按次序来载入文件，最先载入的 .d 文件中的目标会成为默认目标。
+** 参考文献
+[[https://seisman.github.io/how-to-write-makefile/introduction.html][跟我一起写Makefile]]
 
 * mkdir
 Linux mkdir（英文全拼：make directory）命令用于创建目录。
@@ -3765,6 +5290,7 @@ mkdir [-p] dirName
 
 参数说明：
 -p 确保目录名称存在，不存在的就建一个。
+
 * mount
 #+begin_src bash
 mount [-t vfstype] [-o options] device dir
@@ -7385,6 +8911,20 @@ PermitRootLogin no
 为：PermitRootLogin yes
 
 并重启ssh服务：service sshd restart
+** SSH-Key authentication fails
+root用户无法用密钥登录的解决方法
+
+ssh -vvv root@10.0.12.28 查看连接详细信息，发现出现
+#+begin_src bash
+debug1: Offering public key: /c/Users/123/.ssh/id_rsa RSA SHA256:FBIuIq5fVuKYh0ncLnXiJryP/K+58ysh2fGdwVveU1I
+debug3: send packet: type 50
+debug2: we sent a publickey packet, wait for reply
+debug3: receive packet: type 51
+#+END_SRC
+这个是root用户目录下的.ssh文件夹以及authorized_keys文件的权限没有正确设置的原因
+
+*** 参考文章
+[[https://superuser.com/questions/1137438/ssh-key-authentication-fails][SSH-Key authentication fails]]
 ** 参考文章
 [[https://www.jianshu.com/p/1e793e386beb][ssh配置文件详解]]
 [[https://wangdoc.com/ssh/client.html][ssh教程]]
@@ -7631,7 +9171,9 @@ window 名称不用全局唯一，鉴定出一个 window 用的是 session 和 w
 多个客户端可以依附到同一个 session 上，
 
 session 没有 index 但是有名次，session 的名称必须唯一。
-** 会话 - 每个会话都是一个独立的工作区，其中包含一个或多个窗口
+** 会话
+每个会话都是一个独立的工作区，其中包含一个或多个窗口
+
 tmux 开始一个新的会话
 tmux new -s NAME -n window_name 以指定名称开始一个新的会话,-s指定会话名，-n指定窗口名
 tmux new 'emacs ~/.tmux.conf' 或者 tmux new -- emacs ~/.tmux.conf 启动其他程序替代启动 shell
@@ -7646,7 +9188,9 @@ tmux attach -d -t <session_name>. The “-d” option causes the session to be d
 <C-b> s 会话切换
 <C-b> w 会显示 session 和 session 下的 window ，并选中 session 下的 current window 。
 exit 退出会话
-** 窗口 - 相当于编辑器或是浏览器中的标签页，从视觉上将一个会话分割为多个部分
+** 窗口 
+相当于编辑器或是浏览器中的标签页，从视觉上将一个会话分割为多个部分
+
 <C-b> c 创建一个新的窗口，使用 <C-d>关闭
 tmux neww -n Window1 创建一个新的名为Window1的窗口
 <C-b> N 跳转到第 N 个窗口，注意每个窗口都是有编号的
@@ -7657,7 +9201,9 @@ tmux neww -n Window1 创建一个新的名为Window1的窗口
 <C-b> w 列出当前所有窗口
 <C-b> ? 列出所有快捷键
 
-** 面板 - 像 vim 中的分屏一样，面板使我们可以在一个屏幕里显示多个 shell
+** 面板
+像 vim 中的分屏一样，面板使我们可以在一个屏幕里显示多个 shell
+
 <C-b> " 水平分割
 <C-b> % 垂直分割
 <C-b> <方向> 切换到指定方向的面板，<方向> 指的是键盘上的方向键
@@ -8724,6 +10270,190 @@ watch -t -differences=cumulative uptime
 watch -n 60 from            # 监控mail
 watch -n 1 "df -i;df"       # 监测磁盘inode和block数目变化情况
 #+END_SRC
+* wget
+** 介绍
+Linux系统中的wget是一个下载文件的工具，它用在命令行下。对于Linux用户是必不可少的工具，我们经常要下载一些软件或从远程服务器恢复备份到本地服务器。wget支持HTTP，HTTPS和FTP协议，可以使用HTTP代理。所谓的自动下载是指，wget可以在用户退出系统的之后在后台执行。这意味这你可以登录系统，启动一个wget下载任务，然后退出系统，wget将在后台执行直到任务完成，相对于其它大部分浏览器在下载大量数据时需要用户一直的参与，这省去了极大的麻烦。
+
+wget 可以跟踪HTML页面上的链接依次下载来创建远程服务器的本地版本，完全重建原始站点的目录结构。这又常被称作”递归下载”。在递归下载的时候，wget 遵循Robot Exclusion标准(/robots.txt). wget可以在下载的同时，将链接转换成指向本地文件，以方便离线浏览。
+
+wget 非常稳定，它在带宽很窄的情况下和不稳定网络中有很强的适应性.如果是由于网络的原因下载失败，wget会不断的尝试，直到整个文件下载完毕。如果是服务器打断下载过程，它会再次联到服务器上从停止的地方继续下载。这对从那些限定了链接时间的服务器上下载大文件非常有用。
+
+用于从网络上下载资源，没有指定目录，下载资源回默认为当前目录。wget虽然功能强大，但是使用起来还是比较简单：
+
+wget优点：
+1）支持断点下传功能；这一点，也是网络蚂蚁和FlashGet当年最大的卖点，现在，Wget也可以使用此功能，那些网络不是太好的用户可以放心了；
+
+2）同时支持FTP和HTTP下载方式；尽管现在大部分软件可以使用HTTP方式下载，但是，有些时候，仍然需要使用FTP方式下载软件；
+
+3）支持代理服务器；对安全强度很高的系统而言，一般不会将自己的系统直接暴露在互联网上，所以，支持代理是下载软件必须有的功能；
+
+4）设置方便简单；可能，习惯图形界面的用户已经不是太习惯命令行了，但是，命令行在设置上其实有更多的优点，最少，鼠标可以少点很多次，也不要担心是否错点鼠标；
+
+5）程序小，完全免费；程序小可以考虑不计，因为现在的硬盘实在太大了；完全免费就不得不考虑了，即使网络上有很多所谓的免费软件，但是，这些软件的广告却不是我们喜欢的。
+** 参数
+*** 启动参数：
+-V, –version 显示wget的版本后退出
+
+-h, –help 打印语法帮助
+
+-b, –background 启动后转入后台执行
+
+-e, –execute=COMMAND 执行`.wgetrc’格式的命令，wgetrc格式参见/etc/wgetrc或~/.wgetrc
+*** 记录和输入文件参数：
+
+-o, –output-file=FILE 把记录写到FILE文件中
+
+-a, –append-output=FILE 把记录追加到FILE文件中
+
+-d, –debug 打印调试输出
+
+-q, –quiet 安静模式(没有输出)
+
+-v, –verbose 冗长模式(这是缺省设置)
+
+-nv, –non-verbose 关掉冗长模式，但不是安静模式
+
+-i, –input-file=FILE 下载在FILE文件中出现的URLs
+
+-F, –force-html 把输入文件当作HTML格式文件对待
+
+-B, –base=URL 将URL作为在-F -i参数指定的文件中出现的相对链接的前缀
+
+–sslcertfile=FILE 可选客户端证书
+
+–sslcertkey=KEYFILE 可选客户端证书的KEYFILE
+
+–egd-file=FILE 指定EGD socket的文件名
+*** 下载参数：
+
+–bind-address=ADDRESS 指定本地使用地址(主机名或IP，当本地有多个IP或名字时使用)
+
+-t, –tries=NUMBER 设定最大尝试链接次数(0 表示无限制).
+
+-O –output-document=FILE 把文档写到FILE文件中
+
+-nc, –no-clobber 不要覆盖存在的文件或使用.#前缀
+
+-c, –continue 接着下载没下载完的文件
+
+–progress=TYPE 设定进程条标记
+
+-N, –timestamping 不要重新下载文件除非比本地文件新
+
+-S, –server-response 打印服务器的回应
+
+–spider 不下载任何东西
+
+-T, –timeout=SECONDS 设定响应超时的秒数
+
+-w, –wait=SECONDS 两次尝试之间间隔SECONDS秒
+
+–waitretry=SECONDS 在重新链接之间等待1…SECONDS秒
+
+–random-wait 在下载之间等待0…2*WAIT秒
+
+-Y, –proxy=on/off 打开或关闭代理
+
+-Q, –quota=NUMBER 设置下载的容量限制
+
+–limit-rate=RATE 限定下载输率
+*** 目录参数：
+
+-nd –no-directories 不创建目录
+
+-x, –force-directories 强制创建目录
+
+-nH, –no-host-directories 不创建主机目录
+
+-P, –directory-prefix=PREFIX 将文件保存到目录 PREFIX/…
+
+–cut-dirs=NUMBER 忽略 NUMBER层远程目录
+
+*** HTTP 选项参数：
+
+–http-user=USER 设定HTTP用户名为 USER.
+
+–http-passwd=PASS 设定http密码为 PASS
+
+-C, –cache=on/off 允许/不允许服务器端的数据缓存 (一般情况下允许)
+
+-E, –html-extension 将所有text/html文档以.html扩展名保存
+
+–ignore-length 忽略 `Content-Length’头域
+
+–header=STRING 在headers中插入字符串 STRING
+
+–proxy-user=USER 设定代理的用户名为 USER
+
+–proxy-passwd=PASS 设定代理的密码为 PASS
+
+–referer=URL 在HTTP请求中包含 `Referer: URL’头
+
+-s, –save-headers 保存HTTP头到文件
+
+-U, –user-agent=AGENT 设定代理的名称为 AGENT而不是 Wget/VERSION
+
+–no-http-keep-alive 关闭 HTTP活动链接 (永远链接)
+
+–cookies=off 不使用 cookies
+
+–load-cookies=FILE 在开始会话前从文件 FILE中加载cookie
+
+–save-cookies=FILE 在会话结束后将 cookies保存到 FILE文件中
+*** FTP 选项参数：
+
+-nr, –dont-remove-listing 不移走 `.listing’文件
+
+-g, –glob=on/off 打开或关闭文件名的 globbing机制
+
+–passive-ftp 使用被动传输模式 (缺省值).
+
+–active-ftp 使用主动传输模式
+
+–retr-symlinks 在递归的时候，将链接指向文件(而不是目录)
+*** 递归下载参数：
+
+-r, –recursive 递归下载－－慎用!
+
+-l, –level=NUMBER 最大递归深度 (inf 或 0 代表无穷)
+
+–delete-after 在现在完毕后局部删除文件
+
+-k, –convert-links 转换非相对链接为相对链接
+
+-K, –backup-converted 在转换文件X之前，将之备份为 X.orig
+
+-m, –mirror 等价于 -r -N -l inf -nr
+
+-p, –page-requisites 下载显示HTML文件的所有图片
+
+递归下载中的包含和不包含(accept/reject)：
+
+-A, –accept=LIST 分号分隔的被接受扩展名的列表
+
+-R, –reject=LIST 分号分隔的不被接受的扩展名的列表
+
+-D, –domains=LIST 分号分隔的被接受域的列表
+
+–exclude-domains=LIST 分号分隔的不被接受的域的列表
+
+–follow-ftp 跟踪HTML文档中的FTP链接
+
+–follow-tags=LIST 分号分隔的被跟踪的HTML标签的列表
+
+-G, –ignore-tags=LIST 分号分隔的被忽略的HTML标签的列表
+
+-H, –span-hosts 当递归时转到外部主机
+
+-L, –relative 仅仅跟踪相对链接
+
+-I, –include-directories=LIST 允许目录的列表
+
+-X, –exclude-directories=LIST 不被包含目录的列表
+
+-np, –no-parent 不要追溯到父目录
+
+wget -S –spider url 不下载只显示过程
 * xargs（用来给命令传递参数）
 xargs（英文全拼： eXtended ARGuments）是给命令传递参数的一个过滤器，也是组合多个命令的一个工具。
 
@@ -9958,3 +11688,9 @@ name mangling可以通过extern "C"解决。C++有个特定的关键字用来声
 ** 参考文章
 [[https://blog.nowcoder.net/n/8e07e78a703c413c916d0f830b8ceda7][浅析静态库和动态库的区别]]
 [[https://www.cnblogs.com/skynet/p/3372855.html][C++静态库与动态库]]
+* 创建用户
+下面将创建用户 zyq01
+1. 输入命令：sudo useradd zyq01，回车，创建用户；
+2. 输入命令：ls，回车，查看用户是否创建成功（可以看到用户已经创建成功了）；
+3. 输入命令：sudo passwd zyq01，回车，设置登录用户密码；
+4. 输入命令：su zyq01，切换到新用户
