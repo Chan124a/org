@@ -1,0 +1,431 @@
+* 简介
+Ruby 是一种开源的面向对象程序设计的服务器端脚本语言，在 20 世纪 90 年代中期由日本的松本行弘（まつもとゆきひろ/Yukihiro Matsumoto）设计并开发。在 Ruby 社区，松本也被称为马茨（Matz）。Ruby 可运行于多种平台，如 Windows、MAC OS 和 UNIX 的各种版本。
+* Ruby环境
+** 常用的Ruby编辑器
+- 如果您是在 Windows 上进行编写，那么您可以使用任何简单的文本编辑器，比如 VSCode 或 Edit plus。
+- VIM（Vi IMproved）是一个简单的文本编辑器，几乎在所有的 Unix 上都是可用的，现在也能在 Windows 上使用。另外，您还可以使用您喜欢的 vi 编辑器来编写 Ruby 程序。
+- RubyWin 是一个针对 Windows 的 Ruby 集成开发环境（IDE）。
+- Ruby Development Environment （RDE） 对于 Windows 用户来说，也是一个很好的集成开发环境（IDE）。
+** 交互式 Ruby（IRb）
+交互式 Ruby（IRb）为体验提供了一个 shell。在 IRb shell 内，您可以逐行立即查看解释结果。
+
+这个工具会随着 Ruby 的安装自动带有，所以您不需要做其他额外的事情，IRb 即可正常工作。
+
+只需要在命令提示符中键入 irb，一个交互式 Ruby Session 将会开始，如下所示：
+
+#+BEGIN_SRC ruby 
+$irb
+irb 0.6.1(99/09/16)
+irb(main):001:0> def hello
+irb(main):002:1> out = "Hello World"
+irb(main):003:1> puts out
+irb(main):004:1> end
+nil
+irb(main):005:0> hello
+Hello World
+nil
+irb(main):006:0>
+
+#+END_SRC
+* Ruby 中文编码
+用 Ruby 输出 "Hello, World!"，英文没有问题，但是如果你输出中文字符"你好，世界"就有可能会碰到中文编码问题。
+
+Ruby 文件中如果未指定编码，在执行过程会出现报错：
+
+#+BEGIN_SRC ruby 
+#!/usr/bin/ruby -w
+
+puts "你好，世界！";
+
+#+END_SRC
+以上程序执行输出结果为：
+
+#+begin_src bash
+invalid multibyte char (US-ASCII) 
+#+END_SRC
+以上出错信息显示了 Ruby 使用用 ASCII 编码来读源码，中文会出现乱码，解决方法为只要在文件开头加入 # -*- coding: UTF-8 -*-（EMAC写法） 或者 #coding=utf-8 就行了。
+
+实例:
+
+#+BEGIN_SRC ruby
+#!/usr/bin/ruby -w
+# -*- coding: UTF-8 -*-
+ 
+puts "你好，世界！";
+
+#+END_SRC
+
+运行实例,输出结果为：
+
+#+begin_src bash
+你好，世界！
+#+END_SRC
+
+所以如果大家再学习过程中，源代码文件中，若包含中文编码，则需要注意两点：
+1. 必须在首行添加 # -*- coding: UTF-8 -*-,告诉解释器使用utf-8来解析源码。
+2. 必须设置编辑器保存文件的编码为utf-8。
+
+* Ruby 命令行选项
+Ruby 一般是从命令行运行，方式如下：
+
+#+begin_src bash
+$ ruby [ options ] [.] [ programfile ] [ arguments ... ]
+#+END_SRC
+解释器可以通过下列选项被调用，来控制解释器的环境和行为。
+
+#+BEGIN_EXAMPLE
+选项	描述
+-a	与 -n 或 -p 一起使用时，可以打开自动拆分模式(auto split mode)。请查看 -n 和 -p 选项。
+-c	只检查语法，不执行程序。
+-C dir	在执行前改变目录（等价于 -X）。
+-d	启用调试模式（等价于 -debug）。
+-F pat	指定 pat 作为默认的分离模式（$;）。
+-e prog	指定 prog 作为程序在命令行中执行。可以指定多个 -e 选项，用来执行多个程序。
+-h	显示命令行选项的一个概览。
+-i [ ext]	把文件内容重写为程序输出。原始文件会被加上扩展名 ext 保存下来。如果未指定 ext，原始文件会被删除。
+-I dir	添加 dir 作为加载库的目录。
+-K [ kcode]	指定多字节字符集编码。e 或 E 对应 EUC（extended Unix code），s 或 S 对应 SJIS（Shift-JIS），u 或 U 对应 UTF-8，a、A、n 或 N 对应 ASCII。
+-l	启用自动行尾处理。从输入行取消一个换行符，并向输出行追加一个换行符。
+-n	把代码放置在一个输入循环中（就像在 while gets; ... end 中一样）。
+-0[ octal]	设置默认的记录分隔符（$/）为八进制。如果未指定 octal 则默认为 \0。
+-p	把代码放置在一个输入循环中。在每次迭代后输出变量 $_ 的值。
+-r lib	使用 require 来加载 lib 作为执行前的库。
+-s	解读程序名称和文件名参数之间的匹配模式 -xxx 的任何参数作为开关，并定义相应的变量。
+-T [level]	设置安全级别，执行不纯度测试（如果未指定 level，则默认值为 1）。
+-v	显示版本，并启用冗余模式。
+-w	启用冗余模式。如果未指定程序文件，则从 STDIN 读取。
+-x [dir]	删除 #!ruby 行之前的文本。如果指定了 dir，则把目录改变为 dir。
+-X dir	在执行前改变目录（等价于 -C）。
+-y	启用解析器调试模式。
+--copyright	显示版权声明。
+--debug	启用调试模式（等价于 -d）。
+--help	显示命令行选项的一个概览（等价于 -h）。
+--version	显示版本。
+--verbose	启用冗余模式（等价于 -v）。设置 $VERBOSE 为 true。
+--yydebug	启用解析器调试模式（等价于 -y）。
+
+#+END_EXAMPLE
+单字符的命令行选项可以组合使用。下面两行表达了同样的意思：
+
+#+begin_src bash
+$ ruby -ne 'print if /Ruby/' /usr/share/bin
+
+$ ruby -n -e 'print if /Ruby/' /usr/share/bin
+#+END_SRC
+
+* Ruby 环境变量
+Ruby 解释器使用下列环境变量来控制它的行为。ENV 对象包含了所有当前设置的环境变量列表。
+#+BEGIN_EXAMPLE
+变量	描述
+DLN_LIBRARY_PATH	动态加载模块搜索的路径。
+HOME	当没有参数传递给 Dir::chdir 时，要移动到的目录。也用于 File::expand_path 来扩展 "~"。
+LOGDIR	当没有参数传递给 Dir::chdir 且未设置环境变量 HOME 时，要移动到的目录。
+PATH	执行子进程的搜索路径，以及在指定 -S 选项后，Ruby 程序的搜索路径。每个路径用冒号分隔（在 DOS 和 Windows 中用分号分隔）。
+RUBYLIB	库的搜索路径。每个路径用冒号分隔（在 DOS 和 Windows 中用分号分隔）。
+RUBYLIB_PREFIX	用于修改 RUBYLIB 搜索路径，通过使用格式 path1;path2 或 path1path2，把库的前缀 path1 替换为 path2。
+RUBYOPT	传给 Ruby 解释器的命令行选项。在 taint 模式时被忽略（其中，$SAFE 大于 0）。
+RUBYPATH	指定 -S 选项后，Ruby 程序的搜索路径。优先级高于 PATH。在 taint 模式时被忽略（其中，$SAFE 大于 0）。
+RUBYSHELL	指定执行命令时所使用的 shell。如果未设置该环境变量，则使用 SHELL 或 COMSPEC。
+#+END_EXAMPLE
+
+对于 Unix，使用 env 命令来查看所有环境变量的列表。
+#+begin_src bash
+HOSTNAME=ip-72-167-112-17.ip.secureserver.net
+RUBYPATH=/usr/bin
+SHELL=/bin/bash
+TERM=xterm
+HISTSIZE=1000
+SSH_CLIENT=122.169.131.179 1742 22
+SSH_TTY=/dev/pts/1
+USER=amrood
+JRE_HOME=/usr/java/jdk/jre
+J2RE_HOME=/usr/java/jdk/jre
+PATH=/usr/local/bin:/bin:/usr/bin:/home/guest/bin
+MAIL=/var/spool/mail/guest
+PWD=/home/amrood
+INPUTRC=/etc/inputrc
+JAVA_HOME=/usr/java/jdk
+LANG=C
+HOME=/root
+SHLVL=2
+JDK_HOME=/usr/java/jdk
+LOGDIR=/usr/log/ruby
+LOGNAME=amrood
+SSH_CONNECTION=122.169.131.179 1742 72.167.112.17 22
+LESSOPEN=|/usr/bin/lesspipe.sh %s
+RUBYLIB=/usr/lib/ruby
+G_BROKEN_FILENAMES=1
+_=/bin/env
+#+END_SRC
+
+* Ruby 语法
+让我们编写一个简单的 Ruby 程序。所有的 Ruby 文件扩展名都是 .rb。所以，把下面的源代码放在 test.rb 文件中。
+
+实例:
+#+BEGIN_SRC ruby
+#!/usr/bin/ruby -w
+ 
+puts "Hello, Ruby!";
+#+END_SRC
+
+在这里，假设您的 /usr/bin 目录下已经有可用的 Ruby 解释器。现在，尝试运行这个程序，如下所示：
+#+begin_src bash
+$ ruby test.rb
+#+END_SRC
+这将会产生下面的结果：
+#+BEGIN_EXAMPLE
+Hello, Ruby!
+#+END_EXAMPLE
+您已经看到了一个简单的 Ruby 程序，现在让我们看看一些 Ruby 语法相关的基本概念：
+
+** Ruby 程序中的空白
+在 Ruby 代码中的空白字符，如空格和制表符一般会被忽略，除非当它们出现在字符串中时才不会被忽略。
+然而，有时候它们用于解释模棱两可的语句。当启用 -w 选项时，这种解释会产生警告。
+
+实例：
+- a + b 被解释为 a+b （这是一个局部变量）
+- a  +b 被解释为 a(+b) （这是一个方法调用）
+
+** Ruby 程序中的行尾
+Ruby 把分号和换行符解释为语句的结尾。但是，如果 Ruby 在行尾遇到运算符，比如 +、- 或反斜杠，它们表示一个语句的延续。
+
+** Ruby 标识符
+标识符是变量、常量和方法的名称。
+Ruby 标识符是大小写敏感的。
+这意味着 Ram 和 RAM 在 Ruby 中是两个不同的标识符。
+
+Ruby 标识符的名称可以包含字母、数字和下划线字符（ _ ）。
+
+** 保留字
+下表列出了 Ruby 中的保留字。这些保留字不能作为常量或变量的名称。但是，它们可以作为方法名。
+#+BEGIN_EXAMPLE
+BEGIN	do	next	then
+END	else	nil	true
+alias	elsif	not	undef
+and	end	or	unless
+begin	ensure	redo	until
+break	false	rescue	when
+case	for	retry	while
+class	if	return	yield
+def	in	self	__FILE__
+defined?	module	super	__LINE__
+#+END_EXAMPLE
+
+** Ruby 中的 Here Document
+"Here Document" 是指建立多行字符串。
+在 << 之后，您可以指定一个字符串或标识符来终止字符串，且当前行之后直到终止符为止的所有行是字符串的值。
+
+如果终止符用引号括起，引号的类型决定了面向行的字符串类型。请注意<< 和终止符之间必须没有空格。
+
+下面是不同的实例：
+#+BEGIN_SRC ruby
+#!/usr/bin/ruby -w
+# -*- coding : utf-8 -*-
+ 
+print <<EOF
+    这是第一种方式创建here document 。
+    多行字符串。
+EOF
+ 
+print <<"EOF";                # 与上面相同
+    这是第二种方式创建here document 。
+    多行字符串。
+EOF
+ 
+print <<`EOC`                 # 执行命令
+    echo hi there
+    echo lo there
+EOC
+ 
+print <<"foo", <<"bar"          # 您可以把它们进行堆叠
+    I said foo.
+foo
+    I said bar.
+bar
+
+#+END_SRC
+这将产生以下结果：
+#+begin_src bash
+这是第一种方式创建here document 。
+多行字符串。
+这是第二种方式创建here document 。
+多行字符串。
+hi there
+lo there
+I said foo.
+I said bar.
+#+END_SRC
+
+** Ruby BEGIN 语句
+语法
+#+BEGIN_SRC ruby
+BEGIN {
+   code
+}
+#+END_SRC
+声明 code 会在程序运行之前被调用。
+
+实例:
+#+BEGIN_SRC ruby
+#!/usr/bin/ruby
+ 
+puts "这是主 Ruby 程序"
+ 
+BEGIN {
+   puts "初始化 Ruby 程序"
+}
+#+END_SRC
+这将产生以下结果：
+#+BEGIN_EXAMPLE
+初始化 Ruby 程序
+这是主 Ruby 程序
+#+END_EXAMPLE
+
+** Ruby END 语句
+语法
+#+BEGIN_SRC ruby
+END {
+   code
+}
+
+#+END_SRC
+声明 code 会在程序的结尾被调用。
+
+实例
+#+BEGIN_SRC ruby
+#!/usr/bin/ruby
+ 
+puts "这是主 Ruby 程序"
+ 
+END {
+   puts "停止 Ruby 程序"
+}
+BEGIN {
+   puts "初始化 Ruby 程序"
+}
+
+#+END_SRC
+这将产生以下结果：
+#+BEGIN_EXAMPLE
+初始化 Ruby 程序
+这是主 Ruby 程序
+停止 Ruby 程序
+#+END_EXAMPLE
+
+** Ruby 注释
+注释会对 Ruby 解释器隐藏一行，或者一行的一部分，或者若干行。
+您可以在行首使用字符（ # ）进行注释
+
+下面是另一种形式。这种块注释会对解释器隐藏 =begin/=end 之间的行：
+#+BEGIN_SRC ruby
+=begin
+这是注释。
+这也是注释。
+这也是注释。
+这还是注释。
+=end
+#+END_SRC
+* Ruby 类案例
+下面将创建一个名为 Customer 的 Ruby 类，声明两个方法：
+
+display_details：该方法用于显示客户的详细信息。
+total_no_of_customers：该方法用于显示在系统中创建的客户总数量。
+
+实例
+#+BEGIN_SRC ruby
+#!/usr/bin/ruby
+ 
+class Customer
+   @@no_of_customers=0
+   def initialize(id, name, addr)
+      @cust_id=id
+      @cust_name=name
+      @cust_addr=addr
+   end
+   def display_details()
+      puts "Customer id #@cust_id"
+      puts "Customer name #@cust_name"
+      puts "Customer address #@cust_addr"
+    end
+    def total_no_of_customers()
+       @@no_of_customers += 1
+       puts "Total number of customers: #@@no_of_customers"
+    end
+end
+display_details 方法包含了三个 puts 语句，显示了客户 ID、客户名字和客户地址。其中，puts 语句：
+
+puts "Customer id #@cust_id"
+#+END_SRC
+将在一个单行上显示文本 Customer id 和变量 @cust_id 的值。
+
+当您想要在一个单行上显示实例变量的文本和值时，您需要在 puts 语句的变量名前面放置符号（#）。文本和带有符号（#）的实例变量应使用双引号标记。
+
+第二个方法，total_no_of_customers，包含了类变量 @@no_of_customers。表达式 @@no_of_ customers+=1 在每次调用方法 total_no_of_customers 时，把变量 no_of_customers 加 1。通过这种方式，您将得到类变量中的客户总数量。
+
+现在创建两个客户，如下所示：
+#+BEGIN_SRC ruby
+cust1=Customer.new("1", "John", "Wisdom Apartments, Ludhiya")
+cust2=Customer.new("2", "Poul", "New Empire road, Khandala")
+#+END_SRC
+在这里，我们创建了 Customer 类的两个对象，cust1 和 cust2，并向 new 方法传递必要的参数。当 initialize 方法被调用时，对象的必要属性被初始化。
+
+一旦对象被创建，您需要使用两个对象来调用类的方法。如果您想要调用方法或任何数据成员，您可以编写代码，如下所示：
+#+BEGIN_SRC ruby
+cust1.display_details()
+cust1.total_no_of_customers()
+#+END_SRC
+对象名称后总是跟着一个点号，接着是方法名称或数据成员。我们已经看到如何使用 cust1 对象调用两个方法。使用 cust2 对象，您也可以调用两个方法，如下所示：
+#+BEGIN_SRC ruby
+cust2.display_details()
+cust2.total_no_of_customers()
+#+END_SRC
+保存并执行代码
+现在，把所有的源代码放在 main.rb 文件中，如下所示：
+
+实例:
+#+BEGIN_SRC ruby
+#!/usr/bin/ruby
+ 
+class Customer
+   @@no_of_customers=0
+   def initialize(id, name, addr)
+      @cust_id=id
+      @cust_name=name
+      @cust_addr=addr
+   end
+   def display_details()
+      puts "Customer id #@cust_id"
+      puts "Customer name #@cust_name"
+      puts "Customer address #@cust_addr"
+   end
+   def total_no_of_customers()
+      @@no_of_customers += 1
+      puts "Total number of customers: #@@no_of_customers"
+   end
+end
+ 
+# 创建对象
+cust1=Customer.new("1", "John", "Wisdom Apartments, Ludhiya")
+cust2=Customer.new("2", "Poul", "New Empire road, Khandala")
+ 
+# 调用方法
+cust1.display_details()
+cust1.total_no_of_customers()
+cust2.display_details()
+cust2.total_no_of_customers()
+#+END_SRC
+接着，运行程序，如下所示：
+#+begin_src bash
+$ ruby main.rb
+#+END_SRC
+这将产生以下结果：
+#+begin_src bash
+Customer id 1
+Customer name John
+Customer address Wisdom Apartments, Ludhiya
+Total number of customers: 1
+Customer id 2
+Customer name Poul
+Customer address New Empire road, Khandala
+Total number of customers: 2
+#+END_SRC

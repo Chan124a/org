@@ -1,4 +1,3 @@
-# -*- mode: Org; org-download-image-dir: "~/Pictures/foo"; -*-
 * vultr搭建ss
 
 先连接到云服务器上
@@ -50,3 +49,1428 @@ PAC模式：即只有一部分网站，在访问的时候，会翻墙访问。�
 
 全局模式：所有网站都会翻墙访问，这就导致了一些国内站也翻墙访问，速度反而不如不翻墙访问。
 ** 安装bbr加速服务
+* vulte更换节点
+Vultr是一家国际知名的美国云主机提供商，每个月最低只需要2.5美刀即可使用上其云主机服务。因Vultr提供日本东京节点的服务器，国内访问延时非常小，所以受到了很多国内站长的欢迎。国内站长的大量涌入，以及国内搭梯子的需求，是的Vultr越来越多的IP地址被拦到了长城外面。假如你再Vultr使用的某个VPS主机IP地址被拦截，可以尝试使用Vultr的快照功能（使用快照功能备份原VPS，再通过快照创建一个新的VPS），快速实现IP地址更换。具体步骤如下：
+
+一、使用Vultr VPS的快照（Snapshot）功能，备份原服务器全部内容。
+
+1、点击选择你要快照备份的服务器
+
+Vultr VPS更换IP地址教程https://res.duoluodeyu.com/wp-content/uploads/2017/10/vultrcip-1-400x59.jpg
+
+2、点击选择“Snapshots”，在Label处输入快照名称，点击“Take Snapshot”创建快照。
+
+Vultr VPS更换IP地址教程
+
+3、也可以在首页点击“Snapshots”，点击“Add Snapshot”。
+
+Vultr VPS更换IP地址教程
+
+4、选择要备份的服务器，在Label处输入快照名称，点击“Take Snapshot”创建快照。
+
+Vultr VPS更换IP地址教程
+
+5、等待Vultr自动完成快照备份，时间稍微有点长，Status显示“Available”及标示快照备份完成。
+
+Vultr VPS更换IP地址教程
+
+二、点击+号“Deploy New Server”,在“Server Type”处点击“Snapshot”，选择上一步创建的快照Snapshot”。
+
+Vultr VPS更换IP地址教程
+
+其他信息按照你自己的需求选择、勾选，最后点击“Deploy Now”完成新服务器的创建。
+
+登陆新服务器确认IP地址及原服务器的各项服务运行正常后即可将原VPS删除。至此即完成Vultr VPS IP地址的更换。当然如果你是土豪，也可以使用Vultr的Reserved IP功能，具体可查看：Vultr Reserved IPs功能介绍及使用方法
+
+快速访问Vultr官网
+
+在更换Vultr IP地址的过程中，如遇到任何问题，欢迎在页面下留言反馈。
+* v2ray
+** 简介
+V2Ray，是Victoria Raymond以及其社区团队开发的Project V下的一个工具。
+Project V是一个工具集合，包含一系列构建特定网络环境工具的项目，号称可以帮助其使用者打造专属的基础通信网络。
+V2Ray主要负责网络协议和功能的实现，与其它Project V通信。
+V2Ray可以单独运行，也可以和其它工具配合，以提供简便的操作流程。开发过程主要使用Go语言，Core采用MIT许可证并开放源代码。
+
+在中国大陆，本工具广泛用于突破防火长城（GFW），以访问被封锁和屏蔽的内容。
+** 运行原理
+V2Ray的运行原理与其他代理工具基本相同，使用特定的中转服务器完成数据传输。
+例如，用户无法直接访问Google，YouTube等网站，但代理服务器可以访问，且用户可以直接连接代理服务器，那么用户就可以通过特定软件连接代理服务器，然后由代理服务器获取网站内容并回传给用户，从而实现代理上网的效果。
+服务器和客户端软件会要求提供用户ID（GUID）和加密方式，双方一致后才能成功连接（VMess协议能够自适应客户端采用的加密方式）。
+连接到服务器后，客户端会在本机构建一个本地Socks5代理（或VPN、HTTP、透明代理等）。
+浏览网络时，客户端通过这个Socks5（或其他形式）代理收集网络流量，然后再经混淆加密发送到服务器端，以防网络流量被识别和拦截，反之亦然。
+
+V2Ray 定位为一个平台，任何开发者都可以利用 V2Ray 提供的模块开发出新的代理软件。
+** 主要特性
+- 多入口多出口：一个V2Ray进程可并发支持多个入站和出站协议，每个协议可独立工作。
+- 定制化路由：入站流量可按配置由不同地出口发出。轻松实现按区域或按域名分流，以达到最优的网络性能。
+- 多协议支持：V2Ray 可同时开启多个协议支持，包括Socks、HTTP、Shadowsocks、VMess、Trojan和VLESS等。每个协议可单独设置传输载体，比如TCP、mKCP和WebSocket等。
+- 隐蔽性：V2Ray的节点可以伪装成正常的网站（HTTPS），将其流量与正常的网页流量混淆，以避开第三方干扰。
+- 反向代理：通用的反向代理支持，可实现内网穿透功能。
+- 多平台支持：原生支持所有常见平台，如Windows、macOS和Linux，并已有第三方支持移动平台。
+** 衍生项目
+*** Project X
+2020年11月，因为开源许可证等原因,XTLS被V2Ray社区从V2ray core移除，VLESS及XTLS的作者和支持者基于V2Ray另行组建了Project X 组织 ，开发了基于V2Ray的衍生版本Xray。
+该软件完全兼容V2Ray的配置文件和传输协议，由于Project X社区非常活跃，大部分新版图形化客户端已支持Xray。
+*** V2Fly
+由开源社区在原作者失踪后重组成立。
+
+其于2019年6月2日表示：“由于原开发者长期不上线，其他维护者没有完整权限，为了方便维护，我们创建了新的organization：https://github.com/v2fly  
+原organization中的仓库：v2ray/v2ray-core 将会一直同步更新。”
+
+而实际上原仓库已停止同步更新，所有工作转移至v2fly/v2ray-core仓库下。
+*** 由V2Ray衍生的图形客户端
+由于V2Ray、Xray项目本身开源，所以在Github等网站上有兼容或包含V2Ray、Xray核心而开发的图形化代理客户端，
+如Qv2ray （使用Qt/C++开发的兼容多种平台和多种协议的代理客户端）、
+SagerNet （包含v2ray-core的Android代理客户端，并能通过添加插件支持Brook、Hysteria、NaiveProxy等多种代理协议）、
+AnXray（包含xray-core的Android代理客户端）、
+v2rayNG （包含v2ray-core和xray-core的Android代理客户端）、
+v2rayN （包含v2ray-core和xray-core的Windows代理客户端）等。
+** V2Ray 跟 Shadowsocks 有什么区别？
+区别还是有的，Shadowsocks 只是一个简单的代理工具，而 V2Ray 定位为一个平台，任何开发者都可以利用 V2Ray 提供的模块开发出新的代理软件。
+
+了解 Shadowsocks 历史的同学都知道，Shadowsocks 是 clowwindy 开发的自用的软件，开发的初衷只是为了让自己能够简单高效地科学上网，自己使用了很长一段时间后觉得不错才共享出来的。
+V2Ray 是 clowwindy 被喝茶之后 V2Ray 项目组为表示抗议开发的，一开始就致力于让大家更好更快的科学上网。
+
+由于出生时的历史背景不同，导致了它们性格特点的差异。
+
+简单来说，Shadowsocks 功能单一，V2Ray 功能强大。听起来似乎有点贬低 Shadowsocks 呢？当然不！换一个角度来看，Shadowsocks 简单好上手，V2Ray 复杂配置多。
+** 工作机制
+*** 单服务器模式
+和其它的网络代理工具一样，你需要在一台配置了 V2Ray 的服务器，然后在自己的设备上安装 V2Ray 客户端，然后即可流畅地访问互联网。
+
+#+DOWNLOADED: screenshot @ 2022-07-24 15:20:40
+[[file:images/%E7%BF%BB%E5%A2%99/v2ray/2022-07-24_15-20-40_screenshot.png]]
+
+一个 V2Ray 服务器可同时支持多台设备，使用不同的代理协议访问。同时，经过合理的配置，V2Ray 可以识别并区分需要代理和不需要代理的流量，直连的流量不需要绕路。
+*** 桥接模式
+如果你不想在每一台设备上都配置路由，你也可以设置一台中转服务器，用于接收客户端发来的所有流量，然后在服务器中进行转发判断。
+
+#+DOWNLOADED: screenshot @ 2022-07-24 15:20:50
+[[file:images/%E7%BF%BB%E5%A2%99/v2ray/2022-07-24_15-20-50_screenshot.png]]
+
+*** 工作原理
+在配置 V2Ray 之前，不妨先来看一下 V2Ray 的工作原理，以下是单个 V2Ray 进程的内部结构示意图。多个 V2Ray 之间互相独立，互不影响。
+
+V2Ray 使用 inbound(传入) 和 outbound(传出) 的结构，
+这样的结构非常清晰地体现了数据包的流动方向，同时也使得 V2Ray 功能强大复杂的同时而不混乱，清晰明了。
+形象地说，我们可以把 V2Ray 当作一个盒子，这个盒子有入口和出口(即 inbound 和 outbound)，我们将数据包通过某个入口放进这个盒子里，然后这个盒子以某种机制决定这个数据包从哪个出口吐出来。
+以这样的角度理解的话，
+V2Ray 做客户端，则 inbound 接收来自浏览器数据，由 outbound 发出去(通常是发到 V2Ray 服务器)；
+V2Ray 做服务器，则 inbound 接收来自 V2Ray 客户端的数据，由 outbound 发出去(通常是如 Google 等想要访问的目标网站)。
+
+#+DOWNLOADED: screenshot @ 2022-07-24 15:21:01
+[[file:images/%E7%BF%BB%E5%A2%99/v2ray/2022-07-24_15-21-01_screenshot.png]]
+
+需要配置至少一个入站协议（Inbound）和一个出站协议（Outbound）才可以正常工作。
+- 入站协议负责与客户端（如浏览器）通信：入站协议通常可以配置用户认证，如 ID 和密码等；入站协议收到数据之后，会交给分发器（Dispatcher）进行分发；
+- 出站协议负责将数据发给服务器，如另一台主机上的 V2Ray。当有多个出站协议时，可以配置路由（Routing）来指定某一类流量由某一个出站协议发出。路由会在必要时查询 DNS 以获取更多信息来进行判断。
+
+无论是客户端还是服务器，配置文件都由两部分内容组成： inbounds 和 outbounds。V2Ray 没有使用常规代理软件的 C/S（即客户端/服务器）结构，它既可以当做服务器也可以作为客户端。
+于是我们可以从另一个角度来理解，认为每一个 V2Ray 都是一个节点，inbound 是关于如何与上一个节点连接的配置，outbound 是关于如何与下一个节点连接的配置。
+对于第一个节点，inbound 与浏览器连接；对于最后一个节点，outbound与目标网站连接。
+inbounds 和 outbounds 是 inbound 和 outbound 的集合，意味着每一个 V2Ray 节点都可以有多个入口和出口。
+
+** 新手上路
+在下载并安装了 V2Ray 之后，你需要对它进行一下配置。这里介绍一下简单的配置方式，只是为了演示，如需配置更复杂的功能，请参考后续的配置文件说明。
+
+*** 客户端
+在你的 PC （或手机）中，你需要运行 V2Ray 并使用下面的配置：
+#+begin_src bash
+{
+  "inbounds": [{
+    "port": 1080,  // SOCKS 代理端口，在浏览器中需配置代理并指向这个端口
+    "listen": "127.0.0.1",
+    "protocol": "socks",
+    "settings": {
+      "udp": true
+    }
+  }],
+  "outbounds": [{
+    "protocol": "vmess",
+    "settings": {
+      "vnext": [{
+        "address": "server", // 服务器地址，请修改为你自己的服务器 ip 或域名
+        "port": 10086,  // 服务器端口
+        "users": [{ "id": "b831381d-6324-4d53-ad4f-8cda48b30811" }]
+      }]
+    }
+  },{
+    "protocol": "freedom",
+    "tag": "direct",
+    "settings": {}
+  }],
+  "routing": {
+    "domainStrategy": "IPOnDemand",
+    "rules": [{
+      "type": "field",
+      "ip": ["geoip:private"],
+      "outboundTag": "direct"
+    }]
+  }
+}
+#+END_SRC
+上述配置唯一要改的地方就是你的服务器 IP，配置中已注明。上述配置会把除了局域网（比如访问路由器）之外的所有流量转发到你的服务器。
+
+在配置当中，有一个 id (在这里的例子是 b831381d-6324-4d53-ad4f-8cda48b30811)，作用类似于 Shadowsocks 的密码(password), VMess 的 id 的格式必须与 UUID 格式相同。
+
+相对应的 VMess 传入传出的 id 必须相同
+由于 id 使用的是 UUID 的格式，我们可以使用任何 UUID 生成工具生成 UUID 作为这里的 id。比如 [[https://www.uuidgenerator.net/][UUID Generator]] 这个网站，只要一打开或者刷新这个网页就可以得到一个 UUID。或者可以在 Linux 使用命令 cat /proc/sys/kernel/random/uuid 生成。
+
+客户端配置中的 inbounds，port 为 1080，即 V2Ray 监听了一个端口 1080，协议是 socks。之前我们已经把浏览器的代理设置好了（SOCKS Host: 127.0.0.1，Port: 1080），假如访问了 google.com，浏览器就会发出一个数据包打包成 socks 协议发送到本机（127.0.0.1指的本机，localhost）的 1080 端口，这个时候数据包就会被 V2Ray 接收到。
+
+再看 outbounds，protocol 是 vmess，说明 V2Ray 接收到数据包之后要将数据包打包成 VMess 协议并且使用预设的 id 加密（这个例子 id 是 b831381d-6324-4d53-ad4f-8cda48b30811），然后发往服务器地址为 serveraddr.com 的 10086 端口。服务器地址 address 可以是域名也可以是 IP，只要正确就可以了。
+*** 服务器
+然后你需要一台防火墙外的服务器，来运行服务器端的 V2Ray。配置如下：
+#+begin_src bash
+{
+  "inbounds": [{
+    "port": 10086, // 服务器监听端口，必须和上面的一样
+    "protocol": "vmess", // 主传入协议
+    "settings": {
+      "clients": [{ "id": "b831381d-6324-4d53-ad4f-8cda48b30811" }] // 用户 ID，客户端与服务器必须相同
+    }
+  }],
+  "outbounds": [{
+    "protocol": "freedom",// 主传出协议
+    "settings": {}
+  }]
+}
+#+END_SRC
+服务器的配置中需要确保 id 和端口与客户端一致，就可以正常连接了。
+
+服务器配置的 id 是 b831381d-6324-4d53-ad4f-8cda48b30811，所以 V2Ray 服务器接收到客户端发来的数据包时就会尝试用 b831381d-6324-4d53-ad4f-8cda48b30811 解密，如果解密成功再看一下时间对不对，对的话就把数据包发到 outbound 去，outbound.protocol 是 freedom（freedom 的中文意思是自由，在这里姑且将它理解成直连吧），数据包就直接发到 google.com 了。
+
+实际上数据包的流向就是：
+#+BEGIN_EXAMPLE
+{浏览器} <--(socks)--> {V2Ray 客户端 inbound <-> V2Ray 客户端 outbound} <--(VMess)-->  {V2Ray 服务器 inbound <-> V2Ray 服务器 outbound} <--(Freedom)--> {目标网站}
+#+END_EXAMPLE
+
+有人疑惑请求发出去后数据怎么回来，毕竟大多数的场景是下载。这个其实不算是问题，既然请求通过 V2Ray 发出去了，响应数据也会通过 V2Ray 原路返回（也许会有朋友看到这话会马上反驳说不一定是原路返回的，有这种想法的估计是非常了解 TCP/IP 协议的，何必较这个劲，这是底层的东西，又掌控在运营商手里，从应用层理解原路返回又有何不可）。
+*** 运行
+在 Windows 和 macOS 中，配置文件通常是 V2Ray 同目录下的 config.json 文件。直接运行 v2ray 或 v2ray.exe 即可。
+
+在 Linux 中，配置文件通常位于 /etc/v2ray/config.json 文件。运行 v2ray --config=/etc/v2ray/config.json，或使用 systemd 等工具把 V2Ray 作为服务在后台运行。
+
+** 命令行参数
+
+*** V2Ray
+V2Ray 的程序文件的命令行参数如下：
+#+begin_src bash
+v2ray [-version] [-test] [-config=config.json] [-format=json]
+#+END_SRC
+
+**** -version
+
+只输出当前版本然后退出，不运行 V2Ray 主程序。
+
+**** -test
+
+测试配置文件有效性，如果有问题则输出错误信息，不运行 V2Ray 主程序。
+
+**** -config
+
+配置文件路径，可选的形式如下:
+- 本地路径，可以是一个绝对路径，或者相对路径。
+- "stdin:": 表示将从标准输入读取配置文件内容，调用者必须在输入完毕后关闭标准输入流。
+- 以http://或https://(均为小写)开头: V2Ray 将尝试从这个远程地址加载配置文件。
+
+#+BEGIN_EXAMPLE
+当-config没有指定时，V2Ray 将先后尝试从以下路径加载config.json:
+- 工作目录（Working Directory）
+- 环境变量中v2ray.location.asset所指定的路径
+#+END_EXAMPLE
+**** -format
+
+配置文件格式，可选的值有：
+- json: JSON 格式；
+- pb 或 protobuf: Protobuf 格式；
+
+*** V2Ctl
+V2Ctl 是一个集合，它有若干个子命令组成。全局的命令行形式如下：
+#+begin_src bash
+v2ctl <command> <options>
+#+END_SRC
+
+**** command
+
+子命令，有以下选项:
+- api: 调用 V2Ray 进程的远程控制指令。
+- config: 从标准输入读取 JSON 格式的配置，然后从标准输出打印 Protobuf 格式的配置。
+- cert: 生成 TLS 证书。
+- fetch: 抓取远程文件。
+- tlsping: (V2Ray 4.17+) 尝试进行 TLS 握手。
+- verify: 验证文件是否由 Project V 官方签名。
+- uuid: 输出一个随机的 UUID。
+
+*** V2Ctl Api
+v2ctl api [--server=127.0.0.1:8080] <Service.Method> <Request>
+
+调用 V2Ray 进程的远程控制指令。示例：
+
+v2ctl api --server=127.0.0.1:8080 LoggerService.RestartLogger ''
+
+*** V2Ctl Config
+v2ctl config
+
+此命令没有参数。它从标准输入读取 JSON 格式的配置，然后从标准输出打印 Protobuf 格式的配置。
+
+*** V2Ctl Cert
+v2ctl cert [--ca] [--domain=v2ray.com] [--expire=240h] [--name="V2Ray Inc"] [--org="V2Ray Inc] [--json] [--file=v2ray]
+
+生成一个 TLS 证书。
+
+**** --ca
+
+如果指定此选项，将会生成一个 CA 证书。
+
+**** --domain
+
+证书的 Alternative Name 项。该参数可以多次使用，来指定多个域名。比如--domain=v2ray.com --domain=v2ray.cool。
+
+**** --expire
+
+证书有效期。格式为 Golang 的时间长度。
+
+**** --name
+
+证书的 Command Name 项。
+
+**** --org
+
+证书的 Orgnization 项。
+
+**** --json
+
+将生成的证书以 V2Ray 支持的 JSON 格式输出到标准输出。默认开启。
+
+**** --file
+
+将证书以 PEM 格式输出到文件。当指定 --file=a 时，将生成 a_cert.pem 和 a_key.pem 两个文件。
+
+*** V2Ctl Fetch
+v2ctl fetch <url>
+
+抓取指定的 URL 的内容并输出，只支持 HTTP 和 HTTPS。
+
+*** V2Ctl TlsPing
+v2ctl tlsping <domain> --ip=[ip]
+
+向指定的域名发起 TLS 握手。
+
+**** domain
+
+目标域名
+
+**** --ip
+
+此域名的 IP 地址。如果未指定此参数，V2Ctl 将使用系统的 DNS 进行域名解析。
+
+*** V2Ctl Verify
+v2ctl verify [--sig=/path/to/sigfile] <filepath>
+
+此命令用于验证一个文件是否由 Project V 官方签名。
+
+**** --sig
+
+签名文件路径，默认值为待验证文件加入'.sig'后缀。
+
+**** filepath
+
+待验证文件路径。
+
+*** V2Ctl UUID
+v2ctl uuid
+
+此命令没有参数。每次运行都会输出一个新的 UUID。
+** 配置文件
+V2Ray 本身使用基于 Protobuf 的配置。
+由于 Protobuf 的文本格式不方便阅读，V2Ray 同时也支持 JSON 格式的配置。
+在运行之前，V2Ray 会自动将 JSON 转换为对应的 Protobuf。换言之，V2Ray 将来也可能会支持其它格式的配置。
+
+以下介绍一下基于 JSON 格式的配置。
+
+JSON，全称 JavaScript Object Notation，简而言之是 Javascript 中的对象（Object）。
+一个 JSON 文件包含一个完整的对象，以大括号“{”开头，大括号“}”结束。
+
+一个 JSON 对象包含一系列的键值对（Key-Value Pair），
+一个键是一个字符串（String），而值有多种类型，常见的有字符串（String）、数字（Number）、布尔（Bool）、数组（Array）和对象（Object）。
+
+下面是一个简单的 JSON 对象示例：
+#+BEGIN_SRC js
+{
+  "stringValue": "This is a string.",
+  "numberValue": 42,
+  "boolValue": true,
+  "arrayValue": ["this", "is", "a", "string", "array"],
+  "objectValue": {
+    "another": "object"
+  }
+}
+#+END_SRC
+
+V2Ray 的 JSON 格式支持注释，可使用“//”或者“/* */”来进行注释。在不支持注释的编辑器中可能被显示为“错误”，但实际上是可以正常使用的。
+*** JSON 数据类型
+这里介绍一下常用的数据类型，在之后其它的配置中会用到。
+
+boolean: true | false
+
+布尔值，只有true和false两种取值，不带引号。
+
+number
+
+数字，在 V2Ray 的使用中通常为非负整数，即0、53…… 数字在 JSON 格式中不带引号。
+
+string
+
+字符串，由引号包含的一串字符，如无特殊说明，字符的内容不限。
+
+array: []
+
+数组，由方括号包含的一组元素，如字符串数组表示为[string]。
+
+object: {}
+
+对象，一组键值对。样例见本文上方的示例。
+
+#+BEGIN_EXAMPLE
+通常一个键值对的后面需要有一个逗号","，但如果这个键值对后面紧跟一个大括号"｝"的话，则一定不能有逗号。
+#+END_EXAMPLE
+
+*** V2Ray 常用数据类型
+map: object {string:string}
+
+一组键值对，其类型在括号内指出。每一个键和值的类型对应相同。
+
+address: string
+
+字符串，表示一个 IP 地址或域名，形如："8.8.8.8" 或 "www.v2ray.com"
+
+address_port: string
+
+字符串，表示一个地址和端口，常见的形式如："8.8.8.8:53"，或者 "www.v2ray.com:80"。在一部分配置中，地址部分可以省略，如":443"。
+
+*** 配置生成器和模板
+V2Ray 项目目前尚没有官方维护模板合集或配置文件生成工具，如有需要，可以前往 神一样的工具们 章节查阅部分收录。
+
+*** 配置文件格式
+V2Ray 的配置文件形式如下，客户端和服务器通用一种形式，只是实际的配置不一样。
+#+BEGIN_SRC js
+{
+  "log": {},
+  "api": {},
+  "dns": {},
+  "stats": {},
+  "routing": {},
+  "policy": {},
+  "reverse": {},
+  "inbounds": [],
+  "outbounds": [],
+  "transport": {}
+}
+#+END_SRC
+log: LogObject :
+日志配置，表示 V2Ray 如何输出日志。
+
+api: ApiObject :
+内置的远程控置 API，详见远程控制配置。
+
+dns: DnsObject :
+内置的 DNS 服务器，若此项不存在，则默认使用本机的 DNS 设置。详见DNS 配置
+
+routing: RoutingObject :
+路由配置
+
+policy: PolicyObject :
+本地策略可进行一些权限相关的配置，详见本地策略
+
+inbounds: [InboundObject] :
+一个数组，每个元素是一个入站连接配置。
+
+outbounds: [OutboundObject] :
+一个数组，每个元素是一个出站连接配置。列表中的第一个元素作为主出站协议。当路由匹配不存在或没有匹配成功时，流量由主出站协议发出。
+
+transport: TransportObject :
+用于配置 V2Ray 如何与其它服务器建立和使用网络连接。详见底层传输配置
+
+stats: StatsObject :
+当此项存在时，开启统计信息。
+
+reverse: ReverseObject :
+反向代理配置。
+
+**** LogObject
+#+BEGIN_SRC js
+{
+  "access": "文件地址",
+  "error": "文件地址",
+  "loglevel": "warning"
+}
+#+END_SRC
+access: string
+
+访问日志的文件地址，其值是一个合法的文件地址，如"/tmp/v2ray/_access.log"（Linux）或者"C:\\Temp\\v2ray\\_access.log"（Windows）。当此项不指定或为空值时，表示将日志输出至 stdout。V2Ray 4.20 加入了特殊值none，即关闭access log。
+
+error: string
+
+错误日志的文件地址，其值是一个合法的文件地址，如"/tmp/v2ray/_error.log"（Linux）或者"C:\\Temp\\v2ray\\_error.log"（Windows）。当此项不指定或为空值时，表示将日志输出至 stdout。V2Ray 4.20 加入了特殊值none，即关闭error log（跟loglevel: "none"等价）。
+
+loglevel: "debug" | "info" | "warning" | "error" | "none"
+
+错误日志的级别。默认值为"warning"。
+- "debug": 只有开发人员能看懂的信息。同时包含所有"info"内容。
+- "info": V2Ray 在运行时的状态，不影响正常使用。同时包含所有"warning"内容。
+- "warning": V2Ray 遇到了一些问题，通常是外部问题，不影响 V2Ray 的正常运行，但有可能影响用户的体验。同时包含所有"error"内容。
+- "error": V2Ray 遇到了无法正常运行的问题，需要立即解决。
+- "none": 不记录任何内容。
+
+**** InboundObject
+入站连接用于接收从客户端（浏览器或上一级代理服务器）发来的数据，可用的协议请见协议列表。
+#+BEGIN_SRC js
+{
+  "port": 1080,
+  "listen": "127.0.0.1",
+  "protocol": "协议名称",
+  "settings": {},
+  "streamSettings": {},
+  "tag": "标识",
+  "sniffing": {
+    "enabled": false,
+    "destOverride": ["http", "tls"]
+  },
+  "allocate": {
+    "strategy": "always",
+    "refresh": 5,
+    "concurrency": 3
+  }
+}
+#+END_SRC
+
+port: number | "env:variable" | string
+
+端口。接受的格式如下:
+- 整型数值: 实际的端口号。
+- 环境变量: 以"env:"开头，后面是一个环境变量的名称，如"env:PORT"。V2Ray 会以字符串形式解析这个环境变量。
+- 字符串: 可以是一个数值类型的字符串，如"1234"；或者一个数值范围，如"5-10"表示端口 5 到端口 10 这 6 个端口。
+
+当只有一个端口时，V2Ray 会在此端口监听入站连接。当指定了一个端口范围时，取决于allocate设置。
+
+listen: address
+
+监听地址，只允许 IP 地址，默认值为"0.0.0.0"，表示接收所有网卡上的连接。除此之外，必须指定一个现有网卡的地址。
+
+protocol: string
+
+连接协议名称，可选的值见协议列表。
+
+settings: InboundConfigurationObject
+
+具体的配置内容，视协议不同而不同。详见每个协议中的InboundConfigurationObject。
+
+streamSettings: StreamSettingsObject。
+
+底层传输配置
+
+tag: string
+
+此入站连接的标识，用于在其它的配置中定位此连接。当其不为空时，其值必须在所有tag中唯一。
+
+sniffing: SniffingObject
+
+尝试探测流量的类型
+
+allocate: AllocateObject
+
+端口分配设置
+
+**** SniffingObject
+#+BEGIN_SRC js
+{
+  "enabled": false,
+  "destOverride": ["http", "tls"]
+}
+#+END_SRC
+
+enabled: true | false
+
+是否开启流量探测。
+
+destOverride: ["http" | "tls"]
+
+当流量为指定类型时，按其中包括的目标地址重置当前连接的目标。
+
+**** AllocateObject
+#+BEGIN_SRC js
+{
+  "strategy": "always",
+  "refresh": 5,
+  "concurrency": 3
+}
+#+END_SRC
+
+strategy: "always" | "random"
+
+端口分配策略。"always"表示总是分配所有已指定的端口，port中指定了多少个端口，V2Ray 就会监听这些端口。"random"表示随机开放端口，每隔refresh分钟在port范围中随机选取concurrency个端口来监听。
+
+refresh: number
+
+随机端口刷新间隔，单位为分钟。最小值为2，建议值为5。这个属性仅当strategy = random时有效。
+
+concurrency: number
+
+随机端口数量。最小值为1，最大值为port范围的三分之一。建议值为3。
+
+**** OutboundObject
+出站连接用于向远程网站或下一级代理服务器发送数据，可用的协议请见协议列表。
+#+BEGIN_SRC js
+{
+  "sendThrough": "0.0.0.0",
+  "protocol": "协议名称",
+  "settings": {},
+  "tag": "标识",
+  "streamSettings": {},
+  "proxySettings": {
+    "tag": "another-outbound-tag"
+  },
+  "mux": {}
+}
+#+END_SRC
+
+sendThrough: address
+
+用于发送数据的 IP 地址，当主机有多个 IP 地址时有效，默认值为"0.0.0.0"。
+
+protocol: string
+
+连接协议名称，可选的值见协议列表。
+
+settings: OutboundConfigurationObject
+
+具体的配置内容，视协议不同而不同。详见每个协议中的OutboundConfigurationObject。
+
+tag: string
+
+此出站连接的标识，用于在其它的配置中定位此连接。当其值不为空时，必须在所有 tag 中唯一。
+
+streamSettings: StreamSettingsObject。
+
+底层传输配置
+
+proxySettings: ProxySettingsObject
+
+出站代理配置。当出站代理生效时，此出站协议的streamSettings将不起作用。
+
+mux: MuxObject
+
+Mux 配置。
+
+**** ProxySettingsObject
+#+BEGIN_SRC js
+{
+  "tag": "another-outbound-tag"
+}
+#+END_SRC
+
+tag: string
+
+当指定另一个出站协议的标识时，此出站协议发出的数据，将被转发至所指定的出站协议发出。
+** 协议列表
+V2Ray 支持以下协议：
+- Blackhole
+- Dokodemo-door
+- Freedom
+- HTTP
+- MTProto
+- Shadowsocks
+- Socks
+- VMess
+
+*** Blackhole
+- 名称: blackhole
+- 类型: 出站协议
+
+Blackhole（黑洞）是一个出站数据协议，它会阻碍所有数据的出站，配合路由（Routing）一起使用，可以达到禁止访问某些网站的效果。
+
+**** OutboundConfigurationObject
+{
+  "response": {
+    "type": "none"
+  }
+}
+
+response: ResponseObject
+
+配置黑洞的响应数据。Blackhole 会在收到待转发数据之后，发送指定的响应数据，然后关闭连接。待转发的数据将被丢弃。如不指定此项，Blackhole 将直接关闭连接。
+
+**** ResponseObject
+{
+  "type": "none"
+}
+
+type: "http" | "none"
+
+当type为"none"（默认值）时，Blackhole将直接关闭连接。当type为"http"时，Blackhole会发回一个简单的 HTTP 403 数据包，然后关闭连接。
+
+*** DNS
+- 名称: dns
+- 类型: 出站协议
+
+DNS 是一个出站协议，主要用于拦截和转发 DNS 查询。此出站协议只能接收 DNS 流量（包含基于 UDP 和 TCP 协议的查询），其它类型的流量会导致错误。
+
+在处理 DNS 查询时，此出站协议会将 IP 查询（即 A 和 AAAA）转发给内置的 DNS 服务器。其它类型的查询流量将被转发至它们原本的目标地址。
+
+DNS 出站协议在 V2Ray 4.15 中引入。
+
+**** OutboundConfigurationObject
+{
+    "network": "tcp",
+    "address": "1.1.1.1",
+    "port": 53
+}
+
+network: "tcp" | "udp"
+
+(V2Ray 4.16+) 修改 DNS 流量的传输层协议，可选的值有"tcp"和"udp"。当不指定时，保持来源的传输方式不变。
+
+address: address
+
+(V2Ray 4.16+) 修改 DNS 服务器地址。当不指定时，保持来源中指定的地址不变。
+
+port: number
+
+(V2Ray 4.16+) 修改 DNS 服务器端口。当不指定时，保持来源中指定的端口不变。
+
+*** Dokodemo-door
+- 名称: dokodemo-door
+- 类型: 入站协议
+
+Dokodemo door（任意门）是一个入站数据协议，它可以监听一个本地端口，并把所有进入此端口的数据发送至指定服务器的一个端口，从而达到端口映射的效果。
+
+**** InboundConfigurationObject
+{
+  "address": "8.8.8.8",
+  "port": 53,
+  "network": "tcp",
+  "timeout": 0,
+  "followRedirect": false,
+  "userLevel": 0
+}
+
+address: address
+
+将流量转发到此地址。可以是一个 IP 地址，形如"1.2.3.4"，或者一个域名，形如"v2ray.com"。字符串类型。
+
+当 followRedirect（见下文）为 true 时，address 可为空。
+
+port: number
+
+将流量转发到目标地址的指定端口，范围[1, 65535]，数值类型。必填参数。
+
+network: "tcp" | "udp" | "tcp,udp"
+
+可接收的网络协议类型。比如当指定为"tcp"时，任意门仅会接收 TCP 流量。默认值为"tcp"。
+
+timeout: number
+
+入站数据的时间限制（秒），默认值为 300。
+
+V2Ray 3.1 后等价于对应用户等级的 connIdle 策略
+
+followRedirect: true | false
+
+当值为true时，dokodemo-door 会识别出由 iptables 转发而来的数据，并转发到相应的目标地址。详见传输配置中的tproxy设置。
+
+userLevel: number
+
+用户等级，所有连接都会使用这个用户等级。
+
+**** 透明代理配置样例
+V2Ray 中增加一个 dokodemo-door 的入站协议：
+
+{
+  "network": "tcp,udp",
+  "timeout": 30,
+  "followRedirect": true
+}
+
+配置 iptables：
+#+begin_src bash
+# Create new chain
+iptables -t nat -N V2RAY
+iptables -t mangle -N V2RAY
+iptables -t mangle -N V2RAY_MARK
+
+# Ignore your V2Ray server's addresses
+# It's very IMPORTANT, just be careful.
+iptables -t nat -A V2RAY -d 123.123.123.123 -j RETURN
+
+# Ignore LANs and any other addresses you'd like to bypass the proxy
+# See Wikipedia and RFC5735 for full list of reserved networks.
+iptables -t nat -A V2RAY -d 0.0.0.0/8 -j RETURN
+iptables -t nat -A V2RAY -d 10.0.0.0/8 -j RETURN
+iptables -t nat -A V2RAY -d 127.0.0.0/8 -j RETURN
+iptables -t nat -A V2RAY -d 169.254.0.0/16 -j RETURN
+iptables -t nat -A V2RAY -d 172.16.0.0/12 -j RETURN
+iptables -t nat -A V2RAY -d 192.168.0.0/16 -j RETURN
+iptables -t nat -A V2RAY -d 224.0.0.0/4 -j RETURN
+iptables -t nat -A V2RAY -d 240.0.0.0/4 -j RETURN
+
+# Anything else should be redirected to Dokodemo-door's local port
+iptables -t nat -A V2RAY -p tcp -j REDIRECT --to-ports 12345
+
+# Add any UDP rules
+ip route add local default dev lo table 100
+ip rule add fwmark 1 lookup 100
+iptables -t mangle -A V2RAY -p udp --dport 53 -j TPROXY --on-port 12345 --tproxy-mark 0x01/0x01
+iptables -t mangle -A V2RAY_MARK -p udp --dport 53 -j MARK --set-mark 1
+
+# Apply the rules
+iptables -t nat -A OUTPUT -p tcp -j V2RAY
+iptables -t mangle -A PREROUTING -j V2RAY
+iptables -t mangle -A OUTPUT -j V2RAY_MARK
+#+END_SRC
+
+*** Freedom
+- 名称：freedom
+- 类型：出站协议
+
+Freedom 是一个出站协议，可以用来向任意网络发送（正常的） TCP 或 UDP 数据。
+
+**** OutboundConfigurationObject
+{
+  "domainStrategy": "AsIs",
+  "redirect": "127.0.0.1:3366",
+  "userLevel": 0
+}
+
+domainStrategy: "AsIs" | "UseIP" | "UseIPv4" | "UseIPv6"
+
+在目标地址为域名时，Freedom 可以直接向此域名发出连接（"AsIs"），或者将域名解析为 IP 之后再建立连接（"UseIP"、"UseIPv4"、"UseIPv6"）。解析 IP 的步骤会使用 V2Ray 内建的 DNS。默认值为"AsIs"。
+
+(V2Ray 4.6+) 当使用"UseIP"模式，并且出站连接配置中指定了sendThrough时，Freedom 会根据sendThrough的值自动判断所需的IP类型，IPv4 或 IPv6。
+
+(V2Ray 4.7+) 当使用"UseIPv4"或"UseIPv6"模式时，Freedom 会只使用对应的 IPv4 或 IPv6 地址。当sendThrough指定了不匹配的本地地址时，将导致连接失败。
+
+redirect: address_port
+
+Freedom 会强制将所有数据发送到指定地址（而不是入站协议指定的地址）。其值为一个字符串，样例："127.0.0.1:80", ":1234"。当地址不指定时，如":443"，Freedom 不会修改原先的目标地址。当端口为0时，如"v2ray.com:0"，Freedom 不会修改原先的端口。
+
+userLevel: number
+
+用户等级，所有连接都使用这一等级。
+
+*** HTTP
+- 名称：http
+- 类型：入站 / 出站
+
+HTTP 的配置分为两部分，InboundConfigurationObject和OutboundConfigurationObject，分别对应入站和出站协议配置中的settings项。
+
+**** InboundConfigurationObject
+{
+  "timeout": 0,
+  "accounts": [
+    {
+      "user": "my-username",
+      "pass": "my-password"
+    }
+  ],
+  "allowTransparent": false,
+  "userLevel": 0
+}
+
+#+BEGIN_EXAMPLE
+应该注意，虽然http inbound可以提供公共服务，但http协议没有对传输加密，不适宜经公网中传输，更容易成为被人用作攻击的肉鸡。http inbound更有意义的用法是在局域网或本机环境下监听，为其他程序提供本地服务。
+#+END_EXAMPLE
+
+timeout: number
+
+从客户端读取数据的超时设置（秒），0 表示不限时。默认值为 300。 V2Ray 3.1 后等价于对应用户等级的 connIdle 策略。
+
+accounts: [AccountObject]
+
+一个数组，数组中每个元素为一个用户帐号。默认值为空。
+
+当 accounts 非空时，HTTP 代理将对入站连接进行 Basic Authentication 验证。
+
+allowTransparent: true | false
+
+当为true时，会转发所有 HTTP 请求，而非只是代理请求。若配置不当，开启此选项会导致死循环。
+
+userLevel: number
+
+用户等级，所有连接使用这一等级。
+
+**** AccountObject
+{
+  "user": "my-username",
+  "pass": "my-password"
+}
+
+user: string
+
+用户名，字符串类型。必填。
+
+pass: string
+
+密码，字符串类型。必填。
+
+#+BEGIN_EXAMPLE
+在 Linux 中使用以下环境变量即可在当前 session 使用全局 HTTP 代理（很多软件都支持这一设置，也有不支持的）。
+- export http_proxy=http://127.0.0.1:8080/ (地址须改成你配置的 HTTP 入站代理地址)
+- export https_proxy=$http_proxy
+#+END_EXAMPLE
+
+**** OutboundConfigurationObject
+{
+  "servers": [
+    {
+      "address": "192.168.108.1",
+      "port": 3128,
+      "users": [
+        {
+          "user": "my-username",
+          "pass": "my-password"
+        }
+      ]
+    }
+  ]
+}
+(V2ray 4.21.0+)
+
+#+BEGIN_SRC 
+应该注意，虽然http outbound可以作为对外访问的配置，但http proxy协议没有对传输加密，不适宜经公网中传输，且因不支持udp传输将会导致core功能受限（Routing过程的的DNS查询不可用）。http outbound更有意义的用法是在特殊情况下，只能使用http proxy对外访问内部网络中，作为为其他协议连接代理服务器的前置代理使用（见OutboundObject的ProxySettingsObject）。另因http proxy只能代理tcp协议，udp系的协议均不能通过。
+#+END_SRC
+(V2ray 4.21.1+)
+#+BEGIN_SRC 
+4.20.0版本中引入了http outbound作为其他协议的前置代理用法中，缺乏了对tls配置的支持。4.21.1的补丁版本中对streamSettings中的security和tlsSettings保留生效。目前前置代理的用法中，vmess/tcp、vmess/tcp-tls和shadowsocks等三种协议方式可使用，其他传输协议的前置代理用法需后续版本开发支持。
+#+END_SRC
+
+servers: 数组
+
+HTTP代理服务器配置，若配置多个，循环使用 (RoundRobin)。
+
+address: string
+
+HTTP代理服务器地址，必填。
+
+port: int
+
+HTTP代理服务器端口，必填。
+
+user: [AccountObject]
+
+一个数组，数组中每个元素为一个用户帐号。默认值为空。
+
+*** MTProto
+- 名称: mtproto
+- 类型: 入站 / 出站
+
+MTProto 是一个 Telegram 专用的代理协议。在 V2Ray 中可使用一组入站出站代理来完成 Telegram 数据的代理任务。
+
+目前只支持转发到 Telegram 的 IPv4 地址。
+
+**** InboundConfigurationObject
+{
+  "users": [{
+    "email": "love@v2ray.com",
+    "level": 0,
+    "secret": "b0cbcef5a486d9636472ac27f8e11a9d"
+  }]
+}
+
+users: [UserObject]
+
+一个数组，其中每一个元素表示一个用户。目前只有第一个用户会生效。
+
+UserObject
+{
+  "email": "love@v2ray.com",
+  "level": 0,
+  "secret": "b0cbcef5a486d9636472ac27f8e11a9d"
+}
+email: string
+
+用户邮箱，用于统计流量等辅助功能
+
+level: number
+
+用户等级。
+
+secret: string
+
+用户密钥。必须为 32 个字符，仅可包含0到9和a到f之间的字符。
+
+使用此命令生成 MTProto 代理所需要的用户密钥：openssl rand -hex 16
+
+**** OutboundConfigurationObject
+{
+}
+
+**** 样例配置
+MTProto 仅可用于 Telegram 数据。你可能需要一个路由来绑定对应的入站出站代理。以下是一个不完整的示例：
+
+入站代理：
+{
+  "tag": "tg-in",
+  "port": 443,
+  "protocol": "mtproto",
+  "settings": {
+    "users": [{"secret": "b0cbcef5a486d9636472ac27f8e11a9d"}]
+  }
+}
+
+出站代理：
+{
+  "tag": "tg-out",
+  "protocol": "mtproto",
+  "settings": {}
+}
+
+路由：
+{
+  "type": "field",
+  "inboundTag": ["tg-in"],
+  "outboundTag": "tg-out"
+}
+
+然后使用 Telegram 连接这台机器的 443 端口即可。 
+
+*** Shadowsocks
+- 名称：shadowsocks
+- 类型：入站 / 出站
+
+Shadowsocks 协议，包含入站和出站两部分，兼容大部分其它版本的实现。
+
+1. 与官方版本的兼容性：
+支持 TCP 和 UDP 数据包转发，其中 UDP 可选择性关闭；
+
+2. 支持 OTA；
+- 客户端可选开启或关闭；
+- 服务器端可强制开启、关闭或自适应；
+
+3. 加密方式（其中 AEAD 加密方式在 V2Ray 3.0 中加入）：
+- aes-256-cfb
+- aes-128-cfb
+- chacha20
+- chacha20-ietf
+- aes-256-gcm
+- aes-128-gcm
+- chacha20-poly1305 或称 chacha20-ietf-poly1305
+
+4. 插件：通过 Standalone 模式支持 obfs
+
+Shadowsocks 的配置分为两部分，InboundConfigurationObject和OutboundConfigurationObject，分别对应入站和出站协议配置中的settings项。
+
+**** InboundConfigurationObject
+{
+  "email": "love@v2ray.com",
+  "method": "aes-128-cfb",
+  "password": "密码",
+  "level": 0,
+  "ota": true,
+  "network": "tcp"
+}
+
+email: string
+
+邮件地址，可选，用于标识用户
+
+method: string
+
+必填。可选的值见加密方式列表
+
+password: string
+
+必填，任意字符串。Shadowsocks 协议不限制密码长度，但短密码会更可能被破解，建议使用 16 字符或更长的密码。
+
+level: number
+
+用户等级，默认值为 0。详见本地策略。
+
+ota: true | false
+
+是否强制 OTA，如果不指定此项，则自动判断。强制开启 OTA 后，V2Ray 会拒绝未启用 OTA 的连接。反之亦然。
+
+当使用 AEAD 时，ota 设置无效
+
+network: "tcp" | "udp" | "tcp,udp"
+
+可接收的网络连接类型，默认值为"tcp"。
+
+**** OutboundConfigurationObject
+{
+  "servers": [
+    {
+      "email": "love@v2ray.com",
+      "address": "127.0.0.1",
+      "port": 1234,
+      "method": "加密方式",
+      "password": "密码",
+      "ota": false,
+      "level": 0
+    }
+  ]
+}
+
+servers: [ServerObject]
+
+一个数组，其中每一项是一个 ServerObject。
+
+**** ServerObject
+{
+  "email": "love@v2ray.com",
+  "address": "127.0.0.1",
+  "port": 1234,
+  "method": "加密方式",
+  "password": "密码",
+  "ota": false,
+  "level": 0
+}
+
+email: string
+
+邮件地址，可选，用于标识用户
+
+address: address
+
+Shadowsocks 服务器地址，支持 IPv4、IPv6 和域名。必填。
+
+port: number
+
+Shadowsocks 服务器端口。必填。
+
+method: string
+
+必填。可选的值见加密方式列表
+
+password: string
+
+必填。任意字符串。Shadowsocks 协议不限制密码长度，但短密码会更可能被破解，建议使用 16 字符或更长的密码。
+
+ota: true | false
+
+是否开启 Shadowsocks 的一次验证（One time auth），默认值为false。
+
+当使用 AEAD 时，ota 设置无效。
+
+level: number
+
+用户等级
+
+**** 加密方式列表
+- "aes-256-cfb"
+- "aes-128-cfb"
+- "chacha20"
+- "chacha20-ietf"
+- "aes-256-gcm"
+- "aes-128-gcm"
+- "chacha20-poly1305" 或 "chacha20-ietf-poly1305"
+
+*** Socks
+- 名称：socks
+- 类型：入站 / 出站
+
+标准 Socks 协议实现，兼容 Socks 4、Socks 4a 和 Socks 5。
+
+Socks 的配置分为两部分，InboundConfigurationObject和OutboundConfigurationObject，分别对应入站和出站协议配置中的settings项。
+
+**** OutboundConfigurationObject
+{
+  "servers": [{
+    "address": "127.0.0.1",
+    "port": 1234,
+    "users": [
+      {
+        "user": "test user",
+        "pass": "test pass",
+        "level": 0
+      }
+    ]
+  }]
+}
+
+应该注意，虽然socks outbound可以作为对外访问的配置，但socks协议没有对传输加密，不适宜经公网中传输。socks outbound 更有意义的用法是在特殊情况下，只能使用socks proxy对外访问内部网络中，作为为其他协议连接代理服务器的前置代理使用（见OutboundObject的ProxySettingsObject）。
+
+servers: [ ServerObject ]
+
+Socks 服务器列表，其中每一项是一个服务器配置。
+
+**** ServerObject
+{
+  "address": "127.0.0.1",
+  "port": 1234,
+  "users": [
+    {
+      "user": "test user",
+      "pass": "test pass",
+      "level": 0
+    }
+  ]
+}
+
+address: address
+
+服务器地址。
+
+仅支持连接到 Socks 5 服务器。
+
+port: number
+
+服务器端口
+
+users: [ UserObject ]
+
+用户列表，其中每一项一个用户配置。当列表不为空时，Socks 客户端会使用此用户信息进行认证；如未指定，则不进行认证。
+
+**** UserObject
+{
+  "user": "test user",
+  "pass": "test pass",
+  "level": 0
+}
+user: string
+
+用户名
+
+pass: string
+
+密码
+
+level: number
+
+用户等级
+
+**** InboundConfigurationObject
+应该注意，虽然socks inbound可以公共服务端口，但socks协议没有对传输加密，不适宜经公网中传输。socks inbound更有意义的用法是在局域网或本机环境下，为其他程序提供本地服务。
+
+{
+  "auth": "noauth",
+  "accounts": [
+    {
+      "user": "my-username",
+      "pass": "my-password"
+    }
+  ],
+  "udp": false,
+  "ip": "127.0.0.1",
+  "userLevel": 0
+}
+auth: "noauth" | "password"
+
+Socks 协议的认证方式，支持"noauth"匿名方式和"password"用户密码方式。默认值为"noauth"。
+
+accounts: [ AccountObject ]
+
+一个数组，数组中每个元素为一个用户帐号。默认值为空。此选项仅当 auth 为 password 时有效。
+
+udp: true | false
+
+是否开启 UDP 协议的支持。默认值为 false。
+
+ip: address
+
+当开启 UDP 时，V2Ray 需要知道本机的 IP 地址。默认值为"127.0.0.1"。
+
+userLevel: number
+
+用户等级，所有连接使用这一等级。
+
+**** AccountObject
+{
+  "user": "my-username",
+  "pass": "my-password"
+}
+
+user: string
+
+用户名
+
+pass: string
+
+密码
+
+*** VMess
+- 名称：vmess
+- 类型：入站 / 出站
+
+VMess 是一个加密传输协议，它分为入站和出站两部分，通常作为 V2Ray 客户端和服务器之间的桥梁。
+
+VMess 依赖于系统时间，请确保使用 V2Ray 的系统 UTC 时间误差在 90 秒之内，时区无关。在 Linux 系统中可以安装ntp服务来自动同步系统时间。
+
+VMess 的配置分为两部分，InboundConfigurationObject和OutboundConfigurationObject，分别对应入站和出站协议配置中的settings项。
+
+**** OutboundConfigurationObject
+{
+  "vnext": [
+    {
+      "address": "127.0.0.1",
+      "port": 37192,
+      "users": [
+        {
+          "id": "27848739-7e62-4138-9fd3-098a63964b6b",
+          "alterId": 4,
+          "security": "auto",
+          "level": 0
+        }
+      ]
+    }
+  ]
+}
+
+vnext：[ ServerObject ]
+
+一个数组，包含一系列的服务器配置
+
+**** ServerObject
+{
+  "address": "127.0.0.1",
+  "port": 37192,
+  "users": []
+}
+
+address: address
+
+服务器地址，支持 IP 地址或者域名。
+
+port: number
+
+服务器端口号。
+
+users: [ UserObject ]
+
+一组服务器认可的用户
+
+**** UserObject
+{
+  "id": "27848739-7e62-4138-9fd3-098a63964b6b",
+  "alterId": 4,
+  "security": "auto",
+  "level": 0
+}
+
+id：string
+
+VMess 用户的主 ID。必须是一个合法的 UUID。
+
+alterId：number
+
+为了进一步防止被探测，一个用户可以在主 ID 的基础上，再额外生成多个 ID。这里只需要指定额外的 ID 的数量，推荐值为 4。不指定的话，默认值是 0。最大值 65535。这个值不能超过服务器端所指定的值。
+
+level: number
+
+用户等级
+
+security: "aes-128-gcm" | "chacha20-poly1305" | "auto" | "none"
+
+加密方式，客户端将使用配置的加密方式发送数据，服务器端自动识别，无需配置。
+- "aes-128-gcm"：推荐在 PC 上使用
+- "chacha20-poly1305"：推荐在手机端使用
+- "auto"：默认值，自动选择（运行框架为 AMD64、ARM64 或 s390x 时为aes-128-gcm加密方式，其他情况则为 Chacha20-Poly1305 加密方式）
+- "none"：不加密
+
+推荐使用"auto"加密方式，这样可以永久保证安全性和兼容性。
+
+**** InboundConfigurationObject
+{
+  "clients": [
+    {
+      "id": "27848739-7e62-4138-9fd3-098a63964b6b",
+      "level": 0,
+      "alterId": 4,
+      "email": "love@v2ray.com"
+    }
+  ],
+  "default": {
+    "level": 0,
+    "alterId": 4
+  },
+  "detour": {
+    "to": "tag_to_detour"
+  },
+  "disableInsecureEncryption": false
+}
+
+clients: [ ClientObject ]
+
+一组服务器认可的用户。clients 可以为空。当此配置用作动态端口时，V2Ray 会自动创建用户。
+
+detour: DetourObject
+
+指示对应的出站协议使用另一个服务器。
+
+default: DefaultObject
+
+可选，clients 的默认配置。仅在配合detour时有效。
+
+disableInsecureEncryption: true | false
+
+是否禁止客户端使用不安全的加密方式，当客户端指定下列加密方式时，服务器会主动断开连接。默认值为false。
+- "none"
+- "aes-128-cfb"
+
+**** ClientObject
+{
+  "id": "27848739-7e62-4138-9fd3-098a63964b6b",
+  "level": 0,
+  "alterId": 4,
+  "email": "love@v2ray.com"
+}
+
+id: string
+
+VMess 的用户 ID。必须是一个合法的 UUID。
+
+level: number
+
+用户等级，详见本地策略
+
+alterId: number
+
+与上文出站协议中的含义相同。
+
+email: string
+
+用户邮箱地址，用于区分不同用户的流量。
+
+alterId 取值的大小和流量特征没有必然联系。对于日常使用，16 以内的值已经够用了。
+
+**** DetourObject
+{
+  "to": "tag_to_detour"
+}
+
+to: string
+
+一个入站协议的tag，详见配置文件。指定的入站协议必须是一个 VMess
+
+**** DefaultObject
+{
+  "level": 0,
+  "alterId": 4
+}
+level: number
+
+用户等级，意义同上。默认值为0。
+
+alterId: number
+
+和ClientObject中的alterId相同，默认值为64。推荐值4。
+** 语法检查功能
+V2Ray 提供的配置检查功能（test 选项），可以检查 JSON 语法错误外的问题，比如说突然间手抖把 vmess 写成了 vmss，一下子就检查出来了。
+
+#+begin_src bash
+$ /usr/bin/v2ray/v2ray -test -config /etc/v2ray/config.json
+failed to parse json config: Ext|Tools|Conf|Serial: failed to parse json config > Ext|Tools|Conf: failed to load inbound detour config. > Ext|Tools|Conf: unknown config id: vmss
+Main: failed to read config file: /etc/v2ray/config.json > Main|Json: failed to execute v2ctl to convert config file. > exit status 255
+#+END_SRC
+如果是配置文件没问题，则是这样的：
+#+begin_src bash
+$ /usr/bin/v2ray/v2ray -test -config /etc/v2ray/config.json
+V2Ray v3.15 (die Commanderin) 20180329
+An unified platform for anti-censorship.
+Configuration OK.
+#+END_SRC
+** 参考文章
+[[https://zh.wikipedia.org/zh-tw/V2Ray][V2Ray 维基百科]]
+[[https://toutyrater.github.io/][前言· V2Ray 配置指南|V2Ray 白话文教程]]
+[[https://www.v2ray.com/chapter_00/workflow.html][Project V官方网站]]

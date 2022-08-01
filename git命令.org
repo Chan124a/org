@@ -1068,7 +1068,7 @@ $ git add .
 $ git add -p
 
 # 删除工作区文件，并且将这次删除放入暂存区，加上-n参数，可以列出要删除的文件，但并不会进行删除操作
-$ git rm [file1] [file2] ...
+$ git rm [file1] [file2] ... c
 
 # 停止追踪指定文件，但该文件会保留在工作区
 $ git rm --cached [file]
