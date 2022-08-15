@@ -3426,7 +3426,6 @@ The command C-x z (repeat) provides another way to repeat an Emacs command many 
 For example, suppose you type C-u 2 0 C-d to delete 20 characters. You can repeat that command (including its argument) three additional times, to delete a total of 80 characters, by typing C-x z z z. 
 
 * The Minibuffer
-
 ** Minibuffers for File Names
 Commands such as C-x C-f (find-file) use the minibuffer to read a file name argument
 

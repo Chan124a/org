@@ -2725,6 +2725,15 @@ make工具可以看成是一个智能的批处理工具，它本身并没有编�
 13.make是一个简单的通过文件时间戳控制自动过程、处理依赖关系的软件，这个自动过程可以是编译一个项目。
 
 * gdb
+作者：张小方
+链接：https://www.zhihu.com/question/65306462/answer/2602659870
+来源：知乎
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+
+常用的 gdb 命令并不多，我这里总结了一个表：命令名称命令缩写命令说明
+intountilu运行到指定行停下来
+watchwatch监视某一个变量或内存地址的值是否发生变化
+dirdir重定向源码文件的位置
 ** gdb安装
 打开终端，在终端里输入以下指令：
 #+BEGIN_SRC bash
@@ -2864,18 +2873,49 @@ gcc -g hello.cc -o hello
 > g++ -g hello.cpp -o hello
 #+END_SRC
 如果没有-g，你将看不见程序的函数名、变量名，所代替的全是运行时的内存地址。
+
+在实际生成调试程序时，我们一般不仅要加上 -g 选项，也建议关闭编译器的程序的优化选项。
+编译器的程序的优化选项一般有五个级别，从 O0~O4（注意第一个O0，是字母 O 加上数字 0），
+O0 表示不优化（关闭优化），从 O1~O4 优化级别越来越高，O4 最大。
+关闭优化的目的是为了调试的时候，符号文件显示的调试变量等能与源代码完全对应起来。
+
+举个例子，假设有以下代码
+#+BEGIN_SRC c++
+int func()
+{
+int a = 1;
+int b = a + 1;
+int c = a + b;
+return a + b + c;
+}
+int main()
+{
+int a = func();
+printf("%d\n", a);
+}
+#+END_SRC
+以上代码中，由于在 main() 函数中调用了 func() 函数，由于 func() 函数值可以在编译期间直接算出来，如果开启了优化选项，可能你实际调试的时候，这个函数中的局部变量 a，b，c 可能已经被编译器优化掉，取而代之的是直接的值，甚至连函数 func() 也可能被优化掉。
+如果出现这种情况，调试的时候，您看到的代码和您实际的代码可能就会有差异了，这会给排查和定位问题带来困难。
+当然，上面说的优化现象是否一定会出现，不同版本的编译器可能会有不同的行为。
+总之一句话，生成调试文件时建议关闭编译器优化选项（使用 O0 选项）。
 ** 启动gdb方式
-1、gdb program
+1. gdb program
 program 也就是你的执行文件，一般在当前目录下。
 
-2、gdb program core
+2. gdb program core
 用gdb同时调试一个运行程序和core文件，core是程序非法执行后core dump后产生的文件。
 
-3、gdb program 1234
+3. gdb program 1234
 如果你的程序是一个服务程序，那么你可以指定这个服务程序运行时的进程ID。gdb会自动attach上去，并调试他。program应该在PATH环境变量中搜索得到。
 
-GDB启动时，可以加上一些GDB的启动开关，详细的开关可以用gdb -help查看。下面只列举一些比较常用的参数：
+4. gdb attach pid
+某些情况下，一个程序已经启动了，我们想调试这个程序，但是又不想重启这个程序。
+假设有这样一个场景，我们的聊天测试服务器程序正在运行，我们运行一段时间之后，发现这个聊天服务器再也没法接受新的客户端连接了，这个时候我们肯定是不能重启程序的，如果重启，当前程序的各种状态信息就丢失了。
+这个时候，我们只需要使用 gdb attach 程序进程ID来将 gdb 调试器附加到我们的聊天测试服务器程序上即可。
 
+
+GDB启动时，可以加上一些GDB的启动开关，详细的开关可以用gdb -help查看。下面只列举一些比较常用的参数：
+#+BEGIN_EXAMPLE
 --symbols=SYMFILE
 从指定文件中读取符号表。
 
@@ -2887,6 +2927,223 @@ GDB启动时，可以加上一些GDB的启动开关，详细的开关可以用gd
 
 --directory=DIR
 加入一个源文件的搜索路径。默认搜索路径是环境变量中PATH所定义的路径。
+#+END_EXAMPLE
+*** 调试已运行的程序（附加进程）
+两种方法：
+1. 在UNIX下用ps查看正在运行的程序的PID（进程ID），然后用gdb PID process-id 格式挂接正在运行的程序。
+2. 先用gdb 关联上源代码，并进行gdb，在gdb中用attach process-id 命令来挂接进程的PID。并用detach来取消挂接的进程。
+
+假设，我们的聊天程序叫 chatserver，我们可以使用 ps 命令获取该进程的 PID，然后gdb attach 上去，就可以调试了。
+#+begin_src bash
+[zhangyl@localhost flamingoserver]$ ps -ef | grep chatserver
+zhangyl 42921 1 17 11:18 ? 00:00:04 ./chatserver -d
+zhangyl 42936 42898 0 11:18 pts/0 00:00:00 grep --color=auto chatserver
+#+END_SRC
+我们得到 chatserver 的 PID 为 42921，然后我们使用 gdb attach 42921 把 gdb 附加到 chatserver
+进程：
+#+begin_src bash
+[zhangyl@localhost flamingoserver]$ gdb attach 42921
+attach: No such file or directory.
+Attaching to process 42921
+Reading symbols from /home/zhangyl/flamingoserver/chatserver...done.
+Reading symbols from /usr/lib64/mysql/libmysqlclient.so.18...Reading symbols
+from /usr/lib64/mysql/libmysqlclient.so.18...(no debugging symbols
+found)...done.
+Reading symbols from /lib64/libpthread.so.0...(no debugging symbols
+found)...done.
+[New LWP 42931]
+[New LWP 42930]
+[New LWP 42929]
+[New LWP 42928]
+[New LWP 42927]
+[New LWP 42926]
+[New LWP 42925]
+[New LWP 42924]
+[New LWP 42922]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib64/libthread_db.so.1".
+Loaded symbols for /lib64/libpthread.so.0
+Reading symbols from /lib64/libc.so.6...(no debugging symbols found)...done.
+#+END_SRC
+为了节约篇幅，上述代码中我删掉了一些无关的信息。当提示 “Attaching to process 42921” 说明我们已经成功将 gdb 附加到目标进程了。
+需要注意的是，由于我们的程序使用了一些系统库（如libc.so），由于这是发行版本的 Linux 系统，这些库是没有调试符号的，所以 gdb 会提示找不到这些库的调试符号。我们的目的是调试 chatserver，对系统 API 调用的内部实现并不关注，所以这些提示我们可以不关注，只要 chatserver 这个文件有调试信息即可。
+
+当用 gdb attach 上目标进程后，调试器会暂停下来，此时我们可以使用 continue 命令让程序继续运行，或者加上相应的断点再继续运行程序。
+
+当您调试完程序想结束此次调试，且不对当前进程 chatserver 有任何影响，也就是说想让这个程序继续运行，可以在gdb的命令行界面输入 detach 命令让程序与 gdb 调试器分离，这样 chatserver 可以继续运行。
+#+begin_src bash
+(gdb) detach
+Detaching from program: /home/zhangyl/flamingoserver/chatserver, process 42921
+#+END_SRC
+然后再退出gdb就可以了。
+#+begin_src bash
+(gdb) quit
+[zhangyl@localhost flamingoserver]$
+#+END_SRC
+*** 调试 core 文件（进程 Crash 之后如何定位问题）
+有时候，我们的服务器程序运行一段时间后，会突然崩溃。这当然不是我们希望看到的，我们需要解决这个问题。
+只要程序在崩溃的时候，有 core 文件产生，我们就可以使用这个 core 文件来定位崩溃的原因。
+当然，Linux 系统默认是不开启程序崩溃产生 core 文件的这一机制的，我们可以使用 ulimit -c 来查看系统是否开启了这一机制。
+#+begin_src bash
+[zhangyl@localhost flamingoserver]$ ulimit -a
+core file size (blocks, -c) 0
+data seg size (kbytes, -d) unlimited
+scheduling priority (-e) 0
+file size (blocks, -f) unlimited
+pending signals (-i) 15045
+max locked memory (kbytes, -l) 64
+max memory size (kbytes, -m) unlimited
+open files (-n) 1024
+pipe size (512 bytes, -p) 8
+POSIX message queues (bytes, -q) 819200
+real-time priority (-r) 0
+stack size (kbytes, -s) 8192
+cpu time (seconds, -t) unlimited
+max user processes (-u) 4096
+virtual memory (kbytes, -v) unlimited
+file locks (-x) unlimited
+#+END_SRC
+我们发现 core file size 那一行默认是 0，表示关闭生成 core 文件，如果我们需要修改某个选项的值，可以使用 ulimit 选项名 设置值来修改，例如我们可以将 core 文件生成改成具体某个值（最大允许的字节数）或不限制大小。
+这里我们直接改成不限制大小，执行命令 ulimit -c unlimited：
+#+begin_src bash
+[zhangyl@localhost flamingoserver]$ ulimit -c unlimited
+[zhangyl@localhost flamingoserver]$ ulimit -a
+core file size (blocks, -c) unlimited
+data seg size (kbytes, -d) unlimited
+scheduling priority (-e) 0
+file size (blocks, -f) unlimited
+pending signals (-i) 15045
+max locked memory (kbytes, -l) 64
+max memory size (kbytes, -m) unlimited
+open files (-n) 1024
+pipe size (512 bytes, -p) 8
+POSIX message queues (bytes, -q) 819200
+real-time priority (-r) 0
+stack size (kbytes, -s) 8192
+cpu time (seconds, -t) unlimited
+max user processes (-u) 4096
+virtual memory (kbytes, -v) unlimited
+file locks (-x) unlimited
+#+END_SRC
+注意，这个命令容易记错，第一个 ulimit 是 Linux 命令，-c 选项后面的 unlimited 是选项的值，表示不限制大小，当然您也可以改成具体的数值大小。
+还有一个问题就是，这样修改以后，当我们关闭这个 Linux 会话后，这个设置项的值就会被还原成 0，而我们的服务器程序一般是以后台程序（守护进程）长周期运行，也就是说当前会话虽然被关闭，服务器程序仍然继续在后台运行，这样这个程序崩溃在某个时刻崩溃后，是无法产生 core 文件，这种情形不利于排查问题。
+
+所以，我们希望这个选项永久生效。设置永久生效的方式有两种：
+1. 在 /etc/security/limits.conf 中增加一行
+#+BEGIN_EXAMPLE
+#<domain> <type> <item> <value>
+\* soft core unlimited
+#+END_EXAMPLE
+这里设置的是不限制 core 文件的大小，也可以设置成具体的数值，如 1024 表示生成的 core 文件最大是 1024k。
+
+2. 把“ulimit -c unlimited”这一行，加到 /etc/profile 文件中去，放到这个文件最后一行即可，修正成功以后执行“source /etc/profile”让配置立即生效。当然这只是对 root 用户，如果想仅仅作用于某一用户，可以把“ulimit -c unlimited”加到该用户对应的 ~/.bashrc 或 ~/.bash_profile 文件中去。
+
+生成的core文件的默认命名方式是：core.pid，其位置是崩溃程序所在目录，
+举个例子，比如某个程序当时运行时其进程 ID 是16663，那么如果其崩溃产生的 core 文件的名称是 core.16663。
+我们来看一个具体的例子吧，某次我发现的我的服务器上 msg_server 崩溃了，在当前目录下产生了一个如下的core 文件：
+#+begin_src bash
+-rw------- 1 root root 10092544 Sep 9 15:14 core.21985
+#+END_SRC
+那么我们就可以通过这个 core.21985 的文件来排查崩溃的原因，调试 core 文件的命令是：
+#+begin_src bash
+gdb filename corename
+#+END_SRC
+- filename 就是程序名，这里就是 msg_server；
+- corename 是 core.21985。
+
+我们输入 gdb msg_server core.21985 来启动调试：
+#+begin_src bash
+[root@myaliyun msg_server]# gdb msg_server core.21985
+Reading symbols from /root/teamtalkserver/src/msg_server/msg_server...done.
+[New LWP 21985]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib64/libthread_db.so.1".
+Core was generated by `./msg_server -d'.
+Program terminated with signal 11, Segmentation fault.
+#0 0x00000000004ceb1f in std::less<CMsgConn*>::operator() (this=0x2283878,
+__x=@0x7ffca83563a0: 0x2284430, __y=@0x51: <error reading variable>)
+at /usr/include/c++/4.8.2/bits/stl_function.h:235
+235 { return __x < __y; }
+#+END_SRC
+我们可以看到程序崩溃的地方是在 stl_function.h 的 235 行，然后通过 bt 命令(下文将详细介绍)查看崩溃时的调用堆栈，进一步分析就能找到崩溃的原因。
+#+begin_src bash
+(gdb) bt
+#0 0x00000000004ceb1f in std::less<CMsgConn*>::operator() (this=0x2283878,
+__x=@0x7ffca83563a0: 0x2284430, __y=@0x51: <error reading variable>)
+at /usr/include/c++/4.8.2/bits/stl_function.h:235
+#1 0x00000000004cdd70 in std::_Rb_tree<CMsgConn*, CMsgConn*,
+std::_Identity<CMsgConn*>, std::less<CMsgConn*>, std::allocator<CMsgConn*>
+>::_M_get_insert_unique_pos
+(this=0x2283878, __k=@0x7ffca83563a0: 0x2284430) at
+/usr/include/c++/4.8.2/bits/stl_tree.h:1324
+#2 0x00000000004cd18a in std::_Rb_tree<CMsgConn*, CMsgConn*,
+std::_Identity<CMsgConn*>, std::less<CMsgConn*>, std::allocator<CMsgConn*>
+>::_M_insert_unique<CMsgConn* const&> (this=0x2283878, __v=@0x7ffca83563a0:
+0x2284430) at /usr/include/c++/4.8.2/bits/stl_tree.h:1377
+#3 0x00000000004cc8bd in std::set<CMsgConn*, std::less<CMsgConn*>,
+std::allocator<CMsgConn*> >::insert (this=0x2283878, __x=@0x7ffca83563a0:
+0x2284430)
+at /usr/include/c++/4.8.2/bits/stl_set.h:463
+#4 0x00000000004cb011 in CImUser::AddUnValidateMsgConn (this=0x2283820,
+pMsgConn=0x2284430) at /root/teamtalkserver/src/msg_server/ImUser.h:42
+#5 0x00000000004c64ae in CDBServConn::_HandleValidateResponse (this=0x227f6a0,
+pPdu=0x22860d0) at /root/teamtalkserver/src/msg_server/DBServConn.cpp:319
+#6 0x00000000004c5e3d in CDBServConn::HandlePdu (this=0x227f6a0,
+pPdu=0x22860d0) at /root/teamtalkserver/src/msg_server/DBServConn.cpp:203
+#7 0x00000000005022b3 in CImConn::OnRead (this=0x227f6a0) at
+/root/teamtalkserver/src/base/imconn.cpp:148
+#8 0x0000000000501db3 in imconn_callback (callback_data=0x7f4b20
+<g_db_server_conn_map>, msg=3 '\003', handle=8, pParam=0x0)
+at /root/teamtalkserver/src/base/imconn.cpp:47
+#9 0x0000000000504025 in CBaseSocket::OnRead (this=0x227f820) at
+/root/teamtalkserver/src/base/BaseSocket.cpp:178
+#10 0x0000000000502f8a in CEventDispatch::StartDispatch (this=0x2279990,
+wait_timeout=100) at /root/teamtalkserver/src/base/EventDispatch.cpp:386
+#11 0x00000000004fddbe in netlib_eventloop (wait_timeout=100) at
+/root/teamtalkserver/src/base/netlib.cpp:160
+#12 0x00000000004d18c2 in main (argc=2, argv=0x7ffca8359978) at
+/root/teamtalkserver/src/msg_server/msg_server.cpp:213
+(gdb)
+#+END_SRC
+堆栈 #4 就不是库代码了，我们可以排查这里我们的代码，找到问题原因。
+
+但是细心的读者会发现一个问题：一个正在程序运行时，其 PID 我们是可以获取到的，但是当程序崩溃后，产生了 core 文件，尤其是多个程序同时崩溃，我们根本没法通过 core 文件名称中的 PID 来区分到底是哪个服务。
+
+解决这个问题有两个方法：
+1. 程序启动时，记录一下自己的 PID；
+#+begin_src bash
+void writePid()
+{
+uint32_t curPid = (uint32_t) getpid();
+FILE* f = fopen("xxserver.pid", "w");
+assert(f);
+char szPid[32];
+snprintf(szPid, sizeof(szPid), "%d", curPid);
+fwrite(szPid, strlen(szPid), 1, f);
+fclose(f);
+}
+#+END_SRC
+我们在程序启动时调用上述 writePID 函数，将程序当时的 PID 记录到 xxserver.pid 文件中去，这样当程序崩溃时，我们可以从这个文件中得到进程当时运行的 PID，这样就可以与默认的 core文件名后面的 PID 做匹配了。
+
+2. 自定义 core 文件的名称和目录
+/proc/sys/kernel/core_uses_pid 可以控制产生的 core 文件的文件名中是否添加 PID 作为扩展，如果添加则文件内容为 1，否则为 0;
+/proc/sys/kernel/core_pattern 可以设置格式化的core 文件保存位置或文件名。
+修改方式如下：
+#+begin_src bash
+echo "/corefile/core-%e-%p-%t" > /proc/sys/kernel/core_pattern
+#+END_SRC
+各个参数的说明如下：
+#+DOWNLOADED: screenshot @ 2022-08-03 14:07:44
+[[file:images/linux%E7%AC%94%E8%AE%B0/soft_core_unlimited/2022-08-03_14-07-44_screenshot.png]]
+假设我们现在的程序叫 test，我们设置该程序崩溃时的 core 文件名如下:
+#+begin_src bash
+echo "/root/testcore/core-%e-%p-%t" > /proc/sys/kernel/core_pattern
+#+END_SRC
+那么最终会在 /root/testcore/ 目录下生成的 test 的 core 文件名格式如下：
+#+begin_src bash
+-rw-------. 1 root root 409600 Jan 14 13:54 core-test-13154-1547445291
+#+END_SRC
+
 ** GDB 的命令概貌
 启动gdb后，就进入gdb的调试环境中，就可以使用gdb的命令开始调试程序了，gdb的命令可以使用help命令来查看，如下所示：
 #+begin_src bash
@@ -2963,34 +3220,65 @@ make
 ** 在GDB中运行程序
 当以 gdb 方式启动gdb后，gdb会在PATH路径和当前目录中搜索源文件。如要确认gdb是否读到源文件，可使用l或list命令，看看gdb是否能列出源代码。
 
-在gdb中，运行程序使用r或是run命令。程序的运行，你有可能需要设置下面四方面的事。
-1. 程序运行参数。
-#+BEGIN_EXAMPLE
-set args 可指定运行时参数。（如：set args 10 20 30 40 50 ）
-show args 命令可以查看设置好的运行参数。
-#+END_EXAMPLE
-2. 运行环境。
+默认情况下，gdb+filename 只是附加一个调试文件，并没有启动这个程序，我们需要输入 run 命令启动这个程序（run 命令简写成 r）。
+假设程序已经启动，我们再次输入 run 命令则是重启程序。
+我们在gdb 界面按 Ctrl + C （界面中的 ^C）让程序中断下来，再次输入 r 命令，gdb 会提示我们是否重启程序，输入 y 确认重启。
+
+
+你有可能需要设置下面三方面的事。
+1. 运行环境。
 #+BEGIN_EXAMPLE
 path  可设定程序的运行路径。
 show paths 查看程序的运行路径。
 set env environmentVarname=value 设置环境变量。如：set env USER=benben
 show env [varname] 查看环境变量，不带varname，打印出当前所有环境变量。
 #+END_EXAMPLE
-3. 工作目录。
+2. 工作目录。
 #+BEGIN_EXAMPLE
 cd 相当于shell的cd命令。
 pwd 显示当前的所在目录。
 #+END_EXAMPLE
-4. 程序的输入输出。
+3. 程序的输入输出。
 #+BEGIN_EXAMPLE
 info terminal 显示你程序用到的终端的模式。
 使用重定向控制程序输出。如：run > outfile
 tty命令可以设置输入输出使用的终端设备。如：tty /dev/tty1
 #+END_EXAMPLE
-** 调试已运行的程序
-两种方法：
-1. 在UNIX下用ps查看正在运行的程序的PID（进程ID），然后用gdb PID process-id 格式挂接正在运行的程序。
-2. 先用gdb 关联上源代码，并进行gdb，在gdb中用attach process-id 命令来挂接进程的PID。并用detach来取消挂接的进程。
+*** 设置命令行参数
+程序运行参数。
+#+BEGIN_EXAMPLE
+set args 可指定运行时参数。（如：set args 10 20 30 40 50 ）
+show args 命令可以查看设置好的运行参数。
+#+END_EXAMPLE
+
+很多程序，需要我们传递命令行参数。
+在 gdb 调试中，很多人会觉得可以使用 gdb filename args 这种形式来给 gdb 调试的程序传递命令行参数，这样是不行的。
+正确的做法是在用 gdb 附加程序后，在使用 run 命令之前，使用 set args 您要的命令行参数来指定，还是以 redis-server 为例，redis 启动时可以指定一个命令行参数，就是它的配置文件，它的默认配置文件位于 redis-server 这个文件的上一层目录，所以我们可以在 gdb 中这样传递这个参数：
+#+begin_src bash
+set args ../redis.conf
+#+END_SRC
+可以通过 show args查看命令行参数是否设置成功。
+#+begin_src bash
+(gdb) set args ../redis.conf
+(gdb) show args
+Argument list to give program being debugged when it is started is
+"../redis.conf ".
+(gdb)
+#+END_SRC
+如果您单个命令行参数之间含有空格，可以使用引号将参数包裹起来。
+#+begin_src bash
+(gdb) set args "999 xx" "hu jj"
+(gdb) show args
+Argument list to give program being debugged when it is started is ""999 xx" "hujj"".
+(gdb)
+#+END_SRC
+如果想清除掉已经设置好的命令行参数，使用 set args 不加任何参数即可。
+#+begin_src bash
+(gdb) set args
+(gdb) show args
+Argument list to give program being debugged when it is started is "".
+(gdb)
+#+END_SRC
 ** 暂停 / 恢复程序运行
 调试程序中，暂停程序运行是必须的，GDB可以方便地暂停程序的运行。你可以设置程序的在哪行停住，在什么条件下停住，在收到什么信号时停往等等。以便于你查看运行时的变量，以及运行时的流程。
 
@@ -3026,11 +3314,17 @@ break ... if cond
 ...可以是上述的参数，condition表示条件，在条件成立时停住。比如在循环境体中，可以设置break if i=100，表示当i为100时停住程序。
 #+END_EXAMPLE
 查看断点时，可使用info命令，如下所示：（注：n表示断点号）
+info break 可以简写为 info b
 #+BEGIN_EXAMPLE
 info breakpoints [n]
 info break [n]
 info watchpoints [n]
 #+END_EXAMPLE
+**** 设置临时断点
+break 命令是添加一个永久断点，tbreak 命令也是添加一个断点，第一个字母“t”的意思是“temporarily ”（“临时的”），也就是说这个命令加的断点是临时的，
+所谓临时断点，就是一旦该断点触发一次后，就会自动删除。
+添加断点的方法与上文中介绍的 break 命令一模一样，这里就不再赘述。
+
 *** 设置观察点（WatchPoint）
 观察点一般来观察某个表达式（变量也是一种表达式）的值是否有变化了，如果有变化，马上停住程序。我们有下面的几种方法来设置观察点：
 #+BEGIN_EXAMPLE
@@ -3095,6 +3389,8 @@ enable所指定的停止点一次，当程序停止后，该停止点马上被GD
 
 enable [breakpoints] delete range...
 enable所指定的停止点一次，当程序停止后，该停止点马上被GDB自动删除。
+
+如果 disable 和 enable 命令不加断点编号，则分别表示禁用和启用所有断点：
 #+END_EXAMPLE
 *** 停止条件维护
 前面在说到设置断点时，我们提到过可以设置一个条件，当条件成立时，程序自动停止，这是一个非常强大的功能，这里，我想专门说说这个条件的相关维护命令。一般来说，为断点设置一个条件，我们使用if关键词，后面跟其断点条件。并且，条件设置好后，我们可以用condition命令来修改断点的条件。（只有 break和watch命令支持if，catch目前暂不支持if）
@@ -3219,12 +3515,19 @@ info locals
 info args
 #+END_SRC
 
-** 函数的调用
+** 函数的调用与返回
 #+begin_src bash
 call name 调用和执行一个函数
 (gdb) call gen_and_sork( 1234,1,0 )
 (gdb) call printf(“abcd”)
 #+END_SRC
+*** finish和return
+在实际调试的时候，我们在某个函数中调试一会儿后，我们不需要再一步步执行到函数返回处，我们希望直接执行完当前函数并回到上一层调用处，我们可以使用 finish 命令。
+与 finish 命令类似的还有return 命令，return 命令作用是结束执行当前函数，还可以指定该函数的返回值。
+
+这里需要注意一下二者的区别：finish 命令会执行函数到正常退出该函数；而 return 命令是立即结束执行当前函数并返回，也就是说，如果当前函数还有剩余的代码未执行完毕，也不会执行了。
+
+可以return指定函数返回值，例如 return 9999 指定函数返回值为9999。
 
 ** 寄存器的标准名字
 - $pc 程序计数器
@@ -3232,61 +3535,6 @@ call name 调用和执行一个函数
 - $sp 栈指针
 - $ps 处理器状态
 ** 查看当前位置 - where
-** layout的使用
-layout用于分割窗口，可以一边查看代码，一边测试。主要有以下几种用法：
-- layout src：显示源代码窗口
-- layout asm：显示汇编窗口
-- layout regs：显示源代码/汇编和寄存器窗口
-- layout split：显示源代码和汇编窗口
-- layout next：显示下一个layout
-- layout prev：显示上一个layout
-- Ctrl + L：刷新窗口
-- Ctrl + x，再按1：单窗口模式，显示一个窗口
-- Ctrl + x，再按2：双窗口模式，显示两个窗口
-- Ctrl + x，再按a：回到传统模式，即退出layout，回到执行layout之前的调试窗口。
-
-** print和display命令：查看变量的值
-*** print
-打印变量或者表达式的值，print 命令可以缩写为 p
-
-#+begin_src bash
-p *argv    # 打印数组argv首个元素
-p *argv@2  # 打印数组前两个元素
-p *argv@argc  # 打印数组所有元素
-#+END_SRC
-
-*** display
-使用 display 命令查看变量或表达式的值，每当程序暂停执行（例如单步执行）时，GDB 调试器都会自动帮我们打印出来，而 print 命令则不会。
-
-display 命令没有缩写形式，常用的语法格式如下 2 种：
-#+begin_src bash
-(gdb) display expr
-(gdb) display/fmt expr
-#+END_SRC
-其中，expr 表示要查看的目标变量或表达式；参数 fmt 用于指定输出变量或表达式的格式，下表罗列了常用的一些 fmt 参数。
-| /fmt | 功 能                                |
-|------+--------------------------------------|
-| /x   | 以十六进制的形式打印出整数。         |
-| /d   | 以有符号、十进制的形式打印出整数。   |
-| /u   | 以无符号、十进制的形式打印出整数。   |
-| /o   | 以八进制的形式打印出整数。           |
-| /t   | 以二进制的形式打印出整数。           |
-| /f   | 以浮点数的形式打印变量或表达式的值。 |
-| /c   | 以字符形式打印变量或表达式的值。     |
-
-注意，display 命令和 /fmt 之间不要留有空格。以 /x 为例，应写为 (gdb)display/x expr。
-*** undisplay：取消追踪观察变量
-*** 参考文章
-[[http://c.biancheng.net/view/8238.html][GDB print和display命令：查看变量的值]]
-** si,ni,s,n的区别
-n/s都是C语言级的断点定位。 s会进入C函数内部,但是不会进入没有定位信息的函数（比如没有加-g编译的代码，因为其没有C代码的行数标记，没办法定位），n不会。
-
-ni/si都是汇编级别的断点定位。si会进入汇编和C函数内部,ni不会。
-
-
-归纳:当要进入没有调试信息的库函数调试的时候，用si是唯一的方法。
-
-当进入有调试信息的函数，用si和s都可以，但是他们不同，si是定位到汇编级别的第一个语句，但是s是进入到C级别的第一个语句
 ** 查看函数调用栈
 查看调用栈信息：
 - backtrace：查看函数调用的顺序（函数调用栈的信息），可以用bt缩写
@@ -3306,9 +3554,489 @@ ni/si都是汇编级别的断点定位。si会进入汇编和C函数内部,ni不
 - info args：查看当前桢中的参数
 - info locals：查看当前桢中的局部变量
 - info catch：查看当前桢中的异常处理器（exception handlers
+** 调试fork多进程程序
+这里说的多进程程序指的是一个进程使用 Linux 系统调用 fork 函数产生的子进程。
 
-** watch：被设置观察点的变量发生修改时，打印显示
-i watch：显示观察点
+在实际的应用中，有一类应用会通过 Linux 函数 fork 出新的子进程。
+以 nginx 为例，nginx 对客户端的连接是采用多进程模型，当 nginx 接受客户端连接后，创建一个新的进程来处理该连接上的信息来往。
+
+新产生的进程与原进程互为父子关系。那么如何用 gdb 调试这样父子进程呢？一般有两种方法：
+*** 方法一：attach
+用 gdb 先调试父进程，等子进程被 fork 出来后，使用 gdb attach 到子进程上去。
+当然，您需要重新开启一个 Shell 窗口用于调试。
+
+**** 例子
+我们这里以调试 nginx 服务为例。
+
+从 nginx 官网 http://nginx.org/en/download.html 下载最新的 nginx 源码，然后编译安装（这里采用的的nginx 版本是 1.18.0）。
+#+begin_src bash
+## 下载 nginx 源码
+[root@iZbp14iz399acush5e8ok7Z zhangyl]# wget http://nginx.org/download/nginx-
+1.18.0.tar.gz
+--2020-07-05 17:22:10-- http://nginx.org/download/nginx-1.18.0.tar.gz
+Resolving nginx.org (nginx.org)... 95.211.80.227, 62.210.92.35,
+2001:1af8:4060:a004:21::e3
+Connecting to nginx.org (nginx.org)|95.211.80.227|:80... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 1039530 (1015K) [application/octet-stream]
+Saving to: ‘nginx-1.18.0.tar.gz’
+nginx-1.18.0.tar.gz 100%
+[===============================================================================
+====================>] 1015K 666KB/s in 1.5s
+2020-07-05 17:22:13 (666 KB/s) - ‘nginx-1.18.0.tar.gz’ saved [1039530/1039530]
+## 解压nginx
+[root@iZbp14iz399acush5e8ok7Z zhangyl]# tar zxvf nginx-1.18.0.tar.gz
+## 编译nginx
+[root@iZbp14iz399acush5e8ok7Z zhangyl]# cd nginx-1.18.0
+[root@iZbp14iz399acush5e8ok7Z nginx-1.18.0]# ./configure --
+prefix=/usr/local/nginx
+[root@iZbp14iz399acush5e8ok7Z nginx-1.18.0]make CFLAGS="-g -O0"
+## 安装，这样nginx就被安装到/usr/local/nginx/目录下
+[root@iZbp14iz399acush5e8ok7Z nginx-1.18.0]make install
+#+END_SRC
+#+BEGIN_EXAMPLE
+注意：使用 make 命令编译时我们为了让生成的 nginx 带有调试符号信息同时关闭编译器优化，
+我们设置了 "-g -O0" 选项。
+#+END_EXAMPLE
+启动 nginx：
+#+begin_src bash
+[root@iZbp14iz399acush5e8ok7Z sbin]# cd /usr/local/nginx/sbin
+[root@iZbp14iz399acush5e8ok7Z sbin]# ./nginx -c /usr/local/nginx/conf/nginx.conf
+[root@iZbp14iz399acush5e8ok7Z sbin]# lsof -i -Pn | grep nginx
+nginx 5246 root 9u IPv4 22252908 0t0 TCP *:80 (LISTEN)
+nginx 5247 nobody 9u IPv4 22252908 0t0 TCP *:80 (LISTEN)
+#+END_SRC
+如上所示，nginx 默认会开启两个进程，在我的机器上以 root 用户运行的 nginx 进程是父进程，进程号 5246，以 nobody 用户运行的进程是子进程，进程号 5247。
+我们在当前窗口使用 gdb attach5246 命令将 gdb 附加到 nginx 主进程上去。
+#+begin_src bash
+[root@iZbp14iz399acush5e8ok7Z sbin]# gdb attach 5246
+...省略部分输出信息...
+0x00007fd42a103c5d in sigsuspend () from /lib64/libc.so.6
+Missing separate debuginfos, use: yum debuginfo-install glibc-2.28-
+72.el8_1.1.x86_64 libxcrypt-4.1.1-4.el8.x86_64 pcre-8.42-4.el8.x86_64 sssd-
+client-2.2.0-19.el8.x86_64 zlib-1.2.11-10.el8.x86_64
+(gdb)
+#+END_SRC
+此时我们就可以调试 nginx 父进程了，例如使用 bt 命令查看当前调用堆栈：
+#+begin_src bash
+(gdb) bt
+#0 0x00007fd42a103c5d in sigsuspend () from /lib64/libc.so.6
+#1 0x000000000044ae32 in ngx_master_process_cycle (cycle=0x1703720) at
+src/os/unix/ngx_process_cycle.c:164
+#2 0x000000000040bc05 in main (argc=3, argv=0x7ffe49109d68) at
+src/core/nginx.c:382
+(gdb) f 1
+#1 0x000000000044ae32 in ngx_master_process_cycle (cycle=0x1703720) at
+src/os/unix/ngx_process_cycle.c:164
+164 sigsuspend(&set);
+(gdb) l
+159 }
+160 }
+161
+162 ngx_log_debug0(NGX_LOG_DEBUG_EVENT, cycle->log, 0,
+"sigsuspend");
+163
+164 sigsuspend(&set);
+165
+166 ngx_time_update();
+167
+168 ngx_log_debug1(NGX_LOG_DEBUG_EVENT, cycle->log, 0,
+(gdb)
+#+END_SRC
+使用 f 1 命令切换到当前调用堆栈 #1，我们可以发现 nginx 父进程的主线程挂起在src/core/nginx.c:382 处。
+此时你可以使用 c 命令让程序继续运行起来，也可以添加断点或者做一些其他的调试操作。
+再开一个 shell 窗口，使用 gdb attach 5247 将 gdb 附加到 nginx 子进程：
+#+begin_src bash
+[root@iZbp14iz399acush5e8ok7Z sbin]# gdb attach 5247
+...部署输出省略...
+0x00007fd42a1c842b in epoll_wait () from /lib64/libc.so.6
+Missing separate debuginfos, use: yum debuginfo-install glibc-2.28-
+72.el8_1.1.x86_64 libblkid-2.32.1-17.el8.x86_64 libcap-2.26-1.el8.x86_64 libgcc-
+8.3.1-4.5.el8.x86_64 libmount-2.32.1-17.el8.x86_64 libselinux-2.9-2.1.el8.x86_64
+libuuid-2.32.1-17.el8.x86_64 libxcrypt-4.1.1-4.el8.x86_64 pcre-8.42-4.el8.x86_64
+pcre2-10.32-1.el8.x86_64 sssd-client-2.2.0-19.el8.x86_64 systemd-libs-239-
+18.el8_1.2.x86_64 zlib-1.2.11-10.el8.x86_64
+(gdb)
+#+END_SRC
+我们使用 bt 命令查看一下子进程的主线程当前调用堆栈：
+#+begin_src bash
+(gdb) bt
+#0 0x00007fd42a1c842b in epoll_wait () from /lib64/libc.so.6
+#1 0x000000000044e546 in ngx_epoll_process_events (cycle=0x1703720,
+timer=18446744073709551615, flags=1) at src/event/modules/ngx_epoll_module.c:800
+#2 0x000000000043f317 in ngx_process_events_and_timers (cycle=0x1703720) at
+src/event/ngx_event.c:247
+#3 0x000000000044c38f in ngx_worker_process_cycle (cycle=0x1703720, data=0x0)
+at src/os/unix/ngx_process_cycle.c:750
+#4 0x000000000044926f in ngx_spawn_process (cycle=0x1703720, proc=0x44c2e1
+<ngx_worker_process_cycle>, data=0x0, name=0x4cfd70 "worker process",
+respawn=-3)
+at src/os/unix/ngx_process.c:199
+#5 0x000000000044b5a4 in ngx_start_worker_processes (cycle=0x1703720, n=1,
+type=-3) at src/os/unix/ngx_process_cycle.c:359
+#6 0x000000000044acf4 in ngx_master_process_cycle (cycle=0x1703720) at
+src/os/unix/ngx_process_cycle.c:131
+#7 0x000000000040bc05 in main (argc=3, argv=0x7ffe49109d68) at
+src/core/nginx.c:382
+(gdb) f 1
+#1 0x000000000044e546 in ngx_epoll_process_events (cycle=0x1703720,
+timer=18446744073709551615, flags=1) at src/event/modules/ngx_epoll_module.c:800
+800 events = epoll_wait(ep, event_list, (int) nevents, timer);
+(gdb)
+#+END_SRC
+可以发现子进程挂起在 src/event/modules/ngx_epoll_module.c:800 的 epoll_wait 函数处。
+我们在 epoll_wait 函数返回后（ src/event/modules/ngx_epoll_module.c:804 ）加一个断点，然后使用 c 命令让 nginx 子进程继续运行。
+#+begin_src bash
+800 events = epoll_wait(ep, event_list, (int) nevents, timer);
+(gdb) list
+795 /* NGX_TIMER_INFINITE == INFTIM */
+796
+797 ngx_log_debug1(NGX_LOG_DEBUG_EVENT, cycle->log, 0,
+798 "epoll timer: %M", timer);
+799
+800 events = epoll_wait(ep, event_list, (int) nevents, timer);
+801
+802 err = (events == -1) ? ngx_errno : 0;
+803
+804 if (flags & NGX_UPDATE_TIME || ngx_event_timer_alarm) {
+(gdb) b 804
+Breakpoint 1 at 0x44e560: file src/event/modules/ngx_epoll_module.c, line 804.
+(gdb) c
+Continuing.
+#+END_SRC
+接着我们在浏览器里面访问 nginx 的站点，我这里的 ip 地址是我的云主机地址，读者实际调试时改成自己的 nginx 服务器所在的地址，如果是本机就是 127.0.0.1，由于默认端口是 80，所以不用指定端口号。
+#+begin_src bash
+http://你的ip地址:80
+等价于
+http://你的ip地址
+#+END_SRC
+此时我们回到 nginx 子进程的调试界面发现断点被触发：
+#+begin_src bash
+Breakpoint 1, ngx_epoll_process_events (cycle=0x1703720,
+timer=18446744073709551615, flags=1) at src/event/modules/ngx_epoll_module.c:804
+804 if (flags & NGX_UPDATE_TIME || ngx_event_timer_alarm) {
+(gdb)
+#+END_SRC
+使用 bt 命令可以获得此时的调用堆栈：
+#+begin_src bash
+(gdb) bt
+#0 ngx_epoll_process_events (cycle=0x1703720, timer=18446744073709551615,
+flags=1) at src/event/modules/ngx_epoll_module.c:804
+#1 0x000000000043f317 in ngx_process_events_and_timers (cycle=0x1703720) at
+src/event/ngx_event.c:247
+#2 0x000000000044c38f in ngx_worker_process_cycle (cycle=0x1703720, data=0x0)
+at src/os/unix/ngx_process_cycle.c:750
+#3 0x000000000044926f in ngx_spawn_process (cycle=0x1703720, proc=0x44c2e1
+<ngx_worker_process_cycle>, data=0x0, name=0x4cfd70 "worker process",
+respawn=-3)
+at src/os/unix/ngx_process.c:199
+#4 0x000000000044b5a4 in ngx_start_worker_processes (cycle=0x1703720, n=1,
+type=-3) at src/os/unix/ngx_process_cycle.c:359
+#5 0x000000000044acf4 in ngx_master_process_cycle (cycle=0x1703720) at
+src/os/unix/ngx_process_cycle.c:131
+#6 0x000000000040bc05 in main (argc=3, argv=0x7ffe49109d68) at
+src/core/nginx.c:382
+(gdb)
+#+END_SRC
+使用 info threads 命令可以查看子进程所有线程信息，我们发现 nginx子进程只有一个主线程：
+#+begin_src bash
+(gdb) info threads
+Id Target Id Frame
+\* 1 Thread 0x7fd42b17c740 (LWP 5247) "nginx" ngx_epoll_process_events
+(cycle=0x1703720, timer=18446744073709551615, flags=1) at
+src/event/modules/ngx_epoll_module.c:804
+(gdb)
+#+END_SRC
+nginx 父进程不处理客户端请求，处理客户端请求的逻辑在子进程中，在单个子进程客户端请求数量达到一定数量时，父进程会重新 fork 一个新的子进程来处理新的客户端请求，也就是说子进程数量可以有多个，你可以开多个 shell 窗口，使用 gdb attach 到各个子进程上去调试。
+
+总结起来，我们可以使用这种方法添加各种断点调试 nginx 的功能，慢慢我们就能熟悉 nginx 的各个内部逻辑了。
+
+然而，方法一存在一个缺点，即程序已经启动了，我们只能使用 gdb 观察程序在这之后的行为，如果我们想调试程序从启动到运行起来之间的执行流程，方法一可能不太适用。
+有些读者可能会说，我用 gdb 附加到进程后，我加好断点然后使用 run 命令重启进程这样不就可以调试程序从启动到运行起来之间的执行流程了。问题是这种方法不是通用的，因为对于多进程服务模型，有些父子进程有一定的依赖关系，是不方便在运行过程中重启的。这个时候就可以使用方法二来调试了。
+*** 方法二：follow-fork
+gdb 调试器提供一个选项叫 follow-fork ，通过 set follow-fork mode 来设置是当一个进程 fork 出新的子进程时，gdb 是继续调试父进程（取值是 parent）还是子进程（取值是 child），默认是父进程（取值是 parent）。
+#+begin_src bash
+# fork之后gdb attach到子进程
+set follow-fork child
+# fork之后gdb attach到父进程，这是默认值
+set follow-fork parent
+#+END_SRC
+我们可以使用 show follow-fork mode 查看当前值：
+#+begin_src bash
+(gdb) show follow-fork mode
+Debugger response to a program call of fork or vfork is "child".
+#+END_SRC
+我们还是以调试 nginx 为例，先进入 nginx 可执行文件所在的目录，将方法一中的 nginx 服务停下来：
+#+begin_src bash
+[root@iZbp14iz399acush5e8ok7Z sbin]# cd /usr/local/nginx/sbin/
+[root@iZbp14iz399acush5e8ok7Z sbin]# ./nginx -s stop
+#+END_SRC
+nginx 源码中存在这样的逻辑，这个逻辑会在程序 main 函数处被调用：
+#+begin_src bash
+//src/os/unix/ngx_daemon.c:13行
+ngx_int_t
+ngx_daemon(ngx_log_t *log)
+{
+    int fd;
+    switch (fork()) {
+    case -1:
+    ngx_log_error(NGX_LOG_EMERG, log, ngx_errno, "fork() failed");
+    return NGX_ERROR;
+    //fork出来的子进程走这个case
+    case 0:
+    break;
+    //父进程中fork返回值是子进程的PID，大于0，因此走这个case
+    //因此主进程会退出
+    default:
+    exit(0);
+    }
+    //...省略部分代码...
+}
+#+END_SRC
+如上述代码中注释所示，为了不让主进程退出，我们在 nginx 的配置文件中增加一行：
+#+begin_src bash
+daemon off;
+#+END_SRC
+这样 nginx 就不会调用 ngx_daemon 函数了。
+接下来，我们执行 gdb nginx ，然后通过设置参数将配置文件 nginx.conf 传给待调试的 nginx 进程：
+#+begin_src bash
+Quit anyway? (y or n) y
+[root@iZbp14iz399acush5e8ok7Z sbin]# gdb nginx
+...省略部分输出...
+Reading symbols from nginx...done.
+(gdb) set args -c /usr/local/nginx/conf/nginx.conf
+(gdb)
+#+END_SRC
+接着输入 run 命令尝试运行 nginx：
+#+begin_src bash
+(gdb) run
+Starting program: /usr/local/nginx/sbin/nginx -c
+/usr/local/nginx/conf/nginx.conf
+[Thread debugging using libthread_db enabled]
+...省略部分输出信息...
+[Detaching after fork from child process 7509]
+#+END_SRC
+如前文所述，gdb 遇到 fork 指令时默认会 attach 到父进程去，因此上述输出中有一行提示 ”Detaching after fork from child process 7509“，我们按 Ctrl + C 将程序中断下来，然后输入 bt 命令查看当前调用堆栈，输出的堆栈信息和我们在方法一中看到的父进程的调用堆栈一样，说明 gdb 在程序 fork 之后确实 attach 了父进程：
+#+begin_src bash
+^C
+Program received signal SIGINT, Interrupt.
+0x00007ffff6f73c5d in sigsuspend () from /lib64/libc.so.6
+(gdb) bt
+#0 0x00007ffff6f73c5d in sigsuspend () from /lib64/libc.so.6
+#1 0x000000000044ae32 in ngx_master_process_cycle (cycle=0x71f720) at
+src/os/unix/ngx_process_cycle.c:164
+#2 0x000000000040bc05 in main (argc=3, argv=0x7fffffffe4e8) at
+src/core/nginx.c:382
+(gdb)
+#+END_SRC
+如果想在 fork 之后 gdb 去 attach 子进程，我们可以在程序运行之前在 gdb 中设置 set follow-fork child ，然后使用 run 命令重新运行程序。
+#+begin_src bash
+(gdb) set follow-fork child
+(gdb) run
+The program being debugged has been started already.
+Start it from the beginning? (y or n) y
+Starting program: /usr/local/nginx/sbin/nginx -c
+/usr/local/nginx/conf/nginx.conf
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib64/libthread_db.so.1".
+[Attaching after Thread 0x7ffff7fe7740 (LWP 7664) fork to child process 7667]
+[New inferior 2 (process 7667)]
+[Detaching after fork from parent process 7664]
+[Inferior 1 (process 7664) detached]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib64/libthread_db.so.1".
+^C
+Thread 2.1 "nginx" received signal SIGINT, Interrupt.
+[Switching to Thread 0x7ffff7fe7740 (LWP 7667)]
+0x00007ffff703842b in epoll_wait () from /lib64/libc.so.6
+(gdb) bt
+#0 0x00007ffff703842b in epoll_wait () from /lib64/libc.so.6
+#1 0x000000000044e546 in ngx_epoll_process_events (cycle=0x71f720,
+timer=18446744073709551615, flags=1) at src/event/modules/ngx_epoll_module.c:800
+#2 0x000000000043f317 in ngx_process_events_and_timers (cycle=0x71f720) at
+src/event/ngx_event.c:247
+#3 0x000000000044c38f in ngx_worker_process_cycle (cycle=0x71f720, data=0x0) at
+src/os/unix/ngx_process_cycle.c:750
+#4 0x000000000044926f in ngx_spawn_process (cycle=0x71f720, proc=0x44c2e1
+<ngx_worker_process_cycle>, data=0x0, name=0x4cfd70 "worker process",
+respawn=-3)
+at src/os/unix/ngx_process.c:199
+#5 0x000000000044b5a4 in ngx_start_worker_processes (cycle=0x71f720, n=1,
+type=-3) at src/os/unix/ngx_process_cycle.c:359
+#6 0x000000000044acf4 in ngx_master_process_cycle (cycle=0x71f720) at
+src/os/unix/ngx_process_cycle.c:131
+#7 0x000000000040bc05 in main (argc=3, argv=0x7fffffffe4e8) at
+src/core/nginx.c:382
+(gdb)
+#+END_SRC
+我们接着按 Ctrl +C 将程序中断下来，然后使用 bt 命令查看当前线程调用堆栈确实是我们在方法一中子进程的主线程所在的调用堆栈，这说明 gdb 确实 attach 到子进程了。
+
+我们可以利用方法二调试程序 fork 之前和之后的任何逻辑，是一种较为通用的多进程调试方法。
+
+** 明明函数存在，添加断点时却无效的解决方案
+有时候，一个函数明明存在，并且我们的程序也存在调试符号，我们使用 break functionName 添加断点时，gdb 却提示：
+#+begin_src bash
+Make breakpoint pending on future shared library load? y/n
+#+END_SRC
+即使我们输入 y，添加的断点可能也不会被正确的触发。此时我们就需要改变添加断点的策略，使用该函数所在的代码文件和行号这种方式添加断点就能添加同样效果的断点。
+
+** 自定义gdb调试命令
+有些场景下，我们需要根据自己的程序情况，自定义一些可以在调试时输出我们程序特定信息的命令。
+这个在 gdb 中很容易做到，只要在 Linux 用户根目录下，root 用户就是 /root 目录，非 root 用户，是/home/用户名 这个目录。
+在上述目录中自定义一个 .gdbinit 文件即可，注意在 linux 系统中这是一个隐藏文件，可以使用 ls -a 命令查看；如果不存在，创建一个就可以。
+然后在这个文件中写上你自定义命令的 shell 脚本就可以。
+
+这里以 apache web 服务器的源码为例（apache server的源码下载地址：http://httpd.apache.org/），在源码根目录下有个文件叫 .gdbinit，这个就是 apache server 自定义的 gdb 命令：
+#+begin_src bash
+# gdb macros which may be useful for folks using gdb to debug
+# apache. Delete it if it bothers you.
+define dump_table
+    set $t = (apr_table_entry_t *)((apr_array_header_t *)$arg0)->elts
+    set $n = ((apr_array_header_t *)$arg0)->nelts
+    set $i = 0
+    while $i < $n
+    if $t[$i].val == (void *)0L
+        printf "[%u] '%s'=>NULL\n", $i, $t[$i].key
+    else
+        printf "[%u] '%s'='%s' [%p]\n", $i, $t[$i].key, $t[$i].val, $t[$i].val
+    end
+        set $i = $i + 1
+    end
+end
+# 省略部分代码
+# Set sane defaults for common signals:
+handle SIGPIPE noprint pass nostop
+handle SIGUSR1 print pass nostop
+#+END_SRC
+当然在这个文件的最底部，apache 的配置了让 gdb 调试器不要处理 SIGPIPE 和 SIGUSR1 这两个信号，而是将这两个信号直接传递给被调试的程序本身（这里就是 apache server）。
+** apropos
+apropos regexp命令查找所有符合regexp正则表达式的命令信息：
+#+begin_src bash
+(gdb) apropos set
+awatch -- Set a watchpoint for an expression
+b -- Set breakpoint at specified line or function
+br -- Set breakpoint at specified line or function
+bre -- Set breakpoint at specified line or function
+brea -- Set breakpoint at specified line or function
+......
+#+END_SRC
+** dir
+你可能会遇到这样的场景：
+我们在使用 gdb调试时由于生成可执行文件的机器和实际执行该可执行程序的机器不是同一台机器，
+例如大多数企业产生目标服务程序的机器是编译机器，即发版机，然后把发版机产生的可执行程序拿到生产机器上去执行。
+这个时候，如果可执行程序产生了崩溃，我们用 gdb 调试 core 文件时，gdb 会提示"No such file or directory"，如下所示：
+#+begin_src bash
+Program received signal SIGSEGV, Segmentation fault.
+0x00000000004d5662 in CAsyncLog::crash () at
+/home/flamingoserver/base/AsyncLog.cpp:475
+475 /home/flamingoserver/base/AsyncLog.cpp: No such file or directory.
+#+END_SRC
+或者由于一些原因，编译时的源码文件被挪动了位置，使用 gdb 调试时也会出现上述情况。
+
+gcc/g++ 编译出来的可执行程序并不包含完整源码，-g 只是加了一个可执行程序与源码之间的位置映射关系，
+我们可以通过 dir 命令重新定位这种关系。
+
+dir 命令使用格式：
+#+begin_src bash
+# 加一个源文件路径到当前路径的前面,指定多个路径，可以使用”:”
+dir SourcePath1:SourcePath2:SourcePath3
+#+END_SRC
+SourcePath1、SourcePath2、SourcePath3 指的就是需要设置的源码目录，gdb 会依次去这些目录搜索相应的原文件。
+以上面的错误提示为例，原来的 AsyncLog.cpp 文件位于 /home/flamingoserver/base/ 目录，由于这个目录被挪动了，所以 gdb 提示找不到该文件。
+现在假设这个文件被移动到/home/zhangyl/flamingoserver/base/ 目录。
+那么我们只需要在 gdb 调试中执行 dir /home/zhangyl/flamingoserver/base/ 即可重定向可执行程序与源码的位置关系：
+#+begin_src bash
+(gdb) dir /home/zhangyl/flamingoserver/base/
+Source directories searched: /home/zhangyl/flamingoserver/base:$cdir:$cwd
+(gdb) r
+The program being debugged has been started already.
+Start it from the beginning? (y or n) y
+Starting program: /home/zhangyl/chatserver
+warning: Loadable section ".note.gnu.property" outside of ELF segments
+warning: Loadable section ".note.gnu.property" outside of ELF segments
+warning: Loadable section ".note.gnu.property" outside of ELF segments
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib64/libthread_db.so.1".
+warning: Loadable section ".note.gnu.property" outside of ELF segments
+warning: Loadable section ".note.gnu.property" outside of ELF segments
+[FATAL][[2020-07-05 16:31:17:375]][140737354028864]
+[/home/flamingoserver/chatserversrc/main.cpp:97]logdir is not set in config file
+Program received signal SIGSEGV, Segmentation fault.
+0x00000000004d5662 in CAsyncLog::crash () at
+/home/flamingoserver/base/AsyncLog.cpp:475
+475 *p = 0;
+(gdb) list
+470 }
+471
+472 void CAsyncLog::crash()
+473 {
+474 char* p = nullptr;
+475 *p = 0;
+476 }
+477
+478 void CAsyncLog::writeThreadProc()
+479 {
+(gdb)
+#+END_SRC
+使用 dir 命令重新定位源文件的位置之后 gdb就不再提示这样的错误了，此时我们也可以使用使用 gdb 其他命令（如 list 命令）查看源码了。
+如果要查看当前设置了哪些源码搜索路径，可以使用 show dir 命令：
+#+begin_src bash
+(gdb) show dir
+Source directories searched: /home/zhangyl/flamingoserver/base:$cdir:$cwd
+(gdb)
+#+END_SRC
+dir 命令不加参数表示清空当前已设置的源码搜索目录：
+#+begin_src bash
+(gdb) dir
+Reinitialize source path to empty? (y or n) y
+Source directories searched: $cdir:$cwd
+(gdb) show dir
+Source directories searched: $cdir:$cwd
+(gdb)
+#+END_SRC
+
+** disassemble 命令
+在一些高级调试时，我们可能要查看某段代码的汇编指令去排查问题，或者是在调试一些没有调试信息的发布版程序时，也只能通过反汇编代码去定位问题，那么 disassemble 命令就派上用场了。
+
+disassemble 会输出当前所在函数的汇编指令，假设我们现在在 redis 的 initServer() 中执行该命令会输出 initServer() 函数的汇编指令，操作如下：
+#+begin_src bash
+Breakpoint 1, initServer () at server.c:2742
+2742 signal(SIGHUP, SIG_IGN);
+(gdb) disassemble
+Dump of assembler code for function initServer:
+0x00000000004310cb <+0>: push %rbp
+0x00000000004310cc <+1>: mov %rsp,%rbp
+0x00000000004310cf <+4>: push %rbx
+...太多了，省略...
+0x0000000000431a93 <+2504>: add $0x18,%rsp
+--Type <RET> for more, q to quit, c to continue without paging--
+0x0000000000431a97 <+2508>: pop %rbx
+0x0000000000431a98 <+2509>: pop %rbp
+0x0000000000431a99 <+2510>: retq
+End of assembler dump.
+(gdb)
+#+END_SRC
+gdb 默认反汇编为 AT&T 格式的指令，可以通过 show disassembly-flavor 查看。
+如果习惯 intel 汇编格式的，用命令 set disassembly-flavor intel 来设置。
+#+begin_src bash
+(gdb) set disassembly-flavor intel
+(gdb) disassemble
+Dump of assembler code for function initServer:
+0x00000000004310cb <+0>: push rbp
+0x00000000004310cc <+1>: mov rbp,rsp
+0x00000000004310cf <+4>: push rbx
+0x00000000004310d0 <+5>: sub rsp,0x18
+...太多了，省略...
+0x0000000000431a93 <+2504>: add rsp,0x18
+--Type <RET> for more, q to quit, c to continue without paging--
+0x0000000000431a97 <+2508>: pop rbx
+0x0000000000431a98 <+2509>: pop rbp
+0x0000000000431a99 <+2510>: ret
+End of assembler dump.
+(gdb)
+#+END_SRC
+这个命令在我们只有程序崩溃后产生 core 文件，且无对应的调试符号时非常有用，我们可以通过分析汇编代码定位一些错误。
+
 ** examine命令
 examine命令缩写为x
 
@@ -3341,6 +4069,685 @@ u:就是指以多少个字节作为一个内存单元-unit,默认为4。u还可�
 >>> x/d argv+8
 >>> x/2c $a1
 #+END_SRC
+** jump
+jump 命令可以简写成 j.
+jump 命令基本用法是：
+#+begin_src bash
+jump <location>
+#+END_SRC
+location 可以是程序的行号或者函数的地址，jump 会让程序执行流跳转到指定位置执行
+
+如果 jump 跳转到的位置后续没有断点，那么 gdb 执行完跳转处的代码会继续执行。
+举个例子：
+#+BEGIN_EXAMPLE
+int somefunc()
+{
+    //代码A
+    //代码B
+    //代码C
+    //代码D
+    //代码E
+    //代码F
+}
+#+END_EXAMPLE
+假设我们的断点初始位置在行号 3 处（代码 A），这个时候我们使用 jump 6，那么程序会跳过代码 B和 C 的执行，执行完代码 D（ 跳转点），程序并不会停在代码 6 处，而是继续执行后续代码，因此如果我们想查看执行跳转处的代码后的结果，需要在行号 6、7 或 8 处设置断点。
+
+** layout的使用
+layout用于分割窗口，可以一边查看代码，一边测试。主要有以下几种用法：
+- layout src：显示源代码窗口
+- layout asm：显示汇编窗口
+- layout regs：显示源代码/汇编和寄存器窗口
+- layout split：显示源代码和汇编窗口
+- layout next：显示下一个layout
+- layout prev：显示上一个layout
+- Ctrl + L：刷新窗口
+- Ctrl + x，再按1：单窗口模式，显示一个窗口
+- Ctrl + x，再按2：双窗口模式，显示两个窗口
+- Ctrl + x，再按a：回到传统模式，即退出layout，回到执行layout之前的调试窗口。
+
+** list命令
+list 命令可以查看当前断点附近的代码，可以简写成 l。
+
+第一次输入 list 命令，会显示断点处前后的代码，继续输入 list指令会以递增行号的形式继续显示剩下的代码行，一直到文件结束为止。 
+list 指令可以往前和往后显示代码，命令分别是 list + (即 list+加号 )和 list - (即 list+减号 )。
+** print、ptype、display
+*** print
+打印变量或者表达式的值，也可以用于修改变量的值，print 命令可以缩写为 p
+
+#+begin_src bash
+p *argv    # 打印数组argv首个元素
+p *argv@2  # 打印数组前两个元素
+p *argv@argc  # 打印数组所有元素
+#+END_SRC
+print 命令不仅可以输出变量值，也可以输出特定表达式计算结果值，甚至可以输出一些函数的执行结果值。
+
+举个例子，我们可以输入 p &server.port 来输出 server.port 的地址。
+如果在 C++ 对象中，我们可以通过 p this 来显示当前对象的地址，也可以通过 p *this 来列出当前对象的各个成员变量值，
+如果有三个变量可以相加（假设变量名分别叫 a、b、c），我们可以使用 p a+b+c 来打印这三个变量的结果值。
+
+假设 func() 是一个可以执行的函数，p func() 命令可以输出该变量的执行结果。
+我举一个最常用的例子，某个时刻，某个系统函数执行失败了，通过系统变量 errno 得到一个错误码，我们可以使用 p strerror(errno) 将这个错误码对应的文字信息打印出来，这样我们就不用费劲地去 man 手册上查找这个错误码对应的错误含义了。
+
+print 命令不仅可以输出表达式结果，同时也可以修改变量的值：
+#+begin_src bash
+(gdb) p server.port=6400
+$4 = 6400
+(gdb) p server.port
+$5 = 6400
+(gdb)
+#+END_SRC
+**** 指定输出格式
+print 输出变量值时可以指定输出格式，命令使用格式如下：
+#+BEGIN_EXAMPLE
+print /format variable
+#+END_EXAMPLE
+format常用的取值有：
+#+BEGIN_EXAMPLE
+o octal 八进制显示
+x hex 十六进制显示
+d decimal 十进制显示
+u unsigned decimal 无符号十进制显示
+t binary 二进制显示
+f float 浮点值显示
+a address 内存地址格式显示(与十六进制相似)
+i instruction 指令格式显示
+s string 字符串形式显示
+z hex, zero padded on the left 十六进制左侧补0显示
+#+END_EXAMPLE
+完整的格式和用法读者可以在 gdb 中输入 help x 来查看。
+演示如下：
+#+begin_src bash
+(gdb) p /x server.port
+$6 = 0x1900
+(gdb) p /s server.port
+$7 = 6400
+(gdb) p /o server.port
+$8 = 014400
+(gdb) p /i server.port
+Format letter "i" is meaningless in "print" command.
+(gdb) p /t server.port
+$9 = 1100100000000
+(gdb) p /f server.port
+$10 = 8.96831017e-42
+(gdb) p /t server.port
+$11 = 1100100000000
+(gdb) p /a server.port
+$12 = 0x1900
+(gdb)
+#+END_SRC
+**** 将 print 显示的字符串或字符数组显示完整
+当我们使用 print 命令打印一个字符串或者字符数组时，如果该字符串太长，print 命令默认显示不全的，我们可以通过在 gdb 中输入 set print element 0 设置一下，这样再次使用 print 命令就能完整地显示该变量所有字符串了。
+
+#+begin_src bash
+void ChatSession::OnGetFriendListResponse(const std::shared_ptr<TcpConnection>&
+conn)
+{
+    std::string friendlist;
+    MakeUpFriendListInfo(friendlist, conn);
+    std::ostringstream os;
+    os << "{\"code\": 0, \"msg\": \"ok\", \"userinfo\":" << friendlist << "}";
+    Send(msg_type_getofriendlist, m_seq, os.str());
+    LOG_INFO << "Response to client: userid=" << m_userinfo.userid << ",
+    cmd=msg_type_getofriendlist, data=" << os.str();
+}
+#+END_SRC
+以上代码，当我们第一次用打印 friendlist 这个变量值时，只能显示部分字符串。当使用 set print element 0 设置以后就能完整地显示出来了。
+#+begin_src bash
+(gdb) n
+563 os << "{\"code\": 0, \"msg\": \"ok\", \"userinfo\":" << friendlist
+<< "}";
+(gdb) p friendlist
+$1 = "[{\"members\":
+[{\"address\":\"\",\"birthday\":19900101,\"clienttype\":0,\"customface\":\"\",\"
+facetype\":2,\"gender\":0,\"mail\":\"\",\"markname\":\"\",\"nickname\":\"bj_man\
+",\"phonenumber\":\"\",\"signature\":\"\",\"status\":0,\"userid\":4,"...
+(gdb) set print element 0
+(gdb) p friendlist
+$2 = "[{\"members\":
+[{\"address\":\"\",\"birthday\":19900101,\"clienttype\":0,\"customface\":\"\",\"
+facetype\":2,\"gender\":0,\"mail\":\"\",\"markname\":\"\",\"nickname\":\"bj_man\
+",\"phonenumber\":\"\",\"signature\":\"\",\"status\":0,\"userid\":4,\"username\"
+:\"13811411052\"},
+{\"address\":\"\",\"birthday\":19900101,\"clienttype\":0,\"customface\":\"\",\"f
+acetype\":0,\"gender\":0,\"mail\":\"\",\"markname\":\"\",\"nickname\":\"Half\",\
+"phonenumber\":\"\",\"signature\":\"\",\"status\":0,\"userid\":5,\"username\":\"
+15618326596\"},
+{\"address\":\"\",\"birthday\":19900101,\"clienttype\":0,\"customface\":\"\",\"f
+acetype\":34,\"gender\":0,\"mail\":\"\",\"markname\":\"\",\"nickname\":\"云淡风轻
+\",\"phonenumber\":\"\",\"signature\":\"\",\"status\":0,\"userid\":7,\"username\
+":\"china001\"},{\"address\":\"上海市浦东新区南泉路1200号409室
+\",\"birthday\":20170914,\"clienttype\":0,\"customface\":\"\",\"facetype\":5,\"g
+ender\":0,\"mail\":\"balloonwj@qq.com\",\"markname\":\"\",\"nickname\":\"qqq123\
+",\"phonenumber\":\"\",\"signature\":\"{“id”：
+12}\",\"status\":0,\"userid\":10,\"username\":\"qqq\"},
+{\"address\":\"\",\"birthday\":19900101,\"clienttype\":0,\"customface\":\"be1957
+4dcdd11fb9a96cf00f7e5f0e66\",\"facetype\":0,\"gender\":0,\"mail\":\"\",\"marknam
+e\":\"\",\"nickname\":\"TzdnerC\",\"phonenumber\":\"\",\"signature\":\"\",\"stat
+us\":0,\"userid\":15,\"username\":\"TzdnerC\"},
+{\"address\":\"\",\"birthday\":19900101,\"clienttype\":0,\"customface\":\"\",\"f
+acetype\":0,\"gender\":0,\"mail\":\"\",\"markname\":\"\",\"nickname\":\"Barry\",
+\"phonenumber\":\"\",\"signature\":\"\",\"status\":0,\"userid\":16,\"username\":
+\"17091203068\"},{\"address\":\"\",\"birthday\":19900101,\"clienttype\":0...太长了，这里省略...
+#+END_SRC
+
+*** ptype
+gdb 还有另外一个命令叫 ptype，顾名思义，其含义是 “print type”，就是输出一个变量的类型。
+#+begin_src bash
+(gdb) ptype server
+type = struct redisServer {
+pid_t pid;
+char *configfile;
+char *executable;
+char **exec_argv;
+int dynamic_hz;
+int config_hz;
+...省略部分字段...
+(gdb) ptype server.port
+type = int
+#+END_SRC
+可以看到，对于一个复合数据类型的变量，ptype 不仅列出了这个变量的类型（这里是一个名叫redisServer 的结构体），而且详细地列出了每个成员变量的字段名，有了这个功能，在调试时我们不必去代码文件中翻看某个变量的类型定义。
+
+*** display
+使用 display 命令查看变量或表达式的值，每当程序暂停执行（例如单步执行）时，GDB 调试器都会自动帮我们打印出来，而 print 命令则不会。
+
+display 命令没有缩写形式，常用的语法格式如下 2 种：
+#+begin_src bash
+(gdb) display expr
+(gdb) display/fmt expr
+#+END_SRC
+其中，expr 表示要查看的目标变量或表达式；参数 fmt 用于指定输出变量或表达式的格式，下表罗列了常用的一些 fmt 参数。
+| /fmt | 功 能                                |
+|------+--------------------------------------|
+| /x   | 以十六进制的形式打印出整数。         |
+| /d   | 以有符号、十进制的形式打印出整数。   |
+| /u   | 以无符号、十进制的形式打印出整数。   |
+| /o   | 以八进制的形式打印出整数。           |
+| /t   | 以二进制的形式打印出整数。           |
+| /f   | 以浮点数的形式打印变量或表达式的值。 |
+| /c   | 以字符形式打印变量或表达式的值。     |
+
+注意，display 命令和 /fmt 之间不要留有空格。以 /x 为例，应写为 (gdb)display/x expr。
+
+可以使用 infodisplay 查看当前已经自动添加了哪些值，
+使用 delete display 清除全部需要自动输出的变量，
+使用delete diaplay 编号 删除某个自动输出的变量。
+#+begin_src bash
+(gdb) delete display
+Delete all auto-display expressions? (y or n) n
+(gdb) delete display 3
+(gdb) info display
+Auto-display expressions now in effect:
+Num Enb Expression
+2: y $ebp
+1: y $eax
+#+END_SRC
+*** undisplay：取消追踪观察变量
+*** 参考文章
+[[http://c.biancheng.net/view/8238.html][GDB print和display命令：查看变量的值]]
+** si,ni,s,n的区别
+n/s都是C语言级的断点定位。 s会进入C函数内部,但是不会进入没有定位信息的函数（比如没有加-g编译的代码，因为其没有C代码的行数标记，没办法定位），n不会。
+
+ni/si都是汇编级别的断点定位。si会进入汇编和C函数内部,ni不会。
+
+
+归纳:当要进入没有调试信息的库函数调试的时候，用si是唯一的方法。
+
+当进入有调试信息的函数，用si和s都可以，但是他们不同，si是定位到汇编级别的第一个语句，但是s是进入到C级别的第一个语句
+
+*** 函数调用方式
+当函数的参数也是函数调用时，这个时候，我们使用 step 命令会依次进入各个函数，那么顺序是什么呢？举个例子，看下面这段代码：
+#+BEGIN_SRC c
+int func1(int a, int b)
+{
+    int c = a + b;
+    c += 2;
+    return c;
+}
+int func2(int p, int q)
+{
+    int t = q * p;
+    return t * t;
+}
+int func3(int m, int n)
+{
+    return m + n;
+}
+int main()
+{
+    int c;
+    c = func3(func1(1, 2), func2(8, 9));
+    printf("c=%d.\n", c);
+    return 0;
+}
+#+END_SRC
+函数调用方式，我们常用的函数调用方式有 __cdecl、__stdcall，C++ 的非静态成员函数的调用方式是__thiscall，
+这些调用方式，函数参数的传递本质上是函数参数的入栈的过程，而这三种调用方式参数的入栈顺序都是从右往左的，所以，这段代码中并没有显式标明函数的调用方式，所以采用默认__cdecl 方式。
+当我们在 22 行代码处，输入 step 先进入的是 func2()，当从 func2() 返回时再次输入step 命令会接着进入 func1()，当从 func1返回时，此时两个参数已经计算出来了，这时候会最终进入 func3()。
+** strip
+Linux 的 strip 命令移除掉某个程序中的调试信
+息，我们这里对 hello_server 使用 strip 命令试试：
+#+BEGIN_SRC bash
+[root@localhost testclient]# gcc -g -o hello_server hello_server.c
+##生成一个带调试信息的程序hello_server。
+[root@localhost testclient]# strip hello_server
+##使用strip命令之前
+-rwxr-xr-x. 1 root root 12416 Sep 8 09:45 hello_server
+##使用strip命令之后
+-rwxr-xr-x. 1 root root 6312 Sep 8 09:55 hello_server
+#+END_SRC
+可以发现，我们对 hello_server 使用 strip 命令之后，这个程序大小明显变小了（由 12416 个字节减
+小为 6312 个字节）。我们通常会在程序测试没问题后，需要发布到生产环境或者正式环境，会生成不
+带调试符号信息的程序，以减小程序体积或提高程序执行效率。
+
+我们再用 gdb 验证一下这个程序的调试信息是否确实被移除了
+#+begin_src bash
+[root@localhost testclient]# gdb hello_server
+GNU gdb (GDB) Red Hat Enterprise Linux 7.6.1-100.el7_4.1
+Copyright (C) 2013 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law. Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "x86_64-redhat-linux-gnu".
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>...
+Reading symbols from /root/testclient/hello_server...(no debugging symbols
+found)...done.
+(gdb)
+#+END_SRC
+** thread
+*** info查看线程信息
+info threads 来查看进程当前所有线程信息和这些线程分别中断在何处。
+
+#+DOWNLOADED: screenshot @ 2022-08-03 16:40:31
+[[file:images/linux%E7%AC%94%E8%AE%B0/gdb/2022-08-03_16-40-31_screenshot.png]]
+这里一共4个线程，其中一个主线程，三个工作线程，线程编号（Id 那一列）分别是 1、2、3、4。
+注意：虽然第一栏的名称叫 Id，但第一栏的数值并不是线程的 Id，第三栏有个括号，内容如( LWP 747)，这个 747 这样的数值才是当前线程真正的线程 Id。
+那 LWP 是什么意思呢？在早期的 Linux 系统的内核里面，其实不存在真正的线程实现，当时所有的线程都是用进程来实现的，这些模拟线程的进程被称为 Light WeightProcess（轻量级进程），后来新的 Linux 系统版本有了真正的线程实现，这个名字也被保留下来至今。
+
+线程编号前面这个星号表示的是当前 gdb 的作用于哪个线程，而不是说标了星号就是主线程。
+现在有 4 个线程，也就有 4 个调用堆栈，如果我们此时，查看输入 backtrace 命令查看调用堆栈，由于当前 gdb 作用在线程 1，所以 backtrace 命令显示的一定是线程 1 的调用堆栈：
+*** 线程
+我们可以通过 thread 线程编号 去切换到具体的线程上去。
+例如，我们想切换到线程 2 上去，我们只要输入 thread 2 即可，然后输入 bt 就能查看这个线程的调用堆栈了：
+#+BEGIN_EXAMPLE
+(gdb) thread 2
+[Switching to thread 2 (Thread 0x7ffff0bb9700 (LWP 5030))]
+#0 0x00007ffff74bc965 in pthread_cond_wait@@GLIBC_2.3.2 () from
+/usr/lib64/libpthread.so.0
+(gdb) bt
+#0 0x00007ffff74bc965 in pthread_cond_wait@@GLIBC_2.3.2 () from
+/usr/lib64/libpthread.so.0
+#1 0x00000000004991c0 in bioProcessBackgroundJobs (arg=0x0) at bio.c:190
+#2 0x00007ffff74b8dd5 in start_thread () from /usr/lib64/libpthread.so.0
+#3 0x00007ffff71e202d in clone () from /usr/lib64/libc.so.6
+(gdb)
+#+END_EXAMPLE
+*** scheduler-locking
+针对调试多线程存在的上述状况，gdb提供了一个在调试时将程序执行流锁定在当前调试线程的命令选项——scheduler-locking 选项，这个选项有三个值，分别是 on、step 和 off，使用方法如下：
+#+begin_src bash
+set scheduler-locking on/step/off
+#+END_SRC
+set scheduler-locking on 可以用来锁定当前线程，只观察这个线程的运行情况， 当锁定这个线程时， 其他线程就处于了暂停状态，也就是说你在当前线程执行 next、step、until、finish、return 命令时，其他线程是不会运行的。
+
+#+BEGIN_EXAMPLE
+需要注意的是，你在使用 set scheduler-locking on/step 选项时要确认下当前线程是否是你期望锁定的线程，如果不是，可以使用 thread + 线程编号 切换到你需要的线程再调用 set scheduler-locking on/step 进行锁定。
+#+END_EXAMPLE
+set scheduler-locking step 也是用来锁定当前线程，当且仅当使用 next 或 step 命令做单步调试时会锁定当前线程，如果你使用 until、finish、return 等线程内调试命令，但是它们不是单步命令，所以其他线程还是有机会运行的。
+相比较 on 选项值，step 选项值给为单步调试提供了更加精细化的控制，因为通常我们只希望在单步调试时，不希望其他线程对当前调试的各个变量值造成影响。
+
+set scheduler-locking off 用于关闭锁定当前线程。
+
+**** 实例
+我们以一个小的示例来说明这三个选项的使用吧。编写如下代码：
+#+BEGIN_SRC c++
+#include <stdio.h>
+#include <pthread.h>
+#include <unistd.h>
+long g = 0;
+void* worker_thread_1(void* p)
+{
+    while (true)
+    {
+        g = 100;
+        printf("worker_thread_1\n");
+        usleep(300000);
+    }
+    return NULL;
+}
+void* worker_thread_2(void* p)
+{
+    while (true)
+    {
+        g = -100;
+        printf("worker_thread_2\n");
+        usleep(500000);
+    }
+    return NULL;
+}
+int main()
+{
+    pthread_t thread_id_1;
+    pthread_create(&thread_id_1, NULL, worker_thread_1, NULL);
+    pthread_t thread_id_2;
+    pthread_create(&thread_id_2, NULL, worker_thread_2, NULL);
+    while (true)
+    {
+        g = -1;
+        printf("g=%d\n", g);
+        g = -2;
+        printf("g=%d\n", g);
+        g = -3;
+        printf("g=%d\n", g);
+        g = -4;
+        printf("g=%d\n", g);
+        usleep(1000000);
+    }
+    return 0;
+}
+#+END_SRC
+上述代码在主线程（main 函数所在的线程）中创建了了两个工作线程，
+主线程接下来的逻辑是在一个循环里面依次将全局变量 g 修改成 -1、-2、-3、-4，然后休眠 1 秒；
+工作线程 worker_thread_1、worker_thread_2 在分别在自己的循环里面将全局变量 g 修改成 100 和 -100。
+
+我们编译程序后将程序使用 gdb 跑起来，三个线程同时运行，交错输出：
+#+begin_src bash
+[root@myaliyun xx]# g++ -g -o main main.cpp -lpthread
+[root@myaliyun xx]# gdb main
+...省略部分无关输出...
+Reading symbols from main...
+(gdb) r
+Starting program: /root/xx/main
+[Thread debugging using libthread_db enabled]
+...省略部分无关输出...
+[New Thread 0x7ffff6f56700 (LWP 402)]
+worker_thread_1
+[New Thread 0x7ffff6755700 (LWP 403)]
+g=-1
+g=-2
+g=-3
+g=-4
+worker_thread_2
+worker_thread_1
+worker_thread_2
+worker_thread_1
+worker_thread_1
+g=-1
+g=-2
+g=-3
+g=-4
+worker_thread_2
+worker_thread_1
+worker_thread_1
+worker_thread_2
+worker_thread_1
+g=-1
+g=-2
+g=-3
+g=-4
+worker_thread_2
+worker_thread_1
+worker_thread_1
+worker_thread_2
+#+END_SRC
+我们按 Ctrl + C 将程序中断下来，如果当前线程不在主线程，可以先使用 info threads 和 threadid 切换到主线程：
+#+begin_src bash
+^C
+Thread 1 "main" received signal SIGINT, Interrupt.
+0x00007ffff701bfad in nanosleep () from /usr/lib64/libc.so.6
+(gdb) info threads
+Id Target Id Frame
+\* 1 Thread 0x7ffff7feb740 (LWP 1191) "main" 0x00007ffff701bfad in nanosleep
+() from /usr/lib64/libc.so.6
+2 Thread 0x7ffff6f56700 (LWP 1195) "main" 0x00007ffff701bfad in nanosleep
+() from /usr/lib64/libc.so.6
+3 Thread 0x7ffff6755700 (LWP 1196) "main" 0x00007ffff701bfad in nanosleep
+() from /usr/lib64/libc.so.6
+(gdb) thread 1
+[Switching to thread 1 (Thread 0x7ffff7feb740 (LWP 1191))]
+#0 0x00007ffff701bfad in nanosleep () from /usr/lib64/libc.so.6
+(gdb)
+#+END_SRC
+然后在代码 11 行和 41 行各加一个断点。我们反复执行 until 48 命令，发现工作线程 1 和 2 还是有机会被执行的。
+#+begin_src bash
+(gdb) b main.cpp:41
+Breakpoint 1 at 0x401205: file main.cpp, line 41.
+(gdb) b main.cpp:11
+Breakpoint 2 at 0x40116e: file main.cpp, line 11.
+(gdb) until 48
+0x00007ffff704c884 in usleep () from /usr/lib64/libc.so.6
+(gdb)
+worker_thread_2
+[Switching to Thread 0x7ffff6f56700 (LWP 1195)]
+Thread 2 "main" hit Breakpoint 2, worker_thread_1 (p=0x0) at main.cpp:11
+11 g = 100;
+(gdb)
+worker_thread_2
+[Switching to Thread 0x7ffff7feb740 (LWP 1191)]
+Thread 1 "main" hit Breakpoint 1, main () at main.cpp:41
+41 printf("g=%d\n", g);
+(gdb)
+worker_thread_1
+worker_thread_2
+g=-1
+g=-2
+g=-3
+g=-4
+main () at main.cpp:49
+49 usleep(1000000);
+(gdb)
+worker_thread_2
+[Switching to Thread 0x7ffff6f56700 (LWP 1195)]
+Thread 2 "main" hit Breakpoint 2, worker_thread_1 (p=0x0) at main.cpp:11
+11 g = 100;
+(gdb)
+#+END_SRC
+现在我们再次将线程切换到主线程（如果 gdb 中断后当前线程不是主线程的话），执行 set scheduler-locking on 命令，然后继续反复执行 until 48 命令。
+#+begin_src bash
+(gdb) set scheduler-locking on
+(gdb) until 48
+Thread 1 "main" hit Breakpoint 1, main () at main.cpp:41
+41 printf("g=%d\n", g);
+(gdb) until 48
+g=-1
+g=-2
+g=-3
+g=-4
+main () at main.cpp:49
+49 usleep(1000000);
+(gdb) until 48
+Thread 1 "main" hit Breakpoint 1, main () at main.cpp:41
+41 printf("g=%d\n", g);
+(gdb)
+g=-1
+g=-2
+g=-3
+g=-4
+main () at main.cpp:49
+49 usleep(1000000);
+(gdb) until 48
+Thread 1 "main" hit Breakpoint 1, main () at main.cpp:41
+41 printf("g=%d\n", g);
+(gdb)
+g=-1
+g=-2
+g=-3
+g=-4
+main () at main.cpp:49
+49 usleep(1000000);
+(gdb) until 48
+Thread 1 "main" hit Breakpoint 1, main () at main.cpp:41
+41 printf("g=%d\n", g);
+(gdb)
+#+END_SRC
+我们再次使用 until 命令时，gdb 锁定了主线程，其他两个工作线程再也不会被执行了，因此两个工作线程无任何输出。
+
+我们再使用 set scheduler-locking step 模式再来锁定一下主线程，然后再次反复执行 until 48命令。
+#+begin_src bash
+(gdb) set scheduler-locking step
+(gdb) until 48
+worker_thread_2
+worker_thread_1
+g=-100
+g=-2
+g=-3
+g=-4
+main () at main.cpp:49
+49 usleep(1000000);
+(gdb) until 48
+worker_thread_2
+[Switching to Thread 0x7ffff6f56700 (LWP 1195)]
+Thread 2 "main" hit Breakpoint 2, worker_thread_1 (p=0x0) at main.cpp:11
+11 g = 100;
+(gdb) until 48
+worker_thread_2
+worker_thread_1
+Thread 2 "main" hit Breakpoint 2, worker_thread_1 (p=0x0) at main.cpp:11
+11 g = 100;
+(gdb) until 48
+worker_thread_2
+[Switching to Thread 0x7ffff7feb740 (LWP 1191)]
+Thread 1 "main" hit Breakpoint 1, main () at main.cpp:41
+41 printf("g=%d\n", g);
+(gdb) until 48
+worker_thread_1
+worker_thread_2
+g=-100
+g=-2
+g=-3
+g=-4
+main () at main.cpp:49
+49 usleep(1000000);
+(gdb) until 48
+worker_thread_2
+[Switching to Thread 0x7ffff6f56700 (LWP 1195)]
+Thread 2 "main" hit Breakpoint 2, worker_thread_1 (p=0x0) at main.cpp:11
+11 g = 100;
+(gdb) until 48
+worker_thread_2
+worker_thread_1
+Thread 2 "main" hit Breakpoint 2, worker_thread_1 (p=0x0) at main.cpp:11
+11 g = 100;
+(gdb)
+#+END_SRC
+可以看到使用 step 模式锁定的主线程，在使用 until 命令时另外两个工作线程仍然有执行的机会。
+我们再次切换到主线程，然后使用 next 命令单步调试下试试。
+#+begin_src bash
+(gdb) info threads
+Id Target Id Frame
+1 Thread 0x7ffff7feb740 (LWP 1191) "main" 0x00007ffff701bfad in nanosleep
+() from /usr/lib64/libc.so.6
+\* 2 Thread 0x7ffff6f56700 (LWP 1195) "main" worker_thread_1 (p=0x0) at
+main.cpp:11
+ 3 Thread 0x7ffff6755700 (LWP 1196) "main" 0x00007ffff701bfad in nanosleep
+() from /usr/lib64/libc.so.6
+(gdb) thread 1
+[Switching to thread 1 (Thread 0x7ffff7feb740 (LWP 1191))]
+#0 0x00007ffff701bfad in nanosleep () from /usr/lib64/libc.so.6
+(gdb) set scheduler-locking step
+(gdb) next
+Single stepping until exit from function nanosleep,
+which has no line number information.
+0x00007ffff704c884 in usleep () from /usr/lib64/libc.so.6
+(gdb) next
+Single stepping until exit from function usleep,
+which has no line number information.
+main () at main.cpp:40
+40 g = -1;
+(gdb) next
+Thread 1 "main" hit Breakpoint 1, main () at main.cpp:41
+41 printf("g=%d\n", g);
+(gdb) next
+g=-1
+42 g = -2;
+(gdb) next
+43 printf("g=%d\n", g);
+(gdb) next
+g=-2
+44 g = -3;
+(gdb) next
+45 printf("g=%d\n", g);
+(gdb) next
+g=-3
+46 g = -4;
+(gdb) next
+47 printf("g=%d\n", g);
+(gdb) next
+g=-4
+49 usleep(1000000);
+(gdb) next
+40 g = -1;
+(gdb) next
+Thread 1 "main" hit Breakpoint 1, main () at main.cpp:41
+41 printf("g=%d\n", g);
+(gdb) next
+g=-1
+42 g = -2;
+(gdb) next
+43 printf("g=%d\n", g);
+(gdb) next
+g=-2
+44 g = -3;
+(gdb) next
+45 printf("g=%d\n", g);
+(gdb) next
+g=-3
+46 g = -4;
+(gdb) next
+47 printf("g=%d\n", g);
+(gdb) next
+g=-4
+49 usleep(1000000);
+(gdb) next
+40 g = -1;
+(gdb) next
+Thread 1 "main" hit Breakpoint 1, main () at main.cpp:41
+41 printf("g=%d\n", g);
+(gdb)
+#+END_SRC
+此时我们发现设置了以 step 模式锁定主线程，工作线程不会在单步调试主线程时被执行，即使在工作线程设置了断点。
+最后我们使用 set scheduler-locking off 取消对主线程的锁定，然后继续使用 next 命令单步调试。
+#+begin_src bash
+(gdb) set scheduler-locking off
+(gdb) next
+worker_thread_2
+worker_thread_1
+g=-100
+42 g = -2;
+(gdb) next
+worker_thread_2
+[Switching to Thread 0x7ffff6f56700 (LWP 1195)]
+Thread 2 "main" hit Breakpoint 2, worker_thread_1 (p=0x0) at main.cpp:11
+11 g = 100;
+(gdb) next
+g=100
+g=-3
+g=-4
+worker_thread_2
+12 printf("worker_thread_1\n");
+(gdb) next
+worker_thread_1
+13 usleep(300000);
+(gdb) next
+worker_thread_2
+[Switching to Thread 0x7ffff7feb740 (LWP 1191)]
+Thread 1 "main" hit Breakpoint 1, main () at main.cpp:41
+41 printf("g=%d\n", g);
+(gdb) next
+[Switching to Thread 0x7ffff6f56700 (LWP 1195)]
+Thread 2 "main" hit Breakpoint 2, worker_thread_1 (p=0x0) at main.cpp:11
+11 g = 100;
+(gdb) next
+g=-1
+g=-2
+g=-3
+g=-4
+worker_thread_2
+12 printf("worker_thread_1\n");
+(gdb)
+#+END_SRC
+取消了锁定之后，单步调试时三个线程都有机会被执行，线程 1 的断点也会被正常触发。
+至此，我们搞清楚了如何利用 set scheduler-locking 选项来方便我们调试多线程程序。
 ** tui界面
 TUI（TextUser Interface）为GDB调试的文本用户界面，可以方便地显示源代码、汇编和寄存器文本窗口
 
@@ -3566,6 +4973,7 @@ Show the system registers in the register window.
 
 update ：更新源代码窗口到当前运行点
 Update the source window and the current execution point. 
+当我们通过方向键调整了 gdbtui 的 src 窗口以后，可以通过 update 命令重新把焦点定位到当前执行的代码上。
 
 winheight winname +count：增加指定窗口的高度 
 winheight winname -count：减小指定窗口的高度
@@ -3578,6 +4986,7 @@ Select the border appearance for the source, assembly and register windows. The 
 
 space
 Use a space character to draw the border.
+当前 gdb tui窗口放大或者缩小以后，gdbtui 窗口中的内容不会自己刷新以适应新的窗口尺寸，我们可以通过 space 键强行刷新 gdbtui 窗口。
 
 ascii
 Use ASCII characters ‘+’, ‘-’ and ‘|’ to draw the border.
@@ -3620,16 +5029,34 @@ Note that the colors of the TUI borders can be controlled using the appropriate 
 *** 参考文章
 [[https://sourceware.org/gdb/onlinedocs/gdb/TUI.html#TUI][25.GDB Text User Interface]]
 [[https://blog.csdn.net/xu415/article/details/19021759][GDB调试之TUI界面 - CSDN博客]]
-** apropos
-apropos regexp命令查找所有符合regexp正则表达式的命令信息：
+** until
+until 的命令，简写成 u，我们使用使用这个命令指定程序运行到某一行停下来。
+** watch
+watch：被设置观察点的变量发生修改时，打印显示
+
+监视某个变量或者某个内存地址会产生一个“watch point”（观察点）。
+
+i watch：显示观察点
+
+watch 命令的使用方式是 watch 变量名或内存地址，一个 watch pointwatch 一般有以下几种格式：
+#+BEGIN_EXAMPLE
+# 整型
+int i;
+watch i
+
+# 指针
+char *p;
+watch p 与 watch *p
+
+# watch一个数组或者内存空间
+# 这里是对 buf 的 128 个数据进行了监视。
+char buf[128];
+watch buf
+#+END_EXAMPLE
+需要注意的是：当设置的观察点是一个局部变量时。局部变量无效后，观察点也会失效。例如在观察点失效时， gdb 可能会提示如下信息：
 #+begin_src bash
-(gdb) apropos set
-awatch -- Set a watchpoint for an expression
-b -- Set breakpoint at specified line or function
-br -- Set breakpoint at specified line or function
-bre -- Set breakpoint at specified line or function
-brea -- Set breakpoint at specified line or function
-......
+Watchpoint 2 deleted because the program has left the block in which its
+expression is valid.
 #+END_SRC
 
 ** 
@@ -3642,6 +5069,8 @@ print $pc
 info reg 打印全部32个用户寄存器
 print/x $satp 查看satp寄存器
 x/3i 0xde4
+** 参考文章
+[[https://www.zhihu.com/question/65306462/answer/2602659870][gdb 高级调试实战教程 张小方]]
 * grep命令
 Linux grep 命令用于查找文件里符合条件的字符串。
 

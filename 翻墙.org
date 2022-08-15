@@ -509,11 +509,11 @@ reverse: ReverseObject :
 #+END_SRC
 access: string
 
-访问日志的文件地址，其值是一个合法的文件地址，如"/tmp/v2ray/_access.log"（Linux）或者"C:\\Temp\\v2ray\\_access.log"（Windows）。当此项不指定或为空值时，表示将日志输出至 stdout。V2Ray 4.20 加入了特殊值none，即关闭access log。
+访问日志的文件地址，将访问的记录保存到文件中，其值是一个合法的文件地址，如"/tmp/v2ray/_access.log"（Linux）或者"C:\\Temp\\v2ray\\_access.log"（Windows）。当此项不指定或为空值时，表示将日志输出至 stdout，即命令行中（terminal、cmd 等）。V2Ray 4.20 加入了特殊值none，即关闭access log。
 
 error: string
 
-错误日志的文件地址，其值是一个合法的文件地址，如"/tmp/v2ray/_error.log"（Linux）或者"C:\\Temp\\v2ray\\_error.log"（Windows）。当此项不指定或为空值时，表示将日志输出至 stdout。V2Ray 4.20 加入了特殊值none，即关闭error log（跟loglevel: "none"等价）。
+错误日志的文件地址，将错误的记录保存到文件中，其值是一个合法的文件地址，如"/tmp/v2ray/_error.log"（Linux）或者"C:\\Temp\\v2ray\\_error.log"（Windows）。当此项不指定或为空值时，表示将日志输出至 stdout，即命令行中（terminal、cmd 等）。V2Ray 4.20 加入了特殊值none，即关闭error log（跟loglevel: "none"等价）。
 
 loglevel: "debug" | "info" | "warning" | "error" | "none"
 
@@ -1469,6 +1469,792 @@ $ /usr/bin/v2ray/v2ray -test -config /etc/v2ray/config.json
 V2Ray v3.15 (die Commanderin) 20180329
 An unified platform for anti-censorship.
 Configuration OK.
+#+END_SRC
+** 路由功能
+V2Ray 的一大特点就是内置了路由功能，用大白话说就是可以根据自己的实际情况制定一些规则来满足自己的上网需求，最简单最常见的就是直连国内网站、拦截特站点以及代理被墙网站。
+*** 简介
+#+BEGIN_SRC js
+{
+  "log": {
+    "loglevel": "warning",
+    "access": "D:\\v2ray\\access.log",
+    "error": "D:\\v2ray\\error.log"
+  },
+  "inbounds": [
+    {
+      "port": 1080,
+      "protocol": "socks",
+      "sniffing": {
+        "enabled": true,
+        "destOverride": ["http", "tls"]
+      },
+      "settings": {
+        "auth": "noauth"  
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "vmess",
+      "settings": {
+        "vnext": [
+          {
+            "address": "serveraddr.com",
+            "port": 16823,  
+            "users": [
+              {
+                "id": "b831381d-6324-4d53-ad4f-8cda48b30811",  
+                "alterId": 64
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
+#+END_SRC
+像上面这个配置就是前面 VMess 的客户端配置文件，假如改一下 outbound 的内容，变成这样：
+#+BEGIN_SRC js
+{
+  "log": {
+    "loglevel": "warning",
+    "access": "D:\\v2ray\\access.log",
+    "error": "D:\\v2ray\\error.log"
+  },
+  "inbounds": [
+    {
+      "port": 1080,
+      "protocol": "socks",
+      "settings": {
+        "auth": "noauth"  
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "freedom", //原来是 VMess，现在改成 freedom
+      "settings": {
+      }
+    }
+  ]
+}
+#+END_SRC
+如果修改成这个配置重启客户端之后，你会发现这个时候浏览器设不设置代理其实是一样的，像 Google 这类被墙的网站没法访问了，taobao 这种国内网站还是跟平常一样能上。
+
+如果是前面的介绍 VMess，数据包的流向是:
+#+BEGIN_EXAMPLE
+{浏览器} <--(socks)--> {V2Ray 客户端 inbound <-> V2Ray 客户端 outbound} <--(VMess)-->  {V2Ray 服务器 inbound <-> V2Ray 服务器 outbound} <--(Freedom)--> {目标网站}
+#+END_EXAMPLE
+
+但因为现在 V2Ray 客户端的 outbound 设成了 freedom，freedom 就是直连，所以修改后数据包流向变成了这样：
+#+BEGIN_EXAMPLE
+{浏览器} <--(socks)--> {V2Ray 客户端 inbound <-> V2Ray 客户端 outbound} <--(Freedom)--> {目标网站}
+#+END_EXAMPLE
+
+V2Ray 客户端从 inbound 接收到数据之后没有经过 VPS 中转，而是直接由 freedom 发出去了，所以效果跟直接访问一个网站是一样的。
+
+再来看下面这个:
+#+BEGIN_SRC js
+{
+  "log":{
+    "loglevel": "warning",
+    "access": "D:\\v2ray\\access.log",
+    "error": "D:\\v2ray\\error.log"
+  },
+  "inbounds": [
+    {
+      "port": 1080,
+      "protocol": "socks",
+      "settings": {
+        "auth": "noauth"  
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "blackhole",
+      "settings": {
+      }
+    }
+  ]
+}
+#+END_SRC
+
+这样的配置生效之后，你会发现无论什么网站都无法访问。这是为什么呢？blackhole 是黑洞的意思，在 V2Ray 这里也差不多相当于是一个黑洞，就是说 V2Ray 从 inbound 接收到数据之后发到 outbound，因为 outbound 是 blackhole，来什么吞掉什么，就是不转发到服务器或者目标网站，相当于要访问什么就阻止访问什么。
+
+目前比较大众的需求是被墙网站走代理，国内网站直连，其他一些不喜欢的则拦截(比如说百度的高精度定位)。
+
+在 V2Ray 的配置中，outbounds 是出口协议的集合，你可以在里面放任意多个出口协议。
+
+下面给出放 3 个出口协议配置的例子。
+#+BEGIN_SRC js
+{
+  "log": {
+    "loglevel": "warning",
+    "access": "D:\\v2ray\\access.log",
+    "error": "D:\\v2ray\\error.log"
+  },
+  "inbounds": [
+    {
+      "port": 1080,
+      "protocol": "socks",
+      "settings": {
+        "auth": "noauth"  
+      }
+    }
+  ],
+  "outbounds": [ 
+    {
+      "protocol": "vmess", // 出口协议
+      "settings": {
+        "vnext": [
+          {
+            "address": "serveraddr.com", // 服务器 IP 地址
+            "port": 16823,  // 服务器端口
+            "users": [
+              {
+                "id": "b831381d-6324-4d53-ad4f-8cda48b30811",  // 用户 ID，须与服务器端配置相同
+                "alterId": 64
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "protocol": "freedom",
+      "settings": {}
+    },
+    {
+      "protocol": "blackhole",
+      "settings": {}
+    }
+  ]
+}
+#+END_SRC
+
+当然这个配置只是包含了多个出口协议而已，在包含多个出口协议的情况下，只会以 outbounds 中的第一个出口作为默认的出口。要达到上面说的被墙网站走代理，国内网站直连，其他特殊网站拦截的效果，还得加入路由功能的配置。关于路由功能的配置见后面两小节。
+*** 国内直连
+**** 客户端配置
+#+BEGIN_SRC js
+{
+  "log": {
+    "loglevel": "warning",
+    "access": "D:\\v2ray\\access.log",
+    "error": "D:\\v2ray\\error.log"
+  },
+  "inbounds": [
+    {
+      "port": 1080,
+      "protocol": "socks",
+      "sniffing": {
+        "enabled": true,
+        "destOverride": ["http", "tls"]
+      },
+      "settings": {
+        "auth": "noauth",
+        "udp": true
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "vmess",
+      "settings": {
+        "vnext": [
+          {
+            "address": "serveraddr.com",
+            "port": 16823,  
+            "users": [
+              {
+                "id": "b831381d-6324-4d53-ad4f-8cda48b30811",
+                "alterId": 64
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "protocol": "freedom",
+      "settings": {},
+      "tag": "direct" //如果要使用路由，这个 tag 是一定要有的，在这里 direct 就是 freedom 的一个标号，在路由中说 direct V2Ray 就知道是这里的 freedom 了
+    }    
+  ],
+  "routing": {
+    "domainStrategy": "IPOnDemand",
+    "rules": [
+      {
+        "type": "field",
+        "outboundTag": "direct",
+        "domain": ["geosite:cn"] // 中国大陆主流网站的域名
+      },
+      {
+        "type": "field",
+        "outboundTag": "direct",
+        "ip": [
+          "geoip:cn", // 中国大陆的 IP
+          "geoip:private" // 私有地址 IP，如路由器等
+        ]
+      }
+    ]
+  }
+}
+#+END_SRC
+**** 服务器配置
+#+BEGIN_SRC js
+{
+  "log": {
+    "loglevel": "warning",
+    "access": "/var/log/v2ray/access.log",
+    "error": "/var/log/v2ray/error.log"
+  },
+  "inbounds": [
+    {
+      "port": 16823,
+      "protocol": "vmess",    
+      "settings": {
+        "clients": [
+          {
+            "id": "b831381d-6324-4d53-ad4f-8cda48b30811"
+          }
+        ]
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "freedom",
+      "settings": {}
+    }
+  ]
+}
+#+END_SRC
+**** 说明
+看客户端配置，注意 routing 有一个 domainStrategy， 跟着写就行，当然也可以设成其它的，这里我不说，想知道就看用户手册。
+重点在 rules，我们要设置的路由规则就放在这里，注意这是一个数组，也就是说可以设置多个路由规则，当访问一个网站，数据包进入 V2Ray 之后路由就会先看看有没有能够匹配的规则，然后执行规则。
+
+在rules 数组中的每个规则由一组大括号{ }扩起来。规则中的 type 是固定的(也就是照抄就行)， 两个规则分别有 "domain": ["geosite:cn"] 和 "ip": ["geoip:cn"]，这两个分别包含了中国大陆主流网站大部分域名和几乎所有的 ip 。
+两个规则的 outboundTag 都是 direct （outbounds 中 tag 为 direct 的是 freedom）那么如果访问了国内的网站路由就会将这个数据包发往 freedom，也就是直连了。
+比如说我访问了 qq.com，qq.com 是国内网站包含在 chinasites 里，就会匹配路由规则发往 freedom。
+
+也许有的朋友会觉得奇怪，在这个例子当中路由规则只有国内网站直连，没有关于走代理的规则，但仍然可以访问 google.com、twitter.com 这类等众多被墙的网站的。这因为 outbounds 中的第一个出口协议是作为默认的出口，当一个数据包没有匹配的规则时，路由就会把数据包发往默认出口，在本例中 VMess 位于 outbounds 中的第一个，即不是访问中国大陆网站的数据包将通过 VPS 代理。
+
+服务器配置与前面 VMess 一样，不再赘述。
+*** 广告过滤 
+**** 客户端配置
+#+BEGIN_SRC js
+{
+  "log": {
+    "loglevel": "warning",
+    "access": "D:\\v2ray\\access.log",
+    "error": "D:\\v2ray\\error.log"
+  },
+  "inbounds": [
+    {
+      "port": 1080,
+      "protocol": "socks",
+      "sniffing": {
+        "enabled": true,
+        "destOverride": ["http", "tls"]
+      },
+      "settings": {
+        "auth": "noauth"
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "vmess",
+      "settings": {
+        "vnext": [
+          {
+            "address": "serveraddr.com",
+            "port": 16823,
+            "users": [
+              {
+                "id": "2b831381d-6324-4d53-ad4f-8cda48b30811",  
+                "alterId": 64
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "protocol": "freedom",
+      "settings": {},
+      "tag": "direct"//如果要使用路由，这个 tag 是一定要有的，在这里 direct 就是 freedom 的一个标号，在路由中说 direct V2Ray 就知道是这里的 freedom 了
+    },
+    {
+      "protocol": "blackhole",
+      "settings": {},
+      "tag": "adblock"//同样的，这个 tag 也是要有的，在路由中说 adblock 就知道是这里的 blackhole（黑洞） 了
+    }
+  ],
+  "routing": {
+    "domainStrategy": "IPOnDemand",
+    "rules": [
+      {
+        "domain": [
+          "tanx.com",
+          "googeadsserving.cn",
+          "baidu.com"
+        ],
+        "type": "field",
+        "outboundTag": "adblock"       
+      },
+      {
+        "domain": [
+          "amazon.com",
+          "microsoft.com",
+          "jd.com",
+          "youku.com",
+          "baidu.com"
+        ],
+        "type": "field",
+        "outboundTag": "direct"
+      },
+      {
+        "type": "field",
+        "outboundTag": "direct",
+        "domain": ["geosite:cn"]
+      },
+      {
+        "type": "field",
+        "outboundTag": "direct",
+        "ip": [
+          "geoip:cn",
+          "geoip:private"
+        ]
+      }
+    ]
+  }
+}
+#+END_SRC
+**** 服务器配置
+#+BEGIN_SRC js
+{
+  "log": {
+    "loglevel": "warning",
+    "access": "/var/log/v2ray/access.log",
+    "error": "/var/log/v2ray/error.log"
+  },
+  "inbounds": [
+    {
+      "port": 16823,
+      "protocol": "vmess",    
+      "settings": {
+        "clients": [
+          {
+            "id": "b831381d-6324-4d53-ad4f-8cda48b30811",
+            "alterId": 64
+          }
+        ]
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "freedom",
+      "settings": {}
+    }
+  ]
+}
+#+END_SRC
+**** 说明
+相对于上小节，在本小节的配置变化只在于客户端配置的 outbounds 和 routing 添加了新的内容，请大家自行比较。
+
+在 routing 中，新添加了两个规则：
+#+BEGIN_SRC js
+{
+  "domain": [
+    "tanx.com",
+    "googeadsserving.cn",
+    "baidu.com"
+  ],
+  "type": "field",
+  "outboundTag": "adblock"       
+},
+{
+  "domain": [
+    "amazon.com",
+    "microsoft.com",
+    "jd.com",
+    "youku.com",
+    "baidu.com"
+  ],
+  "type": "field",
+  "outboundTag": "direct"
+}
+#+END_SRC
+在第一个规则中，域名包含有 tanx.com 或 baidu.com 的就会被阻止连接，如果想拦截某些网站，往 adblock 的规则中写想要拦截的域名就可以了。在第二个规则当中，域名中包含有 amazon.com 或 microsoft.com 或 youku.com 或 baidu.com 的会直连。有一个问题大家发现没有，两个规则都有 baidu.com ，那么会执行哪个呢？答案是只会执行第一个（即adblock)，原因是：
+
+1. 规则是放在 routing.rules 这个数组当中，数组的内容是有顺序的，也就是说在这里规则是有顺序的，匹配规则时是从上往下匹配；
+2. 当路由匹配到一个规则时就会跳出匹配而不会对之后的规则进行匹配；
+*** 注意事项
+本节记录了一些新手朋友使用 V2Ray 使用路由功能时常范的错误，希望大家能够避免。
+**** 通配符
+如果我想让淘宝和京东的域名直连，路由功能的规则写成下面这样的，你觉得这样的规则有问题吗？
+#+BEGIN_SRC js
+[
+    {
+        "type": "field",
+        "outboundTag": "direct",
+        "domain": [
+            "*.taobao.com",
+            "*.jd.com"
+        ]
+    }
+]
+#+END_SRC
+如果使用了这样的规则，你会发现根本没有走 direct 直连。很奇怪？这并不奇怪。这是因为你的经验在作祟。在 V2Ray 中，星号 * 不具备通配符的意义，只是一个普通的字符而已，是你以为星号 * 是通配符，这是臆想。如果想要匹配所有子域名的话，可以这么写规则：
+#+BEGIN_SRC js
+[
+    {
+        "type": "field",
+        "outboundTag": "direct",
+        "domain": [
+            "domain:taobao.com",
+            "domain:jd.com"
+        ]
+    }
+]
+#+END_SRC
+domain: 代表子域名，如 "domain:taobao.com" 这样一条规则包含了所有 taobao.com 域名及其子域名。
+**** IP & domain
+#+BEGIN_SRC js
+[
+    {
+        "type": "field",
+        "outboundTag": "direct",
+        "domain": [
+            "domain:taobao.com"
+        ],
+        "ip": [
+            "192.168.0.0/16"
+        ]
+    }
+]
+#+END_SRC
+这样的一个规则的严格来说没有问题，真正的问题在与使用者不理解规则的配置。如果要匹配以上的规则，那么代表这有一个数据包的目标地址域名是 taobao.com 并且 IP 属于 192.168.0.0.1/16。通常情况下这是不可能的，所以你访问淘宝是不会匹配这个规则。如果你要满足域名和 IP 任一条件都能够匹配规则，那么应该这么写：
+#+BEGIN_SRC js
+[
+    {
+        "type": "field",
+        "outboundTag": "direct",
+        "domain": [
+            "domain:taobao.com"
+        ]
+    }，
+    {
+        "type": "field",
+        "outboundTag": "direct",
+        "ip": [
+            "192.168.0.0/16"
+        ]
+    }
+]
+#+END_SRC
+** 传输层
+V2Ray 的相比其它工具有一大优点是可以自行选择传输层的形式，也就是说 V2Ray 服务器和客户端之间的传输的数据包形式我们是可以选择的。如我们可以选择伪装成 HTTP(TCP)流量，如果使用了 mKCP 也可以伪装成 BT 下载、视频通话、微信视频通话。也可以选择使用 WebSokcs 或者 TLS。以上这个都是传输层的配置决定的。
+
+V2Ray 中传输层配置在 transport 里设定，也可以在 inbound/outbound 中的 streamSettings 设定。这两者的区别是 inbound/outbound 的 streamSettings 只对当前的 inbound/outbound 有效(分连接配置)，不影响其它的 inbound/outbound 的传输层配置，而 transport 是全局的，对整个配置所有的 inbound 和 outbound 都有效(全局配置)，如果一个 inbound/outbound 中设定了 streamSettings，transport 的全局设定不会影响这个 inbound/outbound。
+** Mux多路复用
+Mux 意为多路复用(multiplexing)，能够将多条 TCP 连接合并成一条，节省资源，提高并发能力。
+
+Mux 实质上不能提高网速，但对并发连接比较有效，如浏览图片较多的网页，看直播等。
+
+Mux 只需在客户端开启，服务器会自动识别，所以只给客户端的配置。也就是只要在 outbound 或 outboundDetour 加入 "mux": {"enabled": true} 即可：
+#+BEGIN_SRC js
+{
+  "inbounds": [
+    {
+      "port": 1080, // 监听端口
+      "protocol": "socks", // 入口协议为 SOCKS 5
+      "sniffing": {
+        "enabled": true,
+        "destOverride": ["http", "tls"]
+      },
+      "settings": {
+        "auth": "noauth"  // 不认证
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "vmess", // 出口协议
+      "settings": {
+        "vnext": [
+          {
+            "address": "serveraddr.com", // 服务器地址，请修改为你自己的服务器 ip 或域名
+            "port": 16823,  // 服务器端口
+            "users": [
+              {
+                "id": "b831381d-6324-4d53-ad4f-8cda48b30811",  // 用户 ID，必须与服务器端配置相同
+                "alterId": 64 // 此处的值也应当与服务器相同
+              }
+            ]
+          }
+        ]
+      },
+      "mux": {"enabled": true}
+    }
+  ]
+}
+#+END_SRC
+** mKCP
+V2Ray 引入了 KCP 传输协议，并且做了一些不同的优化，称为 mKCP。如果你发现你的网络环境丢包严重，可以考虑一下使用 mKCP。
+由于快速重传的机制，相对于常规的 TCP 来说，mKCP 在高丢包率的网络下具有更大的优势，也正是因为此， mKCP 明显会比 TCP 耗费更多的流量，所以请酌情使用。
+要了解的一点是，mKCP 与 KCPTUN 同样是 KCP 协议，但两者并不兼容。
+
+mKCP 的配置比较简单，只需在服务器的 inbounds 和 客户端的 outbounds 添加一个 streamSettings 并设置成 mkcp 即可。
+*** 服务器配置
+#+BEGIN_SRC js
+{
+  "inbounds": [
+    {
+      "port": 16823,
+      "protocol": "vmess",
+      "settings": {
+        "clients": [
+          {
+            "id": "b831381d-6324-4d53-ad4f-8cda48b30811",
+            "alterId": 64
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "mkcp", //此处的 mkcp 也可写成 kcp，两种写法是起同样的效果
+        "kcpSettings": {
+          "uplinkCapacity": 5,
+          "downlinkCapacity": 100,
+          "congestion": true,
+          "header": {
+            "type": "none"
+          }
+        }
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "freedom",
+      "settings": {}
+    }
+  ]
+}
+#+END_SRC
+*** 客户端配置
+#+BEGIN_SRC js
+{
+  "inbounds": [
+    {
+      "port": 1080,
+      "protocol": "socks",
+      "sniffing": {
+        "enabled": true,
+        "destOverride": ["http", "tls"]
+    },
+      "settings": {
+        "auth": "noauth"
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "protocol": "vmess",
+      "settings": {
+        "vnext": [
+          {
+            "address": "serveraddr.com",
+            "port": 16823,
+            "users": [
+              {
+                "id": "b831381d-6324-4d53-ad4f-8cda48b30811",
+                "alterId": 64
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "mkcp",
+        "kcpSettings": {
+          "uplinkCapacity": 5,
+          "downlinkCapacity": 100,
+          "congestion": true,
+          "header": {
+            "type": "none"
+          }
+        }
+      }
+    }
+  ]
+}
+#+END_SRC
+*** 说明
+在上面的配置当中，与之前相比主要的变化在于多了一个 streamSettings，包含有不少参数：
+- network: 网络的选择，要像上面的配置写成 kcp 或 mkcp 才会启用 mKCP
+- kcpSettings: 包含一些关于 mKCP 设置的参数，有
+  - uplinkCapacity: 上行链路容量，将决定 V2Ray 向外发送数据包的速率。单位为 MB
+  - downlinkCapacity：下行链路容量，将决定 V2Ray 接收数据包的速率。单位同样是 MB
+  - header：对于数据包的伪装
+    - type：要伪装成的数据包类型
+
+客户端的上行对于服务器来说是下行，同样地客户端的下行是服务器的上行，mKCP 设置当中服务器和客户端都有 uplinkCapacity 和 downlinkCapacity，所以客户端的上传速率由服务器的 downlinkCapacity 和客户端的 uplinkCapacity 中的最小值决定，客户端的下载速率也是同样的道理。因此，建议将服务器和客户端的 downlinkCapacity 设成一个很大的值，然后分别修改两端的 uplinkCapacity 以调整上下行速率。
+
+还有一个 header 参数可以对 mKCP 进行伪装，这是 mKCP 的一个优势。具体的伪装类型在 type 参数设置，type 可以设置成 utp、srtp、wechat-video、dtls、wireguard 或者 none，这几个分别将 mKCP 数据伪装成 BT 下载、视频通话、微信视频通话、dtls、wireguard(一种新型 VPN)以及不进行伪装。这里的 type 参数，客户端与服务器要一致。还有要时刻记住伪装仅仅是伪装。
+
+至于上述配置里有但是我没有说明的参数，是 V2Ray 的默认值，我个人建议是保持默认。如果你需要了解或者修改，请参考手册。
+** 动态端口
+V2Ray 提供了一个叫动态端口的功能。顾名思义，就是可以动态变化通信端口，该功能的初衷是为了应对电信服务运营商可能会对长时间大流量的单个端口进行限速。也许是用的人比较少，到目前为止没有证据可以动态端口对于科学上网是加分项还是减分项。
+
+*** 基本动态端口
+服务器 inbound 的端口作为主端口，在 inboundDetour 开动态监听的端口，客户端不用额外设定，客户端会先与服务器的主端口通信协商下一个使用的端口号。
+**** 服务器配置
+#+BEGIN_SRC js
+{
+  "inbounds":[
+  { //主端口配置
+      "port": 37192,
+      "protocol": "vmess",
+      "settings": {
+        "clients": [
+          {
+            "id": "d17a1af7-efa5-42ca-b7e9-6a35282d737f",
+            "alterId": 64
+          }
+        ],
+        "detour": { //绕行配置，即指示客户端使用 dynamicPort 的配置通信
+          "to": "dynamicPort"   
+        }
+      }
+    },
+    {
+      "protocol": "vmess",
+      "port": "10000-20000", // 端口范围
+      "tag": "dynamicPort",  // 与上面的 detour to 相同
+      "settings": {
+        "default": {
+          "alterId": 64
+        }
+      },
+      "allocate": {            // 分配模式
+        "strategy": "random",  // 随机开启
+        "concurrency": 2,      // 同时开放两个端口,这个值最大不能超过端口范围的 1/3
+        "refresh": 3           // 每三分钟刷新一次
+      }
+    }
+  ]
+}
+
+
+#+END_SRC
+**** 客户端配置
+#+BEGIN_SRC js
+{
+  "outbounds": [
+    {
+      "protocol": "vmess",
+      "settings": {
+        "vnext": [
+          {
+            "address": "1.2.3.4",
+            "port": 37192,
+            "users": [
+              {
+                "id": "d17a1af7-efa5-42ca-b7e9-6a35282d737f",
+                "alterId": 64
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
+
+
+#+END_SRC
+*** 动态端口使用 mKCP
+在对应的 inbounds 和 outbounds 加入 streamSettings 并将 network 设置为 kcp 即可。
+**** 服务器配置
+#+BEGIN_SRC js
+{
+  "inbounds": [
+    {
+      "port": 37192,
+      "protocol": "vmess",
+      "settings": {
+        "clients": [
+          {
+            "id": "d17a1af7-efa5-42ca-b7e9-6a35282d737f",
+            "level": 1,
+            "alterId": 64
+          }
+        ],
+        "detour": {        
+          "to": "dynamicPort"   
+        }
+      },
+      "streamSettings": {
+        "network": "kcp"
+      }
+    },
+    {
+      "protocol": "vmess",
+      "port": "10000-20000", // 端口范围
+      "tag": "dynamicPort",       
+      "settings": {
+        "default": {
+          "level": 1,
+          "alterId": 32
+        }
+      },
+      "allocate": {            // 分配模式
+        "strategy": "random",  // 随机开启
+        "concurrency": 2,      // 同时开放两个端口
+        "refresh": 3           // 每三分钟刷新一次
+      },
+      "streamSettings": {
+        "network": "kcp"
+      }
+    }
+  ]
+}
+
+
+#+END_SRC
+**** 客户端配置
+#+BEGIN_SRC js
+{
+  "outbounds": [
+    {
+      "protocol": "vmess",
+      "settings": {
+        "vnext": [
+          {
+            "address": "1.2.3.4",
+            "port": 37192,
+            "users": [
+              {
+                "id": "d17a1af7-efa5-42ca-b7e9-6a35282d737f",
+                "alterId": 64
+              }
+            ]
+          }
+        ]
+      },
+      "streamSettings": {
+        "network": "kcp"
+      }
+    }
+  ]
+}
+
+
 #+END_SRC
 ** 参考文章
 [[https://zh.wikipedia.org/zh-tw/V2Ray][V2Ray 维基百科]]
