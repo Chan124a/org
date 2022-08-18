@@ -369,6 +369,17 @@ A * a = new a();
 3. 大程序用new，小程序直接申请
 4. new必须delete删除;不用new的方式，系统会自动回收内存
 
+* map
+** map的排序
+*** 按key排序
+實際上map內部所有的資料本來就是按key排序的。分析map結構定義，發現map的按key排序是通過第3個引數（比較函式的函式物件）實現的。
+
+其中，less為其預設的函式物件，所以如果我們不指定引數3，map鍵值對就會按照預設方法進行儲存。當我們希望它能以不同的方式進行排序，就需要重新指定引數3。
+
+如果只是呼叫C++標準庫自帶的方法，我們只需如下所示，在宣告map物件時指定第3引數即可。
+*** 按value排序
+由于sort只能对序列容器（如vector、list、deque）进行排序，而map虽然也是一个集合容器，但却不是线性存储的（比如红黑树）。
+因此并不能直接用sort对map进行按value排序。
 * set自定义去重和排序函数
 ** 方法一：使用std::set内置的less比较函数（直接定义内置类型的set对象）
 
@@ -877,6 +888,91 @@ int main()
 }
 #+END_SRC
 输出
+* sort
+C++ STL 标准库中的 sort() 函数，本质就是一个模板函数。该函数专门用来对容器或普通数组中指定范围内的元素进行排序，排序规则默认以元素值的大小做升序排序，除此之外我们也可以选择标准库提供的其它排序规则（比如std::greater降序排序规则），甚至还可以自定义排序规则。
+
+值得一提的是，sort() 函数位于头文件中，因此在使用该函数前，程序中应包含如下语句：
+#+BEGIN_SRC c++
+#include <algorithm>
+#+END_SRC
+sort() 函数有 2 种用法，其语法格式分别为：
+#+BEGIN_SRC c++
+//对 [first, last) 区域内的元素做默认的升序排序
+void sort (RandomAccessIterator first, RandomAccessIterator last);
+//按照指定的 comp 排序规则，对 [first, last) 区域内的元素进行排序
+void sort (RandomAccessIterator first, RandomAccessIterator last, Compare comp);
+#+END_SRC
+其中，first 和 last 都为随机访问迭代器，它们的组合 [first, last) 用来指定要排序的目标区域；另外在第 2 种格式中，comp 可以是 C++ STL 标准库提供的排序规则（比如 std::greater），也可以是自定义的排序规则。
+
+数组排序样例：
+#+BEGIN_SRC c++
+#include <algorithm>
+#include <algorithm>
+
+using namespace std;
+
+int main(){
+    int arr[] = {2,6,3,5,4,8,1,0,9,10};
+    sort(arr, arr+10);
+    for(int i = 0;i < 10;i++)
+        cout << arr[i] << " ";
+}
+// out
+/*
+0 1 2 3 4 5 6 8 9 10
+*/
+#+END_SRC
+** 使用 STL 标准库提供的排序规则
+#+BEGIN_SRC c++
+int main(){
+    int arr[] = {2,6,3,5,4,8,1,0,9,10};
+    sort(arr, arr+10, std::greater<int>());
+    for(int i = 0;i < 10;i++)
+        cout << arr[i] << " ";
+    cout << endl;
+    sort(arr, arr+10, std::less<int>());
+    for(int i = 0;i < 10;i++)
+        cout << arr[i] << " ";
+}
+// out
+/*
+10 9 8 6 5 4 3 2 1 0
+0 1 2 3 4 5 6 8 9 10
+*/
+#+END_SRC
+** 使用自定义比较器
+#+BEGIN_SRC c++
+bool cmp(const int a, const int b){
+    return a < b;
+}
+int main(){
+    int arr[] = {2,6,3,5,4,8,1,0,9,10};
+    sort(arr, arr+10, cmp);
+    for(int i = 0;i < 10;i++)
+        cout << arr[i] << " ";
+}
+// out
+/*
+0 1 2 3 4 5 6 8 9 10
+*/
+#+END_SRC
+** 使用 lambda 表达式自定义比较器
+#+BEGIN_SRC c++
+int main(){
+    int arr[] = {2,6,3,5,4,8,1,0,9,10};
+    sort(arr, arr+10, [](const int a, const int b){
+         return a < b;
+         });
+    for(int i = 0;i < 10;i++)
+        cout << arr[i] << " ";
+}
+// out
+/*
+0 1 2 3 4 5 6 8 9 10
+*/
+#+END_SRC
+** 参考文章
+[[https://www.cnblogs.com/zhhfan/p/14789325.html][C++中使用sort对常见容器排序]]
 * STL容器底层数据结构总结
 ** vector
 vector是我们用到最多的数据结构，其底层数据结构是数组，由于数组的特点，vector也具有以下特性：
@@ -1523,3 +1619,746 @@ return s1.size() < s2.size();
 // sort on word length, shortest to longest
 sort(words.begin(), words.end(), isShorter);
 #+END_SRC
+* leetcode笔记
+** 优先队列
+ 1046题
+
+ priority_queue<Type, Container, Functional>
+
+ Type 就是数据类型，Container 就是容器类型（Container必须是用数组实现的容器，比如vector,deque等等，但不能用 list。STL里面默认用的是vector），Functional 就是比较的方式。
+ #+BEGIN_SRC c++
+ #include <queue>
+ //升序队列
+ priority_queue <int,vector<int>,greater<int> > q;
+ //降序队列
+ priority_queue <int,vector<int>,less<int> >q;
+
+ //greater和less是std实现的两个仿函数（就是使一个类的使用看上去像一个函数。其实现就是类中实现一个operator()，这个类就有了类似函数的行为，就是一个仿函数类了）
+ #+END_SRC
+** 多维数组的定义
+ #+BEGIN_SRC c++
+ //二维
+ vector<vector<int>> a;
+
+ //三维
+ vector< vector< vector<int> > > b;
+ #+END_SRC
+** 数组的初始化
+ #+BEGIN_SRC c++
+ //一维
+ vector<int> a(5,1)  //定义了5维数组,其中的值都为1
+ //二维
+ vector<vector<int>> a(5，vector<int>(2,1)) //定义了二维数组，第一个维度为5，第二个维度里的每一个数组的维度都为2，值都为1
+ //三维
+ vector<vector<vector<int>>> dp(2, vector<vector<int>>(3, vector<int>(4, 5)));
+ #+END_SRC
+** multiset
+ set和multiset会根据特定的排序准则，自动将元素进行排序。不同的是后者允许元素重复而前者不允许。
+ #+BEGIN_SRC c++
+ #include <set>
+ multiset<int> st;
+ #+END_SRC
+ 和所有关联式容器类似，通常使用平衡二叉树完成。事实上，set和multiset通常以红黑树实作而成。
+
+ 自动排序的优点是使得搜寻元素时具有良好的性能，具有对数时间复杂度。但是造成的一个缺点就是：
+ - 不能直接改变元素值。因为这样会打乱原有的顺序。
+ - 改变元素值的方法是：先删除旧元素，再插入新元素。
+ - 存取元素只能通过迭代器，从迭代器的角度看，元素值是常数。
+
+** 快速排序
+ 记得要从右边开始循环
+
+ 下面这种快速选择的算法也是可以参考的(第215题)：
+ #+BEGIN_SRC c++
+ int search(vector<int>& nums, int left, int right) {
+         int x = rand() % (right - left + 1) + left; //随机化选择
+         swap(nums[x], nums[left]);
+         int p = nums[left];
+         int j = left;
+         for (int i = left+1; i<=right; i++)
+         {
+             if (nums[i] < p) {
+                 j++;
+                 swap(nums[j], nums[i]);
+             }
+         }
+         swap(nums[j], nums[left]);
+         return j;
+     }
+ #+END_SRC
+
+** 随机化
+ srand()是给随机数产生器一个种子，time(NULL)就是把当前的时间值作为种子。
+ 要取得[a,b)的随机整数，使用 ~(rand() % (b-a))+ a~;
+ 要取得[a,b]的随机整数，使用 ~(rand() % (b-a+1))+ a~;
+ 要取得(a,b]的随机整数，使用 ~(rand() % (b-a))+ a + 1~;
+** c++类型转换
+ #+BEGIN_SRC c++
+ long long z = static_cast<long long>(nums[right]);
+ #+END_SRC
+** KMP算法
+ 第28题
+ #+BEGIN_SRC c++
+ class Solution {
+ public:
+     void create(vector<int>& next, string needle) {
+         next[0] = -1;
+         int j = -1;
+         for (int i = 1; i < needle.size(); i++)
+         {
+             while (j != -1 && needle[i] != needle[j + 1])j = next[j];
+             if (needle[i] == needle[j + 1])j++;
+             next[i] = j;
+         }
+     }
+     int strStr(string haystack, string needle) {
+         if (needle.size() == 0)return 0;
+         if (haystack.size() == 0)return -1;
+         int n = haystack.size(), m = needle.size();
+         vector<int> next(m);
+         create(next, needle);
+         int j = -1;
+         for (int i = 0; i < n; i++) {
+             while (j != -1 && haystack[i] != needle[j + 1])j = next[j];
+             if (haystack[i] == needle[j + 1])j++;
+             if (j == m - 1)return i - m+1;
+         }
+         return -1;
+     }
+ };
+ #+END_SRC
+
+** reverse
+ #+BEGIN_SRC c++
+ //给定 matrix = 
+ //[
+ //  [1,4,7],
+ //  [2,5,8],
+ //  [3,6,9]
+ //]
+ //对其以中轴线进行翻转
+ for (auto& row : matrix)
+     reverse(row.begin(), row.end());
+ //结果为：
+ //[
+ //  [7,4,1],
+ //  [8,5,2],
+ //  [9,6,3]
+ //]
+ #+END_SRC
+** C++ vector 的 begin()、end()、front()、back() 区别
+ 一、begin函数
+
+ 函数原型:
+
+ iterator begin();
+
+ const_iterator begin();
+
+ 功能：
+
+ 返回一个当前vector容器中起始元素的迭代器。
+
+ 
+
+ 二、end函数
+
+ 函数原型：
+
+ iterator end();
+
+ const_iterator end();
+
+ 功能：
+
+ 返回一个当前vector容器中末尾元素的迭代器。
+
+ 
+
+ 三、front函数
+
+ 函数原型：
+
+ reference front();
+
+ const_reference front();
+
+ 功能：
+
+ 返回当前vector容器中起始元素的引用。
+
+ 
+
+ 四、back函数
+
+ 函数原型：
+
+ reference back();
+
+ const_reference back();
+
+ 功能：
+
+ 返回当前vector容器中末尾元素的引用。
+
+ leetcode 第56题
+ #+BEGIN_SRC c++
+ class Solution {
+ public:
+     vector<vector<int>> merge(vector<vector<int>>& intervals) {
+         if (intervals.size() == 0)return {};
+         sort(intervals.begin(), intervals.end());
+         vector<vector<int>> merged;
+         for (int i = 0; i < intervals.size(); i++) {
+             int l = intervals[i][0], r = intervals[i][1];
+             if (!merged.size() || merged.back()[1] < l) {
+                 merged.push_back({ l,r });
+             }
+             else {
+                 merged.back()[1] = max(merged.back()[1], r);
+             }
+         }
+         return merged;
+     }
+ };
+ #+END_SRC
+** 形参传值和传引用运行速度的差异
+ C++在做递归回溯算法相关题目时，递归函数形参传值和传引用运行速度有很大的差异。
+
+ 这是我第79题dfs函数的声明，主要区别是visited和word，一个是传值，一个是传引用。前者执行超时，后者在本题是32ms.
+
+ 个人理解为传值时每次递归调用都要在内存中新建立一个vector 来保存visit传入的值，但是传引用直接在visited原始位置操作，不需要进行新建变量与赋值，节省了代码运行的空间与时间开销。
+ #+BEGIN_SRC c++
+ void dfs(vector<vector<char>>& board,vector<vector<int>>visited,int x,int y,int n,string word,bool& flag)
+ void dfs(vector<vector<char>>& board,vector<vector<int>>& visited,int x,int y,int n
+ #+END_SRC
+
+** map的迭代器用法
+ 第90题
+ #+BEGIN_SRC c++
+ class Solution {
+ public:
+     vector<vector<int>> subsetsWithDup(vector<int>& nums) {
+         map<int,int> num;
+         for (int i = 0; i < nums.size(); i++)
+         {
+             num[nums[i]]++;
+         }
+         vector<vector<int>> ans = { {} };
+         for (auto t : num) {
+             int n = ans.size();
+             for (int i = 0; i < n; i++) {
+                 vector<int> temp = ans[i];
+                 for (int j = 0; j < t.second; j++)
+                 {
+                     temp.push_back(t.first);
+                     ans.push_back(temp);
+                 }
+             }
+         }
+         return ans;
+     }
+ };
+ #+END_SRC
+** 字符串
+*** 字符串连接
+  string res = ""
+  可以用 res+="V" 表示字符串 "V"
+*** 关于insert和erase的用法
+ #+BEGIN_SRC c++
+ class Solution {
+ public:
+     vector<string> ans;
+     vector<string> restoreIpAddresses(string s) {
+         string cur = s;
+         int n = s.size();
+         helper(0, -1, n, s, cur);
+         return ans;
+     }
+     void helper(int point_count,int last_point,int n,string &s,string &cur) {
+         if (point_count == 3) {
+             if (check(last_point + 1, n - 1, s)) {
+                 ans.push_back(cur);
+             }
+             return;
+         }
+         for (int i = last_point+1; i < n-1; i++)
+         {
+             if (check(last_point + 1, i, s)) {
+                 //注意这里Insert加了cur.being(),而后面的erase()没加
+                 cur.insert(cur.begin() + i + point_count + 1, '.');
+                 helper(point_count + 1, i,n, s, cur);
+                 cur.erase(i + point_count + 1, 1);
+             }
+         }
+         return;
+     }
+     bool check(int left, int right, string& s) {
+         int num = 0;
+         for (int i = left; i <=right; i++)
+         {
+             if (s[left] == '0' && left != right)return false;
+             num = num * 10 + s[i] - '0';
+             if (num > 255)return false;
+         }
+         return true;
+     }
+ };
+ #+END_SRC
+** 用迭代实现二叉树中序遍历
+ 第94题
+
+ 核心思想:
+ - 使用颜色标记节点的状态，新节点为白色，已访问的节点为灰色。
+ - 如果遇到的节点为白色，则将其标记为灰色，然后将其右子节点、自身、左子节点依次入栈。
+ - 如果遇到的节点为灰色，则将节点的值输出。
+
+ python版本:
+ #+BEGIN_SRC python
+ class Solution:
+     def inorderTraversal(self, root: TreeNode) -> List[int]:
+         WHITE, GRAY = 0, 1
+         res = []
+         stack = [(WHITE, root)]
+         while stack:
+             color, node = stack.pop()
+             if node is None: continue
+             if color == WHITE:
+                 stack.append((WHITE, node.right))
+                 stack.append((GRAY, node))
+                 stack.append((WHITE, node.left))
+             else:
+                 res.append(node.val)
+         return res
+ #+END_SRC
+ c++版本
+ #+BEGIN_SRC c++
+ class Solution {
+	 vector<int>ans;
+ public:
+	 vector<int> inorderTraversal(TreeNode* root) {
+		 int white = 0;
+		 int gray = 1;
+		 stack<pair<int, TreeNode*>>s;
+		 s.push(make_pair(white,root));
+		 while (!s.empty())
+		 {
+			 int color = s.top().first;
+			 TreeNode* t = s.top().second;
+			 s.pop();
+			 if (t == NULL) continue;
+			 if (color == white)
+			 {
+				 s.push(make_pair(white, t->right));
+				 s.push(make_pair(gray, t));
+				 s.push(make_pair(white, t->left));
+			 }
+			 else ans.push_back(t->val);
+		 }
+		 return ans;
+	 }
+ };
+ #+END_SRC
+** 函数返回指针
+ 第116题
+ #+BEGIN_SRC c++
+ class Solution {
+ public:
+     Node* connect(Node* root) {
+         if (root == NULL)return NULL;
+         auto left = root->left;
+         auto right = root->right;
+         while (left!=NULL)
+         {
+             left->next = right;
+             left = left->right;
+             right = right->left;
+         }
+         connect(root->left);  //注意这里不需要设置一个向量来存储函数范围的指针
+         connect(root->right); //注意这里不需要设置一个向量来存储函数范围的指针
+         return root;
+     }
+ };
+ #+END_SRC
+** 如何把一个整数转化为string
+*** string转int的方式
+ 采用最原始的string, 然后按照十进制的特点进行算术运算得到int，但是这种方式太麻烦，这里不介绍了。
+
+ 采用标准库中atoi函数。
+
+ string s = "12"; 
+ int a = atoi(s.c_str()); 
+ 对于其他类型也都有相应的标准库函数，比如浮点型atof(),long型atol()等等。
+
+ 采用sstream头文件中定义的字符串流对象来实现转换。
+
+ istringstream is("12"); //构造输入字符串流，流的内容初始化为“12”的字符串 
+ int i; 
+ is >> i; //从is流中读入一个int整数存入i中
+
+*** int转string的方式
+ 采用标准库中的to_string函数。
+
+ int i = 12; 
+ cout << std::to_string(i) << endl; 
+ 不需要包含任何头文件，应该是在utility中，但无需包含，直接使用，还定义任何其他内置类型转为string的重载函数，很方便。
+
+ 采用sstream中定义的字符串流对象来实现。
+
+ ostringstream os; //构造一个输出字符串流，流内容为空 
+ int i = 12; 
+ os << i; //向输出字符串流中输出int整数i的内容 
+ cout << os.str() << endl; //利用字符串流的str函数获取流中的内容 
+ 字符串流对象的str函数对于istringstream和ostringstream都适用，都可以获取流中的内容。
+
+** c++ 将一个char 转化为string
+ #+BEGIN_SRC c++
+ const char c = 'a';
+ //1.使用 string 的构造函数
+ string s(1,c);
+ //2.声明string 后将char push_back
+ string s1;
+ s1.push_back(c);
+ //3.使用stringstream
+ stringstream ss;
+ ss << c;
+ string str2 = ss.str();
+
+ //注意 使用to_string 方法会转化为char对应的ascii码
+ //原因是 to_string 没有接受char型参数的函数原型，有一个参数类型
+ //为int 的函数原型，所以传入char型字符 实际是先将char 转化
+ //为int 型的ascii 码，然后再转变为string
+ //以下输出结果为 97
+ cout << to_string(c) << endl;
+ #+END_SRC
+** 除留余数法
+ 给定一个正整数，返回它在 Excel 表中相对应的列名称。
+
+ 例如，
+
+     1 -> A
+     2 -> B
+     3 -> C
+     ...
+     26 -> Z
+     27 -> AA
+     28 -> AB 
+     ...
+ 示例 1:
+
+ 输入: 1
+ 输出: "A"
+ 示例 2:
+
+ 输入: 28
+ 输出: "AB"
+ 示例 3:
+
+ 输入: 701
+ 输出: "ZY"
+ #+BEGIN_SRC c++
+ class Solution {
+ public:
+	 string convertToTitle(int n) {
+		 string ans;
+		 while (n != 0)
+		 {
+			 n--;
+			 char c = n% 26 + 'A';
+			 string temp(1, c);
+			 ans = temp + ans;
+			 n /= 26;
+		 }
+		 return ans;
+	 }
+ };  
+ #+END_SRC
+ 下面是我的错误解法：
+ #+BEGIN_SRC c++
+ class Solution {
+ public:
+	 string convertToTitle(int n) {
+		 string ans;
+		 while (n != 0)
+		 {
+			 char c = (n-1)% 26 + 'A';
+			 string temp(1, c);
+			 ans = temp + ans;
+			 n /= 26;
+		 }
+		 return ans;
+	 }
+ };  
+ #+END_SRC
+ 这种解法在n=701(zy)时输出的结果为AZY，是错误的。
+** 谓词、lambda表达式
+
+ 第179题
+
+ 给定一组非负整数 nums，重新排列它们每位数字的顺序使之组成一个最大的整数。
+
+ 注意：输出结果可能非常大，所以你需要返回一个字符串而不是整数。
+
+  
+
+ 示例 1：
+
+ 输入：nums = [10,2]
+ 输出："210"
+ 示例 2：
+
+ 输入：nums = [3,30,34,5,9]
+ 输出："9534330"
+ 示例 3：
+
+ 输入：nums = [1]
+ 输出："1"
+ 示例 4：
+
+ 输入：nums = [10]
+ 输出："10"
+  
+
+ 提示：
+
+ 1 <= nums.length <= 100
+ 0 <= nums[i] <= 109
+
+ 来源：力扣（LeetCode）
+ 链接：https://leetcode-cn.com/problems/largest-number
+ 著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+
+ #+BEGIN_SRC c++
+ class Solution {
+ public:
+     string largestNumber(vector<int>& nums) {
+         if (all_of(nums.begin(), nums.end(), [](int x) {return x == 0; })) {
+             return string("0");
+         }
+         vector<string> strNums(nums.size());
+         std::transform(nums.begin(), nums.end(), strNums.begin(), [](int x) {return std::to_string(x); });
+         std::sort(strNums.begin(), strNums.end(), [](const string& x, const string& y) {   //这里string& x不加&也是可以通过的
+             return x + y > y + x;
+             });
+         return std::accumulate(strNums.begin(), strNums.end(), string());
+     }
+ };
+ #+END_SRC
+** 桶排序
+ 第220题
+
+ 在整数数组 nums 中，是否存在两个下标 i 和 j，使得 nums [i] 和 nums [j] 的差的绝对值小于等于 t ，且满足 i 和 j 的差的绝对值也小于等于 ķ 。
+
+ 如果存在则返回 true，不存在返回 false。
+
+ 示例 1:
+
+ 输入: nums = [1,2,3,1], k = 3, t = 0
+ 输出: true
+ 示例 2:
+
+ 输入: nums = [1,0,1,1], k = 1, t = 2
+ 输出: true
+ 示例 3:
+
+ 输入: nums = [1,5,9,1,5,9], k = 2, t = 3
+ 输出: false
+
+ #+BEGIN_EXAMPLE
+ 我们将数据分到 M 个桶 中。
+ 每个数字nums[i] 都被我们分配到一个桶中
+ 分配的依据就是 nums[i] // (t + 1)
+ 这样相邻桶内的数字最多相差2 * t + 1
+ 不相邻的桶一定不满足相差小于等于t
+ 同一个桶内的数字最多相差t
+ 因此如果命中同一个桶内，那么直接返回True
+ 如果命中相邻桶，我们再判断一下是否满足 相差 <= t
+ 否则返回False
+ 需要注意的是，由于题目有索引相差k的要求，因此要维护一个大小为k的窗口，定期清除桶中过期的数字。
+ #+END_EXAMPLE
+
+ #+BEGIN_SRC c++
+ class Solution {
+ public:
+     bool containsNearbyAlmostDuplicate(vector<int>& nums, int k, int t) {
+         if(t<0) return false;
+         //t+1可能会溢出，所以要+ 1LL
+         long long mod = t + 1LL;
+         unordered_map<long long,long long> buck;
+         for(int i=0;i<nums.size();i++)
+         {
+             long long nth = nums[i] / mod;
+             //可能nums[i]为负数，比如-4 / 5 以及 -4 / 5都等于0，所以负数要向下移动一位
+             if(nums[i] < 0) nth--;
+             //这里要用find 不能直接[],因为可能本身存储的数字就为0
+             if(buck.find(nth)!=buck.end()) 
+                 return true;
+             else if(buck.find(nth-1)!=buck.end() && abs(nums[i] - buck[nth-1]) <= t)
+                 return true;
+             else if(buck.find(nth+1)!=buck.end() && abs(nums[i] - buck[nth+1]) <= t)
+                 return true;
+             buck[nth] = nums[i];
+             if(i >= k)
+             {
+                 buck.erase(nums[i - k] / mod);
+             }
+         }
+         return false;
+     }
+ };
+ #+END_SRC
+
+** 由vector创建set
+ 217. 存在重复元素
+
+ #+BEGIN_EXAMPLE
+ 给定一个整数数组，判断是否存在重复元素。
+
+ 如果任意一值在数组中出现至少两次，函数返回 true 。如果数组中每个元素都不相同，则返回 false 。
+
+  
+
+ 示例 1:
+
+ 输入: [1,2,3,1]
+ 输出: true
+ 示例 2:
+
+ 输入: [1,2,3,4]
+ 输出: false
+ 示例 3:
+
+ 输入: [1,1,1,3,3,4,3,2,4,2]
+ 输出: true
+
+ #+END_EXAMPLE
+ 利用集合，与原数组比较大小
+ #+BEGIN_SRC c++
+ class Solution {
+ public:
+     bool containsDuplicate(vector<int>& nums) {
+
+          return nums.size() > unordered_set<int>(nums.begin(), nums.end()).size(); 
+          //如果原数组的大小>集合的大小，则说明存在重复元素
+     }
+ };
+ #+END_SRC
+** 取中点避免溢出的技巧
+ 二分查找中，计算 mid 时需要防止溢出，代码中 left + (right - left) / 2 就和 (left + right) / 2 的结果相同，但是有效防止了 left 和 right 太大直接相加导致溢出。
+** 异或运算
+ 异或运算有以下三个性质。
+ - 任何数和 0 做异或运算，结果仍然是原来的数
+ - 任何数和其自身做异或运算，结果是 0 .
+ - 异或运算满足交换律和结合律.
+
+** stol用法
+ std::stol()：此函数将参数提供的字符串转换为long long。它解析str并将其内容解释为指定基数的整数，并将其作为long long类型的值返回。
+
+ Convert string to long long
+
+ Parses str interpreting its content as an integral number of the specified base, which is returned as a value of type long long.
+
+ If idx is not a null pointer, the function also sets the value of idx to the position of the first character in str after the number.
+
+ The function uses strtoll (or wcstoll) to perform the conversion (see strtol for more details on the process).
+ #+BEGIN_SRC c++
+ long long stoll (const string&  str, size_t* idx = 0, int base = 10);
+ long long stoll (const wstring& str, size_t* idx = 0, int base = 10);
+ #+END_SRC
+ 参数：
+ - str
+ String object with the representation of an integral number.
+ - idx
+ Pointer to an object of type size_t, whose value is set by the function to position of the next character in str after the numerical value.
+ This parameter can also be a null pointer, in which case it is not used.
+ - base
+ Numerical base (radix) that determines the valid characters and their interpretation.
+ If this is 0, the base used is determined by the format in the sequence (see strtol for details). Notice that by default this argument is 10, not 0.
+
+ #+BEGIN_SRC c++
+ // stoll example
+ #include <iostream>   // std::cout
+ #include <string>     // std::string, std::stoll
+
+ int main ()
+ {
+   std::string str = "8246821 0xffff 020";
+
+   std::string::size_type sz = 0;   // alias of size_t
+
+   while (!str.empty()) {
+     long long ll = std::stoll (str,&sz,0);
+     std::cout << str.substr(0,sz) << " interpreted as " << ll << '\n';
+     str = str.substr(sz);
+   }
+
+   return 0;
+ }
+ #+END_SRC
+
+ #+BEGIN_EXAMPLE
+ 8246821 interpreted as 8246821
+  0xffff interpreted as 65535
+  020 interpreted as 16
+ #+END_EXAMPLE
+** 一个包含所有c++的头文件的头文件
+
+ #include<bits/stdc++.h>包含了目前c++所包含的所有头文件
+** pair
+ 337题 打家劫舍III
+
+ 在上次打劫完一条街道之后和一圈房屋后，小偷又发现了一个新的可行窃的地区。这个地区只有一个入口，我们称之为“根”。 除了“根”之外，每栋房子有且只有一个“父“房子与之相连。一番侦察之后，聪明的小偷意识到“这个地方的所有房屋的排列类似于一棵二叉树”。 如果两个直接相连的房子在同一天晚上被打劫，房屋将自动报警。
+
+ 计算在不触动警报的情况下，小偷一晚能够盗取的最高金额。
+
+ 示例 1:
+
+ 输入: [3,2,3,null,3,null,1]
+
+      3
+     / \
+    2   3
+     \   \ 
+      3   1
+
+ 输出: 7 
+ 解释: 小偷一晚能够盗取的最高金额 = 3 + 3 + 1 = 7.
+ 示例 2:
+
+ 输入: [3,4,5,1,3,null,1]
+
+      3
+     / \
+    4   5
+   / \   \ 
+  1   3   1
+
+ 输出: 9
+ 解释: 小偷一晚能够盗取的最高金额 = 4 + 5 = 9.
+
+
+ 创建元组：
+ #+BEGIN_EXAMPLE
+ make_pair(0,0);
+ pair<int, int> left = helper(root->left);
+ #+END_EXAMPLE
+
+
+
+ #+BEGIN_SRC c++
+ #include <pair>
+ class Solution {
+ public:
+     pair<int, int> helper(TreeNode* root) {
+         if (root == NULL)return make_pair(0,0);
+         pair<int, int> left = helper(root->left);
+         pair<int, int> right = helper(root->right);
+
+         return make_pair(root->val + left.second + right.second, max(left.first, left.second) + max(right.first, right.second));
+     }
+     int rob(TreeNode* root) {
+         pair<int, int> ans = helper(root);
+         return max(ans.first, ans.second);
+     }
+ };
+ #+END_SRC
