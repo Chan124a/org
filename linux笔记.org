@@ -39,6 +39,71 @@ dpkg-query -l
 
 8.apt-cache pkgnames
 列出所有的软件包
+
+** 查看软件所有版本
+这个方法还是比较多的，基本上都可以列举出软件的所有版本号。不过列举出来的都是在当前系统版本下可以安装的版本，比如适用于 Ubuntu 16.04 LTS 的软件版本就不会出现在 Ubuntu 18.04 LTS 的查询结果中。
+
+1、使用 madison 命令
+
+apt-cache madison <<package name>>
+将列出所有来源的版本。如下输出所示：
+
+apt-cache madison vim
+   vim | 2:7.3.547-1 | http://debian.mirrors.tds.net/debian/ unstable/main amd64 Packages
+   vim | 2:7.3.429-2 | http://debian.mirrors.tds.net/debian/ testing/main amd64 Packages
+   vim | 2:7.3.429-2 | http://http.us.debian.org/debian/ testing/main amd64 Packages
+   vim | 2:7.3.429-2 | http://debian.mirrors.tds.net/debian/ testing/main Sources
+   vim | 2:7.3.547-1 | http://debian.mirrors.tds.net/debian/ unstable/main Sources
+madison 是一个 apt-cache 子命令，可以通过 man apt-cache 查询更多用法。
+
+2、使用 policy 命令
+
+apt-cache policy <<package name>>
+将列出所有来源的版本。信息会比上面详细一点，如下输出所示：
+
+apt-cache policy gdb
+gdb:
+  Installed: 7.7.1-0ubuntu5~14.04.2
+  Candidate: 7.7.1-0ubuntu5~14.04.2
+  Version table:
+ *** 7.7.1-0ubuntu5~14.04.2 0
+        500 http://fr.archive.ubuntu.com/ubuntu/ trusty-updates/main amd64 Packages
+        100 /var/lib/dpkg/status
+     7.7-0ubuntu3 0
+        500 http://fr.archive.ubuntu.com/ubuntu/ trusty/main amd64 Packages
+        500 http://archive.ubuntu.com/ubuntu/ trusty/main amd64 Packages
+policy 是一个 apt-cache 子命令，可以通过 man apt-cache 查询更多用法。
+
+3、使用 showpkg 命令
+
+apt-cache showpkg <<package name>>
+4、使用 install 命令
+
+apt-get install -s <<package-name>>
+说明：这个命令只是模拟安装时会安装哪些软件列表，但不会例举出每个软件有多少个版本
+
+5、使用 aptitude 命令
+
+以上基本都是使用的 apt-cache 的子命令，下面介绍点别的，比如这个使用 aptitude 命令的。
+
+aptitude versions <<package name>>
+参考：https://manpages.debian.org/unstable/aptitude/aptitude.8.en.html
+
+6、使用 apt-show-versions 命令
+
+apt-show-versions -a <<package name>>
+说明：列举出所有版本，且能查看是否已经安装。还可以通过 apt-show-versions -u <<package name>> 来查询是否有升级版本。
+
+参考：http://manpages.ubuntu.com/manpages/trusty/man1/apt-show-versions.1p.html
+
+7、使用 whohas 命令
+
+whohas -d Debian,Ubuntu <<package name>> | tr -s ' ' '\t' | cut -f 1-3 | column -t
+8、使用 rmadison 命令
+
+rmadison -u debian,ubuntu,bpo <<package name>> | cut -d "|" -f 1-3
+*** 参考文章
+[[https://oldtang.com/4014.html][Ubuntu 查看软件所有版本以及安装时指定软件版本]]
 ** apt-get
 -y：yes，在命令行交互提示中，直接输入 yes
 **** 修改源
@@ -216,6 +281,24 @@ apt-key命令用于管理Debian Linux系统中的软件包密钥。
 - apt-key list                - 列出已保存在系统中key
 - apt-key finger              - 列出所有验证指纹
 - apt-key adv                 - 设置key的高级配置, Pass advanced options to gpg
+** The following signatures were invalid
+To find any expired repository keys and their IDs, use apt-key as follows:
+
+  apt-key list | grep expired
+
+You will get a result similar to the following:
+
+  pub   4096R/BE1DB1F1 2011-03-29 [expired: 2014-03-28]
+
+The key ID is the bit after the / i.e. BE1DB1F1 in this case.
+
+To update the key, run
+
+  sudo apt-key adv --recv-keys --keyserver keys.gnupg.net BE1DB1F1
+*** 参考文章
+1. [[https://stackoverflow.com/questions/29070471/gpg-error-http-archive-debian-org-lenny-updates-release-the-following-signat#][GPG error: http://archive.debian.org lenny/updates Release: The following signatures were invalid: KEYEXPIRED 1356982504]]
+2. [[https://blog.csdn.net/qq_41538587/article/details/90260913][apt-get update报错：Release: The following signatures were invalid: KEYEXPIRED 1544811256]]
+
 * Anaconda
 Anaconda（官方网站）就是可以便捷获取包且对包能够进行管理，同时对环境可以统一管理的发行版本。Anaconda包含了conda、Python在内的超过180个科学包及其依赖项。如果日常工作或学习并不必要使用1,000多个库，那么可以考虑安装Miniconda
 ** Anaconda、conda、pip、virtualenv的区别
@@ -12103,6 +12186,60 @@ bind p pasteb # 绑定p键为粘贴文本（p键默认用于进入上一个窗�
 bind -T copy-mode-vi v send-keys -X begin-selection
 bind -T copy-mode-vi y send-keys -X copy-selection-and-cancel
 #+END_SRC
+** 启动shell时自动启动tmux
+Bash
+对bash用户, 只需要将下面命令添加到自己家目录下的.bashrc, 要注意这句命令需要在alias配置之前.对其它shell的配置也是类似的
+#+begin_src bash
+~/.bashrc
+# If not running interactively, do not do anything
+[[ $- != *i* ]] && return
+[[ -z "$TMUX" ]] && exec tmux
+#+END_SRC
+注意: 这些代码确保tmux不会在tmux中启动(tmux嵌套于tmux中). tmux 通过设置环境变量$TMUX 来设置tmux启动所用的socket, 如果$TMUX不存在,或者长度为0那么就可以知道当前没有运行tmux.
+下面的配置会尝试只启动一个会话, 当你登录时, 如果之前启动过会话, 那么它会直接attach, 而不是新开一个. 想要新开一个session要么是因为之前没有会话, 要么是你手动启动一个新的会话.
+#+begin_src bash
+# TMUX
+if which tmux >/dev/null 2>&1; then
+    #if not inside a tmux session, and if no session is started, start a new session
+    test -z "$TMUX" && (tmux attach || tmux new-session)
+fi
+#+END_SRC
+下面的配置实现的功能相似, 但是他会在启动tmux之前先检查一下tmux是否已经安装. 它也会在你登出之前帮你重新连接上未关闭的session, 这样可以让你手动关闭会话并保存相应的工作,避免数据丢失,进程异常中断.
+#+begin_src bash
+# TMUX
+if which tmux >/dev/null 2>&1; then
+    # if no session is started, start a new session
+    test -z ${TMUX} && tmux
+
+    # when quitting tmux, try to attach
+    while test -z ${TMUX}; do
+        tmux attach || break
+    done
+fi
+#+END_SRC
+另外一种配置, 一样可以实现自动连接已存在的会话,否则会新开一个:
+#+begin_src bash
+if [[ -z "$TMUX" ]] ;then
+    ID="`tmux ls | grep -vm1 attached | cut -d: -f1`" # get the id of a deattached session
+    if [[ -z "$ID" ]] ;then # if not available create a new one
+        tmux new-session
+    else
+        tmux attach-session -t "$ID" # if available attach to it
+    fi
+fi
+#+END_SRC
+*** 参考文章
+[[https://www.cnblogs.com/yangjig/p/10070178.html][启动shell时自动启动tmux]]
+** 屏幕比例不协调问题（很多点号）
+有时候 tmux 突然中断之后，再次进入时，会发现屏幕被限制在了一个很小的范围内，其他的地方全部变成了点 “.”, 或者“烫”
+
+解决办法：
+
+再次进入时使用  -d 参数：
+
+tmux a -d -t [YOUR TMUX NAME]
+*** 参考文章
+[[https://blog.csdn.net/CSDN_71560364126/article/details/99821058][tmux 解决屏幕比例不协调问题]]
 ** 参考文章
 [[https://missing.csail.mit.edu/2020/command-line/][Command-line Environment]]
 [[http://linuxcommand.org/lc3_adv_termmux.php][Terminal Multiplexers]]
@@ -12727,6 +12864,38 @@ Tip: Use IntelliSense inside string values for tasks.json and launch.json to get
 
 *** 参考文章
 [[https://www.barretlee.com/blog/2019/03/18/debugging-in-vscode-tutorial/][VSCode 调试中 launch.json 配置不完全指南]]
+** VS Code中C/C++ 无法跳转到定义的解决办法
+安装C/C++ 和 C++ intellisense 两个插件
+
+已安装插件的情况下， 会遇到之前正常的的VS code突然无法跳转了，怎么按都没反应，这时候将编译器重启一下，会发现跳转功能又正常了
+
+添加包含路径
+1. 在VS code界面按 ctrl+shift+P ，然后输入 >configurations 调出下面的选项，点击红框
+
+#+DOWNLOADED: screenshot @ 2022-09-18 15:04:51
+[[file:images/linux%E7%AC%94%E8%AE%B0/vscode_%E7%9B%B8%E5%85%B3/2022-09-18_15-04-51_screenshot.png]]
+2. 选择VS code 文件目录中常用的文件夹，我的是“user”
+
+#+DOWNLOADED: screenshot @ 2022-09-18 15:05:04
+[[file:images/linux%E7%AC%94%E8%AE%B0/vscode_%E7%9B%B8%E5%85%B3/2022-09-18_15-05-04_screenshot.png]]
+3. 然后会发现，所选的文件夹下，多了这些东东
+
+#+DOWNLOADED: screenshot @ 2022-09-18 15:05:16
+[[file:images/linux%E7%AC%94%E8%AE%B0/vscode_%E7%9B%B8%E5%85%B3/2022-09-18_15-05-16_screenshot.png]]
+4. 点击新生成的json文件，在includePath 中添加想要跳转的文件所在的路径，建议使用相对路径，当然绝对路径也是可以的。设置之后也是重启编辑器才会生效
+#+DOWNLOADED: screenshot @ 2022-09-18 15:05:30
+[[file:images/linux%E7%AC%94%E8%AE%B0/vscode_%E7%9B%B8%E5%85%B3/2022-09-18_15-05-30_screenshot.png]]
+5. 如果还没有生效，就在C/C++ 插件中，Add Node Addon include paths 取消掉
+
+#+DOWNLOADED: screenshot @ 2022-09-18 15:05:50
+[[file:images/linux%E7%AC%94%E8%AE%B0/vscode_%E7%9B%B8%E5%85%B3/2022-09-18_15-05-50_screenshot.png]]
+
+#+DOWNLOADED: screenshot @ 2022-09-18 15:05:55
+[[file:images/linux%E7%AC%94%E8%AE%B0/vscode_%E7%9B%B8%E5%85%B3/2022-09-18_15-05-55_screenshot.png]]
+6. 如果还没有生效，那么看看要跳转的变量或函数，与当前文件是直接包含还是间接包含。 换成直接包含试试？
+*** 参考文章
+[[https://blog.csdn.net/hb69222/article/details/117034317][VS Code中C/C++ 无法跳转到定义的解决办法]]
+
 * watch命令
 watch是一个非常实用的命令，基本所有的Linux发行版都带有这个小工具，如同名字一样，watch可以帮你监测一个命令的运行结果，省得你一遍遍的手动运行。在Linux下，watch是周期性的执行下个程序，并全屏显示执行结果。你可以拿他来监测你想要的一切命令的结果变化，比如 tail 一个 log 文件，ls 监测某个文件的大小变化。
 
@@ -14179,3 +14348,11 @@ name mangling可以通过extern "C"解决。C++有个特定的关键字用来声
 2. 输入命令：ls，回车，查看用户是否创建成功（可以看到用户已经创建成功了）；
 3. 输入命令：sudo passwd zyq01，回车，设置登录用户密码；
 4. 输入命令：su zyq01，切换到新用户
+
+* 未分类
+如何在 QEMU 中使用 gdb：
+
+修改自己 home 目录下的 .gdbinit 文件，允许 gdb 在xv6-labs-2020这个目录启动的时候，加载该文件夹下的 .gdbinit 文件。
+#+begin_src bash
+echo "add-auto-load-safe-path $(pwd)/.gdbinit " >> ~/.gdbinit
+#+END_SRC

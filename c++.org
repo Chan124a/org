@@ -194,6 +194,16 @@ cout<<typeid(j).name()<<endl; // This will print int*
 auto& k = a;
 cout<<typeid(k).name()<<endl; // This will print int [9]
 #+END_SRC
+符号 & 表明是一个引用变量，能让接下来的代码能够修改数组的内容，而第一种语法不能。
+** 遍历
+*** 遍历unordered_map
+#+begin_src c++
+unordered_map<char, int> mp;
+for (auto& x : mp) {
+    buckets[x.second].push_back(x.first);
+}
+#+END_SRC
+
 * C++四种类型转换运算符
 隐式类型转换是安全的，显式类型转换是有风险的，C语言之所以增加强制类型转换的语法，就是为了强调风险，让程序员意识到自己在做什么。
 
@@ -740,7 +750,7 @@ int main()
     return 0;  
 } 
 #+END_SRC
-* std::hex
+* hex
 Sets the basefield format flag for the str stream to hex.
 
 When basefield is set to hex, integer values inserted into the stream are expressed in hexadecimal base (i.e., radix 16). For input streams, extracted values are also expected to be expressed in hexadecimal base when this flag is set.
@@ -773,7 +783,40 @@ Output:
 106
 
 #+END_EXAMPLE
-* std::boolalpha
+* intptr_t、uintptr_t数据类型的解析
+#+begin_src c++
+typedef  intptr_t      ngx_int_t;
+typedef  uintptr_t    ngx_uint_t;
+#+END_SRC
+intptr_t和uintptr_t是什么类型？以前没见过，于是查了一下。
+这两个数据类型是ISO C99定义的，具体代码在linux平台的/usr/include/stdint.h头文件中。
+
+该头文件中定义intptr_t和uintptr_t这两个数据类型的代码片段如下：
+#+begin_src c++
+/* Types for `void *' pointers.  */
+#if __WORDSIZE == 64
+# ifndef __intptr_t_defined
+typedef long int		intptr_t;
+#  define __intptr_t_defined
+# endif
+typedef unsigned long int	uintptr_t;
+#else
+# ifndef __intptr_t_defined
+typedef int			intptr_t;
+#  define __intptr_t_defined
+# endif
+typedef unsigned int		uintptr_t;
+#endif
+#+END_SRC
+在64位的机器上，intptr_t和uintptr_t分别是long int、unsigned long int的别名；在32位的机器上，intptr_t和uintptr_t分别是int、unsigned int的别名。
+
+那么为什么要用typedef定义新的别名呢？我想主要是为了提高程序的可移植性（在32位和64位的机器上）。很明显，上述代码会根据宿主机器的位数为intptr_t和uintptr_t适配相应的数据类型。
+另外，如注释所言，定义这两个数据类型别名也是为了“void *”指针。
+
+在C语言中，任何类型的指针都可以转换为void *类型，并且在将它转换回原来的类型时不会丢失信息。
+** 参考文章
+[[https://blog.csdn.net/cs_zhanyb/article/details/16973379][intptr_t、uintptr_t数据类型的解析]]
+* boolalpha
 Sets the boolalpha format flag for the str stream.
 
 When the boolalpha format flag is set, bool values are inserted/extracted by their textual representation: either true or false, instead of integral values.
@@ -795,7 +838,7 @@ Output:
 true
 1
 #+END_EXAMPLE
-* std::optional
+* optional
 
 ** 例子 
 场景：如果有这样一个函数，通过返回值来判断计算结果是否有效，如果结果有效，才能使用结果 。
@@ -847,7 +890,32 @@ TEST_F(optional) {
 }
 #+END_SRC
 如果开发项目中没有支持到c++17可以用boost库中的optional。
-* std::string_view使用介绍
+* printf("%5s”,“abcdefg ”)
+执行printf( “ %5s ” , “abcdefg ” ) 后，则输出结果为:abcdefg
+- "%5s",表示输出至少5个字符，不够的话，左侧用空格补。
+- %.5s，最多输出5个字符
+
+* string
+** 初始化
+string test1;    //空串
+
+string test2 = "内容"; //使用=
+
+string test3("内容");   //使用引用字符数组作为参数传给构造函数
+
+string test4(test2); //用一个string初始化另一而string
+
+string test5(test2,pos,num); //从test2中的第pos个位置开始，拷贝个数为num个字符
+
+string test6 = test2 + "内容" + test3 //混合初始化
+
+string test7 = test2.substr(pos,num); //从test2中的第pos个位置开始，拷贝个数为num个字符
+
+string test8 = test2.substr(); //参数列表为空则会拷贝test2的整个对象（复制test2的简便方法）
+
+string test9(num,ch); //拷贝num个字符型ch到test9
+
+* string_view使用介绍
 C++中与字符串有两种风格，分别是C风格的字符串、std::string字符串。C风格的字符串性能更高，但是也不方便操作使用。如下示例：
 #+BEGIN_SRC c++
 #include <iostream>
@@ -971,8 +1039,146 @@ int main(){
 0 1 2 3 4 5 6 8 9 10
 */
 #+END_SRC
+** 对map进行排序
+C++ STL中的map默认以key排序的。
+
+如果想对value进行排序，可以将map的key和value以pair的形式装到vector中，对vector进行排序。
+#+begin_src c++
+int main()
+{
+    unordered_map<int, int> iMap;
+    iMap[1] = 20;
+    iMap[2] = 10;
+    iMap[5] = 30;
+    iMap[4] = 0;
+
+    vector<pair<int, int>> vtMap;
+    for (auto it = iMap.begin(); it != iMap.end(); it++)
+        vtMap.push_back(make_pair(it->first, it->second));
+
+    sort(vtMap.begin(), vtMap.end(), 
+        [](const pair<int, int> &x, const pair<int, int> &y) -> int {
+        return x.second < y.second;
+    });
+
+    for (auto it = vtMap.begin(); it != vtMap.end(); it++)
+        cout << it->first << ':' << it->second << '\n';
+    return 0;
+}
+#+END_SRC
+运行结果： 
+#+DOWNLOADED: screenshot @ 2022-08-21 11:11:46
+[[file:images/c++/sort/2022-08-21_11-11-46_screenshot.png]]
+
+
 ** 参考文章
 [[https://www.cnblogs.com/zhhfan/p/14789325.html][C++中使用sort对常见容器排序]]
+* vector
+** 初始化
+vector<int> ilist1;
+
+默认初始化，vector为空， size为0，表明容器中没有元素，而且 capacity 也返回 0，意味着还没有分配内存空间。这种初始化方式适用于元素个数未知，需要在程序中动态添加的情况。
+
+vector<int> ilist2(ilist);
+
+vector<int> ilist2  = ilist; 
+
+两种方式等价 ，ilist2 初始化为ilist 的拷贝，ilist必须与ilist2 类型相同，也就是同为int的vector类型，ilist2将具有和ilist相同的容量和元素
+
+vector<int> ilist = {1,2,3.0,4,5,6,7};
+
+vector<int> ilist {1,2,3.0,4,5,6,7};
+
+ilist 初始化为列表中元素的拷贝，列表中元素必须与ilist的元素类型相容，本例中必须是与整数类型相容的类型，整形会直接拷贝，其他类型会进行类型转换。
+
+vector<int> ilist3(ilist.begin()+2,ilist.end()-1);
+
+ilist3初始化为两个迭代器指定范围中元素的拷贝，范围中的元素类型必须与ilist3 的元素类型相容，在本例中ilist3被初始化为{3,4,5,6}。注意：由于只要求范围中的元素类型与待初始化的容器的元素类型相容，因此迭代器来自不同的容器是可能的，例如，用一个double的list的范围来初始化ilist3是可行的。另外由于构造函数只是读取范围中的元素进行拷贝，因此使用普通迭代器还是const迭代器来指出范围并没有区别。这种初始化方法特别适合于获取一个序列的子序列。
+
+vector<int> ilist4(7);
+
+默认值初始化，ilist4中将包含7个元素，每个元素进行缺省的值初始化，对于int，也就是被赋值为0，因此ilist4被初始化为包含7个0。当程序运行初期元素大致数量可预知，而元素的值需要动态获取的时候，可采用这种初始化方式。
+
+vector<int> ilist5(7,3);
+
+指定值初始化，ilist5被初始化为包含7个值为3的int
+* volatile
+** 为什么要用volatile？
+volatile 关键字是一种类型修饰符，用它声明的类型变量表示可以被某些编译器未知的因素更改。比如：操作系统、硬件或者其它线程等。遇到这个关键字声明的变量，编译器对访问该变量的代码就不再进行优化，从而可以提供对特殊地址的稳定访问。
+
+声明时语法：volatile int vInt;
+
+当要求使用 volatile 声明的变量的值的时候，系统总是重新从它所在的内存读取数据，即使它前面的指令刚刚从该处读取过数据。例如：
+#+begin_src c++
+volatile int i=10;
+int a = i;
+int b = i; 
+#+END_SRC
+volatile 指出 i 是随时可能发生变化的，每次使用它的时候必须从 i的地址中读取，因而编译器生成的汇编代码会重新从i的地址读取数据放在 b 中。而优化做法是，由于编译器发现两次从 i读数据的代码之间的代码没有对 i 进行过操作，它会自动把上次读的数据放在 b 中。而不是重新从 i 里面读。这样以来，如果 i是一个寄存器变量或者表示一个端口数据就容易出错，所以说 volatile 可以保证对特殊地址的稳定访问。
+
+下面通过插入汇编代码，测试有无 volatile 关键字，对程序最终代码的影响：
+#+begin_src c++
+#include <stdio.h>
+void main()
+{
+    int i = 10;
+    int a = i;
+
+    printf("i = %d", a);
+
+    // 下面汇编语句的作用就是改变内存中 i 的值
+    // 但是又不让编译器知道
+    __asm {
+        mov dword ptr [ebp-4], 20h
+    }
+
+    int b = i;
+    printf("i = %d", b);
+}
+#+END_SRC
+然后，在 Debug 版本模式运行程序，输出结果如下：
+#+BEGIN_EXAMPLE
+i = 10
+i = 32
+#+END_EXAMPLE
+然后，在 Release 版本模式运行程序，输出结果如下：
+#+BEGIN_EXAMPLE
+i = 10
+i = 10
+#+END_EXAMPLE
+
+输出的结果明显表明，Release 模式下，编译器对代码进行了优化，第二次没有输出正确的 i 值。下面，我们把 i 的声明加上 volatile 关键字，看看有什么变化：
+#+begin_src c++
+#include <stdio.h>
+void main()
+{
+    volatile int i = 10;
+    int a = i;
+
+    printf("i = %d", a);
+
+    // 下面汇编语句的作用就是改变内存中 i 的值
+    // 但是又不让编译器知道
+    __asm {
+        mov dword ptr [ebp-4], 20h
+    }
+
+    int b = i;
+    printf("i = %d", b);
+}
+#+END_SRC
+分别在 Debug 和 Release 版本运行程序，输出都是：
+#+begin_src c++
+i = 10
+i = 32
+#+END_SRC
+这说明这个 volatile 关键字发挥了它的作用。其实不只是“内嵌汇编操纵栈”这种方式属于编译无法识别的变量改变，另外更多的可能是多线程并发访问共享变量时，一个线程改变了变量的值，怎样让改变后的值对其它线程 visible。一般说来，volatile用在如下的几个地方：
+1. 中断服务程序中修改的供其它程序检测的变量需要加volatile；
+2. 多任务环境下各任务间共享的标志应该加volatile；
+3. 存储器映射的硬件寄存器通常也要加volatile说明，因为每次对它的读写都可能由不同意义；
+
+** 参考文章
+[[https://zhuanlan.zhihu.com/p/62060524][C/C++ 中的 volatile-知乎]]
 * STL容器底层数据结构总结
 ** vector
 vector是我们用到最多的数据结构，其底层数据结构是数组，由于数组的特点，vector也具有以下特性：
@@ -1619,6 +1825,26 @@ return s1.size() < s2.size();
 // sort on word length, shortest to longest
 sort(words.begin(), words.end(), isShorter);
 #+END_SRC
+* gtest
+** assertion
+在gtest中，是通过断言（assertion）来判断代码实现的功能是否符合预期。断言的结果分为success、non-fatal failture和fatal failture。
+
+根据断言失败的种类，gtest提供了两种断言函数：
+- success：即断言成功，程序的行为符合预期，程序继续向下允许。
+- non-fatal failure：即断言失败，但是程序没有直接crash，而是继续向下运行。
+
+gtest提供了宏函数EXPECT_XXX(expected, actual)：如果condition(expected, actual)返回false，则EXPECT_XXX产生的就是non-fatal failure错误，并显示相关错误。
+- fatal failure：断言失败，程序直接crash，后续的测试案例不会被运行。
+
+gtest提供了宏函数ASSERT_XXX(expected, actual)。
+
+在写单元测试时，更加倾向于使用EXPECT_XXX，因为ASSERT_XXX是直接crash退出的，可能会导致一些内存、文件资源没有释放，因此可能会引入一些bug。
+
+具体的EXPECT_XXX、ASSERT_XXX函数及其判断条件，如下两个表。
+#+DOWNLOADED: screenshot @ 2022-08-23 22:35:24
+[[file:images/c++/gtest/2022-08-23_22-35-24_screenshot.png]]
+** 参考文章
+[[https://zhuanlan.zhihu.com/p/369466622][手把手教你使用gtest写单元测试]]
 * leetcode笔记
 ** 优先队列
  1046题

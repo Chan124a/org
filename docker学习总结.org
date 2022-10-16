@@ -1318,6 +1318,8 @@ SNAT       tcp  --  anywhere             172.17.0.9           tcp spt:http to:19
 然后访问http://192.168.10.214:9998/，就能转发访问到my-nginx9容器的80端口了！！！ 
 ** 参考文章
 [[https://www.cnblogs.com/kevingrace/p/9453987.html][Docker容器内部端口映射到外部宿主机端口 - 运维笔记]]
+* docker 怎么查看远端仓库的标签
+直接上 hub.docker.com 查
 * 参考文档:
 1. [官方文档](https://docs.docker.com/engine/reference/commandline)
 2. [Docker 参数 -i -t 的作用](https://blog.csdn.net/upHailin/article/details/80892505)
