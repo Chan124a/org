@@ -441,11 +441,11 @@ etcd是CoreOS团队于2013年6月发起的开源项目，它的目标是构建�
 
 etcd内部采用raft协议作为一致性算法，etcd基于Go语言实现。
 
+etcd作为服务发现系统，有以下的特点：
 - 简单：安装配置简单，而且提供了HTTP API进行交互，使用也很简单
 - 安全：支持SSL证书验证
 - 快速：根据官方提供的benchmark数据，单实例支持每秒2k+读操作
 - 可靠：采用raft算法，实现分布式系统数据的可用性和一致性
-etcd作为服务发现系统，有以下的特点：
 
 etcd项目地址：https://github.com/coreos/etcd/
 ** etcd安装
@@ -591,103 +591,112 @@ $ etcdctl set /testdir/testkey "Hello world"
 Hello world
 #+END_SRC
 支持的选项包括：
-
---ttl '0' 该键值的超时时间(单位为秒)，不配置(默认为0)则永不超时
---swap-with-value value 若该键现在的值是value，则进行设置操作
---swap-with-index '0'   若该键现在的索引值是指定索引，则进行设置操作
-get
+- --ttl '0' 该键值的超时时间(单位为秒)，不配置(默认为0)则永不超时
+- --swap-with-value value 若该键现在的值是value，则进行设置操作
+- --swap-with-index '0'   若该键现在的索引值是指定索引，则进行设置操作
+**** get
 获取指定键的值。例如：
-
+#+begin_src bash
 $ etcdctl get /testdir/testkey
 Hello world
-当键不存在时，则会报错。例如：
+#+END_SRC
 
+当键不存在时，则会报错。例如：
+#+begin_src bash
 $ etcdctl get /testdir/testkey2
 Error:  100: Key not found (/testdir/testkey2) [5]
+#+END_SRC
 支持的选项为:
-
---sort 对结果进行排序
---consistent 将请求发给主节点，保证获取内容的一致性。
-update
+- --sort 对结果进行排序
+- --consistent 将请求发给主节点，保证获取内容的一致性。
+**** update
 当键存在时，更新值内容。例如：
-
-$ etcdctl update /testdir/testkey "Hello"
+#+begin_src bash
+$ etcdctl update /testdir/testkey "Hello"#+begin_src bash
 Hello
+#+END_SRC
 当键不存在时，则会报错。例如:
-
+#+begin_src bash
 $ etcdctl update /testdir/testkey2 "Hello"
 Error:  100: Key not found (/testdir/testkey2) [6]
+#+END_SRC
 支持的选项为:
-
---ttl '0' 超时时间(单位为秒)，不配置(默认为 0)则永不超时。
-rm
+- --ttl '0' 超时时间(单位为秒)，不配置(默认为 0)则永不超时。
+**** rm
 删除某个键值。例如:
-
+#+begin_src bash
 $ etcdctl rm /testdir/testkey
 PrevNode.Value: Hello
+#+END_SRC
 当键不存在时，则会报错。例如:
-
+#+begin_src bash
 $ etcdctl rm /testdir/testkey
 Error:  100: Key not found (/testdir/testkey) [7]
+#+END_SRC
 支持的选项为：
-
---dir 如果键是个空目录或者键值对则删除
---recursive 删除目录和所有子键
---with-value  检查现有的值是否匹配
---with-index '0'检查现有的index是否匹配
-mk
+- --dir 如果键是个空目录或者键值对则删除
+- --recursive 删除目录和所有子键
+- --with-value  检查现有的值是否匹配
+- --with-index '0'检查现有的index是否匹配
+**** mk
 如果给定的键不存在，则创建一个新的键值。例如:
-
+#+begin_src bash
 $ etcdctl mk /testdir/testkey "Hello world"
 Hello world
+#+END_SRC
 当键存在的时候，执行该命令会报错，例如:
-
+#+begin_src bash
 $ etcdctl mk /testdir/testkey "Hello world"
 Error:  105: Key already exists (/testdir/testkey) [8]
+#+END_SRC
 支持的选项为:
-
---ttl '0'  超时时间(单位为秒），不配置(默认为 0)。则永不超时
-mkdir
+- --ttl '0'  超时时间(单位为秒），不配置(默认为 0)。则永不超时
+**** mkdir
 如果给定的键目录不存在，则创建一个新的键目录。例如：
-
+#+begin_src bash
 $ etcdctl mkdir testdir2
+#+END_SRC
 当键目录存在的时候，执行该命令会报错，例如：
-
+#+begin_src bash
 $ etcdctl mkdir testdir2
 Error:  105: Key already exists (/testdir2) [9]
+#+END_SRC
 支持的选项为：
-
---ttl '0' 超时时间(单位为秒)，不配置(默认为0)则永不超时。
-setdir
+- --ttl '0' 超时时间(单位为秒)，不配置(默认为0)则永不超时。
+**** setdir
 创建一个键目录。如果目录不存在就创建，如果目录存在更新目录TTL。
-
+#+begin_src bash
 $ etcdctl setdir testdir3
+#+END_SRC
 支持的选项为:
-
---ttl '0' 超时时间(单位为秒)，不配置(默认为0)则永不超时。
-updatedir
+- --ttl '0' 超时时间(单位为秒)，不配置(默认为0)则永不超时。
+**** updatedir
 更新一个已经存在的目录。
-
+#+begin_src bash
 $ etcdctl updatedir testdir2
+#+END_SRC
 支持的选项为:
-
---ttl '0' 超时时间(单位为秒)，不配置(默认为0)则永不超时。
-rmdir
+- --ttl '0' 超时时间(单位为秒)，不配置(默认为0)则永不超时。
+**** rmdir
 删除一个空目录，或者键值对。
-
+#+begin_src bash
 $ etcdctl setdir dir1
 $ etcdctl rmdir dir1
+#+END_SRC
 若目录不空，会报错:
-
+#+begin_src bash
 $ etcdctl set /dir/testkey hi
-hi
+#+END_SRC
+**** hi
+#+begin_src bash
 $ etcdctl rmdir /dir
 Error:  108: Directory not empty (/dir) [17]
-ls
+#+END_SRC
+**** ls
 列出目录(默认为根目录)下的键或者子目录，默认不显示子目录中内容。
 
 例如：
-
+#+begin_src bash
 $ etcdctl ls
 /testdir
 /testdir2
@@ -695,14 +704,66 @@ $ etcdctl ls
 
 $ etcdctl ls dir
 /dir/testkey
+#+END_SRC
 支持的选项包括:
+- --sort 将输出结果排序
+- --recursive 如果目录下有子目录，则递归输出其中的内容
+- -p 对于输出为目录，在最后添加/进行区分
 
 
---sort 将输出结果排序
---recursive 如果目录下有子目录，则递归输出其中的内容
--p 对于输出为目录，在最后添加/进行区分
+*** 非数据库操作
+**** backup
+备份etcd的数据。
+#+begin_src bash
+$ etcdctl backup --data-dir /var/lib/etcd  --backup-dir /home/etcd_backup
+#+END_SRC
+支持的选项包括:
+- --data-dir  etcd的数据目录
+- --backup-dir 备份到指定路径
+**** watch
+监测一个键值的变化，一旦键值发生更新，就会输出最新的值并退出。
 
-作者：Austin_Brant
-链接：https://www.jianshu.com/p/f68028682192
-来源：简书
-著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+例如:用户更新testkey键值为Hello watch。
+#+begin_src bash
+$ etcdctl get /testdir/testkey
+Hello world
+$ etcdctl set /testdir/testkey "Hello watch"
+Hello watch
+$ etcdctl watch testdir/testkey
+Hello watch
+#+END_SRC
+支持的选项包括:
+- --forever  一直监测直到用户按CTRL+C退出
+- --after-index '0' 在指定index之前一直监测
+- --recursive 返回所有的键值和子键值
+**** exec-watch
+监测一个键值的变化，一旦键值发生更新，就执行给定命令。
+
+例如：用户更新testkey键值。
+#+begin_src bash
+$ etcdctl exec-watch testdir/testkey -- sh -c 'ls'
+config  Documentation  etcd  etcdctl  README-etcdctl.md  README.md  READMEv2-etcdctl.md
+#+END_SRC
+支持的选项包括:
+- --after-index '0' 在指定 index 之前一直监测
+- --recursive 返回所有的键值和子键值
+**** member
+通过list、add、remove命令列出、添加、删除etcd实例到etcd集群中。
+
+查看集群中存在的节点
+#+begin_src bash
+$ etcdctl member list
+8e9e05c52164694d: name=dev-master-01 peerURLs=http://localhost:2380 clientURLs=http://localhost:2379 isLeader=true
+#+END_SRC
+删除集群中存在的节点
+#+begin_src bash
+$ etcdctl member remove 8e9e05c52164694d
+Removed member 8e9e05c52164694d from cluster
+#+END_SRC
+向集群中新加节点
+#+begin_src bash
+$ etcdctl member add etcd3 http://192.168.1.100:2380
+Added member named etcd3 with ID 8e9e05c52164694d to cluster
+#+END_SRC
+** 参考文章
+[[https://www.jianshu.com/p/f68028682192][Etcd 使用入门]]
