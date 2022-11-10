@@ -1070,9 +1070,21 @@ int main()
 #+DOWNLOADED: screenshot @ 2022-08-21 11:11:46
 [[file:images/c++/sort/2022-08-21_11-11-46_screenshot.png]]
 
-
+** 二维vector排序
+*** 自定义排序函数
+#+begin_src c++
+static bool cmp(const vector<int>& a,const vector<int>& b){
+   return a.back()<b.back();
+}
+sort(points.begin(),points.end(),cmp);
+#+END_SRC
+*** Lambda 函数
+#+begin_src c++
+sort(points.begin(),points.end(),[](vector<int>a, vector<int>b){return a[1]<b[1];}//速度比方法1稍慢
+#+END_SRC
 ** 参考文章
 [[https://www.cnblogs.com/zhhfan/p/14789325.html][C++中使用sort对常见容器排序]]
+[[https://blog.csdn.net/liguojie12/article/details/113800426][C++ 二维vector排序(sort用法)]]
 * vector
 ** 初始化
 vector<int> ilist1;
@@ -1852,6 +1864,8 @@ gtest提供了宏函数ASSERT_XXX(expected, actual)。
  priority_queue<Type, Container, Functional>
 
  Type 就是数据类型，Container 就是容器类型（Container必须是用数组实现的容器，比如vector,deque等等，但不能用 list。STL里面默认用的是vector），Functional 就是比较的方式。
+
+当需要用自定义的数据类型时才需要传入这三个参数，使用基本数据类型时，只需要传入数据类型，默认是大顶堆
  #+BEGIN_SRC c++
  #include <queue>
  //升序队列
@@ -1861,6 +1875,51 @@ gtest提供了宏函数ASSERT_XXX(expected, actual)。
 
  //greater和less是std实现的两个仿函数（就是使一个类的使用看上去像一个函数。其实现就是类中实现一个operator()，这个类就有了类似函数的行为，就是一个仿函数类了）
  #+END_SRC
+*** 自定义比较函数
+***** 方式一：struct重载运算符()
+通过struct重载()操作符，定义了一个函数对象
+#+DOWNLOADED: screenshot @ 2022-11-10 22:37:33
+[[file:images/c++/leetcode%E7%AC%94%E8%AE%B0/2022-11-10_22-37-33_screenshot.png]]
+这是属于传入 函数对象 的方式
+***** 方式二：class重载运算符()
+通过class重载()操作符，定义了一个函数对象
+注意要加public
+
+#+DOWNLOADED: screenshot @ 2022-11-10 22:37:46
+[[file:images/c++/leetcode%E7%AC%94%E8%AE%B0/2022-11-10_22-37-46_screenshot.png]]
+这是属于传入 函数对象 的方式
+***** 方式三：定义函数
+首先定义一个比较函数
+#+DOWNLOADED: screenshot @ 2022-11-10 22:37:54
+[[file:images/c++/leetcode%E7%AC%94%E8%AE%B0/2022-11-10_22-37-54_screenshot.png]]
+decltype()是用于获得函数指针的 类型的。在模板中也要传入它们的类型。
+decltype()要传入的是一个对象的地址，因此需要对cmp加取值符，&cmp为对象的地址
+在这里插入图片描述
+因此可以由函数地址cmp 转为函数指针 类型 decltype(&cmp)
+#+DOWNLOADED: screenshot @ 2022-11-10 22:38:05
+[[file:images/c++/leetcode%E7%AC%94%E8%AE%B0/2022-11-10_22-38-05_screenshot.png]]
+写法一：
+#+DOWNLOADED: screenshot @ 2022-11-10 22:38:15
+[[file:images/c++/leetcode%E7%AC%94%E8%AE%B0/2022-11-10_22-38-15_screenshot.png]]
+写法二：
+如果作为类成员函数，一定要声明static
+#+DOWNLOADED: screenshot @ 2022-11-10 22:38:24
+[[file:images/c++/leetcode%E7%AC%94%E8%AE%B0/2022-11-10_22-38-24_screenshot.png]]
+这是属于传入 函数指针的方式。
+***** 方式四：lambda表达式
+#+DOWNLOADED: screenshot @ 2022-11-10 22:38:32
+[[file:images/c++/leetcode%E7%AC%94%E8%AE%B0/2022-11-10_22-38-32_screenshot.png]]
+这是属于传入 函数指针的方式。
+***** 方式五：function包装lambda表达式
+要加入头文件#include<functional>
+
+由于function对lambda函数进行了包装 ,cmp本身就是一个对象地址。（function对象）
+直接decltype(cmp)获得函数指针 的类型。
+#+DOWNLOADED: screenshot @ 2022-11-10 22:38:41
+[[file:images/c++/leetcode%E7%AC%94%E8%AE%B0/2022-11-10_22-38-41_screenshot.png]]
+这是属于传入 函数指针的方式。
+*** 参考文章
+[[https://blog.csdn.net/qq_21539375/article/details/122128445][c++优先队列priority_queue（自定义比较函数）]]
 ** 多维数组的定义
  #+BEGIN_SRC c++
  //二维
