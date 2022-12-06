@@ -1085,6 +1085,97 @@ sort(points.begin(),points.end(),[](vector<int>a, vector<int>b){return a[1]<b[1]
 ** 参考文章
 [[https://www.cnblogs.com/zhhfan/p/14789325.html][C++中使用sort对常见容器排序]]
 [[https://blog.csdn.net/liguojie12/article/details/113800426][C++ 二维vector排序(sort用法)]]
+* typeid
+typeid可以返回数据类型。
+
+语法
+#+begin_src cpp
+#include <typeinfo>
+
+typeid ( type );
+typeid ( expression );
+#+end_src
+
+** 例子
+#+begin_src cpp
+  // C++ program to show the use of typeid operator
+
+#include <iostream>
+#include <typeinfo>
+using namespace std;
+
+int main()
+{
+    int i, j;
+    char c;
+
+    // Get the type info using typeid operator
+    const type_info& ti1 = typeid(i);
+    const type_info& ti2 = typeid(j);
+    const type_info& ti3 = typeid(c);
+
+    // Check if both types are same
+    if (ti1 == ti2)
+        cout << "i and j are of"
+             << " similar type" << endl;
+    else
+        cout << "i and j are of"
+             << " different type" << endl;
+
+    // Check if both types are same
+    if (ti2 == ti3)
+        cout << "j and c are of"
+             << " similar type" << endl;
+    else
+        cout << "j and c are of"
+             << " different type" << endl;
+
+    return 0;
+}
+#+end_src
+Output
+#+begin_example
+i and j are of similar type
+j and c are of different type
+#+end_example
+#+begin_src cpp
+// C++ program to show the use of typeid operator
+
+#include <iostream>
+#include <typeinfo>
+using namespace std;
+
+int main()
+{
+    int i = 5;
+    float j = 1.0;
+    char c = 'a';
+
+    // Get the type info using typeid operator
+    const type_info& ti1 = typeid(i * j);
+    const type_info& ti2 = typeid(i * c);
+    const type_info& ti3 = typeid(c);
+
+    // Print the types
+    cout << "ti1 is of type "
+         << ti1.name() << endl;
+
+    cout << "ti2 is of type "
+         << ti2.name() << endl;
+
+    cout << "ti3 is of type "
+         << ti3.name() << endl;
+
+    return 0;
+}
+#+end_src
+Output:
+#+begin_example
+ti1 is of type f
+ti2 is of type i
+ti3 is of type c
+#+end_example
+
 * vector
 ** 初始化
 vector<int> ilist1;
@@ -1837,6 +1928,155 @@ return s1.size() < s2.size();
 // sort on word length, shortest to longest
 sort(words.begin(), words.end(), isShorter);
 #+END_SRC
+* 模板
+** 模板类
+*** 模板类的继承
+在模板类的继承中，需要注意以下两点：
+- 如果父类自定义了构造函数，记得子类要使用构造函数列表来初始化
+- 继承的时候，如果子类不是模板类，则必须指明当前的父类的类型，因为要分配内存空间
+- 继承的时候，如果子类是模板类，要么指定父类的类型，要么用子类的泛型来指定父类
+
+#+begin_src cpp
+template <typename T>
+class Parent{
+public:
+    Parent(T p)
+    {
+        this->p = p;
+    }
+
+private:
+    T p;
+};
+
+//如果子类不是模板类，需要指明父类的具体类型
+class ChildOne:public Parent<int>{
+
+public:
+    ChildOne(int a,int b):Parent(b)
+    {
+        this->cone = a;
+    }
+
+private:
+    int cone;
+};
+
+
+//如果子类是模板类，可以用子类的泛型来表示父类
+template <typename T>
+class ChildTwo:public Parent<T>{
+
+public:
+    ChildTwo(T a, T b):Parent<T>(b)
+    {
+        this->ctwo = a;
+    }
+
+private:
+    T ctwo;
+};
+#+end_src
+* 多态
+#+begin_src c++
+#include "stdafx.h"
+#include <iostream>
+#include <stdlib.h>
+using namespace std;
+
+class Father
+{
+public:
+    void Face()
+    {
+        cout << "Father's face" << endl;
+    }
+
+    void Say()
+    {
+        cout << "Father say hello" << endl;
+    }
+};
+
+
+class Son:public Father
+{
+public:
+    void Say()
+    {
+        cout << "Son say hello" << endl;
+    }
+};
+
+void main()
+{
+    Son son;
+    Father *pFather=&son; // 隐式类型转换
+    pFather->Say();
+}
+#+end_src
+输出的结果为:
+#+DOWNLOADED: screenshot @ 2022-12-05 23:01:44
+[[file:images/多态/2022-12-05_23-01-44_screenshot.png]]
+c++编译器在编译的时候，要确定每个对象调用的函数（非虚函数）的地址，这称为早期绑定，
+当我们将Son类的对象son的地址赋给pFather时，c++编译器进行了类型转换，此时c++编译器认为变量pFather保存的就是Father对象的地址，当在main函数中执行pFather->Say(),调用的当然就是Father对象的Say函数
+
+要让编译器采用晚绑定，就要在基类中声明函数时使用virtual关键字，这样的函数我们就称之为虚函数，
+一旦某个函数在基类中声明为virtual，那么在所有的派生类中该函数都是virtual，而不需要再显式地声明为virtual。
+
+#+begin_src c++
+#include "stdafx.h"
+#include <iostream>
+#include <stdlib.h>
+using namespace std;
+
+class Father
+{
+public:
+    void Face()
+    {
+        cout << "Father's face" << endl;
+    }
+
+    virtual void Say()
+    {
+        cout << "Father say hello" << endl;
+    }
+};
+
+
+class Son:public Father
+{
+public:
+    void Say()
+    {
+        cout << "Son say hello" << endl;
+    }
+};
+
+void main()
+{
+    Son son;
+    Father *pFather=&son; // 隐式类型转换
+    pFather->Say();
+}
+#+end_src
+
+#+DOWNLOADED: screenshot @ 2022-12-05 23:03:29
+[[file:images/多态/2022-12-05_23-03-29_screenshot.png]]
+** 虚表
+如果一个类中有虚函数，编译器会为每个包含虚函数的类创建一个虚表(即 vtable)，该表是一个一维数组，在这个数组中存放每个虚函数的地址。
+
+编译器另外还为每个对象提供了一个虚表指针(即vptr)，这个指针指向了对象所属类的虚表。
+
+在构造函数中进行虚表的创建和虚表指针的初始化，
+在构造子类对象时，要先调用父类的构造函数，初始化父类对象的虚表指针，该虚表指针指向父类的虚表，
+当执行子类的构造函数时，子类对象的虚表指针被初始化，指向自身的虚表。
+
+虚表可以继承，如果子类没有重写虚函数，那么子类虚表中仍然会有该函数的地址，只不过这个地址指向的是基类的虚函数实现。
+如果重写了相应的虚函数，那么虚表中的地址就会改变，指向自身的虚函数实现，如果派生类有自己的虚函数，那么虚表中就会添加该项。
+
+
 * gtest
 ** assertion
 在gtest中，是通过断言（assertion）来判断代码实现的功能是否符合预期。断言的结果分为success、non-fatal failture和fatal failture。

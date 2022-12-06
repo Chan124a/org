@@ -510,6 +510,13 @@ Mode 通常是定义对于一种文件类型编辑的核心规则，例如语法
 你也可以使用 =C-x C-e= 来执行某一行的 Lisp 代码。这些可使刚刚修改的配置文件生效。
 当然你也可以将这些函数绑定为快捷键。
 
+** emacs加载方式
+*** use-package
+use-package is a macro that allows you to isolate package configuration in a way that’s both performance-oriented and tidy.
+
+安装即可使用：
+M-x package-install RET use-package RET
+
 * 插件管理
 
 使用默认的插件管理系统（可在菜单栏 =Options > Manage Emacs Packages= 中找到）安
