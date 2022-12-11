@@ -1282,6 +1282,162 @@ i = 32
 
 ** 参考文章
 [[https://zhuanlan.zhihu.com/p/62060524][C/C++ 中的 volatile-知乎]]
+* std::tuple 和 std::tie 的用法简介
+tuple即元组，可以理解为pair的扩展，可以用来将不同类型的元素存放在一起，常用于函数的多返回值。
+
+** 定义与初始化
+tuple可以使用初始化列表进行赋值。
+
+tuple<int,double,string> t3 = {1, 2.0, "3"};
+
+** 访问
+可以使用get<常量表达式>(tuple_name)来访问或修改tuple的元素（返回引用）
+#+begin_src c++
+get<0>(t3) = 4;
+cout << get<1>(t3) << endl;
+#+end_src
+会输出2
+
+** 批量赋值
+std::tie会将变量的引用整合成一个tuple，从而实现批量赋值。
+#+begin_src c++
+int i; double d; string s;
+tie(i, d, s) = t3;
+
+cout << i << " " << d << " " << s << endl;
+#+end_src
+会输出4 2 3
+
+还可以使用std::ignore忽略某些tuple中的某些返回值，如
+
+tie(i, ignore, s) = t3;
+
+** 其它
+需要注意的是，tie无法直接从初始化列表获得值，比如下面第5行会编译错误。
+#+begin_src c++
+int i; double d; string s;
+tuple<int,double,string> t3 = {1, 2.0, "3"};
+tie(i, d, s) = t3;
+t3 = {1, 2.0, "3"};
+tie(i, d, s) = {1, 2.0, "3"};
+#+end_src
+
+** 参考文章
+[[https://blog.csdn.net/m0_37809890/article/details/89367406][std::tuple 和 std::tie 的用法简介]]
+* std::forward
+std::forward通常是用于完美转发的，它会将输入的参数原封不动地传递到下一个函数中，
+这个“原封不动”指的是，如果输入的参数是左值，那么传递给下一个函数的参数的也是左值；
+如果输入的参数是右值，那么传递给下一个函数的参数的也是右值。
+
+** 参考文章
+[[https://zhuanlan.zhihu.com/p/92486775][浅谈std::forward]]
+* std::optional
+在需要多个返回值的时候，可以下面用的pair形式，将返回值定义成结构体：
+#+begin_src C++
+#include <iostream>
+
+using namespace std;
+
+struct Out {
+    string out1 { "" };
+    string out2 { "" };
+};
+
+pair<bool, Out> func(const string& in) {
+    Out o;
+    if (in.size() == 0)
+        return { false, o };
+    o.out1 = "hello";
+    o.out2 = "world";
+    return { true, o };
+}
+
+int main() {
+    if (auto [status, o] = func("hi"); status) {
+        cout << o.out1 << endl;
+        cout << o.out2 << endl;
+    }
+    return 0;
+}
+#+end_src
+
+From cppreference -std::optional
+#+begin_example
+The class template std::optional manages an optional contained value, i.e. a value that may or may not be present.
+A common use case for optional is the return value of a function that may fail. As opposed to other approaches, such as std::pair<T,bool>, optional handles expensive-to-construct objects well and is more readable, as the intent is expressed explicitly.
+类模板 std::optional 管理一个可选的容纳值，即可以存在也可以不存在的值。
+一种常见的 optional 使用情况是一个可能失败的函数的返回值。与其他手段，如 std::pair<T,bool> 相比， optional 良好地处理构造开销高昂的对象，并更加可读，因为它显式表达意图。
+#+end_example
+std::optional 是在 C++ 17 中引入到标准库中的，C++ 17 之前的版本可以通过 boost::optional 实现几乎相同的功能。
+
+我们来看一下使用 std::optional 来实现上面那段代码的样子
+#+begin_src c++
+#include <iostream>
+#include <optional>
+
+using namespace std;
+
+struct Out {
+    string out1 { "" };
+    string out2 { "" };
+};
+
+optional<Out> func(const string& in) {
+    Out o;
+    if (in.size() == 0)
+        return nullopt;
+    o.out1 = "hello";
+    o.out2 = "world";
+    return { o };
+}
+
+int main() {
+    if (auto ret = func("hi"); ret.has_value()) {
+        cout << ret->out1 << endl;
+        cout << ret->out2 << endl;
+    }
+    return 0;
+}
+#+end_src
+这段代码中我们看到了部分 std::optional 的用法，std::nullopt 是 C++ 17 中提供的没有值的 optional 的表达形式，等同于 { } 。
+
+创建一个 optional 的方法：
+#+begin_src c++
+// 空 optiolal
+optional<int> oEmpty;
+optional<float> oFloat = nullopt;
+
+optional<int> oInt(10);
+optional oIntDeduced(10);  // type deduction
+
+// make_optional
+auto oDouble = std::make_optional(3.0);
+auto oComplex = make_optional<complex<double>>(3.0, 4.0);
+
+// in_place
+optional<complex<double>> o7{in_place, 3.0, 4.0};
+
+// initializer list
+optional<vector<int>> oVec(in_place, {1, 2, 3});
+
+// 拷贝赋值
+auto oIntCopy = oInt;
+访问 optional 对象中数据的方法：
+
+// 跟迭代器的使用类似，访问没有 value 的 optional 的行为是未定义的
+cout << (*ret).out1 << endl; 
+cout << ret->out1 << endl;
+
+// 当没有 value 时调用该方法将 throws std::bad_optional_access 异常
+cout << ret.value().out1 << endl;
+
+// 当没有 value 调用该方法时将使用传入的默认值
+Out defaultVal;
+cout << ret.value_or(defaultVal).out1 << endl;
+#+end_src
+使用 std::optional 带来的好处：
+- 省去了运行状态的 bool 值的声明，让代码更简洁，更注重返回值本身的语意
+- 不用担心额外的动态内存分配
 * STL容器底层数据结构总结
 ** vector
 vector是我们用到最多的数据结构，其底层数据结构是数组，由于数组的特点，vector也具有以下特性：
@@ -2076,7 +2232,417 @@ void main()
 虚表可以继承，如果子类没有重写虚函数，那么子类虚表中仍然会有该函数的地址，只不过这个地址指向的是基类的虚函数实现。
 如果重写了相应的虚函数，那么虚表中的地址就会改变，指向自身的虚函数实现，如果派生类有自己的虚函数，那么虚表中就会添加该项。
 
+* 右值
+** 右值引用
+右值引用的标志是&&，顾名思义，右值引用专门为右值而生，可以指向右值，不能指向左值：
+#+begin_src c++
+int &&ref_a_right = 5; // ok
 
+int a = 5;
+int &&ref_a_left = a; // 编译不过，右值引用不可以指向左值
+
+ref_a_right = 6; // 右值引用的用途：可以修改右值
+#+end_src
+*** 指向左值
+std::move可以让右值引用指向左值
+#+begin_src c++
+int a = 5; // a是个左值
+int &ref_a_left = a; // 左值引用指向左值
+int &&ref_a_right = std::move(a); // 通过std::move将左值转化为右值，可以被右值引用指向
+
+cout << a; // 打印结果：5
+#+end_src
+std::move的功能是把左值强制转化为右值，让右值引用可以指向左值,其实现等同于一个类型转换：static_cast<T&&>(lvalue)。
+
+同样的，右值引用能指向右值，本质上也是把右值提升为一个左值，并定义一个右值引用通过std::move指向该左值：
+#+begin_src c++
+int &&ref_a = 5;
+ref_a = 6;
+
+等同于以下代码：
+
+int temp = 5;
+int &&ref_a = std::move(temp);
+ref_a = 6;
+#+end_src
+*** 右值引用本身是左值
+被声明出来的左、右值引用都是左值。 因为被声明出的左右值引用是有地址的，也位于等号左边。仔细看下边代码：
+#+begin_src c++
+// 形参是个右值引用
+void change(int&& right_value) {
+    right_value = 8;
+}
+
+int main() {
+    int a = 5; // a是个左值
+    int &ref_a_left = a; // ref_a_left是个左值引用
+    int &&ref_a_right = std::move(a); // ref_a_right是个右值引用
+
+    change(a); // 编译不过，a是左值，change参数要求右值
+    change(ref_a_left); // 编译不过，左值引用ref_a_left本身也是个左值
+    change(ref_a_right); // 编译不过，右值引用ref_a_right本身也是个左值
+
+    change(std::move(a)); // 编译通过
+    change(std::move(ref_a_right)); // 编译通过
+    change(std::move(ref_a_left)); // 编译通过
+
+    change(5); // 当然可以直接接右值，编译通过
+
+    cout << &a << ' ';
+    cout << &ref_a_left << ' ';
+    cout << &ref_a_right;
+    // 打印这三个左值的地址，都是一样的
+}
+#+end_src
+右值引用既可以是左值也可以是右值，如果有名称则为左值，否则是右值。
+*** 左右值引用的异同
+1. 从性能上讲，左右值引用没有区别，传参使用左右值引用都可以避免拷贝。
+2. 右值引用可以直接指向右值，也可以通过std::move指向左值；而左值引用只能指向左值(const左值引用也能指向右值)。
+3. 作为函数形参时，右值引用更灵活。虽然const左值引用也可以做到左右值都接受，但它无法修改，有一定局限性。
+#+begin_src c++
+void f(const int& n) {
+    n += 1; // 编译失败，const左值引用不能修改指向变量
+}
+
+void f2(int && n) {
+    n += 1; // ok
+}
+
+int main() {
+    f(5);
+    f2(5);
+}
+#+end_src
+*** 右值引用和std::move的应用场景
+*** 参考文章
+[[https://zhuanlan.zhihu.com/p/335994370][一文读懂C++右值引用和std::move]]
+按上文分析，std::move只是类型转换工具，不会对性能有好处；右值引用在作为函数形参时更具灵活性，看上去还是挺鸡肋的。他们有什么实际应用场景吗？
+
+3.1 实现移动语义
+在实际场景中，右值引用和std::move被广泛用于在STL和自定义类中实现移动语义，避免拷贝，从而提升程序性能。 在没有右值引用之前，一个简单的数组类通常实现如下，有构造函数、拷贝构造函数、赋值运算符重载、析构函数等。深拷贝/浅拷贝在此不做讲解。
+
+class Array {
+public:
+    Array(int size) : size_(size) {
+        data = new int[size_];
+    }
+     
+    // 深拷贝构造
+    Array(const Array& temp_array) {
+        size_ = temp_array.size_;
+        data_ = new int[size_];
+        for (int i = 0; i < size_; i ++) {
+            data_[i] = temp_array.data_[i];
+        }
+    }
+     
+    // 深拷贝赋值
+    Array& operator=(const Array& temp_array) {
+        delete[] data_;
+ 
+        size_ = temp_array.size_;
+        data_ = new int[size_];
+        for (int i = 0; i < size_; i ++) {
+            data_[i] = temp_array.data_[i];
+        }
+    }
+ 
+    ~Array() {
+        delete[] data_;
+    }
+ 
+public:
+    int *data_;
+    int size_;
+};
+该类的拷贝构造函数、赋值运算符重载函数已经通过使用左值引用传参来避免一次多余拷贝了，但是内部实现要深拷贝，无法避免。 这时，有人提出一个想法：是不是可以提供一个移动构造函数，把被拷贝者的数据移动过来，被拷贝者后边就不要了，这样就可以避免深拷贝了，如：
+
+class Array {
+public:
+    Array(int size) : size_(size) {
+        data = new int[size_];
+    }
+     
+    // 深拷贝构造
+    Array(const Array& temp_array) {
+        ...
+    }
+     
+    // 深拷贝赋值
+    Array& operator=(const Array& temp_array) {
+        ...
+    }
+ 
+    // 移动构造函数，可以浅拷贝
+    Array(const Array& temp_array, bool move) {
+        data_ = temp_array.data_;
+        size_ = temp_array.size_;
+        // 为防止temp_array析构时delete data，提前置空其data_      
+        temp_array.data_ = nullptr;
+    }
+     
+ 
+    ~Array() {
+        delete [] data_;
+    }
+ 
+public:
+    int *data_;
+    int size_;
+};
+这么做有2个问题：
+
+不优雅，表示移动语义还需要一个额外的参数(或者其他方式)。
+无法实现！temp_array是个const左值引用，无法被修改，所以temp_array.data_ = nullptr;这行会编译不过。当然函数参数可以改成非const：Array(Array& temp_array, bool move){...}，这样也有问题，由于左值引用不能接右值，Array a = Array(Array(), true);这种调用方式就没法用了。
+可以发现左值引用真是用的很不爽，右值引用的出现解决了这个问题，在STL的很多容器中，都实现了以右值引用为参数的移动构造函数和移动赋值重载函数，或者其他函数，最常见的如std::vector的push_back和emplace_back。参数为左值引用意味着拷贝，为右值引用意味着移动。
+
+class Array {
+public:
+    ......
+ 
+    // 优雅
+    Array(Array&& temp_array) {
+        data_ = temp_array.data_;
+        size_ = temp_array.size_;
+        // 为防止temp_array析构时delete data，提前置空其data_      
+        temp_array.data_ = nullptr;
+    }
+     
+ 
+public:
+    int *data_;
+    int size_;
+};
+如何使用：
+
+// 例1：Array用法
+int main(){
+    Array a;
+ 
+    // 做一些操作
+    .....
+     
+    // 左值a，用std::move转化为右值
+    Array b(std::move(a));
+}
+3.2 实例：vector::push_back使用std::move提高性能
+// 例2：std::vector和std::string的实际例子
+int main() {
+    std::string str1 = "aacasxs";
+    std::vector<std::string> vec;
+     
+    vec.push_back(str1); // 传统方法，copy
+    vec.push_back(std::move(str1)); // 调用移动语义的push_back方法，避免拷贝，str1会失去原有值，变成空字符串
+    vec.emplace_back(std::move(str1)); // emplace_back效果相同，str1会失去原有值
+    vec.emplace_back("axcsddcas"); // 当然可以直接接右值
+}
+ 
+// std::vector方法定义
+void push_back (const value_type& val);
+void push_back (value_type&& val);
+ 
+void emplace_back (Args&&... args);
+在vector和string这个场景，加个std::move会调用到移动语义函数，避免了深拷贝。
+
+除非设计不允许移动，STL类大都支持移动语义函数，即可移动的。 另外，编译器会默认在用户自定义的class和struct中生成移动语义函数，但前提是用户没有主动定义该类的拷贝构造等函数(具体规则自行百度哈)。 因此，可移动对象在<需要拷贝且被拷贝者之后不再被需要>的场景，建议使用std::move触发移动语义，提升性能。
+
+moveable_objecta = moveable_objectb; 
+改为： 
+moveable_objecta = std::move(moveable_objectb);
+还有些STL类是move-only的，比如unique_ptr，这种类只有移动构造函数，因此只能移动(转移内部对象所有权，或者叫浅拷贝)，不能拷贝(深拷贝):
+
+std::unique_ptr<A> ptr_a = std::make_unique<A>();
+
+std::unique_ptr<A> ptr_b = std::move(ptr_a); // unique_ptr只有‘移动赋值重载函数‘，参数是&& ，只能接右值，因此必须用std::move转换类型
+
+std::unique_ptr<A> ptr_b = ptr_a; // 编译不通过
+std::move本身只做类型转换，对性能无影响。 我们可以在自己的类中实现移动语义，避免深拷贝，充分利用右值引用和std::move的语言特性。
+
+4. 完美转发 std::forward
+和std::move一样，它的兄弟std::forward也充满了迷惑性，虽然名字含义是转发，但他并不会做转发，同样也是做类型转换.
+
+与move相比，forward更强大，move只能转出来右值，forward都可以。
+
+std::forward<T>(u)有两个参数：T与 u。 a. 当T为左值引用类型时，u将被转换为T类型的左值； b. 否则u将被转换为T类型右值。
+举个例子，有main，A，B三个函数，调用关系为：main->A->B，建议先看懂2.3节对左右值引用本身是左值还是右值的讨论再看这里：
+
+void B(int&& ref_r) {
+    ref_r = 1;
+}
+ 
+// A、B的入参是右值引用
+// 有名字的右值引用是左值，因此ref_r是左值
+void A(int&& ref_r) {
+    B(ref_r);  // 错误，B的入参是右值引用，需要接右值，ref_r是左值，编译失败
+     
+    B(std::move(ref_r)); // ok，std::move把左值转为右值，编译通过
+    B(std::forward<int>(ref_r));  // ok，std::forward的T是int类型，属于条件b，因此会把ref_r转为右值
+}
+ 
+int main() {
+    int a = 5;
+    A(std::move(a));
+}
+例2：
+
+void change2(int&& ref_r) {
+    ref_r = 1;
+}
+ 
+void change3(int& ref_l) {
+    ref_l = 1;
+}
+ 
+// change的入参是右值引用
+// 有名字的右值引用是 左值，因此ref_r是左值
+void change(int&& ref_r) {
+    change2(ref_r);  // 错误，change2的入参是右值引用，需要接右值，ref_r是左值，编译失败
+     
+    change2(std::move(ref_r)); // ok，std::move把左值转为右值，编译通过
+    change2(std::forward<int &&>(ref_r));  // ok，std::forward的T是右值引用类型(int &&)，符合条件b，因此u(ref_r)会被转换为右值，编译通过
+     
+    change3(ref_r); // ok，change3的入参是左值引用，需要接左值，ref_r是左值，编译通过
+    change3(std::forward<int &>(ref_r)); // ok，std::forward的T是左值引用类型(int &)，符合条件a，因此u(ref_r)会被转换为左值，编译通过
+    // 可见，forward可以把值转换为左值或者右值
+}
+ 
+int main() {
+    int a = 5;
+    change(std::move(a));
+}
+上边的示例在日常编程中基本不会用到，std::forward最主要运于模版编程的参数转发中，想深入了解需要学习万能引用(T &&)和引用折叠(eg:& && → ?)等知识，本文就不详细介绍这些了。
+* 结构化绑定声明
+结构化绑定声明，是指在一次声明中同时引入多个变量，同时绑定初始化表达式的各个子对象的语法形式。
+结构化绑定声明使用auto来声明多个变量，所有变量都必须用中括号括起来。
+#+begin_example
+cv-auto+引用 [变量1, 变量2, ... 变量n ] = 初始化表达式;
+cv-auto+引用 [变量1, 变量2, ... 变量n ] (初始化表达式);
+cv-auto+引用 [变量1, 变量2, ... 变量n ] {初始化表达式};
+// 这里 cv-auto+引用 包含 auto, auto const, auto &, auto&& 等等形式
+#+end_example
+结构化绑定所声明的变量有两种形式：
+1. 非引用变量，此时初始化表达式对象需要拷贝一份，变量所绑定的是初始化表达式对象拷贝的各个子对象。
+2. 引用变量，此时初始化表达式对象不需要拷贝，变量所绑定的是初始化表达式对象本身的各个子对象。
+
+结构化绑定中的初始化表达式有三种类型：
+1. 数组类型，此时变量所绑定的是数组的各个元素。
+2. pair tuple等支持 tuple_size<E> 的类型，此时变量所绑定的是 get<0>(e)，get<1>(e)，get<2>(e)…
+这里E是指类型，e是指对象。
+3. 带有 public 成员的结构类型，此时变量所绑定的是结构对象的各个 public 成员。
+
+C++17代码
+#+begin_src c++ 
+#include <iostream>
+#include <utility>
+#include <set>
+#include <map>
+
+using namespace std;
+
+struct S {
+    int a, b;
+};
+
+map<string, int> get_map()
+{
+    return {
+        { "hello", 1 },
+        { "world", 2 },
+        { "it's",  3 },
+        { "me",    4 },
+    };
+}
+
+int main()
+{
+    auto [a, b] = pair(2, "3"s);
+    cout << a << b << endl; // 23
+
+    set<string> myset;
+    if (auto [iter, success] = myset.insert("Hello"); success) 
+       cout << *iter << endl; // Hello
+
+    int arr[] = {1, 2};
+    const auto& [m, n] = arr;
+    cout << m << n << endl; //12
+
+    S s = {4, 5};
+    auto& [x, y] = s;
+    x = 0, y = 1;
+    cout << s.a << s.b << endl; // 01
+
+    for (auto&& [k, v] : get_map())
+        cout << "k=" << k << " v=" << v << endl;
+    // k=hello v=1
+    // k=it's v=3
+    // k=me v=4
+    // k=world v=2
+}
+#+end_src
+代码说明
+代码第25行采用结构化绑定声明了 int 类型的 a 和 string 类型的 b，分别绑定了初始化表达式中 pair 对象的 first 和 second。
+代码第29行采用结构化绑定声明了迭代类型的 iter 和 bool 类型的 success，分别绑定了初始化表达式中 pair 对象的 first 和 second。
+代码第33行采用结构化绑定声明了 const int& 类型的 m 和 n，分别绑定了初始化表达式中 arr 数组的两个元素。
+代码第37行采用结构化绑定声明了 int& 类型的 x 和 y，分别绑定了初始化表达式中 s 对象的两个数据成员 a 和 b。
+代码第41行采用结构化绑定声明了 string&& 类型的 k 和 int 类型的 v，分别绑定了初始化表达式中 pair 对象的 first 和 second。
+
+C++14等价代码
+#+begin_src c++ 
+#include <iostream>
+#include <utility>
+#include <set>
+#include <map>
+
+using namespace std;
+
+struct S {
+    int a, b;
+};
+
+map<string, int> get_map()
+{
+    return {
+        { "hello", 1 },
+        { "world", 2 },
+        { "it's",  3 },
+        { "me",    4 },
+    };
+}
+
+int main()
+{
+    auto kv = make_pair(2, "3"s);
+    auto& a = kv.first; auto& b = kv.second;
+
+    set<string> myset;
+    set<string>::iterator iter;
+    bool success;
+    tie(iter, success) = myset.insert("Hello");
+    if (success) 
+       cout << *iter << endl; // Hello
+
+    int arr[] = {1, 2};
+    const auto &m = arr[0], &n = arr[1];
+    cout << m << n << endl; //12
+
+    S s = {4, 5};
+    auto &x = s.a, &y = s.b;
+    x = 0, y = 1;
+    cout << s.a << s.b << endl; // 01
+
+    for (auto&& kv : get_map()) {
+        auto&& k = forward<decltype(kv.first)>(kv.first);
+        auto&& v = forward<decltype(kv.second)>(kv.second);
+        cout << "k=" << k << " v=" << v << endl;
+    }
+    // k=hello v=1
+    // k=it's v=3
+    // k=me v=4
+    // k=world v=2
+}
+#+end_src
+** 参考文章
+[[https://blog.csdn.net/zwvista/article/details/78111346][C++17尝鲜：结构化绑定声明（Structured Binding Declaration）]]
 * gtest
 ** assertion
 在gtest中，是通过断言（assertion）来判断代码实现的功能是否符合预期。断言的结果分为success、non-fatal failture和fatal failture。
