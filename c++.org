@@ -2424,6 +2424,9 @@ private:
 };
 #+end_src
 * 多态
+C++规定，当一个成员函数被声明为虚函数后，其派生类中的同名函数都自动成为虚函数。
+
+多态的行为必须是在指针或者引用的情况下才能生效。
 ** 简单介绍
 #+begin_src c++
 #include "stdafx.h"
@@ -2579,8 +2582,44 @@ i.e. D1 class's destructor and then calls the destrcutor of Base class - this as
 Thats why we must always make Base class's destrcutor as virtual if it has any virtual functions in it.
 ** 构造函数
 C++标准规定了在构造函数中调用虚函数时，只会绑定到自己类的相应函数。虚函数在构造函数中不起作用。
+** 析构函数
+*** 析构函数为什么必须是虚函数
+当基类的析构函数为非虚函数时，删除一个基类指针指向的派生类实例时，只清理了派生类从基类继承过来的资源，而派生类自己独有的资源却没有被清理，这显然不是我们希望的。
+
+如果一个类会被其他类继承，那么我们有必要将被继承的类（基类）的析构函数定义成虚函数。这样，释放基类指针指向的派生类实例时，先调用派生类的析构函数，再调用基类的析构函数，清理工作才能全面进行，才不会发生内存泄漏。
+*** delete子类指针
+不管什么时候delete子类指针，都会调用父类析构函数（不管父类析构函数是不是虚函数）。
+
+之所以要把父类析构函数定义为虚函数，是因为当父类指针指向子类对象时，delete父类指针可以调用到子类的析构函数（之后会调用父类的析构）。
+** 参数传递
+#+begin_src c++
+  class Parent{
+  public:
+      virtual void print();
+  }
+  class Son{
+  public:
+      void print();
+  }
+  void A(Parent &son){//传引用
+      son.print();
+  }
+  void B(Parent son){//传值
+      son.print();
+  }
+  main(){
+    Son *p=new Son();
+    A(*p);//调用子类的print
+    B(*p);//调用父类的print
+  }
+#+END_SRC
+第一次传引用相当于父类指针指向派生类；
+第二次传值，是用派生类对象赋值给基类对象，仅仅拷贝了派生类的基类部分，因此调用基类版本函数。
+
+多态的行为必须是在指针或者引用的情况下才能生效，对值变量来说，一定是执行静态绑定。
 ** 参考文章
 [[https://www.go4expert.com/articles/virtual-table-vptr-t16544/][How Virtual Table and _vptr works]]
+[[https://blog.csdn.net/qq_42247231/article/details/105109709][为什么析构函数必须是虚函数？为什么默认的析构函数不是虚函数？]]
 * 右值
 ** 右值引用
 右值引用的标志是&&，顾名思义，右值引用专门为右值而生，可以指向右值，不能指向左值：

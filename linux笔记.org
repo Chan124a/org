@@ -17,7 +17,6 @@ dpkg-query -l
 显示软件包的一些常规信息
 例: apt-cache showpkg openssh
 
-
 2.apt-cache stats
 显示相关的统计信息顯示相關的統計資訊
 
@@ -626,6 +625,98 @@ conda config --remove channels conda-forge
 #+END_SRC
 
 疑似 forge 源出了问题
+* update-alternatives
+update-alternatives可以方便实现管理不同版本的程序。
+
+命令格式：update-alternatives [<选项> ...] <命令>
+
+主要参数：
+#+begin_example
+Commands:
+  --install <link> <name> <path> <priority>
+    [--slave <link> <name> <path>] ...
+                           在系统中加入一组替换项.
+  --remove <name> <path>   从 <名称> 替换组中去除 <路径> 项.
+  --remove-all <name>      从替换系统中删除 <名称> 替换组.
+  --auto <name>            将 <名称> 的主链接切换到自动模式.
+  --display <name>         显示关于 <名称> 替换组的信息.
+  --query <name>           machine parseable version of --display <name>.
+  --list <name>            列出 <名称> 替换组中所有的可用替换项.
+  --get-selections         list master alternative names and their status.
+  --set-selections         read alternative status from standard input.
+  --config <name>          列出 <名称> 替换组中的可选项，并就使用其中
+                                 哪一个，征询用户的意见.
+  --set <name> <path>      将 <路径> 设置为 <名称> 的替换项.
+  --all                    对所有可选项一一调用 --config 命令.
+
+<link> 是指向 /etc/alternatives/<名称> 的符号链接>.
+  (e.g. /usr/bin/pager)
+<name> 是该链接替换组的主控名.
+  (e.g. pager)
+<path> 是替换项目标文件的位置.
+  (e.g. /usr/bin/less)
+<priority> 是一个整数，在自动模式下，这个数字越高的选项，其优先级也就越高.
+
+Options:
+  --altdir <directory>     指定不同的可选项目录.
+  --admindir <directory>   指定不同的管理目录.
+  --log <file>             设置log文件.
+  --force                  就算没有通过自检，也强制执行操作。
+  --skip-auto              在自动模式中跳过设置正确候选项的提示
+                           (只与 --config 有关)
+  --verbose                启用详细输出。
+  --quiet                  安静模式，输出尽可能少的信息.
+  --help                   显示本帮助信息.
+  --version                显示版本信息.
+#+end_example
+** display选项
+display选项用来显示一个命令链接的所有可选命令，即查看一个命令链接组的所有信息，包括链接的模式(自动还是手动)、链接priority值、所有可 用的链接命令等等。
+** install选项
+install选项的功能就是增加一组新的系统命令链接符。
+使用语法为：update-alternatives --install <link> <name> <path> <priority> [--slave link name path]...。
+其中link为系统中功能相同软件的公共链接目录，比如/usr/bin/java(需绝对目录);
+name为命令链接符名称,如java；path为你所要使用新命令、新软件的所在目录；
+priority为优先级，当命令链接已存在时，需高于当前值，因为当alternative为自动模式时,系统默认启用priority高的链接；
+–slave为从alternative。
+** config选项
+config选项用来显示和修改实际指向的候选命令，为在现有的命令链接选择一个作为系统默认。
+** remove选项
+remove选项的功能是删除一个命令的link值，其附带的slave也将一起删除。
+使用语法为:update-alternatives --remove name path。
+其中name与path与install中的一致，如果所删除的链接组中还有其他链接的话，系统将会自动从其他中选择一个priority高的链接作为默认为链接。
+比如：update-alternatives –remove java /usr/lib/jvm/jre1.6.0_20/bin/java
+** 用法
+安装:
+#+begin_src bash
+sudo update-alternatives --install link name path priority [ --slave slink sname spath]
+#+END_SRC
+选项注释:
+- link是在/usr/bin/,/usr/local/bin/等默认PATH搜索目录
+- name是在/etc/alternatives目录中的链接名
+- path是真正的可执行程序的位置,可以在任何位置
+- priority是优先级
+
+打印名字的相关链接:
+#+begin_src bash
+sudo update-alternatives --display name
+#+END_SRC
+配置名字的相关链接:
+#+begin_src bash
+sudo update-alternatives --config name
+#+END_SRC
+移除名字的相关链接:
+#+begin_src bash
+sudo update-alternatives --remove name path
+#+END_SRC
+因为优先级的存在,可以为同一个name设置多个path,当删除一个path后,默认连接到slave上.
+
+移除所有名字相关的链接:
+#+begin_src bash
+sudo update-alternatives --remove-all name
+#+END_SRC
+** 参考文章
+[[https://blog.csdn.net/JasonDing1354/article/details/50470109][【Linux】使用update-alternatives命令进行版本的切换]]
+[[https://zhuanlan.zhihu.com/p/20797436][Linux命令之update-alternativse]]
 * awk
 ** 简介
 awk是一个强大的文本分析工具，相对于grep的查找，sed的编辑，awk在其对数据分析并生成报告时，显得尤为强大。简单来说awk就是把文件逐行的读入，以空格为默认分隔符将每行切片，切开的部分再进行各种分析处理。
@@ -2586,6 +2677,39 @@ elf64_phdr 定义在相同的 elf.h 文件中.
 ** 参考文章
 [[http://chuquan.me/2018/05/21/elf-introduce/][计算机那些事(4)——ELF文件结构 - 楚权的世界]]
 [[https://xinqiu.gitbooks.io/linux-inside-zh/content/Theory/linux-theory-2.html][ELF 文件格式· Linux Inside 中文版]]
+* exec
+exec命令 用于调用并执行指令的命令。exec命令通常用在shell脚本程序中，可以调用其他的命令。如果在当前终端中使用命令，则当指定的命令执行完毕后会立即退出终端。
+
+** 语法
+exec(选项)(参数)
+
+** 选项
+-c：在空环境中执行指定的命令。
+
+** 参数
+指令：要执行的指令和相应的参数。
+
+** 实例
+首先使用echo命令将文本“Linux C++”进行输出，输入如下命令：
+#+begin_src bash
+echo Linux C++           # 输出指定信息
+
+#+END_SRC
+执行上面的指令后，输出如下信息：
+#+begin_example
+Linux C++                # 输出信息
+#+end_example
+
+然后再使用exec命令调用echo命令输出同样的信息，并且对输出的信息进行对比，输入指令如下所示：
+#+begin_src bash
+exec -c echo Linux C++          # 调用命令
+#+END_SRC
+执行以上命令后，其输出信息如下：
+#+begin_example
+Linux C++                       # 使用指定指令输出信息
+#+end_example
+
+通过比较两者执行后的结果来看，所实现的功能是相同的，即使用exec命令调用echo命令成功。
 * export 命令
 Linux export 命令用于设置或显示环境变量。
 
@@ -2719,7 +2843,8 @@ expr: Syntax error
 #+END_SRC
 ** 参考文章
 [[https://www.runoob.com/linux/linux-comm-expr.html][Linux expr命令 - 菜鸟教程]]
-* emacs 安装
+* emacs
+** 安装
 源码下载地址：http://mirrors.ocf.berkeley.edu/gnu/emacs/
 
 编译安装：
@@ -2777,10 +2902,28 @@ make && make install
 #+begin_src bash
 ln -s /opt/emacs/bin/emacs /usr/bin/emacs
 #+END_SRC
+** 使Emacs在命令行中运行
+首选：使用emacs-nox并将其设置为默认值：
+#+begin_src bash
+ yum install emacs-nox
+ alternatives --config emacs
+#+END_SRC
+并选择emacs-nox。
 
+第二选择：使用emacs但使用-nw禁用窗口系统 。 通过调用emacs
+#+begin_src bash
+emacs -nw
+#+END_SRC
+您可以编写一个小的脚本 ema并将其放入$PATH ，例如~/bin/：
+#+begin_src bash
+#!/bin/env bash
+emacs -nw $*
+#+END_SRC
+并每次调用ema以使用emacs。
 ** 参考文章
 [[https://www.cnblogs.com/felixwang2/p/10281092.html][emacs源码安装]]
 [[https://stackoverflow.com/questions/52722096/build-emacs-and-gnutls-not-found/52722866][build emacs and gnutls not found]]
+[[https://blog.csdn.net/cuma2369/article/details/107667517][emacs 命令行_默认情况下如何使Emacs在命令行中运行？]]
 * gcc、make、cmake的关系和区别
 1.gcc是GNU Compiler Collection（就是GNU编译器套件），也可以简单认为是编译器，它可以编译很多种编程语言（括C、C++、Objective-C、Fortran、Java等等）。
 
@@ -9715,8 +9858,7 @@ Script. done on 2009年02月08日 星期日 18时57分00秒
 #+END_SRC
 我们在启动script时没有指定文件名，它会自动记录到当前目录下一个名为 typescript的文件中。也可以用 -a参数 指定文件名
 * ssh 相关
-** ubuntu开启SS
-H服务远程登录
+** ubuntu开启SSH服务远程登录
  SSH分客户端openssh-client和openssh-server
 
  如果你只是想登陆别的机器的SSH只需要安装openssh-client（ubuntu有默认安装，如果没有则sudo apt-get install openssh-client），如果要使本机开放SSH服务就需要安装openssh-server。
@@ -11578,6 +11720,117 @@ debug3: receive packet: type 51
 ** 参考文章
 [[https://www.jianshu.com/p/1e793e386beb][ssh配置文件详解]]
 [[https://wangdoc.com/ssh/client.html][ssh教程]]
+* stty命令
+Linux环境下，在终端设备与进程之间的中间有一个终端驱动器，里面有终端驱动函数。
+
+stty 命令的作用是修改或者显示终端驱动程序里面的设置。
+
+stty的设置只存在于当前shell环境中，如果需要重启后自动设置终端，可以将修改加入到profile中。
+** 参数
+常用参数
+stty 命令不带参数可以打印终端行设置，加上 -a 参数可以打印得更详细些。
+
+stty size ：可以显示终端的大小，即行数和列数。
+
+stty 命令还可以更改终端行的设置，格式如下：stty SETTING CHAR
+
+其中，SETTING可以是如下：
+- eof : 输入结束，文件结束，默认为Ctrl+D。比如：用cat >file来创建文件时，按Ctrl+D来结束输入。
+- erase : 向后删除字符，擦除最后一个输入字符，默认为Ctrl+?。注意默认情况下退格键Backspace不是删除字符。
+- intr : 中断当前程序，默认为Ctrl+C。
+- kill : 删除整条命令，删除整行，默认为Ctrl+U。
+- quit :退出当前程序，默认为Ctrl+\或Ctrl+|。
+- start : 启动屏幕输出，默认为Ctrl+Q。
+- stop :停止屏幕输出，默认为Ctrl+S。
+- susp : terminal stop当前程序，默认为Ctrl+Z。这样当前进程就会变成后台进程了。
+- werase：删除最后一个单词，默认为Ctrl+W。
+
+stty 命令还有一些其他用法：
+#+begin_src bash
+#在命令行下，禁止输出大写的方法：
+stty iuclc     #开启
+stty -iuclc    #恢复
+
+#在命令行下禁止输出小写：
+stty olcuc    #开启
+stty -olcuc   #恢复
+
+#打印出终端的行数和列数：
+stty size
+
+#改变Ctrl+D的方法:
+stty eof "string"
+#系统默认是Ctrl+D来表示文件的结束，而通过这种方法，可以改变！
+
+#屏蔽显示：
+stty -echo   #禁止回显
+stty echo    #打开回显
+#测试方法:
+stty -echo;read;stty echo;read
+
+#忽略回车符：
+stty igncr     #开启
+stty -igncr    #恢复
+#+END_SRC
+
+** 使用示例
+*** 打印终端行设置
+#+begin_src bash
+[oracle10g@linux]$ stty -a
+speed 38400 baud; rows 66; columns 132; line = 0;
+intr = ^C; quit = ^\; erase = ^H; kill = ^U; eof = ^D; eol = <undef>; eol2 = <undef>; start = ^Q; stop = ^S; susp = ^Z; rprnt = ^R;
+werase = ^W; lnext = ^V; flush = ^O; min = 1; time = 0;
+-parenb -parodd cs8 -hupcl -cstopb cread -clocal -crtscts
+-ignbrk -brkint -ignpar -parmrk -inpck -istrip -inlcr -igncr icrnl ixon -ixoff -iuclc -ixany -imaxbel
+opost -olcuc -ocrnl onlcr -onocr -onlret -ofill -ofdel nl0 cr0 tab0 bs0 vt0 ff0
+isig icanon iexten echo echoe echok -echonl -noflsh -xcase -tostop -echoprt echoctl echoke
+#+END_SRC
+其中：
+- eof : 输入结束
+- erase : 向后删除字符，
+- intr : 中断当前程序
+- kill : 删除整条命令
+- quit :退出当前程序
+- start : 启动屏幕输出
+- stop :停止屏幕输出；
+- susp : terminal stop当前程序。
+*** 打印当前终端的大小（行数和列数）
+#+begin_src bash
+[root@web ~]# stty size
+24 80
+
+#+END_SRC
+*** 设置退格键Backspace的删除行为
+
+在默认情况下，我们按退格键Backspace时，会在屏幕上回显^H，而不是把前一个字符删除。
+比如使用sftp/ftp/sqlplus/ij等命令时，就会碰到这种情况。
+当然，我们 可以同时按下ctrl+backspace键来删除，但对于习惯了用backspace来删除的用户，这样很不爽。
+这可以通过修改tty终端的设置来实现 backspace删除功能。我们可以使用stty命令把Backspace的行为变成删除前一个字符。
+#+begin_src bash
+sftp> get abc^H^H^H^H
+
+#设置backspace为删除键：
+[root@web ~]# stty erase ^H
+#改回使用ctrl+backspace为删除键
+[root@web ~]# stty erase ^?
+#+END_SRC
+在设置backspace时，最好先在shell提示符下按一下backspace键试一下，如果显示^h就设置成stty erase ^h, 如果^?就用stty erease ^?
+*** 在vi编辑文件时按Ctrl+Q来结束终端僵死的局面
+#+begin_src bash
+[root@web ~]# vi 1.txt
+1
+2
+3
+Ctrl+S
+~
+#+END_SRC
+
+注：按了Ctrl+S之后，就会禁止屏幕输出，从而出现终端僵死的情况。
+这个时候，只要按Ctrl+Q就会结束这种局面，因为它会允许屏幕输出。
+Ctrl+Q
+** 参考文章
+[[https://www.cnblogs.com/goloving/p/15170646.html][浅析Linux中stty命令的作用、常用用法及案例使用]]
+[[https://www.cnblogs.com/the-tops/p/5621207.html][使用stty修改终端设置 stty 用法！]]
 * scp
 scp可以用于从远程复制文件到本地、从本地复制文件到服务器，也可以在两个远程服务器之间传输文件
 
@@ -11684,6 +11937,9 @@ tar [-z|-j|-J] [cv] [-f 待建立的新檔名] filename... <==打包与压缩
 tar [-z|-j|-J] [tv] [-f 既有的 tar 檔名] <==察看檔名
 tar [-z|-j|-J] [xv] [-f 既有的 tar 檔名] [-C 目录] <==解压缩
 #+END_SRC
+-z:gz
+-j:bz2
+-J:xz
 ** 选项与参数：
 - -c ：建立打包文件，可搭配 -v 来察看过程中被打包的档名(filename)
 - -t ：察看打包文件的内容含有哪些档名，重点在察看『档名』就是了；
@@ -12591,6 +12847,20 @@ unzip [-cflptuvz][-agCjLMnoqsVX][-P <密码>][.zip文件][文件][-d <目录>][-
 -Z unzip -Z等于执行zipinfo指令。
 #+END_EXAMPLE
 
+* which
+Linux which命令用于查找文件。
+
+which指令会在环境变量$PATH设置的目录里查找符合条件的文件。
+
+语法:
+which [文件...]
+
+参数：
+- -n<文件名长度> 指定文件名长度，指定的长度必须大于或等于所有文件中最长的文件名。
+- -p<文件名长度> 与-n参数相同，但此处的<文件名长度>包括了文件的路径。
+- -w 指定输出时栏位的宽度。
+- -V 显示版本信息。
+- -a 在每个参数里寻找命令，并打印出每个命令的路径
 * Vmware虚拟机
 NAT模式下，多个虚拟机都是连接到同一个网关地址
 ** ubuntu终端放大缩小
@@ -12715,6 +12985,56 @@ DNS服务器可以设置114.114.114.144 8.8.8.8 等。
 *** 五、这时候基本就可以进行网络连接了，打开网页试一下，如果还连接不上，查看是否是哪一步没有设置对，在就重新启动虚拟计算机的网络。
 ** 修改时区和时间
 ~timedatectl set-timezone Asia/Shanghai~
+** VirtualBox 主机ping不通虚拟机的解决办法
+虚拟机与主机之间相互ping通有一个问题，就是虚拟机能够ping通主机,本地主机ping不通虚拟机
+
+解决办法：
+*** 如果虚拟机有两个网卡
+
+将虚拟机网卡2的连接方式改成桥接即可：
+
+#+DOWNLOADED: screenshot @ 2023-03-05 15:01:07
+[[file:images/Vmware虚拟机/2023-03-05_15-01-07_screenshot.png]]
+️要将虚拟机重启，否则是成功不了的（重要）
+
+然后就能够通过网卡2进行连接：
+
+#+DOWNLOADED: screenshot @ 2023-03-05 15:01:25
+[[file:images/Vmware虚拟机/2023-03-05_15-01-25_screenshot.png]]
+*** 虚拟机只有一个网卡
+
+也是将网卡1改成桥接模式
+
+#+DOWNLOADED: screenshot @ 2023-03-05 15:01:47
+[[file:images/Vmware虚拟机/2023-03-05_15-01-47_screenshot.png]]
+要将虚拟机重启，否则是成功不了的（重要）
+
+然后就成功ping通了
+** 网络连接模式
+桥接、NAT、Host-only上网方式的区别：
+- 桥接 通过使用物理机网卡 具有单独ip
+- NAT 把物理机为路由器进行上网
+- host-only 只能与物理机相连
+*** NAT
+网络地址转换（英语：Network Address Translation，缩写：NAT；又称网络掩蔽、IP掩蔽）在计算机网络中是一种在IP数据包通过路由器或防火墙时重写来源IP地址或目的IP地址的技术。这种技术被普遍使用在有多台主机但只通过一个公有IP地址访问互联网的私有网络中。它是一个方便且得到了广泛应用的技术。当然，NAT也让主机之间的通信变得复杂，导致了通信效率的降低。
+
+NAT模式实际是虚拟了一个网卡出来，虚拟机直接使用链接这个虚拟网卡，每次访问和交互通过这个虚拟网卡交换数据。
+虚拟机发送数据给实体机：虚拟机系统->虚拟网卡->实体机系统（可以发现是不经过真实网卡的流程简单很多）；虚拟机访问外网：虚拟机系统->虚拟网卡->实体机系统->真实网卡->路由器->外网
+
+NAT 模式下，虚拟机仅仅可以同路由器下网段中的一台真实机通讯，而这台真实机就是安装虚拟机的这台电脑，之所以可以通讯是因为这台电脑本身充当了虚拟机的路由器，相当于路由器的 192.168.1.1 这个地址，而你在 vmware 下的网卡管理中是可以看到这个地址的。
+
+
+#+DOWNLOADED: screenshot @ 2023-03-05 15:07:33
+[[file:images/Vmware虚拟机/2023-03-05_15-07-33_screenshot.png]]
+
+*** 桥接
+桥接就是指：就是通过一台设备（可能不止一个）把几个网络串起来形成的连接
+
+虚拟出来的操作系统就像是局域网中的一独立的主机，它可以通过路由器网线访问网内任何一台机器。不过虚拟机需要占用你同一个网段的一个 IP 地址，当且仅当虚拟机和实体机在同一个网段，两者才可以进行通信
+
+** 参考文章
+[[https://blog.csdn.net/qq_19734597/article/details/103386987][VirtualBox 主机ping不通虚拟机的解决办法]]
+[[https://cloud.tencent.com/developer/article/1463782][桥接、NAT、Host-only上网方式的区别]]
 * vim
 [[https://vim.rtorr.com/lang/zh_cn][Vim Cheat Sheet]]
 ** 移动光标
