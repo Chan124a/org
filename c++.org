@@ -2036,6 +2036,13 @@ void MyMethod(T myarr){
 }
 #+END_SRC
 这个时候typename的作用就是告诉C++编译器，typename后面的字符串为一个类型名称，而不是成员函数或者成员变量。这个时候如果前面没有typename，编译器没有任何办法知道T::LengthType是一个类型还是一个成员名称(静态数据成员或者静态函数），所以编译不能够通过。
+* 友元函数
+友元可以是一个函数，该函数被称为友元函数；友元也可以是一个类，该类被称为友元类，在这种情况下，整个类及其所有成员都是友元。
+
+类的友元函数是定义在类外部，但有权访问类的所有私有（private）成员和保护（protected）成员。尽管友元函数的原型有在类的定义中出现过，但是友元函数并不是成员函数。
+
+如果要声明函数为一个类的友元，需要在类定义中该函数原型前使用关键字 friend，如下所示：
+
 * 定义抽象数据类型
 #+BEGIN_SRC c++
 struct ListNode {
@@ -2582,6 +2589,20 @@ i.e. D1 class's destructor and then calls the destrcutor of Base class - this as
 Thats why we must always make Base class's destrcutor as virtual if it has any virtual functions in it.
 ** 构造函数
 C++标准规定了在构造函数中调用虚函数时，只会绑定到自己类的相应函数。虚函数在构造函数中不起作用。
+
+*** 构造函数不能为虚函数
+简言之：构造函数不能是虚函数，因为虚函数是基于对象的，构造函数是用来产生对象的，若构造函数是虚函数，则需要对象来调用，但是此时构造函数没有执行，就没有对象存在，产生矛盾，所以构造函数不能是虚函数。
+**** 从存储空间角度来看
+虚函数的调用需要虚函数表(vptr)指针，而该指针存放在对象的内存空间中，在构造函数中进行初始化工作，即初始化vptr，让它指向正确的虚函数表。
+所以需要调用构造函数才可以创建或初始化它的值，否则即使开辟了空间，该指针也为随机值；若构造函数声明为虚函数，那么由于对象还未创建，还没有内存空间，更没有虚函数表地址用来调用虚函数——构造函数了。
+
+**** 从多态角度来看
+构造一个对象的时候，必须知道对象的实际类型；而虚函数主要是实现多态，在运行时才可以明确调用对象，根据传入的对象类型来调用函数，
+例如通过父类的指针或者引用来调用它的时候可以变成调用子类的那个成员函数
+。而构造函数是在创建对象时自己主动调用的，不可能通过父类的指针或者引用去调用。那使用虚函数也就没有了实际意义。
+在调用构造函数时，由于对象还未构造成功。编译器无法知道对象的实际类型，是该类本身，还是该类的一个派生类，或是更深层次的派生类。
+并且构造函数的作用是提供初始化，在对象生命期仅仅运行一次，不是对象的动态行为，没有必要成为虚函数。
+
 ** 析构函数
 *** 析构函数为什么必须是虚函数
 当基类的析构函数为非虚函数时，删除一个基类指针指向的派生类实例时，只清理了派生类从基类继承过来的资源，而派生类自己独有的资源却没有被清理，这显然不是我们希望的。
@@ -2592,6 +2613,7 @@ C++标准规定了在构造函数中调用虚函数时，只会绑定到自己�
 
 之所以要把父类析构函数定义为虚函数，是因为当父类指针指向子类对象时，delete父类指针可以调用到子类的析构函数（之后会调用父类的析构）。
 ** 参数传递
+*** 引用和值传递
 #+begin_src c++
   class Parent{
   public:
@@ -2617,6 +2639,83 @@ C++标准规定了在构造函数中调用虚函数时，只会绑定到自己�
 第二次传值，是用派生类对象赋值给基类对象，仅仅拷贝了派生类的基类部分，因此调用基类版本函数。
 
 多态的行为必须是在指针或者引用的情况下才能生效，对值变量来说，一定是执行静态绑定。
+*** 默认参数
+虚函数是动态绑定，但默认值是在编译期决定的，所以派生类的
+
+#+begin_src c++
+#include <iostream>
+using namespace std;
+ 
+class Base {
+public:
+    virtual void fun(int x = 111) {
+        cout << "Base::fun(), x = " << x << endl;
+    }
+};
+ 
+class Derived : public Base {
+public:
+    virtual void fun(int x=222) {
+        cout << "Derived::fun(), x = " << x << endl;
+    }
+};
+ 
+int main() {
+    Derived d1;
+    Base* p1 = &d1;
+	Derived* p2=&d1; 
+    p1->fun();
+    p2->fun();
+    return 0;
+}
+#+END_SRC
+输出：
+#+begin_example
+Derived::fun(), x = 111
+Derived::fun(), x = 222
+#+end_example
+注意，上面第一行打印的是派生类函数名，但是使用的默认值是基类的111。
+** 函数声明不同的虚函数是不同的
+如下代码，基类的display方法加了const，这导致派生类实际上有两个不同的虚方法：一个带const，一个不带const。
+
+当用基类指针调用子类对象方法时，由于基类的虚函数表只有带const的方法，所以会调用到子类的带const的display方法。
+#+begin_src c++
+#include <iostream>
+using namespace std;
+ 
+class Base {
+public:
+    virtual void display() const {
+        cout << "Base::display()" << endl;
+    }
+};
+ 
+class Derived : public Base {
+public:
+    virtual void display() {
+        cout << "Derived::display()" << endl;
+    }
+};
+ 
+int main() {
+    Derived d1;
+    Base* p1 = &d1;
+	Derived* p2=&d1; 
+    p1->display();
+    p2->display();
+    return 0;
+}#+END_SRC
+输出：
+#+begin_example
+Base::display()
+Derived::display()
+#+end_example
+
+如果去掉const,则结果为：
+#+begin_example
+Derived::display()
+Derived::display()
+#+end_example
 ** 参考文章
 [[https://www.go4expert.com/articles/virtual-table-vptr-t16544/][How Virtual Table and _vptr works]]
 [[https://blog.csdn.net/qq_42247231/article/details/105109709][为什么析构函数必须是虚函数？为什么默认的析构函数不是虚函数？]]

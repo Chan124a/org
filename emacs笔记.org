@@ -373,6 +373,11 @@ Another form of let is this:
 ) ;  7
 #+END_EXAMPLE
 This form lets you set values to variable without using many setq in the body. This form is convenient if you just have a few simple local vars with known values.
+*** defcustom
+You can specify variables using defcustom so that you and others can then use Emacs’s customize feature to set their values.
+
+The customize feature depends on the defcustom macro.
+Although you can use defvar or setq for variables that users set, the defcustom macro is designed for the job.
 ** 列表
 ** 引号
 quote 操作符接受一个实参，并完封不动地返回它。
@@ -3233,6 +3238,14 @@ company-etags 不能对所有的 mode 进行补全, 例如在 org-mode 中默认
 在该变量中定义了可以使用 company-etags 的 mode, 将 org-mode 加入该变量的值中即可在 org-mode 使用 company-etags 进行补全.
 
 ctags 支持上百种语言, 学会使用 ctags 能够提交效率.
+* flycheck
+C-c ! v 查看配置
+C-c ! n 跳转到下一个错误
+C-c ! p 跳转到上一个错误
+C-c ! l 列出所有错误
+* hook
+Hooks are an important mechanism for customizing Emacs.
+A hook is a Lisp variable which holds a list of functions, to be called on some well-defined occasion.
 * org-download的使用
 ** window
 *** 截图并直接插入当前文件的方法
@@ -3253,6 +3266,9 @@ org-download配置如下：
   (require 'org-download))
 #+END_SRC
 
+* #'的作用
+function (aka #') is used to quote functions, whereas quote (aka ') is used to quote data.
+[[https://stackoverflow.com/questions/16801396/when-should-emacs-function-syntax-be-used][When should Emacs #'function syntax be used?]]
 * 问题集锦
 ** emacs中文环境下的卡顿问题
 *** 解决方法一
