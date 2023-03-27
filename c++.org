@@ -353,6 +353,20 @@ int main(){
 这部分内容我省略没写。
 * C++ STL vector添加元素（push_back()和emplace_back()）详解
 emplace_back() 和 push_back() 的区别，就在于底层实现的机制不同。push_back() 向容器尾部添加元素时，首先会创建这个元素，然后再将这个元素拷贝或者移动到容器中（如果是拷贝的话，事后会自行销毁先前创建的这个元素）；而 emplace_back() 在实现时，则是直接在容器尾部创建这个元素，省去了拷贝或移动元素的过程。
+* 重载
+重载指的是同一作用域内的几个函数名字相同但形参（形参数量或者形参类型）不同。
+
+返回值的不同不能用于区分重载函数。不允许同时存在除了返回类型外其他所有要素都相同的两个函数。
+
+** 隐式转换
+*** 整型提升
+将char、unsigned char、signed char、shot、unsigned short转换为int 或unsigned int。
+*** 整型转换
+可以在任意的两种整数类型中转换。
+** 重载匹配顺序
+精确匹配、提升、一般转换。
+
+其中，一般的整型转换没有先后顺序。
 * new和delete
 new 和 delete 不是函数，它们都是 C++ 定义的关键字，通过特定的语法可以组成表达式。
 ** operator new 和 operator delete
@@ -1571,6 +1585,8 @@ cout << ret.value_or(defaultVal).out1 << endl;
 使用 std::optional 带来的好处：
 - 省去了运行状态的 bool 值的声明，让代码更简洁，更注重返回值本身的语意
 - 不用担心额外的动态内存分配
+* struct和class的区别
+struct的默认访问级别为public，而class的默认访问级别是private。
 * STL容器底层数据结构总结
 ** vector
 vector是我们用到最多的数据结构，其底层数据结构是数组，由于数组的特点，vector也具有以下特性：
@@ -2036,13 +2052,197 @@ void MyMethod(T myarr){
 }
 #+END_SRC
 这个时候typename的作用就是告诉C++编译器，typename后面的字符串为一个类型名称，而不是成员函数或者成员变量。这个时候如果前面没有typename，编译器没有任何办法知道T::LengthType是一个类型还是一个成员名称(静态数据成员或者静态函数），所以编译不能够通过。
-* 友元函数
+* 友元
 友元可以是一个函数，该函数被称为友元函数；友元也可以是一个类，该类被称为友元类，在这种情况下，整个类及其所有成员都是友元。
 
 类的友元函数是定义在类外部，但有权访问类的所有私有（private）成员和保护（protected）成员。尽管友元函数的原型有在类的定义中出现过，但是友元函数并不是成员函数。
 
-如果要声明函数为一个类的友元，需要在类定义中该函数原型前使用关键字 friend，如下所示：
+** 友元函数
+将全局函数声明为友元的写法如下：
+#+begin_src c++
+friend  返回值类型  函数名(参数表);
+#+END_SRC
 
+将其他类的成员函数声明为友元的写法如下：
+#+begin_src c++
+friend  返回值类型  其他类的类名::成员函数名(参数表);
+#+END_SRC
+
+但是，不能把其他类的私有成员函数声明为友元。
+
+#+begin_src c++
+#include<iostream>
+using namespace std;
+class CCar;  //提前声明CCar类，以便后面的CDriver类使用
+class CDriver
+{
+public:
+    void ModifyCar(CCar* pCar);  //改装汽车
+};
+class CCar
+{
+private:
+    int price;
+    friend int MostExpensiveCar(CCar cars[], int total);  //声明友元
+    friend void CDriver::ModifyCar(CCar* pCar);  //声明友元
+};
+void CDriver::ModifyCar(CCar* pCar)
+{
+    pCar->price += 1000;  //汽车改装后价值增加
+}
+int MostExpensiveCar(CCar cars[], int total)  //求最贵气车的价格
+{
+    int tmpMax = -1;
+    for (int i = 0; i<total; ++i)
+        if (cars[i].price > tmpMax)
+            tmpMax = cars[i].price;
+    return tmpMax;
+}
+int main()
+{
+    return 0;
+}
+#+END_SRC
+这个程序只是为了展示友元的用法，所以 main 函数什么也不做。
+
+第 3 行声明了 CCar 类，CCar 类的定义在后面。之所以要提前声明，是因为 CDriver 类的定义中用到了 CCar 类型（第7行），而此时 CCar 类还没有定义，编译会报错。
+
+不要第 3 行，而把 CCar 类的定义写在 CDriver 类的前面，是解决不了这个问题的，因为 CCar 类中也用到了 CDriver 类型（第14行），
+把 CCar 类的定义写在前面会导致第 14 行的 CDriver 因没有定义而报错。C++ 为此提供的解决办法是：可以简单地将一个类的名字提前声明，写法如下：
+
+class  类名;
+
+尽管可以提前声明，但是在一个类的定义出现之前，仍然不能有任何会导致该类对象被生成的语句。但使用该类的指针或引用是没有问题的。
+
+第 13 行将全局函数 MostExpensiveCar 声明为 CCar 类的友元，因此在第 24 行可以访问 cars[i] 的私有成员 price。
+同理，第 14 行将 CDriver 类的 ModifyCar 成员函数声明为友元，因此在第 18 行可以访问 pCar 指针所指向的对象的私有成员变量 price。
+** 友元类
+一个类 A 可以将另一个类 B 声明为自己的友元，类 B 的所有成员函数就都可以访问类 A 对象的私有成员。在类定义中声明友元类的写法如下：
+#+begin_src c++
+friend  class  类名;
+#+END_SRC
+来看如下例程：
+#+begin_src c++
+class CCar
+{
+private:
+    int price;
+    friend class CDriver;  //声明 CDriver 为友元类
+};
+class CDriver
+{
+public:
+    CCar myCar;
+    void ModifyCar()  //改装汽车
+    {
+        myCar.price += 1000;  //因CDriver是CCar的友元类，故此处可以访问其私有成员
+    }
+};
+int main()
+{
+    return 0;
+}
+
+#+END_SRC
+第 5 行将 CDriver 声明为 CCar 的友元类。这条语句本来就是在声明 CDriver 是一个类，所以 CCar 类定义前面就不用声明 CDriver 类了。
+第 5 行使得 CDriver 类的所有成员函数都能访问 CCar 对象的私有成员。如果没有第 5 行，第 13 行对 myCar 私有成员 price 的访问就会导致编译错误。
+
+一般来说，类 A 将类 B 声明为友元类，则类 B 最好从逻辑上和类 A 有比较接近的关系。
+例如上面的例子，CDriver 代表司机，CCar 代表车，司机拥有车，所以 CDriver 类和 CCar 类从逻辑上来讲关系比较密切，把 CDriver 类声明为 CCar 类的友元比较合理。
+
+友元关系在类之间不能传递，即类 A 是类 B 的友元，类 B 是类 C 的友元，并不能导出类 A 是类 C 的友元。
+“咱俩是朋友，所以你的朋友就是我的朋友”这句话在 C++ 的友元关系上 不成立。
+** 继承关系
+*** 基类中的友元函数行为
+C++中, 友元是不会继承的。如果基类有一个友元函数，则此函数不会成为子类的友元函数。
+
+例如下面程序会编译失败，因为函数show()是基类A的友元函数，但无法访问子类B的私有数据。
+#+begin_src c++
+#include <iostream>
+using namespace std;
+class A {
+protected:
+    int x;
+public:
+    A() { x = 222; }
+    friend void show();
+};
+ 
+class B : public A {
+public:
+    B() : y(111) {}
+private:
+    int y;
+};
+ 
+void show() {
+    B b;
+    cout << "The default value of A::x = " << b.x;
+ 
+    // 编译失败。无法访问类'B'中的私有数据
+    cout << "The default value of B::y = " << b.y;
+}
+ 
+int main() {
+    show();
+    return 0;
+}
+
+#+END_SRC
+
+编译失败。第2行cout中，无法打印b.y。
+编译提示(visual studio 2015)：
+error C2248: “B::y”: 无法访问 private 成员(在“B”类中声明)
+
+如果注释掉第2行cout，则编译通过，运行结果为：
+The default value of A::x = 222
+*** 子类中的友元函数的行为
+反之，如果在子类中定义了一个友元函数，则它可以访问基类中的public以及protected数据。
+因为子类B是公有继承A的，A中的public以及protected数据可以被B的对象访问。
+
+如下面例子所示：
+#+begin_src c++
+#include <iostream>
+using namespace std;
+ 
+class A {
+protected:
+    int x;
+public:
+    A() { x = 22; z = 33; }
+    int z;
+};
+ 
+class B : public A {
+public:
+    B() : y(11) {}
+    friend void show();
+private:
+    int y;
+};
+ 
+void show() {
+    B b;
+    cout << "The default value of A::x = " << b.x << std::endl;
+    cout << "The default value of A::z = " << b.z << std::endl;
+    cout << "The default value of B::y = " << b.y << std::endl;
+}
+ 
+int main() {
+    show();
+    return 0;
+}
+#+END_SRC
+输出：
+#+begin_src c++
+The default value of A::x = 22
+The default value of A::z = 33
+The default value of B::y = 11
+#+END_SRC
+
+** 参考文章
+[[http://c.biancheng.net/view/169.html][C++友元函数和友元类（C++ friend）解详]]
+[[https://www.runoob.com/cplusplus/cpp-friend-functions.html][C++ 友元函数]]
 * 定义抽象数据类型
 #+BEGIN_SRC c++
 struct ListNode {
@@ -2716,6 +2916,30 @@ Derived::display()
 Derived::display()
 Derived::display()
 #+end_example
+** 继承
+#+begin_src c++
+  class A
+  ｛
+  public :
+  virtual void test();
+  ｝;
+  class B:public A{
+    public:
+    void test();
+  }
+  class C:public B{
+    public:
+    void test();
+  }
+#+END_SRC
+则B的test函数以及C的test函数都是虚函数；即使C的test函数访问权限发生变化，也是虚函数。
+#+begin_src c++
+  class C:public B{
+    private:
+    void test();
+  }
+#+END_SRC
+
 ** 参考文章
 [[https://www.go4expert.com/articles/virtual-table-vptr-t16544/][How Virtual Table and _vptr works]]
 [[https://blog.csdn.net/qq_42247231/article/details/105109709][为什么析构函数必须是虚函数？为什么默认的析构函数不是虚函数？]]
@@ -3131,6 +3355,167 @@ int main()
 #+end_src
 ** 参考文章
 [[https://blog.csdn.net/zwvista/article/details/78111346][C++17尝鲜：结构化绑定声明（Structured Binding Declaration）]]
+* 继承
+** 多重继承
+非虚拟继承，B和C的对象分别保留一份A对象的内存空间，n处于不同的内存空间，因此是独立的不会相互影响，n的赋值不会覆盖；
+如果B和C虚拟继承A类的话，A的对象只有一份，B和C对象中只是保存指向A对象的指针，n的赋值会覆盖。
+#+begin_src c++
+#include <iostream>
+using namespace std;
+
+class A
+{
+	public:
+	int n;
+};
+class B:public A{};
+class C:public A{};
+class D:public B,public C{};
+
+int main()
+{
+	D d;
+	d.B::n=10;
+	d.C::n=20;
+	cout<<d.B::n<<","<<d.C::n;
+	return 0;
+}
+#+END_SRC
+** 虚继承
+*** 菱形继承的问题
+
+#+DOWNLOADED: screenshot @ 2023-03-14 22:32:32
+[[file:images/继承/2023-03-14_22-32-32_screenshot.png]]
+类 A 派生出类 B 和类 C，类 D 继承自类 B 和类 C，这个时候类 A 中的成员变量和成员函数继承到类 D 中变成了两份，一份来自 A-->B-->D 这条路径，另一份来自 A-->C-->D 这条路径。
+
+在一个派生类中保留间接基类的多份同名成员，虽然可以在不同的成员变量中分别存放不同的数据，但大多数情况下这是多余的：因为保留多份成员变量不仅占用较多的存储空间，还容易产生命名冲突。
+假如类 A 有一个成员变量 a，那么在类 D 中直接访问 a 就会产生歧义，编译器不知道它究竟来自 A -->B-->D 这条路径，还是来自 A-->C-->D 这条路径。
+下面是菱形继承的具体实现：
+#+begin_src c++
+//间接基类A
+class A{
+protected:
+    int m_a;
+};
+
+//直接基类B
+class B: public A{
+protected:
+    int m_b;
+};
+
+//直接基类C
+class C: public A{
+protected:
+    int m_c;
+};
+
+//派生类D
+class D: public B, public C{
+public:
+    void seta(int a){ m_a = a; }  //命名冲突
+    void setb(int b){ m_b = b; }  //正确
+    void setc(int c){ m_c = c; }  //正确
+    void setd(int d){ m_d = d; }  //正确
+private:
+    int m_d;
+};
+
+int main(){
+    D d;
+    return 0;
+}
+#+END_SRC
+这段代码实现了上图所示的菱形继承，第 25 行代码试图直接访问成员变量 m_a，结果发生了错误，因为类 B 和类 C 中都有成员变量 m_a（从 A 类继承而来），编译器不知道选用哪一个，所以产生了歧义。
+
+为了消除歧义，我们可以在 m_a 的前面指明它具体来自哪个类：
+#+begin_src c++
+void seta(int a){ B::m_a = a; }
+#+END_SRC
+这样表示使用 B 类的 m_a。当然也可以使用 C 类的：
+#+begin_src c++
+void seta(int a){ C::m_a = a; }
+#+END_SRC
+*** 虚继承（Virtual Inheritance）
+为了解决多继承时的命名冲突和冗余数据问题，C++ 提出了虚继承，使得在派生类中只保留一份间接基类的成员。
+
+在继承方式前面加上 virtual 关键字就是虚继承，请看下面的例子：
+#+begin_src c++
+//间接基类A
+class A{
+protected:
+    int m_a;
+};
+//直接基类B
+class B: virtual public A{  //虚继承
+protected:
+    int m_b;
+};
+//直接基类C
+class C: virtual public A{  //虚继承
+protected:
+    int m_c;
+};
+//派生类D
+class D: public B, public C{
+public:
+    void seta(int a){ m_a = a; }  //正确
+    void setb(int b){ m_b = b; }  //正确
+    void setc(int c){ m_c = c; }  //正确
+    void setd(int d){ m_d = d; }  //正确
+private:
+    int m_d;
+};
+int main(){
+    D d;
+    return 0;
+}
+#+END_SRC
+这段代码使用虚继承重新实现了上图所示的菱形继承，这样在派生类 D 中就只保留了一份成员变量 m_a，直接访问就不会再有歧义了。
+
+虚继承的目的是让某个类做出声明，承诺愿意共享它的基类。
+其中，这个被共享的基类就称为虚基类（Virtual Base Class），本例中的 A 就是一个虚基类。
+在这种机制下，不论虚基类在继承体系中出现了多少次，在派生类中都只包含一份虚基类的成员。
+
+现在让我们重新梳理一下本例的继承关系，如下图所示：
+
+#+DOWNLOADED: screenshot @ 2023-03-14 22:43:51
+[[file:images/继承/2023-03-14_22-43-51_screenshot.png]]
+
+观察这个新的继承体系，我们会发现虚继承的一个不太直观的特征：必须在虚派生的真实需求出现前就已经完成虚派生的操作。
+在上图中，当定义 D 类时才出现了对虚派生的需求，但是如果 B 类和 C 类不是从 A 类虚派生得到的，那么 D 类还是会保留 A 类的两份成员。
+
+换个角度讲，虚派生只影响从指定了虚基类的派生类中进一步派生出来的类，它不会影响派生类本身。
+
+在实际开发中，位于中间层次的基类将其继承声明为虚继承一般不会带来什么问题。
+通常情况下，使用虚继承的类层次是由一个人或者一个项目组一次性设计完成的。
+对于一个独立开发的类来说，很少需要基类中的某一个类是虚基类，况且新类的开发者也无法改变已经存在的类体系。
+
+C++标准库中的 iostream 类就是一个虚继承的实际应用案例。
+iostream 从 istream 和 ostream 直接继承而来，而 istream 和 ostream 又都继承自一个共同的名为 base_ios 的类，是典型的菱形继承。
+此时 istream 和 ostream 必须采用虚继承，否则将导致 iostream 类中保留两份 base_ios 类的成员。
+
+#+DOWNLOADED: screenshot @ 2023-03-14 22:51:26
+[[file:images/继承/2023-03-14_22-51-26_screenshot.png]]
+*** 虚基类成员的可见性
+因为在虚继承的最终派生类中只保留了一份虚基类的成员，所以该成员可以被直接访问，不会产生二义性。
+此外，如果虚基类的成员只被一条派生路径覆盖，那么仍然可以直接访问这个被覆盖的成员。
+但是如果该成员被两条或多条路径覆盖了，那就不能直接访问了，此时必须指明该成员属于哪个类。
+
+以图2中的菱形继承为例，假设 A 定义了一个名为 x 的成员变量，当我们在 D 中直接访问 x 时，会有三种可能性：
+- 如果 B 和 C 中都没有 x 的定义，那么 x 将被解析为 A 的成员，此时不存在二义性。
+- 如果 B 或 C 其中的一个类定义了 x，也不会有二义性，派生类的 x 比虚基类的 x 优先级更高。
+- 如果 B 和 C 中都定义了 x，那么直接访问 x 将产生二义性问题。
+
+可以看到，使用多继承经常会出现二义性问题，必须十分小心。上面的例子是简单的，如果继承的层次再多一些，关系更复杂一些，程序员就很容易陷人迷魂阵，程序的编写、调试和维护工作都会变得更加困难，
+因我不提倡在程序中使用多继承，只有在比较简单和不易出现二义性的情况或实在必要时才使用多继承，能用单一继承解决的问题就不要使用多继承
+。也正是由于这个原因，C++ 之后的很多面向对象的编程语言，例如 Java、C#、PHP 等，都不支持多继承。
+** 访问控制
+public继承不改变父类中的成员的访问权限；
+protected继承时，public和protected访问级别的成员变为protected，private还是private；
+private继承时，父类所有成员变为private。
+** 参考文章
+[[http://c.biancheng.net/view/2280.html][C++虚继承和虚基类详解]]
 * gtest
 ** assertion
 在gtest中，是通过断言（assertion）来判断代码实现的功能是否符合预期。断言的结果分为success、non-fatal failture和fatal failture。
