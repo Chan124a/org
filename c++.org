@@ -396,6 +396,121 @@ Record lookup(const Telno&);
 精确匹配、提升、一般转换。
 
 其中，一般的整型转换没有先后顺序。
+* boolalpha
+Sets the boolalpha format flag for the str stream.
+
+When the boolalpha format flag is set, bool values are inserted/extracted by their textual representation: either true or false, instead of integral values.
+
+example:
+#+BEGIN_SRC c++
+// modify boolalpha flag
+#include <iostream>     // std::cout, std::boolalpha, std::noboolalpha
+
+int main () {
+  bool b = true;
+  std::cout << std::boolalpha << b << '\n';
+  std::cout << std::noboolalpha << b << '\n';
+  return 0;
+}
+#+END_SRC
+#+BEGIN_EXAMPLE
+Output:
+true
+1
+#+END_EXAMPLE
+* hex
+Sets the basefield format flag for the str stream to hex.
+
+When basefield is set to hex, integer values inserted into the stream are expressed in hexadecimal base (i.e., radix 16). For input streams, extracted values are also expected to be expressed in hexadecimal base when this flag is set.
+
+The basefield format flag can take any of the following values (each with its own manipulator):
+
+| flag value | effect when set                                          |
+|------------+----------------------------------------------------------|
+| dec        | read/write integer values using decimal base format.     |
+| hex        | read/write integer values using hexadecimal base format. |
+| oct        | read/write integer values using octal base format.       |
+
+example:
+#+BEGIN_SRC c++
+// modify basefield
+#include <iostream>     // std::cout, std::dec, std::hex, std::oct
+
+int main () {
+  int n = 70;
+  std::cout << std::dec << n << '\n';
+  std::cout << std::hex << n << '\n';
+  std::cout << std::oct << n << '\n';
+  return 0;
+}
+#+END_SRC
+#+BEGIN_EXAMPLE
+Output:
+70
+46
+106
+
+#+END_EXAMPLE
+* intptr_t、uintptr_t数据类型的解析
+#+begin_src c++
+typedef  intptr_t      ngx_int_t;
+typedef  uintptr_t    ngx_uint_t;
+#+END_SRC
+intptr_t和uintptr_t是什么类型？以前没见过，于是查了一下。
+这两个数据类型是ISO C99定义的，具体代码在linux平台的/usr/include/stdint.h头文件中。
+
+该头文件中定义intptr_t和uintptr_t这两个数据类型的代码片段如下：
+#+begin_src c++
+/* Types for `void *' pointers.  */
+#if __WORDSIZE == 64
+# ifndef __intptr_t_defined
+typedef long int		intptr_t;
+#  define __intptr_t_defined
+# endif
+typedef unsigned long int	uintptr_t;
+#else
+# ifndef __intptr_t_defined
+typedef int			intptr_t;
+#  define __intptr_t_defined
+# endif
+typedef unsigned int		uintptr_t;
+#endif
+#+END_SRC
+在64位的机器上，intptr_t和uintptr_t分别是long int、unsigned long int的别名；在32位的机器上，intptr_t和uintptr_t分别是int、unsigned int的别名。
+
+那么为什么要用typedef定义新的别名呢？我想主要是为了提高程序的可移植性（在32位和64位的机器上）。很明显，上述代码会根据宿主机器的位数为intptr_t和uintptr_t适配相应的数据类型。
+另外，如注释所言，定义这两个数据类型别名也是为了“void *”指针。
+
+在C语言中，任何类型的指针都可以转换为void *类型，并且在将它转换回原来的类型时不会丢失信息。
+** 参考文章
+[[https://blog.csdn.net/cs_zhanyb/article/details/16973379][intptr_t、uintptr_t数据类型的解析]]
+* lambda表达式
+The predicates we pass to an algorithm must have exactly one or two parameters,depending on whether the algorithm takes a unary or binary predicate, respectively.However, sometimes we want to do processing that requires more arguments than the algorithm’s predicate allows.
+
+A lambda expression represents a callable unit of code. It can be thought of as an unnamed, inline function. Like any function, a lambda has a return type, a parameter list, and a function body. Unlike a function, lambdas may be defined inside a function.A lamba expression has the form 
+~[capture list] (parameter list) -> return type { function body }~
+
+where capture list is an (often empty) list of local variables defined in the enclosing function; return type, parameter list, and function body are the same as in any ordinary function. However, unlike ordinary functions, a lambda must use a trailing return to specify its return type.
+
+We can omit either or both of the parameter list and return type but must always include the capture list and function body:
+#+BEGIN_SRC c++
+auto f = [] { return 42; };
+cout << f() << endl; // prints 42
+#+END_SRC
+Here, we’ve defined f as a callable object that takes no arguments and returns 42.
+* likely和unlikely
+* new创建类对象与不new区别
+#+BEGIN_SRC c++
+A a;
+
+A * a = new a();
+#+END_SRC
+以上两种方式皆可实现类的实例化,区别在于：
+1. 前者在堆栈中分配内存，后者为动态内存分配，在一般应用中是没有什么区别的，但动态内存分配会使对象的可控性增强。
+2. 前者在栈中分配内存，后者在堆中分配内存
+3. 大程序用new，小程序直接申请
+4. new必须delete删除;不用new的方式，系统会自动回收内存
+
 * new和delete
 new 和 delete 不是函数，它们都是 C++ 定义的关键字，通过特定的语法可以组成表达式。
 ** operator new 和 operator delete
@@ -526,33 +641,6 @@ delete pAa;
 你应该传入参数设为那个地址！
 ** 参考文章
 [[https://www.cnblogs.com/hazir/p/new_and_delete.htlm][浅谈 C++ 中的 new/delete 和 new[]/delete[]​]]
-* lambda表达式
-The predicates we pass to an algorithm must have exactly one or two parameters,depending on whether the algorithm takes a unary or binary predicate, respectively.However, sometimes we want to do processing that requires more arguments than the algorithm’s predicate allows.
-
-A lambda expression represents a callable unit of code. It can be thought of as an unnamed, inline function. Like any function, a lambda has a return type, a parameter list, and a function body. Unlike a function, lambdas may be defined inside a function.A lamba expression has the form 
-~[capture list] (parameter list) -> return type { function body }~
-
-where capture list is an (often empty) list of local variables defined in the enclosing function; return type, parameter list, and function body are the same as in any ordinary function. However, unlike ordinary functions, a lambda must use a trailing return to specify its return type.
-
-We can omit either or both of the parameter list and return type but must always include the capture list and function body:
-#+BEGIN_SRC c++
-auto f = [] { return 42; };
-cout << f() << endl; // prints 42
-#+END_SRC
-Here, we’ve defined f as a callable object that takes no arguments and returns 42.
-* likely和unlikely
-* new创建类对象与不new区别
-#+BEGIN_SRC c++
-A a;
-
-A * a = new a();
-#+END_SRC
-以上两种方式皆可实现类的实例化,区别在于：
-1. 前者在堆栈中分配内存，后者为动态内存分配，在一般应用中是没有什么区别的，但动态内存分配会使对象的可控性增强。
-2. 前者在栈中分配内存，后者在堆中分配内存
-3. 大程序用new，小程序直接申请
-4. new必须delete删除;不用new的方式，系统会自动回收内存
-
 * map
 ** map的排序
 *** 按key排序
@@ -564,454 +652,7 @@ A * a = new a();
 *** 按value排序
 由于sort只能对序列容器（如vector、list、deque）进行排序，而map虽然也是一个集合容器，但却不是线性存储的（比如红黑树）。
 因此并不能直接用sort对map进行按value排序。
-* set自定义去重和排序函数
-** 方法一：使用std::set内置的less比较函数（直接定义内置类型的set对象）
 
-这种方法适用于：1）比较int、char等内置类型。2）只能针对某一个内置类型去重和排序：如果想通过id（int）去重，并通过hot(int)排序，该种方法就束手无策了。代码如下：
-#+BEGIN_SRC c++
-#include <iostream>
-#include <set>
-using namespace std;
-void main()
-{
-    std::set<int> mySet;    // 直接定义内置类型set集合
-    mySet.insert(10);       // 默认比较函数为less
-    mySet.insert(20);       // 从小到大排序
-    for(auto it:mySet)
-    {
-        std::cout<<it<<std::endl;
-    }
-    std::cout<<"end"<<std::endl;
-
-}
-#+END_SRC
-#+BEGIN_EXAMPLE
-结果如下：
-output：
-            10
-            20
-            end
-#+END_EXAMPLE
-
-** 方法二：自定义类（结构体）比较函数
-
-前文提到：直接定义内置类型的set对象，即使用std::set内置的默认的less比较函数，可能不能满足我们的实际需求。例如：现在有一批结构体对象，需要将其插入set集合，并按照id去重，按照热度hot进行排序。这个时候，就需要重新自定义比较函数了。有两种方法可以自定义比较函数：
-*** 重载<操作符
-甚么要重载<运算符呢？能不能重载"<="或者">="运算符？答案是不可以。几乎所有的方法或容器都需要排序来满足数学意义上的标准严格弱序化，否则这些方法或容器的行为将不可预知。假设f(x,y)是一个比较函数。 如果该函数满足如下条件则它是严格弱序化的。
-1. f(x,x) = false; 
-2. if f(x,y) then !f(y,x)
-3. if f(x,y) and f(y,z) then f(x,z)
-4. if !f(x,y)&&!f(y,x) then x==y; if x==y and y==z then x==z;
-
-看上去有点晕乎，不过不用担心，只要你的比较方法能够满足对相等元素永远返回false（记住一个准则：永远让比较函数对相同元素返回false），那你的方法就满足要求了。
-
-其实，set容器在判定已有元素a和新插入元素b是否相等时，是这么做的：
-1. 将a作为左操作数，b作为有操作数，调用比较函数，并返回比较值  
-2. 将b作为左操作数，a作为有操作数，再调用一次比较函数，并返回比较值。如果1、2两步的返回值都是false，则认为a、b是相等的，则b不会被插入set容器中；
-
-如果1、2两步的返回值都是true，则可能发生未知行为，因此，记住一个准则：永远让比较函数对相同元素返回false。
-#+BEGIN_SRC c++
-#include <iostream>
-#include <set>
-using namespace std;
-struct song
-{
-    int m_id;
-    int m_hot;
-    song(int id,int hot)
-    {
-
-        this->m_id = id;
-        this->m_hot = hot;
-    }
-    bool operator<(const struct song & right)const   //重载<运算符
-    {
-        if(this->m_id == right.m_id)     //根据id去重
-            return false;
-        else
-        {
-            if(this->m_hot != right.m_hot)
-            {
-                return this->m_hot > right.m_hot;      //降序
-            }
-            else
-            {
-                return this->m_id > right.m_id;     
-            }
-        }
-    }
-};
-void main()
-{
-    std::set<song> mySet;
-    song s1(10,100);
-    song s2(20,200);
-    song s3(20,300);
-    song s4(30,200);
-    mySet.insert(s1);    //插入s1
-    mySet.insert(s2);    //插入s2
-    mySet.insert(s3);    //s3和s2的id相同，不插入
-    mySet.insert(s4);    //插入s4
-    for(auto it:mySet)
-    {
-        std::cout<<"id:"<<it.m_id<<",hot:"<<it.m_hot<<std::endl;
-    }
-    std::cout<<"end"<<std::endl;
-;}
-#+END_SRC
-#+BEGIN_EXAMPLE
-结果如下：
-id：30，hot ： 200
-id：20，hot ： 200
-id：10，hot ： 100
-end
-#+END_EXAMPLE
-*** 重载（）运算符
-具体代码如下：
-#+BEGIN_SRC c++
-#include <iostream>
-#include <set>
-using namespace std;
-struct song
-{
-    int m_id;
-    int m_hot;
-    song(int id,int hot)
-    {
-
-        this->m_id = id;
-        this->m_hot = hot;
-    }
-    /*
-    bool operator<(const struct song & right)const   //重载<运算符
-    {
-        if(this->m_id == right.m_id)     //根据id去重
-            return false;
-        else
-        {
-            if(this->m_hot != right.m_hot)
-            {
-                return this->m_hot > right.m_hot;      //降序
-            }
-            else
-            {
-                return this->m_id > right.m_id;
-            }
-        }
-    }
-    */
-};
-struct comp
-{
-    bool operator()(struct song left,struct song  right)  //重载（）运算符
-    {
-
-        if(left.m_id == right.m_id)     //根据id去重
-            return false;
-        else
-        {
-            if(left.m_hot != right.m_hot)
-            {
-                return left.m_hot > right.m_hot;      //降序
-            }
-            else
-            {
-                return left.m_id > right.m_id;
-            }
-
-        }
-    }
-
-};
-void main()
-{
-    std::set<song,comp> mySet;      //写法和2.1中的的区别
-    song s1(10,100);
-    song s2(20,200);
-    song s3(20,300);
-    song s4(30,200);
-    mySet.insert(s1);    //插入s1
-    mySet.insert(s2);    //插入s2
-    mySet.insert(s3);    //s3和s2的id相同，不插入
-    mySet.insert(s4);    //插入s4
-    for(auto it:mySet)
-    {
-        std::cout<<"id:"<<it.m_id<<",hot:"<<it.m_hot<<std::endl;
-    }
-    std::cout<<"end"<<std::endl;
-};
-#+END_SRC
-#+BEGIN_EXAMPLE
-结果如下：
-id：30，hot ： 200
-id：20，hot ： 200
-id：10，hot ： 100
-end
-#+END_EXAMPLE
-* SFML
-SFML 是多媒体库，它为PC的各个组件提供简单的界面，用来简化游戏和多媒体应用程序的开发。 主要由五个模块组成，分别是：系统，窗口，图形，音频和网络。
-
-SFML 是跨平台的，通过 SFML，你的应用程序可以在最常见的操作系统上进行编译和运行：Windows，Linux，macOS以及Android和iOS。
-
-SFML 支持多种语言，具体可以在官网查看支持的语言。
-* std
-** 介绍
-std::是个名称空间标识符，C++标准库中的函数或者对象都是在命名空间std中定义的，所以我们要使用标准库中的函数或者对象都要用std来限定。
-
-至于为什么将cout放到名字空间std中，是因为象cout这样的对象在实际操作中或许会有好多个，比如说你自己也可能会不小心定义一个对象叫cout，那么这两个cout对象就会产生冲突。
-
-
-一般来说，std都是要调用C++标准库时使用。比如：使用标准库文件iostream时，要写上std;使用非标准库文件iostream.h，不用写。如图引入非标准库iostream.h时，省去了std::
-#+BEGIN_SRC c++
-#include <iostream.h>
-#+END_SRC
-
-当然使用标准库时，也是可以省略的，不过需要进行处理
-
-1. 分别将cout和endl释放出来
-#+BEGIN_SRC c++
-#include <iostream>
-using std::cout;
-using std::endl;
-#+END_SRC
-
-2. 将命名空间释放出来
-
-注：using namespace std 告诉编辑器我们将要使用名字空间std中的函数或者对象，所以cout和endl前面不用注明他们是std这个名字空间中的cout和endl
-#+BEGIN_SRC c++
-#include <iostream>
-using namespace std;
-#+END_SRC
-
-** transform
-transform函数的作用是：将某操作应用于指定范围的每个元素。transform函数有两个重载版本：
-
-transform(first,last,result,op);//first是容器的首迭代器，last为容器的末迭代器，result为存放结果的容器，op为要进行操作的一元函数对象或sturct、class。
-
-transform(first1,last1,first2,result,binary_op);//first1是第一个容器的首迭代 器，last1为第一个容器的末迭代器，first2为第二个容器的首迭代器，result为存放结果的容器，binary_op为要进行操作的二元函数 对象或sturct、class。
-
-注意：第二个重载版本必须要保证两个容器的元素个数相等才行，否则会抛出异常
-*** 例子
-看一个例子：利用transform函数将一个给定的字符串中的小写字母改写成大写字母，并将结果保存在一个叫second的数组里，原字符串内容不变。
-我们只需要使用transform的第一个重载函数，当然我们也可以使用for_each函数来完成再copy几次就行了，现在来看一下代码：
-#+BEGIN_SRC c++
-#include <iostream>
-#include <algorithm>
-using namespace std;
-char op(char ch)
-{
-
-   if(ch>='A'&&ch<='Z')
-        return ch+32;
-    else
-        return ch;
-}
-int main()
-{
-    string first,second;
-    cin>>first;
-    second.resize(first.size());
-    transform(first.begin(),first.end(),second.begin(),op);
-    cout<<second<<endl;
-    return 0;
-}
-#+END_SRC
-
-再看一个例子：给你两个vector向量（元素个数相等），请你利用transform函数将两个vector的每个元素相乘，并输出相乘的结果。
-代码：
-foreach的用法
-#+BEGIN_SRC c++
-#include <iostream>
-#include <algorithm>
-#include <vector>
-using namespace std;
-void print(int &elem){cout<<elem<<" ";}
-int op(int a,int b){return a*b;}
-int main()
-{
-    vector <int> A,B,SUM;
-    int n;
-    cin>>n;
-    for(int i=0;i<n;i++)
-    {
-        int t;
-        cin>>t;
-        A.push_back(t);
-    }
-    for(int i=0;i<n;i++)
-    {
-        int t;
-        cin>>t;
-        B.push_back(t);
-    }
-    SUM.resize(n);
-    transform(A.begin(),A.end(),B.begin(),SUM.begin(),op);
-    for_each(SUM.begin(),SUM.end(),print);
-    return 0;
-}
-#+END_SRC
-** to_string
-** all_of
-all_of() 算法会返回 true，前提是序列中的所有元素都可以使谓词返回 true。
-
-*** 实例
-下面是一段代码，用来展示用 all_of() 检查 ages 容器中的元素： 
-#+BEGIN_SRC c++
-int good_age{100};
-std::cout << (std::all_of(std::begin(ages), std::end(ages),[good_age] (int age) { return age < good_age; }) ? "None": "Some") << " of the people are centenarians." << std::endl;
-#+END_SRC
-这个 lambda 表达式会将 ages 中的元素和 good_age 的值作比较，good_age 的值为 100。所有的元素都小于 100，所以 all_of() 会返回 true，而且输出消息会正确报告没有记录的百岁老人。
-** accumulate
-accumulate定义在#include<numeric>中，作用有两个，一个是累加求和，另一个是自定义类型数据的处理
-
-1. 累加求和
-~int sum = accumulate(vec.begin() , vec.end() , 42);~
-
-accumulate带有三个形参：头两个形参指定要累加的元素范围，第三个形参则是累加的初值。
-
-accumulate函数将它的一个内部变量设置为指定的初始值，然后在此初值上累加输入范围内所有元素的值。accumulate算法返回累加的结果，其返回类型就是其第三个实参的类型。
-
-可以使用accumulate把string型的vector容器中的元素连接起来：
-
-~string sum = accumulate(v.begin() , v.end() , string(" "));~
-
-这个函数调用的效果是：从空字符串开始，把vec里的每个元素连接成一个字符串。
-
-2. 自定义数据类型的处理
-
-C++ STL中有一个通用的数值类型计算函数— accumulate(),可以用来直接计算数组或者容器中C++内置数据类型，例如：
-#+BEGIN_SRC c++
-#include <numeric>  
-int arr[]={10,20,30,40,50};  
-vector<int> va(&arr[0],&arr[5]);  
-int sum=accumulate(va.begin(),va.end(),0);  //sum = 150  
-#+END_SRC
-但是对于自定义数据类型，我们就需要自己动手写一个回调函数来实现自定义数据的处理，然后让它作为accumulate()的第四个参数，accumulate()的原型为
-#+BEGIN_SRC c++
-template<class _InIt, class _Ty,  class _Fn2> 
-inline _Ty _Accumulate(_InIt _First, _InIt _Last, _Ty _Val, _Fn2 _Func)  
-{   // return sum of _Val and all in [_First, _Last), using _Func  
-    for (; _First != _Last; ++_First)  
-        _Val = _Func(_Val, *_First);  
-    return (_Val);  
-}
-#+END_SRC
-下面是例子：
-#+BEGIN_SRC c++
-
-#include <vector>  
-#include <string>  
-using namespace std;  
-  
-struct Grade  
-{  
-    string name;  
-    int grade;  
-};  
-  
-int main()  
-{  
-    Grade subject[3] = {  
-        { "English", 80 },  
-        { "Biology", 70 },  
-        { "History", 90 }  
-    };  
-  
-    int sum = accumulate(subject, subject + 3, 0, [](int a, Grade b){return a + b.grade; });  
-    cout << sum << endl;  
-  
-    system("pause");  
-    return 0;  
-} 
-#+END_SRC
-* hex
-Sets the basefield format flag for the str stream to hex.
-
-When basefield is set to hex, integer values inserted into the stream are expressed in hexadecimal base (i.e., radix 16). For input streams, extracted values are also expected to be expressed in hexadecimal base when this flag is set.
-
-The basefield format flag can take any of the following values (each with its own manipulator):
-
-| flag value | effect when set                                          |
-|------------+----------------------------------------------------------|
-| dec        | read/write integer values using decimal base format.     |
-| hex        | read/write integer values using hexadecimal base format. |
-| oct        | read/write integer values using octal base format.       |
-
-example:
-#+BEGIN_SRC c++
-// modify basefield
-#include <iostream>     // std::cout, std::dec, std::hex, std::oct
-
-int main () {
-  int n = 70;
-  std::cout << std::dec << n << '\n';
-  std::cout << std::hex << n << '\n';
-  std::cout << std::oct << n << '\n';
-  return 0;
-}
-#+END_SRC
-#+BEGIN_EXAMPLE
-Output:
-70
-46
-106
-
-#+END_EXAMPLE
-* intptr_t、uintptr_t数据类型的解析
-#+begin_src c++
-typedef  intptr_t      ngx_int_t;
-typedef  uintptr_t    ngx_uint_t;
-#+END_SRC
-intptr_t和uintptr_t是什么类型？以前没见过，于是查了一下。
-这两个数据类型是ISO C99定义的，具体代码在linux平台的/usr/include/stdint.h头文件中。
-
-该头文件中定义intptr_t和uintptr_t这两个数据类型的代码片段如下：
-#+begin_src c++
-/* Types for `void *' pointers.  */
-#if __WORDSIZE == 64
-# ifndef __intptr_t_defined
-typedef long int		intptr_t;
-#  define __intptr_t_defined
-# endif
-typedef unsigned long int	uintptr_t;
-#else
-# ifndef __intptr_t_defined
-typedef int			intptr_t;
-#  define __intptr_t_defined
-# endif
-typedef unsigned int		uintptr_t;
-#endif
-#+END_SRC
-在64位的机器上，intptr_t和uintptr_t分别是long int、unsigned long int的别名；在32位的机器上，intptr_t和uintptr_t分别是int、unsigned int的别名。
-
-那么为什么要用typedef定义新的别名呢？我想主要是为了提高程序的可移植性（在32位和64位的机器上）。很明显，上述代码会根据宿主机器的位数为intptr_t和uintptr_t适配相应的数据类型。
-另外，如注释所言，定义这两个数据类型别名也是为了“void *”指针。
-
-在C语言中，任何类型的指针都可以转换为void *类型，并且在将它转换回原来的类型时不会丢失信息。
-** 参考文章
-[[https://blog.csdn.net/cs_zhanyb/article/details/16973379][intptr_t、uintptr_t数据类型的解析]]
-* boolalpha
-Sets the boolalpha format flag for the str stream.
-
-When the boolalpha format flag is set, bool values are inserted/extracted by their textual representation: either true or false, instead of integral values.
-
-example:
-#+BEGIN_SRC c++
-// modify boolalpha flag
-#include <iostream>     // std::cout, std::boolalpha, std::noboolalpha
-
-int main () {
-  bool b = true;
-  std::cout << std::boolalpha << b << '\n';
-  std::cout << std::noboolalpha << b << '\n';
-  return 0;
-}
-#+END_SRC
-#+BEGIN_EXAMPLE
-Output:
-true
-1
-#+END_EXAMPLE
 * optional
 
 ** 例子 
@@ -1259,205 +900,6 @@ sort(points.begin(),points.end(),[](vector<int>a, vector<int>b){return a[1]<b[1]
 ** 参考文章
 [[https://www.cnblogs.com/zhhfan/p/14789325.html][C++中使用sort对常见容器排序]]
 [[https://blog.csdn.net/liguojie12/article/details/113800426][C++ 二维vector排序(sort用法)]]
-* typedef
-** 定义类型
-* typeid
-typeid可以返回数据类型。
-
-语法
-#+begin_src cpp
-#include <typeinfo>
-
-typeid ( type );
-typeid ( expression );
-#+end_src
-
-** 例子
-#+begin_src cpp
-  // C++ program to show the use of typeid operator
-
-#include <iostream>
-#include <typeinfo>
-using namespace std;
-
-int main()
-{
-    int i, j;
-    char c;
-
-    // Get the type info using typeid operator
-    const type_info& ti1 = typeid(i);
-    const type_info& ti2 = typeid(j);
-    const type_info& ti3 = typeid(c);
-
-    // Check if both types are same
-    if (ti1 == ti2)
-        cout << "i and j are of"
-             << " similar type" << endl;
-    else
-        cout << "i and j are of"
-             << " different type" << endl;
-
-    // Check if both types are same
-    if (ti2 == ti3)
-        cout << "j and c are of"
-             << " similar type" << endl;
-    else
-        cout << "j and c are of"
-             << " different type" << endl;
-
-    return 0;
-}
-#+end_src
-Output
-#+begin_example
-i and j are of similar type
-j and c are of different type
-#+end_example
-#+begin_src cpp
-// C++ program to show the use of typeid operator
-
-#include <iostream>
-#include <typeinfo>
-using namespace std;
-
-int main()
-{
-    int i = 5;
-    float j = 1.0;
-    char c = 'a';
-
-    // Get the type info using typeid operator
-    const type_info& ti1 = typeid(i * j);
-    const type_info& ti2 = typeid(i * c);
-    const type_info& ti3 = typeid(c);
-
-    // Print the types
-    cout << "ti1 is of type "
-         << ti1.name() << endl;
-
-    cout << "ti2 is of type "
-         << ti2.name() << endl;
-
-    cout << "ti3 is of type "
-         << ti3.name() << endl;
-
-    return 0;
-}
-#+end_src
-Output:
-#+begin_example
-ti1 is of type f
-ti2 is of type i
-ti3 is of type c
-#+end_example
-
-* vector
-** 初始化
-vector<int> ilist1;
-
-默认初始化，vector为空， size为0，表明容器中没有元素，而且 capacity 也返回 0，意味着还没有分配内存空间。这种初始化方式适用于元素个数未知，需要在程序中动态添加的情况。
-
-vector<int> ilist2(ilist);
-
-vector<int> ilist2  = ilist; 
-
-两种方式等价 ，ilist2 初始化为ilist 的拷贝，ilist必须与ilist2 类型相同，也就是同为int的vector类型，ilist2将具有和ilist相同的容量和元素
-
-vector<int> ilist = {1,2,3.0,4,5,6,7};
-
-vector<int> ilist {1,2,3.0,4,5,6,7};
-
-ilist 初始化为列表中元素的拷贝，列表中元素必须与ilist的元素类型相容，本例中必须是与整数类型相容的类型，整形会直接拷贝，其他类型会进行类型转换。
-
-vector<int> ilist3(ilist.begin()+2,ilist.end()-1);
-
-ilist3初始化为两个迭代器指定范围中元素的拷贝，范围中的元素类型必须与ilist3 的元素类型相容，在本例中ilist3被初始化为{3,4,5,6}。注意：由于只要求范围中的元素类型与待初始化的容器的元素类型相容，因此迭代器来自不同的容器是可能的，例如，用一个double的list的范围来初始化ilist3是可行的。另外由于构造函数只是读取范围中的元素进行拷贝，因此使用普通迭代器还是const迭代器来指出范围并没有区别。这种初始化方法特别适合于获取一个序列的子序列。
-
-vector<int> ilist4(7);
-
-默认值初始化，ilist4中将包含7个元素，每个元素进行缺省的值初始化，对于int，也就是被赋值为0，因此ilist4被初始化为包含7个0。当程序运行初期元素大致数量可预知，而元素的值需要动态获取的时候，可采用这种初始化方式。
-
-vector<int> ilist5(7,3);
-
-指定值初始化，ilist5被初始化为包含7个值为3的int
-* volatile
-** 为什么要用volatile？
-volatile 关键字是一种类型修饰符，用它声明的类型变量表示可以被某些编译器未知的因素更改。比如：操作系统、硬件或者其它线程等。遇到这个关键字声明的变量，编译器对访问该变量的代码就不再进行优化，从而可以提供对特殊地址的稳定访问。
-
-声明时语法：volatile int vInt;
-
-当要求使用 volatile 声明的变量的值的时候，系统总是重新从它所在的内存读取数据，即使它前面的指令刚刚从该处读取过数据。例如：
-#+begin_src c++
-volatile int i=10;
-int a = i;
-int b = i; 
-#+END_SRC
-volatile 指出 i 是随时可能发生变化的，每次使用它的时候必须从 i的地址中读取，因而编译器生成的汇编代码会重新从i的地址读取数据放在 b 中。而优化做法是，由于编译器发现两次从 i读数据的代码之间的代码没有对 i 进行过操作，它会自动把上次读的数据放在 b 中。而不是重新从 i 里面读。这样以来，如果 i是一个寄存器变量或者表示一个端口数据就容易出错，所以说 volatile 可以保证对特殊地址的稳定访问。
-
-下面通过插入汇编代码，测试有无 volatile 关键字，对程序最终代码的影响：
-#+begin_src c++
-#include <stdio.h>
-void main()
-{
-    int i = 10;
-    int a = i;
-
-    printf("i = %d", a);
-
-    // 下面汇编语句的作用就是改变内存中 i 的值
-    // 但是又不让编译器知道
-    __asm {
-        mov dword ptr [ebp-4], 20h
-    }
-
-    int b = i;
-    printf("i = %d", b);
-}
-#+END_SRC
-然后，在 Debug 版本模式运行程序，输出结果如下：
-#+BEGIN_EXAMPLE
-i = 10
-i = 32
-#+END_EXAMPLE
-然后，在 Release 版本模式运行程序，输出结果如下：
-#+BEGIN_EXAMPLE
-i = 10
-i = 10
-#+END_EXAMPLE
-
-输出的结果明显表明，Release 模式下，编译器对代码进行了优化，第二次没有输出正确的 i 值。下面，我们把 i 的声明加上 volatile 关键字，看看有什么变化：
-#+begin_src c++
-#include <stdio.h>
-void main()
-{
-    volatile int i = 10;
-    int a = i;
-
-    printf("i = %d", a);
-
-    // 下面汇编语句的作用就是改变内存中 i 的值
-    // 但是又不让编译器知道
-    __asm {
-        mov dword ptr [ebp-4], 20h
-    }
-
-    int b = i;
-    printf("i = %d", b);
-}
-#+END_SRC
-分别在 Debug 和 Release 版本运行程序，输出都是：
-#+begin_src c++
-i = 10
-i = 32
-#+END_SRC
-这说明这个 volatile 关键字发挥了它的作用。其实不只是“内嵌汇编操纵栈”这种方式属于编译无法识别的变量改变，另外更多的可能是多线程并发访问共享变量时，一个线程改变了变量的值，怎样让改变后的值对其它线程 visible。一般说来，volatile用在如下的几个地方：
-1. 中断服务程序中修改的供其它程序检测的变量需要加volatile；
-2. 多任务环境下各任务间共享的标志应该加volatile；
-3. 存储器映射的硬件寄存器通常也要加volatile说明，因为每次对它的读写都可能由不同意义；
-
-** 参考文章
-[[https://zhuanlan.zhihu.com/p/62060524][C/C++ 中的 volatile-知乎]]
 * std::tuple 和 std::tie 的用法简介
 tuple即元组，可以理解为pair的扩展，可以用来将不同类型的元素存放在一起，常用于函数的多返回值。
 
@@ -2081,6 +1523,580 @@ void MyMethod(T myarr){
 }
 #+END_SRC
 这个时候typename的作用就是告诉C++编译器，typename后面的字符串为一个类型名称，而不是成员函数或者成员变量。这个时候如果前面没有typename，编译器没有任何办法知道T::LengthType是一个类型还是一个成员名称(静态数据成员或者静态函数），所以编译不能够通过。
+* set自定义去重和排序函数
+** 方法一：使用std::set内置的less比较函数（直接定义内置类型的set对象）
+
+这种方法适用于：1）比较int、char等内置类型。2）只能针对某一个内置类型去重和排序：如果想通过id（int）去重，并通过hot(int)排序，该种方法就束手无策了。代码如下：
+#+BEGIN_SRC c++
+#include <iostream>
+#include <set>
+using namespace std;
+void main()
+{
+    std::set<int> mySet;    // 直接定义内置类型set集合
+    mySet.insert(10);       // 默认比较函数为less
+    mySet.insert(20);       // 从小到大排序
+    for(auto it:mySet)
+    {
+        std::cout<<it<<std::endl;
+    }
+    std::cout<<"end"<<std::endl;
+
+}
+#+END_SRC
+#+BEGIN_EXAMPLE
+结果如下：
+output：
+            10
+            20
+            end
+#+END_EXAMPLE
+
+** 方法二：自定义类（结构体）比较函数
+
+前文提到：直接定义内置类型的set对象，即使用std::set内置的默认的less比较函数，可能不能满足我们的实际需求。例如：现在有一批结构体对象，需要将其插入set集合，并按照id去重，按照热度hot进行排序。这个时候，就需要重新自定义比较函数了。有两种方法可以自定义比较函数：
+*** 重载<操作符
+甚么要重载<运算符呢？能不能重载"<="或者">="运算符？答案是不可以。几乎所有的方法或容器都需要排序来满足数学意义上的标准严格弱序化，否则这些方法或容器的行为将不可预知。假设f(x,y)是一个比较函数。 如果该函数满足如下条件则它是严格弱序化的。
+1. f(x,x) = false; 
+2. if f(x,y) then !f(y,x)
+3. if f(x,y) and f(y,z) then f(x,z)
+4. if !f(x,y)&&!f(y,x) then x==y; if x==y and y==z then x==z;
+
+看上去有点晕乎，不过不用担心，只要你的比较方法能够满足对相等元素永远返回false（记住一个准则：永远让比较函数对相同元素返回false），那你的方法就满足要求了。
+
+其实，set容器在判定已有元素a和新插入元素b是否相等时，是这么做的：
+1. 将a作为左操作数，b作为有操作数，调用比较函数，并返回比较值  
+2. 将b作为左操作数，a作为有操作数，再调用一次比较函数，并返回比较值。如果1、2两步的返回值都是false，则认为a、b是相等的，则b不会被插入set容器中；
+
+如果1、2两步的返回值都是true，则可能发生未知行为，因此，记住一个准则：永远让比较函数对相同元素返回false。
+#+BEGIN_SRC c++
+#include <iostream>
+#include <set>
+using namespace std;
+struct song
+{
+    int m_id;
+    int m_hot;
+    song(int id,int hot)
+    {
+
+        this->m_id = id;
+        this->m_hot = hot;
+    }
+    bool operator<(const struct song & right)const   //重载<运算符
+    {
+        if(this->m_id == right.m_id)     //根据id去重
+            return false;
+        else
+        {
+            if(this->m_hot != right.m_hot)
+            {
+                return this->m_hot > right.m_hot;      //降序
+            }
+            else
+            {
+                return this->m_id > right.m_id;     
+            }
+        }
+    }
+};
+void main()
+{
+    std::set<song> mySet;
+    song s1(10,100);
+    song s2(20,200);
+    song s3(20,300);
+    song s4(30,200);
+    mySet.insert(s1);    //插入s1
+    mySet.insert(s2);    //插入s2
+    mySet.insert(s3);    //s3和s2的id相同，不插入
+    mySet.insert(s4);    //插入s4
+    for(auto it:mySet)
+    {
+        std::cout<<"id:"<<it.m_id<<",hot:"<<it.m_hot<<std::endl;
+    }
+    std::cout<<"end"<<std::endl;
+;}
+#+END_SRC
+#+BEGIN_EXAMPLE
+结果如下：
+id：30，hot ： 200
+id：20，hot ： 200
+id：10，hot ： 100
+end
+#+END_EXAMPLE
+*** 重载（）运算符
+具体代码如下：
+#+BEGIN_SRC c++
+#include <iostream>
+#include <set>
+using namespace std;
+struct song
+{
+    int m_id;
+    int m_hot;
+    song(int id,int hot)
+    {
+
+        this->m_id = id;
+        this->m_hot = hot;
+    }
+    /*
+    bool operator<(const struct song & right)const   //重载<运算符
+    {
+        if(this->m_id == right.m_id)     //根据id去重
+            return false;
+        else
+        {
+            if(this->m_hot != right.m_hot)
+            {
+                return this->m_hot > right.m_hot;      //降序
+            }
+            else
+            {
+                return this->m_id > right.m_id;
+            }
+        }
+    }
+    */
+};
+struct comp
+{
+    bool operator()(struct song left,struct song  right)  //重载（）运算符
+    {
+
+        if(left.m_id == right.m_id)     //根据id去重
+            return false;
+        else
+        {
+            if(left.m_hot != right.m_hot)
+            {
+                return left.m_hot > right.m_hot;      //降序
+            }
+            else
+            {
+                return left.m_id > right.m_id;
+            }
+
+        }
+    }
+
+};
+void main()
+{
+    std::set<song,comp> mySet;      //写法和2.1中的的区别
+    song s1(10,100);
+    song s2(20,200);
+    song s3(20,300);
+    song s4(30,200);
+    mySet.insert(s1);    //插入s1
+    mySet.insert(s2);    //插入s2
+    mySet.insert(s3);    //s3和s2的id相同，不插入
+    mySet.insert(s4);    //插入s4
+    for(auto it:mySet)
+    {
+        std::cout<<"id:"<<it.m_id<<",hot:"<<it.m_hot<<std::endl;
+    }
+    std::cout<<"end"<<std::endl;
+};
+#+END_SRC
+#+BEGIN_EXAMPLE
+结果如下：
+id：30，hot ： 200
+id：20，hot ： 200
+id：10，hot ： 100
+end
+#+END_EXAMPLE
+* SFML
+SFML 是多媒体库，它为PC的各个组件提供简单的界面，用来简化游戏和多媒体应用程序的开发。 主要由五个模块组成，分别是：系统，窗口，图形，音频和网络。
+
+SFML 是跨平台的，通过 SFML，你的应用程序可以在最常见的操作系统上进行编译和运行：Windows，Linux，macOS以及Android和iOS。
+
+SFML 支持多种语言，具体可以在官网查看支持的语言。
+* std
+** 介绍
+std::是个名称空间标识符，C++标准库中的函数或者对象都是在命名空间std中定义的，所以我们要使用标准库中的函数或者对象都要用std来限定。
+
+至于为什么将cout放到名字空间std中，是因为象cout这样的对象在实际操作中或许会有好多个，比如说你自己也可能会不小心定义一个对象叫cout，那么这两个cout对象就会产生冲突。
+
+
+一般来说，std都是要调用C++标准库时使用。比如：使用标准库文件iostream时，要写上std;使用非标准库文件iostream.h，不用写。如图引入非标准库iostream.h时，省去了std::
+#+BEGIN_SRC c++
+#include <iostream.h>
+#+END_SRC
+
+当然使用标准库时，也是可以省略的，不过需要进行处理
+
+1. 分别将cout和endl释放出来
+#+BEGIN_SRC c++
+#include <iostream>
+using std::cout;
+using std::endl;
+#+END_SRC
+
+2. 将命名空间释放出来
+
+注：using namespace std 告诉编辑器我们将要使用名字空间std中的函数或者对象，所以cout和endl前面不用注明他们是std这个名字空间中的cout和endl
+#+BEGIN_SRC c++
+#include <iostream>
+using namespace std;
+#+END_SRC
+
+** transform
+transform函数的作用是：将某操作应用于指定范围的每个元素。transform函数有两个重载版本：
+
+transform(first,last,result,op);//first是容器的首迭代器，last为容器的末迭代器，result为存放结果的容器，op为要进行操作的一元函数对象或sturct、class。
+
+transform(first1,last1,first2,result,binary_op);//first1是第一个容器的首迭代 器，last1为第一个容器的末迭代器，first2为第二个容器的首迭代器，result为存放结果的容器，binary_op为要进行操作的二元函数 对象或sturct、class。
+
+注意：第二个重载版本必须要保证两个容器的元素个数相等才行，否则会抛出异常
+*** 例子
+看一个例子：利用transform函数将一个给定的字符串中的小写字母改写成大写字母，并将结果保存在一个叫second的数组里，原字符串内容不变。
+我们只需要使用transform的第一个重载函数，当然我们也可以使用for_each函数来完成再copy几次就行了，现在来看一下代码：
+#+BEGIN_SRC c++
+#include <iostream>
+#include <algorithm>
+using namespace std;
+char op(char ch)
+{
+
+   if(ch>='A'&&ch<='Z')
+        return ch+32;
+    else
+        return ch;
+}
+int main()
+{
+    string first,second;
+    cin>>first;
+    second.resize(first.size());
+    transform(first.begin(),first.end(),second.begin(),op);
+    cout<<second<<endl;
+    return 0;
+}
+#+END_SRC
+
+再看一个例子：给你两个vector向量（元素个数相等），请你利用transform函数将两个vector的每个元素相乘，并输出相乘的结果。
+代码：
+foreach的用法
+#+BEGIN_SRC c++
+#include <iostream>
+#include <algorithm>
+#include <vector>
+using namespace std;
+void print(int &elem){cout<<elem<<" ";}
+int op(int a,int b){return a*b;}
+int main()
+{
+    vector <int> A,B,SUM;
+    int n;
+    cin>>n;
+    for(int i=0;i<n;i++)
+    {
+        int t;
+        cin>>t;
+        A.push_back(t);
+    }
+    for(int i=0;i<n;i++)
+    {
+        int t;
+        cin>>t;
+        B.push_back(t);
+    }
+    SUM.resize(n);
+    transform(A.begin(),A.end(),B.begin(),SUM.begin(),op);
+    for_each(SUM.begin(),SUM.end(),print);
+    return 0;
+}
+#+END_SRC
+** to_string
+** all_of
+all_of() 算法会返回 true，前提是序列中的所有元素都可以使谓词返回 true。
+
+*** 实例
+下面是一段代码，用来展示用 all_of() 检查 ages 容器中的元素： 
+#+BEGIN_SRC c++
+int good_age{100};
+std::cout << (std::all_of(std::begin(ages), std::end(ages),[good_age] (int age) { return age < good_age; }) ? "None": "Some") << " of the people are centenarians." << std::endl;
+#+END_SRC
+这个 lambda 表达式会将 ages 中的元素和 good_age 的值作比较，good_age 的值为 100。所有的元素都小于 100，所以 all_of() 会返回 true，而且输出消息会正确报告没有记录的百岁老人。
+** accumulate
+accumulate定义在#include<numeric>中，作用有两个，一个是累加求和，另一个是自定义类型数据的处理
+
+1. 累加求和
+~int sum = accumulate(vec.begin() , vec.end() , 42);~
+
+accumulate带有三个形参：头两个形参指定要累加的元素范围，第三个形参则是累加的初值。
+
+accumulate函数将它的一个内部变量设置为指定的初始值，然后在此初值上累加输入范围内所有元素的值。accumulate算法返回累加的结果，其返回类型就是其第三个实参的类型。
+
+可以使用accumulate把string型的vector容器中的元素连接起来：
+
+~string sum = accumulate(v.begin() , v.end() , string(" "));~
+
+这个函数调用的效果是：从空字符串开始，把vec里的每个元素连接成一个字符串。
+
+2. 自定义数据类型的处理
+
+C++ STL中有一个通用的数值类型计算函数— accumulate(),可以用来直接计算数组或者容器中C++内置数据类型，例如：
+#+BEGIN_SRC c++
+#include <numeric>  
+int arr[]={10,20,30,40,50};  
+vector<int> va(&arr[0],&arr[5]);  
+int sum=accumulate(va.begin(),va.end(),0);  //sum = 150  
+#+END_SRC
+但是对于自定义数据类型，我们就需要自己动手写一个回调函数来实现自定义数据的处理，然后让它作为accumulate()的第四个参数，accumulate()的原型为
+#+BEGIN_SRC c++
+template<class _InIt, class _Ty,  class _Fn2> 
+inline _Ty _Accumulate(_InIt _First, _InIt _Last, _Ty _Val, _Fn2 _Func)  
+{   // return sum of _Val and all in [_First, _Last), using _Func  
+    for (; _First != _Last; ++_First)  
+        _Val = _Func(_Val, *_First);  
+    return (_Val);  
+}
+#+END_SRC
+下面是例子：
+#+BEGIN_SRC c++
+
+#include <vector>  
+#include <string>  
+using namespace std;  
+  
+struct Grade  
+{  
+    string name;  
+    int grade;  
+};  
+  
+int main()  
+{  
+    Grade subject[3] = {  
+        { "English", 80 },  
+        { "Biology", 70 },  
+        { "History", 90 }  
+    };  
+  
+    int sum = accumulate(subject, subject + 3, 0, [](int a, Grade b){return a + b.grade; });  
+    cout << sum << endl;  
+  
+    system("pause");  
+    return 0;  
+} 
+#+END_SRC
+* typedef
+** 定义类型
+* typeid
+typeid可以返回数据类型。
+
+语法
+#+begin_src cpp
+#include <typeinfo>
+
+typeid ( type );
+typeid ( expression );
+#+end_src
+
+** 例子
+#+begin_src cpp
+  // C++ program to show the use of typeid operator
+
+#include <iostream>
+#include <typeinfo>
+using namespace std;
+
+int main()
+{
+    int i, j;
+    char c;
+
+    // Get the type info using typeid operator
+    const type_info& ti1 = typeid(i);
+    const type_info& ti2 = typeid(j);
+    const type_info& ti3 = typeid(c);
+
+    // Check if both types are same
+    if (ti1 == ti2)
+        cout << "i and j are of"
+             << " similar type" << endl;
+    else
+        cout << "i and j are of"
+             << " different type" << endl;
+
+    // Check if both types are same
+    if (ti2 == ti3)
+        cout << "j and c are of"
+             << " similar type" << endl;
+    else
+        cout << "j and c are of"
+             << " different type" << endl;
+
+    return 0;
+}
+#+end_src
+Output
+#+begin_example
+i and j are of similar type
+j and c are of different type
+#+end_example
+#+begin_src cpp
+// C++ program to show the use of typeid operator
+
+#include <iostream>
+#include <typeinfo>
+using namespace std;
+
+int main()
+{
+    int i = 5;
+    float j = 1.0;
+    char c = 'a';
+
+    // Get the type info using typeid operator
+    const type_info& ti1 = typeid(i * j);
+    const type_info& ti2 = typeid(i * c);
+    const type_info& ti3 = typeid(c);
+
+    // Print the types
+    cout << "ti1 is of type "
+         << ti1.name() << endl;
+
+    cout << "ti2 is of type "
+         << ti2.name() << endl;
+
+    cout << "ti3 is of type "
+         << ti3.name() << endl;
+
+    return 0;
+}
+#+end_src
+Output:
+#+begin_example
+ti1 is of type f
+ti2 is of type i
+ti3 is of type c
+#+end_example
+
+* vector
+** 初始化
+vector<int> ilist1;
+
+默认初始化，vector为空， size为0，表明容器中没有元素，而且 capacity 也返回 0，意味着还没有分配内存空间。这种初始化方式适用于元素个数未知，需要在程序中动态添加的情况。
+
+vector<int> ilist2(ilist);
+
+vector<int> ilist2  = ilist; 
+
+两种方式等价 ，ilist2 初始化为ilist 的拷贝，ilist必须与ilist2 类型相同，也就是同为int的vector类型，ilist2将具有和ilist相同的容量和元素
+
+vector<int> ilist = {1,2,3.0,4,5,6,7};
+
+vector<int> ilist {1,2,3.0,4,5,6,7};
+
+ilist 初始化为列表中元素的拷贝，列表中元素必须与ilist的元素类型相容，本例中必须是与整数类型相容的类型，整形会直接拷贝，其他类型会进行类型转换。
+
+vector<int> ilist3(ilist.begin()+2,ilist.end()-1);
+
+ilist3初始化为两个迭代器指定范围中元素的拷贝，范围中的元素类型必须与ilist3 的元素类型相容，在本例中ilist3被初始化为{3,4,5,6}。注意：由于只要求范围中的元素类型与待初始化的容器的元素类型相容，因此迭代器来自不同的容器是可能的，例如，用一个double的list的范围来初始化ilist3是可行的。另外由于构造函数只是读取范围中的元素进行拷贝，因此使用普通迭代器还是const迭代器来指出范围并没有区别。这种初始化方法特别适合于获取一个序列的子序列。
+
+vector<int> ilist4(7);
+
+默认值初始化，ilist4中将包含7个元素，每个元素进行缺省的值初始化，对于int，也就是被赋值为0，因此ilist4被初始化为包含7个0。当程序运行初期元素大致数量可预知，而元素的值需要动态获取的时候，可采用这种初始化方式。
+
+vector<int> ilist5(7,3);
+
+指定值初始化，ilist5被初始化为包含7个值为3的int
+* volatile
+** 为什么要用volatile？
+volatile 关键字是一种类型修饰符，用它声明的类型变量表示可以被某些编译器未知的因素更改。比如：操作系统、硬件或者其它线程等。遇到这个关键字声明的变量，编译器对访问该变量的代码就不再进行优化，从而可以提供对特殊地址的稳定访问。
+
+声明时语法：volatile int vInt;
+
+当要求使用 volatile 声明的变量的值的时候，系统总是重新从它所在的内存读取数据，即使它前面的指令刚刚从该处读取过数据。例如：
+#+begin_src c++
+volatile int i=10;
+int a = i;
+int b = i; 
+#+END_SRC
+volatile 指出 i 是随时可能发生变化的，每次使用它的时候必须从 i的地址中读取，因而编译器生成的汇编代码会重新从i的地址读取数据放在 b 中。而优化做法是，由于编译器发现两次从 i读数据的代码之间的代码没有对 i 进行过操作，它会自动把上次读的数据放在 b 中。而不是重新从 i 里面读。这样以来，如果 i是一个寄存器变量或者表示一个端口数据就容易出错，所以说 volatile 可以保证对特殊地址的稳定访问。
+
+下面通过插入汇编代码，测试有无 volatile 关键字，对程序最终代码的影响：
+#+begin_src c++
+#include <stdio.h>
+void main()
+{
+    int i = 10;
+    int a = i;
+
+    printf("i = %d", a);
+
+    // 下面汇编语句的作用就是改变内存中 i 的值
+    // 但是又不让编译器知道
+    __asm {
+        mov dword ptr [ebp-4], 20h
+    }
+
+    int b = i;
+    printf("i = %d", b);
+}
+#+END_SRC
+然后，在 Debug 版本模式运行程序，输出结果如下：
+#+BEGIN_EXAMPLE
+i = 10
+i = 32
+#+END_EXAMPLE
+然后，在 Release 版本模式运行程序，输出结果如下：
+#+BEGIN_EXAMPLE
+i = 10
+i = 10
+#+END_EXAMPLE
+
+输出的结果明显表明，Release 模式下，编译器对代码进行了优化，第二次没有输出正确的 i 值。下面，我们把 i 的声明加上 volatile 关键字，看看有什么变化：
+#+begin_src c++
+#include <stdio.h>
+void main()
+{
+    volatile int i = 10;
+    int a = i;
+
+    printf("i = %d", a);
+
+    // 下面汇编语句的作用就是改变内存中 i 的值
+    // 但是又不让编译器知道
+    __asm {
+        mov dword ptr [ebp-4], 20h
+    }
+
+    int b = i;
+    printf("i = %d", b);
+}
+#+END_SRC
+分别在 Debug 和 Release 版本运行程序，输出都是：
+#+begin_src c++
+i = 10
+i = 32
+#+END_SRC
+这说明这个 volatile 关键字发挥了它的作用。其实不只是“内嵌汇编操纵栈”这种方式属于编译无法识别的变量改变，另外更多的可能是多线程并发访问共享变量时，一个线程改变了变量的值，怎样让改变后的值对其它线程 visible。一般说来，volatile用在如下的几个地方：
+1. 中断服务程序中修改的供其它程序检测的变量需要加volatile；
+2. 多任务环境下各任务间共享的标志应该加volatile；
+3. 存储器映射的硬件寄存器通常也要加volatile说明，因为每次对它的读写都可能由不同意义；
+
+** 参考文章
+[[https://zhuanlan.zhihu.com/p/62060524][C/C++ 中的 volatile-知乎]]
+
+* 转换
+** 显式转换
+*** 命名的强制类型转换
+格式:cast-name<type>(expression);
+如果type是引用类型,则结果是左值.
+
+cast-name是static_cast\dynamic_cast\const_cast和reinterpret_cast中的一种.
+**** const_cast
+const_cast只能改变运算对象的底层const
+#+begin_src c++
+  const char *pc;
+  char *p=const_cast<char*>(pc);
+#+END_SRC
+
 * 友元
 友元可以是一个函数，该函数被称为友元函数；友元也可以是一个类，该类被称为友元类，在这种情况下，整个类及其所有成员都是友元。
 
