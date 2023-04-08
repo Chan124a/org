@@ -358,6 +358,35 @@ emplace_back() 和 push_back() 的区别，就在于底层实现的机制不同�
 
 返回值的不同不能用于区分重载函数。不允许同时存在除了返回类型外其他所有要素都相同的两个函数。
 
+** 形参名字不影响判断
+#+begin_src c++
+Record lookup (const Account &acct);
+Record lookup (const Account&);
+
+typedef Phone Telno;
+Record lookup(const Phone&);
+Record lookup(const Telno&);
+#+end_src
+
+** const形参的判断方式
+*** 顶层const不影响判断
+#+begin_src c++
+  Record lookup(const Phone);
+  Record lookup(Phone);//重复声明
+
+  Record lookup(Phone*);
+  Record lookup(Phone* const);//重复声明
+#+END_SRC
+*** 底层const影响判断
+#+begin_src c++
+  Record lookup(Account&);//函数作用于Account的引用
+  Record lookup(const Account&);//新函数,作用于常量引用
+
+  Record lookup(Account*);//新函数,作用于指向Account的指针
+  Record lookup(const Account*);//新函数,作用于指向常量的指针
+#+END_SRC
+由于非常量对象可以转换成const,所以上面4个函数都能作用于非常
+量对象或者指向非常量对象的指针,此时编译器会优先选用非常量版本的函数.
 ** 隐式转换
 *** 整型提升
 将char、unsigned char、signed char、shot、unsigned short转换为int 或unsigned int。
