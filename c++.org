@@ -2084,6 +2084,19 @@ i = 32
 [[https://zhuanlan.zhihu.com/p/62060524][C/C++ 中的 volatile-知乎]]
 
 * 转换
+** 算术转换
+*** 整型提升
+bool\char\signed char\unsigned char\short\unsigned short等类型:
+- 如果可以存在int里,则转换成int(例如bool转成0或1)
+- 如果不能存在int里,则转换成unsigned int
+
+较大的char类型(wchar_t\char16_t\char32_t)提升成int\unsigned int\long\unsigned long\long long\unsigned long long中最小的一种类型,前提是要能容纳原类型所有可能的值.
+*** 无符号类型的运算对象
+如果某个运算符左右两边的运算对象类型不一致,那么这些运算对象将转换成同一种类型.
+1. 执行整型提升后,如果两边的运算对象的类型一样,则无须进一步的转换;
+2. 如果一个是无符号,一个是有符号,并且无符号类型大于等于带符号类型,那么带符号类型转换成无符号类型;
+3. 如果一个是无符号,一个是有符号,并且无符号类型小于带符号类型,此时转换的结果取决于机器.如果无符号类型所有值都可以存在带符号类型里,则无符号转成有符号,否则有符号转成无符号.
+
 ** 显式转换
 *** 命名的强制类型转换
 格式:cast-name<type>(expression);
@@ -2091,12 +2104,14 @@ i = 32
 
 cast-name是static_cast\dynamic_cast\const_cast和reinterpret_cast中的一种.
 **** const_cast
-const_cast只能改变运算对象的底层const
+const_cast 用来移除变量的 const 或volatile限定符.
+const_cast只能改变运算对象的底层const.
+
 #+begin_src c++
   const char *pc;
-  char *p=const_cast<char*>(pc);
+  char *p=const_cast<char*>(pc);//正确,但是通过p写值是未定义的行为
 #+END_SRC
-
+如果对象本身不时一个常量,使用强制类型转换获得写权限是合法的行为.但是如果对象是一个常量,再使用const_cast执行写操作就会产生未定义的后果.
 * 友元
 友元可以是一个函数，该函数被称为友元函数；友元也可以是一个类，该类被称为友元类，在这种情况下，整个类及其所有成员都是友元。
 
