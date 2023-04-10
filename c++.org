@@ -396,6 +396,7 @@ Record lookup(const Telno&);
 精确匹配、类型提升、类型转换。
 
 其中，一般的整型转换没有先后顺序。
+
 ** 实例
 *** 实例1
 #+begin_src c++
@@ -441,6 +442,9 @@ int main()
 222 WorldHello World
 #+end_example
 由于类型提升优先级高于类型转换，所以会匹配第二个函数。
+
+** 重载与作用域
+
 * boolalpha
 Sets the boolalpha format flag for the str stream.
 
@@ -2136,6 +2140,7 @@ bool\char\signed char\unsigned char\short\unsigned short等类型:
 - 如果不能存在int里,则转换成unsigned int
 
 较大的char类型(wchar_t\char16_t\char32_t)提升成int\unsigned int\long\unsigned long\long long\unsigned long long中最小的一种类型,前提是要能容纳原类型所有可能的值.
+
 **** 从汇编层面理解
 从一个简单的例子开始：
 #+begin_src c++
@@ -2184,6 +2189,10 @@ GAS语法中的mov是把参数从左边移到右边。例如： movl {% endmath_
 通常情况下，在对int类型的数值作运算时，CPU的运算速度是最快的。在x86上，32位算术运算的速度比16位算术运算的速度快一倍。C语言是一个注重效率的语言，所以它会作整型提升，使得程序的运行速度尽可能地快。因此，你必须记住整型提升规则，以免发生一些整型溢出的问题。
 **** 参考文章
 [[https://windmissing.github.io/cpp_notes/grammar/2015-08-25-Integer-Promotion.html][c语言进阶：整型提升]]
+
+*** 浮点类型提升
+float将会提升到double类型再进行运算
+
 *** 无符号类型的运算对象
 如果某个运算符左右两边的运算对象类型不一致,那么这些运算对象将转换成同一种类型.
 1. 执行整型提升后,如果两边的运算对象的类型一样,则无须进一步的转换;
@@ -2197,7 +2206,6 @@ GAS语法中的mov是把参数从左边移到右边。例如： movl {% endmath_
 4. int,unsigned int
 5. long,unsigned long
 6. long long,unsigned long long
-
 
 ** 显式转换
 *** 命名的强制类型转换
