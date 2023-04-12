@@ -204,6 +204,28 @@ for (auto& x : mp) {
 }
 #+END_SRC
 
+* boolalpha
+Sets the boolalpha format flag for the str stream.
+
+When the boolalpha format flag is set, bool values are inserted/extracted by their textual representation: either true or false, instead of integral values.
+
+example:
+#+BEGIN_SRC c++
+// modify boolalpha flag
+#include <iostream>     // std::cout, std::boolalpha, std::noboolalpha
+
+int main () {
+  bool b = true;
+  std::cout << std::boolalpha << b << '\n';
+  std::cout << std::noboolalpha << b << '\n';
+  return 0;
+}
+#+END_SRC
+#+BEGIN_EXAMPLE
+Output:
+true
+1
+#+END_EXAMPLE
 * C++四种类型转换运算符
 隐式类型转换是安全的，显式类型转换是有风险的，C语言之所以增加强制类型转换的语法，就是为了强调风险，让程序员意识到自己在做什么。
 
@@ -355,8 +377,6 @@ int main(){
 emplace_back() 和 push_back() 的区别，就在于底层实现的机制不同。push_back() 向容器尾部添加元素时，首先会创建这个元素，然后再将这个元素拷贝或者移动到容器中（如果是拷贝的话，事后会自行销毁先前创建的这个元素）；而 emplace_back() 在实现时，则是直接在容器尾部创建这个元素，省去了拷贝或移动元素的过程。
 * 重载
 重载指的是同一作用域内的几个函数名字相同但形参（形参数量或者形参类型）不同。
-
-
 ** 返回值不影响判断
 返回值的不同不能用于区分重载函数。不允许同时存在除了返回类型外其他所有要素都相同的两个函数。
 ** 参数默认值不影响判断
@@ -405,6 +425,67 @@ Record lookup(const Telno&);
 
 其中，一般的整型转换没有先后顺序。
 
+** 重载与作用域
+如果在内层作用域声明名字，将会隐藏外层作用域中声明的同名实体。在不同的作用域中无法重载函数名
+#+begin_src c++
+  string read();
+  void print(const string &);
+  void print(double);//重载print函数
+  void fooBar(int ival)
+  {
+    bool read=false;//新作用域，隐藏了外层的read
+    string s=read();//错误，read此时是一个布尔值
+    void print(int);//新作用域，隐藏了之前的print
+    print("Value:" );//错误
+    print(ival);//正确
+    print(3.14);//正确，此时调用的是print(int)
+  }
+#+END_SRC
+如果把同名函数放在同一个函数中，则可以实现重载
+#+begin_src c++
+  void print(const string &);
+  void print(double);//重载print函数
+  void print(int);//新作用域，隐藏了之前的print
+  void fooBar2(int ival)
+  {
+    print("Value:" );//调用print(const string &)
+    print(ival);//调用print(int)
+    print(3.14);//调用print(double)
+  }
+
+#+END_SRC
+** 命名空间
+下面两个函数是重载
+#+begin_src c++
+  namespacs IBM{
+    int myfunc(int a);
+  }
+  namespacs SUN{
+    using IBM::myfunc;
+    int myfunc(double b);
+  }
+#+END_SRC
+** 注意与继承覆盖区别开
+子类如果有与父类相同名字（即使参数不同）的函数，将会覆盖掉父类方法。
+#+begin_src c++
+  class A{
+    public:
+    int myfunc(int a){
+      return 0;
+    }
+  };
+  class SubA : public A{
+    public:
+    int myfunc(int *p){
+      return 0;
+    }
+  };
+  SubA sa;
+  sa.myfunc(1); //报错，不能将int转换为int*
+#+END_SRC
+** 操作符重载
+对于内置数据类型的操作符，它预定义的意义不能被修改，也不能为内置数据类型定义其他操作符。
+例如不能定义int operator+(int, int);也不能定义void operator+(int[],int[]).
 ** 实例
 *** 实例1
 #+begin_src c++
@@ -450,58 +531,331 @@ int main()
 222 WorldHello World
 #+end_example
 由于类型提升优先级高于类型转换，所以会匹配第二个函数。
+* 多态
+C++规定，当一个成员函数被声明为虚函数后，其派生类中的同名函数都自动成为虚函数。
 
-** 重载与作用域
-如果在内层作用域声明名字，将会隐藏外层作用域中声明的同名实体。在不同的作用域中无法重载函数名
+多态的行为必须是在指针或者引用的情况下才能生效。
+** 简单介绍
 #+begin_src c++
-  string read();
-  void print(const string &);
-  void print(double);//重载print函数
-  void fooBar(int ival)
-  {
-    bool read=false;//新作用域，隐藏了外层的read
-    string s=read();//错误，read此时是一个布尔值
-    void print(int);//新作用域，隐藏了之前的print
-    print("Value:" );//错误
-    print(ival);//正确
-    print(3.14);//正确，此时调用的是print(int)
+#include "stdafx.h"
+#include <iostream>
+#include <stdlib.h>
+using namespace std;
+
+class Father
+{
+public:
+    void Face()
+    {
+        cout << "Father's face" << endl;
+    }
+
+    void Say()
+    {
+        cout << "Father say hello" << endl;
+    }
+};
+
+
+class Son:public Father
+{
+public:
+    void Say()
+    {
+        cout << "Son say hello" << endl;
+    }
+};
+
+void main()
+{
+    Son son;
+    Father *pFather=&son; // 隐式类型转换
+    pFather->Say();
+}
+#+end_src
+输出的结果为:
+#+DOWNLOADED: screenshot @ 2022-12-05 23:01:44
+[[file:images/多态/2022-12-05_23-01-44_screenshot.png]]
+c++编译器在编译的时候，要确定每个对象调用的函数（非虚函数）的地址，这称为早期绑定，
+当我们将Son类的对象son的地址赋给pFather时，c++编译器进行了类型转换，此时c++编译器认为变量pFather保存的就是Father对象的地址，当在main函数中执行pFather->Say(),调用的当然就是Father对象的Say函数
+
+要让编译器采用晚绑定，就要在基类中声明函数时使用virtual关键字，这样的函数我们就称之为虚函数，
+一旦某个函数在基类中声明为virtual，那么在所有的派生类中该函数都是virtual，而不需要再显式地声明为virtual。
+
+#+begin_src c++
+#include "stdafx.h"
+#include <iostream>
+#include <stdlib.h>
+using namespace std;
+
+class Father
+{
+public:
+    void Face()
+    {
+        cout << "Father's face" << endl;
+    }
+
+    virtual void Say()
+    {
+        cout << "Father say hello" << endl;
+    }
+};
+
+
+class Son:public Father
+{
+public:
+    void Say()
+    {
+        cout << "Son say hello" << endl;
+    }
+};
+
+void main()
+{
+    Son son;
+    Father *pFather=&son; // 隐式类型转换
+    pFather->Say();
+}
+#+end_src
+
+#+DOWNLOADED: screenshot @ 2022-12-05 23:03:29
+[[file:images/多态/2022-12-05_23-03-29_screenshot.png]]
+** 虚表
+如果一个类中有虚函数，编译器会为每个包含虚函数的类创建一个虚表(即 vtable)，该表是一个一维数组，在这个数组中存放每个虚函数的地址。
+
+编译器另外还为每个对象提供了一个虚表指针(即vptr)，这个指针指向了对象所属类的虚表。
+
+在构造函数中进行虚表的创建和虚表指针的初始化，
+在构造子类对象时，要先调用父类的构造函数，初始化父类对象的虚表指针，该虚表指针指向父类的虚表，
+当执行子类的构造函数时，子类对象的虚表指针被初始化，指向自身的虚表。
+
+虚表可以继承，如果子类没有重写虚函数，那么子类虚表中仍然会有该函数的地址，只不过这个地址指向的是基类的虚函数实现。
+如果重写了相应的虚函数，那么虚表中的地址就会改变，指向自身的虚函数实现，如果派生类有自己的虚函数，那么虚表中就会添加该项。
+** 虚表和虚表指针的运行方式
+#+begin_src c++
+#include<iostream.h>
+
+class Base
+ {
+ public:
+    virtual void function1() {cout<<"Base :: function1()\n";};
+    virtual void function2() {cout<<"Base :: function2()\n";};
+    virtual ~Base(){};
+};
+
+class D1: public Base
+{
+public:
+   ~D1(){};
+   virtual void function1() { cout<<"D1 :: function1()\n";};
+};
+
+class D2: public Base
+{
+public:
+   ~D2(){};
+   virtual void function2() { cout<< "D2 :: function2\n";};
+};
+
+int main()
+{
+  D1 *d = new D1;;
+  Base *b = d;
+
+  b->function1();
+  b->function2();
+
+  delete (b);
+
+  return (0);
+}
+
+output:
+D1 :: function1()
+Base :: function2()
+#+END_SRC
+Here is a pictorial representation of Virtual Table and _vptr for the above code:
+#+DOWNLOADED: screenshot @ 2022-12-26 22:59:51
+[[file:images/多态/2022-12-26_22-59-51_screenshot.png]]
+Here in function main b pointer gets assigned to D1's _vptr and now starts pointing to D1's vtable.
+Then calling to a function1(), makes it's _vptr startightway calls D1's vtable function1() and so in turn calls D1's method
+i.e. function1() as D1 has it's own function1() defined it's class.
+
+Where as pointer b calling to a function2(), makes it's _vptr points to D1's vatble which in-turn pointing to Base class's vtable function2 () as shown in the diagram (as D1 class does not have it's own definition or function2()).
+
+So, now calling delete on pointer b follows the _vptr - which is pointing to D1's vtable calls it's own class's destructor
+i.e. D1 class's destructor and then calls the destrcutor of Base class - this as part of when dervied object gets deleted it turn deletes it's emebeded base object.
+Thats why we must always make Base class's destrcutor as virtual if it has any virtual functions in it.
+** 构造函数
+C++标准规定了在构造函数中调用虚函数时，只会绑定到自己类的相应函数。虚函数在构造函数中不起作用。
+
+*** 构造函数不能为虚函数
+简言之：构造函数不能是虚函数，因为虚函数是基于对象的，构造函数是用来产生对象的，若构造函数是虚函数，则需要对象来调用，但是此时构造函数没有执行，就没有对象存在，产生矛盾，所以构造函数不能是虚函数。
+**** 从存储空间角度来看
+虚函数的调用需要虚函数表(vptr)指针，而该指针存放在对象的内存空间中，在构造函数中进行初始化工作，即初始化vptr，让它指向正确的虚函数表。
+所以需要调用构造函数才可以创建或初始化它的值，否则即使开辟了空间，该指针也为随机值；若构造函数声明为虚函数，那么由于对象还未创建，还没有内存空间，更没有虚函数表地址用来调用虚函数——构造函数了。
+
+**** 从多态角度来看
+构造一个对象的时候，必须知道对象的实际类型；而虚函数主要是实现多态，在运行时才可以明确调用对象，根据传入的对象类型来调用函数，
+例如通过父类的指针或者引用来调用它的时候可以变成调用子类的那个成员函数
+。而构造函数是在创建对象时自己主动调用的，不可能通过父类的指针或者引用去调用。那使用虚函数也就没有了实际意义。
+在调用构造函数时，由于对象还未构造成功。编译器无法知道对象的实际类型，是该类本身，还是该类的一个派生类，或是更深层次的派生类。
+并且构造函数的作用是提供初始化，在对象生命期仅仅运行一次，不是对象的动态行为，没有必要成为虚函数。
+
+** 析构函数
+*** 析构函数为什么必须是虚函数
+当基类的析构函数为非虚函数时，删除一个基类指针指向的派生类实例时，只清理了派生类从基类继承过来的资源，而派生类自己独有的资源却没有被清理，这显然不是我们希望的。
+
+如果一个类会被其他类继承，那么我们有必要将被继承的类（基类）的析构函数定义成虚函数。这样，释放基类指针指向的派生类实例时，先调用派生类的析构函数，再调用基类的析构函数，清理工作才能全面进行，才不会发生内存泄漏。
+*** delete子类指针
+不管什么时候delete子类指针，都会调用父类析构函数（不管父类析构函数是不是虚函数）。
+
+之所以要把父类析构函数定义为虚函数，是因为当父类指针指向子类对象时，delete父类指针可以调用到子类的析构函数（之后会调用父类的析构）。
+** 参数传递
+*** 引用和值传递
+#+begin_src c++
+  class Parent{
+  public:
+      virtual void print();
+  }
+  class Son{
+  public:
+      void print();
+  }
+  void A(Parent &son){//传引用
+      son.print();
+  }
+  void B(Parent son){//传值
+      son.print();
+  }
+  main(){
+    Son *p=new Son();
+    A(*p);//调用子类的print
+    B(*p);//调用父类的print
   }
 #+END_SRC
-如果把同名函数放在同一个函数中，则可以实现重载
+第一次传引用相当于父类指针指向派生类；
+第二次传值，是用派生类对象赋值给基类对象，仅仅拷贝了派生类的基类部分，因此调用基类版本函数。
+
+多态的行为必须是在指针或者引用的情况下才能生效，对值变量来说，一定是执行静态绑定。
+*** 默认参数
+虚函数是动态绑定，但默认值是在编译期决定的，所以派生类的
+
 #+begin_src c++
-  void print(const string &);
-  void print(double);//重载print函数
-  void print(int);//新作用域，隐藏了之前的print
-  void fooBar2(int ival)
-  {
-    print("Value:" );//调用print(const string &)
-    print(ival);//调用print(int)
-    print(3.14);//调用print(double)
-  }
-
-#+END_SRC
-* boolalpha
-Sets the boolalpha format flag for the str stream.
-
-When the boolalpha format flag is set, bool values are inserted/extracted by their textual representation: either true or false, instead of integral values.
-
-example:
-#+BEGIN_SRC c++
-// modify boolalpha flag
-#include <iostream>     // std::cout, std::boolalpha, std::noboolalpha
-
-int main () {
-  bool b = true;
-  std::cout << std::boolalpha << b << '\n';
-  std::cout << std::noboolalpha << b << '\n';
-  return 0;
+#include <iostream>
+using namespace std;
+ 
+class Base {
+public:
+    virtual void fun(int x = 111) {
+        cout << "Base::fun(), x = " << x << endl;
+    }
+};
+ 
+class Derived : public Base {
+public:
+    virtual void fun(int x=222) {
+        cout << "Derived::fun(), x = " << x << endl;
+    }
+};
+ 
+int main() {
+    Derived d1;
+    Base* p1 = &d1;
+	Derived* p2=&d1; 
+    p1->fun();
+    p2->fun();
+    return 0;
 }
 #+END_SRC
-#+BEGIN_EXAMPLE
-Output:
-true
-1
-#+END_EXAMPLE
+输出：
+#+begin_example
+Derived::fun(), x = 111
+Derived::fun(), x = 222
+#+end_example
+注意，上面第一行打印的是派生类函数名，但是使用的默认值是基类的111。
+** 函数声明不同的虚函数是不同的
+如下代码，基类的display方法加了const，这导致派生类实际上有两个不同的虚方法：一个带const，一个不带const。
+
+当用基类指针调用子类对象方法时，由于基类的虚函数表只有带const的方法，所以会调用到子类的带const的display方法。
+#+begin_src c++
+#include <iostream>
+using namespace std;
+ 
+class Base {
+public:
+    virtual void display() const {
+        cout << "Base::display()" << endl;
+    }
+};
+ 
+class Derived : public Base {
+public:
+    virtual void display() {
+        cout << "Derived::display()" << endl;
+    }
+};
+ 
+int main() {
+    Derived d1;
+    Base* p1 = &d1;
+	Derived* p2=&d1; 
+    p1->display();
+    p2->display();
+    return 0;
+}#+END_SRC
+输出：
+#+begin_example
+Base::display()
+Derived::display()
+#+end_example
+
+如果去掉const,则结果为：
+#+begin_example
+Derived::display()
+Derived::display()
+#+end_example
+** 继承
+#+begin_src c++
+  class A
+  ｛
+  public :
+  virtual void test();
+  ｝;
+  class B:public A{
+    public:
+    void test();
+  }
+  class C:public B{
+    public:
+    void test();
+  }
+#+END_SRC
+则B的test函数以及C的test函数都是虚函数；即使C的test函数访问权限发生变化，也是虚函数。
+#+begin_src c++
+  class C:public B{
+    private:
+    void test();
+  }
+#+END_SRC
+
+** 参考文章
+[[https://www.go4expert.com/articles/virtual-table-vptr-t16544/][How Virtual Table and _vptr works]]
+[[https://blog.csdn.net/qq_42247231/article/details/105109709][为什么析构函数必须是虚函数？为什么默认的析构函数不是虚函数？]]
+* 定义抽象数据类型
+#+BEGIN_SRC c++
+struct ListNode {
+    int val;
+    ListNode *next;
+    ListNode() : val(0), next(nullptr) {}
+    ListNode(int x) : val(x), next(nullptr) {}
+    ListNode(int x, ListNode *next) : val(x), next(next) {}
+};
+#+END_SRC
+
+如果调用 ~ListNode(5)~ 那么 ~val=5~ ， ~next~ 指针为空指针
 * hex
 Sets the basefield format flag for the str stream to hex.
 
@@ -568,6 +922,177 @@ typedef unsigned int		uintptr_t;
 在C语言中，任何类型的指针都可以转换为void *类型，并且在将它转换回原来的类型时不会丢失信息。
 ** 参考文章
 [[https://blog.csdn.net/cs_zhanyb/article/details/16973379][intptr_t、uintptr_t数据类型的解析]]
+* 继承
+** 多重继承
+非虚拟继承，B和C的对象分别保留一份A对象的内存空间，n处于不同的内存空间，因此是独立的不会相互影响，n的赋值不会覆盖；
+如果B和C虚拟继承A类的话，A的对象只有一份，B和C对象中只是保存指向A对象的指针，n的赋值会覆盖。
+#+begin_src c++
+#include <iostream>
+using namespace std;
+
+class A
+{
+	public:
+	int n;
+};
+class B:public A{};
+class C:public A{};
+class D:public B,public C{};
+
+int main()
+{
+	D d;
+	d.B::n=10;
+	d.C::n=20;
+	cout<<d.B::n<<","<<d.C::n;
+	return 0;
+}
+#+END_SRC
+** 虚继承
+*** 菱形继承的问题
+
+#+DOWNLOADED: screenshot @ 2023-03-14 22:32:32
+[[file:images/继承/2023-03-14_22-32-32_screenshot.png]]
+类 A 派生出类 B 和类 C，类 D 继承自类 B 和类 C，这个时候类 A 中的成员变量和成员函数继承到类 D 中变成了两份，一份来自 A-->B-->D 这条路径，另一份来自 A-->C-->D 这条路径。
+
+在一个派生类中保留间接基类的多份同名成员，虽然可以在不同的成员变量中分别存放不同的数据，但大多数情况下这是多余的：因为保留多份成员变量不仅占用较多的存储空间，还容易产生命名冲突。
+假如类 A 有一个成员变量 a，那么在类 D 中直接访问 a 就会产生歧义，编译器不知道它究竟来自 A -->B-->D 这条路径，还是来自 A-->C-->D 这条路径。
+下面是菱形继承的具体实现：
+#+begin_src c++
+//间接基类A
+class A{
+protected:
+    int m_a;
+};
+
+//直接基类B
+class B: public A{
+protected:
+    int m_b;
+};
+
+//直接基类C
+class C: public A{
+protected:
+    int m_c;
+};
+
+//派生类D
+class D: public B, public C{
+public:
+    void seta(int a){ m_a = a; }  //命名冲突
+    void setb(int b){ m_b = b; }  //正确
+    void setc(int c){ m_c = c; }  //正确
+    void setd(int d){ m_d = d; }  //正确
+private:
+    int m_d;
+};
+
+int main(){
+    D d;
+    return 0;
+}
+#+END_SRC
+这段代码实现了上图所示的菱形继承，第 25 行代码试图直接访问成员变量 m_a，结果发生了错误，因为类 B 和类 C 中都有成员变量 m_a（从 A 类继承而来），编译器不知道选用哪一个，所以产生了歧义。
+
+为了消除歧义，我们可以在 m_a 的前面指明它具体来自哪个类：
+#+begin_src c++
+void seta(int a){ B::m_a = a; }
+#+END_SRC
+这样表示使用 B 类的 m_a。当然也可以使用 C 类的：
+#+begin_src c++
+void seta(int a){ C::m_a = a; }
+#+END_SRC
+*** 虚继承（Virtual Inheritance）
+为了解决多继承时的命名冲突和冗余数据问题，C++ 提出了虚继承，使得在派生类中只保留一份间接基类的成员。
+
+在继承方式前面加上 virtual 关键字就是虚继承，请看下面的例子：
+#+begin_src c++
+//间接基类A
+class A{
+protected:
+    int m_a;
+};
+//直接基类B
+class B: virtual public A{  //虚继承
+protected:
+    int m_b;
+};
+//直接基类C
+class C: virtual public A{  //虚继承
+protected:
+    int m_c;
+};
+//派生类D
+class D: public B, public C{
+public:
+    void seta(int a){ m_a = a; }  //正确
+    void setb(int b){ m_b = b; }  //正确
+    void setc(int c){ m_c = c; }  //正确
+    void setd(int d){ m_d = d; }  //正确
+private:
+    int m_d;
+};
+int main(){
+    D d;
+    return 0;
+}
+#+END_SRC
+这段代码使用虚继承重新实现了上图所示的菱形继承，这样在派生类 D 中就只保留了一份成员变量 m_a，直接访问就不会再有歧义了。
+
+虚继承的目的是让某个类做出声明，承诺愿意共享它的基类。
+其中，这个被共享的基类就称为虚基类（Virtual Base Class），本例中的 A 就是一个虚基类。
+在这种机制下，不论虚基类在继承体系中出现了多少次，在派生类中都只包含一份虚基类的成员。
+
+现在让我们重新梳理一下本例的继承关系，如下图所示：
+
+#+DOWNLOADED: screenshot @ 2023-03-14 22:43:51
+[[file:images/继承/2023-03-14_22-43-51_screenshot.png]]
+
+观察这个新的继承体系，我们会发现虚继承的一个不太直观的特征：必须在虚派生的真实需求出现前就已经完成虚派生的操作。
+在上图中，当定义 D 类时才出现了对虚派生的需求，但是如果 B 类和 C 类不是从 A 类虚派生得到的，那么 D 类还是会保留 A 类的两份成员。
+
+换个角度讲，虚派生只影响从指定了虚基类的派生类中进一步派生出来的类，它不会影响派生类本身。
+
+在实际开发中，位于中间层次的基类将其继承声明为虚继承一般不会带来什么问题。
+通常情况下，使用虚继承的类层次是由一个人或者一个项目组一次性设计完成的。
+对于一个独立开发的类来说，很少需要基类中的某一个类是虚基类，况且新类的开发者也无法改变已经存在的类体系。
+
+C++标准库中的 iostream 类就是一个虚继承的实际应用案例。
+iostream 从 istream 和 ostream 直接继承而来，而 istream 和 ostream 又都继承自一个共同的名为 base_ios 的类，是典型的菱形继承。
+此时 istream 和 ostream 必须采用虚继承，否则将导致 iostream 类中保留两份 base_ios 类的成员。
+
+#+DOWNLOADED: screenshot @ 2023-03-14 22:51:26
+[[file:images/继承/2023-03-14_22-51-26_screenshot.png]]
+*** 虚基类成员的可见性
+因为在虚继承的最终派生类中只保留了一份虚基类的成员，所以该成员可以被直接访问，不会产生二义性。
+此外，如果虚基类的成员只被一条派生路径覆盖，那么仍然可以直接访问这个被覆盖的成员。
+但是如果该成员被两条或多条路径覆盖了，那就不能直接访问了，此时必须指明该成员属于哪个类。
+
+以图2中的菱形继承为例，假设 A 定义了一个名为 x 的成员变量，当我们在 D 中直接访问 x 时，会有三种可能性：
+- 如果 B 和 C 中都没有 x 的定义，那么 x 将被解析为 A 的成员，此时不存在二义性。
+- 如果 B 或 C 其中的一个类定义了 x，也不会有二义性，派生类的 x 比虚基类的 x 优先级更高。
+- 如果 B 和 C 中都定义了 x，那么直接访问 x 将产生二义性问题。
+
+可以看到，使用多继承经常会出现二义性问题，必须十分小心。上面的例子是简单的，如果继承的层次再多一些，关系更复杂一些，程序员就很容易陷人迷魂阵，程序的编写、调试和维护工作都会变得更加困难，
+因我不提倡在程序中使用多继承，只有在比较简单和不易出现二义性的情况或实在必要时才使用多继承，能用单一继承解决的问题就不要使用多继承
+。也正是由于这个原因，C++ 之后的很多面向对象的编程语言，例如 Java、C#、PHP 等，都不支持多继承。
+** 访问控制
+public继承不改变父类中的成员的访问权限；
+protected继承时，public和protected访问级别的成员变为protected，private还是private；
+private继承时，父类所有成员变为private。
+** 参考文章
+[[http://c.biancheng.net/view/2280.html][C++虚继承和虚基类详解]]
+* 拷贝、赋值、销毁
+如果一个构造函数的第一个参数是自身类类型的引用，且任何额外参数都有默认值，则此构造函数是拷贝构造函数。
+#+begin_src c++
+  class Foo{
+    public:
+    Foo();//默认构造函数
+    Foo(const Foo&);//拷贝构造函数，这里可以不带const
+  }；
+#+END_SRC
+
 * lambda表达式
 The predicates we pass to an algorithm must have exactly one or two parameters,depending on whether the algorithm takes a unary or binary predicate, respectively.However, sometimes we want to do processing that requires more arguments than the algorithm’s predicate allows.
 
@@ -2167,96 +2692,6 @@ i = 32
 ** 参考文章
 [[https://zhuanlan.zhihu.com/p/62060524][C/C++ 中的 volatile-知乎]]
 
-* 转换
-** 算术转换
-*** 整型提升
-bool\char\signed char\unsigned char\short\unsigned short等类型:
-- 如果可以存在int里,则转换成int(例如bool转成0或1)
-- 如果不能存在int里,则转换成unsigned int
-
-较大的char类型(wchar_t\char16_t\char32_t)提升成int\unsigned int\long\unsigned long\long long\unsigned long long中最小的一种类型,前提是要能容纳原类型所有可能的值.
-
-**** 从汇编层面理解
-从一个简单的例子开始：
-#+begin_src c++
-int main(void)
-{
-    unsigned char a = 0xff;
-    char b = 0xff;
-    int c = a + b;
-    return 0;
-}
-
-#+END_SRC
-反汇编结果是：
-#+begin_src c++
-movl    {% math_inline %}0, -4(%rbp)        # The return value of main is 0
-movb    {% endmath_inline %}-1, -5(%rbp)       # unsigned char a = 0xff;
-movb    {% math_inline %}-1, -6(%rbp)       # char b = 0xff;
-movzbl  -5(%rbp), %eax
-movsbl  -6(%rbp), %ecx
-addl    %eax, %ecx          # int c = a + b
-movl    %ecx, -12(%rbp)     # store c onto the stack
-movl    -4(%rbp), %eax
-popq    %rbp
-ret                         # return value 0 from eax
-#+END_SRC
-如果你的GAS语法不熟悉，可以查看X86 Assembly/GAS Syntax。
-GAS语法指令通常以“b”, “s”, “w”, “l”, “q” 和“t” 为后缀，以区分操作数在大小。
-#+begin_src c++
-b = byte (8 bit)
-s = short (16 bit integer) or single (32-bit floating point)
-w = word (16 bit)
-l = long (32 bit integer or 64-bit floating point)
-q = quad (64 bit)
-t = 10 bytes (80-bit floating point)
-
-#+END_SRC
-GAS语法中的mov是把参数从左边移到右边。例如： movl {% endmath_inline %}0, -4(%rbp)的意思是把 0x00000000 移到地址 -4(%rbp)处。
-
-指令 movzbl 表示把一个byte变成long并将空位零填充 。movzbl -5(%rbp), %eax 把 0xff 移到寄存器 %eax 上，并把空位补0。寄存器 %eax 的值变成了 0x000000ff。
-
-指令 movsbl 表示把一个byte变成long并将空位符号填充。movsbl -6(%rbp), %ecx 把 0xff 移到寄存器 %eax ，然后把空位补成有符号的数值，这使得寄存器 %ecx 值变为 0xffffffff。最后， addl %eax, %ecx 执行加法操作， movl %ecx, -12(%rbp) 把结果存到栈上。
-
-现在，你可以把整型提升理解为把C语言类型直接映射到机器指令的一种机制了。所有算术操作的操作数被转成有符号或无符号int后，都会被当作一个小的int的计算。你可以这么想：尽管short和char只占一两个字节，当它们在进行算术运算时，都是当作int的。这种转成int规则被称为整型提升。
-
-总结:
-通常情况下，在对int类型的数值作运算时，CPU的运算速度是最快的。在x86上，32位算术运算的速度比16位算术运算的速度快一倍。C语言是一个注重效率的语言，所以它会作整型提升，使得程序的运行速度尽可能地快。因此，你必须记住整型提升规则，以免发生一些整型溢出的问题。
-**** 参考文章
-[[https://windmissing.github.io/cpp_notes/grammar/2015-08-25-Integer-Promotion.html][c语言进阶：整型提升]]
-
-*** 浮点类型提升
-float将会提升到double类型再进行运算
-
-*** 无符号类型的运算对象
-如果某个运算符左右两边的运算对象类型不一致,那么这些运算对象将转换成同一种类型.
-1. 执行整型提升后,如果两边的运算对象的类型一样,则无须进一步的转换;
-2. 如果一个是无符号,一个是有符号,并且无符号类型大于等于带符号类型,那么带符号类型转换成无符号类型;
-3. 如果一个是无符号,一个是有符号,并且无符号类型小于带符号类型,此时转换的结果取决于机器.如果无符号类型所有值都可以存在带符号类型里,则无符号转成有符号,
-*** 转换优先级
-优先级逐步提升，同一级的类型优先级相同：
-1. bool
-2. char,signed char,unsigned char
-3. short,unsigned short
-4. int,unsigned int
-5. long,unsigned long
-6. long long,unsigned long long
-
-** 显式转换
-*** 命名的强制类型转换
-格式:cast-name<type>(expression);
-如果type是引用类型,则结果是左值.
-
-cast-name是static_cast\dynamic_cast\const_cast和reinterpret_cast中的一种.
-**** const_cast
-const_cast 用来移除变量的 const 或volatile限定符.
-const_cast只能改变运算对象的底层const.
-
-#+begin_src c++
-  const char *pc;
-  char *p=const_cast<char*>(pc);//正确,但是通过p写值是未定义的行为
-#+END_SRC
-如果对象本身不时一个常量,使用强制类型转换获得写权限是合法的行为.但是如果对象是一个常量,再使用const_cast执行写操作就会产生未定义的后果.
 * 友元
 友元可以是一个函数，该函数被称为友元函数；友元也可以是一个类，该类被称为友元类，在这种情况下，整个类及其所有成员都是友元。
 
@@ -2448,18 +2883,6 @@ The default value of B::y = 11
 ** 参考文章
 [[http://c.biancheng.net/view/169.html][C++友元函数和友元类（C++ friend）解详]]
 [[https://www.runoob.com/cplusplus/cpp-friend-functions.html][C++ 友元函数]]
-* 定义抽象数据类型
-#+BEGIN_SRC c++
-struct ListNode {
-    int val;
-    ListNode *next;
-    ListNode() : val(0), next(nullptr) {}
-    ListNode(int x) : val(x), next(nullptr) {}
-    ListNode(int x, ListNode *next) : val(x), next(next) {}
-};
-#+END_SRC
-
-如果调用 ~ListNode(5)~ 那么 ~val=5~ ， ~next~ 指针为空指针
 * 内存泄露
 new 和 delete 是 C++ 用于管理堆内存的两个运算符，对应于C语言中的 malloc 和 free，但是 malloc 和 free 是函数，而new 和 delete 是运算符。除此之外，new 在申请内存的同时，还会调用对象的构造函数，而 malloc 只会申请内存；同样，delete 在释放内存之前，会调用对象的析构函数，而 free 只会释放内存。
 
@@ -2835,319 +3258,17 @@ private:
     T ctwo;
 };
 #+end_src
-* 多态
-C++规定，当一个成员函数被声明为虚函数后，其派生类中的同名函数都自动成为虚函数。
-
-多态的行为必须是在指针或者引用的情况下才能生效。
-** 简单介绍
+* 默认实参
+一旦某个实参被赋予了默认值，它后面所有的形参都必须有默认值。
+** 默认实参声明
+多次声明同一个函数是合法的，但是在给定的作用域中一个形参只能被赋予一次默认参数。
 #+begin_src c++
-#include "stdafx.h"
-#include <iostream>
-#include <stdlib.h>
-using namespace std;
-
-class Father
-{
-public:
-    void Face()
-    {
-        cout << "Father's face" << endl;
-    }
-
-    void Say()
-    {
-        cout << "Father say hello" << endl;
-    }
-};
-
-
-class Son:public Father
-{
-public:
-    void Say()
-    {
-        cout << "Son say hello" << endl;
-    }
-};
-
-void main()
-{
-    Son son;
-    Father *pFather=&son; // 隐式类型转换
-    pFather->Say();
-}
-#+end_src
-输出的结果为:
-#+DOWNLOADED: screenshot @ 2022-12-05 23:01:44
-[[file:images/多态/2022-12-05_23-01-44_screenshot.png]]
-c++编译器在编译的时候，要确定每个对象调用的函数（非虚函数）的地址，这称为早期绑定，
-当我们将Son类的对象son的地址赋给pFather时，c++编译器进行了类型转换，此时c++编译器认为变量pFather保存的就是Father对象的地址，当在main函数中执行pFather->Say(),调用的当然就是Father对象的Say函数
-
-要让编译器采用晚绑定，就要在基类中声明函数时使用virtual关键字，这样的函数我们就称之为虚函数，
-一旦某个函数在基类中声明为virtual，那么在所有的派生类中该函数都是virtual，而不需要再显式地声明为virtual。
-
-#+begin_src c++
-#include "stdafx.h"
-#include <iostream>
-#include <stdlib.h>
-using namespace std;
-
-class Father
-{
-public:
-    void Face()
-    {
-        cout << "Father's face" << endl;
-    }
-
-    virtual void Say()
-    {
-        cout << "Father say hello" << endl;
-    }
-};
-
-
-class Son:public Father
-{
-public:
-    void Say()
-    {
-        cout << "Son say hello" << endl;
-    }
-};
-
-void main()
-{
-    Son son;
-    Father *pFather=&son; // 隐式类型转换
-    pFather->Say();
-}
-#+end_src
-
-#+DOWNLOADED: screenshot @ 2022-12-05 23:03:29
-[[file:images/多态/2022-12-05_23-03-29_screenshot.png]]
-** 虚表
-如果一个类中有虚函数，编译器会为每个包含虚函数的类创建一个虚表(即 vtable)，该表是一个一维数组，在这个数组中存放每个虚函数的地址。
-
-编译器另外还为每个对象提供了一个虚表指针(即vptr)，这个指针指向了对象所属类的虚表。
-
-在构造函数中进行虚表的创建和虚表指针的初始化，
-在构造子类对象时，要先调用父类的构造函数，初始化父类对象的虚表指针，该虚表指针指向父类的虚表，
-当执行子类的构造函数时，子类对象的虚表指针被初始化，指向自身的虚表。
-
-虚表可以继承，如果子类没有重写虚函数，那么子类虚表中仍然会有该函数的地址，只不过这个地址指向的是基类的虚函数实现。
-如果重写了相应的虚函数，那么虚表中的地址就会改变，指向自身的虚函数实现，如果派生类有自己的虚函数，那么虚表中就会添加该项。
-** 虚表和虚表指针的运行方式
-#+begin_src c++
-#include<iostream.h>
-
-class Base
- {
- public:
-    virtual void function1() {cout<<"Base :: function1()\n";};
-    virtual void function2() {cout<<"Base :: function2()\n";};
-    virtual ~Base(){};
-};
-
-class D1: public Base
-{
-public:
-   ~D1(){};
-   virtual void function1() { cout<<"D1 :: function1()\n";};
-};
-
-class D2: public Base
-{
-public:
-   ~D2(){};
-   virtual void function2() { cout<< "D2 :: function2\n";};
-};
-
-int main()
-{
-  D1 *d = new D1;;
-  Base *b = d;
-
-  b->function1();
-  b->function2();
-
-  delete (b);
-
-  return (0);
-}
-
-output:
-D1 :: function1()
-Base :: function2()
+  string screen(sz,sz,char=' ');
+  string screen(sz,sz,char='*');//错误，重复声明。不能修改一个已经存在的默认值
+  string screen(sz=24,sz=80,char);//正确，可以重复声明添加默认实参
 #+END_SRC
-Here is a pictorial representation of Virtual Table and _vptr for the above code:
-#+DOWNLOADED: screenshot @ 2022-12-26 22:59:51
-[[file:images/多态/2022-12-26_22-59-51_screenshot.png]]
-Here in function main b pointer gets assigned to D1's _vptr and now starts pointing to D1's vtable.
-Then calling to a function1(), makes it's _vptr startightway calls D1's vtable function1() and so in turn calls D1's method
-i.e. function1() as D1 has it's own function1() defined it's class.
+** 默认实参初始值
 
-Where as pointer b calling to a function2(), makes it's _vptr points to D1's vatble which in-turn pointing to Base class's vtable function2 () as shown in the diagram (as D1 class does not have it's own definition or function2()).
-
-So, now calling delete on pointer b follows the _vptr - which is pointing to D1's vtable calls it's own class's destructor
-i.e. D1 class's destructor and then calls the destrcutor of Base class - this as part of when dervied object gets deleted it turn deletes it's emebeded base object.
-Thats why we must always make Base class's destrcutor as virtual if it has any virtual functions in it.
-** 构造函数
-C++标准规定了在构造函数中调用虚函数时，只会绑定到自己类的相应函数。虚函数在构造函数中不起作用。
-
-*** 构造函数不能为虚函数
-简言之：构造函数不能是虚函数，因为虚函数是基于对象的，构造函数是用来产生对象的，若构造函数是虚函数，则需要对象来调用，但是此时构造函数没有执行，就没有对象存在，产生矛盾，所以构造函数不能是虚函数。
-**** 从存储空间角度来看
-虚函数的调用需要虚函数表(vptr)指针，而该指针存放在对象的内存空间中，在构造函数中进行初始化工作，即初始化vptr，让它指向正确的虚函数表。
-所以需要调用构造函数才可以创建或初始化它的值，否则即使开辟了空间，该指针也为随机值；若构造函数声明为虚函数，那么由于对象还未创建，还没有内存空间，更没有虚函数表地址用来调用虚函数——构造函数了。
-
-**** 从多态角度来看
-构造一个对象的时候，必须知道对象的实际类型；而虚函数主要是实现多态，在运行时才可以明确调用对象，根据传入的对象类型来调用函数，
-例如通过父类的指针或者引用来调用它的时候可以变成调用子类的那个成员函数
-。而构造函数是在创建对象时自己主动调用的，不可能通过父类的指针或者引用去调用。那使用虚函数也就没有了实际意义。
-在调用构造函数时，由于对象还未构造成功。编译器无法知道对象的实际类型，是该类本身，还是该类的一个派生类，或是更深层次的派生类。
-并且构造函数的作用是提供初始化，在对象生命期仅仅运行一次，不是对象的动态行为，没有必要成为虚函数。
-
-** 析构函数
-*** 析构函数为什么必须是虚函数
-当基类的析构函数为非虚函数时，删除一个基类指针指向的派生类实例时，只清理了派生类从基类继承过来的资源，而派生类自己独有的资源却没有被清理，这显然不是我们希望的。
-
-如果一个类会被其他类继承，那么我们有必要将被继承的类（基类）的析构函数定义成虚函数。这样，释放基类指针指向的派生类实例时，先调用派生类的析构函数，再调用基类的析构函数，清理工作才能全面进行，才不会发生内存泄漏。
-*** delete子类指针
-不管什么时候delete子类指针，都会调用父类析构函数（不管父类析构函数是不是虚函数）。
-
-之所以要把父类析构函数定义为虚函数，是因为当父类指针指向子类对象时，delete父类指针可以调用到子类的析构函数（之后会调用父类的析构）。
-** 参数传递
-*** 引用和值传递
-#+begin_src c++
-  class Parent{
-  public:
-      virtual void print();
-  }
-  class Son{
-  public:
-      void print();
-  }
-  void A(Parent &son){//传引用
-      son.print();
-  }
-  void B(Parent son){//传值
-      son.print();
-  }
-  main(){
-    Son *p=new Son();
-    A(*p);//调用子类的print
-    B(*p);//调用父类的print
-  }
-#+END_SRC
-第一次传引用相当于父类指针指向派生类；
-第二次传值，是用派生类对象赋值给基类对象，仅仅拷贝了派生类的基类部分，因此调用基类版本函数。
-
-多态的行为必须是在指针或者引用的情况下才能生效，对值变量来说，一定是执行静态绑定。
-*** 默认参数
-虚函数是动态绑定，但默认值是在编译期决定的，所以派生类的
-
-#+begin_src c++
-#include <iostream>
-using namespace std;
- 
-class Base {
-public:
-    virtual void fun(int x = 111) {
-        cout << "Base::fun(), x = " << x << endl;
-    }
-};
- 
-class Derived : public Base {
-public:
-    virtual void fun(int x=222) {
-        cout << "Derived::fun(), x = " << x << endl;
-    }
-};
- 
-int main() {
-    Derived d1;
-    Base* p1 = &d1;
-	Derived* p2=&d1; 
-    p1->fun();
-    p2->fun();
-    return 0;
-}
-#+END_SRC
-输出：
-#+begin_example
-Derived::fun(), x = 111
-Derived::fun(), x = 222
-#+end_example
-注意，上面第一行打印的是派生类函数名，但是使用的默认值是基类的111。
-** 函数声明不同的虚函数是不同的
-如下代码，基类的display方法加了const，这导致派生类实际上有两个不同的虚方法：一个带const，一个不带const。
-
-当用基类指针调用子类对象方法时，由于基类的虚函数表只有带const的方法，所以会调用到子类的带const的display方法。
-#+begin_src c++
-#include <iostream>
-using namespace std;
- 
-class Base {
-public:
-    virtual void display() const {
-        cout << "Base::display()" << endl;
-    }
-};
- 
-class Derived : public Base {
-public:
-    virtual void display() {
-        cout << "Derived::display()" << endl;
-    }
-};
- 
-int main() {
-    Derived d1;
-    Base* p1 = &d1;
-	Derived* p2=&d1; 
-    p1->display();
-    p2->display();
-    return 0;
-}#+END_SRC
-输出：
-#+begin_example
-Base::display()
-Derived::display()
-#+end_example
-
-如果去掉const,则结果为：
-#+begin_example
-Derived::display()
-Derived::display()
-#+end_example
-** 继承
-#+begin_src c++
-  class A
-  ｛
-  public :
-  virtual void test();
-  ｝;
-  class B:public A{
-    public:
-    void test();
-  }
-  class C:public B{
-    public:
-    void test();
-  }
-#+END_SRC
-则B的test函数以及C的test函数都是虚函数；即使C的test函数访问权限发生变化，也是虚函数。
-#+begin_src c++
-  class C:public B{
-    private:
-    void test();
-  }
-#+END_SRC
-
-** 参考文章
-[[https://www.go4expert.com/articles/virtual-table-vptr-t16544/][How Virtual Table and _vptr works]]
-[[https://blog.csdn.net/qq_42247231/article/details/105109709][为什么析构函数必须是虚函数？为什么默认的析构函数不是虚函数？]]
 * 右值
 ** 右值引用
 右值引用的标志是&&，顾名思义，右值引用专门为右值而生，可以指向右值，不能指向左值：
@@ -3560,167 +3681,96 @@ int main()
 #+end_src
 ** 参考文章
 [[https://blog.csdn.net/zwvista/article/details/78111346][C++17尝鲜：结构化绑定声明（Structured Binding Declaration）]]
-* 继承
-** 多重继承
-非虚拟继承，B和C的对象分别保留一份A对象的内存空间，n处于不同的内存空间，因此是独立的不会相互影响，n的赋值不会覆盖；
-如果B和C虚拟继承A类的话，A的对象只有一份，B和C对象中只是保存指向A对象的指针，n的赋值会覆盖。
+* 转换
+** 算术转换
+*** 整型提升
+bool\char\signed char\unsigned char\short\unsigned short等类型:
+- 如果可以存在int里,则转换成int(例如bool转成0或1)
+- 如果不能存在int里,则转换成unsigned int
+
+较大的char类型(wchar_t\char16_t\char32_t)提升成int\unsigned int\long\unsigned long\long long\unsigned long long中最小的一种类型,前提是要能容纳原类型所有可能的值.
+
+**** 从汇编层面理解
+从一个简单的例子开始：
 #+begin_src c++
-#include <iostream>
-using namespace std;
-
-class A
+int main(void)
 {
-	public:
-	int n;
-};
-class B:public A{};
-class C:public A{};
-class D:public B,public C{};
-
-int main()
-{
-	D d;
-	d.B::n=10;
-	d.C::n=20;
-	cout<<d.B::n<<","<<d.C::n;
-	return 0;
-}
-#+END_SRC
-** 虚继承
-*** 菱形继承的问题
-
-#+DOWNLOADED: screenshot @ 2023-03-14 22:32:32
-[[file:images/继承/2023-03-14_22-32-32_screenshot.png]]
-类 A 派生出类 B 和类 C，类 D 继承自类 B 和类 C，这个时候类 A 中的成员变量和成员函数继承到类 D 中变成了两份，一份来自 A-->B-->D 这条路径，另一份来自 A-->C-->D 这条路径。
-
-在一个派生类中保留间接基类的多份同名成员，虽然可以在不同的成员变量中分别存放不同的数据，但大多数情况下这是多余的：因为保留多份成员变量不仅占用较多的存储空间，还容易产生命名冲突。
-假如类 A 有一个成员变量 a，那么在类 D 中直接访问 a 就会产生歧义，编译器不知道它究竟来自 A -->B-->D 这条路径，还是来自 A-->C-->D 这条路径。
-下面是菱形继承的具体实现：
-#+begin_src c++
-//间接基类A
-class A{
-protected:
-    int m_a;
-};
-
-//直接基类B
-class B: public A{
-protected:
-    int m_b;
-};
-
-//直接基类C
-class C: public A{
-protected:
-    int m_c;
-};
-
-//派生类D
-class D: public B, public C{
-public:
-    void seta(int a){ m_a = a; }  //命名冲突
-    void setb(int b){ m_b = b; }  //正确
-    void setc(int c){ m_c = c; }  //正确
-    void setd(int d){ m_d = d; }  //正确
-private:
-    int m_d;
-};
-
-int main(){
-    D d;
+    unsigned char a = 0xff;
+    char b = 0xff;
+    int c = a + b;
     return 0;
 }
-#+END_SRC
-这段代码实现了上图所示的菱形继承，第 25 行代码试图直接访问成员变量 m_a，结果发生了错误，因为类 B 和类 C 中都有成员变量 m_a（从 A 类继承而来），编译器不知道选用哪一个，所以产生了歧义。
 
-为了消除歧义，我们可以在 m_a 的前面指明它具体来自哪个类：
+#+END_SRC
+反汇编结果是：
 #+begin_src c++
-void seta(int a){ B::m_a = a; }
+movl    {% math_inline %}0, -4(%rbp)        # The return value of main is 0
+movb    {% endmath_inline %}-1, -5(%rbp)       # unsigned char a = 0xff;
+movb    {% math_inline %}-1, -6(%rbp)       # char b = 0xff;
+movzbl  -5(%rbp), %eax
+movsbl  -6(%rbp), %ecx
+addl    %eax, %ecx          # int c = a + b
+movl    %ecx, -12(%rbp)     # store c onto the stack
+movl    -4(%rbp), %eax
+popq    %rbp
+ret                         # return value 0 from eax
 #+END_SRC
-这样表示使用 B 类的 m_a。当然也可以使用 C 类的：
+如果你的GAS语法不熟悉，可以查看X86 Assembly/GAS Syntax。
+GAS语法指令通常以“b”, “s”, “w”, “l”, “q” 和“t” 为后缀，以区分操作数在大小。
 #+begin_src c++
-void seta(int a){ C::m_a = a; }
-#+END_SRC
-*** 虚继承（Virtual Inheritance）
-为了解决多继承时的命名冲突和冗余数据问题，C++ 提出了虚继承，使得在派生类中只保留一份间接基类的成员。
+b = byte (8 bit)
+s = short (16 bit integer) or single (32-bit floating point)
+w = word (16 bit)
+l = long (32 bit integer or 64-bit floating point)
+q = quad (64 bit)
+t = 10 bytes (80-bit floating point)
 
-在继承方式前面加上 virtual 关键字就是虚继承，请看下面的例子：
+#+END_SRC
+GAS语法中的mov是把参数从左边移到右边。例如： movl {% endmath_inline %}0, -4(%rbp)的意思是把 0x00000000 移到地址 -4(%rbp)处。
+
+指令 movzbl 表示把一个byte变成long并将空位零填充 。movzbl -5(%rbp), %eax 把 0xff 移到寄存器 %eax 上，并把空位补0。寄存器 %eax 的值变成了 0x000000ff。
+
+指令 movsbl 表示把一个byte变成long并将空位符号填充。movsbl -6(%rbp), %ecx 把 0xff 移到寄存器 %eax ，然后把空位补成有符号的数值，这使得寄存器 %ecx 值变为 0xffffffff。最后， addl %eax, %ecx 执行加法操作， movl %ecx, -12(%rbp) 把结果存到栈上。
+
+现在，你可以把整型提升理解为把C语言类型直接映射到机器指令的一种机制了。所有算术操作的操作数被转成有符号或无符号int后，都会被当作一个小的int的计算。你可以这么想：尽管short和char只占一两个字节，当它们在进行算术运算时，都是当作int的。这种转成int规则被称为整型提升。
+
+总结:
+通常情况下，在对int类型的数值作运算时，CPU的运算速度是最快的。在x86上，32位算术运算的速度比16位算术运算的速度快一倍。C语言是一个注重效率的语言，所以它会作整型提升，使得程序的运行速度尽可能地快。因此，你必须记住整型提升规则，以免发生一些整型溢出的问题。
+**** 参考文章
+[[https://windmissing.github.io/cpp_notes/grammar/2015-08-25-Integer-Promotion.html][c语言进阶：整型提升]]
+
+*** 浮点类型提升
+float将会提升到double类型再进行运算
+
+*** 无符号类型的运算对象
+如果某个运算符左右两边的运算对象类型不一致,那么这些运算对象将转换成同一种类型.
+1. 执行整型提升后,如果两边的运算对象的类型一样,则无须进一步的转换;
+2. 如果一个是无符号,一个是有符号,并且无符号类型大于等于带符号类型,那么带符号类型转换成无符号类型;
+3. 如果一个是无符号,一个是有符号,并且无符号类型小于带符号类型,此时转换的结果取决于机器.如果无符号类型所有值都可以存在带符号类型里,则无符号转成有符号,
+*** 转换优先级
+优先级逐步提升，同一级的类型优先级相同：
+1. bool
+2. char,signed char,unsigned char
+3. short,unsigned short
+4. int,unsigned int
+5. long,unsigned long
+6. long long,unsigned long long
+
+** 显式转换
+*** 命名的强制类型转换
+格式:cast-name<type>(expression);
+如果type是引用类型,则结果是左值.
+
+cast-name是static_cast\dynamic_cast\const_cast和reinterpret_cast中的一种.
+**** const_cast
+const_cast 用来移除变量的 const 或volatile限定符.
+const_cast只能改变运算对象的底层const.
+
 #+begin_src c++
-//间接基类A
-class A{
-protected:
-    int m_a;
-};
-//直接基类B
-class B: virtual public A{  //虚继承
-protected:
-    int m_b;
-};
-//直接基类C
-class C: virtual public A{  //虚继承
-protected:
-    int m_c;
-};
-//派生类D
-class D: public B, public C{
-public:
-    void seta(int a){ m_a = a; }  //正确
-    void setb(int b){ m_b = b; }  //正确
-    void setc(int c){ m_c = c; }  //正确
-    void setd(int d){ m_d = d; }  //正确
-private:
-    int m_d;
-};
-int main(){
-    D d;
-    return 0;
-}
+  const char *pc;
+  char *p=const_cast<char*>(pc);//正确,但是通过p写值是未定义的行为
 #+END_SRC
-这段代码使用虚继承重新实现了上图所示的菱形继承，这样在派生类 D 中就只保留了一份成员变量 m_a，直接访问就不会再有歧义了。
-
-虚继承的目的是让某个类做出声明，承诺愿意共享它的基类。
-其中，这个被共享的基类就称为虚基类（Virtual Base Class），本例中的 A 就是一个虚基类。
-在这种机制下，不论虚基类在继承体系中出现了多少次，在派生类中都只包含一份虚基类的成员。
-
-现在让我们重新梳理一下本例的继承关系，如下图所示：
-
-#+DOWNLOADED: screenshot @ 2023-03-14 22:43:51
-[[file:images/继承/2023-03-14_22-43-51_screenshot.png]]
-
-观察这个新的继承体系，我们会发现虚继承的一个不太直观的特征：必须在虚派生的真实需求出现前就已经完成虚派生的操作。
-在上图中，当定义 D 类时才出现了对虚派生的需求，但是如果 B 类和 C 类不是从 A 类虚派生得到的，那么 D 类还是会保留 A 类的两份成员。
-
-换个角度讲，虚派生只影响从指定了虚基类的派生类中进一步派生出来的类，它不会影响派生类本身。
-
-在实际开发中，位于中间层次的基类将其继承声明为虚继承一般不会带来什么问题。
-通常情况下，使用虚继承的类层次是由一个人或者一个项目组一次性设计完成的。
-对于一个独立开发的类来说，很少需要基类中的某一个类是虚基类，况且新类的开发者也无法改变已经存在的类体系。
-
-C++标准库中的 iostream 类就是一个虚继承的实际应用案例。
-iostream 从 istream 和 ostream 直接继承而来，而 istream 和 ostream 又都继承自一个共同的名为 base_ios 的类，是典型的菱形继承。
-此时 istream 和 ostream 必须采用虚继承，否则将导致 iostream 类中保留两份 base_ios 类的成员。
-
-#+DOWNLOADED: screenshot @ 2023-03-14 22:51:26
-[[file:images/继承/2023-03-14_22-51-26_screenshot.png]]
-*** 虚基类成员的可见性
-因为在虚继承的最终派生类中只保留了一份虚基类的成员，所以该成员可以被直接访问，不会产生二义性。
-此外，如果虚基类的成员只被一条派生路径覆盖，那么仍然可以直接访问这个被覆盖的成员。
-但是如果该成员被两条或多条路径覆盖了，那就不能直接访问了，此时必须指明该成员属于哪个类。
-
-以图2中的菱形继承为例，假设 A 定义了一个名为 x 的成员变量，当我们在 D 中直接访问 x 时，会有三种可能性：
-- 如果 B 和 C 中都没有 x 的定义，那么 x 将被解析为 A 的成员，此时不存在二义性。
-- 如果 B 或 C 其中的一个类定义了 x，也不会有二义性，派生类的 x 比虚基类的 x 优先级更高。
-- 如果 B 和 C 中都定义了 x，那么直接访问 x 将产生二义性问题。
-
-可以看到，使用多继承经常会出现二义性问题，必须十分小心。上面的例子是简单的，如果继承的层次再多一些，关系更复杂一些，程序员就很容易陷人迷魂阵，程序的编写、调试和维护工作都会变得更加困难，
-因我不提倡在程序中使用多继承，只有在比较简单和不易出现二义性的情况或实在必要时才使用多继承，能用单一继承解决的问题就不要使用多继承
-。也正是由于这个原因，C++ 之后的很多面向对象的编程语言，例如 Java、C#、PHP 等，都不支持多继承。
-** 访问控制
-public继承不改变父类中的成员的访问权限；
-protected继承时，public和protected访问级别的成员变为protected，private还是private；
-private继承时，父类所有成员变为private。
-** 参考文章
-[[http://c.biancheng.net/view/2280.html][C++虚继承和虚基类详解]]
+如果对象本身不时一个常量,使用强制类型转换获得写权限是合法的行为.但是如果对象是一个常量,再使用const_cast执行写操作就会产生未定义的后果.
 * gtest
 ** assertion
 在gtest中，是通过断言（assertion）来判断代码实现的功能是否符合预期。断言的结果分为success、non-fatal failture和fatal failture。
