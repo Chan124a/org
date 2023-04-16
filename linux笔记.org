@@ -10115,7 +10115,7 @@ HOST w231
  然后重启ssh服务
 
  service sshd restart
-** SSH执行命令
+** 通过SSH远程执行命令
  ssh 的一个经常被忽视的特性是它可以直接远程执行命令。
 
  ssh foobar@server ls 可以直接在用foobar的命令下执行 ls 命令。 
@@ -10200,6 +10200,9 @@ Ciphers blowfish,3des：指定加密算法。
 Compression yes：是否压缩传输信号。
 ConnectionAttempts 10：客户端进行连接时，最大的尝试次数。
 ConnectTimeout 60：客户端进行连接时，服务器在指定秒数内没有回复，则中断连接尝试。
+ControlMaster auto:SSH支持 ControlMaster 模式，可以复用之前已经建立的连接,所以开启这个功能之后，如果已经有一条到服务器的链接，那么再连接的时候，就不需要再输入密码了。It will look for the special file (a socket) in your ControlPath directory that is maintaining a connection to the cluster. If it already exists and is open, it’ll use it to create a connection without re-authenticating; if it doesn’t exist, it’ll authenticate and create the file for subsequent use.
+ControlPath:指定ControlMaster查找连接的目录.
+ControlPersist yes: 在最后一个连接关闭之后也不真正的关掉连接，这样后面再连接的时候就还是不用输入密码。
 DynamicForward 1080：指定动态转发端口。
 EscapeChar ~                              设置escape字符
 ForwardAgent no                           设置连接是否经过验证代理（如果存在）转发给远程计算机。
@@ -10286,7 +10289,7 @@ MaxStartups 10                                                  同时允许几�
 DenyUsers *                                                     设定受抵挡的使用者名称
 AllowUsers *                                                    设定允许的使用者名称
 #+END_EXAMPLE
-** ssh 命令行配置项
+** ssh 命令行参数
 ssh 命令有很多配置项，修改它的默认行为。
 *** -c
 -c参数指定加密算法。
@@ -10310,6 +10313,9 @@ $ ssh -D 1080 server
 #+END_SRC
 上面命令将本机 1080 端口收到的请求，都转发到服务器server。
 
+*** -e
+-e ch|^ch|none
+设置 pty 会话的 escape 字符 (默认字符: `~' ) . escape 字符只在行首有效, escape 字符后面跟一个点 (`.' ) 表示结束连接, 跟一个 control-Z 表示挂起连接(suspend), 跟 escape 字符自己 表示输出这个字符. 把这个字符设为 ``none 则禁止 escape 功能, 使会话完全透明.
 *** -f
 -f参数表示 SSH 连接在后台运行。
 
@@ -11717,9 +11723,35 @@ debug3: receive packet: type 51
 
 *** 参考文章
 [[https://superuser.com/questions/1137438/ssh-key-authentication-fails][SSH-Key authentication fails]]
+** 重用SSH连接
+平时需要经常用到 SSH，比如登录远程服务器，用 Git 推送和更新代码等。建立一次 SSH 连接可能并不需要多久长时间，但是如果要频繁登录同一台服务器，就未免显得有些繁琐和浪费时间。如果是用用户名和密码登录，每次都要输入密码就更加让人崩溃。还有使用 Git 的时候，短时间内可能需要经常 git pull 和 git push，如果每次操作都需要重新建立连接，等待过程就让人心生厌恶了。
+
+实际上，SSH 有个「鲜为人知」的特性可以做到重用连接，只有在第一次登录的时候会创建新的连接，后续的会话都可以重用这个已经存在的连接。这样，后续的登录就会非常快，而且不需要输入密码认证。配置也很简单，直接上代码。
+
+修改 ~/.ssh/config 文件，添加如下配置：
+#+begin_example
+Host *
+    ControlMaster auto
+    ControlPath /tmp/ssh_mux_%h_%p_%r
+    ControlPersist 600
+
+#+end_example
+意思也很好理解：
+
+Host * 这一行表示下面这些配置和规则影响到的 host，* 表示所有的远程 host 都生效。如果要指定某个（些）特定的 host，可以使用类似 Host *.example.com 的配置。
+
+ControlMaster auto 这个选项告诉 SSH 客户端尝试重用现有的连接（master connection）。
+
+ControlPath 指定了这个连接的 socket 保存的路径，这里配置的是在 /tmp 目录，实际上可以在任何有读写权限的路径下。/tmp/ssh_mux_%h_%p_%r 配置了 socket 文件名，%h 表示远程主机名（host），%p 表示远程 SSH 服务器的端口（port），%r 表示登录的远程用户名（remote user name）。这些 socket 可以随时删掉（rm），删除后首次会话又会创建新的 master 连接。曾经遇到过这种情况，本地断网了，打开的几个远程终端都卡死，网络恢复后也一直这样，甚至打开新的终端也登录不上。这个时候只需要把之前的 socket 文件都删掉，重新登录就可以了。
+
+ControlPersist 这个选项比较重要，表示在创建首个连接（master connection）的会话退出后，master 连接仍然在后台保留，以便其他复用该连接的会话不会出现问题。这个特性在使用 Git 的时候就非常有用，在频繁提交和拉代码的时候，每次 SSH 会话都是很短暂的，如果 master 连接能保持在后台，后续的操作就会如丝般顺滑。
+
+只需要添加上面几行配置，SSH 的体验就瞬间上升了好几个档次，简直是懒人必备。
 ** 参考文章
 [[https://www.jianshu.com/p/1e793e386beb][ssh配置文件详解]]
 [[https://wangdoc.com/ssh/client.html][ssh教程]]
+[[https://www.jianshu.com/p/7e43fa159851][使用ssh 的ControlMaster实现不用每次ssh都输入密码]]
+[[http://liyangliang.me/posts/2015/03/reuse-ssh-connection/][重用 SSH 连接]]
 * stty命令
 Linux环境下，在终端设备与进程之间的中间有一个终端驱动器，里面有终端驱动函数。
 

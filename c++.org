@@ -413,8 +413,7 @@ Record lookup(const Telno&);
   Record lookup(Account*);//新函数,作用于指向Account的指针
   Record lookup(const Account*);//新函数,作用于指向常量的指针
 #+END_SRC
-由于非常量对象可以转换成const,所以上面4个函数都能作用于非常
-量对象或者指向非常量对象的指针,此时编译器会优先选用非常量版本的函数.
+由于非常量对象可以转换成const,所以上面4个函数都能作用于非常量对象或者指向非常量对象的指针,此时编译器会优先选用非常量版本的函数.
 ** 隐式转换
 *** 整型提升
 将char、unsigned char、signed char、shot、unsigned short转换为int 或unsigned int。
@@ -856,39 +855,56 @@ struct ListNode {
 #+END_SRC
 
 如果调用 ~ListNode(5)~ 那么 ~val=5~ ， ~next~ 指针为空指针
-* hex
-Sets the basefield format flag for the str stream to hex.
+* 函数指针
+函数指针指向的是函数而非对象.
+函数的类型由返回类型和形参类型共同决定,与函数名无关.
+函数指针可以赋值为nullptr或者值为0的整型常量表达式.
 
-When basefield is set to hex, integer values inserted into the stream are expressed in hexadecimal base (i.e., radix 16). For input streams, extracted values are also expected to be expressed in hexadecimal base when this flag is set.
+函数 bool lengthCompare(const string &,const string &) 的类型是 bool(const string &,const string &).
+如果想声明一个指向该函数的指针,只需要用指针替换函数名即可: bool (*pf)(const string &,const string &) (未初始化).
+注意 *pf 左右两边的括号必不可少,如果没有括号,那么pf是一个返回值为bool指针的函数.
 
-The basefield format flag can take any of the following values (each with its own manipulator):
-
-| flag value | effect when set                                          |
-|------------+----------------------------------------------------------|
-| dec        | read/write integer values using decimal base format.     |
-| hex        | read/write integer values using hexadecimal base format. |
-| oct        | read/write integer values using octal base format.       |
-
-example:
-#+BEGIN_SRC c++
-// modify basefield
-#include <iostream>     // std::cout, std::dec, std::hex, std::oct
-
-int main () {
-  int n = 70;
-  std::cout << std::dec << n << '\n';
-  std::cout << std::hex << n << '\n';
-  std::cout << std::oct << n << '\n';
-  return 0;
-}
+** 使用函数指针
+当把函数名作为一个值使用时,该函数自动转换为指针.
+#+begin_src c++
+  pf = lengthCompare;  //pf指向名为lengthCompare的函数
+  pf = &lengthCompare; //等价的赋值语句:取地址符是可选的
 #+END_SRC
-#+BEGIN_EXAMPLE
-Output:
-70
-46
-106
 
-#+END_EXAMPLE
+可以直接使用指向函数的指针调用该函数,无须提前解引用指针.
+下面三个函数调用的方式是等价的:
+#+begin_src c++
+  bool b1 = pf("hello","goodbye");
+  bool b2 = (*pf)("hello","goodbye");
+  bool b3 = lengthCompare("hello","goodbye");
+#+END_SRC
+
+** 重载函数的指针
+编译器通过指针类型决定选用哪个重载函数,指针类型必须与重载函数中的某一个精确匹配.
+#+begin_src c++
+  void ff(int *);
+  void ff(unsigned int);
+
+  void (*pf1)(unsigned int)=ff; //pf1指向ff(unsigned)
+  void (*pf2)(int)=ff;          //错误:没有任何一个ff与该形参列表匹配
+  double (*pf3)(int*)=ff;       //错误:ff与pf3的返回值不匹配
+#+END_
+** 函数指针形参
+和数组类似,虽然不能定义函数类型的形参,但是形参可以是指向函数的指针.
+#+begin_src c++
+  void useBigger(const string &s1,const string &s2,bool pf(const string &,const string &));//第三个形参是函数类型,它会自动转换为指向函数的指针
+  void useBigger(const string &s1,const string &s2,bool (*pf)(const string &,const string &));//等价声明,显式地将形参定义成指向函数的指针
+
+  useBigger(s1,s2,lengthCompare);//可以直接将函数作为实参使用,此时它会自动转换成指针
+#+END_SRC
+
+可以用类型别名和decltype简化使用函数指针的代码
+#+begin_src c++
+  //Func和Func2是函数类型
+  typedef bool Func(const string&,const string&);
+  typedef decltype(lengthCompare) Func2;//等价的类型
+  //FuncP和FuncP2是指向函数的指针
+#+END_SRC
 * intptr_t、uintptr_t数据类型的解析
 #+begin_src c++
 typedef  intptr_t      ngx_int_t;
@@ -1715,6 +1731,59 @@ cout << ret.value_or(defaultVal).out1 << endl;
 - 不用担心额外的动态内存分配
 * struct和class的区别
 struct的默认访问级别为public，而class的默认访问级别是private。
+* 数组
+
+
+** 数组形参
+数组有两个特殊性质:
+- 不允许拷贝数组
+- 使用数组时(通常)会将其转换为指针
+
+由于不能拷贝数组,所以不能以值传递的方式使用数组参数.
+因为数组会被转换为指针,所以当为函数传递一个数组时,实际上传递的是指向数组首元素的指针.
+
+下面三个函数是等价的:
+#+begin_src c++
+  void print(const int*);
+  void print(const int[]);
+  void print(const int[10]);//这里的维度表示我们期望数组含有多少个元素,实际上编译器不会帮我们做检查
+
+  int i=0,j[2]={0,1};
+  print(&i);//正确,&i的类型是int*
+  print(j);//正确,j转换为int*并指向j[0].数组的大小对函数的调用并没有影响
+#+END_SRC
+上面三个函数的唯一形参都是const int*类型.
+当编译器处理对print函数的调用时,只检查传入的参数是否是const int*类型.
+
+*** 管理数组形参大小的常用技术
+**** 使用标记指定数组长度
+这种方法要求数组本身包含一个结束标记.
+
+典型例子是C语言风格字符串.
+C风格字符串在最后一个字符后面跟着一个空字符.
+函数在处理C风格字符串时遇到空字符停止.
+**** 使用标准库规范
+这种方式指的是调用函数时同时传递数组首元素和尾后元素的指针.
+#+begin_src c++
+  void print(const int *beg,const int *end)
+  {
+    while(beg!=end)
+      cout<<*beg++<<endl;//输出当前元素并将指针移动一个位置
+  }
+  int j[2]={0,1};
+  print(begin(i),end(j));
+#+END_SRC
+**** 显示传递一个表示数组大小的形参
+#+begin_src c++
+  void print(const int ia[],size_t size)
+  {
+    for(size_t i=0;i!=size;++i){
+      cout<<ia[i]<<endl;
+    }
+  }
+  int j[]={0,1};
+  print(j,end(j)-begin(j));
+#+END_SRC
 * STL容器底层数据结构总结
 ** vector
 vector是我们用到最多的数据结构，其底层数据结构是数组，由于数组的特点，vector也具有以下特性：
@@ -2540,6 +2609,39 @@ int main()
     return 0;  
 } 
 #+END_SRC
+** std::hex
+Sets the basefield format flag for the str stream to hex.
+
+When basefield is set to hex, integer values inserted into the stream are expressed in hexadecimal base (i.e., radix 16). For input streams, extracted values are also expected to be expressed in hexadecimal base when this flag is set.
+
+The basefield format flag can take any of the following values (each with its own manipulator):
+
+| flag value | effect when set                                          |
+|------------+----------------------------------------------------------|
+| dec        | read/write integer values using decimal base format.     |
+| hex        | read/write integer values using hexadecimal base format. |
+| oct        | read/write integer values using octal base format.       |
+
+example:
+#+BEGIN_SRC c++
+// modify basefield
+#include <iostream>     // std::cout, std::dec, std::hex, std::oct
+
+int main () {
+  int n = 70;
+  std::cout << std::dec << n << '\n';
+  std::cout << std::hex << n << '\n';
+  std::cout << std::oct << n << '\n';
+  return 0;
+}
+#+END_SRC
+#+BEGIN_EXAMPLE
+Output:
+70
+46
+106
+
+#+END_EXAMPLE
 * typedef
 ** 定义类型
 * typeid
@@ -2740,6 +2842,21 @@ i = 32
 ** 参考文章
 [[https://zhuanlan.zhihu.com/p/62060524][C/C++ 中的 volatile-知乎]]
 
+* 谓词
+A predicate is an expression that can be called and that returns a value that can be used as a condition. The predicates used by library algorithms are either unary predicates (meaning they have a single parameter) or binary predicates (meaning they have two parameters).
+
+The version of sort that takes a binary predicate uses the given predicate in place of < to compare elements.
+
+#+BEGIN_SRC c++
+// comparison function to be used to sort by word length
+bool isShorter(const string &s1, const string &s2)
+C++ Primer, Fifth Edition
+{
+return s1.size() < s2.size();
+}
+// sort on word length, shortest to longest
+sort(words.begin(), words.end(), isShorter);
+#+END_SRC
 * 友元
 友元可以是一个函数，该函数被称为友元函数；友元也可以是一个类，该类被称为友元类，在这种情况下，整个类及其所有成员都是友元。
 
@@ -2931,392 +3048,6 @@ The default value of B::y = 11
 ** 参考文章
 [[http://c.biancheng.net/view/169.html][C++友元函数和友元类（C++ friend）解详]]
 [[https://www.runoob.com/cplusplus/cpp-friend-functions.html][C++ 友元函数]]
-* 内存泄露
-new 和 delete 是 C++ 用于管理堆内存的两个运算符，对应于C语言中的 malloc 和 free，但是 malloc 和 free 是函数，而new 和 delete 是运算符。除此之外，new 在申请内存的同时，还会调用对象的构造函数，而 malloc 只会申请内存；同样，delete 在释放内存之前，会调用对象的析构函数，而 free 只会释放内存。
-
-new运算符申请内存：将调用相应的 operator new(size_t) 函数动态分配内存，在分配到的动态内存块上 初始化 相应类型的对象（构造函数）并返回其首地址。如果调用构造函数初始化对象时抛出异常，则自动调用 operator delete(void*, void*) 函数释放已经分配到的内存。
-
-delete运算符释放内存：调用相应类型的析构函数，处理类内部可能涉及的资源释放，调用相应的 operator delete(void *) 函数。
-** 内存是如何泄露的
-在 C++ 程序中，主要涉及到的内存就是“栈”和“堆”
-
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/v2-f3189547daa4548bc4ab6fdd13eeea6d_720w.png @ 2020-06-13 19:16:48
-[[file:%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2/2020-06-13_19-16-48_v2-f3189547daa4548bc4ab6fdd13eeea6d_720w.png]]
-
-通常来说，一个线程的栈内存是有限的，通常来说是 8M 左右（取决于运行的环境）。栈上的内存通常是由编译器来自动管理的。当在栈上分配一个新的变量时，或进入一个函数时，栈的指针会下移，相当于在栈上分配了一块内存。我们把一个变量分配在栈上，也就是利用了栈上的内存空间。当这个变量的生命周期结束时，栈的指针会上移，相同于回收了内存。
-
-由于栈上的内存的分配和回收都是由编译器控制的，所以在栈上是不会发生内存泄露的，只会发生栈溢出（Stack Overflow），也就是分配的空间超过了规定的栈大小。
-
-而堆上的内存是由程序直接控制的，程序可以通过 malloc/free 或 new/delete 来分配和回收内存，如果程序中通过 malloc/new 分配了一块内存，但忘记使用 free/delete 来回收内存，就发生了内存泄露。
-
-*** 经验 #1：尽量避免在堆上分配内存
-既然只有堆上会发生内存泄露，那第一原则肯定是避免在堆上面进行内存分配，尽可能的使用栈上的内存，由编译器进行分配和回收，这样当然就不会有内存泄露了。
-
-然而，只在栈上分配内存，在有 IO 的情况下是存在一定局限性的。
-
-举个例子，为了完成一个请求，我们通常会为这个请求构造一个 Context 对象，用于描述和这个请求有关的一些上下文。例如下面一段代码：
-#+BEGIN_SRC c++
-void Foo(Reuqest* req) {
-    RequestContext ctx(req);
-    HandleRequest(&ctx);
-}
-#+END_SRC
-如果 HandleRequest 是一个同步函数，当这个函数返回时，请求就可以被处理完成，那么显然 ctx 是可以被分配在栈上的。
-
-但如果 HandleRequest 是一个异步函数，例如：
-#+BEGIN_SRC c++
-void HandleRequest(RequestContext* ctx, Callback cb);
-#+END_SRC
-那么显然，ctx 是不能被分配在栈上的，因为如果 ctx 被分配在栈上，那么当 Foo 函数推出后，ctx 对象的生命周期也就结束了。而 FooCB 中显然会使用到 ctx 对象。
-#+BEGIN_SRC c++
-void HandleRequest(RequestContext* ctx, Callback cb);
-
-void Foo(Reuqest* req) {
-    auto ctx = new RequestContext(req);
-    HandleRequest(ctx, FooCB);
-}
-
-void FooCB(RequestContext* ctx) {
-    FinishRequest(ctx);
-    delete ctx;
-}
-#+END_SRC
-在这种情况下，如果忘记在 FooCB 中调用 delete ctx，则就会触发内存泄露。尽管我们可以借助一些静态检查工具对代码进行检查，但往往异步程序的逻辑是极其复杂的，一个请求的生命周期中，也需要进行大量的内存分配操作，静态检查工具往往无法发现所有的内存泄露情况。
-
-那么怎么才能避免这种情况的产生呢？引入智能指针显然是一种可行的方法，但引入 shared_ptr 往往引入了额外的性能开销，并不十分理想。
-
-在 SmartX，我们通常采用两种方法来应对这种情况。
-
-*** 经验 #2：使用 Arena
-Arena 是一种统一化管理内存生命周期的方法。所有需要在堆上分配的内存，不通过 malloc/new，而是通过 Arena 的 CreateObject 接口。同时，不需要手动的执行 free/delete，而是在 Arena 被销毁的时候，统一释放所有通过 Arena 对象申请的内存。所以，只需要确保 Arena 对象一定被销毁就可以了，而不用再关心其他对象是否有漏掉的 free/delete。这样显然降低了内存管理的复杂度。
-
-此外，我们还可以将 Arena 的生命周期与 Request 的生命周期绑定，一个 Request 生命周期内的所有内存分配都通过 Arena 完成。这样的好处是，我们可以在构造 Arena 的时候，大概预估出处理完成这个 Request 会消耗多少内存，并提前将会使用到的内存一次性的申请完成，从而减少了在处理一个请求的过程中，分配和回收内存的次数，从而优化了性能。
-
-我们最早看到 Arena 的思想，是在 LevelDB 的代码中。这段代码相当简单，建议大家直接阅读。
-
-*** 经验 #3：使用 Coroutine
-Coroutine 相信大家并不陌生，那 Coroutine 的本质是什么？我认为 Coroutine 的本质，是使得一个线程中可以存在多个上下文，并可以由用户控制在多个上下文之间进行切换。而在上下文中，一个重要的组成部分，就是栈指针。使用 Coroutine，意味着我们在一个线程中，可以创造（或模拟）多个栈。
-
-有了多个栈，意味着当我们要做一个异步处理时，不需要释放当前栈上的内存，而只需要切换到另一个栈上，就可以继续做其他的事情了，当异步处理完成时，可以再切换回到这个栈上，将这个请求处理完成。
-
-还是以刚才的代码为示例:
-#+BEGIN_SRC c++
-void Foo(Reuqest* req) {
-    RequestContext ctx(req);
-    HandleRequest(&ctx);
-}
-
-void HandleRequest(RequestCtx* ctx) {
-    SubmitAsync(ctx);
-    Coroutine::Self()->Yield();
-    CompleteRequest(ctx);
-}
-#+END_SRC
-这里的精髓在于，尽管 Coroutine::Self()->Yield() 被调用时，程序可以跳出 HandleRequest 函数去执行其他代码逻辑，但当前的栈却被保存了下来，所以 ctx 对象是安全的，并没有被释放。
-
-这样一来，我们就可以完全抛弃在堆上申请内存，只是用栈上的内存，就可以完成请求的处理，完全不用考虑内存泄露的问题。然而这种假设过于理想，由于在栈上申请内存存在一定的限制，例如栈大小的限制，以及需要在编译是知道分配内存的大小，所以在实际场景中，我们通常会结合使用 Arena 和 Coroutine 两种技术一起使用。
-
-有人可能会提到，想要多个栈用多个线程不就可以了？然而用多线程实现多个栈的问题在于，线程的创建和销毁的开销极大，且线程间切块，也就是在栈之间进行切换的代销需要经过操作系统，这个开销也是极大的。所以想用线程模拟多个栈的想法在实际场景中是走不通的。
-
-关于 Coroutine 有很多开源的实现方式，大家可以在 github 上找到很多，C++20 标准也会包含 Coroutine 的支持。在 SmartX 内部，我们很早就实现了 Coroutine，并对所有异步 IO 操作进行了封装，示例可参考我们之前的一篇文章 smartx：基于 Coroutine 的异步 RPC 框架示例（C++）
-
-这里需要强调一下，Coroutine 确实会带来一定的性能开销，通常 Coroutine 切换的开销在 20ns 以内，然而我们依然在对性能要求很苛刻的场景使用 Coroutine，一方面是因为 20ns 的性能开销是相对很小的，另一方面是因为 Coroutine 极大的降低了异步编程的复杂度，降低了内存泄露的可能性，使得编写异步程序像编写同步程序一样简单，降低了程序员心智的开销。
-
-*** 经验 #4：善用 RAII
-尽管在有些场景使用了 Coroutine，但还是可能会有在堆上申请内存的需要，而此时有可能 Arena 也并不适用。在这种情况下，善用 RAII（Resource Acquisition Is Initialization）思想会帮助我们解决很多问题。
-
-简单来说，RAII 可以帮助我们将管理堆上的内存，简化为管理栈上的内存，从而达到利用编译器自动解决内存回收问题的效果。此外，RAII 可以简化的还不仅仅是内存管理，还可以简化对资源的管理，例如 fd，锁，引用计数等等。
-
-当我们需要在堆上分配内存时，我们可以同时在栈上面分配一个对象，让栈上面的对象对堆上面的对象进行封装，用时通过在栈对象的析构函数中释放堆内存的方式，将栈对象的生命周期和堆内存进行绑定。
-
-unique_ptr 就是一种很典型的例子。然而 unique_ptr 管理的对象类型只能是指针，对于其他的资源，例如 fd，我们可以通过将 fd 封装成另外一个 FileHandle 对象的方式管理，也可以采用一些更通用的方式。例如，在我们内部的 C++ 基础库中实现了 Defer 类，想法类似于 Go 中 defer。
-#+BEGIN_SRC c++
-void Foo() {
-    int fd = open();
-    Defer d = [=]() { close(fd); }
-    // do something with fd
-}
-#+END_SRC
-
-*** 经验 #5：便于 Debug
-在特定的情况下，我们难免还是要手动管理堆上的内存。然而当我们面临一个正在发生内存泄露线上程序时，我们应该怎么处理呢？
-
-当然不是简单的『重启大法好』，毕竟重启后还是可能会产生泄露，而且最宝贵的现场也被破坏了。最佳的方式，还是利用现场进行 Debug，这就要求程序具有便于 Debug 的能力。
-
-这里不得不提到一个经典而强大的工具 gperftools。gperftools 是 google 开源的一个工具集，包含了 tcmalloc，heap profiler，heap checker，cpu profiler 等等。gperftools 的作者之一，就是大名鼎鼎的 Sanjay Ghemawat，没错，就是与 Jeff Dean 齐名，并和他一起写 MapReduce 的那个 Sanjay。
-
-gperftools 的一些经典用法，我们就不在这里进行介绍了，大家可以自行查看文档。而使用 gperftools 可以在不重启程序的情况下，进行内存泄露检查，这个恐怕是很少有人了解。
-
-实际上我们 Release 版本的 C++ 程序可执行文件在编译时全部都链接了 gperftools。在 gperftools 的 heap profiler 中，提供了 HeapProfilerStart 和 HeapProfilerStop 的接口，使得我们可以在运行时启动和停止 heap profiler。同时，我们每个程序都暴露了 RPC 接口，用于接收控制命令和调试命令。在调试命令中，我们就增加了调用 HeapProfilerStart 和 HeapProfilerStop 的命令。由于链接了 tcmalloc，所以 tcmalloc 可以获取所有内存分配和回收的信息。当 heap profiler 启动后，就会定期的将程序内存分配和回收的行为 dump 到一个临时文件中。
-
-当程序运行一段时间后，你将得到一组 heap profile 文件
-#+BEGIN_SRC bash
-  profile.0001.heap
-  profile.0002.heap
-  ...
-  profile.0100.heap
-#+END_SRC
-每个 profile 文件中都包含了一段时间内，程序中内存分配和回收的记录。如果想要找到内存泄露的线索，可以通过使用
-#+BEGIN_SRC bash
-pprof --base=profile.0001.heap /usr/bin/xxx profile.0100.heap --text
-#+END_SRC
-来进行查看，也可以生成 pdf 文件，会更直观一些。
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/v2-a8eedcc8f07691a31707f5f8921acfa8_720w.png @ 2020-06-13 19:27:10
-[[file:%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2/2020-06-13_19-27-10_v2-a8eedcc8f07691a31707f5f8921acfa8_720w.png]]
-* 指针
-** 字符指针
-字符指针是指向字符或字符串的指针,例如 char*。
-数组名存放的是首元素的地址，而指针同理存放的是首字符的地址。
-但不同的是，字符型数组在初始化时会开辟新的内存块，用相同的常量字符串初始化不同数组也会开辟出不同的内存块。
-而字符指针是指向一个地址，也就是说，不论是多少个字符指针，只要你指向的是同一个常量字符串，那么实际你指向的内存地址是不会发生变化的，因为作为常量的字符串有着它独一份不会改变的地址。
-
-下面是一道非常经典的例题：
-#+begin_src C
-#include <stdio.h>
-int main()
-{
-	char str1[] = "hello world.";
-	char str2[] = "hello world.";
-	char *str3  = "hello world.";
-	char *str4  = "hello world.";
-
-	if (str1 == str2)
-	{
-		printf("str1 and str2 are same\n");
-	}
-	else
-	{
-		printf("str1 and str2 are not same\n");
-	}
-
-	if (str3 == str4)
-	{
-		printf("str3 and str4 are same\n");
-	}
-	else
-	{
-		printf("str3 and str4 are not same\n");
-	}
-	return 0;
-}
-#+end_src
-结果为:
-
-#+DOWNLOADED: screenshot @ 2022-12-25 20:20:11
-[[file:images/指针/2022-12-25_20-20-11_screenshot.png]]
-由于str1和str2是数组名，表示数组首元素的地址，而他们在初始化时开辟的是不同的内存块，所以地址不同；而str3 和 str4是指针，指向的是首字符的地址，但作为字符串常量，它的地址是不变的，所以这两个字符指针所存放的地址是相同的。
-** 指针数组和数组指针
-指针数组是存放指针的数组。如int *arr[3] ,其中 [3] 的优先级高，确定它为一个数组，数组名为arr，类型为 int * 。
-
-数组指针是指向数组的指针。如int (*p)[3], (*p)的优先级最高，确定它为一个指针，而指针指向的 [3] 是一个数组，数组类型为 int。
-
-刚开始我们可能不太好分清楚指针数组和数组指针，他们的名字很相似，不免会使人混乱。那么如何分清指针数组与数组指针呢？答案就是优先级。我们可以将其拆分开来，最先定义优先级高的，一般判断出最高的优先级时，我们就能初步判定出它到底是数组还是指针，由此便可得出它的类型。
-
-&数组名和数组名的区分 int arr[10]
-
-我们都知道数组名表示数组首元素的地址，这在前面的字符数组中也提到过。例如 arr 表示 arr[10] 这个数组的首元素地址，即arr[1] 的地址。但当我们用 %p 去分别打印 arr 和 &arr 的地址时，会发现他们两个的地址是一样的。但他们的实际意义是相同的吗？我们可以通过下面一段代码来验证。
-#+begin_src C
-#include <stdio.h>
-int main()
-{
-	int arr[10] = { 0 };
-	printf("arr = %p\n", arr);
-	printf("&arr = %p\n", &arr);
-	printf("arr + 1 = %p\n", arr + 1);
-	printf("&arr + 1 = %p\n", &arr + 1);
-	return 0;
-}
-#+end_src
-这段代码分别打印了 arr 、&arr 、arr+1 和 &arr+1 的地址。
-结果为：
-
-#+DOWNLOADED: screenshot @ 2022-12-25 20:21:17
-[[file:images/指针/2022-12-25_20-21-17_screenshot.png]]
-我们可以看到，当他们各自 +1 以后的结果不同，可知实际意义也有所不同。arr 与 arr+1 的差值为4，是一个int类型的大小，也就是跳过了一个元素。&arr 则表示的是数组的地址。数组的地址 +1 ，跳了整个数组的大小，而该数组有10个元素，每个元素都是int类型，所以 &arr+1 相对于 &arr 的差值刚好为40。由此可知，&arr 的类型为数组指针，他可以等同于 *int (p)[10] 。
-
-** 函数指针
-函数指针是能够指向函数的指针，例如 void (*Fun) ()。Fun 先和 * 结合，确定 Fun 为指针，而指针指向的是一个函数，指向的函数无参数，返回值类型为 void 。函数在调用时需要开辟栈帧，这时就会开辟出新的地址，而函数名就代表函数地址，函数指针则存储函数的地址。
-
-在《c陷阱与缺陷》中，有这样两个代码：
-#+begin_src c
-(*(void (*)())0)();
-#+end_src
-这个代码看上去确实给人一种很混乱的感觉，毕竟有这么多的括号在内，但只要找到它的优先级，还是很好理解的。我们可以看到，其中中间的(void (*)())作为一部分整体是在0的前面，也就是对0进行一个类型的转换，将0强转为一个地址，(*)的优先级最高，表明它是一个指针，而指针指向的是一个函数()，函数的返回值为void。所以它转换后的地址的类型就是“指向返回值为void的函数的指针”。而整体就是调用0地址处的函数。
-
-再来看另外一个代码：
-#+begin_src c
-void (*signal(int , void(*)(int)))(int);
-#+end_src
-同样是一段看上去比较复杂的代码,首先signal先与后面小括号结合，说明它是一个函数，它的参数是signal后面括号内的int和 void(*)(int)。而除了signal函数的其他部分表示的是函数的返回值，void(*) (int)，是一个函数指针。所以这个代码实际上就表示的是一个signal函数，函数的参数为 (int , void(*)(int)),函数的返回值是一个函数指针void(*) (int)。当然这个函数有简化的方式：
-#+begin_src c
-typedef void(*pfun_t)(int);
-pfun_t signal(int , pfun_t);
-#+end_src
-第一个语句通过 typedef 将 pfun_t 定义为函数指针的类型，而第二个语句就十分明了，signal函数的参数为int 和 pfun_t，返回值为 pfun_t。
-** 函数指针数组
-我们知道了函数指针是指向函数的指针，那函数指针数组也就是存放函数指针的数组。
-例如 int (*parr[10])()。首先它必须是一个数组，所以要先和中括号结合，拆分开来就是 parr[10]，它的优先级最高确定它是一个数组。其次是 * ，表明指针，而指向的内容就是后面的函数 () ，数组类型为 int 。
-
-函数指针数组最大的用途：转移表。
-#+begin_src c
-#define _CRT_SECURE_NO_WARNINGS 1
-#include <stdio.h>
-int Add(int x, int y)
-{
-	return x + y;
-}
-int Sub(int x, int y)
-{
-	return x - y;
-}
-int Mul(int x, int y)
-{
-	return x * y;
-}
-int Div(int x, int y)
-{
-	return x / y;
-}
-//以上为加减乘除四个函数
-void menu()
-{
-	printf("1.Add\n2.Sub\n3.Mul\n4.Div\n");
-}
-int main()
-{
-	int input = 0;//input用来做不同计算函数的选项
-	int a = 0;
-	int b = 0;
-	int(*Pfun[5])(int, int) = { 0, Add, Sub, Mul, Div };
-	//第一个元素为0,使元素下标1234分别代表加减乘除函数
-	do
-	{
-		menu();
-		printf("请输入菜单选项: ");
-		scanf("%d", &input);
-		if (input >= 1 && input <= 4)
-		{
-			printf("请输入两个操作数：");
-			scanf("%d %d", &a, &b);
-			printf("%d\n", Pfun[input](a, b));
-			//Pfun[input](a, b)直接调用下标为input的函数
-		}
-	} while (input);
-	return 0;
-}
-#+end_src
-由以上代码我们可以看到，使用转移表会很大程度上去节省我们调用函数的空间，只需要通过函数指针数组访问元素下标地址去调用，而不用一一去调用，能让代码避免更加冗余。
-** 指向函数指针数组的指针
-在理解了函数指针数组之后，那么指向函数指针数组的指针也不难掌握。首先它是一个指针，指针指向一个数组，数组中的元素是函数指针。其实只要将每一层由内到外逐层分析理解，就不难分辨。
-
-例如上文的函数指针数组int (*parr[10])(),那么 我们再增加一个指向该数组的指针，也就是
-#+begin_src c
-int (*(*parr)[10])()这是一个指向存放十个函数指针元素数组的指针。
-#+end_src
-** 二重指针
-char**是二重指针，bai也就是指向指针变量的指针。 而char*是一维指针，即指向zhi字符变量的指针。
-
-其区别在于，指向地址dao所存储的值不同。
-
-对于char **p1, *p1的类型为char*型，而**p1的类型才是char型。
-
-对于char*类指针p2，*p2就是char 型。
-** .和->的区别
-编译器会将p->member变成访问p+offset_member这个内存地址的变量
-
-编译器会将s.member变成访问&s+offset_member这个内存地址的变量
-** 参考文章
-[[https://blog.csdn.net/weixin_44058932/article/details/90767275][C语言中不同类型指针的区别]]
-
-* 字符串
-** 字符串数组
-#+BEGIN_SRC c++
-char a[] = "hello";   //字符串数组，存放的是字符,a表示字符h的地址
-#+END_SRC
-*** 初始化
-#+BEGIN_SRC c++
-char a[10] ="hello";//字符串以'\0'结尾，这种方式系统会自动在数组未填值的地方添加'\0'
-char b[] = {'h', 'e' , 'l', 'l', '\0'};//类似于初始化整型数组，必须要手动在后面添加'\0'
-#+END_SRC
-** 字符串指针数组
-#+BEGIN_SRC c++
-char *b[] = {"hello", "world"};//字符串指针数组，数组b总共有两个4字节的元素,第一个元素存储字符串"hello"的地址,即指向字符h的指针,第二个元素存储字符串"world"的地址,即指向字符w的指针.
-#+END_SRC
-* 谓词
-A predicate is an expression that can be called and that returns a value that can be used as a condition. The predicates used by library algorithms are either unary predicates (meaning they have a single parameter) or binary predicates (meaning they have two parameters).
-
-The version of sort that takes a binary predicate uses the given predicate in place of < to compare elements.
-
-#+BEGIN_SRC c++
-// comparison function to be used to sort by word length
-bool isShorter(const string &s1, const string &s2)
-C++ Primer, Fifth Edition
-{
-return s1.size() < s2.size();
-}
-// sort on word length, shortest to longest
-sort(words.begin(), words.end(), isShorter);
-#+END_SRC
-* 模板
-** 模板类
-*** 模板类的继承
-在模板类的继承中，需要注意以下两点：
-- 如果父类自定义了构造函数，记得子类要使用构造函数列表来初始化
-- 继承的时候，如果子类不是模板类，则必须指明当前的父类的类型，因为要分配内存空间
-- 继承的时候，如果子类是模板类，要么指定父类的类型，要么用子类的泛型来指定父类
-
-#+begin_src cpp
-template <typename T>
-class Parent{
-public:
-    Parent(T p)
-    {
-        this->p = p;
-    }
-
-private:
-    T p;
-};
-
-//如果子类不是模板类，需要指明父类的具体类型
-class ChildOne:public Parent<int>{
-
-public:
-    ChildOne(int a,int b):Parent(b)
-    {
-        this->cone = a;
-    }
-
-private:
-    int cone;
-};
-
-
-//如果子类是模板类，可以用子类的泛型来表示父类
-template <typename T>
-class ChildTwo:public Parent<T>{
-
-public:
-    ChildTwo(T a, T b):Parent<T>(b)
-    {
-        this->ctwo = a;
-    }
-
-private:
-    T ctwo;
-};
-#+end_src
-* 默认实参
-一旦某个实参被赋予了默认值，它后面所有的形参都必须有默认值。
-** 默认实参声明
-多次声明同一个函数是合法的，但是在给定的作用域中一个形参只能被赋予一次默认参数。
-#+begin_src c++
-  string screen(sz,sz,char=' ');
-  string screen(sz,sz,char='*');//错误，重复声明。不能修改一个已经存在的默认值
-  string screen(sz=24,sz=80,char);//正确，可以重复声明添加默认实参
-#+END_SRC
-** 默认实参初始值
-
 * 右值
 ** 右值引用
 右值引用的标志是&&，顾名思义，右值引用专门为右值而生，可以指向右值，不能指向左值：
@@ -3597,6 +3328,198 @@ int main() {
     change(std::move(a));
 }
 上边的示例在日常编程中基本不会用到，std::forward最主要运于模版编程的参数转发中，想深入了解需要学习万能引用(T &&)和引用折叠(eg:& && → ?)等知识，本文就不详细介绍这些了。
+* 内存泄露
+new 和 delete 是 C++ 用于管理堆内存的两个运算符，对应于C语言中的 malloc 和 free，但是 malloc 和 free 是函数，而new 和 delete 是运算符。除此之外，new 在申请内存的同时，还会调用对象的构造函数，而 malloc 只会申请内存；同样，delete 在释放内存之前，会调用对象的析构函数，而 free 只会释放内存。
+
+new运算符申请内存：将调用相应的 operator new(size_t) 函数动态分配内存，在分配到的动态内存块上 初始化 相应类型的对象（构造函数）并返回其首地址。如果调用构造函数初始化对象时抛出异常，则自动调用 operator delete(void*, void*) 函数释放已经分配到的内存。
+
+delete运算符释放内存：调用相应类型的析构函数，处理类内部可能涉及的资源释放，调用相应的 operator delete(void *) 函数。
+** 内存是如何泄露的
+在 C++ 程序中，主要涉及到的内存就是“栈”和“堆”
+
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/v2-f3189547daa4548bc4ab6fdd13eeea6d_720w.png @ 2020-06-13 19:16:48
+[[file:%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2/2020-06-13_19-16-48_v2-f3189547daa4548bc4ab6fdd13eeea6d_720w.png]]
+
+通常来说，一个线程的栈内存是有限的，通常来说是 8M 左右（取决于运行的环境）。栈上的内存通常是由编译器来自动管理的。当在栈上分配一个新的变量时，或进入一个函数时，栈的指针会下移，相当于在栈上分配了一块内存。我们把一个变量分配在栈上，也就是利用了栈上的内存空间。当这个变量的生命周期结束时，栈的指针会上移，相同于回收了内存。
+
+由于栈上的内存的分配和回收都是由编译器控制的，所以在栈上是不会发生内存泄露的，只会发生栈溢出（Stack Overflow），也就是分配的空间超过了规定的栈大小。
+
+而堆上的内存是由程序直接控制的，程序可以通过 malloc/free 或 new/delete 来分配和回收内存，如果程序中通过 malloc/new 分配了一块内存，但忘记使用 free/delete 来回收内存，就发生了内存泄露。
+
+*** 经验 #1：尽量避免在堆上分配内存
+既然只有堆上会发生内存泄露，那第一原则肯定是避免在堆上面进行内存分配，尽可能的使用栈上的内存，由编译器进行分配和回收，这样当然就不会有内存泄露了。
+
+然而，只在栈上分配内存，在有 IO 的情况下是存在一定局限性的。
+
+举个例子，为了完成一个请求，我们通常会为这个请求构造一个 Context 对象，用于描述和这个请求有关的一些上下文。例如下面一段代码：
+#+BEGIN_SRC c++
+void Foo(Reuqest* req) {
+    RequestContext ctx(req);
+    HandleRequest(&ctx);
+}
+#+END_SRC
+如果 HandleRequest 是一个同步函数，当这个函数返回时，请求就可以被处理完成，那么显然 ctx 是可以被分配在栈上的。
+
+但如果 HandleRequest 是一个异步函数，例如：
+#+BEGIN_SRC c++
+void HandleRequest(RequestContext* ctx, Callback cb);
+#+END_SRC
+那么显然，ctx 是不能被分配在栈上的，因为如果 ctx 被分配在栈上，那么当 Foo 函数推出后，ctx 对象的生命周期也就结束了。而 FooCB 中显然会使用到 ctx 对象。
+#+BEGIN_SRC c++
+void HandleRequest(RequestContext* ctx, Callback cb);
+
+void Foo(Reuqest* req) {
+    auto ctx = new RequestContext(req);
+    HandleRequest(ctx, FooCB);
+}
+
+void FooCB(RequestContext* ctx) {
+    FinishRequest(ctx);
+    delete ctx;
+}
+#+END_SRC
+在这种情况下，如果忘记在 FooCB 中调用 delete ctx，则就会触发内存泄露。尽管我们可以借助一些静态检查工具对代码进行检查，但往往异步程序的逻辑是极其复杂的，一个请求的生命周期中，也需要进行大量的内存分配操作，静态检查工具往往无法发现所有的内存泄露情况。
+
+那么怎么才能避免这种情况的产生呢？引入智能指针显然是一种可行的方法，但引入 shared_ptr 往往引入了额外的性能开销，并不十分理想。
+
+在 SmartX，我们通常采用两种方法来应对这种情况。
+
+*** 经验 #2：使用 Arena
+Arena 是一种统一化管理内存生命周期的方法。所有需要在堆上分配的内存，不通过 malloc/new，而是通过 Arena 的 CreateObject 接口。同时，不需要手动的执行 free/delete，而是在 Arena 被销毁的时候，统一释放所有通过 Arena 对象申请的内存。所以，只需要确保 Arena 对象一定被销毁就可以了，而不用再关心其他对象是否有漏掉的 free/delete。这样显然降低了内存管理的复杂度。
+
+此外，我们还可以将 Arena 的生命周期与 Request 的生命周期绑定，一个 Request 生命周期内的所有内存分配都通过 Arena 完成。这样的好处是，我们可以在构造 Arena 的时候，大概预估出处理完成这个 Request 会消耗多少内存，并提前将会使用到的内存一次性的申请完成，从而减少了在处理一个请求的过程中，分配和回收内存的次数，从而优化了性能。
+
+我们最早看到 Arena 的思想，是在 LevelDB 的代码中。这段代码相当简单，建议大家直接阅读。
+
+*** 经验 #3：使用 Coroutine
+Coroutine 相信大家并不陌生，那 Coroutine 的本质是什么？我认为 Coroutine 的本质，是使得一个线程中可以存在多个上下文，并可以由用户控制在多个上下文之间进行切换。而在上下文中，一个重要的组成部分，就是栈指针。使用 Coroutine，意味着我们在一个线程中，可以创造（或模拟）多个栈。
+
+有了多个栈，意味着当我们要做一个异步处理时，不需要释放当前栈上的内存，而只需要切换到另一个栈上，就可以继续做其他的事情了，当异步处理完成时，可以再切换回到这个栈上，将这个请求处理完成。
+
+还是以刚才的代码为示例:
+#+BEGIN_SRC c++
+void Foo(Reuqest* req) {
+    RequestContext ctx(req);
+    HandleRequest(&ctx);
+}
+
+void HandleRequest(RequestCtx* ctx) {
+    SubmitAsync(ctx);
+    Coroutine::Self()->Yield();
+    CompleteRequest(ctx);
+}
+#+END_SRC
+这里的精髓在于，尽管 Coroutine::Self()->Yield() 被调用时，程序可以跳出 HandleRequest 函数去执行其他代码逻辑，但当前的栈却被保存了下来，所以 ctx 对象是安全的，并没有被释放。
+
+这样一来，我们就可以完全抛弃在堆上申请内存，只是用栈上的内存，就可以完成请求的处理，完全不用考虑内存泄露的问题。然而这种假设过于理想，由于在栈上申请内存存在一定的限制，例如栈大小的限制，以及需要在编译是知道分配内存的大小，所以在实际场景中，我们通常会结合使用 Arena 和 Coroutine 两种技术一起使用。
+
+有人可能会提到，想要多个栈用多个线程不就可以了？然而用多线程实现多个栈的问题在于，线程的创建和销毁的开销极大，且线程间切块，也就是在栈之间进行切换的代销需要经过操作系统，这个开销也是极大的。所以想用线程模拟多个栈的想法在实际场景中是走不通的。
+
+关于 Coroutine 有很多开源的实现方式，大家可以在 github 上找到很多，C++20 标准也会包含 Coroutine 的支持。在 SmartX 内部，我们很早就实现了 Coroutine，并对所有异步 IO 操作进行了封装，示例可参考我们之前的一篇文章 smartx：基于 Coroutine 的异步 RPC 框架示例（C++）
+
+这里需要强调一下，Coroutine 确实会带来一定的性能开销，通常 Coroutine 切换的开销在 20ns 以内，然而我们依然在对性能要求很苛刻的场景使用 Coroutine，一方面是因为 20ns 的性能开销是相对很小的，另一方面是因为 Coroutine 极大的降低了异步编程的复杂度，降低了内存泄露的可能性，使得编写异步程序像编写同步程序一样简单，降低了程序员心智的开销。
+
+*** 经验 #4：善用 RAII
+尽管在有些场景使用了 Coroutine，但还是可能会有在堆上申请内存的需要，而此时有可能 Arena 也并不适用。在这种情况下，善用 RAII（Resource Acquisition Is Initialization）思想会帮助我们解决很多问题。
+
+简单来说，RAII 可以帮助我们将管理堆上的内存，简化为管理栈上的内存，从而达到利用编译器自动解决内存回收问题的效果。此外，RAII 可以简化的还不仅仅是内存管理，还可以简化对资源的管理，例如 fd，锁，引用计数等等。
+
+当我们需要在堆上分配内存时，我们可以同时在栈上面分配一个对象，让栈上面的对象对堆上面的对象进行封装，用时通过在栈对象的析构函数中释放堆内存的方式，将栈对象的生命周期和堆内存进行绑定。
+
+unique_ptr 就是一种很典型的例子。然而 unique_ptr 管理的对象类型只能是指针，对于其他的资源，例如 fd，我们可以通过将 fd 封装成另外一个 FileHandle 对象的方式管理，也可以采用一些更通用的方式。例如，在我们内部的 C++ 基础库中实现了 Defer 类，想法类似于 Go 中 defer。
+#+BEGIN_SRC c++
+void Foo() {
+    int fd = open();
+    Defer d = [=]() { close(fd); }
+    // do something with fd
+}
+#+END_SRC
+
+*** 经验 #5：便于 Debug
+在特定的情况下，我们难免还是要手动管理堆上的内存。然而当我们面临一个正在发生内存泄露线上程序时，我们应该怎么处理呢？
+
+当然不是简单的『重启大法好』，毕竟重启后还是可能会产生泄露，而且最宝贵的现场也被破坏了。最佳的方式，还是利用现场进行 Debug，这就要求程序具有便于 Debug 的能力。
+
+这里不得不提到一个经典而强大的工具 gperftools。gperftools 是 google 开源的一个工具集，包含了 tcmalloc，heap profiler，heap checker，cpu profiler 等等。gperftools 的作者之一，就是大名鼎鼎的 Sanjay Ghemawat，没错，就是与 Jeff Dean 齐名，并和他一起写 MapReduce 的那个 Sanjay。
+
+gperftools 的一些经典用法，我们就不在这里进行介绍了，大家可以自行查看文档。而使用 gperftools 可以在不重启程序的情况下，进行内存泄露检查，这个恐怕是很少有人了解。
+
+实际上我们 Release 版本的 C++ 程序可执行文件在编译时全部都链接了 gperftools。在 gperftools 的 heap profiler 中，提供了 HeapProfilerStart 和 HeapProfilerStop 的接口，使得我们可以在运行时启动和停止 heap profiler。同时，我们每个程序都暴露了 RPC 接口，用于接收控制命令和调试命令。在调试命令中，我们就增加了调用 HeapProfilerStart 和 HeapProfilerStop 的命令。由于链接了 tcmalloc，所以 tcmalloc 可以获取所有内存分配和回收的信息。当 heap profiler 启动后，就会定期的将程序内存分配和回收的行为 dump 到一个临时文件中。
+
+当程序运行一段时间后，你将得到一组 heap profile 文件
+#+BEGIN_SRC bash
+  profile.0001.heap
+  profile.0002.heap
+  ...
+  profile.0100.heap
+#+END_SRC
+每个 profile 文件中都包含了一段时间内，程序中内存分配和回收的记录。如果想要找到内存泄露的线索，可以通过使用
+#+BEGIN_SRC bash
+pprof --base=profile.0001.heap /usr/bin/xxx profile.0100.heap --text
+#+END_SRC
+来进行查看，也可以生成 pdf 文件，会更直观一些。
+#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/v2-a8eedcc8f07691a31707f5f8921acfa8_720w.png @ 2020-06-13 19:27:10
+[[file:%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2/2020-06-13_19-27-10_v2-a8eedcc8f07691a31707f5f8921acfa8_720w.png]]
+* 模板
+** 模板类
+*** 模板类的继承
+在模板类的继承中，需要注意以下两点：
+- 如果父类自定义了构造函数，记得子类要使用构造函数列表来初始化
+- 继承的时候，如果子类不是模板类，则必须指明当前的父类的类型，因为要分配内存空间
+- 继承的时候，如果子类是模板类，要么指定父类的类型，要么用子类的泛型来指定父类
+
+#+begin_src cpp
+template <typename T>
+class Parent{
+public:
+    Parent(T p)
+    {
+        this->p = p;
+    }
+
+private:
+    T p;
+};
+
+//如果子类不是模板类，需要指明父类的具体类型
+class ChildOne:public Parent<int>{
+
+public:
+    ChildOne(int a,int b):Parent(b)
+    {
+        this->cone = a;
+    }
+
+private:
+    int cone;
+};
+
+
+//如果子类是模板类，可以用子类的泛型来表示父类
+template <typename T>
+class ChildTwo:public Parent<T>{
+
+public:
+    ChildTwo(T a, T b):Parent<T>(b)
+    {
+        this->ctwo = a;
+    }
+
+private:
+    T ctwo;
+};
+#+end_src
+* 默认实参
+一旦某个实参被赋予了默认值，它后面所有的形参都必须有默认值。
+** 默认实参声明
+多次声明同一个函数是合法的，但是在给定的作用域中一个形参只能被赋予一次默认参数。
+#+begin_src c++
+  string screen(sz,sz,char=' ');
+  string screen(sz,sz,char='*');//错误，重复声明。不能修改一个已经存在的默认值
+  string screen(sz=24,sz=80,char);//正确，可以重复声明添加默认实参
+#+END_SRC
+** 默认实参初始值
+
 * 结构化绑定声明
 结构化绑定声明，是指在一次声明中同时引入多个变量，同时绑定初始化表达式的各个子对象的语法形式。
 结构化绑定声明使用auto来声明多个变量，所有变量都必须用中括号括起来。
@@ -3729,6 +3652,184 @@ int main()
 #+end_src
 ** 参考文章
 [[https://blog.csdn.net/zwvista/article/details/78111346][C++17尝鲜：结构化绑定声明（Structured Binding Declaration）]]
+* 字符串
+** 字符串数组
+#+BEGIN_SRC c++
+char a[] = "hello";   //字符串数组，存放的是字符,a表示字符h的地址
+#+END_SRC
+*** 初始化
+#+BEGIN_SRC c++
+char a[10] ="hello";//字符串以'\0'结尾，这种方式系统会自动在数组未填值的地方添加'\0'
+char b[] = {'h', 'e' , 'l', 'l', '\0'};//类似于初始化整型数组，必须要手动在后面添加'\0'
+#+END_SRC
+** 字符串指针数组
+#+BEGIN_SRC c++
+char *b[] = {"hello", "world"};//字符串指针数组，数组b总共有两个4字节的元素,第一个元素存储字符串"hello"的地址,即指向字符h的指针,第二个元素存储字符串"world"的地址,即指向字符w的指针.
+#+END_SRC
+* 指针
+** 字符指针
+字符指针是指向字符或字符串的指针,例如 char*。
+数组名存放的是首元素的地址，而指针同理存放的是首字符的地址。
+但不同的是，字符型数组在初始化时会开辟新的内存块，用相同的常量字符串初始化不同数组也会开辟出不同的内存块。
+而字符指针是指向一个地址，也就是说，不论是多少个字符指针，只要你指向的是同一个常量字符串，那么实际你指向的内存地址是不会发生变化的，因为作为常量的字符串有着它独一份不会改变的地址。
+
+下面是一道非常经典的例题：
+#+begin_src C
+#include <stdio.h>
+int main()
+{
+	char str1[] = "hello world.";
+	char str2[] = "hello world.";
+	char *str3  = "hello world.";
+	char *str4  = "hello world.";
+
+	if (str1 == str2)
+	{
+		printf("str1 and str2 are same\n");
+	}
+	else
+	{
+		printf("str1 and str2 are not same\n");
+	}
+
+	if (str3 == str4)
+	{
+		printf("str3 and str4 are same\n");
+	}
+	else
+	{
+		printf("str3 and str4 are not same\n");
+	}
+	return 0;
+}
+#+end_src
+结果为:
+
+#+DOWNLOADED: screenshot @ 2022-12-25 20:20:11
+[[file:images/指针/2022-12-25_20-20-11_screenshot.png]]
+由于str1和str2是数组名，表示数组首元素的地址，而他们在初始化时开辟的是不同的内存块，所以地址不同；而str3 和 str4是指针，指向的是首字符的地址，但作为字符串常量，它的地址是不变的，所以这两个字符指针所存放的地址是相同的。
+** 指针数组和数组指针
+指针数组是存放指针的数组。如int *arr[3] ,其中 [3] 的优先级高，确定它为一个数组，数组名为arr，类型为 int * 。
+
+数组指针是指向数组的指针。如int (*p)[3], (*p)的优先级最高，确定它为一个指针，而指针指向的 [3] 是一个数组，数组类型为 int。
+
+刚开始我们可能不太好分清楚指针数组和数组指针，他们的名字很相似，不免会使人混乱。那么如何分清指针数组与数组指针呢？答案就是优先级。我们可以将其拆分开来，最先定义优先级高的，一般判断出最高的优先级时，我们就能初步判定出它到底是数组还是指针，由此便可得出它的类型。
+
+&数组名和数组名的区分 int arr[10]
+
+我们都知道数组名表示数组首元素的地址，这在前面的字符数组中也提到过。例如 arr 表示 arr[10] 这个数组的首元素地址，即arr[1] 的地址。但当我们用 %p 去分别打印 arr 和 &arr 的地址时，会发现他们两个的地址是一样的。但他们的实际意义是相同的吗？我们可以通过下面一段代码来验证。
+#+begin_src C
+#include <stdio.h>
+int main()
+{
+	int arr[10] = { 0 };
+	printf("arr = %p\n", arr);
+	printf("&arr = %p\n", &arr);
+	printf("arr + 1 = %p\n", arr + 1);
+	printf("&arr + 1 = %p\n", &arr + 1);
+	return 0;
+}
+#+end_src
+这段代码分别打印了 arr 、&arr 、arr+1 和 &arr+1 的地址。
+结果为：
+
+#+DOWNLOADED: screenshot @ 2022-12-25 20:21:17
+[[file:images/指针/2022-12-25_20-21-17_screenshot.png]]
+我们可以看到，当他们各自 +1 以后的结果不同，可知实际意义也有所不同。arr 与 arr+1 的差值为4，是一个int类型的大小，也就是跳过了一个元素。&arr 则表示的是数组的地址。数组的地址 +1 ，跳了整个数组的大小，而该数组有10个元素，每个元素都是int类型，所以 &arr+1 相对于 &arr 的差值刚好为40。由此可知，&arr 的类型为数组指针，他可以等同于 *int (p)[10] 。
+
+** 函数指针
+函数指针是能够指向函数的指针，例如 void (*Fun) ()。Fun 先和 * 结合，确定 Fun 为指针，而指针指向的是一个函数，指向的函数无参数，返回值类型为 void 。函数在调用时需要开辟栈帧，这时就会开辟出新的地址，而函数名就代表函数地址，函数指针则存储函数的地址。
+
+在《c陷阱与缺陷》中，有这样两个代码：
+#+begin_src c
+(*(void (*)())0)();
+#+end_src
+这个代码看上去确实给人一种很混乱的感觉，毕竟有这么多的括号在内，但只要找到它的优先级，还是很好理解的。我们可以看到，其中中间的(void (*)())作为一部分整体是在0的前面，也就是对0进行一个类型的转换，将0强转为一个地址，(*)的优先级最高，表明它是一个指针，而指针指向的是一个函数()，函数的返回值为void。所以它转换后的地址的类型就是“指向返回值为void的函数的指针”。而整体就是调用0地址处的函数。
+
+再来看另外一个代码：
+#+begin_src c
+void (*signal(int , void(*)(int)))(int);
+#+end_src
+同样是一段看上去比较复杂的代码,首先signal先与后面小括号结合，说明它是一个函数，它的参数是signal后面括号内的int和 void(*)(int)。而除了signal函数的其他部分表示的是函数的返回值，void(*) (int)，是一个函数指针。所以这个代码实际上就表示的是一个signal函数，函数的参数为 (int , void(*)(int)),函数的返回值是一个函数指针void(*) (int)。当然这个函数有简化的方式：
+#+begin_src c
+typedef void(*pfun_t)(int);
+pfun_t signal(int , pfun_t);
+#+end_src
+第一个语句通过 typedef 将 pfun_t 定义为函数指针的类型，而第二个语句就十分明了，signal函数的参数为int 和 pfun_t，返回值为 pfun_t。
+** 函数指针数组
+我们知道了函数指针是指向函数的指针，那函数指针数组也就是存放函数指针的数组。
+例如 int (*parr[10])()。首先它必须是一个数组，所以要先和中括号结合，拆分开来就是 parr[10]，它的优先级最高确定它是一个数组。其次是 * ，表明指针，而指向的内容就是后面的函数 () ，数组类型为 int 。
+
+函数指针数组最大的用途：转移表。
+#+begin_src c
+#define _CRT_SECURE_NO_WARNINGS 1
+#include <stdio.h>
+int Add(int x, int y)
+{
+	return x + y;
+}
+int Sub(int x, int y)
+{
+	return x - y;
+}
+int Mul(int x, int y)
+{
+	return x * y;
+}
+int Div(int x, int y)
+{
+	return x / y;
+}
+//以上为加减乘除四个函数
+void menu()
+{
+	printf("1.Add\n2.Sub\n3.Mul\n4.Div\n");
+}
+int main()
+{
+	int input = 0;//input用来做不同计算函数的选项
+	int a = 0;
+	int b = 0;
+	int(*Pfun[5])(int, int) = { 0, Add, Sub, Mul, Div };
+	//第一个元素为0,使元素下标1234分别代表加减乘除函数
+	do
+	{
+		menu();
+		printf("请输入菜单选项: ");
+		scanf("%d", &input);
+		if (input >= 1 && input <= 4)
+		{
+			printf("请输入两个操作数：");
+			scanf("%d %d", &a, &b);
+			printf("%d\n", Pfun[input](a, b));
+			//Pfun[input](a, b)直接调用下标为input的函数
+		}
+	} while (input);
+	return 0;
+}
+#+end_src
+由以上代码我们可以看到，使用转移表会很大程度上去节省我们调用函数的空间，只需要通过函数指针数组访问元素下标地址去调用，而不用一一去调用，能让代码避免更加冗余。
+** 指向函数指针数组的指针
+在理解了函数指针数组之后，那么指向函数指针数组的指针也不难掌握。首先它是一个指针，指针指向一个数组，数组中的元素是函数指针。其实只要将每一层由内到外逐层分析理解，就不难分辨。
+
+例如上文的函数指针数组int (*parr[10])(),那么 我们再增加一个指向该数组的指针，也就是
+#+begin_src c
+int (*(*parr)[10])()这是一个指向存放十个函数指针元素数组的指针。
+#+end_src
+** 二重指针
+char**是二重指针，bai也就是指向指针变量的指针。 而char*是一维指针，即指向zhi字符变量的指针。
+
+其区别在于，指向地址dao所存储的值不同。
+
+对于char **p1, *p1的类型为char*型，而**p1的类型才是char型。
+
+对于char*类指针p2，*p2就是char 型。
+** .和->的区别
+编译器会将p->member变成访问p+offset_member这个内存地址的变量
+
+编译器会将s.member变成访问&s+offset_member这个内存地址的变量
+** 参考文章
+[[https://blog.csdn.net/weixin_44058932/article/details/90767275][C语言中不同类型指针的区别]]
 * 转换
 ** 算术转换
 *** 整型提升
