@@ -1097,8 +1097,95 @@ iostream 从 istream 和 ostream 直接继承而来，而 istream 和 ostream �
 public继承不改变父类中的成员的访问权限；
 protected继承时，public和protected访问级别的成员变为protected，private还是private；
 private继承时，父类所有成员变为private。
+** 派生类初始化基类对象
+派生类的构造函数必须先调用基类构造函数才能初始化私有成员,如果不显示的调用基类的构造函数，则会调用默认的构造函数
+
+下面的代码会出现编译错误，error C2512: “Base”: 没有合适的默认构造函数可用
+#+begin_src c++
+include <iostream>
+using namespace std;
+
+class Base
+{
+private:
+    int n;
+
+public:
+    Base(int m):n(m){ cout<<"constructor is called\n";} //这里由于自己定义了构造函数,所以编译器不会合成默认构造函数
+    ~Base(){}
+};
+
+class Derive:public Base
+{
+private:
+    int n;
+
+public:
+    Derive(int m):n(m)//这里没有显示调用基类构造函数,所以会自动调用基类默认构造函数(即不带参数的构造函数),由于基类没有默认构造函数,导致编译出错
+    {
+    }
+    ~Derive(){}
+};
+
+int main()
+{
+    Derive* a = new Derive(10);return 0;
+}
+#+END_SRC
+正确形式应该为显示调用基类的构造函数
+#+begin_src c++
+public:
+    Derive(int m):Base(m),n(m)
+    {
+    }
+    ~Derive(){}
+};
+#+END_SRC
+
+#+DOWNLOADED: screenshot @ 2023-04-18 22:38:37
+[[file:images/继承/2023-04-18_22-38-37_screenshot.png]]
+
+如果不显示的调用基类的构造函数，则会调用默认的构造函数:
+#+begin_src c++
+#include <iostream>
+using namespace std;
+
+class Base
+{
+private:
+    int n;
+
+public:
+    Base(){ cout<<"default constructor is called\n"; n = 8;}
+    Base(int m):n(m){ cout<<"constructor is called\n";}
+    ~Base(){}
+};
+
+class Derive:public Base
+{
+private:
+    int n;
+
+public:
+    Derive(int m):n(m)
+    {
+    }
+    ~Derive(){}
+};
+
+int main()
+{
+    Derive* a = new Derive(10);
+    return 0;
+}
+#+END_SRC
+
+#+DOWNLOADED: screenshot @ 2023-04-18 22:39:14
+[[file:images/继承/2023-04-18_22-39-14_screenshot.png]]
+
 ** 参考文章
 [[http://c.biancheng.net/view/2280.html][C++虚继承和虚基类详解]]
+[[https://www.cnblogs.com/GODYCA/archive/2013/01/17/2865279.html][C++派生类中如何初始化基类对象]]
 * 拷贝、赋值、销毁
 如果一个构造函数的第一个参数是自身类类型的引用，且任何额外参数都有默认值，则此构造函数是拷贝构造函数。
 #+begin_src c++
@@ -1146,6 +1233,97 @@ private继承时，父类所有成员变为private。
 
 如果类中有指针类型的类型的时候，默认拷贝构造函数只能复制指针属性的值，而不能复制指针属性所指向的内存,可能会出现野指针的问题.
 为了避免内存问题,我们应该用显示拷贝构造函数进行深拷贝.
+** 派生类的拷贝或移动构造函数
+*** 当派生类定义了拷贝或移动构造函数，必须显式地调用基类的拷贝或移动构造函数，否则会调用基类的默认构造函数
+#+begin_src c++
+#include <iostream>
+
+class Base {
+ public:
+  Base() { std::cout << "Base default constructor" << std::endl; }
+  Base(const Base &b) { std::cout << "Base copy constructor" << std::endl; }
+  Base(Base &&b) { std::cout << "Base move constructor" << std::endl; }
+};
+
+class Derived : public Base {
+ public:
+  Derived() { std::cout << "Derived default constructor" << std::endl; }
+  Derived(const Derived &d) { std::cout << "Derived copy constructor" << std::endl; }
+  Derived(Derived &&d) { std::cout << "Derived move constructor" << std::endl; }
+};
+ 
+int main() {
+  Derived d;
+  Derived d1(d);
+  Derived d2(std::move(d));
+
+  return 0;
+}
+
+#+END_SRC
+
+输出结果：
+#+begin_example
+Base default constructor
+Derived default constructor
+Base default constructor
+Derived copy constructor
+Base default constructor
+Derived move constructor
+#+end_example
+显式调用，将派生类修改为：
+#+begin_src c++
+ public:
+  Derived() { std::cout << "Derived default constructor" << std::endl; }
+  Derived(const Derived &d) : Base(d) { std::cout << "Derived copy constructor" << std::endl; }
+  Derived(Derived &&d) : Base(std::move(d)) { std::cout << "Derived move constructor" << std::endl; }
+};
+
+#+END_SRC
+class Derived : public Base {
+输出结果：
+#+begin_example
+Base default constructor
+Derived default constructor
+Base copy constructor
+Derived copy constructor
+Base move constructor
+Derived move constructor
+#+end_example
+
+*** 当派生类未定义拷贝或移动构造函数，若基类有拷贝和移动构造函数，则派生类将获得合成的拷贝和移动构造函数，且调用的是基类的拷贝或移动构造函数
+#+begin_src c++
+#include <iostream>
+
+class Base {
+ public:
+  Base() { std::cout << "Base default constructor" << std::endl; }
+  Base(const Base &b) { std::cout << "Base copy constructor" << std::endl; }
+  Base(Base &&b) { std::cout << "Base move constructor" << std::endl; }
+};
+
+class Derived : public Base {
+//  public:
+//   Derived() { std::cout << "Derived default constructor" << std::endl; }
+//   Derived(const Derived &d) : Base(d) { std::cout << "Derived copy constructor" << std::endl; }
+//   Derived(Derived &&d) : Base(std::move(d)) { std::cout << "Derived move constructor" << std::endl; }
+};
+ 
+int main() {
+  Derived d;
+  Derived d1(d);
+  Derived d2(std::move(d));
+
+  return 0;
+}
+
+#+END_SRC
+输出结果：
+#+begin_example
+Base default constructor
+Base copy constructor
+Base move constructor
+#+end_example
 ** 参考文章
 [[https://zhuanlan.zhihu.com/p/111792987][关于C++默认拷贝构造函数产生的问题的讨论]]
 * 类
@@ -1398,6 +1576,23 @@ TEST_F(optional) {
 - "%5s",表示输出至少5个字符，不够的话，左侧用空格补。
 - %.5s，最多输出5个字符
 
+* 全局构造与析构函数
+我们知道一般的C/C++ 的程序是从main函数开始的，然后在main函数结束后程序结束。但是不然，在main函数开始执行前，已经有其他的指令被执行了。
+
+为了程序的顺利执行，首先要初始化执行环境，比如堆分配初始化（malloc, free) ，线程子系统等，这里先提一下：C++ 的全局对象构造函数就是在这一时期被执行的。即C++ 的全局对象构造函数在main 函数之前执行，而C++ 全局对象的析构函数在main函数之后被执行。
+
+linux 系统中，一般程序的入口是“ _start ", 这个函数是Linux系统库(Glibc)的一部分。当我们的程序与Glibc库链接在一起形成最终的可执行文件以后，这个函数就是程序的初始化部分的入口，程序的初始化部分完成一系列初始化过程以后，就会调用main函数来执行程序的主体。在main函数执行完成以后，返回到初始化部分，会进行一系列清理工作，然后结束进程。
+
+对于有些场合，程序的一些特性的操作必须在main函数之前执行，还有一些操作必须在Mian函数之后执行，这里再提一下C++ .因为最具代表性的就是C++ 的全局对象的构造与析构函数。因此ELF（linux里一种文件格式)文件定义了两种段涉及到了这种信息。
+
+§ .init  该段里边保存的是可执行命令，它构成了进程的初始化代码。因此，当一个程序开始运行时，在main函数被调用前Glibc的初始化部分安排执行这个段中的代码。
+
+§ .fini  该段保存着进程终止代码指令。因此，当一个程序的main函数正常退出时，Glibc会安排执行这个段中的代码。
+
+因此，这两个段.init 和 .fini的存在有着特别的目的，如果一个函数放到了.init 段，在main函数执行前，系统就会执行它。同理，假如一个函数放到了.fini段，在main函数返回后函数就会被执行。利用这两个特征，C++ 的全局构造函数和析构函数就是这样来的。
+
+** 参考文章
+[[https://www.cnblogs.com/dormant/p/5065665.html][C++ 的全局构造与析构函数]]
 * string
 ** 初始化
 string test1;    //空串
