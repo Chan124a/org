@@ -70,7 +70,7 @@
 - =M-x ibuffer= 打开buffer管理页面
 - =C-x TAB= 可以进行缩进
 - =C-c C-x C-v= 可以显示图片
-** 查找和替换
+** 查找,替换,过滤
 - =C-s= 向前搜索
 - =C-r= 向后搜索
 - =C-M-s= 使用正则表达式正向搜索
@@ -87,7 +87,15 @@
 
 替换时可用C-q C-j表示换行符
 
-[[rmail:https://www.cnblogs.com/robertzml/archive/2010/03/03/1675870.html][参考文章]]
+- M-x keep-lines will delete lines not matching the pattern (i.e. only keep the lines which match).
+- M-x flush-lines does the opposite, deleting lines which do match the pattern.
+- M-x occur will open a separate buffer showing only the matching lines (which you can use like a compilation error buffer to navigate those positions in the original buffer). This option is the closest to the 'grep' approach.
+- C-u M-x occur will show only the portion of each line which specifically matched the pattern (which is what the quoted part of your question sounds most like).
+- M-x loccur from https://elpa.gnu.org/packages/loccur.html hides/unhides the text within the original buffer (which is therefore a bit like a non-destructive keep-lines).
+
+*** 参考文章
+[[https://www.cnblogs.com/robertzml/archive/2010/03/03/1675870.html][学习Emacs系列教程（八）：查找替换]]
+[[https://emacs.stackexchange.com/questions/68636/filter-text-of-buffer-in-a-grep-like-way][Filter text of buffer in a grep-like way]]
 ** 标记
 - =C-<spc>= 或 =C-@= 会显示Mark set，可以片选文字
 - =C-x C-x= 在标记和光标进行切换
