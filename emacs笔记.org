@@ -394,30 +394,57 @@ quote 操作符接受一个实参，并完封不动地返回它。
 #+END_SRC
 
 #+RESULTS:
-** If Then Else
-The form for “if” expression is:
+** 条件
+*** Special Form: cond clause
+相当于自带break的case语句.
 
-(if test body)
+cond chooses among an arbitrary number of alternatives.
+Each clause in the cond must be a list.
+The CAR of this list is the condition; the remaining elements, if any, the body-forms.
+Thus, a clause looks like this:
 
-or
+#+begin_src emacs-lisp
+(condition body-forms…)
+#+end_src
+cond tries the clauses in textual order, by evaluating the condition of each clause.
+If the value of condition is non-nil, the clause succeeds; then cond evaluates its body-forms, and returns the value of the last of body-forms.
+Any remaining clauses are ignored.
 
-(if test true_body false_body)
-#+BEGIN_EXAMPLE
-(if (< 3 2)
-    7
-  8) ; 8
+If the value of condition is nil, the clause fails, so the cond moves on to the following clause, trying its condition.
 
-;; no false expression, return nil
-(if (< 3 2)
-    (message "yes")) ; nil
-#+END_EXAMPLE
-If you do not need a “else” part, you should use the function when instead, because it is more clear. The form is:
+A clause may also look like this:
+#+begin_src lisp
+(condition)
+#+end_src
+Then, if condition is non-nil when tested, the cond form returns the value of condition.
 
-(when test expr1 expr2 …)
+If every condition evaluates to nil, so that every clause fails, cond returns nil.
 
-Its meaning is the same as
+The following example has four clauses, which test for the cases where the value of x is a number, string, buffer and symbol, respectively:
+#+begin_src lisp
+(cond ((numberp x) x)
+      ((stringp x) x)
+      ((bufferp x)
+       (setq temporary-hack x) ; multiple body-forms
+       (buffer-name x))        ; in one clause
+      ((symbolp x) (symbol-value x)))
+#+END_SRC
+Often we want to execute the last clause whenever none of the previous clauses was successful. To do this, we use t as the condition of the last clause, like this: (t body-forms). The form t evaluates to t, which is never nil, so this clause never fails, provided the cond gets to it at all. For example:
+#+begin_example
+(setq a 5)
+(cond ((eq a 'hack) 'foo)
+      (t "default"))
+⇒ "default"
 
-(if test (progn expr1 expr2 …))
+#+end_example
+This cond expression returns foo if the value of a is hack, and returns the string "default" otherwise.
+
+Any conditional construct can be expressed with cond or with if. Therefore, the choice between them is a matter of style. For example:
+#+begin_example
+(if a b c)
+≡
+(cond (a b) (t c))
+#+end_example
 ** Block of Expressions
 Sometimes you need to group several expressions together as one single expression. This can be done with progn.
 #+BEGIN_EXAMPLE
@@ -444,6 +471,35 @@ progn returns the last expression in its body.
 #+BEGIN_EXAMPLE
 (progn 3 4 ) ; 4
 #+END_EXAMPLE
+** defcustom
+定义变量,然后可以在customize里进行配置.
+** fboundp symbol
+This function returns t if the symbol has an object in its function cell, nil otherwise. It does not check that the object is a legitimate function.
+
+** If Then Else
+The form for “if” expression is:
+
+(if test body)
+
+or
+
+(if test true_body false_body)
+#+BEGIN_EXAMPLE
+(if (< 3 2)
+    7
+  8) ; 8
+
+;; no false expression, return nil
+(if (< 3 2)
+    (message "yes")) ; nil
+#+END_EXAMPLE
+If you do not need a “else” part, you should use the function when instead, because it is more clear. The form is:
+
+(when test expr1 expr2 …)
+
+Its meaning is the same as
+
+(if test (progn expr1 expr2 …))
 ** Loop
 Most basic loop in elisp is with while.
 
@@ -463,6 +519,7 @@ Most basic loop in elisp is with while.
     (setq x (+ x 1))))
 #+END_EXAMPLE
 Usually it's better to use dolist or dotimes.
+
 * emacs配置文件
 
 Emacs 的配置文件默认保存在 =~/.emacs.d/init.el= 文件中。（如果其不存在可自行创建，
