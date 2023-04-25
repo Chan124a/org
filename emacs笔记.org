@@ -87,10 +87,14 @@
 
 替换时可用C-q C-j表示换行符
 
-- M-x keep-lines will delete lines not matching the pattern (i.e. only keep the lines which match).
+- M-x keep-lines will delete lines not matching the pattern
+  (i.e. only keep the lines which match).
 - M-x flush-lines does the opposite, deleting lines which do match the pattern.
-- M-x occur will open a separate buffer showing only the matching lines (which you can use like a compilation error buffer to navigate those positions in the original buffer). This option is the closest to the 'grep' approach.
-- C-u M-x occur will show only the portion of each line which specifically matched the pattern (which is what the quoted part of your question sounds most like).
+- M-x occur will open a separate buffer showing only the matching lines
+  (which you can use like a compilation error buffer to navigate those positions in the original buffer).
+  This option is the closest to the 'grep' approach.
+- C-u M-x occur will show only the portion of each line which specifically matched the pattern
+  (which is what the quoted part of your question sounds most like).
 - M-x loccur from https://elpa.gnu.org/packages/loccur.html hides/unhides the text within the original buffer (which is therefore a bit like a non-destructive keep-lines).
 
 *** 参考文章
@@ -395,8 +399,22 @@ quote 操作符接受一个实参，并完封不动地返回它。
 
 #+RESULTS:
 ** 条件
-*** Special Form: cond clause
+*** cond 
 相当于自带break的case语句.
+
+按顺序检查每个条件，如果满足则执行对应的body，然后跳出cond语句。
+
+如下代码可以分别执行3个setq表达式再执行cond表达式来观察结果。
+#+BEGIN_SRC emacs-lisp :results output
+  (setq a 1)
+  (setq a 2)
+  (setq a -1)
+
+  (cond ((eql a 1) "Equal to 1")
+        ((> a 1)   "Greater than 1")
+        (t         "Something else!"))
+
+#+END_SRC
 
 cond chooses among an arbitrary number of alternatives.
 Each clause in the cond must be a list.
@@ -445,6 +463,138 @@ Any conditional construct can be expressed with cond or with if. Therefore, the 
 ≡
 (cond (a b) (t c))
 #+end_example
+*** if
+条件判断语句，直接看示例。
+
+(if true-or-false-test
+    action-to-carry-out-if-test-is-true)
+#+BEGIN_SRC emacs-lisp :results output
+  (if (> 5 4)                             ; if-part
+      (message "5 is greater than 4!"))   ; then-part
+#+END_SRC
+#+BEGIN_SRC emacs-lisp :results output
+  (defun type-of-animal (characteristic)
+    "Print message in echo area depending on CHARACTERISTIC.
+  If the CHARACTERISTIC is the string \"fierce\",
+  then warn of a tiger."
+    (if (equal characteristic "fierce")
+        (message "It is a tiger!")))
+
+#+END_SRC
+*** if–then–else
+并没有 else 关键字，而是通过缩进来区分。
+#+BEGIN_SRC emacs-lisp :results output
+(if true-or-false-test
+    action-to-carry-out-if-the-test-returns-true
+  action-to-carry-out-if-the-test-returns-false)
+
+#+END_SRC
+#+BEGIN_SRC emacs-lisp :results output
+  (if (> 4 5)                               ; if-part
+      (message "4 falsely greater than 5!") ; then-part
+    (message "4 is not greater than 5!"))   ; else-part
+
+#+END_SRC
+#+BEGIN_SRC emacs-lisp :results output
+  (defun type-of-animal (characteristic)  ; Second version.
+    "Print message in echo area depending on CHARACTERISTIC.
+  If the CHARACTERISTIC is the string \"fierce\",
+  then warn of a tiger; else say it is not fierce."
+    (if (equal characteristic "fierce")
+        (message "It is a tiger!")
+      (message "It is not fierce!")))
+
+
+  (type-of-animal "fierce")
+
+  (type-of-animal "striped")
+
+#+END_SRC
+*** when
+当when后面的表达式为t(true)时执行后面的代码，要执行的代码可以是多个表达式，最一个表达式的结果作为返回结果。
+
+下面这段代码执行后会在echo area打印4，并在message buffer里显示 "Hey, it's true!"。
+#+BEGIN_SRC emacs-lisp :results output
+  (when (> 2 1)
+    (message "Hey, it's true!")
+    (- 5 2)
+    (+ 2 2)) ;; 4
+
+#+END_SRC
+*** unless
+
+当unless后面的表达式为nil(false)时执行后面的代码，其它部分和when一样。
+#+BEGIN_SRC emacs-lisp :results output
+(unless condition a b c)
+
+#+END_SRC
+等价于
+#+BEGIN_SRC emacs-lisp :results output
+  (if condition nil
+    a b c)
+
+#+END_SRC
+#+BEGIN_SRC emacs-lisp :results output
+  (unless (> 1 2)
+    (message "Hey, it's true!")
+    (- 5 2)
+    (+ 2 2)) ;; 4
+
+#+END_SRC
+*** cl-case
+用于增强if,and,or,cond形式，and和or比较简单，就是其它语言里的and和or，不再解释。
+#+BEGIN_SRC emacs-lisp :results output
+  (cl-case (read-char)
+    (?a (do-a-thing))
+    (?b (do-b-thing))
+    ((?\r ?\n) (do-ret-thing))
+    (t (do-other-thing)))
+
+#+END_SRC
+语法为 cl-case keyform clause… ，先执行keyfor，然后将结果与clause对比，clause是key/value形式的列表，当结果和key一致时，执行这个key对应的value，比较使用的是 eql ，这里先记住eql会有一些限制，后面会有pcase来解决。
+*** cl-typecase
+和cl-case差不多，只是比较的不是结果，而是结果的类型，语法为 cl-typecase keyform clause… ，这里的clause是 (type body…) 的形式。
+#+BEGIN_SRC emacs-lisp :results output
+  (cl-typecase x
+    (integer (munch-integer x))
+    (float (munch-float x))
+    (string (munch-integer (string-to-number x)))
+    (t (munch-anything x)))
+
+#+END_SRC
+*** pcase
+
+待补充
+*** when-let
+当绑定的变量不为 nil 执行body，否则返回 nil 。
+#+BEGIN_SRC emacs-lisp :results output
+  ;; "Hello kang"
+  (when-let ((name 'kang))
+     (message "Hello %s" name)
+  )
+
+  ;; nil
+  (when-let ((name nil))
+     (message "Hello %s" name)
+  )
+
+#+END_SRC
+*** if-let
+如果绑定的变量不为 nil 则执行 if 分支，否则执行 else 分支。
+#+BEGIN_SRC emacs-lisp :results output
+  ;; true
+  (if-let ((name 'kang))
+     (message "true")
+     (message "false")
+  )
+
+  ;; false
+  (if-let ((name nil))
+     (message "true")
+     (message "false")
+  )
+
+#+END_SRC
 ** Block of Expressions
 Sometimes you need to group several expressions together as one single expression. This can be done with progn.
 #+BEGIN_EXAMPLE
@@ -473,9 +623,34 @@ progn returns the last expression in its body.
 #+END_EXAMPLE
 ** defcustom
 定义变量,然后可以在customize里进行配置.
-** fboundp symbol
+** fboundp
 This function returns t if the symbol has an object in its function cell, nil otherwise. It does not check that the object is a legitimate function.
+** functionp
+Returns true if object is of type function; otherwise, returns false.
+** file-exists-p filename
+This function returns t if a file named filename appears to exist. This does not mean you can necessarily read the file, only that you can probably find out its attributes. (On GNU and other POSIX-like systems, this is true if the file exists and you have execute permission on the containing directories, regardless of the permissions of the file itself.)
 
+If the file does not exist, or if there was trouble determining whether the file exists, this function returns nil.
+
+Directories are files, so file-exists-p can return t when given a directory. However, because file-exists-p follows symbolic links, it returns t for a symbolic link name only if the target file exists.
+** file-readable-p filename
+This function returns t if a file named filename exists and you can read it. It returns nil otherwise.
+** file-executable-p filename
+This function returns t if a file named filename exists and you can execute it. It returns nil otherwise. On GNU and other POSIX-like systems, if the file is a directory, execute permission means you can check the existence and attributes of files inside the directory, and open those files if their modes permit.
+** file-writable-p filename 
+This function returns t if the file filename can be written or created by you, and nil otherwise. A file is writable if the file exists and you can write it. It is creatable if it does not exist, but its parent directory does exist and you can write in that directory.
+
+In the example below, foo is not writable because the parent directory does not exist, even though the user could create such a directory.
+
+(file-writable-p "~/no-such-dir/foo")
+     ⇒ nil
+** file-accessible-directory-p dirname
+This function returns t if you have permission to open existing files in the directory whose name as a file is dirname; otherwise (e.g., if there is no such directory), it returns nil. The value of dirname may be either a directory name (such as /foo/) or the file name of a file which is a directory (such as /foo, without the final slash).
+
+For example, from the following we deduce that any attempt to read a file in /foo/ will give an error:
+
+(file-accessible-directory-p "/foo")
+     ⇒ nil
 ** If Then Else
 The form for “if” expression is:
 

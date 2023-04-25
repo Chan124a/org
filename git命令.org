@@ -1606,6 +1606,30 @@ remote: Total 3 (delta 0), reused 0 (delta 0)
 git remote set-url origin remote_git_address
 
 http://blog.chinaunix.net/uid-22028680-id-3040436.html
+* 解决git status不能显示中文
+现象：
+git status查看有改动但未提交的文件时总只显示数字串，显示不出中文文件名，非常不方便。如下图：
+
+#+DOWNLOADED: screenshot @ 2023-04-25 22:41:20
+[[file:images/git命令/解决git_status不能显示中文/2023-04-25_22-41-20_screenshot.png]]
+原因：
+
+在默认设置下，中文文件名在工作区状态输出，中文名不能正确显示，而是显示为八进制的字符编码。
+
+解决办法：
+
+git bash终端输入命令：
+#+begin_src bash
+git config --global core.quotepath false
+#+END_SRC
+
+这样设置后，你的git bash终端也要设置成中文和utf-8编码。才能正确显示中文.
+
+在git bash的界面中右击空白处，弹出菜单，选择选项->文本->本地Locale，设置为zh_CN，而旁边的字符集选框选为UTF-8。
+
+英文显示则是：
+Options->Text->Locale改为zh_CN，Character set改为UTF-8
+
 * 问题集锦
 ** warning: LF will be replaced by CRLF in ** 的原因及解决办法
 今天在使用git add 命令的时候，弹出了一个警告 warning: LF will be replaced by CRLF in ******（具体的一个文件）
@@ -1638,3 +1662,42 @@ fatal: Authentication failed for 'https://github.com/Chan124a/emacs.git/'
 通过查看网站 https://github.blog/2020-12-15-token-authentication-requirements-for-git-operations/ ，得知Git 基于密码授权的访问方式已经废弃，强制要求使用基于令牌的认证机制。
 
 通过[[https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token][官方教程：获取个人token]]的操作，使用token登录即可
+
+#+DOWNLOADED: screenshot @ 2023-04-25 22:43:01
+[[file:images/git命令/问题集锦/2023-04-25_22-43-01_screenshot.png]]
+如果你的git bash终端没有菜单选项显示，还可以通过直接修改配置文件的方式来解决中文乱码问题。
+
+进入git的安装目录
+
+编辑etc\gitconfig文件，也有些windows系统是存放在C:\Users\Administrator\.gitconfig路径或安装盘符:\Git\mingw64\etc\gitconfig，在文件末尾增加以下内容：
+#+begin_src bash
+[gui]  
+    encoding = utf-8  
+    # 代码库统一使用utf-8  
+[i18n]  
+    commitencoding = utf-8  
+    # log编码  
+[svn]  
+    pathnameencoding = utf-8  
+    # 支持中文路径  
+[core]
+    quotepath = false 
+    # status引用路径不再是八进制（反过来说就是允许显示中文了）
+
+#+END_SRC
+
+编辑etc\git-completion.bash文件,在文件末尾增加以下内容：
+#+begin_src bash
+# 让ls命令能够正常显示中文
+alias ls='ls --show-control-chars --color=auto' 
+#+END_SRC
+
+编辑etc\inputrc文件，修改output-meta和convert-meta属性值：
+#+begin_src bash
+set output-meta on  # bash可以正常输入中文  
+set convert-meta off  
+#+END_SRC
+编辑profile文件，在文件末尾添加如下内容：
+#+begin_src bash
+export LESSHARESET=utf-8
+#+END_SRC
