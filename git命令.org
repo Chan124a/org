@@ -178,8 +178,8 @@ Git和其他版本控制系统如SVN的一个不同之处就是有暂存区的�
 工作区有一个隐藏目录.git，这个不算工作区，而是Git的版本库。
 
 Git的版本库里存了很多东西，其中最重要的就是称为stage（或者叫index）的暂存区，还有Git为我们自动创建的第一个分支master，以及指向master的一个指针叫HEAD。
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/0.jpg @ 2020-09-10 16:22:36
-[[file:%E5%B7%A5%E4%BD%9C%E5%8C%BA%E5%92%8C%E6%9A%82%E5%AD%98%E5%8C%BA/2020-09-10_16-22-36_0.jpg]]
+#+DOWNLOADED: file:F:/org/图片/0.jpg @ 2020-09-10 16:22:36
+[[file:工作区和暂存区/2020-09-10_16-22-36_0.jpg]]
 前面讲了我们把文件往Git版本库里添加的时候，是分两步执行的：
 
 第一步是用git add把文件添加进去，实际上就是把文件修改添加到暂存区；
@@ -228,8 +228,8 @@ Changes to be committed:
 	modified:   readme.txt
 #+END_SRC
 现在，暂存区的状态就变成这样了：
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/0%20%281%29.jpg @ 2020-09-10 16:25:44
-[[file:%E5%B7%A5%E4%BD%9C%E5%8C%BA%E5%92%8C%E6%9A%82%E5%AD%98%E5%8C%BA/2020-09-10_16-25-44_0%2520%25281%2529.jpg]]
+#+DOWNLOADED: file:F:/org/图片/0 (1).jpg @ 2020-09-10 16:25:44
+[[file:工作区和暂存区/2020-09-10_16-25-44_0%20%281%29.jpg]]
 所以，git add命令实际上就是把要提交的所有修改放到暂存区（Stage），然后，执行git commit就可以一次性把暂存区的所有修改提交到分支。
 #+BEGIN_SRC bash
 $ git commit -m "understand how stage works"
@@ -244,8 +244,8 @@ On branch master
 nothing to commit, working tree clean
 #+END_SRC
 现在版本库变成了这样，暂存区就没有任何内容了：
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/0%20%282%29.jpg @ 2020-09-10 16:27:22
-[[file:%E5%B7%A5%E4%BD%9C%E5%8C%BA%E5%92%8C%E6%9A%82%E5%AD%98%E5%8C%BA/2020-09-10_16-27-22_0%2520%25282%2529.jpg]]
+#+DOWNLOADED: file:F:/org/图片/0 (2).jpg @ 2020-09-10 16:27:22
+[[file:工作区和暂存区/2020-09-10_16-27-22_0%20%282%29.jpg]]
 
 * 管理修改
 为什么Git比其他版本控制系统设计得优秀?因为Git跟踪并管理的是修改，而非文件
@@ -392,11 +392,11 @@ ssh-keygen -t rsa -C "你的github邮箱"
 #+END_SRC
 期间会要求你输入密码，并会给出存放生成的公钥在哪一个文件夹中。我们在这个文件夹中的id_rsa.pub中获得我们账户的公钥。如果一切顺利的话，可以在用户主目录里找到.ssh目录，里面有id_rsa和id_rsa.pub两个文件，这两个就是SSH Key的秘钥对，id_rsa是私钥，不能泄露出去，id_rsa.pub是公钥，可以放心地告诉任何人。
 
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/1803727-20200125171126826-2087303938.jpg @ 2020-09-10 20:12:17
-[[file:%E4%BD%BF%E7%94%A8git%EF%BC%88%E5%90%8C%E4%B8%80%E8%B4%A6%E5%8F%B7%EF%BC%89%E5%9C%A8%E5%A4%9A%E5%8F%B0%E7%94%B5%E8%84%91%E5%8D%8F%E5%90%8C%E5%81%9A%E5%B7%A5/2020-09-10_20-12-17_1803727-20200125171126826-2087303938.jpg]]
+#+DOWNLOADED: file:F:/org/图片/1803727-20200125171126826-2087303938.jpg @ 2020-09-10 20:12:17
+[[file:使用git（同一账号）在多台电脑协同做工/2020-09-10_20-12-17_1803727-20200125171126826-2087303938.jpg]]
 2、将公钥添加到github自己的网站设置上，注意格式（打开的id_rsa.hub文件中不要将最后的邮箱也复制上去，这一点注意看github上的添加英文提醒）点“Add SSH Key”，填上任意Title，在Key文本框里粘贴id_rsa.pub文件的内容：
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/1803727-20200125171143306-574498943.png @ 2020-09-10 20:12:27
-[[file:%E4%BD%BF%E7%94%A8git%EF%BC%88%E5%90%8C%E4%B8%80%E8%B4%A6%E5%8F%B7%EF%BC%89%E5%9C%A8%E5%A4%9A%E5%8F%B0%E7%94%B5%E8%84%91%E5%8D%8F%E5%90%8C%E5%81%9A%E5%B7%A5/2020-09-10_20-12-27_1803727-20200125171143306-574498943.png]]
+#+DOWNLOADED: file:F:/org/图片/1803727-20200125171143306-574498943.png @ 2020-09-10 20:12:27
+[[file:使用git（同一账号）在多台电脑协同做工/2020-09-10_20-12-27_1803727-20200125171143306-574498943.png]]
 3、然后我们在自己希望上传的文档的文件夹中打开git bash，初始化git仓库并作出添加提交，并需要进行一定的配置等命令，输入命令：
 #+BEGIN_SRC bash 
 git init
@@ -492,26 +492,26 @@ Git支持多种协议，包括https，但ssh协议速度最快。
 在版本回退里，你已经知道，每次提交，Git都把它们串成一条时间线，这条时间线就是一个分支。截止到目前，只有一条时间线，在Git里，这个分支叫主分支，即master分支。HEAD严格来说不是指向提交，而是指向master，master才是指向提交的，所以，HEAD指向的就是当前分支。
 
 一开始的时候，master分支是一条线，Git用master指向最新的提交，再用HEAD指向master，就能确定当前分支，以及当前分支的提交点：
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/0.png @ 2020-09-10 18:58:30
-[[file:%E5%88%9B%E5%BB%BA%E4%B8%8E%E5%90%88%E5%B9%B6%E5%88%86%E6%94%AF/2020-09-10_18-58-30_0.png]]
+#+DOWNLOADED: file:F:/org/图片/0.png @ 2020-09-10 18:58:30
+[[file:创建与合并分支/2020-09-10_18-58-30_0.png]]
 每次提交，master分支都会向前移动一步，这样，随着你不断提交，master分支的线也越来越长。
 
 当我们创建新的分支，例如dev时，Git新建了一个指针叫dev，指向master相同的提交，再把HEAD指向dev，就表示当前分支在dev上：
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/l.png @ 2020-09-10 18:59:00
-[[file:%E5%88%9B%E5%BB%BA%E4%B8%8E%E5%90%88%E5%B9%B6%E5%88%86%E6%94%AF/2020-09-10_18-59-00_l.png]]
+#+DOWNLOADED: file:F:/org/图片/l.png @ 2020-09-10 18:59:00
+[[file:创建与合并分支/2020-09-10_18-59-00_l.png]]
 Git创建一个分支很快，因为除了增加一个dev指针，改改HEAD的指向，工作区的文件都没有任何变化！
 
 不过，从现在开始，对工作区的修改和提交就是针对dev分支了，比如新提交一次后，dev指针往前移动一步，而master指针不变：
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/l%20%281%29.png @ 2020-09-10 18:59:36
-[[file:%E5%88%9B%E5%BB%BA%E4%B8%8E%E5%90%88%E5%B9%B6%E5%88%86%E6%94%AF/2020-09-10_18-59-36_l%2520%25281%2529.png]]
+#+DOWNLOADED: file:F:/org/图片/l (1).png @ 2020-09-10 18:59:36
+[[file:创建与合并分支/2020-09-10_18-59-36_l%20%281%29.png]]
 假如我们在dev上的工作完成了，就可以把dev合并到master上。Git怎么合并呢？最简单的方法，就是直接把master指向dev的当前提交，就完成了合并：
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/0%20%281%29.png @ 2020-09-10 18:59:53
-[[file:%E5%88%9B%E5%BB%BA%E4%B8%8E%E5%90%88%E5%B9%B6%E5%88%86%E6%94%AF/2020-09-10_18-59-53_0%2520%25281%2529.png]]
+#+DOWNLOADED: file:F:/org/图片/0 (1).png @ 2020-09-10 18:59:53
+[[file:创建与合并分支/2020-09-10_18-59-53_0%20%281%29.png]]
 所以Git合并分支也很快！就改改指针，工作区内容也不变！
 
 合并完分支后，甚至可以删除dev分支。删除dev分支就是把dev指针给删掉，删掉后，我们就剩下了一条master分支：
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/0%20%282%29.png @ 2020-09-10 19:00:14
-[[file:%E5%88%9B%E5%BB%BA%E4%B8%8E%E5%90%88%E5%B9%B6%E5%88%86%E6%94%AF/2020-09-10_19-00-14_0%2520%25282%2529.png]]
+#+DOWNLOADED: file:F:/org/图片/0 (2).png @ 2020-09-10 19:00:14
+[[file:创建与合并分支/2020-09-10_19-00-14_0%20%282%29.png]]
 ** 创建与合并命令
 - 查看分支：git branch
 - 创建分支：git branch <name>
@@ -558,8 +558,8 @@ Switched to branch 'master'
 
 切换回master分支后，再查看一个readme.txt文件，刚才添加的内容不见了！因为那个提交是在dev分支上，而master分支此刻的提交点并没有变：
 
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/0%20%283%29.png @ 2020-09-10 19:06:55
-[[file:dev/2020-09-10_19-06-55_0%2520%25283%2529.png]]
+#+DOWNLOADED: file:F:/org/图片/0 (3).png @ 2020-09-10 19:06:55
+[[file:dev/2020-09-10_19-06-55_0%20%283%29.png]]
 现在，我们把dev分支的工作成果合并到master分支上：
 #+BEGIN_SRC bash
 $ git merge dev
@@ -638,8 +638,8 @@ $ git commit -m "& simple"
 #+END_SRC
 现在，master分支和feature1分支各自都分别有新的提交，变成了这样：
 
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/0%20%284%29.png @ 2020-09-10 19:19:11
-[[file:%E8%A7%A3%E5%86%B3%E5%86%B2%E7%AA%81/2020-09-10_19-19-11_0%2520%25284%2529.png]]
+#+DOWNLOADED: file:F:/org/图片/0 (4).png @ 2020-09-10 19:19:11
+[[file:解决冲突/2020-09-10_19-19-11_0%20%284%29.png]]
 这种情况下，Git无法执行“快速合并”，只能试图把各自的修改合并起来，但这种合并就可能会有冲突，我们试试看：
 #+BEGIN_SRC bash
 $ git merge feature1
@@ -688,8 +688,8 @@ $ git commit -m "conflict fixed"
 [master cf810e4] conflict fixed
 #+END_SRC
 现在，master分支和feature1分支变成了下图所示：
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/0%20%285%29.png @ 2020-09-10 19:26:26
-[[file:%E8%A7%A3%E5%86%B3%E5%86%B2%E7%AA%81/2020-09-10_19-26-26_0%2520%25285%2529.png]]
+#+DOWNLOADED: file:F:/org/图片/0 (5).png @ 2020-09-10 19:26:26
+[[file:解决冲突/2020-09-10_19-26-26_0%20%285%29.png]]
 用带参数的用git log --graph命令可以看到分支合并图:
 #+BEGIN_SRC bash
  $ git log --graph --pretty=oneline --abbrev-commit
@@ -719,11 +719,11 @@ Deleted branch feature1 (was 14096d0).
 ssh-keygen -t rsa -C "你的github邮箱"
 #+END_SRC
 期间会要求你输入密码，并会给出存放生成的公钥在哪一个文件夹中。我们在这个文件夹中的id_rsa.pub中获得我们账户的公钥。
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/1803727-20200125171126826-2087303938.jpg @ 2020-09-10 20:03:57
-[[file:%E8%A7%A3%E5%86%B3%E5%86%B2%E7%AA%81/2020-09-10_20-03-57_1803727-20200125171126826-2087303938.jpg]]
+#+DOWNLOADED: file:F:/org/图片/1803727-20200125171126826-2087303938.jpg @ 2020-09-10 20:03:57
+[[file:解决冲突/2020-09-10_20-03-57_1803727-20200125171126826-2087303938.jpg]]
 2、将公钥添加到github自己的网站设置上，注意格式（打开的id_rsa.hub文件中不要将最后的邮箱也复制上去，这一点注意看github上的添加英文提醒）
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/1803727-20200125171143306-574498943.png @ 2020-09-10 20:04:21
-[[file:%E8%A7%A3%E5%86%B3%E5%86%B2%E7%AA%81/2020-09-10_20-04-21_1803727-20200125171143306-574498943.png]]
+#+DOWNLOADED: file:F:/org/图片/1803727-20200125171143306-574498943.png @ 2020-09-10 20:04:21
+[[file:解决冲突/2020-09-10_20-04-21_1803727-20200125171143306-574498943.png]]
 * 多人协作
 - 查看远程库信息，使用git remote -v；
 - 本地新建的分支如果不推送到远程，对其他人就是不可见的；
@@ -1022,8 +1022,8 @@ origin
 一旦你使用这种方式删除了一个远程仓库，那么所有和这个远程仓库相关的远程跟踪分支以及配置信息也会一起被删除。
 * git命令
 一般来说，日常使用只要记住下图6个命令，就可以了
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/bg2015120901.png @ 2020-09-11 12:42:17
-[[file:git%E5%91%BD%E4%BB%A4/2020-09-11_12-42-16_bg2015120901.png]]
+#+DOWNLOADED: file:F:/org/图片/bg2015120901.png @ 2020-09-11 12:42:17
+[[file:git命令/2020-09-11_12-42-16_bg2015120901.png]]
 ** 新建代码库
 #+BEGIN_SRC bash
 # 在当前目录新建一个Git代码库
@@ -1396,12 +1396,12 @@ GitBash 是 Windows 系统安装 Git 时默认集成的命令行工具,提供运
 如果选中文件右键没有弹出 GitBashHere 和 GItGUIHere 选项的话,很可能安装 Git 时并没有集成这两个工具,请检查安装 Git 时下图是否已经勾选!
 
 #+DOWNLOADED: screenshot @ 2021-11-30 09:49:31
-[[file:images/git%E5%91%BD%E4%BB%A4/git_bash_%E5%91%BD%E4%BB%A4%E6%8B%93%E5%B1%95/2021-11-30_09-49-31_screenshot.png]]
+[[file:images/git命令/git_bash_命令拓展/2021-11-30_09-49-31_screenshot.png]]
 ** 在gitbash中使用cmd命令
 git bash 命令行内置终端是 mintty ,而 mintty 终端模拟器并不能完全取代 cmd 命令行.
 
 #+DOWNLOADED: screenshot @ 2021-11-30 09:52:38
-[[file:images/git%E5%91%BD%E4%BB%A4/git_bash_%E5%91%BD%E4%BB%A4%E6%8B%93%E5%B1%95/2021-11-30_09-52-38_screenshot.png]]
+[[file:images/git命令/git_bash_命令拓展/2021-11-30_09-52-38_screenshot.png]]
 
 #+BEGIN_EXAMPLE
 可以在 git bash 命令行终端内右键依次选择 Options>About 就可以查看 git bash 的庐山真面目啦!
@@ -1413,12 +1413,12 @@ Mintty works on all Windows versions from Windows XP onwards. Similarly to other
 既然 git bash 终端模拟器是 mintty,所以直接输入 mintty--help 命令也可以查看 mintty 的帮助信息.
 
 #+DOWNLOADED: screenshot @ 2021-11-30 09:57:21
-[[file:images/git%E5%91%BD%E4%BB%A4/git_bash_%E5%91%BD%E4%BB%A4%E6%8B%93%E5%B1%95/2021-11-30_09-57-21_screenshot.png]]
+[[file:images/git命令/git_bash_命令拓展/2021-11-30_09-57-21_screenshot.png]]
 
 如果想要在 git bash 命令行中调用 cmd 程序必须借助 winpty 包装器.
 
 #+DOWNLOADED: screenshot @ 2021-11-30 09:55:18
-[[file:images/git%E5%91%BD%E4%BB%A4/git_bash_%E5%91%BD%E4%BB%A4%E6%8B%93%E5%B1%95/2021-11-30_09-55-18_screenshot.png]]
+[[file:images/git命令/git_bash_命令拓展/2021-11-30_09-55-18_screenshot.png]]
 *** 什么是 winpty 包装器
 winpty 是一种提供与 cmd 通信的软件包,详情请参考 https://github.com/rprichard/winpty
 *** 如何使用 winpty 包装器
@@ -1427,11 +1427,11 @@ git bash 命令行内没有 tree 命令而 cmd 命令行却有 tree 命令.
 只不过 cmd 命令中的 tree 命令实际上是 tree.com 并不是 tree.exe 文件.
 
 #+DOWNLOADED: screenshot @ 2021-11-30 09:58:25
-[[file:images/git%E5%91%BD%E4%BB%A4/git_bash_%E5%91%BD%E4%BB%A4%E6%8B%93%E5%B1%95/2021-11-30_09-58-25_screenshot.png]]
+[[file:images/git命令/git_bash_命令拓展/2021-11-30_09-58-25_screenshot.png]]
 git bash 本身是没有 tree 命令,如果想要调用 tree 命令应该是调用 cmd 的 tree 命令,所以这里需要指明命令的全称: tree.com
 
 #+DOWNLOADED: screenshot @ 2021-11-30 09:59:04
-[[file:images/git%E5%91%BD%E4%BB%A4/git_bash_%E5%91%BD%E4%BB%A4%E6%8B%93%E5%B1%95/2021-11-30_09-59-04_screenshot.png]]
+[[file:images/git命令/git_bash_命令拓展/2021-11-30_09-59-04_screenshot.png]]
 
 如果直接调用 cmd 的 tree.com 命令会出现中文乱码,此时加上 winpty 包装器后再次调用就不会出现乱码现象了,也能顺利调用命令.
 
@@ -1442,7 +1442,7 @@ git bash 本身是没有 tree 命令,如果想要调用 tree 命令应该是调�
 git安装目录下的usr/bin目录存放着Git bash 所有可执行的命令文件
 
 #+DOWNLOADED: screenshot @ 2021-11-30 10:12:16
-[[file:images/git%E5%91%BD%E4%BB%A4/git_bash_%E5%91%BD%E4%BB%A4%E6%8B%93%E5%B1%95/2021-11-30_10-12-16_screenshot.png]]
+[[file:images/git命令/git_bash_命令拓展/2021-11-30_10-12-16_screenshot.png]]
 
 将对应命令的exe文件放入该目录，然后就可以在git bash中使用该命令了
 ** 各种软件安装方法
@@ -1484,17 +1484,17 @@ https://packages.msys2.org/package/zsh?repo=msys&variant=x86_64
 
 
 #+DOWNLOADED: screenshot @ 2021-12-21 22:53:09
-[[file:images/git%E5%91%BD%E4%BB%A4/git_bash_%E5%91%BD%E4%BB%A4%E6%8B%93%E5%B1%95/2021-12-21_22-53-09_screenshot.png]]
+[[file:images/git命令/git_bash_命令拓展/2021-12-21_22-53-09_screenshot.png]]
 下载完成后，如果格式为zst，可以使用软件peazip解压
 
 解压后，可以看到文件如下。
 #+DOWNLOADED: screenshot @ 2021-12-21 23:01:28
-[[file:images/git%E5%91%BD%E4%BB%A4/git_bash_%E5%91%BD%E4%BB%A4%E6%8B%93%E5%B1%95/2021-12-21_23-01-28_screenshot.png]]
+[[file:images/git命令/git_bash_命令拓展/2021-12-21_23-01-28_screenshot.png]]
 将这些文件直接解压到 Git 的安装目录下，与之前的文件进行合并，可以理解为把 zsh 当作 git bash 的一个补充安装包。
 
 完成后的效果如下图所示。
 #+DOWNLOADED: screenshot @ 2021-12-21 23:02:46
-[[file:images/git%E5%91%BD%E4%BB%A4/git_bash_%E5%91%BD%E4%BB%A4%E6%8B%93%E5%B1%95/2021-12-21_23-02-46_screenshot.png]]
+[[file:images/git命令/git_bash_命令拓展/2021-12-21_23-02-46_screenshot.png]]
 
 将/usr/bin/下面的zsh删掉（zsh.exe 文件大小为0，感觉可能是个链接/快捷方式啥的），然后把/usr/bin/下面的 zsh-5.8.exe 更名为 zsh.exe。
 
@@ -1518,7 +1518,7 @@ fi
 Git LFS 是 Github 开发的一个 Git 的扩展，用于实现 Git 对大文件的支持
 
 #+DOWNLOADED: screenshot @ 2021-12-10 14:48:36
-[[file:images/git%E5%91%BD%E4%BB%A4/Git_LFS/2021-12-10_14-48-36_screenshot.png]]
+[[file:images/git命令/Git_LFS/2021-12-10_14-48-36_screenshot.png]]
 ** 使用目的
 在游戏开发过程中,设计资源占用了很大一部分空间. 像png,psd等文件是二进制(blob)的,体积也很庞大.
 
@@ -1527,7 +1527,7 @@ Git LFS 是 Github 开发的一个 Git 的扩展，用于实现 Git 对大文件
 每次当二进制文件修改,发生变化的时候. 都会产生额外的提交量.导致clone和pull的数据量大增.在线仓库的体积也会迅速增长.
 
 #+DOWNLOADED: screenshot @ 2021-12-10 14:49:02
-[[file:images/git%E5%91%BD%E4%BB%A4/Git_LFS/2021-12-10_14-49-02_screenshot.png]]
+[[file:images/git命令/Git_LFS/2021-12-10_14-49-02_screenshot.png]]
 LFS(Large File Storage) 就是为了解决这一问题而产生的工具.
 
 它将你所标记的大文件保存至另外的仓库,而在主仓库仅保留其轻量级指针.

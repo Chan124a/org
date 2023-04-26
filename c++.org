@@ -2050,8 +2050,8 @@ int main()
 }
 #+END_SRC
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-04-11_10-52-03.png @ 2021-04-11 10:54:14
-[[file:STL%E5%AE%B9%E5%99%A8%E5%BA%95%E5%B1%82%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E6%80%BB%E7%BB%93/2021-04-11_10-54-14_Snipaste_2021-04-11_10-52-03.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-04-11_10-52-03.png @ 2021-04-11 10:54:14
+[[file:STL容器底层数据结构总结/2021-04-11_10-54-14_Snipaste_2021-04-11_10-52-03.png]]
 
 从输出结果中的三个红色箭头可以看出vector的扩容规则。
 
@@ -2243,8 +2243,8 @@ int main(int argc, char *argv[])
 - Random Access Iterator： 前4种迭代器只提供部分指针算术能力（前3种支持++运算符，后一种还支持--运算符)，而本迭代器则支持所有指针的算术运算，包括p+n、p-n、p[n]、p1-p2、p1<p2
 
 上述5种迭代器的继承关系如下图所示：
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-04-11_14-30-22.png @ 2021-04-11 14:30:26
-[[file:STL%E5%AE%B9%E5%99%A8%E8%BF%AD%E4%BB%A3%E5%99%A8%E5%A4%B1%E6%95%88%E6%83%85%E5%86%B5%E5%88%86%E6%9E%90%E3%80%81%E6%80%BB%E7%BB%93/2021-04-11_14-30-26_Snipaste_2021-04-11_14-30-22.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-04-11_14-30-22.png @ 2021-04-11 14:30:26
+[[file:STL容器迭代器失效情况分析、总结/2021-04-11_14-30-26_Snipaste_2021-04-11_14-30-22.png]]
 了解了迭代器的类型，我们就能解释vector的迭代器和list迭代器的区别了。显然，vector迭代器具有所有指针算术运算能力，而list由于是双向链表，因此只有双向读写不能随机访问元素。故vector的迭代器种类为Random Access Iterator，而list的迭代器种类为Bidirectional Iterator。我们只需要根据不同的迭代器种类，利用traits编程技巧萃取出迭代器型别，然后由C++重载机制就能够对不同型别的迭代器采用不同的处理流程了。为此，对于每个迭代器都必须定义型别iterator_category，也就是上文代码中的typedef std:forward_iterator_tag iterator_category，实际上可以直接继承STL中定义的iterator模板，模板后三个参数都有默认值，因此继承时只需要指定前两个模板参数即可。如下所示，STL定义了5个空类型作为迭代器的标签：
 #+BEGIN_SRC c++
 template<class Category,class T,class Distance = ptrdiff_t,class Pointer=T*,class Reference=T&>
@@ -3549,8 +3549,8 @@ delete运算符释放内存：调用相应类型的析构函数，处理类内�
 ** 内存是如何泄露的
 在 C++ 程序中，主要涉及到的内存就是“栈”和“堆”
 
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/v2-f3189547daa4548bc4ab6fdd13eeea6d_720w.png @ 2020-06-13 19:16:48
-[[file:%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2/2020-06-13_19-16-48_v2-f3189547daa4548bc4ab6fdd13eeea6d_720w.png]]
+#+DOWNLOADED: file:F:/org/图片/v2-f3189547daa4548bc4ab6fdd13eeea6d_720w.png @ 2020-06-13 19:16:48
+[[file:内存泄露/2020-06-13_19-16-48_v2-f3189547daa4548bc4ab6fdd13eeea6d_720w.png]]
 
 通常来说，一个线程的栈内存是有限的，通常来说是 8M 左右（取决于运行的环境）。栈上的内存通常是由编译器来自动管理的。当在栈上分配一个新的变量时，或进入一个函数时，栈的指针会下移，相当于在栈上分配了一块内存。我们把一个变量分配在栈上，也就是利用了栈上的内存空间。当这个变量的生命周期结束时，栈的指针会上移，相同于回收了内存。
 
@@ -3670,8 +3670,8 @@ gperftools 的一些经典用法，我们就不在这里进行介绍了，大家
 pprof --base=profile.0001.heap /usr/bin/xxx profile.0100.heap --text
 #+END_SRC
 来进行查看，也可以生成 pdf 文件，会更直观一些。
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/v2-a8eedcc8f07691a31707f5f8921acfa8_720w.png @ 2020-06-13 19:27:10
-[[file:%E5%86%85%E5%AD%98%E6%B3%84%E9%9C%B2/2020-06-13_19-27-10_v2-a8eedcc8f07691a31707f5f8921acfa8_720w.png]]
+#+DOWNLOADED: file:F:/org/图片/v2-a8eedcc8f07691a31707f5f8921acfa8_720w.png @ 2020-06-13 19:27:10
+[[file:内存泄露/2020-06-13_19-27-10_v2-a8eedcc8f07691a31707f5f8921acfa8_720w.png]]
 * 模板
 ** 模板类
 *** 模板类的继承
@@ -4174,36 +4174,36 @@ gtest提供了宏函数ASSERT_XXX(expected, actual)。
 ***** 方式一：struct重载运算符()
 通过struct重载()操作符，定义了一个函数对象
 #+DOWNLOADED: screenshot @ 2022-11-10 22:37:33
-[[file:images/c++/leetcode%E7%AC%94%E8%AE%B0/2022-11-10_22-37-33_screenshot.png]]
+[[file:images/c++/leetcode笔记/2022-11-10_22-37-33_screenshot.png]]
 这是属于传入 函数对象 的方式
 ***** 方式二：class重载运算符()
 通过class重载()操作符，定义了一个函数对象
 注意要加public
 
 #+DOWNLOADED: screenshot @ 2022-11-10 22:37:46
-[[file:images/c++/leetcode%E7%AC%94%E8%AE%B0/2022-11-10_22-37-46_screenshot.png]]
+[[file:images/c++/leetcode笔记/2022-11-10_22-37-46_screenshot.png]]
 这是属于传入 函数对象 的方式
 ***** 方式三：定义函数
 首先定义一个比较函数
 #+DOWNLOADED: screenshot @ 2022-11-10 22:37:54
-[[file:images/c++/leetcode%E7%AC%94%E8%AE%B0/2022-11-10_22-37-54_screenshot.png]]
+[[file:images/c++/leetcode笔记/2022-11-10_22-37-54_screenshot.png]]
 decltype()是用于获得函数指针的 类型的。在模板中也要传入它们的类型。
 decltype()要传入的是一个对象的地址，因此需要对cmp加取值符，&cmp为对象的地址
 在这里插入图片描述
 因此可以由函数地址cmp 转为函数指针 类型 decltype(&cmp)
 #+DOWNLOADED: screenshot @ 2022-11-10 22:38:05
-[[file:images/c++/leetcode%E7%AC%94%E8%AE%B0/2022-11-10_22-38-05_screenshot.png]]
+[[file:images/c++/leetcode笔记/2022-11-10_22-38-05_screenshot.png]]
 写法一：
 #+DOWNLOADED: screenshot @ 2022-11-10 22:38:15
-[[file:images/c++/leetcode%E7%AC%94%E8%AE%B0/2022-11-10_22-38-15_screenshot.png]]
+[[file:images/c++/leetcode笔记/2022-11-10_22-38-15_screenshot.png]]
 写法二：
 如果作为类成员函数，一定要声明static
 #+DOWNLOADED: screenshot @ 2022-11-10 22:38:24
-[[file:images/c++/leetcode%E7%AC%94%E8%AE%B0/2022-11-10_22-38-24_screenshot.png]]
+[[file:images/c++/leetcode笔记/2022-11-10_22-38-24_screenshot.png]]
 这是属于传入 函数指针的方式。
 ***** 方式四：lambda表达式
 #+DOWNLOADED: screenshot @ 2022-11-10 22:38:32
-[[file:images/c++/leetcode%E7%AC%94%E8%AE%B0/2022-11-10_22-38-32_screenshot.png]]
+[[file:images/c++/leetcode笔记/2022-11-10_22-38-32_screenshot.png]]
 这是属于传入 函数指针的方式。
 ***** 方式五：function包装lambda表达式
 要加入头文件#include<functional>
@@ -4211,7 +4211,7 @@ decltype()要传入的是一个对象的地址，因此需要对cmp加取值符�
 由于function对lambda函数进行了包装 ,cmp本身就是一个对象地址。（function对象）
 直接decltype(cmp)获得函数指针 的类型。
 #+DOWNLOADED: screenshot @ 2022-11-10 22:38:41
-[[file:images/c++/leetcode%E7%AC%94%E8%AE%B0/2022-11-10_22-38-41_screenshot.png]]
+[[file:images/c++/leetcode笔记/2022-11-10_22-38-41_screenshot.png]]
 这是属于传入 函数指针的方式。
 *** 参考文章
 [[https://blog.csdn.net/qq_21539375/article/details/122128445][c++优先队列priority_queue（自定义比较函数）]]
