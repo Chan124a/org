@@ -1630,6 +1630,28 @@ git config --global core.quotepath false
 英文显示则是：
 Options->Text->Locale改为zh_CN，Character set改为UTF-8
 
+* git hook
+钩子都被存储再git目录下的hooks子目录中.
+
+git默认会存放一些示例脚本,以.sample结尾,要使用它们必须删除这个后缀.
+** 客户端钩子
+*** 提交工作流钩子
+**** pre-commit
+输入提交信息前执行
+**** prepare-commit-msg
+启动提交信息编辑器之前,默认信息创建之后运行
+**** commit-msg
+**** post-commit
+整个提交过程完成之后执行
+
+*** 电子邮件工作流钩子
+
+
+*** pre-rebase
+变基之前运行
+
+*** post-rewrite
+由那些
 * 问题集锦
 ** warning: LF will be replaced by CRLF in ** 的原因及解决办法
 今天在使用git add 命令的时候，弹出了一个警告 warning: LF will be replaced by CRLF in ******（具体的一个文件）
