@@ -1089,20 +1089,20 @@ Python 3以后  ：
 #+END_SRC
 ** 用在变量前面
 1. 向函数传递参数，将变量中可迭代对象的元素拆解出来，作为独立的参数第传给函数，如：
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20201.jpg @ 2020-11-08 18:46:42
+#+DOWNLOADED: file:F:/org/图片/20201.jpg @ 2020-11-08 18:46:42
 [[file:asdf/2020-11-08_18-46-42_20201.jpg]]
 
 对于**，变量为字典，将其拆解出来，单独传给函数。如：
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/v2-d6669f8dfb6a267e993214d5a725e7fa_720w.jpg @ 2020-11-08 18:47:42
+#+DOWNLOADED: file:F:/org/图片/v2-d6669f8dfb6a267e993214d5a725e7fa_720w.jpg @ 2020-11-08 18:47:42
 [[file:asdf/2020-11-08_18-47-42_v2-d6669f8dfb6a267e993214d5a725e7fa_720w.jpg]]
 
 2.在函数定义中使用，收集参数。将参数捕捉到一个元组中，如：
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/v2-9e7ae9491d016162fe9c7aaab4d0a16e_720w.jpg @ 2020-11-08 18:49:18
+#+DOWNLOADED: file:F:/org/图片/v2-9e7ae9491d016162fe9c7aaab4d0a16e_720w.jpg @ 2020-11-08 18:49:18
 [[file:asdf/2020-11-08_18-49-18_v2-9e7ae9491d016162fe9c7aaab4d0a16e_720w.jpg]]
 该用法允许我们创建自己的函数时，可以接收任意数量的参数。
 
 双星号可以将参数捕捉到字典中，如：
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/v2-74c0f1151574fc5bbafa12b9c375ca41_720w.jpg @ 2020-11-08 18:49:42
+#+DOWNLOADED: file:F:/org/图片/v2-74c0f1151574fc5bbafa12b9c375ca41_720w.jpg @ 2020-11-08 18:49:42
 [[file:asdf/2020-11-08_18-49-42_v2-74c0f1151574fc5bbafa12b9c375ca41_720w.jpg]]
 
 * 类
@@ -2158,19 +2158,19 @@ if norm(grad) > max_norm:
 Shebang通常出现在类Unix系统的脚本中第一行，作为前两个字符。在Shebang之后，可以有一个或数个空白字符，后接解释器的绝对路径，用于指明执行这个脚本文件的解释器。
 
 #+DOWNLOADED: screenshot @ 2021-12-23 10:35:49
-[[file:images/python/#!/usr/bin/env_python_%E6%9C%89%E4%BB%80%E4%B9%88%E7%94%A8%EF%BC%9F/2021-12-23_10-35-49_screenshot.png]]
+[[file:images/python/#!/usr/bin/env_python_有什么用？/2021-12-23_10-35-49_screenshot.png]]
 
 如果不加 #! 的话，你每次执行脚本时，都得这样 python xx.py
 
 加上#!/usr/bin/python ，那么当这个文件有可执行权限 时，可以直接运行脚本文件，就像下面这样。
 
 #+DOWNLOADED: screenshot @ 2021-12-23 10:37:08
-[[file:images/python/#!/usr/bin/env_python_%E6%9C%89%E4%BB%80%E4%B9%88%E7%94%A8%EF%BC%9F/2021-12-23_10-37-08_screenshot.png]]
+[[file:images/python/#!/usr/bin/env_python_有什么用？/2021-12-23_10-37-08_screenshot.png]]
 ** !/usr/bin/env python 的解释
 当我执行 env python 时，自动进入了 python console 的模式。
 
 #+DOWNLOADED: screenshot @ 2021-12-23 10:38:54
-[[file:images/python/#!/usr/bin/env_python_%E6%9C%89%E4%BB%80%E4%B9%88%E7%94%A8%EF%BC%9F/2021-12-23_10-38-54_screenshot.png]]
+[[file:images/python/#!/usr/bin/env_python_有什么用？/2021-12-23_10-38-54_screenshot.png]]
 当你执行 env python 时，它其实会去 env | grep PATH 里（也就是 /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/root/bin ）这几个路径里去依次查找名为python的可执行文件。
 
 找到一个就直接执行，上面我们的 python 路径是在 /usr/bin/python 里，在 PATH 列表里倒数第二个目录下，所以当我在 /usr/local/sbin 下创建一个名字也为 python 的可执行文件时，就会执行 /usr/bin/python 了。
@@ -2178,7 +2178,7 @@ Shebang通常出现在类Unix系统的脚本中第一行，作为前两个字符
 具体演示过程，你可以看下面。
 
 #+DOWNLOADED: screenshot @ 2021-12-23 10:40:05
-[[file:images/python/#!/usr/bin/env_python_%E6%9C%89%E4%BB%80%E4%B9%88%E7%94%A8%EF%BC%9F/2021-12-23_10-40-05_screenshot.png]]
+[[file:images/python/#!/usr/bin/env_python_有什么用？/2021-12-23_10-40-05_screenshot.png]]
 
 那么对于 /usr/bin/python 和 /usr/bin/env python ，应该优先使用 #!/usr/bin/env python，因为不是所有的机器的 python 解释器都是 /usr/bin/python
 ** 参考文章
@@ -2306,8 +2306,8 @@ __init__.py可以是一个空文件，也可以有非常丰富的内容。本文
 1、一个普通的四则运算模块
 在不利用__init__.py的情况下，我们来看一个四则运算的例子。我们的工程目录结构如下图所示：
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-10-08_17-01-47.png @ 2021-10-08 17:02:18
-[[file:__init__.py%E7%9A%84%E7%94%A8%E6%B3%95/2021-10-08_17-02-18_Snipaste_2021-10-08_17-01-47.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-10-08_17-01-47.png @ 2021-10-08 17:02:18
+[[file:__init__.py的用法/2021-10-08_17-02-18_Snipaste_2021-10-08_17-01-47.png]]
 如上图，其中，main.py是程序入口，我们用了不同的方式来import四则运算的各个子模块。arithmetic模块实现四则运算；为了展示需要，我们将加减乘除四种运算分别放在不同的代码中。
 
 每个文件的代码如下:
@@ -2793,7 +2793,7 @@ print(args)
 输出结果如下：
 
 #+DOWNLOADED: screenshot @ 2022-01-17 22:45:13
-[[file:images/python/argparse_%E5%BA%93/2022-01-17_22-45-13_screenshot.png]]
+[[file:images/python/argparse_库/2022-01-17_22-45-13_screenshot.png]]
 
 分析：
 
@@ -3460,8 +3460,8 @@ The second variant is compatible with CuDNNGRU (GPU-only) and allows inference o
 ** lambda简介
 
 先来看一段代码示例：
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20190207214329509.jpg @ 2020-11-08 12:53:08
-[[file:ambda%E8%A1%A8%E8%BE%BE%E5%BC%8F/2020-11-08_12-53-08_20190207214329509.jpg]]
+#+DOWNLOADED: file:F:/org/图片/20190207214329509.jpg @ 2020-11-08 12:53:08
+[[file:ambda表达式/2020-11-08_12-53-08_20190207214329509.jpg]]
 第一行是lambda声明，x,y相当于传入的参数，整个函数会返回x+y的值。lambda作为一个表达式，定义了一个匿名函数，上例的代码x，y为入口参数，x+y为函数体。在这里lambda简化了函数定义的书写形式。
 
 python允许用lambda关键字创造匿名函数。匿名是不需要以标准的方式来声明，比如说使用 def 语句。（除非赋值给一个局部变量，这样的对象也不会在任何的名字空间内创建名字，上面的例子中会创建名字。)
@@ -3475,12 +3475,12 @@ lambda [arg1[, arg2, … argN]]: expression
 lambda使用可以加参数也可以不加参数
 
 无参数：
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20190207214435106.jpg @ 2020-11-08 12:56:14
-[[file:ambda%E8%A1%A8%E8%BE%BE%E5%BC%8F/2020-11-08_12-56-14_20190207214435106.jpg]]
+#+DOWNLOADED: file:F:/org/图片/20190207214435106.jpg @ 2020-11-08 12:56:14
+[[file:ambda表达式/2020-11-08_12-56-14_20190207214435106.jpg]]
 
 lambda通常用来编写跳转表（jump table），也就是行为的列表或字典，能够按照需要执行相应的动作。如下段代码所示。
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20190207214542358.jpg @ 2020-11-08 12:56:36
-[[file:ambda%E8%A1%A8%E8%BE%BE%E5%BC%8F/2020-11-08_12-56-36_20190207214542358.jpg]]
+#+DOWNLOADED: file:F:/org/图片/20190207214542358.jpg @ 2020-11-08 12:56:36
+[[file:ambda表达式/2020-11-08_12-56-36_20190207214542358.jpg]]
 
 ** 为什么要使用lambda？
 
@@ -3503,8 +3503,8 @@ map(sq, [y for y in range(10)])
 lambda 和def它两个的基本用法差不多，参数都是可选，也都会返回对象
 
 如下：
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20190207214400126.jpg @ 2020-11-08 12:54:04
-[[file:ambda%E8%A1%A8%E8%BE%BE%E5%BC%8F/2020-11-08_12-54-04_20190207214400126.jpg]]
+#+DOWNLOADED: file:F:/org/图片/20190207214400126.jpg @ 2020-11-08 12:54:04
+[[file:ambda表达式/2020-11-08_12-54-04_20190207214400126.jpg]]
 
 不同之处：
 
@@ -3942,8 +3942,8 @@ foo_v1(2)
 
 以下为Python Documents对它的解释：
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-11-08_22-54-30.png @ 2021-11-11 16:12:46
-[[file:Optional%E5%92%8C%E5%B8%A6%E9%BB%98%E8%AE%A4%E5%80%BC%E7%9A%84%E5%8F%82%E6%95%B0/2021-11-11_16-12-46_Snipaste_2021-11-08_22-54-30.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-11-08_22-54-30.png @ 2021-11-11 16:12:46
+[[file:Optional和带默认值的参数/2021-11-11_16-12-46_Snipaste_2021-11-08_22-54-30.png]]
 
 Optional[X]等价于Union[X, None]
 
@@ -3965,8 +3965,8 @@ foo_v2(2)
 >>> parameter b is a NoneType!
 #+END_SRC
 当你给Optional参数的默认值不为None时，看看Optional为IDE的带来的提示：
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-11-11_16-13-21.png @ 2021-11-11 16:13:26
-[[file:Optional%E5%92%8C%E5%B8%A6%E9%BB%98%E8%AE%A4%E5%80%BC%E7%9A%84%E5%8F%82%E6%95%B0/2021-11-11_16-13-26_Snipaste_2021-11-11_16-13-21.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-11-11_16-13-21.png @ 2021-11-11 16:13:26
+[[file:Optional和带默认值的参数/2021-11-11_16-13-26_Snipaste_2021-11-11_16-13-21.png]]
 这意味着在这个函数中b是一个可选参数,并且提示你它的默认值可以为None。
 
 * operator.itemgetter函数理解
@@ -5472,7 +5472,7 @@ plt.ylabel('some numbers')
 plt.show()
 #+END_SRC
 图形由 show() 函数显示。
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-07-23_10-23-39.png @ 2020-07-23 10:23:43
+#+DOWNLOADED: file:F:/org/图片/Snipaste_2020-07-23_10-23-39.png @ 2020-07-23 10:23:43
 [[file:Matplotlib/2020-07-23_10-23-43_Snipaste_2020-07-23_10-23-39.png]]
 You may be wondering why the x-axis ranges from 0-3 and the y-axis from 1-4. If you provide a single list or array to plot, matplotlib assumes it is a sequence of y values, and automatically generates the x values for you. Since python ranges start with 0, the default x vector has the same length as y but starts with 0. Hence the x data are [0, 1, 2, 3].
 
@@ -5481,7 +5481,7 @@ You may be wondering why the x-axis ranges from 0-3 and the y-axis from 1-4. If 
 plt.plot([1, 2, 3, 4], [1, 4, 9, 16])  #前面的参数作为x，后面的列表作为y的取值
 #+END_SRC
 执行输出结果如下图：
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-07-23_10-26-01.png @ 2020-07-23 10:26:13
+#+DOWNLOADED: file:F:/org/图片/Snipaste_2020-07-23_10-26-01.png @ 2020-07-23 10:26:13
 [[file:Matplotlib/2020-07-23_10-26-13_Snipaste_2020-07-23_10-26-01.png]]q
 
 ** 格式化字符
@@ -5501,7 +5501,7 @@ plt.plot(x,y,"ob")  #这里ob的解释看下面的字符和颜色缩写
 plt.show()
 #+END_SRC
 执行输出结果如下图：
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-07-23_10-11-18.png @ 2020-07-23 10:11:23
+#+DOWNLOADED: file:F:/org/图片/Snipaste_2020-07-23_10-11-18.png @ 2020-07-23 10:11:23
 [[file:Matplotlib/2020-07-23_10-11-23_Snipaste_2020-07-23_10-11-18.png]]
 
 *** 字符 
@@ -6891,8 +6891,8 @@ pyautogui中函数大致分为通用功能、鼠标控制、键盘控制、消�
 坐标体系至关重要，后续鼠标位置、图片大小都根据这套体系定义。PyAutoGUI沿用了传统的坐标体系，并未重新定义，如下图所示。x的取值范围是[0, 宽度分辨率-1]，y的取值范围是[0, 高度分辨率-1]。
 
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-11-08_22-51-31.png @ 2021-11-08 22:51:39
-[[file:PyAutoGUI%E5%BA%93/2021-11-08_22-51-39_Snipaste_2021-11-08_22-51-31.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-11-08_22-51-31.png @ 2021-11-08 22:51:39
+[[file:PyAutoGUI库/2021-11-08_22-51-39_Snipaste_2021-11-08_22-51-31.png]]
 ** 鼠标控制
 鼠标移动，包括绝对位置移动和相对位置移动。
 #+begin_src python
@@ -7003,8 +7003,8 @@ In [32]: pyautogui.password(text='输入密码',title='PyAutoGUI消息框',defau
 Out[32]: 'We_Coder' # 点OK按钮后返回输入内容
 #+END_SRC
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-11-08_22-53-51.png @ 2021-11-08 22:53:56
-[[file:PyAutoGUI%E5%BA%93/2021-11-08_22-53-56_Snipaste_2021-11-08_22-53-51.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-11-08_22-53-51.png @ 2021-11-08 22:53:56
+[[file:PyAutoGUI库/2021-11-08_22-53-56_Snipaste_2021-11-08_22-53-51.png]]
 ** 截图相关
 
 PyAutoGUI提供了screenshot()函数进行屏幕截图，返回是Image对象，这是在Pillow库中定义的，因此需要安装Pillow库才能正常工作。
@@ -7015,8 +7015,8 @@ In [41]: pyautogui.screenshot('shot.png',region=(1000,600,600,400))
 Out[41]: <PIL.Image.Image image mode=RGB size=600x400 at 0x20C87497390>
 #+END_SRC
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-11-08_22-54-30.png @ 2021-11-08 22:54:35
-[[file:PyAutoGUI%E5%BA%93/2021-11-08_22-54-35_Snipaste_2021-11-08_22-54-30.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-11-08_22-54-30.png @ 2021-11-08 22:54:35
+[[file:PyAutoGUI库/2021-11-08_22-54-35_Snipaste_2021-11-08_22-54-30.png]]
 
 PyAutoGUI还有个图片匹配功能，它是在屏幕按像素匹配，定位图片在屏幕上的坐标位置，locateOnScreen()函数返回region对象,即左上角坐标、宽度、高度4个值组成的元组，再用center()函数计算出中心坐标，locateCenterOnScreen()函数则一步到位，返回中心坐标。如果把需要点击的菜单、按钮事先保存成图片，可以用来自动查找菜单、按钮位置，再交由click()函数控制鼠标去点击。
 #+begin_src python
@@ -7202,22 +7202,22 @@ ZeroDivisionError: integer division or modulo by zero
 ~if __name__== 'main':~ 的作用就是控制这两种情况执行代码的过程，在 ~if __name__== 'main':~ 下的代码只有在第一种情况下（即文件作为脚本直接执行）才会被执行，而 ~import~ 到其他脚本中是不会被执行的。
 
 - 直接执行
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20190510141202522.png @ 2020-06-03 22:00:47
-[[file:py%E6%96%87%E4%BB%B6%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%89%A7%E8%A1%8C%E6%96%B9%E5%BC%8F/2020-06-03_22-00-47_20190510141202522.png]]
+#+DOWNLOADED: file:F:/org/图片/20190510141202522.png @ 2020-06-03 22:00:47
+[[file:py文件的两种执行方式/2020-06-03_22-00-47_20190510141202522.png]]
 
 直接执行 test.py，结果如下图，可以成功 print 两行字符串。即， ~if __name__=="__main__":~ 语句之前和之后的代码都被执行。
 
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20190510141303114.png @ 2020-06-03 22:00:59
-[[file:py%E6%96%87%E4%BB%B6%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%89%A7%E8%A1%8C%E6%96%B9%E5%BC%8F/2020-06-03_22-00-59_20190510141303114.png]]
+#+DOWNLOADED: file:F:/org/图片/20190510141303114.png @ 2020-06-03 22:00:59
+[[file:py文件的两种执行方式/2020-06-03_22-00-59_20190510141303114.png]]
 
 - import 执行
 然后在同一文件夹新建名称为 import_test.py 的脚本，输入如下代码：
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20190510141602268.png @ 2020-06-03 22:01:45
-[[file:py%E6%96%87%E4%BB%B6%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%89%A7%E8%A1%8C%E6%96%B9%E5%BC%8F/2020-06-03_22-01-45_20190510141602268.png]]
+#+DOWNLOADED: file:F:/org/图片/20190510141602268.png @ 2020-06-03 22:01:45
+[[file:py文件的两种执行方式/2020-06-03_22-01-45_20190510141602268.png]]
 
 执行 import_test.py 脚本，输出结果如下：
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20190510141624918.png @ 2020-06-03 22:02:00
-[[file:py%E6%96%87%E4%BB%B6%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%89%A7%E8%A1%8C%E6%96%B9%E5%BC%8F/2020-06-03_22-02-00_20190510141624918.png]]
+#+DOWNLOADED: file:F:/org/图片/20190510141624918.png @ 2020-06-03 22:02:00
+[[file:py文件的两种执行方式/2020-06-03_22-02-00_20190510141624918.png]]
 
 只输出了第一行字符串。即， ~if __name__=="__main__":~ 之前的语句被执行，之后的没有被执行。
 
@@ -7229,21 +7229,21 @@ ZeroDivisionError: integer division or modulo by zero
 为了进一步说明，我们在 test.py 脚本的 if __name__=="__main__": 之前加入 print(__name__)，即将 __name__ 打印出来。文件内容和结果如下：
 
 
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20190510142230219.png @ 2020-06-04 08:41:55
-[[file:py%E6%96%87%E4%BB%B6%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%89%A7%E8%A1%8C%E6%96%B9%E5%BC%8F/2020-06-04_08-41-55_20190510142230219.png]]
+#+DOWNLOADED: file:F:/org/图片/20190510142230219.png @ 2020-06-04 08:41:55
+[[file:py文件的两种执行方式/2020-06-04_08-41-55_20190510142230219.png]]
 
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20190510142253482.png @ 2020-06-04 08:42:02
-[[file:py%E6%96%87%E4%BB%B6%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%89%A7%E8%A1%8C%E6%96%B9%E5%BC%8F/2020-06-04_08-42-02_20190510142253482.png]]
+#+DOWNLOADED: file:F:/org/图片/20190510142253482.png @ 2020-06-04 08:42:02
+[[file:py文件的两种执行方式/2020-06-04_08-42-02_20190510142253482.png]]
 
 可以看出，此时变量__name__的值为"__main__"。
 
 再执行 import_test.py，执行结果如下：
 
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20190510142441889.png @ 2020-06-04 08:42:40
-[[file:py%E6%96%87%E4%BB%B6%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%89%A7%E8%A1%8C%E6%96%B9%E5%BC%8F/2020-06-04_08-42-40_20190510142441889.png]]
+#+DOWNLOADED: file:F:/org/图片/20190510142441889.png @ 2020-06-04 08:42:40
+[[file:py文件的两种执行方式/2020-06-04_08-42-40_20190510142441889.png]]
 
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20190510142452571.png @ 2020-06-04 08:42:47
-[[file:py%E6%96%87%E4%BB%B6%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%89%A7%E8%A1%8C%E6%96%B9%E5%BC%8F/2020-06-04_08-42-47_20190510142452571.png]]
+#+DOWNLOADED: file:F:/org/图片/20190510142452571.png @ 2020-06-04 08:42:47
+[[file:py文件的两种执行方式/2020-06-04_08-42-47_20190510142452571.png]]
 
 此时，test.py中的__name__变量值为 test，不满足 __name__=="__main__" 的条件，因此，无法执行其后的代码。
 * Python3 序列解包(*号的作用)
@@ -7394,7 +7394,7 @@ H []
 * Python的-m参数
 先看看 python --help 给出的信息：
 #+DOWNLOADED: screenshot @ 2021-12-22 15:39:00
-[[file:images/python/Python%E7%9A%84-m%E5%8F%82%E6%95%B0/2021-12-22_15-39-00_screenshot.png]]
+[[file:images/python/Python的-m参数/2021-12-22_15-39-00_screenshot.png]]
 意思是将库中的python模块用作脚本去运行。
 
 常用例子
@@ -7610,8 +7610,8 @@ driver.get("www.baidu.com")
 
 一般我都自己采用 xpath 获取元素的，复制即可
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-11-05_15-01-12.png @ 2021-11-05 15:01:51
-[[file:selenium_%E5%BA%93/2021-11-05_15-01-51_Snipaste_2021-11-05_15-01-12.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-11-05_15-01-12.png @ 2021-11-05 15:01:51
+[[file:selenium_库/2021-11-05_15-01-51_Snipaste_2021-11-05_15-01-12.png]]
 关于获取对象的api查找：[[https://www.selenium.dev/selenium/docs/api/py/webdriver_remote/selenium.webdriver.remote.webelement.html][selenium.webdriver.remote.webelement]]
 
 ** 导入Selenium库
@@ -8739,7 +8739,7 @@ class torch.nn.L1Loss(size_average=None, reduce=None)
 功能： 计算output和target之差的绝对值，可选返回同维度的tensor或者是一个标量。
 
 计算公式：
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-08-14_09-18-29.png @ 2020-08-14 09:18:48
+#+DOWNLOADED: file:F:/org/图片/Snipaste_2020-08-14_09-18-29.png @ 2020-08-14 09:18:48
 [[file:torch/2020-08-14_09-18-48_Snipaste_2020-08-14_09-18-29.png]]
 
 参数： reduce(bool)- 返回值是否为标量，默认为True
@@ -8754,7 +8754,7 @@ class torch.nn.MSELoss(size_average=None, reduce=None, reduction='elementwise_me
 功能： 计算output和target之差的平方，可选返回同维度的tensor或者是一个标量。
 
 计算公式：
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-08-14_09-19-52.png @ 2020-08-14 09:19:57
+#+DOWNLOADED: file:F:/org/图片/Snipaste_2020-08-14_09-19-52.png @ 2020-08-14 09:19:57
 [[file:torch/2020-08-14_09-19-57_Snipaste_2020-08-14_09-19-52.png]]
 参数： reduce(bool)- 返回值是否为标量，默认为True
 
@@ -8766,7 +8766,7 @@ class torch.nn.CrossEntropyLoss(weight=None, size_average=None, ignore_index=-10
 功能： 将输入经过softmax激活函数之后，再计算其与target的交叉熵损失。即该方法将nn.LogSoftmax()和 nn.NLLLoss()进行了结合。严格意义上的交叉熵损失函数应该是nn.NLLLoss()。
 
 计算公式：
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-08-14_09-20-56.png @ 2020-08-14 09:21:00
+#+DOWNLOADED: file:F:/org/图片/Snipaste_2020-08-14_09-20-56.png @ 2020-08-14 09:21:00
 [[file:torch/2020-08-14_09-21-00_Snipaste_2020-08-14_09-20-56.png]]
 参数： weight(Tensor)- 为每个类别的loss设置权值，常用于类别不均衡问题。weight必须是float类型的tensor，其长度要于类别C一致，即每一个类别都要设置有weight。带weight的计算公式：
 
@@ -8787,7 +8787,7 @@ ignore_index(int)- 忽略某一类别，不计算其loss，其loss会为0，并�
 
 特别注意： 当带上权值，reduce = True, size_average = True, 其计算公式为：
 
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-08-14_09-22-39.png @ 2020-08-14 09:22:45
+#+DOWNLOADED: file:F:/org/图片/Snipaste_2020-08-14_09-22-39.png @ 2020-08-14 09:22:45
 [[file:torch/2020-08-14_09-22-45_Snipaste_2020-08-14_09-22-39.png]]
 例如当input为[[0.6, 0.2, 0.2], [0.4, 1.2, 0.4]]，target= [0, 1], weight = [0.6, 0.2, 0.2] l1 = - 0.60.6 = - 0.36 l2 = - 1.20.2 = - 0.24 loss = -0.36/(0.6+0.2) + -0.24/(0.6+0.2) = -0.75
 *** torch.nn.PoissonNLLLoss()
@@ -8797,7 +8797,7 @@ class torch.nn.PoissonNLLLoss(log_input=True, full=False, size_average=None, eps
 功能： 用于target服从泊松分布的分类任务。
 
 计算公式：
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-08-14_09-24-03.png @ 2020-08-14 09:24:07
+#+DOWNLOADED: file:F:/org/图片/Snipaste_2020-08-14_09-24-03.png @ 2020-08-14 09:24:07
 [[file:torch/2020-08-14_09-24-07_Snipaste_2020-08-14_09-24-03.png]]
 参数：
 
@@ -8818,7 +8818,7 @@ class torch.nn.KLDivLoss(size_average=None, reduce=None, reduction='elementwise_
 
 计算公式：
 
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-08-14_09-25-53.png @ 2020-08-14 09:25:58
+#+DOWNLOADED: file:F:/org/图片/Snipaste_2020-08-14_09-25-53.png @ 2020-08-14 09:25:58
 [[file:torch/2020-08-14_09-25-58_Snipaste_2020-08-14_09-25-53.png]]
 补充：KL散度 KL散度( Kullback–Leibler divergence) 又称为相对熵(Relative Entropy)，用于描述两个概率分布之间的差异。计算公式(离散时)：
 
@@ -8843,7 +8843,7 @@ class torch.nn.BCELoss(weight=None, size_average=None, reduce=None, reduction='e
 功能： 二分类任务时的交叉熵计算函数。此函数可以认为是nn.CrossEntropyLoss函数的特例。其分类限定为二分类，y必须是{0,1}。还需要注意的是，input应该为概率分布的形式，这样才符合交叉熵的应用。所以在BCELoss之前，input一般为sigmoid激活层的输出，官方例子也是这样给的。该损失函数在自编码器中常用。 
 
 计算公式：
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-08-14_09-27-04.png @ 2020-08-14 09:27:08
+#+DOWNLOADED: file:F:/org/图片/Snipaste_2020-08-14_09-27-04.png @ 2020-08-14 09:27:08
 [[file:torch/2020-08-14_09-27-08_Snipaste_2020-08-14_09-27-04.png]]
 参数：
 
@@ -8874,20 +8874,20 @@ BCELoss
 
 在图片多标签分类时，如果3张图片分3类，会输出一个3*3的矩阵。
 
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20181223124137625.png @ 2020-08-13 09:40:44
+#+DOWNLOADED: file:F:/org/图片/20181223124137625.png @ 2020-08-13 09:40:44
 [[file:torch/2020-08-13_09-40-44_20181223124137625.png]]
 先用Sigmoid给这些值都搞到0~1之间：
 
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20181223124238621.png @ 2020-08-13 09:47:40
+#+DOWNLOADED: file:F:/org/图片/20181223124238621.png @ 2020-08-13 09:47:40
 [[file:torch/2020-08-13_09-47-40_20181223124238621.png]]
 
 假设Target是：
 
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20181223132343472.png @ 2020-08-13 09:49:00
+#+DOWNLOADED: file:F:/org/图片/20181223132343472.png @ 2020-08-13 09:49:00
 [[file:torch/2020-08-13_09-49-00_20181223132343472.png]]
 
 BCELoss是
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/1811847o8o9gi5oi1igg9gu.png @ 2020-08-13 09:43:21
+#+DOWNLOADED: file:F:/org/图片/1811847o8o9gi5oi1igg9gu.png @ 2020-08-13 09:43:21
 [[file:torch/2020-08-13_09-43-21_1811847o8o9gi5oi1igg9gu.png]]
 所以对于第一行：
 #+BEGIN_EXAMPLE
@@ -8914,12 +8914,12 @@ BCELoss是
 
 下面我们用BCELoss来验证一下Loss是不是0.7194！
 
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20181223132408533.png @ 2020-08-13 09:49:14
+#+DOWNLOADED: file:F:/org/图片/20181223132408533.png @ 2020-08-13 09:49:14
 [[file:torch/2020-08-13_09-49-14_20181223132408533.png]]
 
 BCEWithLogitsLoss就是把Sigmoid-BCELoss合成一步。我们直接用刚刚的input验证一下是不是0.7193：
 
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/20181223132922363.png @ 2020-08-13 09:49:28
+#+DOWNLOADED: file:F:/org/图片/20181223132922363.png @ 2020-08-13 09:49:28
 [[file:torch/2020-08-13_09-49-28_20181223132922363.png]]
 *** torch.nn.MarginRankingLoss()
 #+BEGIN_SRC python
@@ -8928,7 +8928,7 @@ class torch.nn.MarginRankingLoss(margin=0, size_average=None, reduce=None, reduc
 功能： 计算两个向量之间的相似度，当两个向量之间的距离大于margin，则loss为正，小于margin，loss为0。
 
 计算公式：
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-08-14_09-28-07.png @ 2020-08-14 09:28:12
+#+DOWNLOADED: file:F:/org/图片/Snipaste_2020-08-14_09-28-07.png @ 2020-08-14 09:28:12
 [[file:torch/2020-08-14_09-28-12_Snipaste_2020-08-14_09-28-07.png]]
 y == 1时，x1要比x2大，才不会有loss，反之，y == -1 时，x1要比x2小，才不会有loss。
 
@@ -8975,7 +8975,7 @@ t4d = torch.empty(1, 3, 5, 3)
 其中t4d中维度分别表示(batchsize, channel, height, width)
 
 为了便于理解，只观察输入矩阵t4d的最后两维，即一个5行3列的矩阵， 如图1
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-08-17_13-48-44.png @ 2020-08-17 13:48:57
+#+DOWNLOADED: file:F:/org/图片/Snipaste_2020-08-17_13-48-44.png @ 2020-08-17 13:48:57
 [[file:torch/2020-08-17_13-48-57_Snipaste_2020-08-17_13-48-44.png]]
 如果F.pad中第二个参数pad只定义两个参数，表示只对输入矩阵的最后一个维度进行扩充，不会对前两个维度造成任何影响，所以此处直接忽略前两个维度。
 #+BEGIN_SRC python 
@@ -8995,7 +8995,7 @@ t1矩阵大小为：torch.Size([1, 3, 5, 6])
 #+END_SRC
 接下来，从可视化的角度分析一下，原始矩阵全为0值，扩充维度全部用1值填充，这样易于理解。
 
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-08-17_13-49-46.png @ 2020-08-17 13:49:54
+#+DOWNLOADED: file:F:/org/图片/Snipaste_2020-08-17_13-49-46.png @ 2020-08-17 13:49:54
 [[file:torch/2020-08-17_13-49-54_Snipaste_2020-08-17_13-49-46.png]]
 从图2可以明显看出，左侧扩充了1列，右侧扩充了2列，即原始矩阵大小从5×3扩充到5×6，则p1d的参数设置意义为
 #+BEGIN_SRC python
@@ -9026,7 +9026,7 @@ t2矩阵大小为：torch.Size([1, 3, 12, 6])
 '''
 #+END_SRC
 这里给出的是两维的扩充代码，为了便于理解，看一下实际的扩充效果，如图3
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-08-17_13-51-23.png @ 2020-08-17 13:51:28
+#+DOWNLOADED: file:F:/org/图片/Snipaste_2020-08-17_13-51-23.png @ 2020-08-17 13:51:28
 [[file:torch/2020-08-17_13-51-28_Snipaste_2020-08-17_13-51-23.png]]
 看图实际一目了然，对左侧扩充了1列，右侧扩充了2列，上边扩充了3行，下边扩充了4行。也就是说，前两个参数对最后一个维度有效，后两个参数对倒数第二维有效。接下来就可以看一下p2d参数的实际意义：
 #+BEGIN_SRC python
@@ -9053,7 +9053,7 @@ t3矩阵大小为：torch.Size([1, 14, 12, 6])
 '''
 #+END_SRC
 从可视化角度分析，如图4所示。
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-08-17_13-52-30.png @ 2020-08-17 13:52:35
+#+DOWNLOADED: file:F:/org/图片/Snipaste_2020-08-17_13-52-30.png @ 2020-08-17 13:52:35
 [[file:torch/2020-08-17_13-52-35_Snipaste_2020-08-17_13-52-30.png]]
 
 根据p3d = (1, 2, 3, 4, 5, 6)中，前4个参数完成了在高和宽维度上的扩张，后两个参数则完成了对通道维度上的扩充。接下来就可以看一下p3d参数的实际意义：
@@ -10083,16 +10083,16 @@ Tqdm 是一个快速，可扩展的Python进度条，可以在 Python 长循环�
 * transformers
 ** HfArgumentParser的使用
 HfArgumentParser是Transformer框架中的命令行解析工具，它是ArgumentParser的子类。用于从类对象中创建解析对象。
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-11-11_21-53-58.png @ 2021-11-11 21:54:17
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-11-11_21-53-58.png @ 2021-11-11 21:54:17
 [[file:transformers/2021-11-11_21-54-17_Snipaste_2021-11-11_21-53-58.png]]
 在python中，我们习惯于将有关联的一些参数放在一个类当中，HfArgumentParser可以将类对象中的实例属性转换成转换为解析参数。必须注意的是，这里的类对象必须是通过@dataclass()创建的类对象。并且通过HfArgumentParser创建的解析参数，都是可选参数。一个简单的例子如下：
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-11-11_21-54-07.png @ 2021-11-11 21:54:39
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-11-11_21-54-07.png @ 2021-11-11 21:54:39
 [[file:transformers/2021-11-11_21-54-39_Snipaste_2021-11-11_21-54-07.png]]
 
 终端输入：
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-11-11_22-04-13.png @ 2021-11-11 22:04:17
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-11-11_22-04-13.png @ 2021-11-11 22:04:17
 [[file:transformers/2021-11-11_22-04-17_Snipaste_2021-11-11_22-04-13.png]]
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-11-11_22-04-31.png @ 2021-11-11 22:04:36
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-11-11_22-04-31.png @ 2021-11-11 22:04:36
 [[file:transformers/2021-11-11_22-04-36_Snipaste_2021-11-11_22-04-31.png]]
 
 * transformers使用
@@ -10320,11 +10320,11 @@ visdom 可以实现远程数据的可视化，对科学实验有很大帮助。�
 Panes（窗格): interface刚打开是个白板，可以用将数据和图片发送到backend，生成多个对应的窗格，panes可以进行拖放，删除，panes保存在envs中，envs的状态存与绘画之间
 
 #+DOWNLOADED: screenshot @ 2021-12-22 16:48:25
-[[file:images/python/visdom%E6%A8%A1%E5%9D%97/2021-12-22_16-48-25_screenshot.png]]
+[[file:images/python/visdom模块/2021-12-22_16-48-25_screenshot.png]]
 Environments(环境)：env对可视化空间进行分区，每个用户默认有个main的env, envs的状态是长期保持的
 
 #+DOWNLOADED: screenshot @ 2021-12-22 16:48:40
-[[file:images/python/visdom%E6%A8%A1%E5%9D%97/2021-12-22_16-48-40_screenshot.png]]
+[[file:images/python/visdom模块/2021-12-22_16-48-40_screenshot.png]]
 
 State(状态)：当你创建一些可视化后，服务器自动缓存这些可视化，重新加载页面，重新打开服务器都会再现这些可视化。save:可以序列化env的状态，并以json文件保持在电脑里，fork:当输入一个新的名字，会复制当前的状态到这个new env下。
 
@@ -10460,8 +10460,8 @@ pip install PyPDF2 # 用于合并pdf
 
 通过以上步骤即可定位到目录元素，用图说明：
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-11-23_16-46-51.png @ 2021-11-23 16:46:57
-[[file:%E9%97%AE%E9%A2%98%E9%9B%86%E9%94%A6/2021-11-23_16-46-57_Snipaste_2021-11-23_16-46-51.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-11-23_16-46-51.png @ 2021-11-23 16:46:57
+[[file:问题集锦/2021-11-23_16-46-57_Snipaste_2021-11-23_16-46-51.png]]
 
 从图看到我们需要的教程名称包含在<div class="wy-side-nav-search"></div>之间的a标签里。假设我们已经获取到了网页内容为html，可以使用以下代码获取该内容：
 #+begin_src python
@@ -10470,8 +10470,8 @@ book_name = soup.find('div', class_='wy-side-nav-search').a.text
 **** 获取目录及对应网址
 使用相同的步骤来获取：
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-11-23_16-47-38.png @ 2021-11-23 16:47:43
-[[file:%E9%97%AE%E9%A2%98%E9%9B%86%E9%94%A6/2021-11-23_16-47-43_Snipaste_2021-11-23_16-47-38.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-11-23_16-47-38.png @ 2021-11-23 16:47:43
+[[file:问题集锦/2021-11-23_16-47-43_Snipaste_2021-11-23_16-47-38.png]]
 
 从图看到我们需要的目录包含在<div class="section"></div>之间，<li class="toctree-l1"></li>标签里为一级目录及网址；<li class="toctree-l2"></li>标签里为二级目录及网址。当然这个url是相对的url，前面还要拼接http://python3-cookbook.readthedocs.io/zh_CN/latest/。
 
@@ -10541,8 +10541,8 @@ def parse_title_and_url(html):
 **** 获取章节内容
 还是同样的方法定位章节内容：
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-11-23_16-48-55.png @ 2021-11-23 16:56:34
-[[file:%E9%97%AE%E9%A2%98%E9%9B%86%E9%94%A6/2021-11-23_16-56-34_Snipaste_2021-11-23_16-48-55.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-11-23_16-48-55.png @ 2021-11-23 16:56:34
+[[file:问题集锦/2021-11-23_16-56-34_Snipaste_2021-11-23_16-48-55.png]]
 
 代码中我们通过itemprop这个属性来定位，好在一级目录内容的元素位置和二级目录内容的元素位置相同，省去了不少麻烦。
 #+begin_src python
@@ -10949,7 +10949,7 @@ model.to(device)
 #+END_SRC
 问题如下：y
 #+DOWNLOADED: screenshot @ 2021-12-30 22:33:58
-[[file:images/python/%E9%97%AE%E9%A2%98%E9%9B%86%E9%94%A6/2021-12-30_22-33-58_screenshot.png]]
+[[file:images/python/问题集锦/2021-12-30_22-33-58_screenshot.png]]
 原因:
 问题是多gpu进行模型训练的时候产生的，具体为，不能够用多gpu加载预训练的bert。应该是torch版本的问题。其中torch1.5以上版本都可能会出现这个问题，据解决方案替换为torch1.4可以解决该问题。
 
