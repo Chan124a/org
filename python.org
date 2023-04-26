@@ -833,6 +833,22 @@ fo.close()
 $ cat test.txt 
 啦啦啦
 #+END_SRC
+** writelines()
+Python 的文件对象中，不仅提供了 write() 函数，还提供了 writelines() 函数，可以实现将字符串列表写入文件中。
+注意，写入函数只有 write() 和 writelines() 函数，而没有名为 writeline 的函数。
+
+例如，还是以 a.txt 文件为例，通过使用 writelines() 函数，可以轻松实现将 a.txt 文件中的数据复制到其它文件中，实现代码如下
+#+begin_src python
+f = open('a.txt', 'r')
+n = open('b.txt','w+')
+n.writelines(f.readlines())
+n.close()
+f.close()
+
+#+end_src
+执行此代码，在 a.txt 文件同级目录下会生成一个 b.txt 文件，且该文件中包含的数据和 a.txt 完全一样。
+
+需要注意的是，使用 writelines() 函数向文件中写入多行数据时，不会自动给各行添加换行符。上面例子中，之所以 b.txt 文件中会逐行显示数据，是因为 readlines() 函数在读取各行数据时，读入了行尾的换行符。
 
 ** zip()
 zip() 函数用于将可迭代的对象作为参数，将对象中对应的元素打包成一个个元组，然后返回由这些元组组成的列表。
@@ -862,6 +878,28 @@ iterabl -- 一个或多个迭代器;
 >>> zip(*zipped)          # 与 zip 相反，*zipped 可理解为解压，返回二维矩阵式
 [(1, 2, 3), (4, 5, 6)]
 #+END_SRC
+
+* 文件操作
+** 替换
+*** replace()
+#+begin_src python
+# opening the file in read mode
+file = open("motivation.txt", "r")
+replacement = ""
+# using the for loop
+for line in file:
+    line = line.strip()
+    changes = line.replace("hardships", "situations")
+    replacement = replacement + changes + "\n"
+
+file.close()
+# opening the file in write mode
+fout = open("motivation.txt", "w")
+fout.write(replacement)
+fout.close()
+#+END_SRC
+** 参考文章
+[[https://www.delftstack.com/zh/howto/python/python-replace-line-in-file/][在 Python 中替换文件中的一行]]
 
 * 条件语句
 ** if
