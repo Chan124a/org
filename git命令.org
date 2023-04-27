@@ -1646,12 +1646,42 @@ git默认会存放一些示例脚本,以.sample结尾,要使用它们必须删�
 
 *** 电子邮件工作流钩子
 
-
 *** pre-rebase
 变基之前运行
 
 *** post-rewrite
-由那些
+由那些会替换提交记录的命令调用,比如:
+- git commit --amend
+- git rebase
+
+不包括git filter-branch
+
+参数是触发重写的命令名,同时从标准输入中接受一系列重写的提交记录.
+
+*** post-checkout
+git checkout成功运行后调用
+
+*** post-merge
+git merge成功运行后调用
+
+*** pre-push
+git push运行期间,更新了远程引用但尚未传送对象时调用
+
+可以接受远程分支的名字和位置作为参数,同时从标准输入中接受一系列待更新的引用.
+
+*** pre-auto-gc
+git偶尔会调用git gc -auto进行垃圾回收.
+pre-auto-gc钩子会在垃圾回收开始之前被调用.
+
+** 服务端钩子
+服务端钩子再推送到服务器之前和之后运行.
+
+推送到服务器前运行的钩子可以再任何时候以非零值退出.
+*** pre-receive
+
+*** update
+
+*** post-receive
 * 问题集锦
 ** warning: LF will be replaced by CRLF in ** 的原因及解决办法
 今天在使用git add 命令的时候，弹出了一个警告 warning: LF will be replaced by CRLF in ******（具体的一个文件）
