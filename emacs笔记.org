@@ -3798,6 +3798,12 @@ M-x describe-code-system
 
 
 网上有乱码恢复工具，可将代码恢复为原来编码。
+** Why does emacs show ^M in a buffer?
+A: The “^M” is ASCII caret notation for unprintable Carriage return char (ASCII 13). If emacs shows that, it's probably because you have mixed characters of ^M and ^J and emacs cannot interpret them consistently as newlines.
+
+To fix it, call “set-buffer-file-coding-system”, then give one of: “mac”, “dos”, “unix”. Then, save the file. If that does not fix it, you can use find and replace to remove it manually.
+*** 参考文章
+[[https://superuser.com/questions/216373/why-does-emacs-insert-m-at-the-end-of-every-line][Why does Emacs insert ^m at the end of every line]]
 ** 关于monokai模式下选中区域颜色的设置
 M-x customize-face 然后输入 region
 

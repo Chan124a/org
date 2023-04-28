@@ -2712,11 +2712,12 @@ Linux C++                       # 使用指定指令输出信息
 通过比较两者执行后的结果来看，所实现的功能是相同的，即使用exec命令调用echo命令成功。
 * execve
 execute program
-
+#+begin_src c++
 #include <unistd.h>
 
 int execve(const char *pathname, char *const argv[],
                   char *const envp[]);
+#+END_SRC
 * export 命令
 Linux export 命令用于设置或显示环境变量。
 
