@@ -843,6 +843,61 @@ Derived::display()
 ** 参考文章
 [[https://www.go4expert.com/articles/virtual-table-vptr-t16544/][How Virtual Table and _vptr works]]
 [[https://blog.csdn.net/qq_42247231/article/details/105109709][为什么析构函数必须是虚函数？为什么默认的析构函数不是虚函数？]]
+* 多线程
+** std::async
+异步接口std::async，通过这个接口可以简单的创建线程并通过std::future中获取结果。以往都是自己去封装线程实现自己的async，现在有线程的跨平台接口可以使用就极大的方便了C++多线程编程。
+
+先看一下std::async的函数原型
+#+begin_src c++
+//(C++11 起) (C++17 前)
+template< class Function, class... Args>
+std::future<std::result_of_t<std::decay_t<Function>(std::decay_t<Args>...)>>
+    async( Function&& f, Args&&... args );
+
+//(C++11 起) (C++17 前)
+template< class Function, class... Args >
+std::future<std::result_of_t<std::decay_t<Function>(std::decay_t<Args>...)>>
+    async( std::launch policy, Function&& f, Args&&... args );  
+#+END_SRC
+第一个参数是线程的创建策略，有两种策略可供选择：
+- std::launch::async：在调用async就开始创建线程。
+- std::launch::deferred：延迟加载方式创建线程。调用async时不创建线程，直到调用了future的get或者wait时才创建线程。
+默认策略是：std::launch::async | std::launch::deferred也就是两种策略的合集，具体什么意思后面详细再说
+
+第二个参数是线程函数:
+线程函数可接受function, lambda expression, bind expression, or another function object
+
+第三个参数是线程函数的参数:
+不再说明
+
+返回值std::future
+
+std::future是一个模板类，它提供了一种访问异步操作结果的机制。从字面意思上看它表示未来，这个意思就非常贴切，因为她不是立即获取结果但是可以在某个时候以同步的方式来获取结果。我们可以通过查询future的状态来获取异步操作的结构。future_status有三种状态：
+- deferred：异步操作还未开始
+- ready：异步操作已经完成
+- timeout：异步操作超时，主要用于std::future<T>.wait_for()
+
+示例：
+#+begin_src c++
+//查询future的状态
+std::future_status status;
+do {
+    status = future.wait_for(std::chrono::seconds(1));
+    if (status == std::future_status::deferred) {
+        std::cout << "deferred" << std::endl;
+    } else if (status == std::future_status::timeout) {
+        std::cout << "timeout" << std::endl;
+    } else if (status == std::future_status::ready) {
+        std::cout << "ready!" << std::endl;
+    }
+} while (status != std::future_status::ready);
+
+#+END_SRC
+std::future获取结果的方式有三种：
+- get：等待异步操作结束并返回结果
+- wait：等待异步操作结束，但没有返回值
+- waite_for：超时等待返回结果，上面示例中就是对超时等待的使用展示
+d
 * 定义抽象数据类型
 #+BEGIN_SRC c++
 struct ListNode {
@@ -1614,6 +1669,45 @@ string test8 = test2.substr(); //参数列表为空则会拷贝test2的整个对
 
 string test9(num,ch); //拷贝num个字符型ch到test9
 
+** c_str()
+c_str() gives you a pointer to a temporary.
+The results of c_str() are valid only through the lifetime of the temporary.
+The lifetime of the temporary in most cases is to the end of the full expression, which is often the semicolon.
+
+示例:
+
+#+begin_src c++
+#include <iostream>
+using namespace std;
+
+static string SomeFunction()
+{
+    string str="111";
+    // does some string stuff
+    return str;
+}
+
+string str = SomeFunction();//这里实际上将SomeFunction()返回的临时值进行了拷贝,存放在了str里
+const char* strConverted = str.c_str(); // strConverted stores the value of the string properly
+const char* charArray= SomeFunction().c_str(); // charArray是一个指针,指向SomeFunction().c_str()返回的临时变量的值,由于该临时变量在分号后被清理,所以charArray指向了随机值
+
+
+int main()
+{
+
+	cout << strConverted<<endl;
+	cout << charArray;//charArray是随机值
+
+   return 0;
+}
+#+END_SRC
+结果:
+#+begin_example
+111
+R
+#+end_example>
+*** 参考文章
+[[https://stackoverflow.com/questions/27627413/why-does-calling-c-str-on-a-function-that-returns-a-string-not-work][Why does calling c_str() on a function that returns a string not work?]]
 * string_view使用介绍
 C++中与字符串有两种风格，分别是C风格的字符串、std::string字符串。C风格的字符串性能更高，但是也不方便操作使用。如下示例：
 #+BEGIN_SRC c++
@@ -1784,6 +1878,14 @@ sort(points.begin(),points.end(),[](vector<int>a, vector<int>b){return a[1]<b[1]
 ** 参考文章
 [[https://www.cnblogs.com/zhhfan/p/14789325.html][C++中使用sort对常见容器排序]]
 [[https://blog.csdn.net/liguojie12/article/details/113800426][C++ 二维vector排序(sort用法)]]
+* static_assert
+c++引入了static_assert关键字，用来实现编译期间的断言，叫静态断言。
+
+语法：static_assert（常量表达式，要提示的字符串）；
+
+如果第一个参数常量表达式的值为false，会产生一条编译错误，错误位置就是该static_assert语句所在行，第二个参数就是错误提示字符串。
+
+然后通过调用 abort 来终止程序运行。
 * std::tuple 和 std::tie 的用法简介
 tuple即元组，可以理解为pair的扩展，可以用来将不同类型的元素存放在一起，常用于函数的多返回值。
 
@@ -1940,6 +2042,12 @@ cout << ret.value_or(defaultVal).out1 << endl;
 使用 std::optional 带来的好处：
 - 省去了运行状态的 bool 值的声明，让代码更简洁，更注重返回值本身的语意
 - 不用担心额外的动态内存分配
+* std::span
+提供连续对象序列的轻量级视图。 span 提供了一种安全的方法来对在内存中背靠背排列的对象进行迭代和索引。 例如存储在内置数组中的对象 std::array 或 std::vector。
+
+如果你通常使用指针和索引访问一系列背靠背对象，则 span 是一种更安全、轻量级的替代方案。
+
+要设置 span 的大小，可以在编译时通过将大小指定为模板参数，也可以在运行时指定 dynamic_extent.
 * struct和class的区别
 struct的默认访问级别为public，而class的默认访问级别是private。
 * 数组
@@ -3262,6 +3370,7 @@ The default value of B::y = 11
 * 引用
 引用和指针赋值不会产生新对象.
 * 右值
+
 ** 右值引用
 右值引用的标志是&&，顾名思义，右值引用专门为右值而生，可以指向右值，不能指向左值：
 #+begin_src c++
@@ -3272,6 +3381,24 @@ int &&ref_a_left = a; // 编译不过，右值引用不可以指向左值
 
 ref_a_right = 6; // 右值引用的用途：可以修改右值
 #+end_src
+*** 左值引用
+左值引用大家都很熟悉，能指向左值，不能指向右值的就是左值引用：
+#+begin_src c++
+int a = 5;
+int &ref_a = a; // 左值引用指向左值，编译通过
+int &ref_a = 5; // 左值引用指向了右值，会编译失败
+#+END_SRC
+引用是变量的别名，由于右值没有地址，没法被修改，所以左值引用无法指向右值。
+
+但是，const左值引用是可以指向右值的：
+#+begin_src c++
+const int &ref_a = 5;  // 编译通过
+#+END_SRC
+const左值引用不会修改指向值，因此可以指向右值，这也是为什么要使用const &作为函数参数的原因之一，如std::vector的push_back：
+#+begin_src c++
+void push_back (const value_type& val);
+#+END_SRC
+如果没有const，vec.push_back(5)这样的代码就无法编译通过了。
 *** 指向左值
 std::move可以让右值引用指向左值
 #+begin_src c++
@@ -3673,6 +3800,97 @@ pprof --base=profile.0001.heap /usr/bin/xxx profile.0100.heap --text
 来进行查看，也可以生成 pdf 文件，会更直观一些。
 #+DOWNLOADED: file:F:/org/图片/v2-a8eedcc8f07691a31707f5f8921acfa8_720w.png @ 2020-06-13 19:27:10
 [[file:内存泄露/2020-06-13_19-27-10_v2-a8eedcc8f07691a31707f5f8921acfa8_720w.png]]
+* 命名空间
+** 内联命名空间
+
+C++11中引入了内联命名空间（inline namespace），它的特点就是不需要使用using语句就可以直接在外层命名空间使用该命名空间内部的内容，而且无需使用命名空间前缀。先看代码：
+#+begin_src c++
+  inline namespacs inline_namespace1{
+    class Inline1{
+      public:
+      int iv;
+    };
+  }
+
+  namespace inline_namespace1{
+    class Inline2{
+      public:
+      double dv;
+    };
+  }
+#+END_SRC
+内联命名空间的声明方法就是在原来的声明语法前面增加inline关键字。除此之外上面代码还有以下特点：
+- 两处声明的命名空间同名，它们同属一个命名空间。这是C++命名空间从来就有的特性。
+- 第一次声明命名空间时使用了inline关键字，这叫显式内联；第二次没有使用inline关键字，但是由于第一次已经声明了inline，这里声明的还是内联命名空间。这种情况成为隐式内联。
+
+内联命名空间声明之后，就可以在外层命名空间不适用前缀而直接使用它们了。
+#+begin_src c++
+namespace inline_test{
+	inline namespace inline_namespace1{
+		class Inline1{
+			public:
+			int iv;
+		};
+	}
+	
+	namespace inline_namespace1{
+		class Inline2{
+			public:
+			double dv;
+		}
+	}
+	
+	void test_inline_namespace(){
+		Inline1 in1;
+		in1.iv=5;
+		
+		Inline2 in2;
+		in2.dv=2;
+	}
+}
+
+void test_inline_namespace(){
+	inline_test::Inline1 in1;
+	in1.iv=5;
+	
+	inline_test::Inline2 in2;
+	in2.dv=2;
+}
+#+END_SRC
+上述代码中test_inline_namespace处在linline_namespace1的外层，所以可以直接使用Inline1和Inline2。test_inline_namespace2处在更外层，这时也只是需要使用外层命名空间inline_test前缀即可。
+
+看起来inline_namespace就像不存在一样。
+** 匿名命名空间
+当定义一个命名空间时，可以忽略这个命名空间的名称：
+#+begin_src c++
+ namespce {
+     char c;
+     int i;
+     double d;
+ }
+#+END_SRC
+
+编译器在内部会为这个命名空间生成一个唯一的名字，而且还会为这个匿名的命名空间生成一条using指令。所以上面的代码在效果上等同于：
+#+begin_src c++
+namespace __UNIQUE_NAME_ {
+    char c;
+    int i;
+    double d;
+}
+using namespace __UNIQUE_NAME_;
+#+END_SRC
+在匿名命名空间中声明的名称也将被编译器转换，与编译器为这个匿名命名空间生成的唯一内部名称(即这里的__UNIQUE_NAME_)绑定在一起。还有一点很重要，就是这些名称具有internal链接属性，这和声明为static的全局名称的链接属性是相同的，即名称的作用域被限制在当前文件中，无法通过在另外的文件中使用extern声明来进行链接。如果不提倡使用全局static声明一个名称拥有internal链接属性，则匿名命名空间可以作为一种更好的达到相同效果的方法。
+
+注意:命名空间都是具有external 连接属性的,只是匿名的命名空间产生的__UNIQUE_NAME__在别的文件中无法得到,这个唯一的名字是不可见的.
+
+C++ 新的标准中提倡使用匿名命名空间,而不推荐使用static,因为static用在不同的地方,涵义不同,容易造成混淆.另外,static不能修饰class。
+
+注意:命名空间都是具有external 连接属性的,只是匿名的命名空间产生的__UNIQUE_NAME__在别的文件中无法得到,这个唯一的名字是不可见的.
+
+C++ 新的标准中提倡使用匿名命名空间,而不推荐使用static,因为static用在不同的地方,涵义不同,容易造成混淆.另外,static不能修饰class。
+** 参考文章
+[[https://blog.csdn.net/craftsman1970/article/details/82872497][C++11新特性(79)-内联命名空间(inline namespace)]]
+[[https://www.cnblogs.com/youxin/p/4308364.html][C++匿名命名空间]]
 * 模板
 ** 模板类
 *** 模板类的继承

@@ -2679,6 +2679,25 @@ elf64_phdr 定义在相同的 elf.h 文件中.
 [[https://xinqiu.gitbooks.io/linux-inside-zh/content/Theory/linux-theory-2.html][ELF 文件格式· Linux Inside 中文版]]
 * exec
 exec命令 用于调用并执行指令的命令。exec命令通常用在shell脚本程序中，可以调用其他的命令。如果在当前终端中使用命令，则当指定的命令执行完毕后会立即退出终端。
+在父进程中fork一个子进程，在子进程中调用exec函数启动新的程序。
+
+exec函数一共有六个，其中execve为内核级系统调用，其他（execl，execle，execlp，execv，execvp）都是调用execve的库函数。
+#+begin_src c++
+int execl(const char *path, const char *arg, ...);
+
+int execlp(const char *file, const char *arg, ...);
+
+int execle(const char *path, const char *arg, ..., char * const envp[]);
+
+int execv(const char *path, char *const argv[]);
+
+int execvp(const char *file, char *const argv[]);
+
+#+END_SRC
+
+- path参数表示你要启动程序的名称包括路径名
+- arg参数表示启动程序所带的参数，一般第一个参数为要执行命令名，不是带路径且arg必须以NULL结束
+- 返回值:成功返回0,失败返回-1
 
 ** 语法
 exec(选项)(参数)
@@ -2710,14 +2729,199 @@ Linux C++                       # 使用指定指令输出信息
 #+end_example
 
 通过比较两者执行后的结果来看，所实现的功能是相同的，即使用exec命令调用echo命令成功。
+** 带l 的exec函数：execl,execlp,execle
+#+begin_src c++
+int execl(const char *path, const char *arg, ...);
+
+int execlp(const char *file, const char *arg, ...);
+
+int execle(const char *path, const char *arg, ..., char * const envp[]);
+#+END_SRC
+
+带l 的exec函数：execl,execlp,execle，表示后边的参数以可变参数的形式给出且都以一个空指针结束。
+
+示例：
+#+begin_src c++
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+int main(void)
+{
+    printf("entering main process---\n");
+    execl("/bin/ls","ls","-l",NULL);
+    printf("exiting main process ----\n");
+    return 0;
+}
+#+END_SRC
+
+#+DOWNLOADED: screenshot @ 2023-04-30 11:44:24
+[[file:images/linux笔记/exec/2023-04-30_11-44-24_screenshot.png]]
+利用execl将当前进程main替换掉，所有最后那条打印语句不会输出
+
+** 带 p 的exec函数：execlp,execvp
+带 p 的exec函数：execlp,execvp，表示第一个参数path不用输入完整路径，只有给出命令名即可，它会在环境变量PATH当中查找命令
+
+示例：
+
+当不带p但没给出完整路径时：
+#+begin_src c++
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+int main(void)
+{
+    printf("entering main process---\n");
+    execl("/bin/ls","ls","-l",NULL);
+    printf("exiting main process ----\n");
+    return 0;
+}
+#+END_SRC
+结果：
+#+DOWNLOADED: screenshot @ 2023-04-30 11:45:48
+[[file:images/linux笔记/exec/2023-04-30_11-45-48_screenshot.png]]
+结果显示找不到，所有替换不成功，main进程继续执行
+
+现在带p：
+
+#+DOWNLOADED: screenshot @ 2023-04-30 11:46:07
+[[file:images/linux笔记/exec/2023-04-30_11-46-07_screenshot.png]]
+替换成功
+
+** 不带 l 的exec函数：execv,execvp
+不带 l 的exec函数：execv,execvp表示命令所需的参数以char *arg[]形式给出且arg最后一个元素必须
+是NULL
+
+示例：
+#+begin_src c++
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+int main(void)
+{
+    printf("entering main process---\n");
+    int ret;
+    char *argv[] = {"ls","-l",NULL};
+    ret = execvp("ls",argv);
+    if(ret == -1)
+        perror("execl error");
+    printf("exiting main process ----\n");
+    return 0;
+}
+
+#+END_SRC
+结果：
+#+DOWNLOADED: screenshot @ 2023-04-30 12:03:57
+[[file:images/linux笔记/exec/2023-04-30_12-03-57_screenshot.png]]
+进程替换成功
 * execve
-execute program
+execve() executes the program referred to by pathname.
+This causes the program that is currently being run by the calling process to be replaced with a new program, with newly initialized stack, heap, and (initialized and uninitialized) data segments.
 #+begin_src c++
 #include <unistd.h>
 
 int execve(const char *pathname, char *const argv[],
                   char *const envp[]);
 #+END_SRC
+** 参数
+execve()用来执行参数filename字符串所代表的文件路径，第二个参数是利用数组指针来传递给执行文件，并且需要以空指针(NULL)结束，最后一个参数则为传递给执行文件的新环境变量数组。
+
+pathname must be either a binary executable, or a script starting with a line of the form:
+
+#!interpreter [optional-arg]
+
+For details of the latter case, see "Interpreter scripts" below.
+
+argv is an array of pointers to strings passed to the new program as its command-line arguments.
+By convention, the first of these strings (i.e., argv[0]) should contain the filename associated with the file being executed.
+The argv array must be terminated by a NULL pointer.
+(Thus, in the new program, argv[argc] will be NULL.)
+
+envp is an array of pointers to strings, conventionally of the form key=value, which are passed as the environment of the new program.
+The envp array must be terminated by a NULL pointer.
+** ERRORS
+#+begin_example
+E2BIG  The total number of bytes in the environment (envp) and
+              argument list (argv) is too large.
+
+EACCES Search permission is denied on a component of the path
+       prefix of pathname or the name of a script interpreter.
+       (See also path_resolution(7).)
+
+EACCES The file or a script interpreter is not a regular file.
+
+       EACCES Execute permission is denied for the file or a script or
+       ELF interpreter.
+
+EACCES The filesystem is mounted noexec.
+
+EAGAIN (since Linux 3.1)
+       Having changed its real UID using one of the set*uid()
+       calls, the caller was—and is now still—above its
+       RLIMIT_NPROC resource limit (see setrlimit(2)).  For a
+       more detailed explanation of this error, see NOTES.
+
+EFAULT pathname or one of the pointers in the vectors argv or
+       envp points outside your accessible address space.
+
+EINVAL An ELF executable had more than one PT_INTERP segment
+       (i.e., tried to name more than one interpreter).
+
+EIO    An I/O error occurred.
+
+EISDIR An ELF interpreter was a directory.
+
+ELIBBAD
+       An ELF interpreter was not in a recognized format.
+
+ELOOP  Too many symbolic links were encountered in resolving
+       pathname or the name of a script or ELF interpreter.
+
+ELOOP  The maximum recursion limit was reached during recursive
+       script interpretation (see "Interpreter scripts", above).
+       Before Linux 3.8, the error produced for this case was
+       ENOEXEC.
+
+EMFILE The per-process limit on the number of open file
+       descriptors has been reached.
+
+ENAMETOOLONG
+       pathname is too long.
+
+ENFILE The system-wide limit on the total number of open files
+       has been reached.
+
+ENOENT The file pathname or a script or ELF interpreter does not
+       exist.
+
+ENOEXEC
+       An executable is not in a recognized format, is for the
+       wrong architecture, or has some other format error that
+       means it cannot be executed.
+
+ENOMEM Insufficient kernel memory was available.
+
+ENOTDIR
+       A component of the path prefix of pathname or a script or
+       ELF interpreter is not a directory.
+
+EPERM  The filesystem is mounted nosuid, the user is not the
+       superuser, and the file has the set-user-ID or set-group-
+       ID bit set.
+
+EPERM  The process is being traced, the user is not the superuser
+       and the file has the set-user-ID or set-group-ID bit set.
+
+EPERM  A "capability-dumb" applications would not obtain the full
+       set of permitted capabilities granted by the executable
+       file.  See capabilities(7).
+
+ETXTBSY
+       The specified executable was open for writing by one or
+       more processes.
+#+end_example
 * export 命令
 Linux export 命令用于设置或显示环境变量。
 

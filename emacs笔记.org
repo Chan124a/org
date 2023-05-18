@@ -512,7 +512,7 @@ The customize feature depends on the defcustom macro.
 Although you can use defvar or setq for variables that users set, the defcustom macro is designed for the job.
 ** 列表
 ** 引号
-quote 操作符接受一个实参，并完封不动地返回它。
+quote 操作符(')接受一个实参，并完封不动地返回它。
 #+BEGIN_SRC emacs-lisp :results output
 (quote (+ 3 5))
 #+END_SRC
@@ -642,7 +642,6 @@ Any conditional construct can be expressed with cond or with if. Therefore, the 
 
 #+END_SRC
 *** unless
-
 当unless后面的表达式为nil(false)时执行后面的代码，其它部分和when一样。
 #+BEGIN_SRC emacs-lisp :results output
 (unless condition a b c)
@@ -743,6 +742,13 @@ progn returns the last expression in its body.
 #+END_EXAMPLE
 ** defcustom
 定义变量,然后可以在customize里进行配置.
+** dolist
+(dolist (VAR LIST [RESULT]) BODY ...) ，对 LIST 进行遍历，将 VAR 与 LIST 中的每一元素绑定并执行 BODY，以 RESULT 作为返回值，若没有 RESULT 则返回 nil
+这是一个简单的例子：
+#+BEGIN_SRC emacs-lisp :results output
+(setq a 0)
+(dolist (i '(1 2 3 4 5) a) (cl-incf a i)) => 15
+#+END_SRC
 ** fboundp
 This function returns t if the symbol has an object in its function cell, nil otherwise. It does not check that the object is a legitimate function.
 ** functionp
@@ -814,6 +820,73 @@ Most basic loop in elisp is with while.
     (setq x (+ x 1))))
 #+END_EXAMPLE
 Usually it's better to use dolist or dotimes.
+
+** mapc
+#+BEGIN_SRC emacs-lisp :results output
+(mapc FUNCTION SEQUENCE) ，对 SEQUENCE 的每个元素应用 FUNCTION，调用结束后返回 SEQUENCE
+#+END_SRC
+一般是为了发挥函数的副作用，该函数对 SEQUECNE 没有副作用
+举例来说的话， (mapc print '(1 2 3))
+** memq
+This function tests to see whether object is a member of list. If it is, memq returns a list starting with the first occurrence of object. Otherwise, it returns nil. The letter ‘q’ in memq says that it uses eq to compare object against the elements of the list. For example:
+#+BEGIN_SRC emacs-lisp :results output
+(memq 'b '(a b c b a))
+     ⇒ (b c b a)
+(memq '(2) '((1) (2)))    ; The two (2)s need not be eq.
+     ⇒ Unspecified; might be nil or ((2)).
+#+END_SRC
+** Operating System Environment
+Emacs provides access to variables in the operating system environment through various functions. These variables include the name of the system, the user’s UID, and so on.
+
+*** Variable: system-configuration
+This variable holds the standard GNU configuration name for the hardware/software configuration of your system, as a string. For example, a typical value for a 64-bit GNU/Linux system is ‘"x86_64-unknown-linux-gnu"’.
+
+*** Variable: system-type
+The value of this variable is a symbol indicating the type of operating system Emacs is running on. The possible values are:
+
+aix
+IBM’s AIX.
+
+berkeley-unix
+Berkeley BSD and its variants.
+
+cygwin
+Cygwin, a POSIX layer on top of MS-Windows.
+
+darwin
+Darwin (macOS).
+
+gnu
+The GNU system (using the GNU kernel, which consists of the HURD and Mach).
+
+gnu/linux
+A GNU/Linux system—that is, a variant GNU system, using the Linux kernel. (These systems are the ones people often call “Linux”, but actually Linux is just the kernel, not the whole system.)
+
+gnu/kfreebsd
+A GNU (glibc-based) system with a FreeBSD kernel.
+
+hpux
+Hewlett-Packard HPUX operating system.
+
+nacl
+Google Native Client (NaCl) sandboxing system.
+
+ms-dos
+Microsoft’s DOS. Emacs compiled with DJGPP for MS-DOS binds system-type to ms-dos even when you run it on MS-Windows.
+
+usg-unix-v
+AT&T Unix System V.
+
+windows-nt
+Microsoft Windows NT, 9X and later. The value of system-type is always windows-nt, e.g., even on Windows 10.
+
+We do not wish to add new symbols to make finer distinctions unless it is absolutely necessary! In fact, we hope to eliminate some of these alternatives in the future. If you need to make a finer distinction than system-type allows for, you can test system-configuration, e.g., against a regexp.
+
+*** Function: system-name
+This function returns the name of the machine you are running on, as a string.
+
+*** User Option: mail-host-address
+If this variable is non-nil, it is used instead of system-name for purposes of generating email addresses. For example, it is used when constructing the default value of user-mail-address. See User Identification.
 
 * emacs配置文件
 ** Major Mode和Minor Mode
@@ -2367,6 +2440,34 @@ define-advice 是一个 Emacs25 中加入的宏, 在 Emacs24 中不能使用, �
 使用 define-advice 定义的代码, 当在 Normal 模式时光标两边的括号不会高亮, 而使用
 defadvice 可以.
 
+* cdLatex
+优点:
+1. 快捷键快速输入数学符号
+2. Tab自动补全
+
+C-c ? 可以查看Tab补全模板
+
+Tab补全模板分为TEXT\MATH两种环境.TEXT表示文本环境,MATH表示数学环境(例如$$里面)
+
+Tab跳转在前后有空格和前后没空格两种场景下的跳转位置是不同的.
+
+** 字体格式
+数学环境:可以在数学环境通过里通过单引号`设置字体格式(例如加粗)
+
+文本环境:
+- 单词后面输入`,会自动对整个单词设置字体
+- 空白处输入`,可以把多个单词放入字体环境
+- 最后一个单词后面输入 M+数字 ' ,可以对指定单词个数进行字体设置
+** 添加标签和引用
+*** 添加标签
+lbl + tab
+
+在列表或者数学公式环境中,添加的标签会自动编号
+
+在章节等其他环境中,添加的标签会根据上下文编号,或者也可以自己指定编号
+
+*** 添加引用
+ref + tab
 * Macro 与 Use-package
   这次主要介绍 Emacs Lisp 中的宏(Macro)以及 Use-package 插件.
 
@@ -3750,6 +3851,24 @@ org-download配置如下：
   :config
   (require 'org-download))
 #+END_SRC
+
+* RefTex
+打开reftex : M-x reftex-mode
+** 添加标签和引用
+*** 添加标签
+C-c (
+*** 添加引用
+C-c )
+
+如果在选择便签的时候没有找到想要标签,可以输入r刷新列表.
+
+可以输入m同时选择多个标签进行引用
+** 自定义关键字
+M-x customized-variable RET reftex-label-alist RET
+
+添加关键词 方程\式\第\图 等中午关键字
+#+DOWNLOADED: screenshot @ 2023-04-29 12:12:24
+[[file:images/emacs笔记/RefTex/2023-04-29_12-12-24_screenshot.png]]
 
 * #'的作用
 function (aka #') is used to quote functions, whereas quote (aka ') is used to quote data.
