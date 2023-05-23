@@ -2114,6 +2114,7 @@ C风格字符串在最后一个字符后面跟着一个空字符.
 为了交互对象之间的松耦合设计而努力.
 松耦合的设计将对象之间的互相依赖降到最低,让我们能够建立有弹性的OO系统应对变化.
 
+类应该对扩展开放,对修改关闭.
 ** 策略模式
 策略模式定义了算法族,分别封装起来,让它们之间可以相互替换,此模式让算法独立于使用算法的客户.
 *** 介绍
@@ -2272,6 +2273,83 @@ public class StrategyPatternDemo {
       public void display();
   }
 #+end_src
+** 装饰着模式
+装饰着模式动态地将责任附加到对象上,若要扩展功能,装饰者提供了比继承更有弹性的替代方案.
+
+#+begin_src java
+  //抽象组件
+  public abstract class Beverage{
+    String description = "Unknown Beverage";
+
+    public String getDescription(){
+        return description;
+    }
+
+    public abstract double cost(){};
+  }
+
+  //抽象装饰者
+  public abstract class CondimentDecorator extends Beverage{ //调料
+      public abstract String getDescription();
+  }
+  //具体组件
+  public class Espresso extends Beverage{
+      public Espresso(){
+          description = "Espresso";
+      }
+
+      public double cost(){
+          return 1.99;
+      }
+  }
+  //具体组件
+  public class HouseBlend extends Beverage{
+      public Houseblend(){
+          description = "House Blend Coffee";
+      }
+
+      public double cost(){
+          return .89;
+      }
+  }
+  public class DarkRoast extends Beverage{};
+
+  //具体装饰者
+  public class Mocha extends Condimentdecorator{
+      Beverage beverage;
+
+      public Mocha(Beverage beverage){
+          this.beverage = beverage;
+      }
+
+      public String getDescription(){
+          return beverage.getDescription() + ", Mocah";
+      }
+
+      public double cost(){
+          return .20 + beverage.cost();
+      }
+  }
+  public class Whip extends Condimentdecorator{};
+  public class Soy extends Condimentdecorator{};
+  //测试代码
+  public class StarbuzzCoffee{
+      Beverage beverage = new Espresso();
+      Sysrem.out.println(beverage.getDescription() + " $" + beverage.cost());
+
+      Beverage beverage2 = new DarkRoast();//新建一个DarkRoast对象
+      bevarage2 = new Mocha(bevarage2);//用Mocha装饰它
+      bevarage2 = new Mocha(bevarage2);//用第二个Mocha装饰
+      bevarage2 = new Whip(bevarage2);//用Whip装饰它
+      System.out.println(bevarage2.getDescription() + " $" + bevarage2.cost());
+
+      Beverage beverage3 = new HouseBlend();
+      bevarage3 = new Soy(bevarage3);
+      bevarage3 = new Mocha(bevarage3);
+      bevarage3 = new Whip(bevarage3);
+      System.out.println(bevarage3.getDescription() + " $" + bevarage3.cost());
+  }
+#+END_SRC
 * STL容器底层数据结构总结
 ** vector
 vector是我们用到最多的数据结构，其底层数据结构是数组，由于数组的特点，vector也具有以下特性：
