@@ -1,4 +1,7 @@
+所有内容都已转移到linux笔记.org中
+
 * 命令
+
 #+BEGIN_SRC bash
 docker ps  #可以用来查看当前正在运行的容器
 docker ps -a #查看所有容器，包括已停止运行的
