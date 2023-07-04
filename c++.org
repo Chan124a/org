@@ -4187,6 +4187,63 @@ The default value of B::y = 11
 [[https://www.runoob.com/cplusplus/cpp-friend-functions.html][C++ 友元函数]]
 * 引用
 引用和指针赋值不会产生新对象.
+** 子类引用
+#+begin_src c++
+#include <iostream>
+using namespace std;
+class Father
+{
+public:
+	Father()
+	{
+		f = 1;
+	}
+
+	void print()
+	{
+		cout<<"f = "<<f<<endl;
+	}
+public:
+	int f;
+};
+class Son : public Father
+{
+public:
+	Son():Father()
+	{
+		s = 2;
+	}
+
+	void print()
+	{
+		cout<<"s = "<<s<<endl;
+	}
+public:
+	int s;
+};
+
+void testPrint(Father &f)
+{
+	f.print();
+}
+
+int main()
+{
+	Son s;
+	s.print();//输出s = 2
+	Father& f = s;//这里如果直接用值，就是把“&”去掉，即使使用virtual也不会调用子类的方法，原因待解！
+	f.print();//输出父类 f=1
+
+	f = s;//父类引用指向子类对象
+
+	f.print();//这里输出 f = 1;和java不一样，java里面则直接调用子类的方法，但是这里不是，这里调用的还是父类的，要让其自动调用子类的方法则需要将方法设置为虚函数，加关键字virtual
+	((Son&)f).print();//强制转换，输出 s = 2
+
+	testPrint(s);//输出父类 f=1
+
+	return 0;
+}
+#+END_SRC
 * 右值
 
 ** 右值引用
