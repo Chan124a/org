@@ -15436,6 +15436,7 @@ mode_t umask(mode_t cmask);
 
 在进程创建一个新文件或新目录时，就一定会使用文件模式创建屏蔽字（回忆 3.3 节和 3.4节，在那里我们说明了open和creat函数。这两个函数都有一个参数mode，它指定了新文件的访问权限位）。我们将在4.21节说明如何创建一个新目录。在文件模式创建屏蔽字中为1的位，在文件mode中的相应位一定被关闭。
 
+
 *** 实例
 图4-9程序创建了两个文件，创建第一个时，umask值为0，创建第二个时，umask值禁止所有组和其他用户的访问权限。
 #+begin_src c++
@@ -15472,6 +15473,208 @@ UNIX系统的大多数用户从不处理他们的umask值。通常在登录时�
 在前面的示例中，我们用shell的umask命令在运行程序的前、后打印文件模式创建屏蔽字。从中可见，更改进程的文件模式创建屏蔽字并不影响其父进程（常常是shell）的屏蔽字。所有shell都有内置umask命令，我们可以用该命令设置或打印当前文件模式创建屏蔽字。
 
 用户可以设置umask值以控制他们所创建文件的默认权限。该值表示成八进制数，一位代表一种要屏蔽的权限，这示于图4-10中。设置了相应位后，它所对应的权限就会被拒绝。常用的几种 umask 值是 002、022 和 027。002 阻止其他用户写入你的文件，022 阻止同组成员和其他用户写入你的文件，027阻止同组成员写你的文件以及其他用户读、写或执行你的文件。
+
+
+#+DOWNLOADED: screenshot @ 2023-07-05 22:44:00
+[[file:images/linux笔记/UNIX-文件和目录/2023-07-05_22-44-00_screenshot.png]]
+Single UNIX Specification要求shell应该支持符号形式的umask命令。与八进制格式不同，符号格式指定许可的权限（即在文件创建屏蔽字中为0的位）而非拒绝的权限（即在文件创建屏蔽字中为1的位）。下面显示了两种格式的命令。
+#+begin_src bash
+$ umask 先打印当前文件模式创建屏蔽字
+$ umask -S 打印符号格式
+$ umask 027 更改文件模式创建屏蔽字
+$ umask -S 打印符号格式
+002
+u=rwx,g=rwx,o=rx
+u=rwx,g=rx,o=
+#+END_SRC
+
+** 函数chmod、fchmod和fchmodat
+chmod、fchmod和fchmodat这3个函数使我们可以更改现有文件的访问权限。
+#+begin_src c++
+#include <sys/stat.h>
+
+int chmod(const char *pathname, mode_t mode);
+
+int fchmod(int fd, mode_t mode);
+
+int fchmodat(int fd, const char *pathname, mode_t mode, int flag);
+
+#+END_SRC
+
+3个函数返回值：若成功，返回0；若出错，返回−1
+
+chmod 函数在指定的文件上进行操作，而 fchmod 函数则对已打开的文件进行操作。
+fchmodat函数与chmod函数在下面两种情况下是相同的：一种是pathname参数为绝对路径，另一种是fd参数取值为AT_FDCWD而pathname参数为相对路径。否则，fchmodat计算相对于打开目录（由fd参数指向）的pathname。flag参数可以用于改变fchmodat的行为，当设置了AT_SYMLINK_NOFOLLOW标志时，fchmodat并不会跟随符号链接。
+
+为了改变一个文件的权限位，进程的有效用户ID必须等于文件的所有者ID，或者该进程必须具有超级用户权限。
+
+参数mode是图4-11中所示常量的按位或。
+
+#+DOWNLOADED: screenshot @ 2023-07-05 22:47:57
+[[file:images/linux笔记/UNIX-文件和目录/2023-07-05_22-47-57_screenshot.png]]
+注意，在图4-11中，有9项是取自图4-6中的9个文件访问权限位。我们另外加了6个，它们是两个设置ID常量（S_ISUID和S_ISGID）、保存正文常量（S_ISVTX）以及3个组合常量（S_IRWXU、S_IRWXG和S_IRWXO）。
+
+保存正文位（S_ISVTX）不是POSIX.1的一部分。在Single UNIX Specification中，它被定义在XSI扩展中。
+*** 实例
+为了演示umask函数，我们在前面运行了图4-9程序，先让我们回忆文件foo和bar当时的最后状态：
+#+begin_src bash
+$ ls -l foo bar
+-rw------- 1 sar 0 Dec 7 21:20 bar
+-rw-rw-rw- 1 sar 0 Dec 7 21:20 foo
+#+END_SRC
+
+图4-12的程序修改了这两个文件的模式。
+#+begin_src c++
+#include "apue.h"
+int main(void)
+{
+  struct stat statbuf;
+  /* turn on set-group-ID and turn off group-execute */
+  if (stat("foo", &statbuf) < 0)
+    err_sys("stat error for foo");
+  if (chmod("foo"，(statbuf.st_mode & ~S_IXGRP) | S_ISGID) < 0)
+    err_sys("chmod error for foo");
+  /* set absolute mode to "rw-r--r--" */
+  if (chmod("bar", S_IRUSR / S_IWUSR / S_IRGRP | S_IROTH) < 0)
+    err_sys("chmod error for bar");
+  exit(O);
+}
+#+END_SRC
+在运行图4-12程序后，这两个文件的最后状态是：
+#+begin_src bash
+$ ls -l foo bar
+-rw-r--r-- 1 sar 0 Dec 7 21:20 bar-rw-rwSrw- 1 sar 0 Dec 7 21:20 foo
+#+END_SRC
+
+在本例中，不管文件bar的当前权限位如何，我们都将其权限设置为一个绝对值。对文件foo，我们相对于其当前状态设置权限。为此，先调用stat获得其当前权限，然后修改它。我们显式地打开了设置组ID位、关闭了组执行位。注意，ls命令将组执行权限表示为S，它表示设置组ID位已经设置，同时，组执行位未设置。
+
+在Solaris中，ls命令显示l而非S，这表明对该文件可以加强制性文件或记录锁。这只能用于普通文件，14.3节将更详细地讨论这一点。
+
+最后还要注意，在运行图4-12程序后，ls命令列出的时间和日期并没有改变。在4.19节中，我们会了解到 chmod 函数更新的只是 i 节点最近一次被更改的时间。按系统默认方式，ls -l列出的是最后修改文件内容的时间。
+
+chmod函数在下列条件下自动清除两个权限位。
+
+•Solaris 等系统对用于普通文件的粘着位赋予了特殊含义，在这些系统上如果我们试图设置普通文件的粘着位（S_ISVTX），而且又没有超级用户权限，那么mode中的粘着位自动被关闭（我们将在下一节说明粘着位）。这意味着只有超级用户才能设置普通文件的粘着位。这样做的理由是防止恶意用户设置粘着位，由此影响系统性能。
+
+在FreeBSD 8.0和Solaris 10中，只有超级用户才能对普通文件设置粘着位。Linux 3.2.0和Mac OS X 10.6.8对设置粘着位并无此种限制，其原因是，粘着位对Linux普通文件并无意义。虽然粘着位对FreeBSD的普通文件也无意义，但还是阻止除超级用户以外的任何用户对普通文件设置该位。
+
+•新创建文件的组 ID 可能不是调用进程所属的组。回忆一下 4.6 节，新文件的组 ID可能是父目录的组ID。特别地，如果新文件的组ID不等于进程的有效组ID或者进程附属组 ID 中的一个，而且进程没有超级用户权限，那么设置组 ID 位会被自动被关闭。这就防止了用户创建一个设置组ID文件，而该文件是由并非该用户所属的组拥有的。
+
+这种情况下，FreeBSD 8.0对试图设置组ID的操作肯定会返回失败，而其他的系统则无声息地关闭该位，但不会对试图改变文件访问权限的操作直接做失败处理。
+
+FreeBSD 8.0、Linux 3.2.0、Mac OS X 10.6.8和Solaris 10增加了另一个安全性功能以试图阻止误用某些保护位。如果没有超级用户权限的进程写一个文件，则设置用户 ID 位和设置组ID位会被自动清除。如果恶意用户找到一个他们可以写的设置组ID和设置用户ID文件，即使可以修改此文件，他们也没有对该文件的特殊权限。
+** 粘着位
+S_ISVTX位有一段有趣的历史。在UNIX尚未使用请求分页式技术的早期版本中，S_ISVTX位被称为粘着位（sticky bit）。如果一个可执行程序文件的这一位被设置了，那么当该程序第一次被执行，在其终止时，程序正文部分的一个副本仍被保存在交换区（程序的正文部分是机器指令）。这使得下次执行该程序时能较快地将其装载入内存。其原因是：通常的UNIX文件系统中，文件的各数据块很可能是随机存放的，相比较而言，交换区是被作为一个连续文件来处理的。对于通用的应用程序，如文本编辑程序和C语言编译器，我们常常设置它们所在文件的粘着位。自然地，对于在交换区中可以同时存放的设置了粘着位的文件数是有限制的，以免过多占用交换区空间，但无论如何这是一个有用的技术。因为在系统再次自举前，文件的正文部分总是在交换区中，这正是名字中“粘着”的由来。后来的UNIX版本称它为保存正文位（saved-text bit），因此也就有了常量S_ISVTX。现今较新的UNIX系统大多数都配置了虚拟存储系统以及快速文件系统，所以不再需要使用这种技术。
+
+现今的系统扩展了粘着位的使用范围，Single UNIX Specification允许针对目录设置粘着位。如果对一个目录设置了粘着位，只有对该目录具有写权限的用户并且满足下列条件之一，才能删除或重命名该目录下的文件：
+
+•拥有此文件；
+
+•拥有此目录；
+
+•是超级用户。
+
+目录/tmp 和/var/tmp 是设置粘着位的典型候选者—任何用户都可在这两个目录中创建文件。任一用户（用户、组和其他）对这两个目录的权限通常都是读、写和执行。但是用户不应能删除或重命名属于其他人的文件，为此在这两个目录的文件模式中都设置了粘着位。
+
+POSIX.1没有定义保存正文位，Single UNIX Specification将它定义在XSI扩展部分。FreeBSD 8.0、Linux 3.2.0、Mac OS X 10.6.8和Solaris 10则支持这种功能。
+
+在Solaris 10中，如果对普通文件设置了粘着位，那么它就具有特殊含义。在这种情况下，如果任何执行位都没有设置，那么操作系统就不会缓存文件内容。
+** 函数chown、fchown、fchownat和lchown
+下面几个chown函数可用于更改文件的用户ID和组ID。如果两个参数owner或group中的任意一个是-1，则对应的ID不变。
+
+#include <unistd.h>
+
+int chown(const char *pathname, uid_t owner, gid_t group);
+
+int fchown(int fd, uid_t owner, gid_t group);
+
+int fchownat(int fd, const char *pathname, uid_t owner, gid_t group, int flag);
+
+int lchown(const char *pathname, uid_t owner, gid_t group);
+
+4个函数的返回值：若成功，返回0；若出错，返回-1
+
+除了所引用的文件是符号链接以外，这 4 个函数的操作类似。在符号链接情况下，lchown和fchownat（设置了AT_SYMLINK_NOFOLLOW标志）更改符号链接本身的所有者，而不是该符号链接所指向的文件的所有者。
+
+fchown函数改变fd参数指向的打开文件的所有者，既然它在一个已打开的文件上操作，就不能用于改变符号链接的所有者。
+
+fchownat函数与chown或者lchown函数在下面两种情况下是相同的：一种是pathname参数为绝对路径，另一种是fd参数取值为AT_FDCWD而pathname参数为相对路径。在这两种情况下，如果flag参数中设置了AT_SYMLINK_NOFOLLOW标志，fchownat与lchown行为相同，如果flag参数中清除了AT_SYMLINK_NOFOLLOW标志，则fchownat与chown行为相同。如果fd参数设置为打开目录的文件描述符，并且pathname参数是一个相对路径名，fchownat函数计算相对于打开目录的pathname。
+
+基于BSD的系统一直规定只有超级用户才能更改一个文件的所有者。这样做的原因是防止用户改变其文件的所有者从而摆脱磁盘空间限额对他们的限制。System V则允许任一用户更改他们所拥有的文件的所有者。
+
+按照_POSIX_CHOWN_RESTRICTED的值，POSIX.1允许在这两种形式的操作中选用一种。
+
+对于Solaris 10，此功能是个配置选项，其默认值是施加限制。而FreeBSD 8.0、Linux 3.2.0和Mac OS X 10.6.8则总对chown施加限制。
+
+回忆2.6节，_POSIX_CHOWN_RESTRICTED常量可选地定义在头文件<unistd.h>中，而且总是可以用pathconf或fpathconf函数进行查询。此选项还与所引用的文件有关—可在每个文件系统基础上，使该选项起作用或不起作用。在下文中，如提及“若_POSIX_CHOWN_RESTRICTED生效”，则表示“这适用于我们正在谈及的文件”，而不管该实际常量是否在头文件中定义。
+
+若_POSIX_CHOWN_RESTRICTED对指定的文件生效，则
+
+（1）只有超级用户进程能更改该文件的用户ID；
+
+（2）如果进程拥有此文件（其有效用户ID等于该文件的用户ID），参数owner等于-1或文件的用户ID，并且参数group等于进程的有效组ID或进程的附属组ID之一，那么一个非超级用户进程可以更改该文件的组ID。
+
+这意味着，当_POSIX_CHOWN_RESTRICTED有效时，不能更改其他用户文件的用户ID。你可以更改你所拥用的文件的组ID，但只能改到你所属的组。
+
+如果这些函数由非超级用户进程调用，则在成功返回时，该文件的设置用户 ID 位和设置组ID位都被清除。
+** 文件长度
+stat结构成员st_size表示以字节为单位的文件的长度。此字段只对普通文件、目录文件和符号链接有意义。
+
+FreeBSD 8.0、Mac OS X 10.6.8和Solaris 10对管道也定义了文件长度，它表示可从该管道中读到的字节数。
+
+对于普通文件，其文件长度可以是0，在开始读这种文件时，将得到文件结束（end-of-file）指示。
+对于目录，文件长度通常是一个数（如16或512）的整倍数.
+对于符号链接，文件长度是在文件名中的实际字节数。例如，在下面的例子中，文件长度7就是路径名usr/lib的长度：
+#+begin_src bash
+lrwxrwxrwx 1 root 7 Sep 25 07:14 lib -> usr/lib
+#+END_SRC
+（注意，因为符号链接文件长度总是由st_size指示，所以它并不包含通常C语言用作名字结尾的null字节。）
+
+现今，大多数现代的UNIX系统提供字段st_blksize和st_blocks。其中，第一个是对文件I/O较合适的块长度，第二个是所分配的实际512字节块块数。回忆前面章节，其中提到了当我们将st_blksize用于读操作时，读一个文件所需的时间量最少。为了提高效率，标准I/O库（我们将在第5章中说明）也试图一次读、写st_blksize个字节。
+
+应当了解的是，不同的UNIX版本其st_blocks所用的单位可能不是512字节的块。使用此值并不是可移植的。
+
+*** 文件中的空洞
+我们曾经提及普通文件可以包含空洞。在图3-2 程序中例示了这一点。空洞是由所设置的偏移量超过文件尾端，并写入了某些数据后造成的。
+作为一个例子，考虑下列情况：
+#+begin_src bash
+$ ls -l core
+-rw-r--r-- 1 sar 8483248 Nov 18 12:18 core
+
+$ du -s core
+272 core
+#+END_SRC
+文件core的长度稍稍超过8 MB，可是du命令报告该文件所使用的磁盘空间总量是272个512字节块（即139 264字节）。
+很明显，此文件中有很多空洞。
+
+在很多BSD类系统上，du命令报告的是1 024字节块的块数，Solaris报告的是512字节块的块数。
+在Linux上，报告的块数单位取决于是否设置了环境变量POSIXLY_CORRECT。当设置了该环境变量，du 命令报告的是1024 字节块的块数；没有设置该环境变量时，du 命令报告的是512字节块的块数。
+
+正如我们在3.6节中提及的，对于没有写过的字节位置，read函数读到的字节是0。如果执行下面的命令，可以看出正常的I/O操作读整个文件长度：
+#+begin_src bash
+$ wc -c core
+8483248 core
+#+END_SRC
+
+带-c选项的wc(1)命令计算文件中的字符数（字节）。
+
+如果使用实用程序（如cat(1)）复制这个文件，那么所有这些空洞都会被填满，其中所有实际数据字节皆填写为0。
+#+begin_src bash
+$ cat core > core.copy
+
+$ ls -l core*
+-rw-r--r-- 1 sar 8483248 Nov 18 12:18 core
+-rw-rw-r-- 1 sar 8483248 Nov 18 12:27 core.copy
+
+$ du -s core*
+272 core
+16592 core.copy
+#+END_SRC
+
+从中可见，新文件所用的实际字节数是8 495 104（512×16 592）。此长度与ls命令报告的长度不同，其原因是，文件系统使用了若干块以存放指向实际数据块的各个指针。
+
+有兴趣的读者可以参阅Bach[1986]的4.2节、McKusick 等[1996]的7.2节和7.3节（或McKusick和Neville-Neil[2005]的8.2节和8.3节）、McDougall和Mauro[2007]的15.2节以及Singh[2006]的第12章，以更详细地了解文件的物理结构。
+
 * unzip命令
 Linux unzip命令用于解压缩zip文件
 
