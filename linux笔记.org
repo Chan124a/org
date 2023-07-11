@@ -15994,20 +15994,469 @@ lrwxrwxrwx　1　sar　　　 13 Jan 22 00:26　myfile -> /no/such/file
 文件myfile存在，但cat却称没有这一文件。其原因是myfile是个符号链接，由该符号链接所指向的文件并不存在。ls命令的-l选项给我们两个提示：第一个字符是l，它表示这是一个符号链接，而->也表明这是一个符号链接。ls 命令还有另一个选项-F，它会在符号链接的文件名后加一个@符号，在未使用-l选项时，这可以帮助我们识别出符号链接。
 
 ** 创建和读取符号链接
+可以用symlink或symlinkat函数创建一个符号链接。
+#+begin_src c++
+#include <unistd.h>
 
+int symlink(const char *actualpath, const char *sympath);
+
+int symlinkat(const char *actualpath, int fd, const char *sympath);
+
+#+END_SRC
+
+两个函数的返回值：若成功，返回0；若出错，返回-1
+
+函数创建了一个指向actualpath的新目录项sympath。在创建此符号链接时，并不要求actualpath已经存在（在上一节结束部分的例子中我们已经看到了这一点）。并且，actualpath和sympath并不需要位于同一文件系统中。
+
+symlinkat函数与symlink函数类似，但sympath参数根据相对于打开文件描述符引用的目录（由 fd 参数指定）进行计算。如果 sympath 参数指定的是绝对路径或者 fd 参数设置了AT_FDCWD值，那么symlinkat就等同于symlink函数。
+
+因为open函数跟随符号链接，所以需要有一种方法打开该链接本身，并读该链接中的名字。readlink和readlinkat函数提供了这种功能。
+#+begin_src c++
+#include <unistd.h>
+
+ssize_t readlink(const char *restrict pathname, char *restrict buf,
+
+size_t bufsize);
+
+ssize_t readlinkat(int fd, const char* restrict pathname,
+
+char *restrict buf, size_t bufsize);
+
+#+END_SRC
+
+两个函数的返回值：若成功，返回读取的字节数；若出错，返回-1
+
+两个函数组合了 open、read 和 close 的所有操作。如果函数成功执行，则返回读入buf的字节数。在buf中返回的符号链接的内容不以null字节终止。
+
+当pathname参数指定的是绝对路径名或者fd参数的值为AT_FDCWD，readlinkat函数的行为与readlink相同。但是，如果fd参数是一个打开目录的有效文件描述符并且pathname参数是相对路径名，则readlinkat计算相对于由fd代表的打开目录的路径名。
 ** 文件的时间
+在4.2节中，我们讨论了Single UNIX Specification 2008年版如何提高stat结构中时间字段的精度，从原来的秒提高到秒加上纳秒。每个文件属性所保存的实际精度依赖于文件系统的实现。对于把时间戳记录在秒级的文件系统来说，纳秒这个字段就会被填充为 0。对于时间戳的记录精度高于秒级的文件系统来说，不足秒的值被转换成纳秒并记录在纳秒这个字段中。
+
+对每个文件维护3个时间字段，它们的意义示于图4-19中。
+#+DOWNLOADED: screenshot @ 2023-07-11 22:30:33
+[[file:images/linux笔记/UNIX-文件和目录/2023-07-11_22-30-33_screenshot.png]]
+注意，修改时间（st_mtim）和状态更改时间（st_ctim）之间的区别。修改时间是文件内容最后一次被修改的时间。状态更改时间是该文件的i节点最后一次被修改的时间。在本章中我们已说明了很多影响到i节点的操作，如更改文件的访问权限、更改用户ID、更改链接数等，但它们并没有更改文件的实际内容。因为i节点中的所有信息都是与文件的实际内容分开存放的，所以，除了要记录文件数据修改时间以外，还需要记录状态更改时间，也就是更改i节点中信息的时间。
+
+注意，系统并不维护对一个i节点的最后一次访问时间，所以access和stat函数并不更改这3个时间中的任一个。
+
+系统管理员常常使用访问时间来删除在一定时间范围内没有被访问过的文件。典型的例子是删除在过去一周内没有被访问过的名为a.out或core的文件。find(1)命令常被用来进行这种类型的操作。
+
+修改时间和状态更改时间可被用来归档那些内容已经被修改或i节点已经被更改的文件。
+
+ls命令按这3个时间值中的一个排序进行显示。系统默认（用-l或-t选项调用时）是按文件的修改时间的先后排序显示。-u选项使ls命令按访问时间排序，-c选项则使其按状态更改时间排序。
+
+图4-20列出了我们已说明过的各种函数对这3个时间的作用。回忆4.14节中所述，目录是包含目录项（文件名和相关的i节点编号）的文件，增加、删除或修改目录项会影响到它所在目录相关的3个时间。这就是在图4-20中包含两列的原因，其中一列是与该文件（或目录）相关的3个时间，另一列是与所引用的文件（或目录）的父目录相关的3个时间。例如，创建一个新文件影响到包含此新文件的目录，也影响该新文件的i节点。但是，读或写一个文件只影响该文件的i节点，而对目录则无影响。
+
+#+DOWNLOADED: screenshot @ 2023-07-11 22:34:58
+[[file:images/linux笔记/UNIX-文件和目录/2023-07-11_22-34-58_screenshot.png]]
 
 ** 函数futimens、utimensat和utimes
+一个文件的访问和修改时间可以用以下几个函数更改。futimens和utimensat函数可以指定纳秒级精度的时间戳。用到的数据结构是与stat函数族相同的timespec结构（见4.2节）。
 
+#include <sys/stat.h>
+
+int futimens(int fd, const struct timespec times[2]);
+
+int utimensat(int fd, const char *path, const struct timespec times[2], int flag);
+
+两个函数返回值：若成功，返回0；若出错，返回-1
+
+这两个函数的times数组参数的第一个元素包含访问时间，第二元素包含修改时间。这两个时间值是日历时间，如1.10节所述，这是自特定时间（1970年1月1日00:00:00）以来所经过的秒数。不足秒的部分用纳秒表示。
+
+时间戳可以按下列4种方式之一进行指定。
+
+（1）如果times参数是一个空指针，则访问时间和修改时间两者都设置为当前时间。
+
+（2）如果times参数指向两个timespec结构的数组，任一数组元素的tv_nsec字段的值为UTIME_NOW，相应的时间戳就设置为当前时间，忽略相应的tv_sec字段。
+
+（3）如果times参数指向两个timespec结构的数组，任一数组元素的tv_nsec字段的值为UTIME_OMIT，相应的时间戳保持不变，忽略相应的tv_sec字段。
+
+（4）如果 times 参数指向两个 timespec 结构的数组，且 tv_nsec 字段的值为既不是UTIME_NOW 也不是 UTIME_OMIT，在这种情况下，相应的时间戳设置为相应的 tv_sec 和tv_nsec字段的值。
+
+执行这些函数所要求的优先权取决于times参数的值。
+
+• 如果times是一个空指针，或者任一tv_nsec字段设为UTIME_NOW，则进程的有效用户ID必须等于该文件的所有者ID；进程对该文件必须具有写权限，或者进程是一个超级用户进程。
+
+• 如果 times 是非空指针，并且任一 tv_nsec 字段的值既不是 UTIME_NOW 也不是UTIME_OMIT，则进程的有效用户ID必须等于该文件的所有者ID，或者进程必须是一个超级用户进程。对文件只具有写权限是不够的。
+
+• 如果times是非空指针，并且两个tv_nsec字段的值都为UTIME_OMIT，就不执行任何的权限检查。
+
+futimens 函数需要打开文件来更改它的时间，utimensat 函数提供了一种使用文件名更改文件时间的方法。pathname参数是相对于fd参数进行计算的，fd要么是打开目录的文件描述符，要么设置为特殊值 AT_FDCWD（强制通过相对于调用进程的当前目录计算pathname）。如果pathname指定了绝对路径，那么fd参数被忽略。
+
+utimensat的flag参数可用于进一步修改默认行为。如果设置了AT_SYMLINK_NOFOLLOW标志，则符号链接本身的时间就会被修改（如果路径名指向符号链接）。默认的行为是跟随符号链接，并把文件的时间改成符号链接的时间。
+
+futimens 和utimensat 函数都包含在POSIX.1 中，第3 个函数utimes 包含在Single UNIX Specification的XSI扩展选项中。
+
+#include <sys/time.h>
+
+int utimes(const char *pathname, const struct timeval times[2]);
+
+函数返回值：若成功，返回0；若出错，返回-1
+
+utimes函数对路径名进行操作。times参数是指向包含两个时间戳（访问时间和修改时间）元素的数组的指针，两个时间戳是用秒和微妙表示的。
+
+struct timeval {
+
+time_t tv_sec; /* seconds */
+
+long tv_usec; /* microseconds */
+
+};
+
+注意，我们不能对状态更改时间st_ctim（i节点最近被修改的时间）指定一个值，因为调用utimes函数时，此字段会被自动更新。
+
+在某些UNIX版本中，touch(1)命令使用这些函数中的某一个。另外，标准归档程序tar(1)和cpio(1)可选地调用这些函数，以便将一个文件的时间值设置为将它归档时保存的时间。
+*** 实例
+图4-21的程序使用带O_TRUNC选项的open函数将文件长度截断为0，但并不更改其访问时间及修改时间。为了做到这一点，首先用stat函数得到这些时间，然后截断文件，最后再用futimens函数重置这两个时间。可以用以下Linux命令演示图4-21中的程序：
+#+begin_src c++
+#include "apue.h"
+#include <fcntl.h>
+int main(int argc, char *argv[]) int i, fd;
+struct stat statbuf;
+struct timespec times[2];
+for (i = 1; i < argc; i++)
+{
+  if (stat(argv[i], &statbuf) < 0)
+  { /* fetch current times */
+    err_ret("%s : stat error", argv[i]);
+    continue;
+  }
+  if ((fd = open(argv[i]，O_RDWR | O_TRUNC)) < 0)
+  {
+    /* truncate */
+    err_ret("%s: open error", argv[i]);
+    continue;
+    times[0] = -statbuf.st_atim;
+    times[l] = statbuf.st_mtim;
+    if (futimens(fd, times) < 0) /* reset times */
+      err_ret("%s: futimens error", argv[i]);
+    close(fd);
+  }
+exit 0 ) ;
+}
+#+END_SRC
+
+#+begin_src bash
+$ ls -l changemod times　　　　 查看长度和最后修改时间
+
+-rwxr-xr-x 1 sar 13792 Jan 22 01:26 changemod
+
+-rwxr-xr-x 1 sar 13824 Jan 22 01:26 times
+
+$ ls -lu changemod times　　　　 查看最后访问时间
+
+-rwxr-xr-x 1 sar 13792 Jan 22 22:22 changemod
+
+-rwxr-xr-x 1 sar 13824 Jan 22 22:22 times
+
+$ date　　　　　　　　　　　　　 打印当天日期Fri Jan 27 20:53:46 EST 2012
+
+$ ./a.out changemod times　　　 运行图4-21的程序
+
+$ ls -l changemod times　　　　 检查结果
+
+-rwxr-xr-x 1 sar　　　　　0 Jan 22 01:26 changemod
+
+-rwxr-xr-x 1 sar　　　　　0 Jan 22 01:26 times
+
+$ ls -lu changemod times　　　　 检查最后访问时间
+
+-rwxr-xr-x 1 sar　　　　　0 Jan 22 22:22 changemod
+
+-rwxr-xr-x 1 sar　　　　　0 Jan 22 22:22 times
+
+$ ls -lc changemod times　　　　 检查状态更改时间
+
+-rwxr-xr-x 1 sar　　　　　0 Jan 27 20:53 changemod
+
+-rwxr-xr-x 1 sar　　　　　0 Jan 27 20:53 times
+
+#+END_SRC
+
+正如我们所预见的一样，最后修改时间和最后访问时间未变。但是，状态更改时间则更改为程序运行时的时间。
 ** 函数mkdir、mkdirat和rmdir
+用mkdir和mkdirat函数创建目录，用rmdir函数删除目录。
+#+begin_src c++
+#include <sys/stat.h>
 
+int mkdir(const char *pathname, mode_t mode);
+
+int mkdirat(int fd, const char *pathname, mode_t mode);
+
+#+END_SRC
+
+两个函数返回值：若成功，返回0；若出错，返回-1
+
+这两个函数创建一个新的空目录。其中，.和..目录项是自动创建的。所指定的文件访问权限mode由进程的文件模式创建屏蔽字修改。
+
+常见的错误是指定与文件相同的mode（只指定读、写权限）。但是，对于目录通常至少要设置一个执行权限位，以允许访问该目录中的文件名（见习题4.16）。
+
+按照4.6节中讨论的规则来设置新目录的用户ID和组ID。
+
+Solaris 10和Linux 3.2.0也使新目录继承父目录的设置组ID位。这就使得在新目录中创建的文件将继承该目录的组ID。对于 Linux，文件系统的实现决定是否支持此特征。例如，ext2、ext3和ext4文件系统用mount(1)命令的一个选项来控制是否支持此特征。但是，Linux的UFS文件系统实现则是不可选择的，新目录继承父目录的设置组ID位，这仿效了历史上BSD的实现。在BSD系统中，新目录的组ID是从父目录继承的。
+
+基于BSD的系统并不要求在目录间传递设置组ID位，因为不论设置组ID位如何，新创建的文件和目录总是继承父目录的组ID。因为FreeBSD 8.0和Mac OS X 10.6.8是基于4.4BSD的，它们不要求继承设置组 ID 位。在这些平台上，新创建的文件和目录总是继承父目录的组 ID，这与是否设置了设置组ID位无关。
+
+早期的UNIX版本并没有mkdir函数，它是由4.2BSD和SVR3引入的。在早期版本中，进程要调用mknod函数创建一个新目录，但是只有超级用户进程才能使用mknod函数。为了避免这一点，创建目录的命令mkdir(1)必须由根用户拥有，而且对它设置了设置用户ID位。要通过一个进程创建一个目录，必须用system(3)函数调用mkdir(1)命令。
+
+mkdirat函数与mkdir函数类似。当fd参数具有特殊值AT_FDCWD或者pathname参数指定了绝对路径名时，mkdirat与mkdir完全一样。否则，fd参数是一个打开目录，相对路径名根据此打开目录进行计算。
+
+用rmdir函数可以删除一个空目录。空目录是只包含.和..这两项的目录。
+#+begin_src c++
+#include <unistd.h>
+
+int rmdir(const char *pathname);
+
+#+END_SRC
+
+返回值：若成功，返回0；若出错，返回-1
+
+如果调用此函数使目录的链接计数成为 0，并且也没有其他进程打开此目录，则释放由此目录占用的空间。如果在链接计数达到0时，有一个或多个进程打开此目录，则在此函数返回前删除最后一个链接及.和..项。另外，在此目录中不能再创建新文件。但是在最后一个进程关闭它之前并不释放此目录。（即使另一些进程打开该目录，它们在此目录下也不能执行其他操作。这样处理的原因是，为了使rmdir函数成功执行，该目录必须是空的。）
 ** 读目录
+对某个目录具有访问权限的任一用户都可以读该目录，但是，为了防止文件系统产生混乱，只有内核才能写目录。回忆 4.5 节，一个目录的写权限位和执行权限位决定了在该目录中能否创建新文件以及删除文件，它们并不表示能否写目录本身。
+
+目录的实际格式依赖于 UNIX 系统实现和文件系统的设计。早期的系统（如 V7）有一个比较简单的结构：每个目录项是16个字节，其中14个字节是文件名，2个字节是i节点编号。而对于4.2BSD，由于它允许更长的文件名，所以每个目录项的长度是可变的。这就意味着读目录的程序与系统相关。为了简化读目录的过程，UNIX 现在包含了一套与目录有关的例程，它们是POSIX.1的一部分。很多实现阻止应用程序使用read函数读取目录的内容，由此进一步将应用程序与目录格式中与实现相关的细节隔离。
+#+begin_src c++
+#include <dirent.h>
+
+DIR *opendir(const char *pathname);
+
+DIR *fdopendir(int fd);
+
+#+END_SRC
+
+两个函数返回值：若成功，返回指针；若出错，返回NULL
+#+begin_src c++
+struct dirent *readdir(DIR *dp);
+#+END_SRC
+
+返回值：若成功，返回指针；若在目录尾或出错，返回NULL
+#+begin_src c++
+void rewinddir(DIR *dp);
+
+int closedir(DIR *dp);
+
+#+END_SRC
+
+返回值：若成功，返回0；若出错，返回-1
+#+begin_src c++
+long telldir(DIR *dp);
+
+#+END_SRC
+
+返回值：与dp关联的目录中的当前位置
+#+begin_src c++
+void seekdir(DIR *dp, long loc);
+#+END_SRC
+
+fdopendir函数最早出现在SUSv4（Single UNIX Specification第4版）中，它提供了一种方法，可以把打开文件描述符转换成目录处理函数需要的DIR结构。
+
+telldir 和 seekdir 函数不是基本 POSIX.1 标准的组成部分。它们是 Single UNIX Specification中的XSI扩展，所以可以期望所有符合UNIX系统的实现都会提供这两个函数。
+
+回忆一下，在图1-3程序中（ls命令的基本实现部分）使用了其中几个函数。
+
+定义在头文件<dirent.h>中的dirent结构与实现有关。实现对此结构所做的定义至少包含下列两个成员：
+#+begin_example
+ino_t d_ino;　　　　　　　 /* i-node number */
+
+char　d_name[];　　　　　　/* null-terminated filename */
+
+#+end_example
+
+POSIX.1并没有定义d_ino项，因为这是一个实现特征，但在POSIX.1的XSI扩展中定义了d_ino。POSIX.1在此结构中只定义了d_name项。
+
+注意，d_name项的大小并没有指定，但必须保证它能包含至少NAME_MAX个字节（不包含终止null字节，回忆图2-15）。因为文件名是以null字节结束的，所以在头文件中如何定义数组d_name并无多大关系，数组大小并不表示文件名的长度。
+
+DIR 结构是一个内部结构，上述 7 个函数用这个内部结构保存当前正在被读的目录的有关信息。其作用类似于FILE结构。FILE结构由标准I/O库维护，我们将在第5章中对它进行说明。
+
+由opendir和fdopendir返回的指向DIR结构的指针由另外5个函数使用。opendir执行初始化操作，使第一个readdir返回目录中的第一个目录项。DIR结构由fdopendir创建时，readdir返回的第一项取决于传给fdopendir函数的文件描述符相关联的文件偏移量。注意，目录中各目录项的顺序与实现有关。它们通常并不按字母顺序排列。
+
 
 ** 函数chdir、fchdir和getcwd
+每个进程都有一个当前工作目录，此目录是搜索所有相对路径名的起点（不以斜线开始的路径名为相对路径名）。当用户登录到 UNIX 系统时，其当前工作目录通常是口令文件（/etc/passwd）中该用户登录项的第6个字段—用户的起始目录（home directory）。当前工作目录是进程的一个属性，起始目录则是登录名的一个属性。
 
+进程调用chdir或fchdir函数可以更改当前工作目录。
+#+begin_src c++
+#include <unistd.h>
+
+int chdir(const char *pathname);
+
+int fchdir(int fd);
+
+#+END_SRC
+
+两个函数的返回值：若成功，返回0；若出错，返回-1
+
+在这两个函数中，分别用pathname或打开文件描述符来指定新的当前工作目录。
+
+因为内核必须维护当前工作目录的信息，所以我们应能获取其当前值。遗憾的是，内核为每个进程只保存指向该目录 v 节点的指针等目录本身的信息，并不保存该目录的完整路径名。
+
+Linux内核可以确定完整路径名。完整路径名的各个组成部分分布在mount表和dcache表中，然后进行重新组装，比如在读取/proc/self/cwd符号链接时。
+
+我们需要一个函数，它从当前工作目录（.）开始，用..找到其上一级目录，然后读其目录项，直到该目录项中的i节点编号与工作目录i节点编号相同，这样地就找到了其对应的文件名。按照这种方法，逐层上移，直到遇到根，这样就得到了当前工作目录完整的绝对路径名。很幸运，函数getcwd就提供了这种功能。
+
+#include <unistd.h>
+
+char *getcwd(char *buf, s i z e_t size);
+
+返回值：若成功，返回buf；若出错，返回NULL
+
+必须向此函数传递两个参数，一个是缓冲区地址buf，另一个是缓冲区的长度size（以字节为单位）。该缓冲区必须有足够的长度以容纳绝对路径名再加上一个终止 null 字节，否则返回出错（请回忆2.5.5节中有关为最大长度路径名分配空间的讨论）。
+
+某些getcwd的早期实现允许第一个参数buf为NULL。在这种情况下，此函数调用malloc动态地分配size字节数的空间。这不是POSIX.1或Single UNIX Specification的所属部分，应当避免使用。
+*** 实例
+**** 实例1
+因为当前工作目录是进程的一个属性，所以它只影响调用 chdir 的进程本身，而不影响其他进程（我们将在第8章更详细地说明进程之间的关系）。这就意味着图4-23的程序并不会产生我们可能希望得到的结果。
+#+begin_src c++
+#include "apue.h"
+int main(void)
+{
+  if (chdir("/ tmp") < 0)
+    err_sys("chdir failed");
+  printf("chdir to /tmp succeeded \n");
+  exit(0);
+}
+
+#+END_SRC
+如果编译图4-23程序，并且调用其可执行目标代码文件mycd，则可以得到下列结果：
+
+$ pwd
+
+/usr/lib
+
+$ mycd
+
+chdir to /tmp succeeded
+
+$ pwd
+
+/usr/lib
+
+从中可以看出，执行mycd命令的shell的当前工作目录并没有改变，这是shell执行程序工作方式的一个副作用。每个程序运行在独立的进程中，shell 的当前工作目录并不会随着程序调用chdir而改变。由此可见，为了改变shell进程自己的工作目录，shell应当直接调用chdir函数，为此，cd命令内建在shell中。
+**** 实例2
+图 4-24的程序将工作目录更改至一个指定的目录，然后调用 getcwd，最后打印该工作目录。
+#+begin_src c++
+#include "apue.h"
+int main(void)
+{
+  char *ptr;
+  size_t size;
+  if (chdir("/usr/spool/uucppublic") < 0)
+    err_sys("chdir failed");
+  ptr = path_alloc(&size); /* our own function */
+  if (getcwd(ptr, size) == NULL)
+    err_sys("getcwd failed");
+  printf("cwd = %s \n", ptr);
+  exit(0);
+}
+#+END_SRC
+如果运行该程序，则可得
+#+begin_src bash
+$ ./a.out
+
+cwd = /var/spool/uucppublic
+
+$ ls -l /usr/spool
+
+lrwxrwxrwx 1 root 12 Jan 31 07:57 /usr/spool -> ../var/spool
+
+#+END_SRC
+注意，chdir跟随符号链接（正如我们希望的，如图4-17中所示），但是当getcwd沿目录树上溯遇到/var/spool 目录时，它并不了解该目录由符号链接/usr/spool 所指向。这是符号链接的一种特性。
+
+当一个应用程序需要在文件系统中返回到它工作的出发点时，getcwd 函数是有用的。在更换工作目录之前，我们可以调用getcwd函数先将其保存起来。在完成了处理后，就可将所保存的原工作目录路径名作为调用参数传送给chdir，这样就返回到了文件系统中的出发点。
+
+fchdir函数向我们提供了一种完成此任务的便捷方法。在更换到文件系统中的不同位置前，无需调用getcwd函数，而是使用open打开当前工作目录，然后保存其返回的文件描述符。当希望回到原工作目录时，只要简单地将该文件描述符传送给fchdir。
 ** 设备特殊文件
+st_dev和st_rdev这两个字段经常引起混淆，在18.9节，我们编写ttyname函数时，需要使用这两个字段。有关规则很简单：
 
+•每个文件系统所在的存储设备都由其主、次设备号表示。设备号所用的数据类型是基本系统数据类型dev_t。主设备号标识设备驱动程序，有时编码为与其通信的外设板；次设备号标识特定的子设备。回忆图4-13，一个磁盘驱动器经常包含若干个文件系统。在同一磁盘驱动器上的各文件系统通常具有相同的主设备号，但是次设备号却不同。
+
+•我们通常可以使用两个宏：major和minor来访问主、次设备号，大多数实现都定义这两个宏。这就意味着我们无需关心这两个数是如何存放在dev_t对象中的。
+
+早期的系统用16位整型存放设备号：8位用于主设备号，8位用于次设备号。FreeBSD 8.0和Mac OS X 10.6.8使用32位整型，其中8位表示主设备号，24位表示次设备号。在32位系统中，Solaris 10用32位整型表示dev_t，其中14位用于主设备号，18位用于次设备号。在64位系统中，Solaris 10用64位整型表示dev_t，主设备号和次设备号各用其中的32位表示。在Linux 3.2.0上，虽然dev_t是64位整型，但其中只有12位用于主设备号，20位用于次设备号。
+
+POSIX.1说明dev_t类型是存在的，但没有定义它包含什么，或如何取得其内容。大多数实现定义了宏major和minor，但在哪一个头文件中定义它们则与实现有关。基于BSD的UNIX系统将它们定义在<sys/types>中。Solaris 在<sys/mkdev.h>中定义了它们的函数原型，因为在<sys/sysmacros.h>中的宏定义都弃用了。Linux 将它们定义在<sys/sysmacros.h>中，而该头文件又包含在<sys/type.h>中。
+
+•系统中与每个文件名关联的 st_dev 值是文件系统的设备号，该文件系统包含了这一文件名以及与其对应的i节点。
+
+•只有字符特殊文件和块特殊文件才有st_rdev值。此值包含实际设备的设备号。
+*** 实例
+图4-25的程序为每个命令行参数打印设备号，另外，若此参数引用的是字符特殊文件或块特殊文件，则还打印该特殊文件的st_rdev值。
+#+begin_src c++
+#include "apue.h"
+#ifdef SOLARIS
+#include <sys/mkdev.h>
+#endif
+int main(int argc, char *argv[])
+{
+  int i;
+  struct stat buf;
+  for (i = 1; i < argc; i++)
+  {
+    printf("%s: ", argv[i]);
+    if (stat(argv[i], &buf) < 0)
+    {
+      err_ret("stat error");
+      continue;
+    }
+    printf("dev = %d/%d", major(buf.st_dev), minor(buf.st_dev));
+    if (S_ISCHR(buf.st_mode) l / S_ISBLK(buf.st_mode))
+    {
+      printf("(%s) rdev = %d/ %d",
+             (S_ISCHR(buf.st_mode)) ? "character" : "block", major(buf.st_rdev), minor(buf.st_rdev));
+    }
+    printf("\n");
+  }
+  exit(O);
+}
+#+END_SRC
+在Linux上运行此程序得到下面的输出：
+
+$ ./a.out / /home/sar /dev/tty[01]
+
+/: dev = 8/3
+
+/home/sar: dev = 8/4
+
+/dev/tty0: dev = 0/5 (character) rdev = 4/0
+
+/dev/tty1: dev = 0/5 (character) rdev = 4/1
+
+$ mount　　　　　　　　　　　　　　　哪些目录安装在哪些设备上?
+
+/dev/sda3 on / type ext3 (rw,errors=remount-ro,commit=0)
+
+/dev/sda4 on /home type ext2 (rw,commit=0)
+
+$ ls -l /dev/tty[01] /dev/sda[34]
+
+brw-rw---- 1 root　　8, 3 2011-07-01 11:08 /dev/sda3
+
+brw-rw---- 1 root　　8, 4 2011-07-01 11:08 /dev/sda4
+
+crw--w---- 1 root　　4, 0 2011-07-01 11:08 /dev/tty0
+
+crw------- 1 root　　4, 1 2011-07-01 11:08 /dev/tty1
+
+传给该程序的前两个参数是目录（/和/home/sar），后两个参数是设备名/dev/tty[01]。（我们用 shell 正则表达式语言以缩短所需的输入量。shell 将字符串/dev/tty[01]扩展为/dev/tty0 /dev/tty1。）
+
+我们期望设备是字符特殊文件。从程序的输出可见，根目录和/home/sar 目录的设备号不同，这表示它们位于不同的文件系统中。运行mount(1)命令可以证明了这一点。
+
+然后用ls命令查看由mount命令报告的两个磁盘设备和两个终端设备。这两个磁盘设备是块特殊文件，而两个终端设备是字符特殊文件。（通常，只有那些包含随机访问文件系统的设备类型是块特殊文件设备，如硬盘驱动器、软盘驱动器和CD-ROM等。UNIX的早期版本支持磁带存放文件系统，但这从未广泛使用过。）
+
+注意，两个终端设备（st_dev）的文件名和i节点在设备0/5上（devtmpfs伪文件系统，它实现了/dev文件系统），但是它们的实际设备号是4/0和4/1。
 ** 文件访问权限位小结
+我们已经说明了所有文件访问权限位，其中某些位有多种用途。图4-26列出了所有这些权限位，以及它们对普通文件和目录文件的作用。
+
+最后9个常量还可以分成如下3组：
+- S_IRWXU = S_IRUSR｜S_IWUSR｜S_IXUSR
+- S_IRWXG = S_IRGRP｜S_IWGRP｜S_IXGRP
+- S_IRWXO = S_IROTH｜S_IWOTH｜S_IXOTH
+
+
+#+DOWNLOADED: screenshot @ 2023-07-11 23:21:23
+[[file:images/linux笔记/UNIX-文件和目录/2023-07-11_23-21-23_screenshot.png]]
+
 * UNIX-标准I/O库
 标准I/O库处理很多细节，如缓冲区分配、以优化的块长度执行I/O等。这些处理使用户不必担心如何选择使用正确的块长度.
 ** 流和FILE对象
@@ -16463,7 +16912,6 @@ return(0);
 *** 实例
 
 图7-1中的程序是经典的“hello, world”实例。
-
 
 ** 命令行参数
 ** 环境表
