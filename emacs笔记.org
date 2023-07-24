@@ -2081,7 +2081,7 @@ eslint 检查器的配置也可以使用项目目录下的 =.eslintrc= 来进行
 #+END_SRC
 
 简单的使用方法就是使用 =~= 来定义模板，然后调用 =aya-create= 再使用 =aya-expand= 来使用模板。
-* auctex
+* aucte
 ** 编译文档
 C-c C-c 对主文档执行各种命令，如编译、预览PDF等。
 如果没有额外设置，默认主文档为当前正在编辑的文档。
@@ -2217,6 +2217,18 @@ c:\emacs\bin\emacsclient.exe" --no-wait +%l "%f
 
 #+END_SRC
 
+** outline-mode
+类似org的折叠功能
+
+change the default prefix key C-c @ to C-c for outline-minor-mode:
+#+begin_src elisp
+(define-key outline-minor-mode-map (kbd "C-c")
+  (lookup-key outline-minor-mode-map (kbd "C-c @")))
+#+end_src
+
+prefix C-e show-entry
+prefix C-a show-all-entry
+prefix C-t hidd-body
 ** 参考文章
 [[https://herechen.github.io/post/Emacs-AUCTeX-installation-settings/][Emacs 和 AUCTeX 的安装与配置]]
 [[https://www.jianshu.com/p/d8a6a601274d][用Auctex写Latex]]
