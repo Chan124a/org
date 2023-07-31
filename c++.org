@@ -1649,106 +1649,6 @@ linux 系统中，一般程序的入口是“ _start ", 这个函数是Linux系�
 
 ** 参考文章
 [[https://www.cnblogs.com/dormant/p/5065665.html][C++ 的全局构造与析构函数]]
-* string
-** 初始化
-string test1;    //空串
-
-string test2 = "内容"; //使用=
-
-string test3("内容");   //使用引用字符数组作为参数传给构造函数
-
-string test4(test2); //用一个string初始化另一而string
-
-string test5(test2,pos,num); //从test2中的第pos个位置开始，拷贝个数为num个字符
-
-string test6 = test2 + "内容" + test3 //混合初始化
-
-string test7 = test2.substr(pos,num); //从test2中的第pos个位置开始，拷贝个数为num个字符
-
-string test8 = test2.substr(); //参数列表为空则会拷贝test2的整个对象（复制test2的简便方法）
-
-string test9(num,ch); //拷贝num个字符型ch到test9
-
-** c_str()
-c_str() gives you a pointer to a temporary.
-The results of c_str() are valid only through the lifetime of the temporary.
-The lifetime of the temporary in most cases is to the end of the full expression, which is often the semicolon.
-
-示例:
-
-#+begin_src c++
-#include <iostream>
-using namespace std;
-
-static string SomeFunction()
-{
-    string str="111";
-    // does some string stuff
-    return str;
-}
-
-string str = SomeFunction();//这里实际上将SomeFunction()返回的临时值进行了拷贝,存放在了str里
-const char* strConverted = str.c_str(); // strConverted stores the value of the string properly
-const char* charArray= SomeFunction().c_str(); // charArray是一个指针,指向SomeFunction().c_str()返回的临时变量的值,由于该临时变量在分号后被清理,所以charArray指向了随机值
-
-
-int main()
-{
-
-	cout << strConverted<<endl;
-	cout << charArray;//charArray是随机值
-
-   return 0;
-}
-#+END_SRC
-结果:
-#+begin_example
-111
-R
-#+end_example>
-*** 参考文章
-[[https://stackoverflow.com/questions/27627413/why-does-calling-c-str-on-a-function-that-returns-a-string-not-work][Why does calling c_str() on a function that returns a string not work?]]
-* string_view使用介绍
-C++中与字符串有两种风格，分别是C风格的字符串、std::string字符串。C风格的字符串性能更高，但是也不方便操作使用。如下示例：
-#+BEGIN_SRC c++
-#include <iostream>
-#include <string>
- 
-int main()
-{
-    //C风格字符串总是以null结尾
-    char cstr1[] = { 'y', 'a', 'n', 'g', NULL};
-    char cstr2[5];
-    strcpy(cstr1, cstr2);
-    std::cout << cstr2 << std::endl;
- 
-    //C++风格的字符串操作更方便，但是性能不如C风格字符串
-    std::string str = "yang";
-    std::string str2 = str;
-}
-#+END_SRC
-
-C++17中我们可以使用std::string_view来获取一个字符串的视图，字符串视图并不真正的创建或者拷贝字符串，而只是拥有一个字符串的查看功能。std::string_view比std::string的性能要高很多，因为每个std::string都独自拥有一份字符串的拷贝，而std::string_view只是记录了自己对应的字符串的指针和偏移位置。当我们在只是查看字符串的函数中可以直接使用std::string_view来代替std::string。
-#+BEGIN_SRC c++
-#include <iostream>
-#include <string>
-#include <string_view>
- 
-int main()
-{
- 
-    const char* cstr = "yangxunwu";
-    std::string_view stringView1(cstr);
-    std::string_view stringView2(cstr, 4);
-    std::cout << "stringView1: " << stringView1 << ", stringView2: " << stringView2 << std::endl;
- 
-    std::string str = "yangxunwu";
-    std::string_view stringView3(str.c_str());
-    std::string_view stringView4(str.c_str(), 4);
-    std::cout << "stringView3: " << stringView1 << ", stringView4: " << stringView2 << std::endl;
-}
-#+END_SRC
-输出
 * sort
 C++ STL 标准库中的 sort() 函数，本质就是一个模板函数。该函数专门用来对容器或普通数组中指定范围内的元素进行排序，排序规则默认以元素值的大小做升序排序，除此之外我们也可以选择标准库提供的其它排序规则（比如std::greater降序排序规则），甚至还可以自定义排序规则。
 
@@ -1878,6 +1778,106 @@ sort(points.begin(),points.end(),[](vector<int>a, vector<int>b){return a[1]<b[1]
 ** 参考文章
 [[https://www.cnblogs.com/zhhfan/p/14789325.html][C++中使用sort对常见容器排序]]
 [[https://blog.csdn.net/liguojie12/article/details/113800426][C++ 二维vector排序(sort用法)]]
+* string
+** 初始化
+string test1;    //空串
+
+string test2 = "内容"; //使用=
+
+string test3("内容");   //使用引用字符数组作为参数传给构造函数
+
+string test4(test2); //用一个string初始化另一而string
+
+string test5(test2,pos,num); //从test2中的第pos个位置开始，拷贝个数为num个字符
+
+string test6 = test2 + "内容" + test3 //混合初始化
+
+string test7 = test2.substr(pos,num); //从test2中的第pos个位置开始，拷贝个数为num个字符
+
+string test8 = test2.substr(); //参数列表为空则会拷贝test2的整个对象（复制test2的简便方法）
+
+string test9(num,ch); //拷贝num个字符型ch到test9
+
+** c_str()
+c_str() gives you a pointer to a temporary.
+The results of c_str() are valid only through the lifetime of the temporary.
+The lifetime of the temporary in most cases is to the end of the full expression, which is often the semicolon.
+
+示例:
+
+#+begin_src c++
+#include <iostream>
+using namespace std;
+
+static string SomeFunction()
+{
+    string str="111";
+    // does some string stuff
+    return str;
+}
+
+string str = SomeFunction();//这里实际上将SomeFunction()返回的临时值进行了拷贝,存放在了str里
+const char* strConverted = str.c_str(); // strConverted stores the value of the string properly
+const char* charArray= SomeFunction().c_str(); // charArray是一个指针,指向SomeFunction().c_str()返回的临时变量的值,由于该临时变量在分号后被清理,所以charArray指向了随机值
+
+
+int main()
+{
+
+	cout << strConverted<<endl;
+	cout << charArray;//charArray是随机值
+
+   return 0;
+}
+#+END_SRC
+结果:
+#+begin_example
+111
+R
+#+end_example>
+*** 参考文章
+[[https://stackoverflow.com/questions/27627413/why-does-calling-c-str-on-a-function-that-returns-a-string-not-work][Why does calling c_str() on a function that returns a string not work?]]
+* string_view使用介绍
+C++中与字符串有两种风格，分别是C风格的字符串、std::string字符串。C风格的字符串性能更高，但是也不方便操作使用。如下示例：
+#+BEGIN_SRC c++
+#include <iostream>
+#include <string>
+ 
+int main()
+{
+    //C风格字符串总是以null结尾
+    char cstr1[] = { 'y', 'a', 'n', 'g', NULL};
+    char cstr2[5];
+    strcpy(cstr1, cstr2);
+    std::cout << cstr2 << std::endl;
+ 
+    //C++风格的字符串操作更方便，但是性能不如C风格字符串
+    std::string str = "yang";
+    std::string str2 = str;
+}
+#+END_SRC
+
+C++17中我们可以使用std::string_view来获取一个字符串的视图，字符串视图并不真正的创建或者拷贝字符串，而只是拥有一个字符串的查看功能。std::string_view比std::string的性能要高很多，因为每个std::string都独自拥有一份字符串的拷贝，而std::string_view只是记录了自己对应的字符串的指针和偏移位置。当我们在只是查看字符串的函数中可以直接使用std::string_view来代替std::string。
+#+BEGIN_SRC c++
+#include <iostream>
+#include <string>
+#include <string_view>
+ 
+int main()
+{
+ 
+    const char* cstr = "yangxunwu";
+    std::string_view stringView1(cstr);
+    std::string_view stringView2(cstr, 4);
+    std::cout << "stringView1: " << stringView1 << ", stringView2: " << stringView2 << std::endl;
+ 
+    std::string str = "yangxunwu";
+    std::string_view stringView3(str.c_str());
+    std::string_view stringView4(str.c_str(), 4);
+    std::cout << "stringView3: " << stringView1 << ", stringView4: " << stringView2 << std::endl;
+}
+#+END_SRC
+输出
 * static_assert
 c++引入了static_assert关键字，用来实现编译期间的断言，叫静态断言。
 
@@ -2116,6 +2116,20 @@ a = 9
 如果你通常使用指针和索引访问一系列背靠背对象，则 span 是一种更安全、轻量级的替代方案。
 
 要设置 span 的大小，可以在编译时通过将大小指定为模板参数，也可以在运行时指定 dynamic_extent.
+* STL
+** 六大组件
+STl提供六大组件,彼此可以组合套用:
+1. 容器(containers):各种数据结构，如vector，list，deque，set，map,用来存放数据
+2. 算法（algorithms) :各种常用算法如sort，search，copy，erase。从实现的角度来看，STL算法是一种function template。
+3. 迭代器（ iterators):扮演容器与算法之间的胶合剂，是所谓的“泛型指针”，共有五种类型，以及其它衍生变化。从实现的角度来看，迭代器是一种将operator*, operator->， operator++, operator--等指针相关操作予以重载的 class template。所有STL容器都附带有自己专属的迭代器。原生指针(nativepointer)也是一种迭代器。
+4、仿函数( functors) :行为类似函数，可作为算法的某种策略( policy)，从实现的角度来看,仿函数是-一种重载了operator()的class或class template。一般函数指针可视为狭义的仿函数。
+5. 配接器( adapters) :一种用来修饰容器( containers）或仿函数（ functors)或迭代器(iterators）接口的东西。例如，STL提供的queue和stack，虽然看似容器，其实只能算是一种容器配接器，因为它们的底部完全借助deque，所有操作都由底层的deque供应。改变functor接口者，称为function adapter;改变container接口者,称为container adapter:改变iterator接口者，称为iterator adapter。
+6.配置器（ allocators) :负责空间配置与管理。从实现的角度来看，配置器是一个实现了动态空间配置、空间管理、空间释放的class template。
+#+DOWNLOADED: screenshot @ 2023-07-31 23:17:55
+[[file:images/c++/STL/2023-07-31_23-17-55_screenshot.png]]
+
+
+
 * struct和class的区别
 struct的默认访问级别为public，而class的默认访问级别是private。
 * 数组
@@ -5134,6 +5148,61 @@ char**是二重指针，bai也就是指向指针变量的指针。 而char*是�
 编译器会将p->member变成访问p+offset_member这个内存地址的变量
 
 编译器会将s.member变成访问&s+offset_member这个内存地址的变量
+** 智能指针
+智能指针用于自动释放内存.
+*** shared_ptr类
+Defined in header <memory>
+#+begin_src c++
+template< class T > class shared_ptr;
+(since C++11)
+#+END_SRC
+默认初始化的智能指针保存着一个空指针.
+
+如果在一个条件判断中使用智能指针,效果就是检测它是否为空:
+#+begin_src c++
+// if p1 is not null, check whether it's the empty string
+if (p1 && p1->empty())
+*p1 = "hi"; // if so, dereference p1 to assign a new value to that string
+#+END_SRC
+
+*** 支持的操作
+
+#+DOWNLOADED: screenshot @ 2023-07-31 21:46:20
+[[file:images/c++/指针/2023-07-31_21-46-20_screenshot.png]]
+
+#+DOWNLOADED: screenshot @ 2023-07-31 21:46:32
+[[file:images/c++/指针/2023-07-31_21-46-32_screenshot.png]]
+
+*** shared_ptr
+shared_ptr允许多个指针指向同一个对象
+**** make_shared函数
+make_shared在动态内存中分配一个对象并初始化它,返回指向此对象的shared_ptr.
+调用make_chared<T>时传递的参数必须跟T的某个构造函数相匹配.
+#+begin_src c++
+// 指向一个值为42的int的shared_ptr
+shared_ptr<int> p3 = make_shared<int>(42);
+// p4指向一个值为"9999999999"的string
+shared_ptr<string> p4 = make_shared<string>(10, '9');
+// p5指向一个值初始化的int,即值为0
+shared_ptr<int> p5 = make_shared<int>();
+#+END_SRC
+**** shared_ptr的拷贝与赋值
+每个shared_ptr都有一个引用计数,用来记录有多少个shared_ptr指向相同的对象.
+shared_ptr的析构函数会递减引用计数,一旦引用计数变为0,就会自动释放管理的对象并释放内存.
+
+拷贝一个shared_ptr,引用计数都会增加:
+- 用一个shared_ptr初始化另一个shared_ptr
+- 将shared_ptr作为参数传递给一个函数
+- 作为函数的返回值
+
+引用计数减少的情况:
+- 给shared_ptr赋一个新值
+- shared_ptr被销毁(例如一个局部的shared_ptr离开其作用域)
+*** unique_ptr
+unique_ptr独占所指向的对象.
+*** week_ptr
+week_ptr是一种弱引用,指向shared_ptr指向的对象.
+
 ** 参考文章
 [[https://blog.csdn.net/weixin_44058932/article/details/90767275][C语言中不同类型指针的区别]]
 * 转换
