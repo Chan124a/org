@@ -2122,14 +2122,299 @@ STl提供六大组件,彼此可以组合套用:
 1. 容器(containers):各种数据结构，如vector，list，deque，set，map,用来存放数据
 2. 算法（algorithms) :各种常用算法如sort，search，copy，erase。从实现的角度来看，STL算法是一种function template。
 3. 迭代器（ iterators):扮演容器与算法之间的胶合剂，是所谓的“泛型指针”，共有五种类型，以及其它衍生变化。从实现的角度来看，迭代器是一种将operator*, operator->， operator++, operator--等指针相关操作予以重载的 class template。所有STL容器都附带有自己专属的迭代器。原生指针(nativepointer)也是一种迭代器。
-4、仿函数( functors) :行为类似函数，可作为算法的某种策略( policy)，从实现的角度来看,仿函数是-一种重载了operator()的class或class template。一般函数指针可视为狭义的仿函数。
+4、仿函数( functors) :行为类似函数，可作为算法的某种策略( policy)，仿函数就是使一个类的使用看上去像一个函数。其实现就是类中实现一个operator()，这个类就有了类似函数的行为，就是一个仿函数类了。从实现的角度来看,仿函数是一种重载了operator()的class或class template。一般函数指针可视为狭义的仿函数。
 5. 配接器( adapters) :一种用来修饰容器( containers）或仿函数（ functors)或迭代器(iterators）接口的东西。例如，STL提供的queue和stack，虽然看似容器，其实只能算是一种容器配接器，因为它们的底部完全借助deque，所有操作都由底层的deque供应。改变functor接口者，称为function adapter;改变container接口者,称为container adapter:改变iterator接口者，称为iterator adapter。
 6.配置器（ allocators) :负责空间配置与管理。从实现的角度来看，配置器是一个实现了动态空间配置、空间管理、空间释放的class template。
 #+DOWNLOADED: screenshot @ 2023-07-31 23:17:55
 [[file:images/c++/STL/2023-07-31_23-17-55_screenshot.png]]
 
+** 临时对象的运用
+临时对象指的是一种无名对象.
+
+临时对象的产生(例如拷贝操作)往往降低效率,但有时可以用来简化程序.
+
+刻意制造临时对象的方法是，在型别名称之后直接加一对小括号，并可指定初值，
+例如 shape(3,5）或int(8)，其意义相当于调用相应的constructor且不指定对象名称。
+STL最常将此技巧应用于仿函数（ functor）与算法的搭配上，例如:
+
+#+begin_src c++
+// file: 1config-temporary-object.cpp 
+// 本例测试仿函式用于 for_each()的情形
+// vc6[o] cb4[o] gcc[o] 
+
+// 匿名对象使用
+
+#include <vector>
+#include <algorithm>
+#include <iostream>
+
+using namespace std;
+
+template <typename T>
+class print {
+public:
+    void operator() (const T& elem) {
+        cout << elem << ' ';
+    }
+};
+
+int main() {
+    int ia[6] = {0, 1, 2, 3, 4, 5};
+    vector<int> iv(ia, ia + 6);
+    
+    // print<int>() 是一个匿名对象(临时对象)，不是函数调用
+    for_each(iv.begin(), iv.end(), print<int>());
+}
+#+END_SRC
+最后一行便是产生“function template具现体”print<int>的一个临时对象。
+这个对象将被传人for_each()之中起作用。当for_each()结束时，这个临时对象也就结束了它的生命。
+
+** function call 操作符（operator())
+函数调用操作(C++语法中的左右小括号）也可以被重载。
+
+许多STL算法都提供了两个版本，一个用于一般状况（例如排序时以递增方式排列),一个用于特殊状况(例如排序时由使用者指定以何种特殊关系进行排列)。
+
+在特殊情况下，需要用户指定某个条件或某个策略，而条件或策略的背后由一整组操作构成，便需要某种特殊的东西来代表这“一整组操作”。
+代表“一整组操作”的，当然是函数。过去C语言时代，欲将函数当做参数传递，唯有通过函数指针（(pointer to function，或称function pointer）才能达成，例如:
+#+begin_src c++
+// file: 1qsort.cpp
+
+// c++使用函数对象/仿函数实现一组动作
+// c使用函数指针实现一组动作，但是无法存储状态在里面
+
+#include <cstdlib>
+#include <ctime>
+#include <iostream>
+using namespace std;
+
+int fcmp(const void *elem1, const void *elem2);
+
+int main() {
+    int ia[10];
+    // int ia[10] = {32, 92, 67, 58, 10, 4, 25, 52, 59, 54};
+    srand((unsigned int)time(NULL));
+    for (int i = 0; i < 10; i++) {
+        ia[i] = rand() % 100 + 1;
+        cout << ia[i] << " ";
+    }
+    cout << endl;
+
+    // 快速排序
+    qsort(ia, sizeof(ia) / sizeof(int), sizeof(int), fcmp);
+
+    for (int i = 0; i < 10; i++) {
+        cout << ia[i] << " ";
+    }
+}
+
+int fcmp(const void* elem1, const void* elem2) {
+    const int *i1 = (const int *)elem1;
+    const int *i2 = (const int *)elem2;
+
+    if (*i1 < *i2)
+        return -1;
+    else if (*i1 == *i2)
+        return 0;
+    else
+        return 1;
+}
+#+END_SRC
+但是函数指针有缺点,最重要的是它无法持有自己的状态(所谓局部状态, localstates)，也无法达到组件技术中的可适配性（adaptability)——--也就是无法再将某些修饰条件加诸于其上而改变其状态。
+
+为此，STL算法的特殊版本所接受的所谓“条件”或“策略”或“一整组操作”，都以仿函数形式呈现。
+所谓仿函数(functor）就是使用起来像函数一样的东西。
+如果你针对某个class进行operator()重载，它就成为一个仿函数。至于要成为一个可配接的仿函数，还需要做一些额外的努力.
+
+下面是一个将operator()重载的例子:
+#+begin_src c++
+// file: 1functor.cpp
+
+#include <iostream>
+using namespace std;
+
+// 重载了函数调用符()的类或结构体，因此plus为仿函数
+template <class T>
+struct plus {
+    // const 后置修饰为常函数
+    T operator() (const T& x, const T& y) const {
+        return x + y;
+    }
+};
+
+// 重载了函数调用符()的类或结构体，因此minus为仿函数
+template <class T>
+ struct minus {
+     // const 后置修饰为常函数
+     T operator() (const T& x, const T& y) const {
+         return x - y;
+     }
+ };
 
 
+int main() {
+    // 生成仿函数对象
+    plus<int> plusobj;
+    minus<int> minusobj;
+
+    cout << plusobj(3, 5) << endl;
+    cout << minusobj(3, 5) << endl;
+
+    // 以下直接产生仿函数的临时对象(第一对小括号),并调用之(第二对小括号)
+    cout << plus<int>()(3, 5) << endl;
+    cout << minus<int>()(3, 5) << endl;
+}
+#+END_SRC
+上述的 plus<T>和minus<T>已经非常接近STL的实现了，唯一的差别在于它缺乏“可配接能力”。
+
+** 空间配置器
+空间配置器(allocator)可以配置内存\\磁盘或其它辅助存储介质.
+
+*** 空间配置器的标准接口
+根据STL的规范，以下是allocator的必要接口
+#+begin_example
+allocator:: value_type
+
+allocator::pointer
+
+allocator:: const pointerallocator : :reference
+
+allocator::const_referenceal1ocator : :size_type
+
+allocator::difference_type
+
+allocator::rebind :一个嵌套的(nested) class template。 class rebind<U>拥有唯-一成员other，那是一个typedef，代表allocator<U>
+
+allocator::allocator ( ) :default constructor
+
+allocator::allocator (const allocator& ) :copy constructor
+
+template cclass Usallocator : :allocator ( const allocator<U>&) :泛化的 copy constructor
+
+allocator::-allocator ( ) :default constructor
+
+pointer allocator::address (reference x) const :返回某个对象的地址。算式a.address (x〉等同于&x
+
+const_pointer allocator::address (const_reference x) const :返回某个const对象的地址。算式a.address(x〉等同于&x
+
+pointer allocator::allocate(size_type n, cosnt void* = 0) :配置空间，足以存储n个r对象。第二参数是个提示。实现上可能会利用它来增进区域性(locality)，或完全忽略之
+
+void allocator::deallocate(pointer p, size_type n) :归还先前配置的空间
+
+size_type allocator::max_size ( ) const :返回可成功配置的最大量
+
+void allocator::construct (pointer p, const T& ) :等同于new (const void* ) p)T(x)
+
+void allocator::destroy(pointer p) :等同于p->~T ()
+
+#+end_example>
+
+*** 设计一个简单的空间配置器，JJ:allocator
+根据前述的标准接口，我们可以自行完成一个功能简单、接口不怎么齐全的allocator 如下:
+#+begin_src c++
+// file: 2jjalloc.h
+
+#ifndef __JJALLOC__
+#define __JJALLOC_
+
+#include <new>      // for placement new
+#include <cstddef>  // for ptrdiff_t, size_t
+#include <cstdlib>  // for exit()
+#include <climits>  // for UINT_MAX
+#include <iostream> // for cerr
+using namespace std;
+
+// 在全局命名空间中有一个自带的、隐藏的operator new专门用来分配内存。
+// 默认情况下编译器会将new这个关键字翻译成这个operator new和相应的构造函数。
+// 但在有的情况下，用户自己会在类中重载operator new，这种情况下，编译器默认会使用类中重载的operator new
+// （本质上因为编译器会从命名空间由内而外查找自己想要的函数，选用第一个）。
+// 如果我们想要继续使用默认的operator new，就应该写成::new 字面意思就是调用最外层命名空间中的operator new
+// 值得一提的是最外层的（也是默认的）operator new也是可以被重载的。通过这种方式我们可以改变所有new的部分行为。
+
+namespace JJ {
+    // 配置空间，足以储存 n个 T对象。第二自变量是个提示。
+    // 可能会利用它来增进区域性（locality），或完全忽略之。
+    template <class T>
+    inline T* _allocate(ptrdiff_t size, T*) {
+        set_new_handler(0);
+        T *tmp = (T *)(::operator new((size_t)(size * sizeof(T))));
+        if (tmp == 0) {
+            cerr << "out of memory" << endl;
+            exit(1);
+        }
+        return tmp;
+    }
+
+    // 归还先前配置的空间
+    template <class T>
+    inline void _deallocate(T* buffer) {
+        ::operator delete(buffer);
+    }
+
+    // 等同于 new(const void*) p) T(x)
+    template <class T1, class T2>
+    inline void _construct(T1* p, const T2& value) {
+        new (p) T1(value);   // placement new. invoke ctor of T1
+    }
+
+    // 等同于 p->~T()。
+    template <class T>
+    inline void _destroy(T* ptr) {
+        ptr->~T();
+    }
+
+    template <class T>
+    class allocator {
+    public:
+        typedef T          value_type;
+        typedef T *        pointer;
+        typedef const T *  const_pointer;
+        typedef T &        reference;
+        typedef const T &  const_reference;
+        typedef size_t     size_type;
+        typedef ptrdiff_t  difference_type;
+
+        // rebind allocator of type U
+        template <class U>
+        struct rebind {
+            typedef allocator<U> other;
+        };
+
+        // hint used for locality. ref. [Austern], p189
+        pointer allocate(size_type n, const void* hint=0) {
+            return _allocate((difference_type)n, (pointer)0);
+        }
+
+        void deallocate(pointer p, size_type n) {
+            _deallocate(p);
+        }
+
+        void construct(pointer p, const T& value) {
+            _construct(p, value);
+        }
+
+        void destroy(pointer p) {
+            _destroy(p);
+        }
+
+        // 传回某个对象的地址。a.address(x)等同于 &x
+        pointer address(reference x) {
+            return (pointer)&x;
+        }
+
+        // 传回某个 const对象的地址。a.address(x)等同于 &x
+        const_pointer const_address(const_reference x) {
+            return (const_pointer)&x;
+        }
+
+        // 传回可成功配置的最大量
+        size_type max_size() const {
+            return size_type(UINT_MAX / sizeof(T));
+        }
+    };
+}
+#endif
+
+#+END_SRC
 * struct和class的区别
 struct的默认访问级别为public，而class的默认访问级别是private。
 * 数组
