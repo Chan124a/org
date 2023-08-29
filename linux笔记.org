@@ -625,98 +625,6 @@ conda config --remove channels conda-forge
 #+END_SRC
 
 疑似 forge 源出了问题
-* update-alternatives
-update-alternatives可以方便实现管理不同版本的程序。
-
-命令格式：update-alternatives [<选项> ...] <命令>
-
-主要参数：
-#+begin_example
-Commands:
-  --install <link> <name> <path> <priority>
-    [--slave <link> <name> <path>] ...
-                           在系统中加入一组替换项.
-  --remove <name> <path>   从 <名称> 替换组中去除 <路径> 项.
-  --remove-all <name>      从替换系统中删除 <名称> 替换组.
-  --auto <name>            将 <名称> 的主链接切换到自动模式.
-  --display <name>         显示关于 <名称> 替换组的信息.
-  --query <name>           machine parseable version of --display <name>.
-  --list <name>            列出 <名称> 替换组中所有的可用替换项.
-  --get-selections         list master alternative names and their status.
-  --set-selections         read alternative status from standard input.
-  --config <name>          列出 <名称> 替换组中的可选项，并就使用其中
-                                 哪一个，征询用户的意见.
-  --set <name> <path>      将 <路径> 设置为 <名称> 的替换项.
-  --all                    对所有可选项一一调用 --config 命令.
-
-<link> 是指向 /etc/alternatives/<名称> 的符号链接>.
-  (e.g. /usr/bin/pager)
-<name> 是该链接替换组的主控名.
-  (e.g. pager)
-<path> 是替换项目标文件的位置.
-  (e.g. /usr/bin/less)
-<priority> 是一个整数，在自动模式下，这个数字越高的选项，其优先级也就越高.
-
-Options:
-  --altdir <directory>     指定不同的可选项目录.
-  --admindir <directory>   指定不同的管理目录.
-  --log <file>             设置log文件.
-  --force                  就算没有通过自检，也强制执行操作。
-  --skip-auto              在自动模式中跳过设置正确候选项的提示
-                           (只与 --config 有关)
-  --verbose                启用详细输出。
-  --quiet                  安静模式，输出尽可能少的信息.
-  --help                   显示本帮助信息.
-  --version                显示版本信息.
-#+end_example
-** display选项
-display选项用来显示一个命令链接的所有可选命令，即查看一个命令链接组的所有信息，包括链接的模式(自动还是手动)、链接priority值、所有可 用的链接命令等等。
-** install选项
-install选项的功能就是增加一组新的系统命令链接符。
-使用语法为：update-alternatives --install <link> <name> <path> <priority> [--slave link name path]...。
-其中link为系统中功能相同软件的公共链接目录，比如/usr/bin/java(需绝对目录);
-name为命令链接符名称,如java；path为你所要使用新命令、新软件的所在目录；
-priority为优先级，当命令链接已存在时，需高于当前值，因为当alternative为自动模式时,系统默认启用priority高的链接；
-–slave为从alternative。
-** config选项
-config选项用来显示和修改实际指向的候选命令，为在现有的命令链接选择一个作为系统默认。
-** remove选项
-remove选项的功能是删除一个命令的link值，其附带的slave也将一起删除。
-使用语法为:update-alternatives --remove name path。
-其中name与path与install中的一致，如果所删除的链接组中还有其他链接的话，系统将会自动从其他中选择一个priority高的链接作为默认为链接。
-比如：update-alternatives –remove java /usr/lib/jvm/jre1.6.0_20/bin/java
-** 用法
-安装:
-#+begin_src bash
-sudo update-alternatives --install link name path priority [ --slave slink sname spath]
-#+END_SRC
-选项注释:
-- link是在/usr/bin/,/usr/local/bin/等默认PATH搜索目录
-- name是在/etc/alternatives目录中的链接名
-- path是真正的可执行程序的位置,可以在任何位置
-- priority是优先级
-
-打印名字的相关链接:
-#+begin_src bash
-sudo update-alternatives --display name
-#+END_SRC
-配置名字的相关链接:
-#+begin_src bash
-sudo update-alternatives --config name
-#+END_SRC
-移除名字的相关链接:
-#+begin_src bash
-sudo update-alternatives --remove name path
-#+END_SRC
-因为优先级的存在,可以为同一个name设置多个path,当删除一个path后,默认连接到slave上.
-
-移除所有名字相关的链接:
-#+begin_src bash
-sudo update-alternatives --remove-all name
-#+END_SRC
-** 参考文章
-[[https://blog.csdn.net/JasonDing1354/article/details/50470109][【Linux】使用update-alternatives命令进行版本的切换]]
-[[https://zhuanlan.zhihu.com/p/20797436][Linux命令之update-alternativse]]
 * awk
 ** 简介
 awk是一个强大的文本分析工具，相对于grep的查找，sed的编辑，awk在其对数据分析并生成报告时，显得尤为强大。
@@ -5214,6 +5122,94 @@ emacs -nw $*
 [[https://www.cnblogs.com/felixwang2/p/10281092.html][emacs源码安装]]
 [[https://stackoverflow.com/questions/52722096/build-emacs-and-gnutls-not-found/52722866][build emacs and gnutls not found]]
 [[https://blog.csdn.net/cuma2369/article/details/107667517][emacs 命令行_默认情况下如何使Emacs在命令行中运行？]]
+* fallocate
+[root@centos8 logs]# fallocate --help
+用法：
+ fallocate [选项] <文件名>
+
+为文件预分配空间或从文件回收空间。
+** 选项
+-c, --collapse-range 移除文件中的某个范围
+-d, --dig-holes      检测零并替换为空洞
+-i, --insert-range   insert a hole at range, shifting existing data
+-l, --length <数字>  范围操作的长度(字节数)
+-n, --keep-size      保持文件的显示大小
+-o, --offset <数字>  范围操作的偏移量(字节数)
+-p, --punch-hole     将某个范围替换为空洞(连带打开 -n)
+-z, --zero-range     清零并保证分配某个范围
+-x, --posix          use posix_fallocate(3) instead of fallocate(2)
+-v, --verbose        详尽模式
+-h, --help           display this help
+-V, --version        display version
+** 例子
+*** 按指定大小生成文件
+
+#-l: length,指定文件的长度
+
+[root@centos8 logs]# fallocate -l 50M /data/web/www/html/b.zip
+查看文件的显示大小
+
+#-h: human-readable,用人性化的方性显示结果
+
+[root@centos8 html]# ll -h b.zip 
+-rw-r--r-- 1 root root 50M 5月   8 14:25 b.zip
+查看文件占用磁盘空间的大小
+
+[root@centos8 html]# du -sh b.zip 
+50M b.zip
+说明：我们用du查看文件可以看到，
+
+用fallocate生成的文件在磁盘上确实占用了50M的空间
+
+而不是一个空洞文件
+*** 把前面创建的大文件中的零替换为空洞:
+
+#-d：挖洞，仅替换为0的数据,使不再占用多余的磁盘空间
+
+[root@centos8 html]# fallocate -d b.zip
+查看占用磁盘空间的大小
+
+[root@centos8 html]# du -sh b.zip 
+84K b.zip
+查看文件显示大小
+
+[root@centos8 html]# ll -h b.zip 
+-rw-r--r-- 1 root root 50M 5月   8 15:21 b.zip
+逻辑大小还是50M,
+
+但对磁盘的占用变成了84K
+*** 在文件上挖出指定大小的空洞
+
+生成一个占用30M磁盘空间的文件
+
+生成一个30M大小的文件
+
+[root@centos8 html]# fallocate -l 30M c.zip
+[root@centos8 html]# ll -h c.zip
+-rw-r--r-- 1 root root 30M 5月   8 15:33 c.zip
+[root@centos8 html]# du -sh c.zip
+30M c.zip
+du命令显示文件确实是30M大小
+
+从偏移10M的位置挖一个10M大小的洞
+
+应该还剩20M
+
+#-p：挖洞,不管文件中是否有非0数据,会改变文件的内容
+
+#-o:  偏移位置
+
+#-l: 挖洞的大小
+
+[root@centos8 html]# fallocate -p -o 10M -l 10M c.zip
+查看文件显示大小
+
+[root@centos8 html]# ll -h c.zip
+-rw-r--r-- 1 root root 30M 5月   8 15:38 c.zip
+查看文件占用磁盘空间的大小
+
+[root@centos8 html]# du -sh c.zip
+20M c.zip
 * gcc、make、cmake的关系和区别
 1.gcc是GNU Compiler Collection（就是GNU编译器套件），也可以简单认为是编译器，它可以编译很多种编程语言（括C、C++、Objective-C、Fortran、Java等等）。
 
@@ -7587,6 +7583,295 @@ print/x $satp 查看satp寄存器
 x/3i 0xde4
 ** 参考文章
 [[https://www.zhihu.com/question/65306462/answer/2602659870][gdb 高级调试实战教程 张小方]]
+* gpg
+Pretty Good Privacy (PGP) 是一款诞生于 1991 年的，一款用于认证、加密的一款软件，现如今已经有了标准化协议 OpenPGP，最常用的实现是 GnuPG，一般提到 GPG 时都是指的 GnuPG。
+** 安装
+GPG有两种安装方式。可以下载源码，自己编译安装。
+#+begin_src bash
+./configure
+make
+make install
+#+END_SRC
+
+也可以安装编译好的二进制包。
+#+begin_src bash
+# Debian / Ubuntu 环境
+sudo apt-get install gnupg
+
+# Fedora 环境
+yum install gnupg
+#+END_SRC
+
+安装完成后，键入下面的命令：
+#+begin_src bash
+gpg --help
+#+END_SRC
+
+如果屏幕显示GPG的帮助，就表示安装成功。
+** 生成密钥
+安装成功后，使用gen-ken参数生成自己的密钥。
+#+begin_src bash
+gpg --gen-key
+#+END_SRC
+
+回车以后，会跳出一大段文字：
+#+begin_src bash
+gpg (GnuPG) 1.4.12; Copyright (C) 2012 Free Software Foundation, Inc.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
+请选择您要使用的密钥种类：
+(1) RSA and RSA (default)
+(2) DSA and Elgamal
+(3) DSA (仅用于签名)　
+(4) RSA (仅用于签名)
+您的选择？
+#+END_SRC
+
+第一段是版权声明，然后让用户自己选择加密算法。默认选择第一个选项，表示加密和签名都使用RSA算法。
+
+然后，系统就会问你密钥的长度。
+#+begin_src bash
+RSA 密钥长度应在 1024 位与 4096 位之间。
+您想要用多大的密钥尺寸？(2048)
+#+END_SRC
+
+密钥越长越安全，默认是2048位。
+
+接着，设定密钥的有效期。
+#+begin_src bash
+请设定这把密钥的有效期限。
+0 = 密钥永不过期
+<n> = 密钥在 n 天后过期
+<n>w = 密钥在 n 周后过期
+<n>m = 密钥在 n 月后过期
+<n>y = 密钥在 n 年后过期
+密钥的有效期限是？(0)
+#+END_SRC
+
+如果密钥只是个人使用，并且你很确定可以有效保管私钥，建议选择第一个选项，即永不过期。回答完上面三个问题以后，系统让你确认。
+#+begin_src bash
+以上正确吗？(y/n)
+#+END_SRC
+
+输入y，系统就要求你提供个人信息。
+#+begin_src bash
+您需要一个用户标识来辨识您的密钥；本软件会用真实姓名、注释和电子邮件地址组合成用户标识，如下所示：
+"Heinrich Heine (Der Dichter) <heinrichh@duesseldorf.de>"
+
+真实姓名：
+电子邮件地址：
+注释：
+#+END_SRC
+
+"真实姓名"填入你姓名的英文写法，"电子邮件地址"填入你的邮件地址，"注释"这一栏可以空着。
+
+然后，你的"用户ID"生成了。
+#+begin_src bash
+您选定了这个用户标识：
+"Ruan YiFeng <yifeng.ruan@gmail.com>"
+#+END_SRC
+
+我的"真实姓名"是Ruan YiFeng，"电子邮件地址"是yifeng.ruan@gmail.com，所以我的"用户ID"就是"Ruan YiFeng <yifeng.ruan@gmail.com>"。系统会让你最后确认一次。
+#+begin_src bash
+更改姓名(N)、注释(C)、电子邮件地址(E)或确定(O)/退出(Q)？
+#+END_SRC
+
+输入O表示"确定"。
+
+接着，系统会让你设定一个私钥的密码。这是为了防止误操作，或者系统被侵入时有人擅自动用私钥。
+#+begin_src bash
+您需要一个密码来保护您的私钥：
+#+END_SRC
+
+然后，系统就开始生成密钥了，这时会要求你做一些随机的举动，以生成一个随机数。
+#+begin_src bash
+我们需要生成大量的随机字节。这个时候您可以多做些琐事(像是敲打键盘、移动鼠标、读写硬盘之类的)，这会让随机数字发生器有更好的机会获得足够的熵数。
+#+END_SRC
+
+几分钟以后，系统提示密钥已经生成了。
+#+begin_src bash
+gpg: 密钥 EDDD6D76 被标记为绝对信任
+公钥和私钥已经生成并经签名。
+#+END_SRC
+
+请注意上面的字符串"EDDD6D76"，这是"用户ID"的Hash字符串，可以用来替代"用户ID"。
+
+这时，最好再生成一张"撤销证书"，以备以后密钥作废时，可以请求外部的公钥服务器撤销你的公钥。
+#+begin_src bash
+gpg --gen-revoke [用户ID]
+#+END_SRC
+
+上面的"用户ID"部分，可以填入你的邮件地址或者Hash字符串（以下同）。
+** 密钥管理
+*** 列出密钥
+
+list-keys参数列出系统中已有的密钥．
+
+　　gpg --list-keys
+
+显示结果如下：
+
+　　/home/ruanyf/.gnupg/pubring.gpg
+　　-------------------------------
+　　pub 4096R/EDDD6D76 2013-07-11
+　　uid Ruan YiFeng <yifeng.ruan@gmail.com>
+　　sub 4096R/3FA69BE4 2013-07-11
+
+第一行显示公钥文件名（pubring.gpg），第二行显示公钥特征（4096位，Hash字符串和生成时间），第三行显示"用户ID"，第四行显示私钥特征。
+
+如果你要从密钥列表中删除某个密钥，可以使用delete-key参数。
+
+　　gpg --delete-key [用户ID]
+*** 输出密钥
+
+公钥文件（.gnupg/pubring.gpg）以二进制形式储存，armor参数可以将其转换为ASCII码显示。
+
+　　gpg --armor --output public-key.txt --export [用户ID]
+
+"用户ID"指定哪个用户的公钥，output参数指定输出文件名（public-key.txt）。
+
+类似地，export-secret-keys参数可以转换私钥。
+
+　　gpg --armor --output private-key.txt --export-secret-keys
+*** 上传公钥
+
+公钥服务器是网络上专门储存用户公钥的服务器。send-keys参数可以将公钥上传到服务器。
+
+　　gpg --send-keys [用户ID] --keyserver hkp://subkeys.pgp.net
+
+使用上面的命令，你的公钥就被传到了服务器subkeys.pgp.net，然后通过交换机制，所有的公钥服务器最终都会包含你的公钥。
+
+由于公钥服务器没有检查机制，任何人都可以用你的名义上传公钥，所以没有办法保证服务器上的公钥的可靠性。通常，你可以在网站上公布一个公钥指纹，让其他人核对下载到的公钥是否为真。fingerprint参数生成公钥指纹。
+
+　　gpg --fingerprint [用户ID]
+*** 输入密钥
+
+除了生成自己的密钥，还需要将他人的公钥或者你的其他密钥输入系统。这时可以使用import参数。
+
+　　gpg --import [密钥文件]
+
+为了获得他人的公钥，可以让对方直接发给你，或者到公钥服务器上寻找。
+
+　　gpg --keyserver hkp://subkeys.pgp.net --search-keys [用户ID]
+
+正如前面提到的，我们无法保证服务器上的公钥是否可靠，下载后还需要用其他机制验证．
+** 加密和解密
+
+*** 加密
+
+假定有一个文本文件demo.txt，怎样对它加密呢？
+
+encrypt参数用于加密。
+
+　　gpg --recipient [用户ID] --output demo.en.txt --encrypt demo.txt
+
+recipient参数指定接收者的公钥，output参数指定加密后的文件名，encrypt参数指定源文件。运行上面的命令后，demo.en.txt就是已加密的文件，可以把它发给对方。
+
+*** 解密
+
+对方收到加密文件以后，就用自己的私钥解密。
+
+　　gpg --decrypt demo.en.txt --output demo.de.txt
+
+decrypt参数指定需要解密的文件，output参数指定解密后生成的文件。运行上面的命令，demo.de.txt就是解密后的文件。
+
+GPG允许省略decrypt参数。
+
+　　gpg demo.en.txt
+
+运行上面的命令以后，解密后的文件内容直接显示在标准输出。
+
+** 签名
+
+*** 对文件签名
+
+有时，我们不需要加密文件，只需要对文件签名，表示这个文件确实是我本人发出的。sign参数用来签名。
+
+　　gpg --sign demo.txt
+
+运行上面的命令后，当前目录下生成demo.txt.gpg文件，这就是签名后的文件。这个文件默认采用二进制储存，如果想生成ASCII码的签名文件，可以使用clearsign参数。
+
+　　gpg --clearsign demo.txt
+
+运行上面的命令后 ，当前目录下生成demo.txt.asc文件，后缀名asc表示该文件是ASCII码形式的。
+
+如果想生成单独的签名文件，与文件内容分开存放，可以使用detach-sign参数。
+
+　　gpg --detach-sign demo.txt
+
+运行上面的命令后，当前目录下生成一个单独的签名文件demo.txt.sig。该文件是二进制形式的，如果想采用ASCII码形式，要加上armor参数。
+
+　　gpg --armor --detach-sign demo.txt
+
+*** 签名+加密
+
+上一节的参数，都是只签名不加密。如果想同时签名和加密，可以使用下面的命令。
+
+　　gpg --local-user [发信者ID] --recipient [接收者ID] --armor --sign --encrypt demo.txt
+
+local-user参数指定用发信者的私钥签名，recipient参数指定用接收者的公钥加密，armor参数表示采用ASCII码形式显示，sign参数表示需要签名，encrypt参数表示指定源文件。
+
+*** 验证签名
+
+我们收到别人签名后的文件，需要用对方的公钥验证签名是否为真。verify参数用来验证。
+
+　　gpg --verify demo.txt.asc demo.txt
+
+举例来说，openvpn网站就提供每一个下载包的gpg签名文件。你可以根据它的说明，验证这些下载包是否为真。
+** emacs中的gpg
+*** 密码输入
+为了提高 key 安全系数，一般推荐在创建 key 时设置一个密码，这样即使密钥丢了，别人也无法使用。
+
+但是每次 输入密码显得有些繁琐，解决方式是让 gpg-agent 这个进程记住密码，这样只需在系统第一次使用时输入即可。为了让 Emacs 能在首次使用 GPG 时，捕获密码输入框，在 minibuffer 中输入密码，需要做如下的配置：
+
+修改 agent 的配置文件
+#+begin_src bash
+# cat ~/.gnupg/gpg-agent.conf
+allow-emacs-pinentry allow-loopback-pinentry
+#+END_SRC
+之后然后加载即可
+#+begin_src bash
+gpgconf --reload gpg-agent
+#+END_SRC
+安装 pinentry 包，配置 loopback，
+启动 pinentry server，参考配置
+#+begin_src emacs-lisp
+(use-package pinentry
+  :config
+  (setq epa-pinentry-mode 'loopback)
+  (pinentry-start))
+#+end_src
+pinentry 进程的作用：它会让用户输入的密码不会因内存不足而换出到磁盘
+
+*** 文件操作
+GPG 格式的文件是一种二进制文件，一般的编辑器是无法打开的，但 Emacs 对 GPG 提供了非常方便的支持，比如创建一个名为 password.org.gpg 的文件，保存时 Emacs 会自动弹出选择框，让用户选择加密的公钥。
+#+begin_example
+Select recipients for encryption.
+If no one is selected, symmetric encryption will be performed.
+- ‘m’ to mark a key on the line
+- ‘u’ to unmark a key on the line
+[Cancel][OK]
+
+  u D3026E5C08A0BAB4 Jiacai Liu <xxx@gmail.com>
+#+end_example
+而且，这个文件的 major mode 也能正确识别为 org mode，这样就可以非常方便的编辑 GPG 文件。与此同理，可以方便地创建任何格式的 GPG 文件，比如： diary.md.gpg ，重新打开文件时，Emacs 会自动解密，并设置相应的 major mode。
+
+*** EasyPG
+Emacs 自带的 EasyPG 包对常用 GPG 命令都提供了相应函数的支持：
+- epa-sign-file
+- epa-encrypt-file
+- epa-decrypt-file
+- epa-encrypt-region
+- epa-decrypt-region
+- epa-import-keys
+- epa-export-keys
+- epa-list-keys
+- epa-list-secret-keys
+- epa-delete-keys
+** 参考文章
+[[https://zhuanlan.zhihu.com/p/440603184][GPG in Emacs]]
+[[http://www.ruanyifeng.com/blog/2013/07/gpg.html][GPG入门教程]]
 * grep命令
 Linux grep 命令用于查找文件里符合条件的字符串。
 
@@ -8072,6 +8357,23 @@ nohup java -jar app.jar >log 2>&1 &
 #+END_SRC
 ** 参考文章
 [[https://blog.csdn.net/zhaominpro/article/details/82630528][Linux shell中2>&1的含义解释]]
+* linux稀疏文件
+** 创建文件的命令
+The Unix command
+#+begin_src bash
+dd of=sparse-file bs=5M seek=1 count=0
+#+END_SRC
+will create a file of five mebibytes in size, but with no data stored on the media (only metadata). (GNU dd has this behavior because it calls ftruncate to set the file size; other implementations may merely create an empty file.)
+
+Similarly the truncate command may be used, if available:
+#+begin_src bash
+truncate -s 5M <filename>
+#+END_SRC
+On Linux, an existing file can be converted to sparse by:
+#+begin_src bash
+fallocate -d <filename>
+#+END_SRC
+There is no portable system call to punch holes; Linux provides fallocate(FALLOC_FL_PUNCH_HOLE), and Solaris provides fcntl(F_FREESP).
 * ldd命令
 作用：用来查看程式运行所需的共享库,常用来解决程式因缺少某个库文件而不能运行的一些问题。ldd不是个可执行程式，而只是个shell脚本。
 
@@ -14385,6 +14687,19 @@ My Linux                        #提示用户输入数据
 My Linux                        #输出数据，进行输出反馈  
 #+END_EXAMPLE
 此时，可以分别打开文件"file1"和"file2"，查看其内容是否均是"My Linux"即可判断指令"tee"是否执行成功。
+* tmp目录
+** /tmp临时目录
+inux的/tmp目录中保存了linux操作系统和其他正在执行的应用层软件需要的一些临时文件。
+比如，当你编写某个文档的时候，文档的内容实际上是先以临时文件的方式保存在/tmp目录中的。当你将文档保存之后，它才以文件的方式保存到你制定的位置里，而/tmp目录中的临时文件，在你关闭这片文档的时候，就会被移除。
+** /tmp目录和/var/tmp目录的区别
+Ubuntu的临时文件目录，更多规则参考这里：https://manpages.ubuntu.com/manpages/lunar/en/man5/tmpfiles.d.5.html
+*** 有效期不同
+/tmp目录和/var/tmp目录都被操作系统和应用软件存储临时文件，最大的不同是两个目录中临时文件的有效期不同。
+保存在/var/tmp目录中的临时文件，有效期更久。
+默认情况下，/var/tmp目录中临时文件的有效期为30天，/tmp目录中的临时文件有效期为10天。
+*** 重启清理
+还有就是，/tmp目录中的临时文件，当系统重启的时候就会被清理一次。而/var/tmp目录中的临时文件，在系统重启的时候不会被清理。
+
 * tmux
 ** sessions, windows and panes介绍
 摘抄 github 上 tmux 项目的 wiki 之 Getting-Started#summary-of-terms 属于解释表，如下：
@@ -15171,6 +15486,98 @@ ubuntu安装好后，root初始密码（默认密码）不知道，需要设置�
 4、输入：su root
 
 切换用户到root
+* update-alternatives
+update-alternatives可以方便实现管理不同版本的程序。
+
+命令格式：update-alternatives [<选项> ...] <命令>
+
+主要参数：
+#+begin_example
+Commands:
+  --install <link> <name> <path> <priority>
+    [--slave <link> <name> <path>] ...
+                           在系统中加入一组替换项.
+  --remove <name> <path>   从 <名称> 替换组中去除 <路径> 项.
+  --remove-all <name>      从替换系统中删除 <名称> 替换组.
+  --auto <name>            将 <名称> 的主链接切换到自动模式.
+  --display <name>         显示关于 <名称> 替换组的信息.
+  --query <name>           machine parseable version of --display <name>.
+  --list <name>            列出 <名称> 替换组中所有的可用替换项.
+  --get-selections         list master alternative names and their status.
+  --set-selections         read alternative status from standard input.
+  --config <name>          列出 <名称> 替换组中的可选项，并就使用其中
+                                 哪一个，征询用户的意见.
+  --set <name> <path>      将 <路径> 设置为 <名称> 的替换项.
+  --all                    对所有可选项一一调用 --config 命令.
+
+<link> 是指向 /etc/alternatives/<名称> 的符号链接>.
+  (e.g. /usr/bin/pager)
+<name> 是该链接替换组的主控名.
+  (e.g. pager)
+<path> 是替换项目标文件的位置.
+  (e.g. /usr/bin/less)
+<priority> 是一个整数，在自动模式下，这个数字越高的选项，其优先级也就越高.
+
+Options:
+  --altdir <directory>     指定不同的可选项目录.
+  --admindir <directory>   指定不同的管理目录.
+  --log <file>             设置log文件.
+  --force                  就算没有通过自检，也强制执行操作。
+  --skip-auto              在自动模式中跳过设置正确候选项的提示
+                           (只与 --config 有关)
+  --verbose                启用详细输出。
+  --quiet                  安静模式，输出尽可能少的信息.
+  --help                   显示本帮助信息.
+  --version                显示版本信息.
+#+end_example
+** display选项
+display选项用来显示一个命令链接的所有可选命令，即查看一个命令链接组的所有信息，包括链接的模式(自动还是手动)、链接priority值、所有可 用的链接命令等等。
+** install选项
+install选项的功能就是增加一组新的系统命令链接符。
+使用语法为：update-alternatives --install <link> <name> <path> <priority> [--slave link name path]...。
+其中link为系统中功能相同软件的公共链接目录，比如/usr/bin/java(需绝对目录);
+name为命令链接符名称,如java；path为你所要使用新命令、新软件的所在目录；
+priority为优先级，当命令链接已存在时，需高于当前值，因为当alternative为自动模式时,系统默认启用priority高的链接；
+–slave为从alternative。
+** config选项
+config选项用来显示和修改实际指向的候选命令，为在现有的命令链接选择一个作为系统默认。
+** remove选项
+remove选项的功能是删除一个命令的link值，其附带的slave也将一起删除。
+使用语法为:update-alternatives --remove name path。
+其中name与path与install中的一致，如果所删除的链接组中还有其他链接的话，系统将会自动从其他中选择一个priority高的链接作为默认为链接。
+比如：update-alternatives –remove java /usr/lib/jvm/jre1.6.0_20/bin/java
+** 用法
+安装:
+#+begin_src bash
+sudo update-alternatives --install link name path priority [ --slave slink sname spath]
+#+END_SRC
+选项注释:
+- link是在/usr/bin/,/usr/local/bin/等默认PATH搜索目录
+- name是在/etc/alternatives目录中的链接名
+- path是真正的可执行程序的位置,可以在任何位置
+- priority是优先级
+
+打印名字的相关链接:
+#+begin_src bash
+sudo update-alternatives --display name
+#+END_SRC
+配置名字的相关链接:
+#+begin_src bash
+sudo update-alternatives --config name
+#+END_SRC
+移除名字的相关链接:
+#+begin_src bash
+sudo update-alternatives --remove name path
+#+END_SRC
+因为优先级的存在,可以为同一个name设置多个path,当删除一个path后,默认连接到slave上.
+
+移除所有名字相关的链接:
+#+begin_src bash
+sudo update-alternatives --remove-all name
+#+END_SRC
+** 参考文章
+[[https://blog.csdn.net/JasonDing1354/article/details/50470109][【Linux】使用update-alternatives命令进行版本的切换]]
+[[https://zhuanlan.zhihu.com/p/20797436][Linux命令之update-alternativse]]
 * UNIX-文件IO库
 ** 文件描述符
 对于内核而言，所有打开的文件都通过文件描述符引用。文件描述符是一个非负整数。
@@ -15551,6 +15958,7 @@ Linux没有使用v节点，而是使用了通用i节点结构。虽然两种实�
 UNIX系统为这样的操作提供了一种原子操作方法，即在打开文件时设置O_APPEND标志。
 这样做使得内核在每次写操作之前，都将进程的当前偏移量设置到该文件的尾端处，于是在每次写之前就不再需要调用lseek。
 *** 函数pread和pwrite
+pread/pwrite文档可知，这两个函数不会改变文件句柄的偏移量且线程安全，所以多线程环境下推荐使用，
 
 Single UNIX Specification包括了XSI扩展，该扩展允许原子性地定位并执行I/O。
 pread和pwrite就是这种扩展。
@@ -18752,7 +19160,12 @@ Tip: Use IntelliSense inside string values for tasks.json and launch.json to get
 6. 如果还没有生效，那么看看要跳转的变量或函数，与当前文件是直接包含还是间接包含。 换成直接包含试试？
 *** 参考文章
 [[https://blog.csdn.net/hb69222/article/details/117034317][VS Code中C/C++ 无法跳转到定义的解决办法]]
+** 文件标签栏多行显示
+按住 ctrl + shift + p
 
+输入 open workspace settings,选择打开工作区设置
+
+输入workbench.editor.wrapTabs,勾选该设置项即可
 * watch命令
 watch是一个非常实用的命令，基本所有的Linux发行版都带有这个小工具，如同名字一样，watch可以帮你监测一个命令的运行结果，省得你一遍遍的手动运行。在Linux下，watch是周期性的执行下个程序，并全屏显示执行结果。你可以拿他来监测你想要的一切命令的结果变化，比如 tail 一个 log 文件，ls 监测某个文件的大小变化。
 

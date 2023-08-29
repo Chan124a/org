@@ -960,6 +960,27 @@ struct ListNode {
   typedef decltype(lengthCompare) Func2;//等价的类型
   //FuncP和FuncP2是指向函数的指针
 #+END_SRC
+* 互斥锁
+** pthread_mutex_init()函数
+该函数用于C函数的多线程编程中，互斥锁的初始化。
+#+begin_src c++
+int pthread_mutex_init(pthread_mutex_t *restrict mutex,
+                       const pthread_mutexattr_t *restrict attr);
+#+END_SRC
+pthread_mutex_init()函数是以动态方式创建互斥锁的.
+
+参数attr指定了新建互斥锁的属性。如果参数attr为NULL，则使用默认的互斥锁属性，默认属性为快速互斥锁。
+
+pthread_mutexattr_init()函数成功完成之后会返回零，其他任何返回值都表示出现了错误。
+
+函数成功执行后，互斥锁被初始化为锁住态。
+
+*** 互斥锁属性
+互斥锁的属性在创建锁的时候指定，在LinuxThreads实现中仅有一个锁类型属性，不同的锁类型在试图对一个已经被锁定的互斥锁加锁时表现不同。当前（glibc2.2.3,linuxthreads0.9）有四个值可供选择：
+- PTHREAD_MUTEX_TIMED_NP，这是缺省值，也就是普通锁。当一个线程加锁以后，其余请求锁的线程将形成一个等待队列，并在解锁后按优先级获得锁。这种锁策略保证了资源分配的公平性。
+- PTHREAD_MUTEX_RECURSIVE_NP，嵌套锁，允许同一个线程对同一个锁成功获得多次，并通过多次unlock解锁。如果是不同线程请求，则在加锁线程解锁时重新竞争。
+- PTHREAD_MUTEX_ERRORCHECK_NP，检错锁，如果同一个线程请求同一个锁，则返回EDEADLK，否则与PTHREAD_MUTEX_TIMED_NP类型动作相同。这样就保证当不允许多次加锁时不会出现最简单情况下的死锁。
+- PTHREAD_MUTEX_ADAPTIVE_NP，适应锁，动作最简单的锁类型，仅等待解锁后重新竞争。
 * intptr_t、uintptr_t数据类型的解析
 #+begin_src c++
 typedef  intptr_t      ngx_int_t;
@@ -1380,8 +1401,693 @@ Base default constructor
 Base copy constructor
 Base move constructor
 #+end_example
-** 参考文章
+** 右值
+
+*** 右值引用
+右值引用的标志是&&，顾名思义，右值引用专门为右值而生，可以指向右值，不能指向左值：
+#+begin_src c++
+int &&ref_a_right = 5; // ok
+
+int a = 5;
+int &&ref_a_left = a; // 编译不过，右值引用不可以指向左值
+
+ref_a_right = 6; // 右值引用的用途：可以修改右值
+#+end_src
+**** 左值引用
+左值引用大家都很熟悉，能指向左值，不能指向右值的就是左值引用：
+#+begin_src c++
+int a = 5;
+int &ref_a = a; // 左值引用指向左值，编译通过
+int &ref_a = 5; // 左值引用指向了右值，会编译失败
+#+END_SRC
+引用是变量的别名，由于右值没有地址，没法被修改，所以左值引用无法指向右值。
+
+但是，const左值引用是可以指向右值的：
+#+begin_src c++
+const int &ref_a = 5;  // 编译通过
+#+END_SRC
+const左值引用不会修改指向值，因此可以指向右值，这也是为什么要使用const &作为函数参数的原因之一，如std::vector的push_back：
+#+begin_src c++
+void push_back (const value_type& val);
+#+END_SRC
+如果没有const，vec.push_back(5)这样的代码就无法编译通过了。
+**** 指向左值
+std::move可以让右值引用指向左值
+#+begin_src c++
+int a = 5; // a是个左值
+int &ref_a_left = a; // 左值引用指向左值
+int &&ref_a_right = std::move(a); // 通过std::move将左值转化为右值，可以被右值引用指向
+
+cout << a; // 打印结果：5
+#+end_src
+std::move的功能是把左值强制转化为右值，让右值引用可以指向左值,其实现等同于一个类型转换：static_cast<T&&>(lvalue)。
+
+同样的，右值引用能指向右值，本质上也是把右值提升为一个左值，并定义一个右值引用通过std::move指向该左值：
+#+begin_src c++
+int &&ref_a = 5;
+ref_a = 6;
+
+等同于以下代码：
+
+int temp = 5;
+int &&ref_a = std::move(temp);
+ref_a = 6;
+#+end_src
+**** 右值引用本身是左值
+被声明出来的左、右值引用都是左值。 因为被声明出的左右值引用是有地址的，也位于等号左边。仔细看下边代码：
+#+begin_src c++
+// 形参是个右值引用
+void change(int&& right_value) {
+    right_value = 8;
+}
+
+int main() {
+    int a = 5; // a是个左值
+    int &ref_a_left = a; // ref_a_left是个左值引用
+    int &&ref_a_right = std::move(a); // ref_a_right是个右值引用
+
+    change(a); // 编译不过，a是左值，change参数要求右值
+    change(ref_a_left); // 编译不过，左值引用ref_a_left本身也是个左值
+    change(ref_a_right); // 编译不过，右值引用ref_a_right本身也是个左值
+
+    change(std::move(a)); // 编译通过
+    change(std::move(ref_a_right)); // 编译通过
+    change(std::move(ref_a_left)); // 编译通过
+
+    change(5); // 当然可以直接接右值，编译通过
+
+    cout << &a << ' ';
+    cout << &ref_a_left << ' ';
+    cout << &ref_a_right;
+    // 打印这三个左值的地址，都是一样的
+}
+#+end_src
+右值引用既可以是左值也可以是右值，如果有名称则为左值，否则是右值。
+**** 左右值引用的异同
+1. 从性能上讲，左右值引用没有区别，传参使用左右值引用都可以避免拷贝。
+2. 右值引用可以直接指向右值，也可以通过std::move指向左值；而左值引用只能指向左值(const左值引用也能指向右值)。
+3. 作为函数形参时，右值引用更灵活。虽然const左值引用也可以做到左右值都接受，但它无法修改，有一定局限性。
+#+begin_src c++
+  void f(const int& n) {
+      n += 1; // 编译失败，const左值引用不能修改指向变量
+  }
+
+  void f2(int && n) {
+      n += 1; // ok
+  }
+
+
+  int main() {
+      f(5);
+      f2(5);
+  }
+#+end_src
+**** 右值引用和std::move的应用场景
+**** 参考文章
+[[https://zhuanlan.zhihu.com/p/335994370][一文读懂C++右值引用和std::move]]
+按上文分析，std::move只是类型转换工具，不会对性能有好处；右值引用在作为函数形参时更具灵活性，看上去还是挺鸡肋的。他们有什么实际应用场景吗？
+
+3.1 实现移动语义
+在实际场景中，右值引用和std::move被广泛用于在STL和自定义类中实现移动语义，避免拷贝，从而提升程序性能。 在没有右值引用之前，一个简单的数组类通常实现如下，有构造函数、拷贝构造函数、赋值运算符重载、析构函数等。深拷贝/浅拷贝在此不做讲解。
+
+class Array {
+public:
+    Array(int size) : size_(size) {
+        data = new int[size_];
+    }
+     
+    // 深拷贝构造
+    Array(const Array& temp_array) {
+        size_ = temp_array.size_;
+        data_ = new int[size_];
+        for (int i = 0; i < size_; i ++) {
+            data_[i] = temp_array.data_[i];
+        }
+    }
+     
+    // 深拷贝赋值
+    Array& operator=(const Array& temp_array) {
+        delete[] data_;
+ 
+        size_ = temp_array.size_;
+        data_ = new int[size_];
+        for (int i = 0; i < size_; i ++) {
+            data_[i] = temp_array.data_[i];
+        }
+    }
+ 
+    ~Array() {
+        delete[] data_;
+    }
+ 
+public:
+    int *data_;
+    int size_;
+};
+该类的拷贝构造函数、赋值运算符重载函数已经通过使用左值引用传参来避免一次多余拷贝了，但是内部实现要深拷贝，无法避免。 这时，有人提出一个想法：是不是可以提供一个移动构造函数，把被拷贝者的数据移动过来，被拷贝者后边就不要了，这样就可以避免深拷贝了，如：
+
+class Array {
+public:
+    Array(int size) : size_(size) {
+        data = new int[size_];
+    }
+     
+    // 深拷贝构造
+    Array(const Array& temp_array) {
+        ...
+    }
+     
+    // 深拷贝赋值
+    Array& operator=(const Array& temp_array) {
+        ...
+    }
+ 
+    // 移动构造函数，可以浅拷贝
+    Array(const Array& temp_array, bool move) {
+        data_ = temp_array.data_;
+        size_ = temp_array.size_;
+        // 为防止temp_array析构时delete data，提前置空其data_      
+        temp_array.data_ = nullptr;
+    }
+     
+ 
+    ~Array() {
+        delete [] data_;
+    }
+ 
+public:
+    int *data_;
+    int size_;
+};
+这么做有2个问题：
+
+不优雅，表示移动语义还需要一个额外的参数(或者其他方式)。
+无法实现！temp_array是个const左值引用，无法被修改，所以temp_array.data_ = nullptr;这行会编译不过。当然函数参数可以改成非const：Array(Array& temp_array, bool move){...}，这样也有问题，由于左值引用不能接右值，Array a = Array(Array(), true);这种调用方式就没法用了。
+可以发现左值引用真是用的很不爽，右值引用的出现解决了这个问题，在STL的很多容器中，都实现了以右值引用为参数的移动构造函数和移动赋值重载函数，或者其他函数，最常见的如std::vector的push_back和emplace_back。参数为左值引用意味着拷贝，为右值引用意味着移动。
+
+class Array {
+public:
+    ......
+ 
+    // 优雅
+    Array(Array&& temp_array) {
+        data_ = temp_array.data_;
+        size_ = temp_array.size_;
+        // 为防止temp_array析构时delete data，提前置空其data_      
+        temp_array.data_ = nullptr;
+    }
+     
+ 
+public:
+    int *data_;
+    int size_;
+};
+如何使用：
+
+// 例1：Array用法
+int main(){
+    Array a;
+ 
+    // 做一些操作
+    .....
+     
+    // 左值a，用std::move转化为右值
+    Array b(std::move(a));
+}
+3.2 实例：vector::push_back使用std::move提高性能
+// 例2：std::vector和std::string的实际例子
+int main() {
+    std::string str1 = "aacasxs";
+    std::vector<std::string> vec;
+     
+    vec.push_back(str1); // 传统方法，copy
+    vec.push_back(std::move(str1)); // 调用移动语义的push_back方法，避免拷贝，str1会失去原有值，变成空字符串
+    vec.emplace_back(std::move(str1)); // emplace_back效果相同，str1会失去原有值
+    vec.emplace_back("axcsddcas"); // 当然可以直接接右值
+}
+ 
+// std::vector方法定义
+void push_back (const value_type& val);
+void push_back (value_type&& val);
+ 
+void emplace_back (Args&&... args);
+在vector和string这个场景，加个std::move会调用到移动语义函数，避免了深拷贝。
+
+除非设计不允许移动，STL类大都支持移动语义函数，即可移动的。 另外，编译器会默认在用户自定义的class和struct中生成移动语义函数，但前提是用户没有主动定义该类的拷贝构造等函数(具体规则自行百度哈)。 因此，可移动对象在<需要拷贝且被拷贝者之后不再被需要>的场景，建议使用std::move触发移动语义，提升性能。
+
+moveable_objecta = moveable_objectb; 
+改为： 
+moveable_objecta = std::move(moveable_objectb);
+还有些STL类是move-only的，比如unique_ptr，这种类只有移动构造函数，因此只能移动(转移内部对象所有权，或者叫浅拷贝)，不能拷贝(深拷贝):
+
+std::unique_ptr<A> ptr_a = std::make_unique<A>();
+
+std::unique_ptr<A> ptr_b = std::move(ptr_a); // unique_ptr只有‘移动赋值重载函数‘，参数是&& ，只能接右值，因此必须用std::move转换类型
+
+std::unique_ptr<A> ptr_b = ptr_a; // 编译不通过
+std::move本身只做类型转换，对性能无影响。 我们可以在自己的类中实现移动语义，避免深拷贝，充分利用右值引用和std::move的语言特性。
+
+4. 完美转发 std::forward
+和std::move一样，它的兄弟std::forward也充满了迷惑性，虽然名字含义是转发，但他并不会做转发，同样也是做类型转换.
+
+与move相比，forward更强大，move只能转出来右值，forward都可以。
+
+std::forward<T>(u)有两个参数：T与 u。 a. 当T为左值引用类型时，u将被转换为T类型的左值； b. 否则u将被转换为T类型右值。
+举个例子，有main，A，B三个函数，调用关系为：main->A->B，建议先看懂2.3节对左右值引用本身是左值还是右值的讨论再看这里：
+
+void B(int&& ref_r) {
+    ref_r = 1;
+}
+ 
+// A、B的入参是右值引用
+// 有名字的右值引用是左值，因此ref_r是左值
+void A(int&& ref_r) {
+    B(ref_r);  // 错误，B的入参是右值引用，需要接右值，ref_r是左值，编译失败
+     
+    B(std::move(ref_r)); // ok，std::move把左值转为右值，编译通过
+    B(std::forward<int>(ref_r));  // ok，std::forward的T是int类型，属于条件b，因此会把ref_r转为右值
+}
+ 
+int main() {
+    int a = 5;
+    A(std::move(a));
+}
+例2：
+
+void change2(int&& ref_r) {
+    ref_r = 1;
+}
+ 
+void change3(int& ref_l) {
+    ref_l = 1;
+}
+ 
+// change的入参是右值引用
+// 有名字的右值引用是 左值，因此ref_r是左值
+void change(int&& ref_r) {
+    change2(ref_r);  // 错误，change2的入参是右值引用，需要接右值，ref_r是左值，编译失败
+     
+    change2(std::move(ref_r)); // ok，std::move把左值转为右值，编译通过
+    change2(std::forward<int &&>(ref_r));  // ok，std::forward的T是右值引用类型(int &&)，符合条件b，因此u(ref_r)会被转换为右值，编译通过
+     
+    change3(ref_r); // ok，change3的入参是左值引用，需要接左值，ref_r是左值，编译通过
+    change3(std::forward<int &>(ref_r)); // ok，std::forward的T是左值引用类型(int &)，符合条件a，因此u(ref_r)会被转换为左值，编译通过
+    // 可见，forward可以把值转换为左值或者右值
+}
+ 
+int main() {
+    int a = 5;
+    change(std::move(a));
+}
+上边的示例在日常编程中基本不会用到，std::forward最主要运于模版编程的参数转发中，想深入了解需要学习万能引用(T &&)和引用折叠(eg:& && → ?)等知识，本文就不详细介绍这些了。
+
+*** 参考文章
 [[https://zhuanlan.zhihu.com/p/111792987][关于C++默认拷贝构造函数产生的问题的讨论]]
+** 移动语义
+考虑下面一个例子：
+#+begin_src c++
+class MyClass
+{
+public:
+   MyClass(const std::string& s)
+        : str{ s }
+    {};
+private:
+    std::string str;
+};
+std::vector<MyClass> myClasses;
+MyClass tmp{ "hello" };
+myClasses.push_back(tmp);
+myClasses.push_back(tmp);
+#+END_SRC
+在这个例子中，我们创建了一个容器以及一个MyClass对象tmp，我们将tmp对象添加到容器中2次。每次添加时，都会发生一次拷贝操作。最终内存中的数据如图所示：
+#+DOWNLOADED: screenshot @ 2023-08-23 22:49:51
+[[file:images/c++/拷贝、赋值、销毁/2023-08-23_22-49-51_screenshot.png]]
+现在问题来了，tmp对象在被添加到容器中2次之后，就不需要了，也就是说，它的生命期即将结束。既然tmp对象不再需要了，那么第2次将其添加到容器中的操作是不是就可以不执行拷贝操作了，而是让容器直接取tmp对象的数据继续用。移动语义就是进行这种操作的.
+
+所谓移动语义，就像其字面意思一样，即把数据从一个对象中转移到另一个对象中，从而避免拷贝操作所带来的性能损耗。
+
+为了支持移动语义，C++11引入了一种新的引用类型，称为“右值引用”，使用“&&”来声明。而我们最常使用的，使用“&”声明的引用，现在则称为“左值引用”。
+*** 移动构造函数
+移动构造函数是C++11引入的一种新的构造函数，它接收右值引用。
+#+begin_src c++
+class MyClass
+{
+public:
+ MyClass()
+    : val{ 998 }
+  {
+    name = new char[] { "Peter" };
+  }
+ // 实现移动构造函数
+ MyClass(MyClass&& rValue) noexcept
+    : val{ std::move(rValue.val) }  // 转移数据
+  {
+    rValue.val = 0;  // 清除被转移对象的数据
+    name = rValue.name;  // 转移数据
+    rValue.name = nullptr;  // 清除被转移对象的数据
+  }
+  ~MyClass()
+  {
+   if (nullptr != name)
+    {
+     delete[] name;
+      name = nullptr;
+    }
+  }
+private:
+ int val;
+ char* name;
+};
+MyClass A{};
+MyClass B{ std::move(A) };  // 通过移动构造函数创建新对象B
+#+END_SRC
+在移动构造函数中，我们将传入对象A的数据转移给新创建的对象B。同时，还需要关注的重点在于，我们需要把传入对象A的数据清除，不然就会产生多个对象共享同一份数据的问题。被转移数据的对象会处于“有效但未定义（valid but unspecified）”的状态.
+
+通过移动构造函数创建对象B之后，内存中的布局如图所示：
+#+DOWNLOADED: screenshot @ 2023-08-23 23:09:39
+[[file:images/c++/拷贝、赋值、销毁/2023-08-23_23-09-39_screenshot.png]]
+*** 移动赋值
+C++11还引入了移动赋值运算符。移动赋值运算符也是接收右值引用，它的实现和移动构造函数基本一致。在移动赋值运算符中，我们也是从传入的对象中转移数据，并将该对象的数据清除：
+#+begin_src c++
+class MyClass
+{
+public:
+ MyClass()
+    : val{ 998 }
+  {
+    name = new char[] { "Peter" };
+  }
+ MyClass(MyClass&& rValue) noexcept
+    : val{ std::move(rValue.val) }
+  {
+    rValue.val = 0;
+    name = rValue.name;
+    rValue.name = nullptr;
+  }
+ // 移动赋值运算符
+  MyClass& operator=(MyClass&& myClass) noexcept
+  {
+    val = myClass.val;
+    myClass.val = 0;
+    name = myClass.name;
+    myClass.name = nullptr;
+   return *this;
+  }
+  ~MyClass()
+  {
+   if (nullptr != name)
+    {
+     delete[] name;
+      name = nullptr;
+    }
+  }
+private:
+ int val;
+ char* name;
+};
+MyClass A{};
+MyClass B{};
+B = std::move(A);  // 使用移动赋值运算符将对象A赋值给对象B
+#+END_SRC
+
+** 拷贝语义
+c++中对象中涉及其他对象或指针数据的话,执行拷贝操作可能会是一个很耗时的过程。
+
+我们来看一个例子。假设我们有个类，该类中有一个string类型的成员变量，定义如下：
+#+begin_src c++
+class MyClass
+{
+public:
+   MyClass(const std::string& s)
+        : str{ s }
+    {};
+private:
+    std::string str;
+};
+MyClass A{ "hello" };
+#+END_SRC
+当我们新建一个该类的对象A，并传递参数“hello”时，对象A的成员变量str中会存储字符串“hello”。而为了存储字符串，string类型会为其分配内存空间。因此，当前内存中的数据如图所示：
+
+#+DOWNLOADED: screenshot @ 2023-08-23 22:47:28
+[[file:images/c++/拷贝、赋值、销毁/2023-08-23_22-47-28_screenshot.png]]
+现在，当我们定义了一个该类的新对象B，且把对象A赋值给对象B时，会发生什么？即，我们执行如下语句：
+#+begin_src c++
+MyClass B = A;
+#+END_SRC
+当拷贝发生时，为了让B对象中的成员变量str也能够存储字符串“hello”，string类型会为其分配内存空间，并将对象A的str中存储的数据复制过来。因此，经过拷贝操作后，此时内存中的数据如图所示：
+
+#+DOWNLOADED: screenshot @ 2023-08-23 22:48:51
+[[file:images/c++/拷贝、赋值、销毁/2023-08-23_22-48-51_screenshot.png]]
+
+** 移动构造函数和移动赋值运算符的生成规则
+
+#+DOWNLOADED: screenshot @ 2023-08-23 23:32:23
+[[file:images/c++/拷贝、赋值、销毁/2023-08-23_23-32-23_screenshot.png]]
+
+在C++11之前，我们拥有4个特殊成员函数，即构造函数、析构函数、拷贝构造函数以及拷贝赋值运算符。从C++11开始，我们多了2个特殊成员函数，即移动构造函数和移动赋值运算符。
+*** deleted functions
+在细说移动构造函数和移动赋值运算符的生成规则之前，我们先要说一说“已删除的函数(deleted functions)”。
+
+在C++11中，可以使用语法=delete；来将函数定义为“已删除”。任何使用“已删除”函数的代码都会产生编译错误：
+#+begin_src c++
+class MyClass
+{
+public:
+   void Test() = delete;
+};
+MyClass value;
+value.Test();  // 编译错误：attempting to reference a deleted function
+#+END_SRC
+在之后的介绍中，我们需要关注到的点是在特定情况下，编译器会将移动构造函数和移动赋值运算符定义为deleted。
+*** 默认情况
+在C++11之前，如果我们定义一个空类，编译器会自动为我们生成构造函数、析构函数、拷贝构造函数以及拷贝赋值运算符。该特性在移动语义上得以延伸。在C++11之后，如果我们定义一个空类，除了之前的4个特殊成员函数，编译器还会为我们生成移动构造函数和移动赋值运算符：
+#+begin_src c++
+class MyClass
+{};
+MyClass A{};  // OK，执行编译器默认生成的构造函数
+MyClass B{ A };  // OK，执行编译器默认生成的拷贝构造函数
+MyClass C{ std::move(A) };  // OK，执行编译器默认生成的移动构造函数
+#+END_SRC
+*** 当自己定义了拷贝操作之后
+如果我们在类中定义了拷贝构造函数或者拷贝赋值运算符，那么编译器就不会自动生成移动构造函数和移动赋值运算符。此时，如果调用移动语义的话，由于编译器没有自动生成，因此会转而执行拷贝操作：
+#+begin_src c++
+class MyClass
+{
+public:
+ MyClass()
+  {}
+ // 我们定义了拷贝构造函数，这会禁止编译器自动生成移动构造函数和移动赋值运算符
+ MyClass(const MyClass& value)
+  {}
+};
+MyClass A{};
+MyClass B{ std::move(A) };  // 执行的是拷贝构造函数来创建对象B
+#+END_SRC
+*** 当我们自己定义了析构函数 析构函数的情况和定义拷贝操作一致，如果我们在类中定义了析构函数，那么编译器也不会自动生成移动构造函数和移动赋值运算符。此时，如果调用移动语义的话，同样会转而执行拷贝操作：
+#+begin_src c++
+class MyClass
+{
+public:
+ // 我们定义了析构函数，这会禁止编译器自动生成移动构造函数和移动赋值运算符
+  ~MyClass()
+  {}
+};
+MyClass A{};
+MyClass B{ std::move(A) };  // 执行的是拷贝构造函数来创建对象B
+#+END_SRC
+析构函数有一点值得注意，许多情况下，当一个类需要作为基类时，都需要声明一个virtual析构函数，此时需要特别留意是不是应该手动的为该类定义移动构造函数以及移动赋值运算符。此外，当子类派生时，如果子类没有实现自己的析构函数，那么将不会影响移动构造函数以及移动赋值运算符的自动生成：
+#+begin_src c++
+class MyBaseClass
+{
+public:
+ virtual ~MyBaseClass()
+  {}
+};
+class MyClass : MyBaseClass  // 子类没有实现自己的析构函数
+{};
+MyClass A{};
+MyClass B{ std::move(A) };  // 这里将执行编译器自动生成的移动构造函数
+#+END_SRC
+*** 参考文章
+[[https://bbs.huaweicloud.com/blogs/375866][一文入魂：再也不用担心我不懂C++移动语义了！]]
+** noexcept
+*** 为什么需要noexcept
+为了说明为什么需要noexcept，我们还是从一个例子出发。我们定义MyClass类，并且我们先不对MyClass类的移动构造函数使用noexcept：
+#+begin_src c++
+class MyClass
+{
+public:
+   MyClass()
+    {}
+   MyClass(const MyClass& lValue)
+    {
+        std::cout << "拷贝构造函数" << std::endl;
+    }
+   MyClass(MyClass&& rValue)  // 注意这里，我们没有对移动构造函数使用noexcept
+    {
+        std::cout << "移动构造函数" << std::endl;
+    }
+private:
+    std::string str{ "hello" };
+};
+#+END_SRC
+接着，我们创建一个MyClass的对象A，并且将其往classes容器中添加2次：
+#+begin_src c++
+MyClass A{};
+std::vector<MyClass> classes;
+classes.push_back(A);
+classes.push_back(A);
+#+END_SRC
+现在，我们来梳理一下流程。classes容器在定义时默认会申请1个元素的内存空间。当第1次执行classes.push_back(A)；时，对象A会被拷贝到容器第1个元素的位置：
+
+#+DOWNLOADED: screenshot @ 2023-08-23 23:31:08
+[[file:images/c++/拷贝、赋值、销毁/2023-08-23_23-31-08_screenshot.png]]
+当第2次执行classes.push_back(A)；时，由于classes容器已没有多余的内存空间，因此它需要分配一块新的内存空间。在分配新的内存空间之后，classes容器会做2个操作：将对象A拷贝到容器第2个元素的位置，以及将之前的元素放到新的内存空间中容器第1个元素的位置：
+#+DOWNLOADED: screenshot @ 2023-08-23 23:33:22
+[[file:images/c++/拷贝、赋值、销毁/2023-08-23_23-33-22_screenshot.png]]
+如上图所示那般，老的元素是被拷贝到新的内存空间中的。是的，classes容器确实使用的是拷贝构造函数。那么此时我们会想到，既然classes容器已经不需要之前的内存中的数据了，那么将老数据放到新的内存空间中应该使用移动语义，而非拷贝操作。
+
+那么为什么classes容器没有使用移动语义呢？
+
+此时，我们需要提及一个概念，即“强异常保证（strong exception guarantee）”。所谓强异常保证，即当我们调用一个函数时，如果发生了异常，那么应用程序的状态能够回滚到函数调用之前：
+
+#+DOWNLOADED: screenshot @ 2023-08-23 23:33:42
+[[file:images/c++/拷贝、赋值、销毁/2023-08-23_23-33-42_screenshot.png]]
+那么强异常保证和决定使用移动语义或拷贝操作又有什么关系呢？
+
+这是因为容器的push_back函数是具备强异常保证的，也就是说，当push_back函数在执行操作的过程中（由于内存不足需要申请新的内存、将老的元素放到新内存中等），如果发生了异常（内存空间不足无法申请等），push_back函数需要确保应用程序的状态能够回滚到调用它之前。以上面的例子来说，当第2次执行classes.push_back(A)；时，如果发生了异常，应用程序的状态会回滚到第1次执行classes.push_back(A)；之后，即classes容器中只有一个元素。
+
+由于我们的移动构造函数没有使用noexcept说明符，也就是我们没有保证移动构造函数不会抛出异常。因此，为了确保强异常保证，就只能使用拷贝构造函数了。那么拷贝构造函数同样没有保证不会抛出异常，为什么就能用呢？这是因为拷贝构造函数执行之后，被拷贝对象的原始数据是不会丢失的。因此，即使发生异常需要回滚，那些已经被拷贝的对象仍然完整且有效。但移动语义就不同了，被移动对象的原始数据是会被清除的，因此如果发生异常，那些已经被移动的对象的数据就没有了，找不回来了，也就无法完成状态回滚了。
+*** 为移动语义使用noexcept说明符
+在了解了以上的规则后，我们就清楚了，要想使用移动构造函数来将老的元素放到新的内存中，我们就需要告知编译器，我们的移动构造函数不会抛出异常，可以放心使用，这就是通过noexcept说明符完成的。
+
+我们来修改下MyClass类的移动构造函数，为其加上noexcept说明符：
+#+begin_src c++
+class MyClass
+{
+public:
+   MyClass()
+    {}
+   MyClass(const MyClass& lValue)
+    {
+        std::cout << "拷贝构造函数" << std::endl;
+    }
+   MyClass(MyClass&& rValue) noexcept  // 注意这里，为移动构造函数使用noexcept
+    {
+        std::cout << "移动构造函数" << std::endl;
+    }
+private:
+    std::string str{ "hello" };
+};
+#+END_SRC
+现在，我们再次执行上文的例子，会发现使用的是移动构造函数来创建新的内存中的元素了：
+
+#+DOWNLOADED: screenshot @ 2023-08-23 23:35:08
+[[file:images/c++/拷贝、赋值、销毁/2023-08-23_23-35-08_screenshot.png]]
+关于noexcept说明符，是个庞大的话题，这里我们只是粗略的提及和移动语义有关的部分。值得注意的是，noexcept说明符是我们对于不会抛出异常的保证，如果在执行的过程中有异常被抛出了，应用程序将会直接终止执行。
+** 使用移动语义时需要注意的其他内容
+*** 编译器生成的移动构造函数和移动赋值运算符
+前文我们提及，在特定情况下，编译器会为我们自动生成移动构造函数和移动赋值运算符。在自动生成的函数中，编译器执行的是逐成员的移动语义。
+
+假设我们的类包含一个int类型和一个std::string类型的成员：
+#+begin_src c++
+class MyClass
+{
+private:
+   int val;
+    std::string str;
+};
+#+END_SRC
+那么编译器为我们自动生成的移动构造函数和移动赋值运算符类似于如下所示：
+#+begin_src c++
+class MyClass
+{
+public:
+   // 编译器自动生成的移动构造函数类似这样，执行逐成员的移动语义
+   MyClass(MyClass&& rValue) noexcept
+        : val{ std::move(rValue.val) }
+        , str{ std::move(rValue.str) }
+    {}
+   // 编译器自动生成的移动赋值运算符类似这样，执行逐成员的移动语义
+    MyClass& operator=(MyClass&& rValue) noexcept
+    {
+        val = std::move(rValue.val);
+        str = std::move(rValue.str);
+       return *this;
+    }
+private:
+   int val;
+    std::string str;
+};
+#+END_SRC
+*** 被移动对象的状态
+当一个对象被移动之后，该对象仍然是有效的，你可以继续使用它，最终它会被销毁，执行析构函数。
+
+C++在其文档中表明，所有标准库中的对象，当被移动之后，会处于一个“有效但未定义的状态（valid but unspecified state）”。
+
+C++并没有强制的规定限制被移动对象必须处于什么状态，并且当类型需要满足不同用途时它的要求也不一致（例如用于key的类型要求被移动对象仍然能够进行排序），因此我们在实现自己的类型时需要根据具体情况来分析。但通常来说，我们应该尽可能的贴近C++标准库中的类型规范。但不管如何，以下这一点是我们必须考虑的：
+
+保证被移动对象能够被正确的析构。
+
+为什么必须保证这一点呢？这是因为被移动对象只是处于一个特殊的状态，对于运行时来说，仍然是有效的，最终也会执行析构函数进行销毁。
+
+例如在之前我们的MyClass类型定义中，当我们执行移动语义后，被移动对象的name指针会被置空。当执行析构函数时，我们就可以简单的通过判空来避免指针的无效释放，这就确保了被移动对象能够正确的析构：
+#+begin_src c++
+class MyClass
+{
+public:
+   MyClass()
+        : val{ 998 }
+    {
+        name = new char[] { "Peter" };
+    }
+   MyClass(MyClass&& rValue) noexcept
+        : val{ std::move(rValue.val) }
+    {
+        rValue.val = 0;
+        name = rValue.name;
+        rValue.name = nullptr;  // 置空被移动对象的指针
+    }
+    MyClass& operator=(MyClass&& myClass) noexcept
+    {
+        val = myClass.val;
+        myClass.val = 0;
+        name = myClass.name;
+        myClass.name = nullptr;  // 置空被移动对象的指针
+       return *this;
+    }
+    ~MyClass()
+    {
+       if (nullptr != name)  // 通过判空来避免指针的无效释放
+        {
+           delete[] name;
+            name = nullptr;
+        }
+    }
+private:
+   int val;
+   char* name;
+};
+#+END_SRC
+*** 避免非必要的std::move调用
+在C++中，存在称为“NRVO（named return value optimization，命名返回值优化）”的技术，即如果函数返回一个临时对象，则该对象会直接给函数调用方使用，而不会再创建一个新对象。听起来有点晦涩，我们来看一个例子：
+#+begin_src c++
+class MyClass
+{};
+MyClass GetTemporary()
+{
+    MyClass A{};
+   return A;
+}
+MyClass myClass = GetTemporary();  // 注意这里
+#+END_SRC
+在上面的例子中，GetTemporary函数会创建一个临时的MyClass对象A，接着在函数结束时返回。在没有NRVO的情况下，当执行语句MyClass myClass=GetTemporary()；时，会调用MyClass类的拷贝构造函数，通过对象A来拷贝创建myClass对象。因此，整个流程如图所示：
+
+#+DOWNLOADED: screenshot @ 2023-08-23 23:39:02
+[[file:images/c++/拷贝、赋值、销毁/2023-08-23_23-39-02_screenshot.png]]
+我们可以发现，在创建完myClass对象之后，对象A就被销毁了，这无疑是一种浪费。因此，编译器会启用NRVO，直接让myClass对象使用对象A。这样一来，在整个过程中，我们只有一次创建对象A时构造函数的调用开销，省去了拷贝构造函数以及析构函数的调用开销：
+
 * 类
 ** 构造函数
 *** 构造函数初始值列表
@@ -1406,6 +2112,37 @@ Data(const std::string &s,int n,double p) : bookNo(s),sold(n),revenue(p*n){}
     std::string contents;
   }
 #+END_SRC
+
+#+DOWNLOADED: screenshot @ 2023-08-23 23:39:17
+[[file:images/c++/lambda表达式/2023-08-23_23-39-17_screenshot.png]]
+为NRVO点赞！
+
+此时，可能有细心的小伙伴已经发现了，这种返回临时对象的情况不就是移动语义发挥的场景嘛。没错，机智的你是不是会想到如下的修改：
+#+begin_src c++
+MyClass GetTemporary()
+{
+    MyClass A{};
+   return std::move(A);  // 使用移动语义
+}
+#+END_SRC
+这样一来，通过移动语义，即使没有NRVO，也可以避免拷贝操作。乍看上去没啥毛病，但我们忽略了一种情况，那就是返回的对象类型并没有实现移动语义。
+
+让我们来分析一下这种情况，我们改写一下MyClass类：
+#+begin_src c++
+class MyClass
+{
+public:
+    ~MyClass()  // 注意这里，通过声明析构函数，我们禁止了编译器去实现默认移动构造函数
+    {}
+};
+#+END_SRC
+现在，MyClass类型没有实现移动语义，当我们执行语句MyClass myClass=GetTemporary()；时，编译器没有办法调用移动构造函数来创建myClass对象。同时，遗憾的是，由于std::move(A)返回的类型是MyClass&&，与函数的返回类型MyClass不一致，因此编译器也不会使用NRVO。最终，编译器只能调用拷贝构造函数来创建myClass对象。
+
+因此，当返回局部对象时，我们不用画蛇添足，直接返回对象即可，编译器会优先使用最佳的NRVO，在没有NRVO的情况下，会尝试执行移动构造函数，最后才是开销最大的拷贝构造函数。
+
+#+DOWNLOADED: screenshot @ 2023-08-23 23:40:54
+[[file:images/c++/类/2023-08-23_23-40-54_screenshot.png]]
+
 * lambda表达式
 The predicates we pass to an algorithm must have exactly one or two parameters,depending on whether the algorithm takes a unary or binary predicate, respectively.However, sometimes we want to do processing that requires more arguments than the algorithm’s predicate allows.
 
@@ -2980,7 +3717,6 @@ struct iterator_traits<T*> { l/偏特化版--迭代器是个原生指针typedef 
 iterator_traits<const int* > : : value_type
 获得的是 const int 而非int。这是我们期望的吗?我们希望利用这种机制来声明一个暂时变量，使其型别与迭代器的 value type 相同，而现在，声明一-个无法赋值（因const 之故）的暂时变量，没什么用!因此，如果迭代器是个pointer-to-const,我们应该设法令其value type为一个non-const型别.没问题，只要另外设计一个特化版本，就能解决这个问题:
 
-
 * struct和class的区别
 struct的默认访问级别为public，而class的默认访问级别是private。
 * 数组
@@ -4470,6 +5206,202 @@ using std::endl;
 using namespace std;
 #+END_SRC
 
+** accumulate
+accumulate定义在#include<numeric>中，作用有两个，一个是累加求和，另一个是自定义类型数据的处理
+
+1. 累加求和
+~int sum = accumulate(vec.begin() , vec.end() , 42);~
+
+accumulate带有三个形参：头两个形参指定要累加的元素范围，第三个形参则是累加的初值。
+
+accumulate函数将它的一个内部变量设置为指定的初始值，然后在此初值上累加输入范围内所有元素的值。accumulate算法返回累加的结果，其返回类型就是其第三个实参的类型。
+
+可以使用accumulate把string型的vector容器中的元素连接起来：
+
+~string sum = accumulate(v.begin() , v.end() , string(" "));~
+
+这个函数调用的效果是：从空字符串开始，把vec里的每个元素连接成一个字符串。
+
+2. 自定义数据类型的处理
+
+C++ STL中有一个通用的数值类型计算函数— accumulate(),可以用来直接计算数组或者容器中C++内置数据类型，例如：
+#+BEGIN_SRC c++
+#include <numeric>  
+int arr[]={10,20,30,40,50};  
+vector<int> va(&arr[0],&arr[5]);  
+int sum=accumulate(va.begin(),va.end(),0);  //sum = 150  
+#+END_SRC
+但是对于自定义数据类型，我们就需要自己动手写一个回调函数来实现自定义数据的处理，然后让它作为accumulate()的第四个参数，accumulate()的原型为
+#+BEGIN_SRC c++
+template<class _InIt, class _Ty,  class _Fn2> 
+inline _Ty _Accumulate(_InIt _First, _InIt _Last, _Ty _Val, _Fn2 _Func)  
+{   // return sum of _Val and all in [_First, _Last), using _Func  
+    for (; _First != _Last; ++_First)  
+        _Val = _Func(_Val, *_First);  
+    return (_Val);  
+}
+#+END_SRC
+下面是例子：
+#+BEGIN_SRC c++
+
+#include <vector>  
+#include <string>  
+using namespace std;  
+  
+struct Grade  
+{  
+    string name;  
+    int grade;  
+};  
+  
+int main()  
+{  
+    Grade subject[3] = {  
+        { "English", 80 },  
+        { "Biology", 70 },  
+        { "History", 90 }  
+    };  
+  
+    int sum = accumulate(subject, subject + 3, 0, [](int a, Grade b){return a + b.grade; });  
+    cout << sum << endl;  
+  
+    system("pause");  
+    return 0;  
+} 
+#+END_SRC
+** all_of
+all_of() 算法会返回 true，前提是序列中的所有元素都可以使谓词返回 true。
+
+*** 实例
+下面是一段代码，用来展示用 all_of() 检查 ages 容器中的元素： 
+#+BEGIN_SRC c++
+int good_age{100};
+std::cout << (std::all_of(std::begin(ages), std::end(ages),[good_age] (int age) { return age < good_age; }) ? "None": "Some") << " of the people are centenarians." << std::endl;
+#+END_SRC
+这个 lambda 表达式会将 ages 中的元素和 good_age 的值作比较，good_age 的值为 100。所有的元素都小于 100，所以 all_of() 会返回 true，而且输出消息会正确报告没有记录的百岁老人。
+** bind
+std::bind的头文件是 <functional>，它是一个函数适配器，接受一个可调用对象（callable object），生成一个新的可调用对象来“适应”原对象的参数列表。
+*** 函数原型
+std::bind函数有两种函数原型，定义如下：
+#+begin_src c++
+template< class F, class... Args >
+/*unspecified*/ bind( F&& f, Args&&... args );
+
+template< class R, class F, class... Args >
+/*unspecified*/ bind( F&& f, Args&&... args );
+#+END_SRC
+std::bind返回一个基于f的函数对象，其参数被绑定到args上。
+f的参数要么被绑定到值，要么被绑定到placeholders（占位符，如_1, _2, ..., _n）。
+
+std::bind将可调用对象与其参数一起进行绑定，绑定后的结果可以使用std::function保存。
+
+std::bind主要有以下两个作用：
+- 将可调用对象和其参数绑定成一个仿函数；
+- 只绑定部分参数，减少可调用对象传入的参数。
+*** std::bind绑定普通函数
+#+begin_src c++
+double callableFunc (double x, double y) {return x/y;}
+auto NewCallable = std::bind (callableFunc, std::placeholders::_1,2);
+std::cout << NewCallable (10) << '\n';
+#+END_SRC
+bind的第一个参数是函数名，普通函数做实参时，会隐式转换成函数指针。因此std::bind(callableFunc,_1,2)等价于std::bind (&callableFunc,_1,2)；
+
+_1表示占位符，位于<functional>中，std::placeholders::_1；
+
+第一个参数被占位符占用，表示这个参数以调用时传入的参数为准，在这里调用NewCallable时，给它传入了10，其实就想到于调用callableFunc(10,2);
+*** std::bind绑定一个成员函数
+#+begin_src c++
+class Base
+{
+public:
+    void display_sum(int a1, int a2)
+    {
+        std::cout << a1 + a2 << '\n';
+    }
+
+    int m_data = 30;
+};
+int main()
+{
+    Base base;
+    auto newiFunc = std::bind(&Base::display_sum, &base, 100, std::placeholders::_1);
+    f(20); // should out put 120.
+}
+
+#+END_SRC
+bind绑定类成员函数时，第一个参数表示对象的成员函数的指针，第二个参数表示对象的地址。
+
+必须显式地指定&Base::diplay_sum，因为编译器不会将对象的成员函数隐式转换成函数指针，所以必须在Base::display_sum前添加&；
+
+使用对象成员函数的指针时，必须要知道该指针属于哪个对象，因此第二个参数为对象的地址 &base；
+*** 绑定一个引用参数
+默认情况下，bind的那些不是占位符的参数被拷贝到bind返回的可调用对象中。但是，与lambda类似，有时对有些绑定的参数希望以引用的方式传递，或是要绑定参数的类型无法拷贝。
+#+begin_src c++
+#include <iostream>
+#include <functional>
+#include <vector>
+#include <algorithm>
+#include <sstream>
+using namespace std::placeholders;
+using namespace std;
+
+ostream & printInfo(ostream &os, const string& s, char c)
+{
+    os << s << c;
+    return os;
+}
+
+int main()
+{
+    vector<string> words{"welcome", "to", "C++11"};
+    ostringstream os;
+    char c = ' ';
+    for_each(words.begin(), words.end(),
+                   [&os, c](const string & s){os << s << c;} );
+    cout << os.str() << endl;
+
+    ostringstream os1;
+    // ostream不能拷贝，若希望传递给bind一个对象，
+    // 而不拷贝它，就必须使用标准库提供的ref函数
+    for_each(words.begin(), words.end(),
+                   bind(printInfo, ref(os1), _1, c));
+    cout << os1.str() << endl;
+}
+
+#+END_SRC
+** hex
+Sets the basefield format flag for the str stream to hex.
+
+When basefield is set to hex, integer values inserted into the stream are expressed in hexadecimal base (i.e., radix 16). For input streams, extracted values are also expected to be expressed in hexadecimal base when this flag is set.
+
+The basefield format flag can take any of the following values (each with its own manipulator):
+
+| flag value | effect when set                                          |
+|------------+----------------------------------------------------------|
+| dec        | read/write integer values using decimal base format.     |
+| hex        | read/write integer values using hexadecimal base format. |
+| oct        | read/write integer values using octal base format.       |
+
+example:
+#+BEGIN_SRC c++
+// modify basefield
+#include <iostream>     // std::cout, std::dec, std::hex, std::oct
+
+int main () {
+  int n = 70;
+  std::cout << std::dec << n << '\n';
+  std::cout << std::hex << n << '\n';
+  std::cout << std::oct << n << '\n';
+  return 0;
+}
+#+END_SRC
+#+BEGIN_EXAMPLE
+Output:
+70
+46
+106
+
+#+END_EXAMPLE
 ** transform
 transform函数的作用是：将某操作应用于指定范围的每个元素。transform函数有两个重载版本：
 
@@ -4538,112 +5470,6 @@ int main()
 }
 #+END_SRC
 ** to_string
-** all_of
-all_of() 算法会返回 true，前提是序列中的所有元素都可以使谓词返回 true。
-
-*** 实例
-下面是一段代码，用来展示用 all_of() 检查 ages 容器中的元素： 
-#+BEGIN_SRC c++
-int good_age{100};
-std::cout << (std::all_of(std::begin(ages), std::end(ages),[good_age] (int age) { return age < good_age; }) ? "None": "Some") << " of the people are centenarians." << std::endl;
-#+END_SRC
-这个 lambda 表达式会将 ages 中的元素和 good_age 的值作比较，good_age 的值为 100。所有的元素都小于 100，所以 all_of() 会返回 true，而且输出消息会正确报告没有记录的百岁老人。
-** accumulate
-accumulate定义在#include<numeric>中，作用有两个，一个是累加求和，另一个是自定义类型数据的处理
-
-1. 累加求和
-~int sum = accumulate(vec.begin() , vec.end() , 42);~
-
-accumulate带有三个形参：头两个形参指定要累加的元素范围，第三个形参则是累加的初值。
-
-accumulate函数将它的一个内部变量设置为指定的初始值，然后在此初值上累加输入范围内所有元素的值。accumulate算法返回累加的结果，其返回类型就是其第三个实参的类型。
-
-可以使用accumulate把string型的vector容器中的元素连接起来：
-
-~string sum = accumulate(v.begin() , v.end() , string(" "));~
-
-这个函数调用的效果是：从空字符串开始，把vec里的每个元素连接成一个字符串。
-
-2. 自定义数据类型的处理
-
-C++ STL中有一个通用的数值类型计算函数— accumulate(),可以用来直接计算数组或者容器中C++内置数据类型，例如：
-#+BEGIN_SRC c++
-#include <numeric>  
-int arr[]={10,20,30,40,50};  
-vector<int> va(&arr[0],&arr[5]);  
-int sum=accumulate(va.begin(),va.end(),0);  //sum = 150  
-#+END_SRC
-但是对于自定义数据类型，我们就需要自己动手写一个回调函数来实现自定义数据的处理，然后让它作为accumulate()的第四个参数，accumulate()的原型为
-#+BEGIN_SRC c++
-template<class _InIt, class _Ty,  class _Fn2> 
-inline _Ty _Accumulate(_InIt _First, _InIt _Last, _Ty _Val, _Fn2 _Func)  
-{   // return sum of _Val and all in [_First, _Last), using _Func  
-    for (; _First != _Last; ++_First)  
-        _Val = _Func(_Val, *_First);  
-    return (_Val);  
-}
-#+END_SRC
-下面是例子：
-#+BEGIN_SRC c++
-
-#include <vector>  
-#include <string>  
-using namespace std;  
-  
-struct Grade  
-{  
-    string name;  
-    int grade;  
-};  
-  
-int main()  
-{  
-    Grade subject[3] = {  
-        { "English", 80 },  
-        { "Biology", 70 },  
-        { "History", 90 }  
-    };  
-  
-    int sum = accumulate(subject, subject + 3, 0, [](int a, Grade b){return a + b.grade; });  
-    cout << sum << endl;  
-  
-    system("pause");  
-    return 0;  
-} 
-#+END_SRC
-** std::hex
-Sets the basefield format flag for the str stream to hex.
-
-When basefield is set to hex, integer values inserted into the stream are expressed in hexadecimal base (i.e., radix 16). For input streams, extracted values are also expected to be expressed in hexadecimal base when this flag is set.
-
-The basefield format flag can take any of the following values (each with its own manipulator):
-
-| flag value | effect when set                                          |
-|------------+----------------------------------------------------------|
-| dec        | read/write integer values using decimal base format.     |
-| hex        | read/write integer values using hexadecimal base format. |
-| oct        | read/write integer values using octal base format.       |
-
-example:
-#+BEGIN_SRC c++
-// modify basefield
-#include <iostream>     // std::cout, std::dec, std::hex, std::oct
-
-int main () {
-  int n = 70;
-  std::cout << std::dec << n << '\n';
-  std::cout << std::hex << n << '\n';
-  std::cout << std::oct << n << '\n';
-  return 0;
-}
-#+END_SRC
-#+BEGIN_EXAMPLE
-Output:
-70
-46
-106
-
-#+END_EXAMPLE
 * typedef
 ** 定义类型
 
@@ -4860,6 +5686,13 @@ return s1.size() < s2.size();
 // sort on word length, shortest to longest
 sort(words.begin(), words.end(), isShorter);
 #+END_SRC
+* workFlow
+通过工厂类WFTaskFactory创建不同类型的task.
+在创建task时会将回调函数作为入参.
+而回调函数自己的入参是task本身.
+
+工厂方法只会创建两种类型的对象:ComplexHttpTask和ComplexHttpProxyTask.
+
 * 友元
 友元可以是一个函数，该函数被称为友元函数；友元也可以是一个类，该类被称为友元类，在这种情况下，整个类及其所有成员都是友元。
 
@@ -5110,305 +5943,6 @@ int main()
 	return 0;
 }
 #+END_SRC
-* 右值
-
-** 右值引用
-右值引用的标志是&&，顾名思义，右值引用专门为右值而生，可以指向右值，不能指向左值：
-#+begin_src c++
-int &&ref_a_right = 5; // ok
-
-int a = 5;
-int &&ref_a_left = a; // 编译不过，右值引用不可以指向左值
-
-ref_a_right = 6; // 右值引用的用途：可以修改右值
-#+end_src
-*** 左值引用
-左值引用大家都很熟悉，能指向左值，不能指向右值的就是左值引用：
-#+begin_src c++
-int a = 5;
-int &ref_a = a; // 左值引用指向左值，编译通过
-int &ref_a = 5; // 左值引用指向了右值，会编译失败
-#+END_SRC
-引用是变量的别名，由于右值没有地址，没法被修改，所以左值引用无法指向右值。
-
-但是，const左值引用是可以指向右值的：
-#+begin_src c++
-const int &ref_a = 5;  // 编译通过
-#+END_SRC
-const左值引用不会修改指向值，因此可以指向右值，这也是为什么要使用const &作为函数参数的原因之一，如std::vector的push_back：
-#+begin_src c++
-void push_back (const value_type& val);
-#+END_SRC
-如果没有const，vec.push_back(5)这样的代码就无法编译通过了。
-*** 指向左值
-std::move可以让右值引用指向左值
-#+begin_src c++
-int a = 5; // a是个左值
-int &ref_a_left = a; // 左值引用指向左值
-int &&ref_a_right = std::move(a); // 通过std::move将左值转化为右值，可以被右值引用指向
-
-cout << a; // 打印结果：5
-#+end_src
-std::move的功能是把左值强制转化为右值，让右值引用可以指向左值,其实现等同于一个类型转换：static_cast<T&&>(lvalue)。
-
-同样的，右值引用能指向右值，本质上也是把右值提升为一个左值，并定义一个右值引用通过std::move指向该左值：
-#+begin_src c++
-int &&ref_a = 5;
-ref_a = 6;
-
-等同于以下代码：
-
-int temp = 5;
-int &&ref_a = std::move(temp);
-ref_a = 6;
-#+end_src
-*** 右值引用本身是左值
-被声明出来的左、右值引用都是左值。 因为被声明出的左右值引用是有地址的，也位于等号左边。仔细看下边代码：
-#+begin_src c++
-// 形参是个右值引用
-void change(int&& right_value) {
-    right_value = 8;
-}
-
-int main() {
-    int a = 5; // a是个左值
-    int &ref_a_left = a; // ref_a_left是个左值引用
-    int &&ref_a_right = std::move(a); // ref_a_right是个右值引用
-
-    change(a); // 编译不过，a是左值，change参数要求右值
-    change(ref_a_left); // 编译不过，左值引用ref_a_left本身也是个左值
-    change(ref_a_right); // 编译不过，右值引用ref_a_right本身也是个左值
-
-    change(std::move(a)); // 编译通过
-    change(std::move(ref_a_right)); // 编译通过
-    change(std::move(ref_a_left)); // 编译通过
-
-    change(5); // 当然可以直接接右值，编译通过
-
-    cout << &a << ' ';
-    cout << &ref_a_left << ' ';
-    cout << &ref_a_right;
-    // 打印这三个左值的地址，都是一样的
-}
-#+end_src
-右值引用既可以是左值也可以是右值，如果有名称则为左值，否则是右值。
-*** 左右值引用的异同
-1. 从性能上讲，左右值引用没有区别，传参使用左右值引用都可以避免拷贝。
-2. 右值引用可以直接指向右值，也可以通过std::move指向左值；而左值引用只能指向左值(const左值引用也能指向右值)。
-3. 作为函数形参时，右值引用更灵活。虽然const左值引用也可以做到左右值都接受，但它无法修改，有一定局限性。
-#+begin_src c++
-  void f(const int& n) {
-      n += 1; // 编译失败，const左值引用不能修改指向变量
-  }
-
-  void f2(int && n) {
-      n += 1; // ok
-  }
-
-
-  int main() {
-      f(5);
-      f2(5);
-  }
-#+end_src
-*** 右值引用和std::move的应用场景
-*** 参考文章
-[[https://zhuanlan.zhihu.com/p/335994370][一文读懂C++右值引用和std::move]]
-按上文分析，std::move只是类型转换工具，不会对性能有好处；右值引用在作为函数形参时更具灵活性，看上去还是挺鸡肋的。他们有什么实际应用场景吗？
-
-3.1 实现移动语义
-在实际场景中，右值引用和std::move被广泛用于在STL和自定义类中实现移动语义，避免拷贝，从而提升程序性能。 在没有右值引用之前，一个简单的数组类通常实现如下，有构造函数、拷贝构造函数、赋值运算符重载、析构函数等。深拷贝/浅拷贝在此不做讲解。
-
-class Array {
-public:
-    Array(int size) : size_(size) {
-        data = new int[size_];
-    }
-     
-    // 深拷贝构造
-    Array(const Array& temp_array) {
-        size_ = temp_array.size_;
-        data_ = new int[size_];
-        for (int i = 0; i < size_; i ++) {
-            data_[i] = temp_array.data_[i];
-        }
-    }
-     
-    // 深拷贝赋值
-    Array& operator=(const Array& temp_array) {
-        delete[] data_;
- 
-        size_ = temp_array.size_;
-        data_ = new int[size_];
-        for (int i = 0; i < size_; i ++) {
-            data_[i] = temp_array.data_[i];
-        }
-    }
- 
-    ~Array() {
-        delete[] data_;
-    }
- 
-public:
-    int *data_;
-    int size_;
-};
-该类的拷贝构造函数、赋值运算符重载函数已经通过使用左值引用传参来避免一次多余拷贝了，但是内部实现要深拷贝，无法避免。 这时，有人提出一个想法：是不是可以提供一个移动构造函数，把被拷贝者的数据移动过来，被拷贝者后边就不要了，这样就可以避免深拷贝了，如：
-
-class Array {
-public:
-    Array(int size) : size_(size) {
-        data = new int[size_];
-    }
-     
-    // 深拷贝构造
-    Array(const Array& temp_array) {
-        ...
-    }
-     
-    // 深拷贝赋值
-    Array& operator=(const Array& temp_array) {
-        ...
-    }
- 
-    // 移动构造函数，可以浅拷贝
-    Array(const Array& temp_array, bool move) {
-        data_ = temp_array.data_;
-        size_ = temp_array.size_;
-        // 为防止temp_array析构时delete data，提前置空其data_      
-        temp_array.data_ = nullptr;
-    }
-     
- 
-    ~Array() {
-        delete [] data_;
-    }
- 
-public:
-    int *data_;
-    int size_;
-};
-这么做有2个问题：
-
-不优雅，表示移动语义还需要一个额外的参数(或者其他方式)。
-无法实现！temp_array是个const左值引用，无法被修改，所以temp_array.data_ = nullptr;这行会编译不过。当然函数参数可以改成非const：Array(Array& temp_array, bool move){...}，这样也有问题，由于左值引用不能接右值，Array a = Array(Array(), true);这种调用方式就没法用了。
-可以发现左值引用真是用的很不爽，右值引用的出现解决了这个问题，在STL的很多容器中，都实现了以右值引用为参数的移动构造函数和移动赋值重载函数，或者其他函数，最常见的如std::vector的push_back和emplace_back。参数为左值引用意味着拷贝，为右值引用意味着移动。
-
-class Array {
-public:
-    ......
- 
-    // 优雅
-    Array(Array&& temp_array) {
-        data_ = temp_array.data_;
-        size_ = temp_array.size_;
-        // 为防止temp_array析构时delete data，提前置空其data_      
-        temp_array.data_ = nullptr;
-    }
-     
- 
-public:
-    int *data_;
-    int size_;
-};
-如何使用：
-
-// 例1：Array用法
-int main(){
-    Array a;
- 
-    // 做一些操作
-    .....
-     
-    // 左值a，用std::move转化为右值
-    Array b(std::move(a));
-}
-3.2 实例：vector::push_back使用std::move提高性能
-// 例2：std::vector和std::string的实际例子
-int main() {
-    std::string str1 = "aacasxs";
-    std::vector<std::string> vec;
-     
-    vec.push_back(str1); // 传统方法，copy
-    vec.push_back(std::move(str1)); // 调用移动语义的push_back方法，避免拷贝，str1会失去原有值，变成空字符串
-    vec.emplace_back(std::move(str1)); // emplace_back效果相同，str1会失去原有值
-    vec.emplace_back("axcsddcas"); // 当然可以直接接右值
-}
- 
-// std::vector方法定义
-void push_back (const value_type& val);
-void push_back (value_type&& val);
- 
-void emplace_back (Args&&... args);
-在vector和string这个场景，加个std::move会调用到移动语义函数，避免了深拷贝。
-
-除非设计不允许移动，STL类大都支持移动语义函数，即可移动的。 另外，编译器会默认在用户自定义的class和struct中生成移动语义函数，但前提是用户没有主动定义该类的拷贝构造等函数(具体规则自行百度哈)。 因此，可移动对象在<需要拷贝且被拷贝者之后不再被需要>的场景，建议使用std::move触发移动语义，提升性能。
-
-moveable_objecta = moveable_objectb; 
-改为： 
-moveable_objecta = std::move(moveable_objectb);
-还有些STL类是move-only的，比如unique_ptr，这种类只有移动构造函数，因此只能移动(转移内部对象所有权，或者叫浅拷贝)，不能拷贝(深拷贝):
-
-std::unique_ptr<A> ptr_a = std::make_unique<A>();
-
-std::unique_ptr<A> ptr_b = std::move(ptr_a); // unique_ptr只有‘移动赋值重载函数‘，参数是&& ，只能接右值，因此必须用std::move转换类型
-
-std::unique_ptr<A> ptr_b = ptr_a; // 编译不通过
-std::move本身只做类型转换，对性能无影响。 我们可以在自己的类中实现移动语义，避免深拷贝，充分利用右值引用和std::move的语言特性。
-
-4. 完美转发 std::forward
-和std::move一样，它的兄弟std::forward也充满了迷惑性，虽然名字含义是转发，但他并不会做转发，同样也是做类型转换.
-
-与move相比，forward更强大，move只能转出来右值，forward都可以。
-
-std::forward<T>(u)有两个参数：T与 u。 a. 当T为左值引用类型时，u将被转换为T类型的左值； b. 否则u将被转换为T类型右值。
-举个例子，有main，A，B三个函数，调用关系为：main->A->B，建议先看懂2.3节对左右值引用本身是左值还是右值的讨论再看这里：
-
-void B(int&& ref_r) {
-    ref_r = 1;
-}
- 
-// A、B的入参是右值引用
-// 有名字的右值引用是左值，因此ref_r是左值
-void A(int&& ref_r) {
-    B(ref_r);  // 错误，B的入参是右值引用，需要接右值，ref_r是左值，编译失败
-     
-    B(std::move(ref_r)); // ok，std::move把左值转为右值，编译通过
-    B(std::forward<int>(ref_r));  // ok，std::forward的T是int类型，属于条件b，因此会把ref_r转为右值
-}
- 
-int main() {
-    int a = 5;
-    A(std::move(a));
-}
-例2：
-
-void change2(int&& ref_r) {
-    ref_r = 1;
-}
- 
-void change3(int& ref_l) {
-    ref_l = 1;
-}
- 
-// change的入参是右值引用
-// 有名字的右值引用是 左值，因此ref_r是左值
-void change(int&& ref_r) {
-    change2(ref_r);  // 错误，change2的入参是右值引用，需要接右值，ref_r是左值，编译失败
-     
-    change2(std::move(ref_r)); // ok，std::move把左值转为右值，编译通过
-    change2(std::forward<int &&>(ref_r));  // ok，std::forward的T是右值引用类型(int &&)，符合条件b，因此u(ref_r)会被转换为右值，编译通过
-     
-    change3(ref_r); // ok，change3的入参是左值引用，需要接左值，ref_r是左值，编译通过
-    change3(std::forward<int &>(ref_r)); // ok，std::forward的T是左值引用类型(int &)，符合条件a，因此u(ref_r)会被转换为左值，编译通过
-    // 可见，forward可以把值转换为左值或者右值
-}
- 
-int main() {
-    int a = 5;
-    change(std::move(a));
-}
-上边的示例在日常编程中基本不会用到，std::forward最主要运于模版编程的参数转发中，想深入了解需要学习万能引用(T &&)和引用折叠(eg:& && → ?)等知识，本文就不详细介绍这些了。
 * 内存泄露
 new 和 delete 是 C++ 用于管理堆内存的两个运算符，对应于C语言中的 malloc 和 free，但是 malloc 和 free 是函数，而new 和 delete 是运算符。除此之外，new 在申请内存的同时，还会调用对象的构造函数，而 malloc 只会申请内存；同样，delete 在释放内存之前，会调用对象的析构函数，而 free 只会释放内存。
 

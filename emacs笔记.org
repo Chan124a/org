@@ -3823,6 +3823,7 @@ C-c ! l 列出所有错误
 Hooks are an important mechanism for customizing Emacs.
 A hook is a Lisp variable which holds a list of functions, to be called on some well-defined occasion.
 * org-mode
+
 ** Org-mode 管理 Emacs 配置
 
 Org-mode 下的文学编程将颠覆你对于 Emacs 的看法。因为我们也可以使用 Org 来管理
