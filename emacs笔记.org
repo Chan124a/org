@@ -740,6 +740,31 @@ progn returns the last expression in its body.
 #+BEGIN_EXAMPLE
 (progn 3 4 ) ; 4
 #+END_EXAMPLE
+** buffer-string
+buffer-string
+
+This function returns the contents of the entire accessible portion of the current buffer, as a string. If the text being copied has any text properties, these are copied into the string along with the characters they belong to.
+** cl-defstruct
+cl-defstruct is an autoloaded Lisp macro in `cl-macs.el'.
+
+(cl-defstruct NAME SLOTS...)
+
+Define a struct type.
+This macro defines a new data type called NAME that stores data
+in SLOTs. It defines a `make-NAME' constructor, a `copy-NAME'
+copier, a `NAME-p' predicate, and slot accessors named `NAME-SLOT'.
+You can use the accessors to set the corresponding slots, via `setf'.
+
+NAME may instead take the form (NAME OPTIONS...), where each
+OPTION is either a single keyword or (KEYWORD VALUE) where
+KEYWORD can be one of :conc-name, :constructor, :copier, :predicate,
+:type, :named, :initial-offset, :print-function, or :include.
+
+Each SLOT may instead take the form (SNAME SDEFAULT SOPTIONS...), where
+SDEFAULT is the default value of that slot and SOPTIONS are keyword-value
+pairs for that slot.
+Currently, only one keyword is supported, `:read-only'. If this has a
+non-nil value, that slot cannot be set via `setf'.
 ** defcustom
 定义变量,然后可以在customize里进行配置.
 ** dolist
@@ -749,33 +774,51 @@ progn returns the last expression in its body.
 (setq a 0)
 (dolist (i '(1 2 3 4 5) a) (cl-incf a i)) => 15
 #+END_SRC
+** expand-file-name
+expand-file-name filename &optional directory
+
+This function converts filename to an absolute file name. If directory is supplied, it is the default directory to start with if filename is relative and does not start with ‘~’. (The value of directory should itself be an absolute directory name or directory file name; it may start with ‘~’.) Otherwise, the current buffer’s value of default-directory is used. For example:
+
+(expand-file-name "foo")
+     ⇒ "/xcssun/users/rms/lewis/foo"
+(expand-file-name "../foo")
+     ⇒ "/xcssun/users/rms/foo"
+(expand-file-name "foo" "/usr/spool/")
+     ⇒ "/usr/spool/foo"
 ** fboundp
 This function returns t if the symbol has an object in its function cell, nil otherwise. It does not check that the object is a legitimate function.
 ** functionp
 Returns true if object is of type function; otherwise, returns false.
-** file-exists-p filename
-This function returns t if a file named filename appears to exist. This does not mean you can necessarily read the file, only that you can probably find out its attributes. (On GNU and other POSIX-like systems, this is true if the file exists and you have execute permission on the containing directories, regardless of the permissions of the file itself.)
-
-If the file does not exist, or if there was trouble determining whether the file exists, this function returns nil.
-
-Directories are files, so file-exists-p can return t when given a directory. However, because file-exists-p follows symbolic links, it returns t for a symbolic link name only if the target file exists.
-** file-readable-p filename
-This function returns t if a file named filename exists and you can read it. It returns nil otherwise.
-** file-executable-p filename
-This function returns t if a file named filename exists and you can execute it. It returns nil otherwise. On GNU and other POSIX-like systems, if the file is a directory, execute permission means you can check the existence and attributes of files inside the directory, and open those files if their modes permit.
-** file-writable-p filename 
-This function returns t if the file filename can be written or created by you, and nil otherwise. A file is writable if the file exists and you can write it. It is creatable if it does not exist, but its parent directory does exist and you can write in that directory.
-
-In the example below, foo is not writable because the parent directory does not exist, even though the user could create such a directory.
-
-(file-writable-p "~/no-such-dir/foo")
-     ⇒ nil
 ** file-accessible-directory-p dirname
 This function returns t if you have permission to open existing files in the directory whose name as a file is dirname; otherwise (e.g., if there is no such directory), it returns nil. The value of dirname may be either a directory name (such as /foo/) or the file name of a file which is a directory (such as /foo, without the final slash).
 
 For example, from the following we deduce that any attempt to read a file in /foo/ will give an error:
 
 (file-accessible-directory-p "/foo")
+     ⇒ nil
+** file-executable-p filename
+This function returns t if a file named filename exists and you can execute it. It returns nil otherwise. On GNU and other POSIX-like systems, if the file is a directory, execute permission means you can check the existence and attributes of files inside the directory, and open those files if their modes permit.
+** file-exists-p filename
+This function returns t if a file named filename appears to exist. This does not mean you can necessarily read the file, only that you can probably find out its attributes. (On GNU and other POSIX-like systems, this is true if the file exists and you have execute permission on the containing directories, regardless of the permissions of the file itself.)
+
+If the file does not exist, or if there was trouble determining whether the file exists, this function returns nil.
+
+Directories are files, so file-exists-p can return t when given a directory. However, because file-exists-p follows symbolic links, it returns t for a symbolic link name only if the target file exists.
+** file-name-as-directory
+file-name-as-directory filename ¶
+
+This function returns a string representing filename in a form that the operating system will interpret as the name of a directory (a directory name). On most systems, this means appending a slash to the string (if it does not already end in one).
+
+(file-name-as-directory "~rms/lewis")
+     ⇒ "~rms/lewis/"
+** file-readable-p filename
+This function returns t if a file named filename exists and you can read it. It returns nil otherwise.
+** file-writable-p filename 
+This function returns t if the file filename can be written or created by you, and nil otherwise. A file is writable if the file exists and you can write it. It is creatable if it does not exist, but its parent directory does exist and you can write in that directory.
+
+In the example below, foo is not writable because the parent directory does not exist, even though the user could create such a directory.
+
+(file-writable-p "~/no-such-dir/foo")
      ⇒ nil
 ** If Then Else
 The form for “if” expression is:
@@ -801,6 +844,10 @@ If you do not need a “else” part, you should use the function when instead, 
 Its meaning is the same as
 
 (if test (progn expr1 expr2 …))
+** insert
+insert &rest args
+
+This function inserts the strings and/or characters args into the current buffer, at point, moving point forward. In other words, it inserts the text before point. An error is signaled unless all args are either strings or characters. The value is nil.
 ** Loop
 Most basic loop in elisp is with while.
 
@@ -888,6 +935,60 @@ This function returns the name of the machine you are running on, as a string.
 *** User Option: mail-host-address
 If this variable is non-nil, it is used instead of system-name for purposes of generating email addresses. For example, it is used when constructing the default value of user-mail-address. See User Identification.
 
+** split-string
+split-string string &optional separators omit-nulls trim ¶
+This function splits string into substrings based on the regular expression separators (see Regular Expressions). Each match for separators defines a splitting point; the substrings between splitting points are made into a list, which is returned.
+
+If separators is nil (or omitted), the default is the value of split-string-default-separators and the function behaves as if omit-nulls were t.
+
+If omit-nulls is nil (or omitted), the result contains null strings whenever there are two consecutive matches for separators, or a match is adjacent to the beginning or end of string. If omit-nulls is t, these null strings are omitted from the result.
+
+If the optional argument trim is non-nil, it should be a regular expression to match text to trim from the beginning and end of each substring. If trimming makes the substring empty, it is treated as null.
+
+If you need to split a string into a list of individual command-line arguments suitable for call-process or start-process, see split-string-and-unquote.
+
+Examples:
+
+(split-string "  two words ")
+     ⇒ ("two" "words")
+The result is not ("" "two" "words" ""), which would rarely be useful. If you need such a result, use an explicit value for separators:
+
+(split-string "  two words "
+              split-string-default-separators)
+     ⇒ ("" "two" "words" "")
+(split-string "Soup is good food" "o")
+     ⇒ ("S" "up is g" "" "d f" "" "d")
+(split-string "Soup is good food" "o" t)
+     ⇒ ("S" "up is g" "d f" "d")
+(split-string "Soup is good food" "o+")
+     ⇒ ("S" "up is g" "d f" "d")
+Empty matches do count, except that split-string will not look for a final empty match when it already reached the end of the string using a non-empty match or when string is empty:
+
+(split-string "aooob" "o*")
+     ⇒ ("" "a" "" "b" "")
+(split-string "ooaboo" "o*")
+     ⇒ ("" "" "a" "b" "")
+(split-string "" "")
+     ⇒ ("")
+However, when separators can match the empty string, omit-nulls is usually t, so that the subtleties in the three previous examples are rarely relevant:
+
+(split-string "Soup is good food" "o*" t)
+     ⇒ ("S" "u" "p" " " "i" "s" " " "g" "d" " " "f" "d")
+(split-string "Nice doggy!" "" t)
+     ⇒ ("N" "i" "c" "e" " " "d" "o" "g" "g" "y" "!")
+(split-string "" "" t)
+     ⇒ nil
+Somewhat odd, but predictable, behavior can occur for certain “non-greedy” values of separators that can prefer empty matches over non-empty matches. Again, such values rarely occur in practice:
+
+(split-string "ooo" "o*" t)
+     ⇒ nil
+(split-string "ooo" "\\|o+" t)
+     ⇒ ("o" "o" "o")
+** with-temp-buffer
+(with-temp-buffer (insert "abcdefg") (buffer-substring 2 4))
+==> "bc"
+
+相当于创建了个临时的buffer,然后在buffer里分别执行(insert "abcdefg")和 (buffer-substring 2 4)两条命令.
 * emacs配置文件
 ** Major Mode和Minor Mode
 Emacs 的配置文件默认保存在 =~/.emacs.d/init.el= 文件中。（如果其不存在可自行创建，
@@ -3888,6 +3989,43 @@ M-x customized-variable RET reftex-label-alist RET
 #+DOWNLOADED: screenshot @ 2023-04-29 12:12:24
 [[file:images/emacs笔记/RefTex/2023-04-29_12-12-24_screenshot.png]]
 
+* tramp
+** 与其他模块结合
+在 Emacs 中，shell.el、eshell.el、compile.el、gud.el（gdb）这几个内置模块都与 tramp 做了完美整合，执行相应命令时会通过相应协议在远端执行。
+** 多级跳跃 multiple hops
+一般来说，公司内处于安全考虑，会禁止开发同学直接登录生产机器，相应会提供一跳板机来登录生产机器 ，这时就需要多次跳跃。tramp 支持通过下面的语法，级联登录多个机器
+
+C-x C-f /ssh:bird@bastion|ssh:admin@production:/path RET
+上面命令会先用 bird 用户登录堡垒机 bastion，之后再在堡垒机上以 admin 用户登录 production 打开 /path 。
+** 以 sudo 方式打开文件
+一般来说，登录远端机器时都是非 root 用户，有时会需要用 sudo 来打开某些文件，tramp 通过下面的语法支持这类操作：
+
+C-x C-f /ssh:you@remotehost|sudo::/path RET
+sudo:: 的方式在 Emacs 27 上运行没有问题，其他低版本可能需要输入完整的命令：
+
+C-x C-f /ssh:you@remotehost|sudo:remotehost:/path RET
+** 重启emacs卡死的解决方法
+Tramp 打开的远端文件和本地的文件没什么区别，会被记录在 backup、autosave、recentf 等中。在今后重启 Emacs 时，如果这时无法连接远端机器，Emacs 可能会卡住，这时因为 tramp 会对之前打开的文件进行检查，可以通过下面的一些配置来绕过 tramp，让 backup 等机制不对 tramp 打开的文件起作用：
+
+(setq recentf-exclude `(,tramp-file-name-regexp
+                        "COMMIT_EDITMSG")
+      tramp-auto-save-directory temporary-file-directory
+      backup-directory-alist (list (cons tramp-file-name-regexp nil)))
+如果用了 emacs-dashboard 来展示 project.el 中的项目，Emacs 启动时会检查这些项目，因此也需要跳过那些远端项目，不要持久化保存：
+
+(defun my/project-remember-advice (fn pr &optional no-write)
+  (let* ((remote? (file-remote-p (project-root pr)))
+         (no-write (if remote? t no-write)))
+    (funcall fn pr no-write)))
+
+(advice-add 'project-remember-project :around
+            'my/project-remember-advice)
+如果通过上面的配置，打开 Emacs 还是有卡吨，可以通过调整 tramp-verbose 来进行调试：
+
+(setq tramp-verbose 10); 默认是 3
+设置之后再重启时，会在 *debug-tramp* 内打开出 tramp 执行的详细信息。
+** 参考文章
+[[https://zhuanlan.zhihu.com/p/488366338][Tramp 使用指南]]
 * #'的作用
 function (aka #') is used to quote functions, whereas quote (aka ') is used to quote data.
 [[https://stackoverflow.com/questions/16801396/when-should-emacs-function-syntax-be-used][When should Emacs #'function syntax be used?]]

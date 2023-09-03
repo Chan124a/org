@@ -10688,6 +10688,35 @@ mount [-t vfstype] [-o options] device dir
 3.device 要挂接(mount)的设备。
 
 4.dir设备在系统上的挂接点(mount point)。
+* minGW
+** 安装
+1) 打开 MinGW 官网（点击即可进入官网），下载 MinGW 安装包。
+
+2) 下载完成后，会得到一个名为 mingw-get-setup.exe 的安装包，双击打开它，可以看到如下的对话框：
+   #+DOWNLOADED: screenshot @ 2023-09-03 15:10:36
+   [[file:images/linux笔记/minGW/2023-09-03_15-10-36_screenshot.png]]
+3) 直接点击“Install”，进入下面的对话框：
+   #+DOWNLOADED: screenshot @ 2023-09-03 15:10:49
+   [[file:images/linux笔记/minGW/2023-09-03_15-10-49_screenshot.png]]
+4) 读者可根据自己操作系统的实际情况，自定义 MinGW 的安装位置（例如我选择将其安装到 E 盘），然后点击“continue”，进入下面的对话框：
+   #+DOWNLOADED: screenshot @ 2023-09-03 15:11:06
+   [[file:images/linux笔记/minGW/2023-09-03_15-11-06_screenshot.png]]
+5) 进入安装 MinGW 配置器的界面，读者耐心等待安装完成（显示 100%）即可。安装完成之后，我们会得到一个名为 "MinGW Installer Manager" 的软件，借助它，我们可以随时根据需要修改 GCC 编译器的配置。点击“continue”,会自动弹出配置界面，如下所示：
+   #+DOWNLOADED: screenshot @ 2023-09-03 15:11:24
+   [[file:images/linux笔记/minGW/2023-09-03_15-11-24_screenshot.png]]
+勾选完成后，在菜单栏中选择Installation -> Apply Changes，弹出如下对话框：
+
+#+DOWNLOADED: screenshot @ 2023-09-03 15:11:39
+[[file:images/linux笔记/minGW/2023-09-03_15-11-39_screenshot.png]]
+选择“Apply”。然后耐心等待，直至安装成功，即可关闭此界面。注意，整个安装过程中可能会提示某些组件下载失败，但没关系，后续需要时，可以通过 MinGw Installer（图 4 所示）安装界面中的 “All Packages”选项中，手动选择指定的安装包进行安装。
+
+6) 在安装完成的基础上，我们需要手动配置 PATH 环境变量。依次右击计算机（我的电脑） -> 属性 -> 高级系统设置 -> 环境变量，建议读者在当前用户的 PATH 环境变量中增加 MinGW 的安装路径，例如我将其安装到了E:\MinGW文件夹中，因此 PATH 环境变量的设置如下：
+
+#+DOWNLOADED: screenshot @ 2023-09-03 15:11:56
+[[file:images/linux笔记/minGW/2023-09-03_15-11-56_screenshot.png]]
+
+7) 由此，打开命令行窗口（通过在搜索栏中执行 cmd 指令即可），输入gcc -v指令，如果输出 GCC 编译器的具体信息，则表示安装成功.
+
 * objdump
 objdump命令是Linux下的反汇编目标文件或者可执行文件的命令，它以一种可阅读的格式让你更多地了解二进制文件可能带有的附加信息。
 
@@ -15624,6 +15653,13 @@ oflag参数可用来说明此函数的多个选项。用下列一个或多个常
 - O_TTY_INIT 如果打开一个还未打开的终端设备，设置非标准 termios 参数值，使其符合Single UNIX Specification。第18章将讨论终端I/O的termios结构。
 - O_DSYNC 使每次write要等待物理I/O操作完成，但是如果该写操作并不影响读取刚写入的数据，则不需等待文件属性被更新。O_DSYNC 和 O_SYNC 标志有微妙的区别。仅当文件属性需要更新以反映文件数据变化（例如，更新文件大小以反映文件中包含了更多的数据）时，O_DSYNC标志才影响文件属性。而设置O_SYNC标志后，数据和属性总是同步更新。当文件用O_DSYN标志打开，在重写其现有的部分内容时，文件时间属性不会同步更新。与此相反，如果文件是用O_SYNC标志打开，那么对该文件的每一次write都将在write返回前更新文件时间，这与是否改写现有字节或追加写文件无关。
 - O_RSYNC使每一个以文件描述符作为参数进行的read操作等待，直至所有对文件同一部分挂起的写操作都完成。
+
+**** O_DSYNC
+O_DSYNC告诉内核，当向文件写入数据的时候，只有当数据写到了磁盘时，写入操作才算完成（write才返回成功）。
+和O_DSYNC同类的文件标志，还有O_SYNC,O_RSYNC，O_DIRECT。
+O_SYNC比O_DSYNC更严格，不仅要求数据已经写到了磁盘，而且对应的数据文件的属性（例如文件长度等）也需要更新完成才算write操作成功。可见O_SYNC较之O_DSYNC要多做一些操作。
+O_RSYNC表示文件读取时，该文件的OS cache必须已经全部flush到磁盘了【附录3】 ；
+如果使用O_DIRECT打开文件，则读/写操作都会跳过OS cache，直接在device（disk）上读/写。因为没有了OS cache，所以会O_DIRECT降低文件的顺序读写的效率。
 *** 返回值
 两函数的返回值：若成功，返回文件描述符；若出错，返回−1
 
