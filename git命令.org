@@ -1330,6 +1330,42 @@ $ git revert [commit]
 $ git stash
 $ git stash pop
 #+END_SRC
+** Git blame 查看代码是谁写的
+git blame 命令可以查看每行代码的提交详情，包括提交人、时间等信息，成熟的编辑器如 Sublime、Jetbrains 等都集成了这个功能.
+#+BEGIN_SRC emacs-lisp :results output
+$ git blame <filename>
+#+END_SRC
+
+得到的结果，每列分别为:
+提交 sha1   用户名 提交时间                    行数    代码
+
+#+begin_src bash
+# 要看某一行或某个范围行，这时可以使用 -L 参数。
+$ git blame <filename> -L <start>[,<end>]
+
+# 查看第 10 行
+$ git blame <filename> -L 10,10
+# 查看第 10 行及以后
+$ git blame <filename> -L 10
+# 查看第 10 到 20 行
+$ git blame <filename> -L 10,20
+
+# end 也可以加上正负符号，比如
+# 查看 10 行以后 5 行的数据
+$ git blame <filename> -L 10,+5
+# 查看 10 行以前 5 行的数据
+$ git blame <filename> -L 10,-5
+
+# start 和 end 又不止于数字，它还可以是个正则表达式
+# 查看正则匹配到 20 行
+$ git blame <filename> -L /filter/,20
+
+# 可以通过-L:进行过滤
+$ git blame <filename> -L:filter
+#+END_SRC
+
+*** 参考文章
+[[https://wxnacy.com/2019/05/21/git-blame/][Git blame 查看代码是谁写的]]
 ** 其他
 #+BEGIN_SRC bash
 # 生成一个可供发布的压缩包

@@ -2949,6 +2949,41 @@ if __name__=='__main__':
     print(first)   #输出 1  
 #+END_SRC
 
+* excel操作
+** pandas 读写 Excel
+表格内容如下：
+
+#+DOWNLOADED: screenshot @ 2023-10-09 23:51:45
+[[file:images/python/excel操作/2023-10-09_23-51-45_screenshot.png]]
+程序示例：
+#+begin_src  python
+import pandas as pd
+from pandas import DataFrame
+
+
+# 3.8.2 pandas读写Excel
+def fun3_8_2():
+    data = pd.read_excel('3_8 pandas 修改操作练习.xlsx', sheet_name='Sheet1')
+    print(data)
+
+    # 增加行数据，在第5行新增
+    data.loc[4] = ['4', 'john', 'pandas']
+
+    # 增加列数据，给定默认值None
+    data['new_col'] = None
+
+    # 保存数据
+    DataFrame(data).to_excel('new.xlsx', sheet_name='Sheet1', index=False, header=True)
+
+
+if __name__ == '__main__':
+    fun3_8_2()
+#+end_src
+
+#+DOWNLOADED: screenshot @ 2023-10-09 23:52:52
+[[file:images/python/excel操作/2023-10-09_23-52-52_screenshot.png]]
+** 参考文章
+[[https://zhuanlan.zhihu.com/p/259583430][Python 自动化操作 Excel 看这一篇就够了]]
 * field
 field 在 dataclasses 里面是比较重要的功能， 用于初处理定义的参数非常有用
 在 PEP 557 中是这样描述 field 的
@@ -3046,6 +3081,54 @@ class A:
 print(A().a) # 实例化 A 的时候已经可以不传递值了
 #+END_SRC
 打印的结果是 '123'
+* filter() 函数
+filter() 函数用于过滤序列，过滤掉不符合条件的元素，返回由符合条件元素组成的新列表。
+
+该接收两个参数，第一个为函数，第二个为序列，序列的每个元素作为参数传递给函数进行判断，然后返回 True 或 False，最后将返回 True 的元素放到新列表中。
+
+注意: Python2.7 返回列表，Python3.x 返回迭代器对象，具体内容可以查看：Python3 filter() 函数
+
+语法
+以下是 filter() 方法的语法:
+
+filter(function, iterable)
+参数
+function -- 判断函数。
+iterable -- 可迭代对象。
+返回值
+返回列表。
+
+实例
+以下展示了使用 filter 函数的实例：
+
+过滤出列表中的所有奇数：
+#!/usr/bin/python
+# -*- coding: UTF-8 -*-
+ 
+def is_odd(n):
+    return n % 2 == 1
+ 
+newlist = filter(is_odd, [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+print(newlist)
+输出结果 ：
+
+[1, 3, 5, 7, 9]
+过滤出1~100中平方根是整数的数：
+#!/usr/bin/python
+# -*- coding: UTF-8 -*-
+ 
+import math
+def is_sqr(x):
+    return math.sqrt(x) % 1 == 0
+ 
+newlist = filter(is_sqr, range(1, 101))
+print(newlist)
+输出结果 ：
+
+[1, 4, 9, 16, 25, 36, 49, 64, 81, 100]
+
+** 参考文章
+[[https://www.runoob.com/python/python-func-filter.html][Python filter() 函数]]
 * format()用法
 format():把传统的%替换为{}来实现格式化输出
 
@@ -7811,17 +7894,71 @@ find_element_by_partial_link_text()
 find_element_by_xpath()
 find_element_by_css_selector()
 #+END_EXAMPLE
+
+除了上述的公共方法，下面还有两个私有方法，在你查找也页面元素的时候也许有用。 他们是 find_element 和 find_elements 。
+
+用法示例:
+#+begin_src python
+from selenium.webdriver.common.by import By
+
+driver.find_element(By.XPATH, '//button[text()="Some text"]')
+driver.find_elements(By.XPATH, '//button')
+#+END_SRC
+下面是 By 类的一些可用属性:
+#+begin_example
+ID = "id"
+XPATH = "xpath"
+LINK_TEXT = "link text"
+PARTIAL_LINK_TEXT = "partial link text"
+NAME = "name"
+TAG_NAME = "tag name"
+CLASS_NAME = "class name"
+CSS_SELECTOR = "css selector"
+#+end_example
+*** 通过链接文本获取超链接
+当你知道在一个锚标签中使用的链接文本时使用这个。 在该策略下，页面中第一个匹配链接内容锚标签 会被匹配并返回。如果找不到任何元素，会抛出 NoSuchElementException 异常。
+
+作为示例，页面元素如下所示:
+#+begin_example
+<html>
+ <body>
+  <p>Are you sure you want to do this?</p>
+  <a href="continue.html">Continue</a>
+  <a href="cancel.html">Cancel</a>
+</body>
+<html>
+#+end_example
+continue.html 超链接可以被这样查找到:
+#+begin_src python
+continue_link = driver.find_element_by_link_text('Continue')
+continue_link = driver.find_element_by_partial_link_text('Conti')
+#+END_SRC
+**** AttributeError: ‘WebDriver‘ object has no attribute ‘find_element_by_link_text‘ 解决
+原因：
+Selenium在4.3.0版本中移除了find_element_by_*
+
+解决办法：
+用driver.find_element()代替
+
+原代码：
+driver.find_element_by_link_text('Pet. Eng. Handbook')
+替换为： 
+driver.find_element("link text", "Pet. Eng. Handbook")
 ** Webelement常用方法
 点击和输入
 #+begin_src python
-driver.find_element_by_id("kw").clear() # 清楚文本 driver.find_element_by_id("kw").send_keys("selenium") # 模拟按键输入 driver.find_element_by_id("su").click() # 单机元素
+driver.find_element_by_id("kw").clear() # 清楚文本
+driver.find_element_by_id("kw").send_keys("selenium") # 模拟按键输入
+driver.find_element_by_id("su").click() # 单机元素
 #+END_SRC
 
 提交
 
 可以在搜索框模拟回车操作
 #+begin_src python
-search_text = driver.find_element_by_id('kw') search_text.send_keys('selenium') search_text.submit()
+search_text = driver.find_element_by_id('kw')
+search_text.send_keys('selenium')
+search_text.submit()
 #+END_SRC
 
 其他
@@ -7858,6 +7995,9 @@ above = driver.find_element_by_link_text("设置")
 ActionChains(driver).move_to_element(above).perform()
 #+END_SRC
 ** 键盘事件
+Keys类提供键盘按键的支持，比如：RETURN, F1, ALT等
+from selenium.webdriver.common.keys import Keys
+
 以下为常用的键盘操作：
 - send_keys(Keys.BACK_SPACE) 删除键（BackSpace）
 - send_keys(Keys.SPACE) 空格键(Space)
@@ -10414,6 +10554,122 @@ zhconv 提供基于 MediaWiki 词汇表的最大正向匹配简繁转换。Pytho
 '張國榮曾在英國里茲大學學習。'
 #+END_SRC
 
+* 如何在Python中过滤字符串列表
+** 使用另一个列表过滤字符串列表
+本示例说明了如何在不使用任何方法的情况下过滤字符串列表中的数据。 字符串列表在此使用另一个列表进行过滤。 在此，声明了两个列表变量，名称分别为list1和list2。 使用list1的值过滤list2的值。 该脚本会将list2的每个值的第一个单词与list1的值进行匹配，并打印list1中不存在的那些值。
+
+Copy
+#coding=utf-8
+# 声明两个列表变量
+list1 = ['Python', 'PHP', 'Java',  'Bash']
+list2 = ['JavaScript是客户端脚本语言',
+        'PHP是服务器端脚本语言',
+         'Java是一种编程语言',
+        'Kotlin是一种静态编程语言']
+
+# 根据第一个列表过滤第二个列表
+filter_data = [x for x in list2 if
+              all(y  not in x for y in list1)]
+
+# 在过滤前和过滤后打印列表数据
+print("第一个列表的内容:",  list1)
+print("第二个列表的内容:", list2)
+print("过滤后的第二个列表的内容:", filter_data)
+运行脚本。 在此，list1不包含单词“Kotlin”。 输出将仅包含list2中的一个值，即 ['Kotlin是一种静态编程语言']。
+
+输出如下：
+第一个列表的内容: ['Python', 'PHP', 'Java', 'Bash']
+第二个列表的内容: ['JavaScript是客户端脚本语言', 'PHP是服务器端脚本语言', 'Java是一种编程语言', 'Kotlin是一种静态编程语言']
+过滤后的第二个列表的内容: ['Kotlin是一种静态编程语言']
+** 使用另一个列表和自定义函数过滤字符串列表
+本示例说明如何使用另一个列表和自定义过滤器功能过滤字符串列表。 该脚本包含两个名为list1和list2的列表变量。 自定义过滤器功能将找出两个列表变量的公共值。
+
+Copy
+# 声明两个列表变量
+list1 = ['100', '67', '39', '505', '122', '287', '399']
+list2 =  ['70', '100', '308', '415', '362', '230']
+
+# 声明一个函数来过滤第一个列表中的数据
+def  Filter(list1, list2):
+    return [n for n in list1 if
+            any(m in  n for m in list2)]
+
+# 在过滤器之前和之后打印列表数据
+print("list1的的内容:",  list1)
+print("list2的的内容:", list2)
+print("过滤后的数据",Filter(list1, list2))
+运行脚本。 两个列表变量中都存在100的值。 运行脚本后，将生成以下输出。
+
+list1的的内容: ['100', '67', '39', '505', '122', '287', '399']
+list2的的内容: ['70', '100', '308', '415', '362', '230']
+过滤后的数据 ['100']
+
+** 使用正则表达式过滤字符串列表
+通过使用前两个示例中的all()和any()方法来过滤列表。 在此示例中，使用正则表达式从列表中过滤数据。 正则表达式是一种模式，通过该模式可以搜索或匹配任何数据。 Python中使用're'模块在脚本中应用正则表达式。 在此，使用主题代码声明列表。 正则表达式用于过滤以“ CSE”开头的主题代码。 正则表达式模式中使用'^'符号在文本的开头进行搜索。
+
+Copy
+# 导入re模块以使用正则表达式
+import re
+
+# 声明列表包含科目编号
+sublist = ['IDC-108',  'OKY-309', 'IDC-709', 'PHP-102', 'MIO-801']
+
+# 声明过滤功能
+def Filter(datalist):
+    # 根据列表中的正则表达式搜索数据
+    return [val  for val in datalist
+        if re.search(r'^IDC', val)]
+
+# 打印过滤器数据
+print(Filter(sublist))
+运行脚本。 子列表变量包含两个以“IDC”开头的值。 运行脚本后，将显示以下输出。
+
+['IDC-108', 'IDC-709']
+
+** 使用lamda表达式过滤字符串列表
+本示例说明了使用lamda表达式从字符串列表中过滤数据。 在这里，名为search_word的列表变量用于从名为text的文本变量中过滤内容。 通过使用split（）方法，基于空间将文本内容转换为名为text_word的列表。 lamda表达式将忽略text_word中存在于search_word中的那些值，并通过添加空格将过滤后的值存储在变量中。
+
+Copy
+# 声明一个包含linuxidc_word中关键词的列表
+linuxidc_word = ["系统", "linuxidc", "Python",  "Kotlin"]
+
+# 定义文本，从列表中搜索单词
+text = "Linux公社 linuxidc 是专业的 Linux 系统 门户网站，实时发布 最新 Kotlin  资讯!"
+
+# 根据空格分割文本并将单词存储在列表中
+text_word = text.split()
+
+# 使用lambda表达式过滤数据
+filter_text = ' '.join((filter(lambda val: val not in  linuxidc_word, text_word)))
+
+# 在过滤前和过滤后打印文本
+print("\n过滤前的文本：\n", text)
+print("过滤后的文本：\n",  filter_text)
+运行脚本。 运行脚本后，将显示以下输出。
+
+过滤前的文本：
+Linux公社 linuxidc 是专业的 Linux 系统 门户网站，实时发布 最新 Kotlin 资讯!
+过滤后的文本：
+Linux公社 是专业的 Linux 门户网站，实时发布 最新 资讯!
+
+** 使用filter()方法过滤字符串列表
+filter()方法接受两个参数。 第一个参数采用函数名称或“ None”，第二个参数采用列表变量的名称作为值。 filter()方法如果返回true，则从列表中存储这些数据，否则将丢弃该数据。 在此，第一个参数值不指定任何值。 所有不为false的值将从列表中检索为已过滤数据。
+
+Copy
+#声明混合数据列表
+listData = ['linuxidc', 90, 9, 'com', 100, False, 22, True,  '1']
+
+# 使用None和列表调用filter()方法
+filteredData = filter(None,  listData)
+
+#过滤数据后打印列表
+print('过滤后的列表：')
+for val in  filteredData:
+    print(val)
+运行脚本。该列表只包含一个false值，在过滤后的数据中将省略该false值。运行脚本后将出现以下输出。
+
+** 参考文章
+[[https://www.cnblogs.com/wyh0923/p/14166552.html][如何在Python中过滤字符串列表]]
 * 问题集锦
 ** python3 报错TypeError: 'range' object does not support item assignment
 尝试使用range() 创建整数列表（导致“TypeError: ‘range’ object does not support item assignment”）有时你想要得到一个有序的整数列表，所以range() 看上去是生成此列表的不错方式。然而，你需要记住range() 返回的是“range object”，而不是实际的list 值。

@@ -103,3 +103,55 @@ Ctrl+W关闭窗口，点击菜单栏，窗口—动作，动作小窗口点击�
 [[file:images/windows%E6%93%8D%E4%BD%9C%E6%96%B9%E6%B3%95/pdf_%E5%8A%A0%E6%B7%B1_%E6%89%AB%E6%8F%8F%E4%BB%B6/2022-07-16_10-11-57_screenshot.png]]
 ** 参考文章
 [[https://blog.csdn.net/weixin_39628160/article/details/111647690][pdf 加深 扫描件_将扫描的PDF文件颜色加深]]
+
+* Windows下交换CapsLock 和 Ctrl 键位的方式
+1、点击Win+R键
+2、在输入框键入regedit，打开注册表
+3、进入HKEY_LOCAL_MACHINE -> System -> CurrentControlSet -> Control -> KeyBoard Layout。
+4、右键菜单，然后选择New -> Binary value
+5、重命名New Value #1 -> Scancode Map
+6、右键菜单Scancode Map -> Modify
+
+如果要交换CapsLock 与左Ctrl与输入如下值：
+#+begin_example
+0000 00 00 00 00 00 00 00 00
+0008 03 00 00 00 1D 00 3A 00
+0010 3A 00 1D 00 00 00 00 00
+0018
+#+end_example
+
+
+如果要交换CapsLock 与右Ctrl与输入如下值：
+#+begin_example
+00,00,00,00,00,00,00,00
+03,00,00,00,3A,00,1D,E0
+1D,E0,3A,00,00,00,00,00
+#+end_example
+
+7、注销Windows账号，然后重新登录，就可以使用了。
+
+** window键位映射关系：
+#+begin_example
+Escape 01 00
+Tab 0F 00
+Caps Lock 3A 00
+Left Alt 38 00
+Left Ctrl 1D 00
+Left Shift 2A 00
+Left Windows 5B E0
+Right Alt 38 E0
+Right Ctrl 1D E0
+Right Shift 36 00
+Right Windows 5C E0
+Backspace 0E 00
+Delete 53 E0
+Enter 1C 00
+Space 39 00
+Insert 52 E0
+HOME 47 E0
+End 4F E0
+Num Lock 45 00
+Page Down 51 E0
+Page Up 49 E0
+Scroll Lock 46 00
+#+end_example

@@ -127,6 +127,13 @@ ISO指的是传感器对于光线的敏感程度.
 相同ISO,性能越好的相机,相片越细腻.
 高ISO带来的噪点可以通过后期消除掉一些.
 
+* 噪点
+噪点会随着ISO的增加而大幅度增加.
+ISO为3200时,画面中的噪点就密密麻麻.
+
+可以通过补光灯增加环境亮度或者三脚架延迟曝光时间来减少噪点.
+** 向右曝光
+宁欠勿过,前期拍摄时,应该要尽量欠曝一点,让直方图往左走,这样画面里高光的部位不至于过曝.
 * 安全快门
 保证手抖不影响相片模糊的最慢的快门称为安全快门.
 
@@ -173,3 +180,104 @@ ISO指的是传感器对于光线的敏感程度.
 红色拉倒50 蓝色拉倒-50.
 发现饱和度有点高，就可以把蓝颜色的饱和度拉下来，红色的饱和度也拉下来一点。
 橙蓝色对比峰。
+** 曝光度
+可以调整画面的整体亮度
+** 对比度
+增加对比度可以同时提升画面的高光以及压暗暗部.
+** 直方图
+直方图是亮度的统计报告图.
+横坐标表示亮度级别,范围为0-255,最右边表示最亮,最左表表示最暗.
+纵坐标表示像素数量.
+
+#+DOWNLOADED: screenshot @ 2023-10-07 23:23:56
+[[file:images/摄影/lightRoom/2023-10-07_23-23-56_screenshot.png]]
+
+** 曲线
+曲线是通过映射的方式,重塑直方图.
+实际上就是对横坐标进行转换.
+
+#+DOWNLOADED: screenshot @ 2023-10-08 22:53:58
+[[file:images/摄影/lightRoom/2023-10-08_22-53-58_screenshot.png]]
+
+直线上面的提亮,直线下面的压暗
+#+DOWNLOADED: screenshot @ 2023-10-08 22:54:20
+[[file:images/摄影/lightRoom/2023-10-08_22-54-20_screenshot.png]]
+** 常见曲线
+*** 提亮曲线
+往左上角拉曲线
+#+DOWNLOADED: screenshot @ 2023-10-08 22:56:47
+[[file:images/摄影/lightRoom/2023-10-08_22-56-47_screenshot.png]]
+
+*** 压暗曲线
+往右下角拉曲线
+#+DOWNLOADED: screenshot @ 2023-10-08 22:56:17
+[[file:images/摄影/lightRoom/2023-10-08_22-56-17_screenshot.png]]
+
+*** 加强对比度
+阴影压暗,同时高光提亮
+#+DOWNLOADED: screenshot @ 2023-10-08 22:57:35
+[[file:images/摄影/lightRoom/2023-10-08_22-57-35_screenshot.png]]
+
+*** 胶片灰
+
+#+DOWNLOADED: screenshot @ 2023-10-08 22:58:18
+[[file:images/摄影/lightRoom/2023-10-08_22-58-18_screenshot.png]]
+
+** 曲线调色
+*** 日系小清新
+整体大幅度提亮
+#+DOWNLOADED: screenshot @ 2023-10-08 23:13:36
+[[file:images/摄影/lightRoom/2023-10-08_23-13-36_screenshot.png]]
+
+绿色:阴影偏绿,高光不要偏向任何色彩
+#+DOWNLOADED: screenshot @ 2023-10-08 23:14:27
+[[file:images/摄影/lightRoom/2023-10-08_23-14-27_screenshot.png]]
+
+蓝色:阴影偏黄
+#+DOWNLOADED: screenshot @ 2023-10-08 23:15:27
+[[file:images/摄影/lightRoom/2023-10-08_23-15-27_screenshot.png]]
+
+红色:整体给一点青色
+#+DOWNLOADED: screenshot @ 2023-10-08 23:16:16
+[[file:images/摄影/lightRoom/2023-10-08_23-16-16_screenshot.png]]
+
+
+
+#+DOWNLOADED: screenshot @ 2023-10-08 23:18:24
+[[file:images/摄影/lightRoom/2023-10-08_23-18-24_screenshot.png]]
+
+#+DOWNLOADED: screenshot @ 2023-10-08 23:18:11
+[[file:images/摄影/lightRoom/2023-10-08_23-18-11_screenshot.png]]
+
+*** 复古色调
+整体提亮
+#+DOWNLOADED: screenshot @ 2023-10-08 23:17:43
+[[file:images/摄影/lightRoom/2023-10-08_23-17-43_screenshot.png]]
+
+红色:整体给一点青色
+#+DOWNLOADED: screenshot @ 2023-10-08 23:19:25
+[[file:images/摄影/lightRoom/2023-10-08_23-19-25_screenshot.png]]
+
+蓝色:高光偏黄
+#+DOWNLOADED: screenshot @ 2023-10-08 23:20:30
+[[file:images/摄影/lightRoom/2023-10-08_23-20-30_screenshot.png]]
+
+绿色:整体稍微给点绿色
+#+DOWNLOADED: screenshot @ 2023-10-08 23:21:17
+[[file:images/摄影/lightRoom/2023-10-08_23-21-17_screenshot.png]]
+
+#+DOWNLOADED: screenshot @ 2023-10-08 23:18:59
+[[file:images/摄影/lightRoom/2023-10-08_23-18-59_screenshot.png]]
+
+#+DOWNLOADED: screenshot @ 2023-10-08 23:21:54
+[[file:images/摄影/lightRoom/2023-10-08_23-21-54_screenshot.png]]
+
+* RGB
+** 互补色
+
+#+DOWNLOADED: screenshot @ 2023-10-08 23:03:13
+[[file:images/摄影/RGB/2023-10-08_23-03-13_screenshot.png]]
+
+
+#+DOWNLOADED: screenshot @ 2023-10-08 23:07:27
+[[file:images/摄影/RGB/2023-10-08_23-07-27_screenshot.png]]

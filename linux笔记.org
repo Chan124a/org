@@ -7583,6 +7583,58 @@ print/x $satp 查看satp寄存器
 x/3i 0xde4
 ** 参考文章
 [[https://www.zhihu.com/question/65306462/answer/2602659870][gdb 高级调试实战教程 张小方]]
+* global
+GNU Global 是一个源代码标记系统，以相同的方式工作在不同的环境中，比如 Emacs editor, Vi editor, Less viewer, Bash shell, various web browsers 等等。可以用来定位指定的符号，比如函数（function）、宏（macros）、结构体（struct）、类（class），并轻松跳转。对于包含很多子目录，有很多 #ifdef 和 main() 函数的大型项目是很有用的。它类似 ctags 或者 etags，不同之处在于其独立于编辑器。
+
+GNU GLOBAL 将包含子目录的源码树视为项目。在项目的任意地方都可以使用一个高性能的 tag 数据库。不需要指定数据库的位置，global 会自行定位。由于这个特性，可以在项目中内和项目间自由切换。
+
+可以通过命令行使用 tag 工具,和其他 tag 系统相比，这是 Global 的一大优点。
+
+GNU GLOBAL 具有以下功能：
+- 支持 C，C ++，Yacc，Java，PHP4 和 assembly。
+- 以相同的方式工作在的环境中：Shell 命令行,Bash shell,Vi 编辑器（Nvi，Elvis，vim）,Less viewer,Emacs 编辑器（Emacs，Mule，Xemacs）,网页浏览器,Doxygen 文档系统
+- 快速查找指定符号（symbol）位置。
+- 定位 symbol 定义和引用。
+- 允许重复 tag。
+- 查找匹配指定模式的路径。
+- 默认分层搜索。
+- 搜索工程源码和依赖的库源码。
+- 为补全输入方法生成补全列表。
+- 支持多种输出格式。
+- 允许自定义用来标记的候选文件。
+- 支持 POSIX 1003.2 正则表达式。
+- 支持 idutils 作为外部的搜索引擎。
+- tag 文件独立于机器架构。
+- 支持增量更新标记文件。
+- 通过解析器插件来支持新语言。
+- 通过 gtags.conf 来进行定制。
+- 为源码生成超文本文件。
+- 格式紧凑，节省磁盘空间。
+- 支持客户端/服务器环境（使用 Tramp）。
+- 忽略二进制文件、点文件和指定文件。
+- 包含兼容 cscope 的程序（gtags-cscope）。
+- 包含 grep-like 命令（-g command）。
+- 支持 grep-like 符号高亮。
+** 安装
+*** 使用自带的源安装 global
+
+1sudo apt-get install global
+*** 编译安装global
+
+Ubuntu 14.04 自带的 GLOBAL 版本是 5.7.1 但是官网都已经是 6.6. 因此如果想用最新版的 GLOBAL， 就需要自己编译安装.
+
+安装编译依赖的库
+sudo apt build-dep global
+sudo apt install libncurses5-dev libncursesw5-dev
+
+移驾至 GNU GLOBAL 官方下载最新的 tar.gz 包并解开.
+
+1wget https://ftp.gnu.org/pub/gnu/global/global-6.6.tar.gz
+编译安装
+./configure --with-sqlite3   # gtags可以使用Sqlite3作为数据库, 在编译时需要加这个参数
+make -j4
+sudo make install
+
 * gpg
 Pretty Good Privacy (PGP) 是一款诞生于 1991 年的，一款用于认证、加密的一款软件，现如今已经有了标准化协议 OpenPGP，最常用的实现是 GnuPG，一般提到 GPG 时都是指的 GnuPG。
 ** 安装
@@ -19972,7 +20024,6 @@ ssh -X tsfh@192.168.0.200　　　　　　//-X参数表示转发X11数据， �
 xclock
 #+END_SRC
 等待一小会儿 你就可以在客服端C 的桌面上看到服务器S 的xclock了
-
 
 ** termux设置方法
 先安装VNC Viewer

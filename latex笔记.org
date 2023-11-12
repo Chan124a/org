@@ -265,5 +265,6 @@ booktabs 宏包没有提供单独的表格环境，只需要在普通的表格�
 [[https://zhuanlan.zhihu.com/p/24939492][LaTeX 第六课：图表的排版 - 知乎专栏]]
 [[https://blog.csdn.net/liu3237/article/details/14165993][Latex中修改表格的整体大小 - CSDN博客]]
 
+* 图片
 * 中文支持
 \documentclass[UTF-8]{ctexart}
