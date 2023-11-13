@@ -132,7 +132,6 @@ D & E & F \\
 #+DOWNLOADED: screenshot @ 2022-05-22 14:13:44
 [[file:images/latex%E7%AC%94%E8%AE%B0/%E8%A1%A8%E6%A0%BC/2022-05-22_14-13-44_screenshot.png]]
 
-
 ** 垂直对齐选项
 垂直对齐选项表示在行内使用时，表格的哪一部分与文字对齐，其参数可以是 t 或者 b，默认条件是居中对齐。举例如下：
 
@@ -268,3 +267,5 @@ booktabs 宏包没有提供单独的表格环境，只需要在普通的表格�
 * 图片
 * 中文支持
 \documentclass[UTF-8]{ctexart}
+* 参考文章
+[[https://zhuanlan.zhihu.com/p/64497187][latex系列--2 标题、章节、目录、标签、引用]]

@@ -989,7 +989,7 @@ Somewhat odd, but predictable, behavior can occur for certain “non-greedy” v
 ==> "bc"
 
 相当于创建了个临时的buffer,然后在buffer里分别执行(insert "abcdefg")和 (buffer-substring 2 4)两条命令.
-* emacs配置文件
+2* emacs配置文件
 ** Major Mode和Minor Mode
 Emacs 的配置文件默认保存在 =~/.emacs.d/init.el= 文件中。（如果其不存在可自行创建，
 配置文件也可保存在 =~/.emacs= 文件中，他们之间的区别我们会在后面做讨论）

@@ -15422,7 +15422,7 @@ USE SECURITY APPLICATIONS, AS WELL AS HOW THE APPLCATIONS WORK AND WHY THEY ARE 
 #+END_SRC
 大小写转换，也可以通过[:lower][:upper]参数来实现。例如使用如下命令：
 #+begin_src bash
-cat testfile |tr [:lower:] [:upper:] 
+capt testfile |tr [:lower:] [:upper:] 
 #+END_SRC
 输出结果如下：
 #+begin_src bash
