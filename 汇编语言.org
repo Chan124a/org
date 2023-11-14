@@ -21,13 +21,13 @@ PC是寄存器x32。
 整个寄存器的组织如下：
 
 #+DOWNLOADED: screenshot @ 2022-04-07 15:56:46
-[[file:images/%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80/RISC-V%E5%9F%BA%E6%9C%AC%E6%8C%87%E4%BB%A4%E9%9B%86/2022-04-07_15-56-46_screenshot.png]]
+[[file:images/汇编语言/RISC-V基本指令集/2022-04-07_15-56-46_screenshot.png]]
 
 RV32I的指令长度为32位，并且需要在内存中对齐存储，并且是小端存储。
 一共有6种指令格式：R、I、S、U以及变种SB、UJ，如下所示：
 
 #+DOWNLOADED: screenshot @ 2022-04-07 15:57:51
-[[file:images/%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80/RISC-V%E5%9F%BA%E6%9C%AC%E6%8C%87%E4%BB%A4%E9%9B%86/2022-04-07_15-57-51_screenshot.png]]
+[[file:images/汇编语言/RISC-V基本指令集/2022-04-07_15-57-51_screenshot.png]]
 
 可以发现SB、UJ与S、U格式的不同在与立即数编码方式的不同。
 
@@ -40,10 +40,10 @@ RV32I的指令长度为32位，并且需要在内存中对齐存储，并且是�
 下面展示了RV32I的主要操作码表，可以发现RV32I的主要操作码的位数为5，而主操作码的长度为7位，但是在基础的ISA当中，最低两位被设置恒为11，保留这两位来作为ISA的扩展：
 
 #+DOWNLOADED: screenshot @ 2022-04-07 16:09:17
-[[file:images/%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80/RISC-V%E5%9F%BA%E6%9C%AC%E6%8C%87%E4%BB%A4%E9%9B%86/2022-04-07_16-09-17_screenshot.png]]
+[[file:images/汇编语言/RISC-V基本指令集/2022-04-07_16-09-17_screenshot.png]]
 ** 运算指令
 #+DOWNLOADED: screenshot @ 2022-04-07 16:09:35
-[[file:images/%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80/RISC-V%E5%9F%BA%E6%9C%AC%E6%8C%87%E4%BB%A4%E9%9B%86/2022-04-07_16-09-35_screenshot.png]]
+[[file:images/汇编语言/RISC-V基本指令集/2022-04-07_16-09-35_screenshot.png]]
 RV32I包含有21条运算相关的指令，包括算术运算、逻辑运算以及比较运算。这些指令在整型寄存器上进行操作，一些指令需要立即数操作数。运算指令在有符号和无符号整数上都进行操作。有符号整数使用补码表示法来表示。所有的立即数操作数都是符号扩展的，即使是在立即数表示为无符号数的上下文当中。这个特性可以降低ISA的描述复杂度，在某些情况下也确实获得了更好的性能。
 *** 算术指令：
 #+BEGIN_EXAMPLE
@@ -82,7 +82,7 @@ SLTIU - [rd] <- (imm[11:0] > [rs1]? 1: 0), [rs1] and imm[11:0] are unsigned
 2. AUIPC - add upper immediate to PC - 将立即数中的高20位（也就是指令中的20位）加进PC当中，然后将结果写到寄存器rd中。AUIPC是RISC-V基址寻址机制的基础，以PC作为基址寄存器来进行寻址。
 ** 内存交互指令
 #+DOWNLOADED: screenshot @ 2022-04-07 16:11:52
-[[file:images/%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80/RISC-V%E5%9F%BA%E6%9C%AC%E6%8C%87%E4%BB%A4%E9%9B%86/2022-04-07_16-11-52_screenshot.png]]
+[[file:images/汇编语言/RISC-V基本指令集/2022-04-07_16-11-52_screenshot.png]]
 
 RV32I提供5种从内存中读取一个整数到一个整型寄存器的指令，以及3种存储数据到内存当中的指令。所有的这些指令都使用字节地址的方式来定位内存中存储单元。指令中组成存储地址的方式是，将立即数地址的值（12位）与寄存器rs1中的值（32位）相加，实际上，很多时候寄存器rs1中的值的低12位都是0，因此实际上是两个地址的拼接而成为了一个32位的地址。
 
@@ -120,7 +120,7 @@ RV32I同样还提供一个指令来同步指令流与内存访问：FENCE.I。�
 
 ** 程序流控制指令
 #+DOWNLOADED: screenshot @ 2022-04-07 16:13:15
-[[file:images/%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80/RISC-V%E5%9F%BA%E6%9C%AC%E6%8C%87%E4%BB%A4%E9%9B%86/2022-04-07_16-13-15_screenshot.png]]
+[[file:images/汇编语言/RISC-V基本指令集/2022-04-07_16-13-15_screenshot.png]]
 RV32I一共提供有6种指令来有条件的控制程序流。这些分支指令都是使用SB类型的指令格式，能够提供两个寄存器之间算术的比较且可以在1KB的地址范围内实现跳转。新地址由指令中符号扩展的12位立即数与当前的pc相加得到。
 #+BEGIN_EXAMPLE
 BEQ - jump to Addr(imm[12:1] + pc) if (rs1 == rs2)
@@ -141,7 +141,7 @@ RISC-V还提供了两种无条件跳转的控制语句：UJ型指令格式的JAL
 ** 系统指令
 
 #+DOWNLOADED: screenshot @ 2022-04-07 16:14:18
-[[file:images/%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80/RISC-V%E5%9F%BA%E6%9C%AC%E6%8C%87%E4%BB%A4%E9%9B%86/2022-04-07_16-14-18_screenshot.png]]
+[[file:images/汇编语言/RISC-V基本指令集/2022-04-07_16-14-18_screenshot.png]]
 RV32I中有8条系统指令。在简单的实现当中，可能会选择不实现（不使用）这些指令，并且在自身的系统软件中实现它们的功能，但是高性能的实现需要将它们在硬件中实现。
 
 SCALL指令用于调用操作系统来实现系统调用。SBREAK指令用于调用调试器。
@@ -160,7 +160,7 @@ CSRRWI、CSRRCI、CSRRSI的功能与CSRRW、CSRRC、CSRRS一致，只是将rs1�
 
 在大多数的系统当中，CSRs只有在特权模式下才能访问，但RV32I提供了一些用户层次使用的基本CSR寄存器，这些CSR寄存器都是只读的并且只能够通过CSRR类指令来使用，这些CSR寄存器如下所示：
 #+DOWNLOADED: screenshot @ 2022-04-07 16:14:52
-[[file:images/%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80/RISC-V%E5%9F%BA%E6%9C%AC%E6%8C%87%E4%BB%A4%E9%9B%86/2022-04-07_16-14-52_screenshot.png]]
+[[file:images/汇编语言/RISC-V基本指令集/2022-04-07_16-14-52_screenshot.png]]
 #+BEGIN_EXAMPLE
 cycle：用于记录从任意参照的时间流逝的时钟周期数。
 time：用于记录流逝的系统时间。
@@ -201,7 +201,7 @@ csrw	mscratch, t0
 * la指令
 la(load address),顾名思义，它是一条地址加载指令。
 #+DOWNLOADED: screenshot @ 2022-04-07 15:36:11
-[[file:images/%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80/la%E6%8C%87%E4%BB%A4/2022-04-07_15-36-11_screenshot.png]]
+[[file:images/汇编语言/la指令/2022-04-07_15-36-11_screenshot.png]]
 
 最左一栏是la指令的格式，它将一个内存地址（symbol是一个地址标记）的值加载到rd寄存器中。
 第二栏是la为指令被翻译成的等价的实际指令，可以看出来，la指令在非位置无关码（non-PIC）和位置无关码（PIC，position independance code）中，具有不同的解释方式
@@ -223,7 +223,7 @@ sb t0, 8(sp)	Stores (dereferences) from register t0 into memory address (sp + 8)
 
 
 #+DOWNLOADED: screenshot @ 2022-05-04 16:38:49
-[[file:images/%E6%B1%87%E7%BC%96%E8%AF%AD%E8%A8%80/sa%E6%8C%87%E4%BB%A4/2022-05-04_16-38-49_screenshot.png]]
+[[file:images/汇编语言/sa指令/2022-05-04_16-38-49_screenshot.png]]
 
 * auipc指令
 在Risc-V架构中，要得到当前指令pc（指令在存储器中的位置，instruction program counter)，可以通过AUIPC指令，把它读入到一个通用寄存器中。

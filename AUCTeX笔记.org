@@ -114,7 +114,7 @@ cdlatex主要有三种快捷输入:反引号`,单引号'和TAB补全.
 - =M-x customize-variable REF cdlatex-command-alist= ,这个是修改TAB补全快捷键
 
 在变量 =cdlatex-command-alist= 里的替换符号添加?并将Hook改为 =cdlatex-position-cursor=,之后每次按TAB补全后,光标就会停留在?所在的位置.
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-02-07_16-32-18.png @ 2020-02-07 16:51:12
+#+DOWNLOADED: file:F:/org/图片/Snipaste_2020-02-07_16-32-18.png @ 2020-02-07 16:51:12
 [[file:cdlatex/2020-02-07_16-51-12_Snipaste_2020-02-07_16-32-18.png]]
 
 修改完后可以用以下方法使得设置生效:

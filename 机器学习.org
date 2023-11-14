@@ -12,7 +12,7 @@ N-Gram是一种基于统计语言模型的算法。它的基本思想是将文�
 * 梯度累加(Gradient Accumulation)
 
 #+DOWNLOADED: screenshot @ 2021-12-05 19:13:38
-[[file:images/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/%E6%A2%AF%E5%BA%A6%E7%B4%AF%E5%8A%A0(Gradient_Accumulation)/2021-12-05_19-13-38_screenshot.png]]
+[[file:images/机器学习/梯度累加(Gradient_Accumulation)/2021-12-05_19-13-38_screenshot.png]]
  上图也是某种意义上的梯度累加：一般是直接加总或者取平均，这样操作是scale了，其实影响不大，只是确保loss计算时的value不至于太大。batchsize超过64的情况不多(batchsize太大会有副作用)，这时候优化的粒度没那么细，scale操作适当又做了惩罚。可能在某些时候比不加收敛更快
 
 我们在训练神经网络的时候，超参数batch size的大小会对最终的模型效果产生很大的影响。一定条件下，batch size设置的越大，模型就会越稳定。batch size的值通常设置在 8-32 之间，但是当我们做一些计算量需求大的任务(例如语义分割、GAN等)或者输入图片尺寸太大的时候，我们的batch size往往只能设置为2或者4，否则就会出现 “CUDA OUT OF MEMORY” 的不可抗力报错。
@@ -284,7 +284,7 @@ show_random_elements(datasets["train"])
 #+END_SRC
 
 #+DOWNLOADED: screenshot @ 2021-12-13 15:06:03
-[[file:images/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/%E6%95%B0%E6%8D%AE%E9%9B%86/2021-12-13_15-06-03_screenshot.png]]
+[[file:images/机器学习/数据集/2021-12-13_15-06-03_screenshot.png]]
 
 
 *** 参考文章
@@ -319,7 +319,7 @@ show_random_elements(datasets["train"])
 
 token级别的分类任务通常指的是为文本中的每一个token预测一个标签结果。比如命名实体识别任务：
 #+DOWNLOADED: screenshot @ 2021-12-09 09:50:48
-[[file:images/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/%E5%BA%8F%E5%88%97%E6%A0%87%E6%B3%A8%EF%BC%88Sequence_Tagging%EF%BC%89/2021-12-09_09-50-48_screenshot.png]]
+[[file:images/机器学习/序列标注（Sequence_Tagging）/2021-12-09_09-50-48_screenshot.png]]
 常见的token级别分类任务:
 - NER (Named-entity recognition 名词-实体识别) 分辨出文本中的名词和实体 (person人名, organization组织机构名, location地点名...).
 - POS (Part-of-speech tagging词性标注) 根据语法对token进行词性标注 (noun名词, verb动词, adjective形容词...)
@@ -333,7 +333,7 @@ token级别的分类任务通常指的是为文本中的每一个token预测一�
 
 首先给定一个训练集
 #+DOWNLOADED: screenshot @ 2021-12-08 21:59:27
-[[file:images/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/%E5%BA%8F%E5%88%97%E6%A0%87%E6%B3%A8%EF%BC%88Sequence_Tagging%EF%BC%89/2021-12-08_21-59-27_screenshot.png]]
+[[file:images/机器学习/序列标注（Sequence_Tagging）/2021-12-08_21-59-27_screenshot.png]]
 ** 标签方案
 标签方案给出了标记的定义方式，常用的标签方案可以参考这篇文章，这里我们介绍一下其中的“BIO”方案。
 
@@ -352,11 +352,11 @@ BIO标注：将每个元素标注为“B-X”、“I-X”或者“O”。其中�
 
 因此可以将一段话划分为如下结果;
 #+DOWNLOADED: screenshot @ 2021-12-08 22:13:23
-[[file:images/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/%E5%BA%8F%E5%88%97%E6%A0%87%E6%B3%A8%EF%BC%88Sequence_Tagging%EF%BC%89/2021-12-08_22-13-23_screenshot.png]]
+[[file:images/机器学习/序列标注（Sequence_Tagging）/2021-12-08_22-13-23_screenshot.png]]
 我们可以进一步将BIO应用到NER中，来定义所有的命名实体（人名、组织名、地点、时间等），那么我们会有许多 B 和 I 的类别，如 B-PERS、I-PERS、B-ORG、I-ORG等。然后可以得到以下结果：
 
 #+DOWNLOADED: screenshot @ 2021-12-08 22:15:36
-[[file:images/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/%E5%BA%8F%E5%88%97%E6%A0%87%E6%B3%A8%EF%BC%88Sequence_Tagging%EF%BC%89/2021-12-08_22-15-36_screenshot.png]]
+[[file:images/机器学习/序列标注（Sequence_Tagging）/2021-12-08_22-15-36_screenshot.png]]
 *** 举例：命名实体识别 
 一段待标注的序列X=x1,x2,...,xn
 - B - Begin，表示开始
@@ -391,14 +391,14 @@ IOBES：
 按照前面所说的，可以把序列标注问题当作分类问题来解，此时相当于对输入观测序列的每个token进行一次多分类，DNN自然可以派上用场。大致流程如下图所示：
 
 #+DOWNLOADED: screenshot @ 2021-12-08 22:03:24
-[[file:images/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/%E5%BA%8F%E5%88%97%E6%A0%87%E6%B3%A8%EF%BC%88Sequence_Tagging%EF%BC%89/2021-12-08_22-03-24_screenshot.png]]
+[[file:images/机器学习/序列标注（Sequence_Tagging）/2021-12-08_22-03-24_screenshot.png]]
 
 这里的DNN，通常采用LSTM、GRU、Transformer等。
 **** DNN+CRF
 仅用DNN的情况下会存在一个问题，由于每个输出标记的预测是独立的，可能会导致出现类似“B_PER I_LOC”的标记序列。因此，考虑引入CRF学习标记之间的约束关系，（也可以采用其它的方式，如beam search解码，但是CRF将标记序列作为整体看待，效果更好）。大致流程如下图所示：
 
 #+DOWNLOADED: screenshot @ 2021-12-08 22:04:20
-[[file:images/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0/%E5%BA%8F%E5%88%97%E6%A0%87%E6%B3%A8%EF%BC%88Sequence_Tagging%EF%BC%89/2021-12-08_22-04-20_screenshot.png]]
+[[file:images/机器学习/序列标注（Sequence_Tagging）/2021-12-08_22-04-20_screenshot.png]]
 在这里，DNN的输出是当前时刻对所有标记的打分，对应CRF打分函数中的 [公式] ，打分函数中的另一项 [公式] 则作为CRF层的参数进行学习（随机初始化），由此可以通过最大化似然概率进行模型训练，训练完成后，使用Viterbi算法即可完成预测。
 
 序列标注模型的框架基本上可以分为特征提取层和序列标注层。在DNN+CRF模型中，DNN是特征提取层，CRF是序列标注层；而在仅用CRF的传统机器学习模型中，特征提取层由人工模板特征来替代，因此它的特点是task-specific，较之于DNN而言，不利于迁移和泛化。

@@ -23,7 +23,7 @@ by a blackboard bold capital r: \( \R \).
 #+END_SRC
 
 #+DOWNLOADED: screenshot @ 2022-03-01 20:10:54
-[[file:images/latex%E7%AC%94%E8%AE%B0/newcommand_%E8%87%AA%E5%AE%9A%E4%B9%89%E5%91%BD%E4%BB%A4/2022-03-01_20-10-54_screenshot.png]]
+[[file:images/latex笔记/newcommand_自定义命令/2022-03-01_20-10-54_screenshot.png]]
 The statement \newcommand{\R}{\mathbb{R}} has two parameters that define a new command
 
 \R
@@ -45,7 +45,7 @@ numbers \( \bb{Q} \) and the integer numbers \( \bb{Z} \).
 
 
 #+DOWNLOADED: screenshot @ 2022-03-01 20:12:15
-[[file:images/latex%E7%AC%94%E8%AE%B0/newcommand_%E8%87%AA%E5%AE%9A%E4%B9%89%E5%91%BD%E4%BB%A4/2022-03-01_20-12-15_screenshot.png]]
+[[file:images/latex笔记/newcommand_自定义命令/2022-03-01_20-12-15_screenshot.png]]
 
 The line \newcommand{\bb}[1]{\mathbb{#1}} defines a new command that takes one parameter.
 
@@ -74,7 +74,7 @@ And even the exponent can be changed
 
 
 #+DOWNLOADED: screenshot @ 2022-03-01 20:13:52
-[[file:images/latex%E7%AC%94%E8%AE%B0/newcommand_%E8%87%AA%E5%AE%9A%E4%B9%89%E5%91%BD%E4%BB%A4/2022-03-01_20-13-52_screenshot.png]]
+[[file:images/latex笔记/newcommand_自定义命令/2022-03-01_20-13-52_screenshot.png]]
 
 Let's analyse the syntax of the line \newcommand{\plusbinomial}[3][2]{(#2 + #3)^#1}:
 
@@ -99,7 +99,7 @@ sometimes represented by \( \S \)
 #+END_SRC
 
 #+DOWNLOADED: screenshot @ 2022-03-01 20:15:19
-[[file:images/latex%E7%AC%94%E8%AE%B0/newcommand_%E8%87%AA%E5%AE%9A%E4%B9%89%E5%91%BD%E4%BB%A4/2022-03-01_20-15-19_screenshot.png]]
+[[file:images/latex笔记/newcommand_自定义命令/2022-03-01_20-15-19_screenshot.png]]
 
 In this example the command \S (see the example in the commands section) is overwritten to print a blackboard bold S.
 
@@ -116,7 +116,7 @@ D & E & F \\
 列格式说明的基本元素有 l c r 三种，分别表示这一列是靠左、居中还是靠右对齐。在左右两端或基本元素之间可以加上竖线，表示这里是不是需要用线来分隔。举例如下：
 
 #+DOWNLOADED: screenshot @ 2022-05-22 14:13:07
-[[file:images/latex%E7%AC%94%E8%AE%B0/%E8%A1%A8%E6%A0%BC/2022-05-22_14-13-07_screenshot.png]]
+[[file:images/latex笔记/表格/2022-05-22_14-13-07_screenshot.png]]
 在列格式中还有一些其他的说明符，在此也列举如下：
 - p{<宽度>}，表示本列具有固定的宽度，表格内容在其中可以自动换行（但不能手动用 \\ 进行换行），并可以用 \raggedleft，\centering 等命令进行对齐。
 - @{<内容>}，添加任意内容，不占表项计数，同时取消表列间的距离。例如我们需要某一列的数据按小数点对齐，就可以用 r@{.}l 这样定义两列，分别输入整数部分和小数部分，实现这个效果。
@@ -125,12 +125,12 @@ D & E & F \\
 ** hline
 可以在其中视需要加入横线进行分隔（\hline）。举例如下：
 #+DOWNLOADED: screenshot @ 2022-05-22 14:13:28
-[[file:images/latex%E7%AC%94%E8%AE%B0/%E8%A1%A8%E6%A0%BC/2022-05-22_14-13-28_screenshot.png]]
+[[file:images/latex笔记/表格/2022-05-22_14-13-28_screenshot.png]]
 ** cline
 如果希望某一行的横线不贯穿整个表格，则可以使用 \cline 命令。\cline{x-y} 可以获得一段从第 x 格到第 y 格的横线，举例如下：
 
 #+DOWNLOADED: screenshot @ 2022-05-22 14:13:44
-[[file:images/latex%E7%AC%94%E8%AE%B0/%E8%A1%A8%E6%A0%BC/2022-05-22_14-13-44_screenshot.png]]
+[[file:images/latex笔记/表格/2022-05-22_14-13-44_screenshot.png]]
 
 ** 垂直对齐选项
 垂直对齐选项表示在行内使用时，表格的哪一部分与文字对齐，其参数可以是 t 或者 b，默认条件是居中对齐。举例如下：
@@ -138,11 +138,11 @@ D & E & F \\
 与底部对齐：
 
 #+DOWNLOADED: screenshot @ 2022-05-22 14:21:39
-[[file:images/latex%E7%AC%94%E8%AE%B0/%E8%A1%A8%E6%A0%BC/2022-05-22_14-21-39_screenshot.png]]
+[[file:images/latex笔记/表格/2022-05-22_14-21-39_screenshot.png]]
 居中对齐：
 
 #+DOWNLOADED: screenshot @ 2022-05-22 14:21:57
-[[file:images/latex%E7%AC%94%E8%AE%B0/%E8%A1%A8%E6%A0%BC/2022-05-22_14-21-57_screenshot.png]]
+[[file:images/latex笔记/表格/2022-05-22_14-21-57_screenshot.png]]
 ** 单元格合并
 可以使用 \multicolumn 命令。这一命令的使用方式如下：
 
@@ -189,7 +189,7 @@ D & E & F \\
 \bottomrule
 booktabs 宏包没有提供单独的表格环境，只需要在普通的表格中插入新定义的线条即可。详细的使用说明可以看看 booktabs 的文档。下面用一个比较复杂的三线表来回顾一下我们到现在为止讲到的全部内容吧（自己动手之前别忘了需要的宏包噢）。
 #+DOWNLOADED: screenshot @ 2022-05-22 14:34:46
-[[file:images/latex%E7%AC%94%E8%AE%B0/%E8%A1%A8%E6%A0%BC/2022-05-22_14-34-46_screenshot.png]]
+[[file:images/latex笔记/表格/2022-05-22_14-34-46_screenshot.png]]
 
 ** 浮动体与图表标题的制作
 一般情况下，图表都会占据页面中大块的位置，造成分页的困难。放在前面一页位置不够，放在后面一页又会造成前面一页底部有大量空白，非常不美观。

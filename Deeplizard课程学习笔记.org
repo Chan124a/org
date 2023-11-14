@@ -888,8 +888,8 @@ for i, batch in enumerate(train_loader, start=1):
 plt.show()
 #+END_SRC
 
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/fashion%20mnist%20grid%20sample%202.png @ 2020-07-04 22:18:24
-[[file:%E7%AC%AC16%E8%AF%BE/2020-07-04_22-18-24_fashion%2520mnist%2520grid%2520sample%25202.png]]
+#+DOWNLOADED: file:F:/org/图片/fashion mnist grid sample 2.png @ 2020-07-04 22:18:24
+[[file:第16课/2020-07-04_22-18-24_fashion mnist grid sample 2.png]]
 
 * 第17课 Build PyTorch CNN - Object Oriented Neural Networks
 ** Building A Neural Network In PyTorch

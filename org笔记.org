@@ -1176,8 +1176,8 @@ org-mode的文档在导出到html时,有一个问题就是abc_def 会变成类�
 (set-face-attribute 'org-level-3 nil :height 1.2 :bold t)))
 #+END_SRC
 
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/tangotango_org.png @ 2020-06-03 20:31:21
-[[file:%E5%AF%BC%E5%87%BA/2020-06-03_20-31-21_tangotango_org.png]]
+#+DOWNLOADED: file:F:/org/图片/tangotango_org.png @ 2020-06-03 20:31:21
+[[file:导出/2020-06-03_20-31-21_tangotango_org.png]]
 
 * 两个与中文相关的问题
 ** 不关闭中文输入法，输入章节标题里面的星号

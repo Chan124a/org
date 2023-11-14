@@ -1,69 +1,69 @@
 * 安装方法
 ** 1.下载MySQL：https://dev.mysql.com/downloads/（官网），这里我们选择社区版，如下图
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-07_14-36-14.png @ 2021-03-07 14:36:45
-[[file:%E5%AE%89%E8%A3%85%E6%96%B9%E6%B3%95/2021-03-07_14-36-45_Snipaste_2021-03-07_14-36-14.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-07_14-36-14.png @ 2021-03-07 14:36:45
+[[file:安装方法/2021-03-07_14-36-45_Snipaste_2021-03-07_14-36-14.png]]
 接下来我们选择下载安装版，点击"Go to Download Page>"进入下载页
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-07_14-36-23.png @ 2021-03-07 14:37:09
-[[file:%E5%AE%89%E8%A3%85%E6%96%B9%E6%B3%95/2021-03-07_14-37-09_Snipaste_2021-03-07_14-36-23.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-07_14-36-23.png @ 2021-03-07 14:37:09
+[[file:安装方法/2021-03-07_14-37-09_Snipaste_2021-03-07_14-36-23.png]]
 这里已经提示安装包是32位的，但是将安装32位和64位的，所以我们直接下载其中一个就好
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-07_14-36-30.png @ 2021-03-07 14:37:07
-[[file:%E5%AE%89%E8%A3%85%E6%96%B9%E6%B3%95/2021-03-07_14-37-07_Snipaste_2021-03-07_14-36-30.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-07_14-36-30.png @ 2021-03-07 14:37:07
+[[file:安装方法/2021-03-07_14-37-07_Snipaste_2021-03-07_14-36-30.png]]
 ** 2.安装MySQL
 2.1.运行安装包，勾选同意，Next
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-07_14-38-35.png @ 2021-03-07 14:40:55
-[[file:%E5%AE%89%E8%A3%85%E6%96%B9%E6%B3%95/2021-03-07_14-40-55_Snipaste_2021-03-07_14-38-35.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-07_14-38-35.png @ 2021-03-07 14:40:55
+[[file:安装方法/2021-03-07_14-40-55_Snipaste_2021-03-07_14-38-35.png]]
 2.2.选择安装类型
 
 第一个选项包含了一些MySQL其他组件，如果只安装MySQL数据库，选择第二项Server only就行。这里我直接选择默认的Developer Default
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-07_14-38-40.png @ 2021-03-07 14:40:51
-[[file:%E5%AE%89%E8%A3%85%E6%96%B9%E6%B3%95/2021-03-07_14-40-51_Snipaste_2021-03-07_14-38-40.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-07_14-38-40.png @ 2021-03-07 14:40:51
+[[file:安装方法/2021-03-07_14-40-51_Snipaste_2021-03-07_14-38-40.png]]
 2.3.检查必需项（Check Requirements）
 
   Execute-->Next；出现警告框点击“是”继续
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-07_14-38-48.png @ 2021-03-07 14:40:48
-[[file:%E5%AE%89%E8%A3%85%E6%96%B9%E6%B3%95/2021-03-07_14-40-48_Snipaste_2021-03-07_14-38-48.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-07_14-38-48.png @ 2021-03-07 14:40:48
+[[file:安装方法/2021-03-07_14-40-48_Snipaste_2021-03-07_14-38-48.png]]
 4.Installation
 
  点击Execute开始执行安装，等全部安装完之后，点击Next
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-07_14-38-59.png @ 2021-03-07 14:40:46
-[[file:%E5%AE%89%E8%A3%85%E6%96%B9%E6%B3%95/2021-03-07_14-40-46_Snipaste_2021-03-07_14-38-59.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-07_14-38-59.png @ 2021-03-07 14:40:46
+[[file:安装方法/2021-03-07_14-40-46_Snipaste_2021-03-07_14-38-59.png]]
 5.进入配置界面 Product Configuration，Next
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-07_14-39-07.png @ 2021-03-07 14:40:43
-[[file:%E5%AE%89%E8%A3%85%E6%96%B9%E6%B3%95/2021-03-07_14-40-43_Snipaste_2021-03-07_14-39-07.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-07_14-39-07.png @ 2021-03-07 14:40:43
+[[file:安装方法/2021-03-07_14-40-43_Snipaste_2021-03-07_14-39-07.png]]
 6.进行服务配置，MySQL默认端口为3306，Next
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-07_14-39-12.png @ 2021-03-07 14:40:42
-[[file:%E5%AE%89%E8%A3%85%E6%96%B9%E6%B3%95/2021-03-07_14-40-42_Snipaste_2021-03-07_14-39-12.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-07_14-39-12.png @ 2021-03-07 14:40:42
+[[file:安装方法/2021-03-07_14-40-42_Snipaste_2021-03-07_14-39-12.png]]
 7.Accounts and Roles
 
  这里一般不添加具有普通用户权限的MySQL用户账户，而是用root账户。
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-07_14-39-21.png @ 2021-03-07 14:40:30
-[[file:%E5%AE%89%E8%A3%85%E6%96%B9%E6%B3%95/2021-03-07_14-40-30_Snipaste_2021-03-07_14-39-21.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-07_14-39-21.png @ 2021-03-07 14:40:30
+[[file:安装方法/2021-03-07_14-40-30_Snipaste_2021-03-07_14-39-21.png]]
 8.Windows Service
 
 这里注意MySQL服务名（Windows Service Name）为:MySQL56
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-07_14-39-27.png @ 2021-03-07 14:40:27
-[[file:%E5%AE%89%E8%A3%85%E6%96%B9%E6%B3%95/2021-03-07_14-40-27_Snipaste_2021-03-07_14-39-27.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-07_14-39-27.png @ 2021-03-07 14:40:27
+[[file:安装方法/2021-03-07_14-40-27_Snipaste_2021-03-07_14-39-27.png]]
 9.Apply Configuration(应用配置)
 
  点击Execute
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-07_14-39-32.png @ 2021-03-07 14:40:25
-[[file:%E5%AE%89%E8%A3%85%E6%96%B9%E6%B3%95/2021-03-07_14-40-25_Snipaste_2021-03-07_14-39-32.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-07_14-39-32.png @ 2021-03-07 14:40:25
+[[file:安装方法/2021-03-07_14-40-25_Snipaste_2021-03-07_14-39-32.png]]
 10.配置完成之后Finish
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-07_14-39-38.png @ 2021-03-07 14:40:23
-[[file:%E5%AE%89%E8%A3%85%E6%96%B9%E6%B3%95/2021-03-07_14-40-23_Snipaste_2021-03-07_14-39-38.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-07_14-39-38.png @ 2021-03-07 14:40:23
+[[file:安装方法/2021-03-07_14-40-23_Snipaste_2021-03-07_14-39-38.png]]
 11.然后再配置MySQL的实例，点击next
 
   Check-->Next-->Execute
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-07_14-39-44.png @ 2021-03-07 14:40:21
-[[file:%E5%AE%89%E8%A3%85%E6%96%B9%E6%B3%95/2021-03-07_14-40-21_Snipaste_2021-03-07_14-39-44.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-07_14-39-44.png @ 2021-03-07 14:40:21
+[[file:安装方法/2021-03-07_14-40-21_Snipaste_2021-03-07_14-39-44.png]]
 12.执行完毕之后点击Finish，又回到了主程序，然后点击Next
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-07_14-39-50.png @ 2021-03-07 14:40:18
-[[file:%E5%AE%89%E8%A3%85%E6%96%B9%E6%B3%95/2021-03-07_14-40-18_Snipaste_2021-03-07_14-39-50.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-07_14-39-50.png @ 2021-03-07 14:40:18
+[[file:安装方法/2021-03-07_14-40-18_Snipaste_2021-03-07_14-39-50.png]]
 13.安装完成，Finish
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-07_14-39-57.png @ 2021-03-07 14:40:15
-[[file:%E5%AE%89%E8%A3%85%E6%96%B9%E6%B3%95/2021-03-07_14-40-15_Snipaste_2021-03-07_14-39-57.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-07_14-39-57.png @ 2021-03-07 14:40:15
+[[file:安装方法/2021-03-07_14-40-15_Snipaste_2021-03-07_14-39-57.png]]
 
 ** 3.MySQL环境变量的配置
 为了能让Windows命令行操作MySQL数据库，需要配置一下系统的环境变量。
@@ -72,28 +72,28 @@
 *** 安装MySQL服务
 以管理员方式打开命令行窗口，进入MySQL\MySQL Server 5.7\bin目录，执行命令 mysqld --install
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-07_22-39-37.png @ 2021-03-07 22:39:43
-[[file:%E5%AE%89%E8%A3%85%E6%96%B9%E6%B3%95/2021-03-07_22-39-43_Snipaste_2021-03-07_22-39-37.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-07_22-39-37.png @ 2021-03-07 22:39:43
+[[file:安装方法/2021-03-07_22-39-43_Snipaste_2021-03-07_22-39-37.png]]
 
 表示服务安装成功，如果你进入Windows服务管理界面就可以看到MySQL服务了，如下：
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-07_22-41-03.png @ 2021-03-07 22:41:16
-[[file:%E5%AE%89%E8%A3%85%E6%96%B9%E6%B3%95/2021-03-07_22-41-16_Snipaste_2021-03-07_22-41-03.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-07_22-41-03.png @ 2021-03-07 22:41:16
+[[file:安装方法/2021-03-07_22-41-16_Snipaste_2021-03-07_22-41-03.png]]
 然后启动服务，正常情况下会正常启动，但是很不幸它不正常：
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-07_22-41-09.png @ 2021-03-07 22:41:13
-[[file:%E5%AE%89%E8%A3%85%E6%96%B9%E6%B3%95/2021-03-07_22-41-13_Snipaste_2021-03-07_22-41-09.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-07_22-41-09.png @ 2021-03-07 22:41:13
+[[file:安装方法/2021-03-07_22-41-13_Snipaste_2021-03-07_22-41-09.png]]
 *** 初始化mysql
 执行命令 mysqld --initialize --console 在这里，初始化会产生一个随机密码,如下图框框所示，记住这个密码，后面会用到
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-07_22-45-28.png @ 2021-03-07 22:45:32
-[[file:%E5%AE%89%E8%A3%85%E6%96%B9%E6%B3%95/2021-03-07_22-45-32_Snipaste_2021-03-07_22-45-28.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-07_22-45-28.png @ 2021-03-07 22:45:32
+[[file:安装方法/2021-03-07_22-45-32_Snipaste_2021-03-07_22-45-28.png]]
 *** 开启mysql的服务(net start mysql)
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-07_22-46-24.png @ 2021-03-07 22:46:29
-[[file:%E5%AE%89%E8%A3%85%E6%96%B9%E6%B3%95/2021-03-07_22-46-29_Snipaste_2021-03-07_22-46-24.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-07_22-46-24.png @ 2021-03-07 22:46:29
+[[file:安装方法/2021-03-07_22-46-29_Snipaste_2021-03-07_22-46-24.png]]
 *** 登录验证
 登录验证，mysql是否安装成功！(要注意上面产生的随机密码，不包括前面符号前面的空格，否则会登陆失败)，如果和下图所示一样，则说明你的mysql已经安装成功！注意，，一定要先开启服务，不然会登陆失败，出现拒绝访问的提示符！！！
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-07_22-47-38.png @ 2021-03-07 22:47:43
-[[file:%E5%AE%89%E8%A3%85%E6%96%B9%E6%B3%95/2021-03-07_22-47-43_Snipaste_2021-03-07_22-47-38.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-07_22-47-38.png @ 2021-03-07 22:47:43
+[[file:安装方法/2021-03-07_22-47-43_Snipaste_2021-03-07_22-47-38.png]]
 
 ** 修改密码
 由于初始化产生的随机密码太复杂，，不便于我们登录mysql，因此，我们应当修改一个自己能记住的密码！！
@@ -101,11 +101,11 @@
 alter user 'root'@'localhost' identified by '新密码';
 #+END_EXAMPLE
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-07_22-54-50.png @ 2021-03-07 22:54:54
-[[file:%E5%AE%89%E8%A3%85%E6%96%B9%E6%B3%95/2021-03-07_22-54-54_Snipaste_2021-03-07_22-54-50.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-07_22-54-50.png @ 2021-03-07 22:54:54
+[[file:安装方法/2021-03-07_22-54-54_Snipaste_2021-03-07_22-54-50.png]]
 再次登录验证新密码：
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-07_22-55-04.png @ 2021-03-07 22:55:09
-[[file:%E5%AE%89%E8%A3%85%E6%96%B9%E6%B3%95/2021-03-07_22-55-09_Snipaste_2021-03-07_22-55-04.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-07_22-55-04.png @ 2021-03-07 22:55:09
+[[file:安装方法/2021-03-07_22-55-09_Snipaste_2021-03-07_22-55-04.png]]
 
 ** 设置系统的全局变量
 将 MySQL\MySQL Server 5.7\bin 添加进环境变量即可
@@ -113,8 +113,8 @@ alter user 'root'@'localhost' identified by '新密码';
 配置完成之后，每当我们想要用命令行使用mysql时，只需要win+R，-->输入"cmd"打开命令行，之后输入登录sql语句即可。
 ** ini配置文件
 在mysql目录下创建一个ini或cnf配置文件，在这里我创建的是ini配置文件，里面写的代码是mysql的一些基本配置（可不用）
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-07_22-59-29.png @ 2021-03-07 22:59:33
-[[file:%E5%AE%89%E8%A3%85%E6%96%B9%E6%B3%95/2021-03-07_22-59-33_Snipaste_2021-03-07_22-59-29.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-07_22-59-29.png @ 2021-03-07 22:59:33
+[[file:安装方法/2021-03-07_22-59-33_Snipaste_2021-03-07_22-59-29.png]]
 #+BEGIN_EXAMPLE
 [mysqld]
 character-set-server=utf8mb4
@@ -128,8 +128,8 @@ default-character-set=utf8mb4
 #+END_EXAMPLE
 * 基础概念
 MySQL 为关系型数据库(Relational Database Management System), 这种所谓的"关系型"可以理解为"表格"的概念, 一个关系型数据库由一个或数个表格组成, 如图所示的一个表格:
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-07_14-12-33.png @ 2021-03-07 14:12:37
-[[file:%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5/2021-03-07_14-12-37_Snipaste_2021-03-07_14-12-33.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-07_14-12-33.png @ 2021-03-07 14:12:37
+[[file:基础概念/2021-03-07_14-12-37_Snipaste_2021-03-07_14-12-33.png]]
 
 - 表头(header): 每一列的名称;
 - 列(row): 具有相同数据类型的数据的集合;
@@ -373,8 +373,8 @@ MySQL官方对索引的定义为：索引（Index）是帮助MySQL高效获取�
 
 看一个例子：
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-08_14-48-21.png @ 2021-03-08 14:48:30
-[[file:%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%8F%8A%E7%AE%97%E6%B3%95%E5%9F%BA%E7%A1%80/2021-03-08_14-48-30_Snipaste_2021-03-08_14-48-21.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-08_14-48-21.png @ 2021-03-08 14:48:30
+[[file:数据结构及算法基础/2021-03-08_14-48-30_Snipaste_2021-03-08_14-48-21.png]]
 图1展示了一种可能的索引方式。左边是数据表，一共有两列七条记录，最左边的是数据记录的物理地址（注意逻辑上相邻的记录在磁盘上也并不是一定物理相邻的）。为了加快Col2的查找，可以维护一个右边所示的二叉查找树，每个节点分别包含索引键值和一个指向对应数据记录物理地址的指针，这样就可以运用二叉查找在O(log2n)的复杂度内获取到相应数据。
 
 虽然这是一个货真价实的索引，但是实际的数据库系统几乎没有使用二叉查找树或其进化品种红黑树（red-black tree）实现的，原因会在下文介绍。
@@ -396,8 +396,8 @@ MySQL官方对索引的定义为：索引（Index）是帮助MySQL高效获取�
 - 如果某个指针在节点node的左右相邻key分别是keyi和keyi+1且不为null，则其指向节点的所有key小于v(keyi+1)且大于v(keyi)。
 
 图2是一个d=2的B-Tree示意图。
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-08_15-01-45.png @ 2021-03-08 15:02:04
-[[file:%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84%E5%8F%8A%E7%AE%97%E6%B3%95%E5%9F%BA%E7%A1%80/2021-03-08_15-02-04_Snipaste_2021-03-08_15-01-45.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-08_15-01-45.png @ 2021-03-08 15:02:04
+[[file:数据结构及算法基础/2021-03-08_15-02-04_Snipaste_2021-03-08_15-01-45.png]]
 由于B-Tree的特性，在B-Tree中按key检索数据的算法非常直观：首先从根节点进行二分查找，如果找到则返回对应节点的data，否则对相应区间的指针指向的节点递归进行查找，直到找到节点或找到null指针，前者查找成功，后者查找失败。B-Tree上查找算法的伪代码如下：
 #+BEGIN_EXAMPLE
 BTree_Search(node, key) {
@@ -459,8 +459,8 @@ SQL 标准定义了四个隔离级别：
 mysql> show engines;
 
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-09_19-26-58.png @ 2021-03-09 19:27:04
-[[file:%E6%9F%A5%E7%9C%8BMySQL%E6%8F%90%E4%BE%9B%E7%9A%84%E6%89%80%E6%9C%89%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E/2021-03-09_19-27-04_Snipaste_2021-03-09_19-26-58.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-09_19-26-58.png @ 2021-03-09 19:27:04
+[[file:查看MySQL提供的所有存储引擎/2021-03-09_19-27-04_Snipaste_2021-03-09_19-26-58.png]]
 从上图我们可以查看出 MySQL 当前默认的存储引擎是InnoDB,并且在5.7版本所有的存储引擎中只有 InnoDB 是事务性存储引擎，也就是说只有 InnoDB 支持事务。
 
 ** 查看MySQL当前默认的存储引擎
@@ -472,8 +472,8 @@ mysql> show variables like '%storage_engine%';
 ** 查看表的存储引擎
 
 show table status like "table_name" ;
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-09_19-27-48.png @ 2021-03-09 19:27:51
-[[file:%E6%9F%A5%E7%9C%8BMySQL%E7%9A%84/2021-03-09_19-27-51_Snipaste_2021-03-09_19-27-48.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-09_19-27-48.png @ 2021-03-09 19:27:51
+[[file:查看MySQL的/2021-03-09_19-27-51_Snipaste_2021-03-09_19-27-48.png]]
 * MyISAM和InnoDB区别
 MyISAM是MySQL的默认数据库引擎（5.5版之前）。虽然性能极佳，而且提供了大量的特性，包括全文索引、压缩、空间函数等，但MyISAM不支持事务和行级锁，而且最大的缺陷就是崩溃后无法安全恢复。不过，5.5版本之后，MySQL引入了InnoDB（事务性数据库引擎），MySQL 5.5版本后默认的存储引擎为InnoDB。
 

@@ -10157,7 +10157,26 @@ Samples elements randomly from a given list of indices, without replacement.
 *** Parameters
 - indices (sequence) – a sequence of indices
 - generator (Generator) – Generator used in sampling.
-
+* try异常处理
+#+begin_src python
+try:
+    raise Exception('spam', 'eggs')
+except Exception as inst:
+    print(type(inst))    # the exception type
+    print(inst.args)     # arguments stored in .args
+    print(inst)          # __str__ allows args to be printed directly,
+                         # but may be overridden in exception subclasses
+    x, y = inst.args     # unpack args
+    print('x =', x)
+    print('y =', y)
+#+end_src
+#+begin_example
+<class 'Exception'>
+('spam', 'eggs')
+('spam', 'eggs')
+x = spam
+y = eggs
+#+end_example
 * typing --- 类型提示支持
 ** typing.Tuple
 元组类型； Tuple[X, Y] 是二项元组类型，第一个元素的类型是 X，第二个元素的类型是 Y。空元组的类型可写为 Tuple[()]。

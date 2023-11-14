@@ -229,7 +229,7 @@ Changes to be committed:
 #+END_SRC
 现在，暂存区的状态就变成这样了：
 #+DOWNLOADED: file:F:/org/图片/0 (1).jpg @ 2020-09-10 16:25:44
-[[file:工作区和暂存区/2020-09-10_16-25-44_0%20%281%29.jpg]]
+[[file:工作区和暂存区/2020-09-10_16-25-44_0 (1).jpg]]
 所以，git add命令实际上就是把要提交的所有修改放到暂存区（Stage），然后，执行git commit就可以一次性把暂存区的所有修改提交到分支。
 #+BEGIN_SRC bash
 $ git commit -m "understand how stage works"
@@ -245,7 +245,7 @@ nothing to commit, working tree clean
 #+END_SRC
 现在版本库变成了这样，暂存区就没有任何内容了：
 #+DOWNLOADED: file:F:/org/图片/0 (2).jpg @ 2020-09-10 16:27:22
-[[file:工作区和暂存区/2020-09-10_16-27-22_0%20%282%29.jpg]]
+[[file:工作区和暂存区/2020-09-10_16-27-22_0 (2).jpg]]
 
 * 管理修改
 为什么Git比其他版本控制系统设计得优秀?因为Git跟踪并管理的是修改，而非文件
@@ -503,15 +503,15 @@ Git创建一个分支很快，因为除了增加一个dev指针，改改HEAD的�
 
 不过，从现在开始，对工作区的修改和提交就是针对dev分支了，比如新提交一次后，dev指针往前移动一步，而master指针不变：
 #+DOWNLOADED: file:F:/org/图片/l (1).png @ 2020-09-10 18:59:36
-[[file:创建与合并分支/2020-09-10_18-59-36_l%20%281%29.png]]
+[[file:创建与合并分支/2020-09-10_18-59-36_l (1).png]]
 假如我们在dev上的工作完成了，就可以把dev合并到master上。Git怎么合并呢？最简单的方法，就是直接把master指向dev的当前提交，就完成了合并：
 #+DOWNLOADED: file:F:/org/图片/0 (1).png @ 2020-09-10 18:59:53
-[[file:创建与合并分支/2020-09-10_18-59-53_0%20%281%29.png]]
+[[file:创建与合并分支/2020-09-10_18-59-53_0 (1).png]]
 所以Git合并分支也很快！就改改指针，工作区内容也不变！
 
 合并完分支后，甚至可以删除dev分支。删除dev分支就是把dev指针给删掉，删掉后，我们就剩下了一条master分支：
 #+DOWNLOADED: file:F:/org/图片/0 (2).png @ 2020-09-10 19:00:14
-[[file:创建与合并分支/2020-09-10_19-00-14_0%20%282%29.png]]
+[[file:创建与合并分支/2020-09-10_19-00-14_0 (2).png]]
 ** 创建与合并命令
 - 查看分支：git branch
 - 创建分支：git branch <name>
@@ -559,7 +559,7 @@ Switched to branch 'master'
 切换回master分支后，再查看一个readme.txt文件，刚才添加的内容不见了！因为那个提交是在dev分支上，而master分支此刻的提交点并没有变：
 
 #+DOWNLOADED: file:F:/org/图片/0 (3).png @ 2020-09-10 19:06:55
-[[file:dev/2020-09-10_19-06-55_0%20%283%29.png]]
+[[file:dev/2020-09-10_19-06-55_0 (3).png]]
 现在，我们把dev分支的工作成果合并到master分支上：
 #+BEGIN_SRC bash
 $ git merge dev
@@ -639,7 +639,7 @@ $ git commit -m "& simple"
 现在，master分支和feature1分支各自都分别有新的提交，变成了这样：
 
 #+DOWNLOADED: file:F:/org/图片/0 (4).png @ 2020-09-10 19:19:11
-[[file:解决冲突/2020-09-10_19-19-11_0%20%284%29.png]]
+[[file:解决冲突/2020-09-10_19-19-11_0 (4).png]]
 这种情况下，Git无法执行“快速合并”，只能试图把各自的修改合并起来，但这种合并就可能会有冲突，我们试试看：
 #+BEGIN_SRC bash
 $ git merge feature1
@@ -689,7 +689,7 @@ $ git commit -m "conflict fixed"
 #+END_SRC
 现在，master分支和feature1分支变成了下图所示：
 #+DOWNLOADED: file:F:/org/图片/0 (5).png @ 2020-09-10 19:26:26
-[[file:解决冲突/2020-09-10_19-26-26_0%20%285%29.png]]
+[[file:解决冲突/2020-09-10_19-26-26_0 (5).png]]
 用带参数的用git log --graph命令可以看到分支合并图:
 #+BEGIN_SRC bash
  $ git log --graph --pretty=oneline --abbrev-commit

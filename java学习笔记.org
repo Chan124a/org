@@ -76,16 +76,16 @@ Java Development Kit（JDK）是太阳微系统针对Java开发人员发布的�
 在 Java 中，JVM 可以理解的代码就叫做字节码（即扩展名为 .class 的文件），它不面向任何特定的处理器，只面向虚拟机。Java 语言通过字节码的方式，在一定程度上解决了传统解释型语言执行效率低的问题，同时又保留了解释型语言可移植的特点。所以 Java 程序运行时比较高效，而且，由于字节码并不针对一种特定的机器，因此，Java 程序无须重新编译便可在多种不同操作系统的计算机上运行。
 ** java编译过程
 Java 程序从源代码到运行一般有下面 3 步：
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-08_15-37-33.png @ 2021-03-08 15:37:37
-[[file:%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/2021-03-08_15-37-37_Snipaste_2021-03-08_15-37-33.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-08_15-37-33.png @ 2021-03-08 15:37:37
+[[file:快速入门/2021-03-08_15-37-37_Snipaste_2021-03-08_15-37-33.png]]
 我们需要格外注意的是 .class->机器码 这一步。在这一步 JVM 类加载器首先加载字节码文件，然后通过解释器逐行解释执行，这种方式的执行速度会相对比较慢。而且，有些方法和代码块是经常需要被调用的(也就是所谓的热点代码)，所以后面引进了 JIT 编译器，而 JIT 属于运行时编译。当 JIT 编译器完成第一次编译后，其会将字节码对应的机器码保存下来，下次可以直接使用。而我们知道，机器码的运行效率肯定是高于 Java 解释器的。这也解释了我们为什么经常会说 Java 是编译与解释共存的语言。
 ** 安装JDK
 因为Java程序必须运行在JVM之上，所以，我们第一件事情就是安装JDK。
 
 搜索JDK 15，确保从Oracle的官网下载最新的稳定版JDK：
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/2020-12-1.png @ 2020-12-01 20:23:28
-[[file:%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/2020-12-01_20-23-28_2020-12-1.png]]
+#+DOWNLOADED: file:E:/org/图片/2020-12-1.png @ 2020-12-01 20:23:28
+[[file:快速入门/2020-12-01_20-23-28_2020-12-1.png]]
 
 找到Java SE 15的下载链接，下载安装即可。
 
@@ -236,15 +236,15 @@ Hello, world!
 Eclipse的发行版提供了预打包的开发环境，包括Java、JavaEE、C++、PHP、Rust等。从[[https://www.eclipse.org/downloads/packages/][这里]]下载：
 
 我们需要下载的版本是Eclipse IDE for Java Developers：
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-02_21-31-59.png @ 2020-12-02 21:34:44
-[[file:%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/2020-12-02_21-34-44_Snipaste_2020-12-02_21-31-59.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2020-12-02_21-31-59.png @ 2020-12-02 21:34:44
+[[file:快速入门/2020-12-02_21-34-44_Snipaste_2020-12-02_21-31-59.png]]
 
 *** 设置Eclipse
 下载并安装完成后，我们启动Eclipse，对IDE环境做一个基本设置：
 
 选择菜单“Eclipse/Window”-“Preferences”，打开配置对话框：
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-02_21-35-03.png @ 2020-12-02 21:36:16
-[[file:%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/2020-12-02_21-36-16_Snipaste_2020-12-02_21-35-03.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2020-12-02_21-35-03.png @ 2020-12-02 21:36:16
+[[file:快速入门/2020-12-02_21-36-16_Snipaste_2020-12-02_21-35-03.png]]
 
 
 我们需要调整以下设置项：
@@ -260,8 +260,8 @@ Eclipse的发行版提供了预打包的开发环境，包括Java、JavaEE、C++
 
 对于“New text file line delimiter”，建议使用Unix，即换行符使用\n而不是Windows的\r\n。
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-02_21-36-39.png @ 2020-12-02 21:36:44
-[[file:%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/2020-12-02_21-36-44_Snipaste_2020-12-02_21-36-39.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2020-12-02_21-36-39.png @ 2020-12-02 21:36:44
+[[file:快速入门/2020-12-02_21-36-44_Snipaste_2020-12-02_21-36-39.png]]
 
 3. Java > Compiler
 
@@ -277,8 +277,8 @@ Eclipse的发行版提供了预打包的开发环境，包括Java、JavaEE、C++
 
 *** Eclipse IDE结构
 打开Eclipse后，整个IDE由若干个区域组成：
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-02_21-42-49.png @ 2020-12-02 21:45:17
-[[file:%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/2020-12-02_21-45-17_Snipaste_2020-12-02_21-42-49.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2020-12-02_21-42-49.png @ 2020-12-02 21:45:17
+[[file:快速入门/2020-12-02_21-45-17_Snipaste_2020-12-02_21-42-49.png]]
 
 - 中间可编辑的文本区（见1）是编辑器，用于编辑源码；
 - 分布在左右和下方的是视图：
@@ -290,14 +290,14 @@ Eclipse的发行版提供了预打包的开发环境，包括Java、JavaEE、C++
 *** 新建Java项目
 在Eclipse菜单选择“File”-“New”-“Java Project”，填入HelloWorld，JRE选择Java SE 15：
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-02_21-46-41.png @ 2020-12-02 21:46:51
-[[file:%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/2020-12-02_21-46-51_Snipaste_2020-12-02_21-46-41.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2020-12-02_21-46-41.png @ 2020-12-02 21:46:51
+[[file:快速入门/2020-12-02_21-46-51_Snipaste_2020-12-02_21-46-41.png]]
 
 
 暂时不要勾选“Create module-info.java file”，因为模块化机制我们后面才会讲到：
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-02_21-46-46.png @ 2020-12-02 21:47:04
-[[file:%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/2020-12-02_21-47-04_Snipaste_2020-12-02_21-46-46.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2020-12-02_21-46-46.png @ 2020-12-02 21:47:04
+[[file:快速入门/2020-12-02_21-47-04_Snipaste_2020-12-02_21-46-46.png]]
 
 
 点击“Finish”就成功创建了一个名为HelloWorld的Java工程。
@@ -305,38 +305,38 @@ Eclipse的发行版提供了预打包的开发环境，包括Java、JavaEE、C++
 *** 新建Java文件并运行
 展开HelloWorld工程，选中源码目录src，点击右键，在弹出菜单中选择“New”-“Class”：
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-02_21-47-11.png @ 2020-12-02 21:47:46
-[[file:%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/2020-12-02_21-47-46_Snipaste_2020-12-02_21-47-11.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2020-12-02_21-47-11.png @ 2020-12-02 21:47:46
+[[file:快速入门/2020-12-02_21-47-46_Snipaste_2020-12-02_21-47-11.png]]
 
 
 在弹出的对话框中，Name一栏填入Hello：
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-02_21-47-16.png @ 2020-12-02 21:47:54
-[[file:%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/2020-12-02_21-47-54_Snipaste_2020-12-02_21-47-16.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2020-12-02_21-47-16.png @ 2020-12-02 21:47:54
+[[file:快速入门/2020-12-02_21-47-54_Snipaste_2020-12-02_21-47-16.png]]
 
 
 点击”Finish“，就自动在src目录下创建了一个名为Hello.java的源文件。我们双击打开这个源文件，填上代码：
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-02_21-47-23.png @ 2020-12-02 21:48:10
-[[file:%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/2020-12-02_21-48-10_Snipaste_2020-12-02_21-47-23.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2020-12-02_21-47-23.png @ 2020-12-02 21:48:10
+[[file:快速入门/2020-12-02_21-48-10_Snipaste_2020-12-02_21-47-23.png]]
 
 
 保存，然后选中文件Hello.java，点击右键，在弹出的菜单中选中“Run As...”-“Java Application”：
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-02_21-47-26.png @ 2020-12-02 21:48:17
-[[file:%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/2020-12-02_21-48-17_Snipaste_2020-12-02_21-47-26.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2020-12-02_21-47-26.png @ 2020-12-02 21:48:17
+[[file:快速入门/2020-12-02_21-48-17_Snipaste_2020-12-02_21-47-26.png]]
 
 在Console窗口中就可以看到运行结果：
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-02_21-47-33.png @ 2020-12-02 21:48:23
-[[file:%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/2020-12-02_21-48-23_Snipaste_2020-12-02_21-47-33.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2020-12-02_21-47-33.png @ 2020-12-02 21:48:23
+[[file:快速入门/2020-12-02_21-48-23_Snipaste_2020-12-02_21-47-33.png]]
 
 如果没有在主界面中看到Console窗口，请选中菜单“Window”-“Show View”-“Console”，即可显示。
 ** JDK8与Java1.8的区别
 从下方的JDK各个版本发布时间和版本名称表也可以看到，Java大体有3大类命名方式：JDK、J2SE、JAVA SE。
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/20200407153336875.png @ 2021-02-02 22:27:29
-[[file:%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8/2021-02-02_22-27-29_20200407153336875.png]]
+#+DOWNLOADED: file:E:/org/图片/20200407153336875.png @ 2021-02-02 22:27:29
+[[file:快速入门/2021-02-02_22-27-29_20200407153336875.png]]
 
 JDK8或者JDK1.8是由于自从JDK1.5/JDK5命名方式改变后遗留的新旧命令方式问题。所以JDK8或者JDK1.8也是同一个东西。
 
@@ -965,8 +965,8 @@ num2 = 20
 #+END_EXAMPLE
 解析：
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-08_20-56-03.png @ 2021-03-08 20:56:14
-[[file:%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/2021-03-08_20-56-14_Snipaste_2021-03-08_20-56-03.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-08_20-56-03.png @ 2021-03-08 20:56:14
+[[file:面向对象编程基础/2021-03-08_20-56-14_Snipaste_2021-03-08_20-56-03.png]]
 
 在 swap 方法中，a、b 的值进行交换，并不会影响到 num1、num2。因为，a、b 中的值，只是从 num1、num2 的复制过来的。也就是说，a、b 相当于 num1、num2 的副本，副本的内容无论怎么修改，都不会影响到原件本身。
 
@@ -992,8 +992,8 @@ public static void change(int[] array) {
 #+END_EXAMPLE
 解析：
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-08_20-58-34.png @ 2021-03-08 20:58:38
-[[file:%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/2021-03-08_20-58-38_Snipaste_2021-03-08_20-58-34.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-08_20-58-34.png @ 2021-03-08 20:58:38
+[[file:面向对象编程基础/2021-03-08_20-58-38_Snipaste_2021-03-08_20-58-34.png]]
 array 被初始化 arr 的拷贝也就是一个对象的引用，也就是说 array 和 arr 指向的是同一个数组对象。 因此，外部对引用对象的改变会反映到所对应的对象上。
 
 通过 example2 我们已经看到，实现一个改变对象参数状态的方法并不是一件难事。理由很简单，方法得到的是对象引用的拷贝，对象引用及其他的拷贝同时引用同一个对象。
@@ -1030,12 +1030,12 @@ s2:小李
 解析：
 
 交换之前：
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-08_20-59-41.png @ 2021-03-08 20:59:52
-[[file:%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/2021-03-08_20-59-52_Snipaste_2021-03-08_20-59-41.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-08_20-59-41.png @ 2021-03-08 20:59:52
+[[file:面向对象编程基础/2021-03-08_20-59-52_Snipaste_2021-03-08_20-59-41.png]]
 
 交换之后：
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-08_20-59-43.png @ 2021-03-08 20:59:50
-[[file:%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/2021-03-08_20-59-50_Snipaste_2021-03-08_20-59-43.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-08_20-59-43.png @ 2021-03-08 20:59:50
+[[file:面向对象编程基础/2021-03-08_20-59-50_Snipaste_2021-03-08_20-59-43.png]]
 通过上面两张图可以很清晰的看出： 方法并没有改变存储在变量 s1 和 s2 中的对象引用。swap 方法的参数 x 和 y 被初始化为两个对象引用的拷贝，这个方法交换的是这两个拷贝
 
 Java 程序设计语言对对象采用的不是引用调用，实际上，对象引用是按 值传递的。
@@ -3000,11 +3000,11 @@ package_sample
       └─ jun
          └─ Arrays.class
 这里需要特别注意的是，jar包里的第一层目录，不能是bin，而应该是hong、ming、mr。如果在Windows的资源管理器中看，应该长这样：
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-11_16-12-04.png @ 2020-12-11 16:12:46
-[[file:%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/2020-12-11_16-12-46_Snipaste_2020-12-11_16-12-04.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2020-12-11_16-12-04.png @ 2020-12-11 16:12:46
+[[file:面向对象编程基础/2020-12-11_16-12-46_Snipaste_2020-12-11_16-12-04.png]]
 如果长这样：
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-11_16-12-11.png @ 2020-12-11 16:13:00
-[[file:%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80/2020-12-11_16-13-00_Snipaste_2020-12-11_16-12-11.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2020-12-11_16-12-11.png @ 2020-12-11 16:13:00
+[[file:面向对象编程基础/2020-12-11_16-13-00_Snipaste_2020-12-11_16-12-11.png]]
 
 说明打包打得有问题，JVM仍然无法从jar包中查找正确的class，原因是hong.Person必须按hong/Person.class存放，而不是bin/hong/Person.class。
 
@@ -5704,8 +5704,8 @@ String getFullName(Object obj) {
  System.out.println(c1.getName());
 #+end_src
 打印结果如下：
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-27_10-07-12.png @ 2021-03-27 10:07:24
-[[file:%E5%8F%8D%E5%B0%84/2021-03-27_10-07-24_Snipaste_2021-03-27_10-07-12.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-27_10-07-12.png @ 2021-03-27 10:07:24
+[[file:反射/2021-03-27_10-07-24_Snipaste_2021-03-27_10-07-12.png]]
 ***** Class.forName
  比如我们获取java.lang.String的类名 
 #+begin_src java  
@@ -5720,8 +5720,8 @@ try {
 这里也通过捕获异常，因为我们传的这个字符串可能不合法，字符串合法命名是类的命名空间和类的名称组成
 
 打印结果如下：
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-27_10-10-52.png @ 2021-03-27 10:10:57
-[[file:%E5%8F%8D%E5%B0%84/2021-03-27_10-10-57_Snipaste_2021-03-27_10-10-52.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-27_10-10-52.png @ 2021-03-27 10:10:57
+[[file:反射/2021-03-27_10-10-57_Snipaste_2021-03-27_10-10-52.png]]
 我们还可以通过c1.getSuperclass()获取到他的父类
 ***** Type属性
 基本类型都有type属性，可以得到这个基本类型的类型，比如：
@@ -5790,8 +5790,8 @@ for (int i = 0; i < constructors.length; i++) {
   }
 #+end_src
 运行结果如下所示：
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-27_10-17-44.png @ 2021-03-27 10:17:49
-[[file:%E5%8F%8D%E5%B0%84/2021-03-27_10-17-49_Snipaste_2021-03-27_10-17-44.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-27_10-17-44.png @ 2021-03-27 10:17:49
+[[file:反射/2021-03-27_10-17-49_Snipaste_2021-03-27_10-17-44.png]]
 这样我们就得到了类中所有构造方法和构造方法中的参数，那么我们如何获取特定的构造方法呢？
 
 **** 获取类中特定的构造方法
@@ -5810,8 +5810,8 @@ try {
 
 #+end_src
 这里要进行异常捕获，因为可能不存在对应的构造方法，打印结果如下：  
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-27_10-44-46.png @ 2021-03-27 10:44:50
-[[file:%E5%8F%8D%E5%B0%84/2021-03-27_10-44-50_Snipaste_2021-03-27_10-44-46.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-27_10-44-46.png @ 2021-03-27 10:44:50
+[[file:反射/2021-03-27_10-44-50_Snipaste_2021-03-27_10-44-46.png]]
 如果我们想获取有两个参数分别为int和String类型的构造方法，代码如下：
 #+begin_src java  
  Class[] p = {int.class,String.class};
@@ -5829,8 +5829,8 @@ try {
 #+end_src
 
 这里我们同样打印出构造方法的参数：
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-27_10-45-28.png @ 2021-03-27 10:45:32
-[[file:%E5%8F%8D%E5%B0%84/2021-03-27_10-45-32_Snipaste_2021-03-27_10-45-28.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-27_10-45-28.png @ 2021-03-27 10:45:32
+[[file:反射/2021-03-27_10-45-32_Snipaste_2021-03-27_10-45-28.png]]
 
 
 **** 调用构造方法
@@ -5856,8 +5856,8 @@ constructors = c4.getDeclaredConstructor(p);
 constructors.newInstance(24,"HuangLinqing");
 #+end_src
 运行打印结果如下：
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-27_10-47-38.png @ 2021-03-27 10:47:42
-[[file:%E5%8F%8D%E5%B0%84/2021-03-27_10-47-42_Snipaste_2021-03-27_10-47-38.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-27_10-47-38.png @ 2021-03-27 10:47:42
+[[file:反射/2021-03-27_10-47-42_Snipaste_2021-03-27_10-47-38.png]]
 那么调用私有构造方法呢，和上面一样，只是我们要设置constructors.setAccessible(true);代码如下：
 #+begin_src java 
 Class[] p = {String.class};
@@ -5867,8 +5867,8 @@ constructors.newInstance("HuangLinqing");
 #+end_src
 打印结果如下：
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-27_10-50-06.png @ 2021-03-27 10:50:10
-[[file:%E5%8F%8D%E5%B0%84/2021-03-27_10-50-10_Snipaste_2021-03-27_10-50-06.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-27_10-50-06.png @ 2021-03-27 10:50:10
+[[file:反射/2021-03-27_10-50-10_Snipaste_2021-03-27_10-50-06.png]]
 
 **** 调用类的私有方法
 如何调用类中的私有方法呢，我们先在测试类中编写一个测试的私有方法 如下：
@@ -5895,8 +5895,8 @@ method.invoke(test,arg1s);
 #+end_src
 test类的实例当不能new 获取的时候我们也可以通过反射获取，就是上面的newInstance方法。打印结果如下：
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-27_10-56-13.png @ 2021-03-27 10:56:17
-[[file:%E5%8F%8D%E5%B0%84/2021-03-27_10-56-17_Snipaste_2021-03-27_10-56-13.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-27_10-56-13.png @ 2021-03-27 10:56:17
+[[file:反射/2021-03-27_10-56-17_Snipaste_2021-03-27_10-56-13.png]]
 
 **** 获取类的私有字段并修改值
 看到这里你可能会说，有了set方法，什么私有不私有，test.set不就可以了，但是这里要注意我们是没有办法得到这个类的实例的，要不然都可以得到实例就没有反射一说了。我们在通过反射得到类的实例之后先获取字段：
@@ -5907,8 +5907,8 @@ field.set(o,"代码男人");
 #+end_src
 o是我们上面通过反射构造方法获取的实例，  打印field.get(o).toString()的值如下：
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-27_10-57-46.png @ 2021-03-27 10:57:50
-[[file:%E5%8F%8D%E5%B0%84/2021-03-27_10-57-50_Snipaste_2021-03-27_10-57-46.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-27_10-57-46.png @ 2021-03-27 10:57:50
+[[file:反射/2021-03-27_10-57-50_Snipaste_2021-03-27_10-57-46.png]]
 不过要注意的是我们修改了name的值只对当前的实例对象有效。
 
 *** 完整代码
@@ -7305,8 +7305,8 @@ class HelloThread extends Thread {
 
 下面用一个图片来整体描述一下设计模式之间的关系：
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-27_22-33-59.png @ 2020-12-27 22:34:04
-[[file:%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/2020-12-27_22-34-04_Snipaste_2020-12-27_22-33-59.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2020-12-27_22-33-59.png @ 2020-12-27 22:34:04
+[[file:设计模式/2020-12-27_22-34-04_Snipaste_2020-12-27_22-33-59.png]]
 
 **** 创建型模式
 这些设计模式提供了一种在创建对象的同时隐藏创建逻辑的方式，而不是使用 new 运算符直接实例化对象。这使得程序在判断针对某个给定实例需要创建哪些对象时更加灵活
@@ -7357,14 +7357,14 @@ MVC 模式代表 Model-View-Controller（模型-视图-控制器） 模式。这
 - View（视图） - 视图代表模型包含的数据的可视化。
 - Controller（控制器） - 控制器作用于模型和视图上。它控制数据流向模型对象，并在数据变化时更新视图。它使视图与模型分离开。
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-28_11-14-19.png @ 2020-12-28 11:14:31
-[[file:%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/2020-12-28_11-14-31_Snipaste_2020-12-28_11-14-19.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2020-12-28_11-14-19.png @ 2020-12-28 11:14:31
+[[file:设计模式/2020-12-28_11-14-31_Snipaste_2020-12-28_11-14-19.png]]
 *** 实现
 我们将创建一个作为模型的 Student 对象。StudentView 是一个把学生详细信息输出到控制台的视图类，StudentController 是负责存储数据到 Student 对象中的控制器类，并相应地更新视图 StudentView。
 
 MVCPatternDemo，我们的演示类使用 StudentController 来演示 MVC 模式的用法。
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-28_11-16-08.png @ 2020-12-28 11:16:14
-[[file:%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/2020-12-28_11-16-14_Snipaste_2020-12-28_11-16-08.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2020-12-28_11-16-08.png @ 2020-12-28 11:16:14
+[[file:设计模式/2020-12-28_11-16-14_Snipaste_2020-12-28_11-16-08.png]]
 **** 步骤一：创建模型
 #+begin_src java  
 public class Student {
@@ -7511,8 +7511,8 @@ Swing 是新一代的图形界面工具。使用 Swing 来开发图形界面比 
 Swing 组件都采用 MVC（Model-View-Controller，即模型-视图-控制器）的设计，实现 GUI 组件的显示逻辑和数据逻辑的分离，从而允许程序员自定义 Render 来改变 GUI 组件的显示外观，以提供更多的灵活性。
 
 Swing 围绕 JComponent 组件构建，JComponent 则由 AWT 的容器类扩展而来。Swing 组织结构如图所示。
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-27_22-12-28.png @ 2020-12-27 22:12:47
-[[file:Swing%E4%BB%8B%E7%BB%8D/2020-12-27_22-12-47_Snipaste_2020-12-27_22-12-28.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2020-12-27_22-12-28.png @ 2020-12-27 22:12:47
+[[file:Swing介绍/2020-12-27_22-12-47_Snipaste_2020-12-27_22-12-28.png]]
 从上图可以看出，Swing 组件除了 AbstmctButton 类之外都以 J 开头。Swing 容器组件直接继承 AWT 类库中的容器组件类，其他大部分组件都是继承 JComponet 组件。组件可以划分为容器组件和非容器组件，容器组件包括 JFmme 和 JDialog。其中 JComponent 定义了非容器类的轻量级组件（JBntton、JPanel、JMenu 等）。
 
 *** Swing 包
@@ -7554,8 +7554,8 @@ Swing 中容器可以分为两类：顶层容器和中间容器。
 
 在 Java 程序中容器类都是继承自 Container 类。中间容器和顶层容器在，AWT 包和 Swing 包中继承 Container 类的继承关系，如图 2 所示。
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-28_20-06-43.png @ 2020-12-28 20:07:00
-[[file:Swing%E4%BB%8B%E7%BB%8D/2020-12-28_20-07-00_Snipaste_2020-12-28_20-06-43.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2020-12-28_20-06-43.png @ 2020-12-28 20:07:00
+[[file:Swing介绍/2020-12-28_20-07-00_Snipaste_2020-12-28_20-06-43.png]]
 ** Swing事件监听
 事件表示程序和用户之间的交互，例如在文本框中输入，在列表框或组合框中选择，选中复选框和单选框，单击按钮等。事件处理表示程序对事件的响应，对用户的交互或者说对事件的处理是事件处理程序完成的。
 
@@ -7568,8 +7568,8 @@ Swing 中容器可以分为两类：顶层容器和中间容器。
 
 例如，如果鼠标单击了按钮对象 Button，则该按钮 Button 就是事件源，而 Java 运行时系统会生成 ActionEvent 类的对象 ActionEvent，该对象中描述了单击事件发生时的一些信息。之后，事件处理者对象将接收由 Java 运行时系统传递过来的事件对象 ActionEvent，并进行相应的处理。事件处理模型如图 1 所示。
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-28_20-09-30.png @ 2020-12-28 20:09:34
-[[file:Swing%E4%BB%8B%E7%BB%8D/2020-12-28_20-09-34_Snipaste_2020-12-28_20-09-30.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2020-12-28_20-09-30.png @ 2020-12-28 20:09:34
+[[file:Swing介绍/2020-12-28_20-09-34_Snipaste_2020-12-28_20-09-30.png]]
 
 由于同一个事件源上可能发生多种事件，因此，Java 采取了授权模型（Delegation Model），事件源可以把在其自身上所有可能发生的事件分别授权给不同的事件处理者来处理。例如，在 Panel 对象上既可能发生鼠标事件，也可能发生键盘事件，该 Panel 对象可以授权给事件处理者 a 来处理鼠标事件，同时授权给事件处理者 b 来处理键盘事件。
 
@@ -7647,8 +7647,8 @@ public class ActionListenerDemo extends JFrame
 上述代码调用 addActionListener() 方法为 button1 添加了单击动作的事件监听器，该监听器由 button1ActionListener 类来实现。button1ActionListener 类必须继承 ActionListener 类，并重写父类的 actionPerformed() 方法。在 actionPerformed() 方法内编写按钮被单击后执行的功能。
 
 图 2 所示为程序运行后，没有单击和单击后的效果。
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-28_20-18-43.png @ 2020-12-28 20:18:47
-[[file:Swing%E4%BB%8B%E7%BB%8D/2020-12-28_20-18-47_Snipaste_2020-12-28_20-18-43.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2020-12-28_20-18-43.png @ 2020-12-28 20:18:47
+[[file:Swing介绍/2020-12-28_20-18-47_Snipaste_2020-12-28_20-18-43.png]]
 在本例中使用的是内部类形式，当然也可以写成如下形式的代码：
 #+begin_src java  
 //为按钮buttonl添加ActionEvent事件的处理程序
@@ -7677,8 +7677,8 @@ JFrame 类的常用构造方法如下所示。
 frame.getContentPane().add(b);
 #+END_SRC
 使用 JFrame 类创建 GUI 界面时，其组件的布局组织示意如图 1 所示。
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-29_15-01-37.png @ 2020-12-29 15:02:28
-[[file:Swing%E4%BB%8B%E7%BB%8D/2020-12-29_15-02-28_Snipaste_2020-12-29_15-01-37.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2020-12-29_15-01-37.png @ 2020-12-29 15:02:28
+[[file:Swing介绍/2020-12-29_15-02-28_Snipaste_2020-12-29_15-01-37.png]]
 在图 1 中显示有“大家好”的 Swing 组件需要放到内容窗格的上面，内容窗格再放到 JFrame 顶层容器的上面。菜单栏可以直接放到顶层容器 JFrame 上，而不通过内容窗格。内容窗格是一个透明的没有边框的中间容器。
 
 JFrame 类中的常用方法如表 1 所示。
@@ -7723,8 +7723,8 @@ public class JFrameDemo extends JFrame
 
 程序运行的窗口结果如图 2 所示。
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-29_15-11-26.png @ 2020-12-29 15:11:34
-[[file:Swing%E4%BB%8B%E7%BB%8D/2020-12-29_15-11-34_Snipaste_2020-12-29_15-11-26.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2020-12-29_15-11-26.png @ 2020-12-29 15:11:34
+[[file:Swing介绍/2020-12-29_15-11-34_Snipaste_2020-12-29_15-11-26.png]]
 *** JPanel 面板
 JPanel 是一种中间层容器，它能容纳组件并将组件组合在一起，但它本身必须添加到其他容器中使用。JPanel 类的构造方法如下。
 - JPanel()：使用默认的布局管理器创建新面板，默认的布局管理器为 FlowLayout。
@@ -7764,8 +7764,8 @@ public class JPanelDemo
 如上述代码，首先创建了一个 JFrame 对象，并设置其大小和位置，然后创建了一个 JPanel对象表示面板，调用 setBackground() 方法设置面板的背景色为白色，调用 add() 方法将标签添加到此面板。JFrame 类的 add() 方法将 JPanel 面板添加到 JFmme 窗口中。最后调用 setVisible() 方法将窗口设置为可见。
 
 运行程序，显示的窗口如图 3 所示。
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-12-29_19-08-47.png @ 2020-12-29 19:09:05
-[[file:Swing%E4%BB%8B%E7%BB%8D/2020-12-29_19-09-05_Snipaste_2020-12-29_19-08-47.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2020-12-29_19-08-47.png @ 2020-12-29 19:09:05
+[[file:Swing介绍/2020-12-29_19-09-05_Snipaste_2020-12-29_19-08-47.png]]
 * spring
 ** spring入门
 任何不平凡的应用程序都由许多组件组成，每个组件负责自己的在整体应用程序中的那部分功能，并与其他应用程序元素协调以完成工作。在运行应用程序时，需要以某种方式创建这些组件并相互引用。
@@ -7780,7 +7780,7 @@ Spring 的核心是一个 容器，通常称为 Spring 应用程序上下文，�
 
 从历史上看，引导 Spring 应用程序上下文将 bean 连接在一起的方式是使用一个或多个 XML 文件，这些文件描述了组件及其与其他组件的关系。例如，以下 XML 声明两个 bean，一个 InventoryService bean 和一个 ProductService bean，然后通过构造函数参数将 InventoryService bean 注入到 ProductService 中：
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-02-03_17-34-31.png @ 2021-02-03 17:35:06
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-02-03_17-34-31.png @ 2021-02-03 17:35:06
 [[file:spring/2021-02-03_17-35-06_Snipaste_2021-02-03_17-34-31.png]]
 
 #+BEGIN_EXAMPLE
@@ -8099,7 +8099,7 @@ Person
 ** getClass(）返回Class类型的对象。
 getClass(）返回Class类型的对象。
 返回的是内存中实实在在存在的Person 这个类
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-08_18-48-21.png @ 2021-03-08 18:48:26
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-08_18-48-21.png @ 2021-03-08 18:48:26
 [[file:getclass/2021-03-08_18-48-26_Snipaste_2021-03-08_18-48-21.png]]
 ** 返回类型为Class理解：
 一个男人有爸爸的称呼，丈夫（老公），还有儿子的称呼，还有爷爷，叔叔等等的称呼，而这些称呼的参照物不同导致有不同的称呼。当参照物是老婆时，这个男人的称呼是丈夫(老公)，当参照物是男人的儿子时，此男人的称呼是爸爸。以此类推等等。
@@ -8181,8 +8181,8 @@ com.test.Teacher@28a418fc
 #+END_EXAMPLE
 结果分析：由输出结果可以看出，它们的地址值是相同的，那么它们肯定是同一个对象。teacher和otherTeacher的只是引用而已，他们都指向了一个相同的对象Teacher(“riemann”,28)。 这就叫做引用拷贝。
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-09_20-27-38.png @ 2021-03-09 20:27:42
-[[file:%E6%B5%85%E6%8B%B7%E8%B4%9D%E5%92%8C%E6%B7%B1%E6%8B%B7%E8%B4%9D/2021-03-09_20-27-42_Snipaste_2021-03-09_20-27-38.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-09_20-27-38.png @ 2021-03-09 20:27:42
+[[file:浅拷贝和深拷贝/2021-03-09_20-27-42_Snipaste_2021-03-09_20-27-38.png]]
 *** 对象拷贝
 注：深拷贝和浅拷贝都是对象拷贝
 
@@ -8234,8 +8234,8 @@ com.test.Teacher@28a418fc
 com.test.Teacher@5305068a
 #+END_EXAMPLE
 结果分析：由输出结果可以看出，它们的地址是不同的，也就是说创建了新的对象， 而不是把原对象的地址赋给了一个新的引用变量,这就叫做对象拷贝。
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-09_20-31-45.png @ 2021-03-09 20:31:49
-[[file:%E6%B5%85%E6%8B%B7%E8%B4%9D%E5%92%8C%E6%B7%B1%E6%8B%B7%E8%B4%9D/2021-03-09_20-31-49_Snipaste_2021-03-09_20-31-45.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-09_20-31-45.png @ 2021-03-09 20:31:49
+[[file:浅拷贝和深拷贝/2021-03-09_20-31-49_Snipaste_2021-03-09_20-31-45.png]]
 
 ** 浅拷贝
 对基本数据类型进行值传递，对引用数据类型进行引用传递般的拷贝，此为浅拷贝。
@@ -8340,8 +8340,8 @@ student1的teacher为： jack
 student2的teacher为： jack
 #+END_EXAMPLE
 结果分析： 两个引用student1和student2指向不同的两个对象，但是两个引用student1和student2中的两个teacher引用指向的是同一个对象，所以说明是浅拷贝。
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-09_20-33-45.png @ 2021-03-09 20:33:50
-[[file:%E6%B5%85%E6%8B%B7%E8%B4%9D%E5%92%8C%E6%B7%B1%E6%8B%B7%E8%B4%9D/2021-03-09_20-33-50_Snipaste_2021-03-09_20-33-45.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-09_20-33-45.png @ 2021-03-09 20:33:50
+[[file:浅拷贝和深拷贝/2021-03-09_20-33-50_Snipaste_2021-03-09_20-33-45.png]]
 
 ** 深拷贝
 深拷贝：对基本数据类型进行值传递，对引用数据类型，创建一个新的对象，并复制其内容，此为深拷贝。
@@ -8460,5 +8460,5 @@ student2的teacher为： riemann
 结果分析：
 两个引用student1和student2指向不同的两个对象，两个引用student1和student2中的两个teacher引用指向的是两个对象，但对teacher对象的修改只能影响student1对象,所以说是深拷贝。
 
-#+DOWNLOADED: file:E%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2021-03-09_20-43-15.png @ 2021-03-09 20:43:19
-[[file:%E6%B5%85%E6%8B%B7%E8%B4%9D%E5%92%8C%E6%B7%B1%E6%8B%B7%E8%B4%9D/2021-03-09_20-43-19_Snipaste_2021-03-09_20-43-15.png]]
+#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-03-09_20-43-15.png @ 2021-03-09 20:43:19
+[[file:浅拷贝和深拷贝/2021-03-09_20-43-19_Snipaste_2021-03-09_20-43-15.png]]

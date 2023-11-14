@@ -5,15 +5,15 @@
 ** 阿里云
 进入控制台-安全组-选择你ECS实例使用的安全组策略并配置规则
 
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/%E6%8D%95%E8%8E%B7.JPG @ 2020-05-09 22:53:28
-[[file:%E5%AE%89%E8%A3%85%E5%AE%9D%E5%A1%94%E5%92%8Cwordpress/2020-05-09_22-53-28_%25E6%258D%2595%25E8%258E%25B7.JPG]]
+#+DOWNLOADED: file:F:/org/图片/捕获.JPG @ 2020-05-09 22:53:28
+[[file:安装宝塔和wordpress/2020-05-09_22-53-28_捕获.JPG]]
 
 选择公网入方向-新建规则
 
 放行8888端口 并开放所有ip访问 点击确定即可
 
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/181847o8o9gi5oi1igg9gu.png @ 2020-05-09 21:11:28
-[[file:%E5%AE%89%E8%A3%85%E5%AE%9D%E5%A1%94%E5%92%8Cwordpress/2020-05-09_21-11-28_181847o8o9gi5oi1igg9gu.png]]
+#+DOWNLOADED: file:F:/org/图片/181847o8o9gi5oi1igg9gu.png @ 2020-05-09 21:11:28
+[[file:安装宝塔和wordpress/2020-05-09_21-11-28_181847o8o9gi5oi1igg9gu.png]]
 注意：
 如需完整使用宝塔的所有功能 你还需要放行如下端口
 - 20 、21、 39000-40000端口（linux 系统 ），3000-4000（windows系统）
@@ -62,17 +62,17 @@ Fedora安装命令:
 
 安装好环境后我们就可以开始搭建wordpress了，这里推荐大家到软件商店中安装宝塔源码一键部署
 
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-05-09_22-55-47.png @ 2020-05-09 22:56:33
-[[file:%E5%AE%89%E8%A3%85%E5%AE%9D%E5%A1%94%E5%92%8Cwordpress/2020-05-09_22-56-33_Snipaste_2020-05-09_22-55-47.png]]
+#+DOWNLOADED: file:F:/org/图片/Snipaste_2020-05-09_22-55-47.png @ 2020-05-09 22:56:33
+[[file:安装宝塔和wordpress/2020-05-09_22-56-33_Snipaste_2020-05-09_22-55-47.png]]
 
 
 这里我们可以快速部署一些常用的应用
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/ErBd.png @ 2020-05-09 22:43:59
-[[file:%E5%AE%89%E8%A3%85%E5%AE%9D%E5%A1%94%E5%92%8Cwordpress/2020-05-09_22-43-59_ErBd.png]]
+#+DOWNLOADED: file:F:/org/图片/ErBd.png @ 2020-05-09 22:43:59
+[[file:安装宝塔和wordpress/2020-05-09_22-43-59_ErBd.png]]
 
 这里可以看到wordpress了，我们点击一键部署后可以看到下面这个界面
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-05-09_22-57-53.png @ 2020-05-09 22:57:58
-[[file:%E5%AE%89%E8%A3%85%E5%AE%9D%E5%A1%94%E5%92%8Cwordpress/2020-05-09_22-57-58_Snipaste_2020-05-09_22-57-53.png]]
+#+DOWNLOADED: file:F:/org/图片/Snipaste_2020-05-09_22-57-53.png @ 2020-05-09 22:57:58
+[[file:安装宝塔和wordpress/2020-05-09_22-57-58_Snipaste_2020-05-09_22-57-53.png]]
 
 域名这里大家填上自己申请的那个域名就好，如果没有域名的填ip地址好像也可以
 
@@ -80,8 +80,8 @@ Fedora安装命令:
 
 注意我们要记下数据库的名字和密码
 
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-05-09_22-59-57.png @ 2020-05-09 23:00:07
-[[file:%E5%AE%89%E8%A3%85%E5%AE%9D%E5%A1%94%E5%92%8Cwordpress/2020-05-09_23-00-07_Snipaste_2020-05-09_22-59-57.png]]
+#+DOWNLOADED: file:F:/org/图片/Snipaste_2020-05-09_22-59-57.png @ 2020-05-09 23:00:07
+[[file:安装宝塔和wordpress/2020-05-09_23-00-07_Snipaste_2020-05-09_22-59-57.png]]
 数据库名：chenpeidong_top
 
 用户：chenpeidong_top
@@ -91,48 +91,48 @@ Fedora安装命令:
 访问站点：http://chenpeidong.top
 
 安装好后访问我们的站点就可以看到下面的界面，
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-05-09_23-42-40.png @ 2020-05-09 23:42:46
-[[file:%E5%AE%89%E8%A3%85%E5%AE%9D%E5%A1%94%E5%92%8Cwordpress/2020-05-09_23-42-46_Snipaste_2020-05-09_23-42-40.png]]
+#+DOWNLOADED: file:F:/org/图片/Snipaste_2020-05-09_23-42-40.png @ 2020-05-09 23:42:46
+[[file:安装宝塔和wordpress/2020-05-09_23-42-46_Snipaste_2020-05-09_23-42-40.png]]
 
 
 然后我们就安装里面的步骤一步步来进行操作
 
 然后在登录一下就可以了，（登录地址为：域名/wp-login.php）登录后就可以看到下面的界面了：
 
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-05-10_16-56-03.png @ 2020-05-10 16:56:25
-[[file:%E5%AE%89%E8%A3%85%E5%AE%9D%E5%A1%94%E5%92%8Cwordpress/2020-05-10_16-56-25_Snipaste_2020-05-10_16-56-03.png]]
+#+DOWNLOADED: file:F:/org/图片/Snipaste_2020-05-10_16-56-03.png @ 2020-05-10 16:56:25
+[[file:安装宝塔和wordpress/2020-05-10_16-56-25_Snipaste_2020-05-10_16-56-03.png]]
 
 以后我们写文章都会在这里写，还有网站的一些配置也在这里.
 * 网站支持https
 我们可以到阿里云里面购买SSL证书,这里我们可以直接买免费版的
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-05-11_18-43-33.png @ 2020-05-11 18:44:04
-[[file:%E7%BD%91%E7%AB%99%E6%94%AF%E6%8C%81https/2020-05-11_18-44-04_Snipaste_2020-05-11_18-43-33.png]]
+#+DOWNLOADED: file:F:/org/图片/Snipaste_2020-05-11_18-43-33.png @ 2020-05-11 18:44:04
+[[file:网站支持https/2020-05-11_18-44-04_Snipaste_2020-05-11_18-43-33.png]]
 
 购买成功后，要申请证书。在证书申请里填写信息后提交审核即可。
 
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-05-11_18-46-50.png @ 2020-05-11 18:47:58
-[[file:%E7%BD%91%E7%AB%99%E6%94%AF%E6%8C%81https/2020-05-11_18-47-58_Snipaste_2020-05-11_18-46-50.png]]
+#+DOWNLOADED: file:F:/org/图片/Snipaste_2020-05-11_18-46-50.png @ 2020-05-11 18:47:58
+[[file:网站支持https/2020-05-11_18-47-58_Snipaste_2020-05-11_18-46-50.png]]
 
 审核成功后就要下载证书，选择Nginx服务器类型，会得到一个key和pem后缀的文件
 
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-05-11_18-55-12.png @ 2020-05-11 18:55:18
-[[file:%E7%BD%91%E7%AB%99%E6%94%AF%E6%8C%81https/2020-05-11_18-55-18_Snipaste_2020-05-11_18-55-12.png]]
+#+DOWNLOADED: file:F:/org/图片/Snipaste_2020-05-11_18-55-12.png @ 2020-05-11 18:55:18
+[[file:网站支持https/2020-05-11_18-55-18_Snipaste_2020-05-11_18-55-12.png]]
 
 我们先打开宝塔。然后到网站那个板块点击一下就可以进入网站的设置
 
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-05-11_19-02-56.png @ 2020-05-11 19:03:02
-[[file:%E7%BD%91%E7%AB%99%E6%94%AF%E6%8C%81https/2020-05-11_19-03-02_Snipaste_2020-05-11_19-02-56.png]]
+#+DOWNLOADED: file:F:/org/图片/Snipaste_2020-05-11_19-02-56.png @ 2020-05-11 19:03:02
+[[file:网站支持https/2020-05-11_19-03-02_Snipaste_2020-05-11_19-02-56.png]]
 
 然后进入SSL里面把我们下载的key和pem的文件用记事本打开并将里面的内容复制进去就可以了
 
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-05-11_19-03-36.png @ 2020-05-11 19:03:52
-[[file:%E7%BD%91%E7%AB%99%E6%94%AF%E6%8C%81https/2020-05-11_19-03-52_Snipaste_2020-05-11_19-03-36.png]]
+#+DOWNLOADED: file:F:/org/图片/Snipaste_2020-05-11_19-03-36.png @ 2020-05-11 19:03:52
+[[file:网站支持https/2020-05-11_19-03-52_Snipaste_2020-05-11_19-03-36.png]]
 
 这样我们的网站就支持https了。其他的设置如果看不懂我们就不要乱修改。
 
 这里我们还要修改一下伪静态，加上wordpress的规则就可以了。
 
-#+DOWNLOADED: file:F%3A/org/%E5%9B%BE%E7%89%87/Snipaste_2020-05-11_19-07-51.png @ 2020-05-11 19:08:07
-[[file:%E7%BD%91%E7%AB%99%E6%94%AF%E6%8C%81https/2020-05-11_19-08-07_Snipaste_2020-05-11_19-07-51.png]]
+#+DOWNLOADED: file:F:/org/图片/Snipaste_2020-05-11_19-07-51.png @ 2020-05-11 19:08:07
+[[file:网站支持https/2020-05-11_19-08-07_Snipaste_2020-05-11_19-07-51.png]]
 
 https需要我们放行443端口，阿里云默认已经放行了，如果发现https没有用的话可以去看一下是否放行了该端口。

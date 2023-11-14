@@ -4,12 +4,12 @@
 
 
 #+DOWNLOADED: screenshot @ 2022-07-16 10:04:06
-[[file:images/windows%E6%93%8D%E4%BD%9C%E6%96%B9%E6%B3%95/pdf_%E5%8A%A0%E6%B7%B1_%E6%89%AB%E6%8F%8F%E4%BB%B6/2022-07-16_10-04-06_screenshot.png]]
+[[file:images/windows操作方法/pdf_加深_扫描件/2022-07-16_10-04-06_screenshot.png]]
 打开扫描文件文字非常浅的文件，点击文件—另存为(快捷键：Ctrl+Shift+S)；
 
 
 #+DOWNLOADED: screenshot @ 2022-07-16 10:04:26
-[[file:images/windows%E6%93%8D%E4%BD%9C%E6%96%B9%E6%B3%95/pdf_%E5%8A%A0%E6%B7%B1_%E6%89%AB%E6%8F%8F%E4%BB%B6/2022-07-16_10-04-26_screenshot.png]]
+[[file:images/windows操作方法/pdf_加深_扫描件/2022-07-16_10-04-26_screenshot.png]]
 在打开的另存为窗口，选择存储的路径，小编此处选择存桌面，选择刚刚建立的文件夹;
 
 文件名默认不更改，保存类型选择JPEG,在设置中将分辨率设置为118.11像素/厘米(这样导出的图片在用PS打开是300分辨率的，打印出来清晰)；
@@ -17,90 +17,90 @@
 点击右下角保存；
 
 #+DOWNLOADED: screenshot @ 2022-07-16 10:04:49
-[[file:images/windows%E6%93%8D%E4%BD%9C%E6%96%B9%E6%B3%95/pdf_%E5%8A%A0%E6%B7%B1_%E6%89%AB%E6%8F%8F%E4%BB%B6/2022-07-16_10-04-49_screenshot.png]]
+[[file:images/windows操作方法/pdf_加深_扫描件/2022-07-16_10-04-49_screenshot.png]]
 转换过程中，文件右下角有处理进度条；
 
 原扫描文件夹里会逐渐创建我们将单个PDF文件转成单张图片格式的文件，页数570页较多，要等待1分钟左右；
 
 #+DOWNLOADED: screenshot @ 2022-07-16 10:05:28
-[[file:images/windows%E6%93%8D%E4%BD%9C%E6%96%B9%E6%B3%95/pdf_%E5%8A%A0%E6%B7%B1_%E6%89%AB%E6%8F%8F%E4%BB%B6/2022-07-16_10-05-28_screenshot.png]]
+[[file:images/windows操作方法/pdf_加深_扫描件/2022-07-16_10-05-28_screenshot.png]]
 
 查看导出的jpg文件夹，每个页面已按顺序自动排好.
 ** 在PS中录制加深动作
 打开Photoshop软件，点击文件-打开刚刚导出PDF中的任意一页(用来录制动作用的)点击菜单栏，窗口—动作；
 #+DOWNLOADED: screenshot @ 2022-07-16 10:06:30
-[[file:images/windows%E6%93%8D%E4%BD%9C%E6%96%B9%E6%B3%95/pdf_%E5%8A%A0%E6%B7%B1_%E6%89%AB%E6%8F%8F%E4%BB%B6/2022-07-16_10-06-30_screenshot.png]]
+[[file:images/windows操作方法/pdf_加深_扫描件/2022-07-16_10-06-30_screenshot.png]]
 动作小窗口点击右下角“新建动作”按钮；
 #+DOWNLOADED: screenshot @ 2022-07-16 10:06:41
-[[file:images/windows%E6%93%8D%E4%BD%9C%E6%96%B9%E6%B3%95/pdf_%E5%8A%A0%E6%B7%B1_%E6%89%AB%E6%8F%8F%E4%BB%B6/2022-07-16_10-06-41_screenshot.png]]
+[[file:images/windows操作方法/pdf_加深_扫描件/2022-07-16_10-06-41_screenshot.png]]
 在弹出的动作小窗口，我们将名称命名为“加深”，点击记录，这样接下来的操作将记录在此动作中；
 #+DOWNLOADED: screenshot @ 2022-07-16 10:06:50
-[[file:images/windows%E6%93%8D%E4%BD%9C%E6%96%B9%E6%B3%95/pdf_%E5%8A%A0%E6%B7%B1_%E6%89%AB%E6%8F%8F%E4%BB%B6/2022-07-16_10-06-50_screenshot.png]]
+[[file:images/windows操作方法/pdf_加深_扫描件/2022-07-16_10-06-50_screenshot.png]]
 按快捷键“Ctrl+M”调出“曲线”窗口，上下拉动直接变曲线调整加(根据文件调整合适的参数)，调好后点击确定；
 #+DOWNLOADED: screenshot @ 2022-07-16 10:07:13
-[[file:images/windows%E6%93%8D%E4%BD%9C%E6%96%B9%E6%B3%95/pdf_%E5%8A%A0%E6%B7%B1_%E6%89%AB%E6%8F%8F%E4%BB%B6/2022-07-16_10-07-13_screenshot.png]]
+[[file:images/windows操作方法/pdf_加深_扫描件/2022-07-16_10-07-13_screenshot.png]]
 按快捷键“Ctrl+L”调出“色阶”窗口，左右调整三角形调整加深(根据文件调整合适的参数)，调好后点击确定；
 #+DOWNLOADED: screenshot @ 2022-07-16 10:07:31
-[[file:images/windows%E6%93%8D%E4%BD%9C%E6%96%B9%E6%B3%95/pdf_%E5%8A%A0%E6%B7%B1_%E6%89%AB%E6%8F%8F%E4%BB%B6/2022-07-16_10-07-31_screenshot.png]]
+[[file:images/windows操作方法/pdf_加深_扫描件/2022-07-16_10-07-31_screenshot.png]]
 鼠标单击桌面空白处，点击新建—新建文件夹，小编命名为“加深”；
 
 
 #+DOWNLOADED: screenshot @ 2022-07-16 10:07:41
-[[file:images/windows%E6%93%8D%E4%BD%9C%E6%96%B9%E6%B3%95/pdf_%E5%8A%A0%E6%B7%B1_%E6%89%AB%E6%8F%8F%E4%BB%B6/2022-07-16_10-07-41_screenshot.png]]
+[[file:images/windows操作方法/pdf_加深_扫描件/2022-07-16_10-07-41_screenshot.png]]
 点击文件—另存为(快捷键：Ctrl+Shift+S)，选择存储的路径，小编此处选择存桌面刚刚建立的“加深”文件夹，保存类型选JPEG，点击保存；
 
 #+DOWNLOADED: screenshot @ 2022-07-16 10:08:00
-[[file:images/windows%E6%93%8D%E4%BD%9C%E6%96%B9%E6%B3%95/pdf_%E5%8A%A0%E6%B7%B1_%E6%89%AB%E6%8F%8F%E4%BB%B6/2022-07-16_10-08-00_screenshot.png]]
+[[file:images/windows操作方法/pdf_加深_扫描件/2022-07-16_10-08-00_screenshot.png]]
 Ctrl+W关闭窗口，点击菜单栏，窗口—动作，动作小窗口点击左下角停止按钮，动作就录制好了；
 
 
 #+DOWNLOADED: screenshot @ 2022-07-16 10:08:09
-[[file:images/windows%E6%93%8D%E4%BD%9C%E6%96%B9%E6%B3%95/pdf_%E5%8A%A0%E6%B7%B1_%E6%89%AB%E6%8F%8F%E4%BB%B6/2022-07-16_10-08-09_screenshot.png]]
+[[file:images/windows操作方法/pdf_加深_扫描件/2022-07-16_10-08-09_screenshot.png]]
 清空加深文件夹(下一步批处理在此存储的路径)；
 
 
 #+DOWNLOADED: screenshot @ 2022-07-16 10:08:18
-[[file:images/windows%E6%93%8D%E4%BD%9C%E6%96%B9%E6%B3%95/pdf_%E5%8A%A0%E6%B7%B1_%E6%89%AB%E6%8F%8F%E4%BB%B6/2022-07-16_10-08-18_screenshot.png]]
+[[file:images/windows操作方法/pdf_加深_扫描件/2022-07-16_10-08-18_screenshot.png]]
 ** 在PS中批处理加深图片
 点击文件—自动—批处理；
 #+DOWNLOADED: screenshot @ 2022-07-16 10:08:46
-[[file:images/windows%E6%93%8D%E4%BD%9C%E6%96%B9%E6%B3%95/pdf_%E5%8A%A0%E6%B7%B1_%E6%89%AB%E6%8F%8F%E4%BB%B6/2022-07-16_10-08-46_screenshot.png]]
+[[file:images/windows操作方法/pdf_加深_扫描件/2022-07-16_10-08-46_screenshot.png]]
 在批处理窗口中，动作选择刚刚录制的动作“加深”；
 #+DOWNLOADED: screenshot @ 2022-07-16 10:09:03
-[[file:images/windows%E6%93%8D%E4%BD%9C%E6%96%B9%E6%B3%95/pdf_%E5%8A%A0%E6%B7%B1_%E6%89%AB%E6%8F%8F%E4%BB%B6/2022-07-16_10-09-03_screenshot.png]]
+[[file:images/windows操作方法/pdf_加深_扫描件/2022-07-16_10-09-03_screenshot.png]]
 源:默认为“文件夹”，点击选择，找到PDF另存为的“原扫描文件”文件夹，点击右上角确定；
 #+DOWNLOADED: screenshot @ 2022-07-16 10:09:13
-[[file:images/windows%E6%93%8D%E4%BD%9C%E6%96%B9%E6%B3%95/pdf_%E5%8A%A0%E6%B7%B1_%E6%89%AB%E6%8F%8F%E4%BB%B6/2022-07-16_10-09-13_screenshot.png]]
+[[file:images/windows操作方法/pdf_加深_扫描件/2022-07-16_10-09-13_screenshot.png]]
 此时PS在快速批处理闪动窗口，加深文件夹里会逐渐创建我们需要处理加深的文件；
 
 页数570页较多，要等待2分钟左右。处理完后可以查看导出的jpg加深文件夹，每个页面已按顺序自动排好
 ** 在PDF中合并多张JPG格式文件为单个PDF文件
 我们打开PDF，点击文件—创建—将文件合并为单个PDF；
 #+DOWNLOADED: screenshot @ 2022-07-16 10:10:07
-[[file:images/windows%E6%93%8D%E4%BD%9C%E6%96%B9%E6%B3%95/pdf_%E5%8A%A0%E6%B7%B1_%E6%89%AB%E6%8F%8F%E4%BB%B6/2022-07-16_10-10-07_screenshot.png]]
+[[file:images/windows操作方法/pdf_加深_扫描件/2022-07-16_10-10-07_screenshot.png]]
 点击添加文件，选择点击桌面，点击加深文件夹；
 #+DOWNLOADED: screenshot @ 2022-07-16 10:10:21
-[[file:images/windows%E6%93%8D%E4%BD%9C%E6%96%B9%E6%B3%95/pdf_%E5%8A%A0%E6%B7%B1_%E6%89%AB%E6%8F%8F%E4%BB%B6/2022-07-16_10-10-21_screenshot.png]]
+[[file:images/windows操作方法/pdf_加深_扫描件/2022-07-16_10-10-21_screenshot.png]]
 在加深文件夹中选择第一页，按Ctrl+A全选文件，点击打开；
 #+DOWNLOADED: screenshot @ 2022-07-16 10:10:34
-[[file:images/windows%E6%93%8D%E4%BD%9C%E6%96%B9%E6%B3%95/pdf_%E5%8A%A0%E6%B7%B1_%E6%89%AB%E6%8F%8F%E4%BB%B6/2022-07-16_10-10-34_screenshot.png]]
+[[file:images/windows操作方法/pdf_加深_扫描件/2022-07-16_10-10-34_screenshot.png]]
 在PDF合并窗口中，可以看到是按顺序默认的从001-570的排列的；
 
 可以将鼠标滑动到PDF单页预览页会显示对应的名字；直接点击右上角合并；
 
 
 #+DOWNLOADED: screenshot @ 2022-07-16 10:11:15
-[[file:images/windows%E6%93%8D%E4%BD%9C%E6%96%B9%E6%B3%95/pdf_%E5%8A%A0%E6%B7%B1_%E6%89%AB%E6%8F%8F%E4%BB%B6/2022-07-16_10-11-15_screenshot.png]]
+[[file:images/windows操作方法/pdf_加深_扫描件/2022-07-16_10-11-15_screenshot.png]]
 文件快速进入合并工作状态，合并570页大约需要1分钟左右(合并过程中，预览图上有√号的为一加入合并的，其他图片陆续会加入)；
 #+DOWNLOADED: screenshot @ 2022-07-16 10:11:32
-[[file:images/windows%E6%93%8D%E4%BD%9C%E6%96%B9%E6%B3%95/pdf_%E5%8A%A0%E6%B7%B1_%E6%89%AB%E6%8F%8F%E4%BB%B6/2022-07-16_10-11-32_screenshot.png]]
+[[file:images/windows操作方法/pdf_加深_扫描件/2022-07-16_10-11-32_screenshot.png]]
 合并成单个PDF文件后，点击文件—另存为(快捷键：Ctrl+Shift+S)，选择存储的路径，小编此处选择存桌面，文件名根据自己好识别的重新命名，点击右下角保存；
 
 这样文件就将扫描件颜色浅的文件快速将其颜色加深了；
 
 单页对比一下效果图。
 #+DOWNLOADED: screenshot @ 2022-07-16 10:11:57
-[[file:images/windows%E6%93%8D%E4%BD%9C%E6%96%B9%E6%B3%95/pdf_%E5%8A%A0%E6%B7%B1_%E6%89%AB%E6%8F%8F%E4%BB%B6/2022-07-16_10-11-57_screenshot.png]]
+[[file:images/windows操作方法/pdf_加深_扫描件/2022-07-16_10-11-57_screenshot.png]]
 ** 参考文章
 [[https://blog.csdn.net/weixin_39628160/article/details/111647690][pdf 加深 扫描件_将扫描的PDF文件颜色加深]]
 
