@@ -107,7 +107,7 @@ Ctrl+W关闭窗口，点击菜单栏，窗口—动作，动作小窗口点击�
 * Windows下交换CapsLock 和 Ctrl 键位的方式
 1、点击Win+R键
 2、在输入框键入regedit，打开注册表
-3、进入HKEY_LOCAL_MACHINE -> System -> CurrentControlSet -> Control -> KeyBoard Layout。
+3、进入计算机\HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Keyboard Layout
 4、右键菜单，然后选择New -> Binary value
 5、重命名New Value #1 -> Scancode Map
 6、右键菜单Scancode Map -> Modify
