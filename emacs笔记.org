@@ -72,10 +72,13 @@
 - =C-c C-x C-v= 可以显示图片
 ** 查找,替换,过滤
 - =C-s= 向前搜索
+- =C-s C-w= 以当前光标所在单词作为关键词进行搜索
+- =C-s C-h= 打开搜索帮助
 - =C-r= 向后搜索
 - =C-M-s= 使用正则表达式正向搜索
 - =C-M-r= 使用正则表达式反向搜索
 - =RET=	退出搜索并停留在当前搜索到的位置
+- =C-x C-x= or =C-u C-SPC= 返回搜索前的位置
 - =M-%= 或 =query-replace=	交互替换，即选择替换，可以自己选择是否替换内容
 - =M-x query-replace-regexp=	选择替换的正则表达式版本
 - =SPC或y=	替换当前匹配
@@ -3983,6 +3986,60 @@ C-c ! l 列出所有错误
 * hook
 Hooks are an important mechanism for customizing Emacs.
 A hook is a Lisp variable which holds a list of functions, to be called on some well-defined occasion.
+* highlight
+** Highlight Changes mode
+Highlight Changes mode is a minor mode that highlights the parts of the buffer that were changed most recently, by giving that text a different face. To enable or disable Highlight Changes mode, use M-x highlight-changes-mode.
+** hi-lock-mode
+Hi Lock mode is a minor mode that highlights text that matches regular expressions you specify. For example, you can use it to highlight all the references to a certain variable in a program source file, highlight certain parts in a voluminous output of some program, or highlight certain names in an article.
+To enable or disable Hi Lock mode, use the command M-x hi-lock-mode.
+To enable Hi Lock mode for all buffers, use M-x global-hi-lock-mode or place (global-hi-lock-mode 1) in your .emacs file.
+
+Hi Lock mode works like Font Lock mode (see Font Lock mode), except that you specify explicitly the regular expressions to highlight. 
+*** key binding
+‘hi-lock-mode’ minor mode bindings starting with ‘C-x w’:
+#+begin_example
+key             binding
+C-x w b         hi-lock-write-interactive-patterns
+C-x w r         unhighlight-regexp
+C-x w h         highlight-regexp
+C-x w p         highlight-phrase
+C-x w l         highlight-lines-matching-regexp
+C-x w i         hi-lock-find-patterns
+#+end_example
+Starting with emacs 23.1, the hi-lock shortcuts are now:
+#+begin_example
+M-s h w         hi-lock-write-interactive-patterns
+M-s h u         unhighlight-regexp
+M-s h r         highlight-regexp
+M-s h p         highlight-phrase
+M-s h l         highlight-lines-matching-regexp
+M-s h f         hi-lock-find-patterns
+#+end_example
+*** M-s h r regexp RET face RET ,highlight-regexp
+Highlight text that matches regexp using face face (highlight-regexp). The highlighting will remain as long as the buffer is loaded. For example, to highlight all occurrences of the word “whim” using the default face (a yellow background), type M-s h r whim RET RET. Any face can be used for highlighting, Hi Lock provides several of its own and these are pre-loaded into a list of default values. While being prompted for a face use M-n and M-p to cycle through them. A prefix numeric argument limits the highlighting to the corresponding subexpression.
+
+Setting the option hi-lock-auto-select-face to a non-nil value causes this command (and other Hi Lock commands that read faces) to automatically choose the next face from the default list without prompting.
+
+You can use this command multiple times, specifying various regular expressions to highlight in different ways.
+*** M-s h u regexp RET ,unhighlight-regexp
+Unhighlight regexp (unhighlight-regexp). If you invoke this from the menu, you select the expression to unhighlight from a list. If you invoke this from the keyboard, you use the minibuffer. It will show the most recently added regular expression; use M-n to show the next older expression and M-p to select the next newer expression. (You can also type the expression by hand, with completion.) When the expression you want to unhighlight appears in the minibuffer, press RET to exit the minibuffer and unhighlight it.
+*** M-s h l regexp RET face RET ,highlight-lines-matching-regexp
+Highlight entire lines containing a match for regexp, using face face (highlight-lines-matching-regexp).
+*** M-s h p phrase RET face RET ,highlight-phrase
+Highlight matches of phrase, using face face (highlight-phrase). phrase can be any regexp, but spaces will be replaced by matches to whitespace and initial lower-case letters will become case insensitive.
+*** M-s h .
+Highlight the symbol found near point, using the next available face (highlight-symbol-at-point).
+*** M-s h w ,hi-lock-write-interactive-patterns
+Insert all the current highlighting regexp/face pairs into the buffer at point, with comment delimiters to prevent them from changing your program. (This key binding runs the hi-lock-write-interactive-patterns command.)
+
+These patterns are extracted from the comments, if appropriate, if you invoke M-x hi-lock-find-patterns, or if you visit the file while Hi Lock mode is enabled (since that runs hi-lock-find-patterns).
+*** M-s h f
+Extract regexp/face pairs from comments in the current buffer (hi-lock-find-patterns). Thus, you can enter patterns interactively with highlight-regexp, store them into the file with hi-lock-write-interactive-patterns, edit them (perhaps including different faces for different parenthesized parts of the match), and finally use this command (hi-lock-find-patterns) to have Hi Lock highlight the edited patterns.
+
+The variable hi-lock-file-patterns-policy controls whether Hi Lock mode should automatically extract and highlight patterns found in a file when it is visited. Its value can be nil (never highlight), ask (query the user), or a function. If it is a function, hi-lock-find-patterns calls it with the patterns as argument; if the function returns non-nil, the patterns are used. The default is ask. Note that patterns are always highlighted if you call hi-lock-find-patterns directly, regardless of the value of this variable.
+
+Also, hi-lock-find-patterns does nothing if the current major mode’s symbol is a member of the list hi-lock-exclude-modes.
+
 * org-mode
 
 ** Org-mode 管理 Emacs 配置
