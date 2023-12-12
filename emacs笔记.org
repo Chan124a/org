@@ -4041,7 +4041,6 @@ The variable hi-lock-file-patterns-policy controls whether Hi Lock mode should a
 Also, hi-lock-find-patterns does nothing if the current major mode’s symbol is a member of the list hi-lock-exclude-modes.
 
 * org-mode
-
 ** Org-mode 管理 Emacs 配置
 
 Org-mode 下的文学编程将颠覆你对于 Emacs 的看法。因为我们也可以使用 Org 来管理
