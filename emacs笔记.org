@@ -877,6 +877,27 @@ Usually it's better to use dolist or dotimes.
 #+END_SRC
 一般是为了发挥函数的副作用，该函数对 SEQUECNE 没有副作用
 举例来说的话， (mapc print '(1 2 3))
+
+** mapcar
+The function (mapcar) allows you to perform a "function" on each element of the list. Let's try a simple example :
+
+What we want to do is add 1 to each element of a list.
+
+	(setq a 1)
+	(mapcar '1+ (list a))
+This will return 2.
+
+This is what happened :
+
+mapcar adds 1 to the (list a) to make 2.
+
+Now a longer list :
+
+	(setq a '(1 2 3 4 5 6 7 8 9 10))
+	(mapcar '1+ a)
+This will return :
+
+	(2 3 4 5 6 7 8 9 10 11)
 ** memq
 This function tests to see whether object is a member of list. If it is, memq returns a list starting with the first occurrence of object. Otherwise, it returns nil. The letter ‘q’ in memq says that it uses eq to compare object against the elements of the list. For example:
 #+BEGIN_SRC emacs-lisp :results output
