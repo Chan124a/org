@@ -19052,7 +19052,6 @@ new thread: pid 17874 tid 140693886129920 (0x7ff5d91ad700)
 
 Linux 2.4和Linux 2.6在线程实现上是不同的。Linux 2.4中，LinuxThreads是用单独的进程实现每个线程的，这使得它很难与POSIX线程的行为匹配。Linux 2.6中，对Linux内核和线程库进行了很大的修改，采用了一个称为Native POSIX线程库（Native POSIX Thread Library，NPTL）的新线程实现。它支持单个进程中有多个线程的模型，也更容易支持POSIX线程的语义。
 
-
 ** 线程终止
 如果进程中的任意线程调用了 exit、_Exit 或者_exit，那么整个进程就会终止。与此相类似，如果默认的动作是终止进程，那么，发送到线程的信号就会终止整个进程。
 
@@ -19399,6 +19398,7 @@ int pthread_detach(pthread_t tid);
 *** 参考文章
 [[https://blog.csdn.net/qq_33573235/article/details/79288487][pthread_detach()函数的作用]]
 ** 线程同步
+*** 并发场景简介
 当多个控制线程共享相同的内存时，需要确保每个线程看到一致的数据视图。如果每个线程使用的变量都是其他线程不会读取和修改的，那么就不存在一致性问题。同样，如果变量是只读的，多个线程同时读取该变量也不会有一致性问题。但是，当一个线程可以修改的变量，其他线程也可以读取或者修改的时候，我们就需要对这些线程进行同步，确保它们在访问变量的存储内容时不会访问到无效的值。
 
 当一个线程修改变量时，其他线程在读取这个变量时可能会看到一个不一致的值。在变量修改时间多于一个存储器访问周期的处理器结构中，当存储器读与存储器写这两个周期交叉时，这种不一致就会出现。当然，这种行为是与处理器体系结构相关的，但是可移植的程序并不能对使用何种处理器体系结构做出任何假设。
@@ -19533,14 +19533,113 @@ void foo_rele(struct foo *fp) /* release a reference to the object */
 可以通过仔细控制互斥量加锁的顺序来避免死锁的发生。例如，假设需要对两个互斥量A和B同时加锁。如果所有线程总是在对互斥量B加锁之前锁住互斥量A，那么使用这两个互斥量就不会产生死锁（当然在其他的资源上仍可能出现死锁）。类似地，如果所有的线程总是在锁住互斥量A之前锁住互斥量B，那么也不会发生死锁。可能出现的死锁只会发生在一个线程试图锁住另一个线程以相反的顺序锁住的互斥量。
 
 有时候，应用程序的结构使得对互斥量进行排序是很困难的。如果涉及了太多的锁和数据结构，可用的函数并不能把它转换成简单的层次，那么就需要采用另外的方法。在这种情况下，可以先释放占有的锁，然后过一段时间再试。这种情况可以使用pthread_mutex_trylock接口避免死锁。如果已经占有某些锁而且pthread_mutex_trylock接口返回成功，那么就可以前进。但是，如果不能获取锁，可以先释放已经占有的锁，做好清理工作，然后过一段时间再重新试。
-
-实例
-
+*** 实例
 在这个例子中，我们更新了图11-10的程序，展示了两个互斥量的使用方法。在同时需要两个互斥量时，总是让它们以相同的顺序加锁，这样可以避免死锁。第二个互斥量维护着一个用于跟踪foo数据结构的散列列表。这样hashlock互斥量既可以保护foo数据结构中的散列表fh，又可以保护散列链字段f_next。foo结构中的f_lock互斥量保护对foo结构中的其他字段的访问。
-
-
-
-
+#+begin_src c++
+#include <stdlib.h>
+#include <pthread.h>
+#define NHASH 29
+#define HASH(id) (((unsigned long)id) % NHASH)
+struct foo *fh[NHASH];
+pthread_mutex_t hashlock = PTHREAD_MUTEX_INITIALIZER;
+struct foo
+{
+    int f_count;
+    pthread_mutex_t f_lock;
+    int f_id;
+    struct foo *f_next; /* protected by hashlock */
+    /* ... more stuff here ... */
+};
+struct foo *
+foo_alloc(int id) /* allocate the object */
+{
+    struct foo *fp;
+    int idx;
+    if ((fp = malloc(sizeof(struct foo))) != NULL)
+    {
+        fp->f_count = 1;
+        fp->f_id = id;
+        if (pthread_mutex_init(&fp->f_lock, NULL) != 0)
+        {
+            free(fp);
+            return (NULL);
+        }
+        idx = HASH(id);
+        pthread_mutex_lock(&hashlock);
+        fp->f_next = fh[idx];
+        fh[idx] = fp;
+        pthread_mutex_lock(&fp->f_lock);
+        pthread_mutex_unlock(&hashlock);
+        /* ... continue initialization ... */
+        pthread_mutex_unlock(&fp->f_lock);
+    }
+    return (fp);
+}
+void foo_hold(struct foo *fp) /* add a reference to the object */
+{
+    pthread_mutex_lock(&fp->f_lock);
+    fp->f_count++;
+    pthread_mutex_unlock(&fp->f_lock);
+}
+struct foo *
+foo_find(int id) /* find an existing object */
+{
+    struct foo *fp;
+    pthread_mutex_lock(&hashlock);
+    for (fp = fh[HASH(id)]; fp != NULL; fp = fp->f_next)
+    {
+        if (fp->f_id == id)
+        {
+            foo_hold(fp);
+            break;
+        }
+    }
+    pthread_mutex_unlock(&hashlock);
+    return (fp);
+}
+void foo_rele(struct foo *fp) /* release a reference to the object */
+{
+    struct foo *tfp;
+    int idx;
+    pthread_mutex_lock(&fp->f_lock);
+    if (fp->f_count == 1)
+    { /* last reference */
+        pthread_mutex_unlock(&fp->f_lock);
+        pthread_mutex_lock(&hashlock);
+        pthread_mutex_lock(&fp->f_lock);
+        /* need to recheck the condition */
+        if (fp->f_count != 1)
+        {
+            fp->f_count--;
+            pthread_mutex_unlock(&fp->f_lock);
+            pthread_mutex_unlock(&hashlock);
+            return;
+        }
+        /* remove from list */
+        idx = HASH(fp->f_id);
+        tfp = fh[idx];
+        if (tfp == fp)
+        {
+            fh[idx] = fp->f_next;
+        }
+        else
+        {
+            while (tfp->f_next != fp)
+                tfp = tfp->f_next;
+            tfp->f_next = fp->f_next;
+        }
+        pthread_mutex_unlock(&hashlock);
+        pthread_mutex_unlock(&fp->f_lock);
+        pthread_mutex_destroy(&fp->f_lock);
+        free(fp);
+    }
+    else
+    {
+        fp->f_count--;
+        pthread_mutex_unlock(&fp->f_lock);
+    }
+}
+#+end_src
 图11-11 使用两个互斥量
 
 比较图 11-11 和图 11-10，可以看出，分配函数现在锁住了散列列表锁，把新的结构添加到了散列桶中，而且在对散列列表的锁解锁之前，先锁定了新结构中的互斥量。因为新的结构是放在全局列表中的，其他线程可以找到它，所以在初始化完成之前，需要阻塞其他线程试图访问新结构。
@@ -19551,54 +19650,163 @@ foo_find函数锁住散列列表锁，然后搜索被请求的结构。如果找
 
 这种锁方法很复杂，所以我们需要重新审视原来的设计。我们也可以使用散列列表锁来保护结构引用计数，使事情大大简化。结构互斥量可以用于保护foo结构中的其他任何东西。图11-12反映了这种变化。
 
-
-
-
+#+begin_src c++
+#include <stdlib.h>
+#include <pthread.h>
+#define NHASH 29
+#define HASH(id) (((unsigned long)id) % NHASH)
+struct foo *fh[NHASH];
+pthread_mutex_t hashlock = PTHREAD_MUTEX_INITIALIZER;
+struct foo
+{
+    int f_count; /* protected by hashlock */
+    pthread_mutex_t f_lock;
+    int f_id;
+    struct foo *f_next; /* protected by hashlock */
+    /* ... more stuff here ... */
+};
+struct foo *
+foo_alloc(int id) /* allocate the object */
+{
+    struct foo *fp;
+    int idx;
+    if ((fp = malloc(sizeof(struct foo))) != NULL)
+    {
+        fp->f_count = 1;
+        fp->f_id = id;
+        if (pthread_mutex_init(&fp->f_lock, NULL) != 0)
+        {
+            free(fp);
+            return (NULL);
+        }
+        idx = HASH(id);
+        pthread_mutex_lock(&hashlock);
+        fp->f_next = fh[idx];
+        fh[idx] = fp;
+        pthread_mutex_lock(&fp->f_lock);
+        pthread_mutex_unlock(&hashlock);
+        /* ... continue initialization ... */
+        pthread_mutex_unlock(&fp->f_lock);
+    }
+    return (fp);
+}
+void foo_hold(struct foo *fp) /* add a reference to the object */
+{
+    pthread_mutex_lock(&hashlock);
+    fp->f_count++;
+    pthread_mutex_unlock(&hashlock);
+}
+struct foo *
+foo_find(int id) /* find an existing object */
+{
+    struct foo *fp;
+    pthread_mutex_lock(&hashlock);
+    for (fp = fh[HASH(id)]; fp != NULL; fp = fp->f_next)
+    {
+        if (fp->f_id == id)
+        {
+            fp->f_count++;
+            break;
+        }
+    }
+    pthread_mutex_unlock(&hashlock);
+    return (fp);
+}
+void foo_rele(struct foo *fp) /* release a reference to the object */
+{
+    struct foo *tfp;
+    int idx;
+    pthread_mutex_lock(&hashlock);
+    if (--fp->f_count == 0)
+    { /* last reference, remove from list */
+        idx = HASH(fp->f_id);
+        tfp = fh[idx];
+        if (tfp == fp)
+        {
+            fh[idx] = fp->f_next;
+        }
+        else
+        {
+            while (tfp->f_next != fp)
+                tfp = tfp->f_next;
+            tfp->f_next = fp->f_next;
+        }
+        pthread_mutex_unlock(&hashlock);
+        pthread_mutex_destroy(&fp->f_lock);
+        free(fp);
+    }
+    else
+    {
+        pthread_mutex_unlock(&hashlock);
+    }
+}
+#+end_src
 图11-12 简化的锁
 
-注意，与图11-11中的程序相比，图11-12中的程序就简单多了。两种用途使用相同的锁时，围绕散列列表和引用计数的锁的排序问题就不存在了。多线程的软件设计涉及这两者之间的折中。如果锁的粒度太粗，就会出现很多线程阻塞等待相同的锁，这可能并不能改善并发性。如果锁的粒度太细，那么过多的锁开销会使系统性能受到影响，而且代码变得复杂。作为一个程序员，需要在满足锁需求的情况下，在代码复杂性和性能之间找到正确的平衡。
-
-11.6.3 函数pthread_mutex_timedlock
+注意，与图11-11中的程序相比，图11-12中的程序就简单多了。图11和图12的最主要区别在于:图12的hashlock锁的范围更大了,每次访问列表中的数据时,都需要持有hashlocak.图12的程序,并发性比较差.两种用途使用相同的锁时，围绕散列列表和引用计数的锁的排序问题就不存在了。
+多线程的软件设计涉及这两者之间的折中。如果锁的粒度太粗，就会出现很多线程阻塞等待相同的锁，这可能并不能改善并发性。如果锁的粒度太细，那么过多的锁开销会使系统性能受到影响，而且代码变得复杂。作为一个程序员，需要在满足锁需求的情况下，在代码复杂性和性能之间找到正确的平衡。
+*** 函数pthread_mutex_timedlock
 当线程试图获取一个已加锁的互斥量时，pthread_mutex_timedlock 互斥量原语允许绑定线程阻塞时间。pthread_mutex_timedlock函数与pthread_mutex_lock是基本等价的，但是在达到超时时间值时，pthread_mutex_timedlock 不会对互斥量进行加锁，而是返回错误码ETIMEDOUT。
-
+#+begin_src c++
 #include <pthread.h>
-
 #include <time.h>
 
-int pthread_mutex_timedlock(pthread_mutex_t *restrict mutex,
-
-const struct timespec *restrict tsptr);
-
+int pthread_mutex_timedlock(pthread_mutex_t *restrict mutex,const struct timespec *restrict tsptr);
+#+end_src
 返回值：若成功，返回0；否则，返回错误编号
 
 超时指定愿意等待的绝对时间（与相对时间对比而言，指定在时间X之前可以阻塞等待，而不是说愿意阻塞Y秒）。这个超时时间是用timespec结构来表示的，它用秒和纳秒来描述时间。
-
-实例
+*** 实例
 
 图11-13给出了如何用pthread_mutex_timedlock避免永久阻塞。
-
+#+begin_src c++
+#include "apue.h"
+#include <pthread.h>
+int main(void)
+{
+    int err;
+    struct timespec tout;
+    struct tm *tmp;
+    char buf[64];
+    pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
+    pthread_mutex_lock(&lock);
+    printf("mutex is locked\n");
+    clock_gettime(CLOCK_REALTIME, &tout);
+    tmp = localtime(&tout.tv_sec);
+    strftime(buf, sizeof(buf), "%r", tmp);
+    printf("current time is %s\n", buf);
+    tout.tv_sec += 10;
+    /* 10 seconds from now */
+    /* caution: this could lead to deadlock */
+    err = pthread_mutex_timedlock(&lock, &tout);
+    clock_gettime(CLOCK_REALTIME, &tout);
+    tmp = localtime(&tout.tv_sec);
+    strftime(buf, sizeof(buf), "%r", tmp);
+    printf("the time is now %s\n", buf);
+    if (err == 0)
+        printf("mutex locked again!\n");
+    else
+        printf("can’t lock mutex again: %s\n", strerror(err));
+    exit(0);
+}
+#+end_src
 
 图11-13 使用pthread_mutex_timedlock
 
 图11-13中的程序运行结果输出如下：
-
+#+begin_src bash
 $ ./a.out
-
 mutex is locked
-
 current time is 11:41:58 AM
-
 the time is now 11:42:08 AM
-
 can’t lock mutex again: Connection timed out
-
+#+end_src
 这个程序故意对它已有的互斥量进行加锁，目的是演示pthread_mutex_timedlock是如何工作的。不推荐在实际中使用这种策略，因为它会导致死锁。
 
 注意，阻塞的时间可能会有所不同，造成不同的原因有多种：开始时间可能在某秒的中间位置，系统时钟的精度可能不足以精确到支持我们指定的超时时间值，或者在程序继续运行前，调度延迟可能会增加时间值。
 
 Mac OS X 10.6.8还没有支持pthread_mutex_timedlock，但是FreeBSD 8.0、Linux 3.2.0以及Solaris 10支持该函数，虽然Solaris仍然把它放在实时库librt中。Solaris 10还提供了另一个使用相对超时时间的函数。
-
-11.6.4 读写锁
+*** 读写锁
 读写锁（reader-writer lock）与互斥量类似，不过读写锁允许更高的并行性。互斥量要么是锁住状态，要么就是不加锁状态，而且一次只有一个线程可以对其加锁。读写锁可以有3种状态：读模式下加锁状态，写模式下加锁状态，不加锁状态。一次只有一个线程可以占有写模式的读写锁，但是多个线程可以同时占有读模式的读写锁。
 
 当读写锁是写加锁状态时，在这个锁被解锁之前，所有试图对这个锁加锁的线程都会被阻塞。当读写锁在读加锁状态时，所有试图以读模式对它进行加锁的线程都可以得到访问权，但是任何希望以写模式对此锁进行加锁的线程都会阻塞，直到所有的线程释放它们的读锁为止。虽然各操作系统对读写锁的实现各不相同，但当读写锁处于读模式锁住的状态，而这时有一个线程试图以写模式获取锁时，读写锁通常会阻塞随后的读模式锁请求。这样可以避免读模式锁长期占用，而等待的写模式锁请求一直得不到满足。
@@ -19608,25 +19816,24 @@ Mac OS X 10.6.8还没有支持pthread_mutex_timedlock，但是FreeBSD 8.0、Linu
 读写锁也叫做共享互斥锁（shared-exclusive lock）。当读写锁是读模式锁住时，就可以说成是以共享模式锁住的。当它是写模式锁住的时候，就可以说成是以互斥模式锁住的。
 
 与互斥量相比，读写锁在使用之前必须初始化，在释放它们底层的内存之前必须销毁。
-
+#+begin_src c++
 #include <pthread.h>
 
 int pthread_rwlock_init(pthread_rwlock_t *restrict rwlock,
-
 const pthread_rwlockattr_t *restrict attr);
 
 int pthread_rwlock_destroy(pthread_rwlock_t *rwlock);
-
+#+end_src
 两个函数的返回值：若成功，返回0；否则，返回错误编号
 
-读写锁通过调用 pthread_rwlock_init 进行初始化。如果希望读写锁有默认的属性，可以传一个null指针给attr，我们将在12.4.2节中讨论读写锁的属性。
+读写锁通过调用 pthread_rwlock_init 进行初始化。如果希望读写锁有默认的属性，可以传一个null指针给attr
 
 Single UNIX Specification在XSI扩展中定义了PTHREAD_RWLOCK_INITIALIZER常量。如果默认属性就足够的话，可以用它对静态分配的读写锁进行初始化。
 
 在释放读写锁占用的内存之前，需要调用 pthread_rwlock_destroy 做清理工作。如果pthread_rwlock_init为读写锁分配了资源，pthread_rwlock_destroy将释放这些资源。如果在调用 pthread_rwlock_destroy 之前就释放了读写锁占用的内存空间，那么分配给这个锁的资源就会丢失。
 
 要在读模式下锁定读写锁，需要调用pthread_rwlock_rdlock。要在写模式下锁定读写锁，需要调用pthread_rwlock_wrlock。不管以何种方式锁住读写锁，都可以调用pthread_rwlock_unlock进行解锁。
-
+#+begin_src c++
 #include <pthread.h>
 
 int pthread_rwlock_rdlock(pthread_rwlock_t *rwlock);
@@ -19634,56 +19841,152 @@ int pthread_rwlock_rdlock(pthread_rwlock_t *rwlock);
 int pthread_rwlock_wrlock(pthread_rwlock_t *rwlock);
 
 int pthread_rwlock_unlock(pthread_rwlock_t *rwlock);
-
+#+end_src
 所有函数的返回值：若成功，返回0；否则，返回错误编号
 
 各种实现可能会对共享模式下可获取的读写锁的次数进行限制，所以需要检查 pthread_rwlock_rdlock的返回值。即使pthread_rwlock_wrlock和pthread_rwlock_unlock有错误返回，而且从技术上来讲，在调用函数时应该总是检查错误返回，但是如果锁设计合理的话，就不需要检查它们。错误返回值的定义只是针对不正确使用读写锁的情况（如未经初始化的锁），或者试图获取已拥有的锁从而可能产生死锁的情况。但是需要注意，有些特定的实现可能会定义另外的错误返回。
 
 Single UNIX Specification还定义了读写锁原语的条件版本。
-
+#+begin_src c++
 #include <pthread.h>
 
 int pthread_rwlock_tryrdlock(pthread_rwlock_t *rwlock);
 
 int pthread_rwlock_trywrlock(pthread_rwlock_t *rwlock);
-
+#+end_src
 两个函数的返回值：若成功，返回0；否则，返回错误编号
 
 可以获取锁时，这两个函数返回0。否则，它们返回错误EBUSY。这两个函数可以用于我们前面讨论的遵守某种锁层次但还不能完全避免死锁的情况。
-
-实例
+*** 实例
 
 图11-14中的程序解释了读写锁的使用。作业请求队列由单个读写锁保护。这个例子给出了图11-1所示的一种可能的实现，多个工作线程获取单个主线程分配给它们的作业。
 
-
-
-
+#+begin_src c++
+#include <stdlib.h>
+#include <pthread.h>
+struct job
+{
+    struct job *j_next;
+    struct job *j_prev;
+    pthread_t j_id;
+    /* tells which thread handles this job */
+    /* ... more stuff here ... */
+};
+struct queue
+{
+    struct job *q_head;
+    struct job *q_tail;
+    pthread_rwlock_t q_lock;
+};
+/*
+ * Initialize a queue.
+ */
+int queue_init(struct queue *qp)
+{
+    int err;
+    qp->q_head = NULL;
+    qp->q_tail = NULL;
+    err = pthread_rwlock_init(&qp->q_lock, NULL);
+    if (err != 0)
+        return (err);
+    /* ... continue initialization ... */
+    return (0);
+}
+/*
+ * Insert a job at the head of the queue.
+ */
+void job_insert(struct queue *qp, struct job *jp)
+{
+    pthread_rwlock_wrlock(&qp->q_lock);
+    jp->j_next = qp->q_head;
+    jp->j_prev = NULL;
+    if (qp->q_head != NULL)
+        qp->q_head->j_prev = jp;
+    else
+        qp->q_tail = jp;
+    /* list was empty */
+    qp->q_head = jp;
+    pthread_rwlock_unlock(&qp->q_lock);
+}
+/*
+ * Append a job on the tail of the queue.
+ */
+void job_append(struct queue *qp, struct job *jp)
+{
+    pthread_rwlock_wrlock(&qp->q_lock);
+    jp->j_next = NULL;
+    jp->j_prev = qp->q_tail;
+    if (qp->q_tail != NULL)
+        qp->q_tail->j_next = jp;
+    else
+        qp->q_head = jp;
+    /* list was empty */
+    qp->q_tail = jp;
+    pthread_rwlock_unlock(&qp->q_lock);
+}
+/*
+ * Remove the given job from a queue.
+ */
+void job_remove(struct queue *qp, struct job *jp)
+{
+    pthread_rwlock_wrlock(&qp->q_lock);
+    if (jp == qp->q_head)
+    {
+        qp->q_head = jp->j_next;
+        if (qp->q_tail == jp)
+            qp->q_tail = NULL;
+        else
+            jp->j_next->j_prev = jp->j_prev;
+    }
+    else if (jp == qp->q_tail)
+    {
+        qp->q_tail = jp->j_prev;
+        jp->j_prev->j_next = jp->j_next;
+    }
+    else
+    {
+        jp->j_prev->j_next = jp->j_next;
+        jp->j_next->j_prev = jp->j_prev;
+    }
+    pthread_rwlock_unlock(&qp->q_lock);
+}
+/*
+ * Find a job for the given thread ID.
+ */
+struct job *
+job_find(struct queue *qp, pthread_t id)
+{
+    struct job *jp;
+    if (pthread_rwlock_rdlock(&qp->q_lock) != 0)
+        return (NULL);
+    for (jp = qp->q_head; jp != NULL; jp = jp->j_next)
+        if (pthread_equal(jp->j_id, id))
+            break;
+    pthread_rwlock_unlock(&qp->q_lock);
+    return (jp);
+}
+#+end_src
 图11-14 使用读写锁
 
 在这个例子中，凡是需要向队列中增加作业或者从队列中删除作业的时候，都采用了写模式来锁住队列的读写锁。不管何时搜索队列，都需要获取读模式下的锁，允许所有的工作线程并发地搜索队列。在这种情况下，只有在线程搜索作业的频率远远高于增加或删除作业时，使用读写锁才可能改善性能。
 
 工作线程只能从队列中读取与它们的线程 ID 匹配的作业。由于作业结构同一时间只能由一个线程使用，所以不需要额外的加锁。
-
-11.6.5 带有超时的读写锁
+*** 带有超时的读写锁
 与互斥量一样，Single UNIX Specification提供了带有超时的读写锁加锁函数，使应用程序在获取读写锁时避免陷入永久阻塞状态。这两个函数是 pthread_rwlock_timedrdlock 和 pthread_rwlock_timedwrlock。
-
+#+begin_src c++
 #include <pthread.h>
-
 #include <time.h>
 
 int pthread_rwlock_timedrdlock(pthread_rwlock_t *restrict rwlock,
-
 const struct timespec *restrict tsptr);
 
 int pthread_rwlock_timedwrlock(pthread_rwlock_t *restrict rwlock,
-
 const struct timespec *restrict tsptr);
-
+#+end_src
 两个函数的返回值：若成功，返回0；否则，返回错误编号
 
 这两个函数的行为与它们“不计时的”版本类似。tsptr参数指向timespec结构，指定线程应该停止阻塞的时间。如果它们不能获取锁，那么超时到期时，这两个函数将返回 ETIMEDOUT错误。与pthread_mutex_timedlock函数类似，超时指定的是绝对时间，而不是相对时间。
-
-11.6.6 条件变量
+*** 条件变量
 条件变量是线程可用的另一种同步机制。条件变量给多个线程提供了一个会合的场所。条件变量与互斥量一起使用时，允许线程以无竞争的方式等待特定的条件发生。
 
 条件本身是由互斥量保护的。线程在改变条件状态之前必须首先锁住互斥量。其他线程在获得互斥量之前不会察觉到这种改变，因为互斥量必须在锁定以后才能计算条件。
@@ -19692,32 +19995,29 @@ const struct timespec *restrict tsptr);
 
 在释放条件变量底层的内存空间之前，可以使用pthread_cond_destroy函数对条件变量进行反初始化（deinitialize）。
 
+#+begin_src c++
 #include <pthread.h>
 
 int pthread_cond_init(pthread_cond_t *restrict cond,
-
 const pthread_condattr_t *restrict attr);
 
 int pthread_cond_destroy(pthread_cond_t *cond);
-
+#+end_src
 两个函数的返回值：若成功，返回0；否则，返回错误编号
 
-除非需要创建一个具有非默认属性的条件变量，否则pthread_cond_init函数的attr参数可以设置为NULL。我们将在12.4.3节中讨论条件变量属性。
+除非需要创建一个具有非默认属性的条件变量，否则pthread_cond_init函数的attr参数可以设置为NULL。
 
 我们使用pthread_cond_wait等待条件变量变为真。如果在给定的时间内条件不能满足，那么会生成一个返回错误码的变量。
-
+#+begin_src c++
 #include <pthread.h>
 
 int pthread_cond_wait(pthread_cond_t *restrict cond,
-
 pthread_mutex_t *restrict mutex);
 
 int pthread_cond_timedwait(pthread_cond_t *restrict cond,
-
 pthread_mutex_t *restrict mutex,
-
 const struct timespec *restrict tsptr);
-
+#+end_src
 两个函数的返回值：若成功，返回0；否则，返回错误编号
 
 传递给pthread_cond_wait的互斥量对条件进行保护。调用者把锁住的互斥量传给函数，函数然后自动把调用线程放到等待条件的线程列表上，对互斥量解锁。这就关闭了条件检查和线程进入休眠状态等待条件改变这两个操作之间的时间通道，这样线程就不会错过条件的任何变化。pthread_cond_wait返回时，互斥量再次被锁住。
@@ -19727,60 +20027,352 @@ pthread_cond_timedwait函数的功能与pthread_cond_wait函数相似，只是�
 如图11-13所示，需要指定愿意等待多长时间，这个时间值是一个绝对数而不是相对数。例如，假设愿意等待3分钟。那么，并不是把3分钟转换成timespec结构，而是需要把当前时间加上3分钟再转换成timespec结构。
 
 可以使用clock_gettime函数（见6.10节）获取timespec结构表示的当前时间。但是目前并不是所有的平台都支持这个函数，因此，也可以用另一个函数 gettimeofday 获取timeval结构表示的当前时间，然后把这个时间转换成timespec结构。要得到超时值的绝对时间，可以使用下面的函数（假设阻塞的最大时间使用分来表示的）：
-
+#+begin_src c++
 #include <sys/time.h>
-
 #include <stdlib.h>
 
 void
-
 maketimeout(struct timespec *tsp, long minutes)
-
 {
-
 struct timeval now;
 
 /* get the current time */
-
 gettimeofday(&now, NULL);
-
 tsp->tv_sec = now.tv_sec;
-
 tsp->tv_nsec = now.tv_usec * 1000; /* usec to nsec */
 
 /* add the offset to get timeout value */
-
 tsp->tv_sec += minutes * 60;
-
 }
-
+#+end_src
 如果超时到期时条件还是没有出现，pthread_cond_timewait 将重新获取互斥量，然后返回错误ETIMEDOUT。从pthread_cond_wait或者pthread_cond_timedwait调用成功返回时，线程需要重新计算条件，因为另一个线程可能已经在运行并改变了条件。
 
 有两个函数可以用于通知线程条件已经满足。pthread_cond_signal函数至少能唤醒一个等待该条件的线程，而pthread_cond_broadcast函数则能唤醒等待该条件的所有线程。
 
 POSIX 规范为了简化 pthread_cond_signal 的实现，允许它在实现的时候唤醒一个以上的线程。
-
+#+begin_src c++
 #include <pthread.h>
 
 int pthread_cond_signal(pthread_cond_t *cond);
 
 int pthread_cond_broadcast(pthread_cond_t *cond);
-
+#+end_src
 两个函数的返回值：若成功，返回0；否则，返回错误编号
 
 在调用pthread_cond_signal或者pthread_cond_broadcast时，我们说这是在给线程或者条件发信号。必须注意，一定要在改变条件状态以后再给线程发信号。
+**** 为什么pthread_cond_wait需要互斥锁mutex作为参数
+***** 生产者和消费者问题的介绍
+存在一个共享缓冲区，生产者向共享缓冲区写入数据，消费者从共享缓冲区中读取数据。
 
-实例
+生产者和消费者存在同步关系：当共享缓冲区为满时，生产者需要等待，等待消费者从共享缓冲区取走数据；当共享缓冲区为空时，消费者需要等待，等待生产者向共享缓冲区中写入数据。
+
+使用环形队列实现共享缓冲区，数据结构如下：
+#+begin_src c++
+#define CAPACITY 8     // 缓冲区的最大容量
+int buffer[CAPACITY];  // 缓冲区数组
+int in;                // 缓冲区的写指针
+int out;               // 缓冲区的读指针
+int size;              // 缓冲区中的数据个数
+缓冲区的相关代码如下
+
+void buffer_init()
+{
+    in = 0;
+    out = 0;
+    size = 0;
+}
+
+// 判断缓冲区是否为空
+int buffer_is_empty()
+{
+    return size == 0; 
+}
+
+// 判断缓冲区是否为满
+int buffer_is_full()
+{
+    return size == CAPACITY; 
+}
+
+// 向缓冲区中追加一个数据
+void buffer_put(int item)
+{
+    buffer[in] = item;
+    in = (in + 1) % CAPACITY;
+    size++;
+}
+
+// 从缓冲区中取走一个数据
+int buffer_get()
+{
+    int item;
+
+    item = buffer[out];
+    out = (out + 1) % CAPACITY;
+    size--;
+
+    return item;
+}
+#+end_src
+如果存在多个生产者和多个消费者，变量in、out和size会被它们共享访问，因此生产者和消费者还存在互斥关系：
+- 当某个生产者执行buffer_is_full、buffer_put时，访问了变量in、out和size，只能允许该生产者独占访问这三个变量，禁止其他生产者和消费者访问这些共享变量。
+- 当某个消费者执行buffer_is_empty、buffer_get时，访问了变量in、out和size，只能允许该消费者独占访问这三个变量，禁止其他生产者和消费者访问这些共享变量。
+***** 用于同步和互斥的全局变量
+总结以上
+- 生产者和消费者中存在有同步关系，需要使用pthread_cond_wait和pthread_cond_signal解决
+- 生产者和消费者中存在有互斥关系，需要使用pthread_mutex_lock和pthread_mutex_unlock解决
+
+程序中需要引入两个全局变量cond和mutex用于同步和互斥
+- pthread_cond_t cond;
+- pthread_mutex_t mutex;
+***** 使用pthread_cond_wait(cond)解决生产者和消费者问题(第一版)
+下面我们尝试使用没有mutex参数的pthread_cond_wait来模拟生产者消费者，假想中没有mutex参数的pthread_cond_wait原型如下：
+int pthread_cond_wait(pthread_cond_t *cond);
+
+pthread_cond_wait(cond)的功能非常简单，仅仅阻塞当前线程。在生产者消费者这个应用场景中，很快就能发现pthread_cond_wait(cond)的问题。
+
+使用pthread_cond_wait(cond)解决生产者和消费者问题的代码如下：
+#+begin_src c++
+
+// 生产者线程执行的流程
+void producer_loop()
+{
+    int i;
+
+    // 生产CAPACITY*2个数据
+    for (i = 0; i < CAPACITY*2; i++) {  
+        pthread_mutex_lock(&mutex);
+
+        // 当缓冲区为满时，生产者需要等待
+        while (buffer_is_full()) {   
+            // 当前线程已经持有了mutex，调用pthread_cond_wait阻塞，必然导致死锁
+            pthread_cond_wait(&cond);
+        }
+
+        // 此时，缓冲区肯定不是满的，向缓冲区写数据
+        buffer_put(i);
+
+        pthread_mutex_unlock(&mutex);        
+
+        // 缓冲区的状态发生了变化，唤醒其它的生产者或消费者
+        pthread_cond_signal(&cond);
+    }
+}
+
+// 消费者线程执行的流程
+void consumer_loop()
+{
+    int i;
+
+    // 消费CAPACITY*2个数据
+    for (i = 0; i < CAPACITY*2; i++) {  
+        pthread_mutex_lock(&mutex);
+
+        // 当缓冲区为空时，消费者需要等待
+        while (buffer_is_empty()) {   
+            // 当前线程已经持有了mutex，调用pthread_cond_wait阻塞，必然导致死锁
+            pthread_cond_wait(&cond);
+        }
+
+        // 此时，缓冲区肯定不是空的，从缓冲区取数据
+        int item = buffer_get();
+
+        pthread_mutex_unlock(&mutex);        
+
+        // 缓冲区的状态发生了变化，唤醒其它的生产者或消费者
+        pthread_cond_signal(&cond);
+    }
+}
+#+end_src
+以上程序存在一个会导致死锁的严重错误，以生产者为例：
+1. 当前缓冲区已经满了，生产者运行，首先获取mutex
+2. 然后检测buffer_is_full为真，生产者无法放入数据
+3. 调用pthread_cond_wait，该生产者进入阻塞状态，等待被消费者唤醒
+4. 消费者试图获取mutex，由于mutex已经被占用了，消费者将进入阻塞状态
+5. 生产者和消费者均进入阻塞状态，系统死锁
+***** 使用pthread_cond_wait(cond)解决生产者和消费者问题(第二版)
+为了解决死锁的问题，需要对上一节的程序进行如下改进
+- 调用线程调用pthread_cond_wait(cond)前，已经持有了mutex
+- 执行pthread_cond_wait(cond)前，调用pthread_unlock(mutex)释放mutex
+- 执行pthread_cond_wait(cond)后，调用pthread_lock(mutex)再次获得mutex
+
+#+begin_src c++
+
+// 生产者线程执行的流程
+void producer_loop()
+{
+    int i;
+
+    // 生产CAPACITY*2个数据
+    for (i = 0; i < CAPACITY*2; i++) {  
+        pthread_mutex_lock(&mutex);
+
+        // 当缓冲区为满时，生产者需要等待
+        while (buffer_is_full()) {   
+            pthread_mutex_unlock(&mutex);
+            pthread_cond_wait(&cond);
+            pthread_mutex_lock(&mutex);
+        }
+
+        // 此时，缓冲区肯定不是满的，向缓冲区写数据
+        buffer_put(i);
+
+        pthread_mutex_unlock(&mutex);        
+
+        // 缓冲区的状态发生了变化，唤醒其它的生产者或消费者
+        pthread_cond_signal(&cond);
+    }
+}
+
+// 消费者线程执行的流程
+void consumer_loop()
+{
+    int i;
+
+    // 消费CAPACITY*2个数据
+    for (i = 0; i < CAPACITY*2; i++) {  
+        pthread_mutex_lock(&mutex);
+
+        // 当缓冲区为空时，消费者需要等待
+        while (buffer_is_empty()) {   
+            pthread_mutex_unlock(&mutex);
+            pthread_cond_wait(&cond);
+            pthread_mutex_lock(&mutex);            
+        }
+
+        // 此时，缓冲区肯定不是空的，从缓冲区取数据
+        int item = buffer_get();
+
+        pthread_mutex_unlock(&mutex);        
+
+        // 缓冲区的状态发生了变化，唤醒其它的生产者或消费者
+        pthread_cond_signal(&cond);
+    }
+}
+#+end_src
+这里解释一下为什么线程调用pthread_cond_wait返回后，需要再次调用pthread_mutex_lock获取锁。以生产者为例，以下为生产者向buffer中追加数据的代码段：
+#+begin_src c++
+// 生产者向buffer中追加数据
+pthread_mutex_lock(&mutex);
+while (buffer_is_full()) {   
+    pthread_mutex_unlock(&mutex);
+    pthread_cond_wait(&cond);
+    pthread_mutex_lock(&mutex);
+}
+buffer_put(i);
+pthread_mutex_unlock(&mutex);
+#+end_src
+在上面这段代码中，生产者线程会调用buffer_is_full和buffer_put，访问共享变量in、out和size。必须保证线程以独占的方式访问这些共享变量，即线程在调用buffer_is_full和buffer_put前必须持有锁。线程从pthread_cond_wait返回后，调用pthread_mutex_lock再次获得锁，然后执行语句while (buffer_is_full())时，因为已经拥有了锁，所以通过buffer_is_full访问共享变量是安全的。
+
+该版本代码存在的问题是:由于 pthread_mutex_unlock 和 pthread_cond_wait 两个函数调用不是原子的，可能导致这种情况发生：生产者在调用 pthread_mutext_unlock 之后，但是在调用 pthread_cond_wait 之前，消费者调用了 pthread_mutex_lock 和 pthread_cond_signal，生产者再调用 pthread_cond_wait 时，会丢失消费者的 pthread_cond_signal 唤醒操作，导致这个生产者阻塞。
+***** 使用pthread_cond_wait(cond, mutex)解决生产者和消费者问题
+在上一个版本的程序中，生产者和消费者中存在如下代码段
+#+begin_src c++
+// 先释放mutex、再阻塞、最后再次获取mutex
+pthread_mutex_unlock(&mutex);
+pthread_cond_wait(&cond);
+pthread_mutex_lock(&mutex);
+#+end_src
+为了解决原子操作问题,将这三行代码改成一个命令pthread_cond_wait(cond, mtex)即可.
+
+使用pthread_cond_wait(cond, mutex)解决生产者和消费者问题的代码如下：
+#+begin_src c++
+
+// 生产者线程执行的流程
+void producer_loop()
+{
+    int i;
+
+    // 生产CAPACITY*2个数据
+    for (i = 0; i < CAPACITY*2; i++) {  
+        pthread_mutex_lock(&mutex);
+
+        // 当缓冲区为满时，生产者需要等待
+        while (buffer_is_full()) {   
+            // 当前线程已经持有了mutex，首先释放mutex，然后阻塞，醒来后再次获取mutex            
+            pthread_cond_wait(&cond, &mutex);
+        }
+
+        // 此时，缓冲区肯定不是满的，向缓冲区写数据
+        buffer_put(i);
+
+        pthread_mutex_unlock(&mutex);        
+
+        // 缓冲区的状态发生了变化，唤醒其它的生产者或消费者
+        pthread_cond_signal(&cond);
+    }
+}
+
+// 消费者线程执行的流程
+void consumer_loop()
+{
+    int i;
+
+    // 消费CAPACITY*2个数据
+    for (i = 0; i < CAPACITY*2; i++) {  
+        pthread_mutex_lock(&mutex);
+
+        // 当缓冲区为空时，消费者需要等待
+        while (buffer_is_empty()) {  
+            // 当前线程已经持有了mutex，首先释放mutex，然后阻塞，醒来后再次获取mutex 
+            pthread_cond_wait(&cond, &mutex);
+        }
+
+        // 此时，缓冲区肯定不是空的，从缓冲区取数据
+        int item = buffer_get();
+
+        pthread_mutex_unlock(&mutex);        
+
+        // 缓冲区的状态发生了变化，唤醒其它的生产者或消费者
+        pthread_cond_signal(&cond);
+    }
+}
+#+end_src
+***** 参考文章
+[[https://zhuanlan.zhihu.com/p/58838318][为什么pthread_cond_wait需要互斥锁mutex作为参数]]
+*** 实例
 
 图11-15给出了如何结合使用条件变量和互斥量对线程进行同步。
 
-
-
+#+begin_src c++
+#include <pthread.h>
+struct msg
+{
+    struct msg *m_next;
+    /* ... more stuff here ... */
+};
+struct msg *workq;
+pthread_cond_t qready = PTHREAD_COND_INITIALIZER;
+pthread_mutex_t qlock = PTHREAD_MUTEX_INITIALIZER;
+void process_msg(void)
+{
+    struct msg *mp;
+    for (;;)
+    {
+        pthread_mutex_lock(&qlock);
+        while (workq == NULL)
+            pthread_cond_wait(&qready, &qlock);
+        mp = workq;
+        workq = mp->m_next;
+        pthread_mutex_unlock(&qlock);
+        /* now process the message mp */
+    }
+}
+void enqueue_msg(struct msg *mp)
+{
+    pthread_mutex_lock(&qlock);
+    mp->m_next = workq;
+    workq = mp;
+    pthread_mutex_unlock(&qlock);
+    pthread_cond_signal(&qready);
+}
+#+end_src
 图11-15 使用条件变量
 
-条件是工作队列的状态。我们用互斥量保护条件，在 while 循环中判断条件。把消息放到工作队列时，需要占有互斥量，但在给等待线程发信号时，不需要占有互斥量。只要线程在调用pthread_cond_signal之前把消息从队列中拖出了，就可以在释放互斥量以后完成这部分工作。因为我们是在 while 循环中检查条件，所以不存在这样的问题：线程醒来，发现队列仍为空，然后返回继续等待。如果代码不能容忍这种竞争，就需要在给线程发信号的时候占有互斥量。
-
-11.6.7 自旋锁
+条件是工作队列的状态。我们用互斥量保护条件，在 while 循环中判断条件。把消息放到工作队列时，需要占有互斥量，但在给等待线程发信号时，不需要占有互斥量。只要线程可以在调用pthread_cond_signal之前把消息从队列中拉出，我们就可以在释放互斥量以后完成这部分工作。因为我们是在 while 循环中检查条件，所以不存在这样的问题：线程醒来，发现队列仍为空，然后返回继续等待。如果代码不能容忍这种竞争，就需要在给线程发信号的时候占有互斥量。
+**** 参考文献
+[[https://stackoverflow.com/questions/4544234/calling-pthread-cond-signal-without-locking-mutex][Calling pthread_cond_signal without locking mutex]]
+*** 自旋锁
 自旋锁与互斥量类似，但它不是通过休眠使进程阻塞，而是在获取锁之前一直处于忙等（自旋）阻塞状态。自旋锁可用于以下情况：锁被持有的时间短，而且线程并不希望在重新调度上花费太多的成本。
 
 自旋锁通常作为底层原语用于实现其他类型的锁。根据它们所基于的系统体系结构，可以通过使用测试并设置指令有效地实现。当然这里说的有效也还是会导致CPU资源的浪费：当线程自旋等待锁变为可用时，CPU不能做其他的事情。这也是自旋锁只能够被持有一小段时间的原因。
@@ -19792,18 +20384,19 @@ int pthread_cond_broadcast(pthread_cond_t *cond);
 很多互斥量的实现非常高效，以至于应用程序采用互斥锁的性能与曾经采用过自旋锁的性能基本是相同的。事实上，有些互斥量的实现在试图获取互斥量的时候会自旋一小段时间，只有在自旋计数到达某一阈值的时候才会休眠。这些因素，加上现代处理器的进步，使得上下文切换越来越快，也使得自旋锁只在某些特定的情况下有用。
 
 自旋锁的接口与互斥量的接口类似，这使得它可以比较容易地从一个替换为另一个。可以用pthread_spin_init 函数对自旋锁进行初始化。用 pthread_spin_destroy 函数进行自旋锁的反初始化。
-
+#+begin_src c++
 #include <pthread.h>
 
 int pthread_spin_init(pthread_spinlock_t *lock, int pshared);
 
 int pthread_spin_destroy(pthread_spinlock_t *lock);
-
+#+end_src
 两个函数的返回值：若成功，返回0；否则，返回错误编号
 
 只有一个属性是自旋锁特有的，这个属性只在支持线程进程共享同步（Thread Process-Shared Synchronization）选项（这个选项目前在Single UNIX Specification中是强制的，见图2-5）的平台上才用得到。pshared 参数表示进程共享属性，表明自旋锁是如何获取的。如果它设为 PTHREAD_PROCESS_SHARED，则自旋锁能被可以访问锁底层内存的线程所获取，即便那些线程属于不同的进程，情况也是如此。否则pshared参数设为 PTHREAD_PROCESS_PRIVATE，自旋锁就只能被初始化该锁的进程内部的线程所访问。
 
 可以用pthread_spin_lock或pthread_spin_trylock对自旋锁进行加锁，前者在获取锁之前一直自旋，后者如果不能获取锁，就立即返回EBUSY 错误。注意，pthread_spin_trylock不能自旋。不管以何种方式加锁，自旋锁都可以调用pthread_spin_unlock函数解锁。
+#+begin_src c++
 
 #include <pthread.h>
 
@@ -19812,40 +20405,39 @@ int pthread_spin_lock(pthread_spinlock_t *lock);
 int pthread_spin_trylock(pthread_spinlock_t *lock);
 
 int pthread_spin_unlock(pthread_spinlock_t *lock);
-
+#+end_src
 所有函数的返回值：若成功，返回0；否则，返回错误编号
 
 注意，如果自旋锁当前在解锁状态的话，pthread_spin_lock函数不要自旋就可以对它加锁。如果线程已经对它加锁了，结果就是未定义的。调用pthread_spin_lock会返回EDEADLK错误（或其他错误），或者调用可能会永久自旋。具体行为依赖于实际的实现。试图对没有加锁的自旋锁进行解锁，结果也是未定义的。
 
 不管是pthread_spin_lock还是pthread_spin_trylock，返回值为0的话就表示自旋锁被加锁。需要注意，不要调用在持有自旋锁情况下可能会进入休眠状态的函数。如果调用了这些函数，会浪费CPU资源，因为其他线程需要获取自旋锁需要等待的时间就延长了。
-
-11.6.8 屏障
+*** 屏障
 屏障（barrier）是用户协调多个线程并行工作的同步机制。屏障允许每个线程等待，直到所有的合作线程都到达某一点，然后从该点继续执行。我们已经看到一种屏障，pthread_join函数就是一种屏障，允许一个线程等待，直到另一个线程退出。
 
 但是屏障对象的概念更广，它们允许任意数量的线程等待，直到所有的线程完成处理工作，而线程不需要退出。所有线程达到屏障后可以接着工作。
 
 可以使用 pthread_barrier_init 函数对屏障进行初始化，用 thread_barrier_destroy函数反初始化。
+#+begin_src c++
 
 #include <pthread.h>
 
 int pthread_barrier_init(pthread_barrier_t *restrict barrier,
-
 const pthread_barrierattr_t *restrict attr,
-
 unsigned int count);
 
 int pthread_barrier_destroy(pthread_barrier_t *barrier);
-
+#+end_src
 两个函数的返回值：若成功，返回0；否则，返回错误编号
 
 初始化屏障时，可以使用count参数指定，在允许所有线程继续运行之前，必须到达屏障的线程数目。使用attr参数指定屏障对象的属性，我们会在下一章详细讨论。现在设置attr为NULL，用默认属性初始化屏障。如果使用pthread_barrier_init函数为屏障分配资源，那么在反初始化屏障时可以调用pthread_barrier_destroy函数释放相应的资源。
 
 可以使用pthread_barrier_wait函数来表明，线程已完成工作，准备等所有其他线程赶上来。
+#+begin_src c++
 
 #include <pthread.h>
 
 int pthread_barrier_wait(pthread_barrier_t *barrier);
-
+#+end_src
 返回值：若成功，返回0或者PTHREAD_BARRIER_SERIAL_THREAD；否则，返回错误编号
 
 调用pthread_barrier_wait的线程在屏障计数（调用pthread_barrier_init时设定）未满足条件时，会进入休眠状态。如果该线程是最后一个调用pthread_barrier_wait的线程，就满足了屏障计数，所有的线程都被唤醒。
@@ -19853,14 +20445,119 @@ int pthread_barrier_wait(pthread_barrier_t *barrier);
 对于一个任意线程，pthread_barrier_wait函数返回了PTHREAD_BARRIER_SERIAL_THREAD。剩下的线程看到的返回值是0。这使得一个线程可以作为主线程，它可以工作在其他所有线程已完成的工作结果上。
 
 一旦达到屏障计数值，而且线程处于非阻塞状态，屏障就可以被重用。但是除非在调用了pthread_barrier_destroy函数之后，又调用了pthread_barrier_init函数对计数用另外的数进行初始化，否则屏障计数不会改变。
-
-实例
+*** 实例
 
 图11-16给出了在一个任务上合作的多个线程之间如何用屏障进行同步。
+#+begin_src c++
+#include "apue.h"
+#include <pthread.h>
+#include <limits.h>
+#include <sys/time.h>
+#define NTHR 8               /* number of threads */
+#define NUMNUM 8000000L      /* number of numbers to sort */
+#define TNUM (NUMNUM / NTHR) /* number to sort per thread */
 
-
-
-
+long nums[NUMNUM];
+long snums[NUMNUM];
+pthread_barrier_t b;
+#ifdef SOLARIS
+#define heapsort qsort
+#else
+extern int heapsort(void *, size_t, size_t,
+                    int (*)(const void *, const void *));
+#endif
+/*
+ * Compare two long integers (helper function for heapsort)
+ */
+int complong(const void *arg1, const void *arg2)
+{
+    long l1 = *(long *)arg1;
+    long l2 = *(long *)arg2;
+    if (l1 == l2)
+        return 0;
+    else if (l1 < l2)
+        return -1;
+    else
+        return 1;
+}
+/*
+ * Worker thread to sort a portion of the set of numbers.
+ */
+void *
+thr_fn(void *arg)
+{
+    long idx = (long)arg;
+    heapsort(&nums[idx], TNUM, sizeof(long), complong);
+    pthread_barrier_wait(&b);
+    /*
+     * Go off and perform more work ...
+     */
+    return ((void *)0);
+}
+/*
+ * Merge the results of the individual sorted ranges.
+ */
+void merge()
+{
+    long idx[NTHR];
+    long i, minidx, sidx, num;
+    for (i = 0; i < NTHR; i++)
+        idx[i] = i * TNUM;
+    for (sidx = 0; sidx < NUMNUM; sidx++)
+    {
+        num = LONG_MAX;
+        for (i = 0; i < NTHR; i++)
+        {
+            if ((idx[i] < (i + 1) * TNUM) && (nums[idx[i]] < num))
+            {
+                num = nums[idx[i]];
+                minidx = i;
+            }
+        }
+        snums[sidx] = nums[idx[minidx]];
+        idx[minidx]++;
+    }
+}
+int main()
+{
+    unsigned long i;
+    struct timeval start, end;
+    long long startusec, endusec;
+    double elapsed;
+    int err;
+    pthread_t tid;
+    /*
+     * Create the initial set of numbers to sort.
+     */
+    srandom(1);
+    for (i = 0; i < NUMNUM; i++)
+        nums[i] = random();
+    /*
+     * Create 8 threads to sort the numbers.
+     */
+    gettimeofday(&start, NULL);
+    pthread_barrier_init(&b, NULL, NTHR + 1);
+    for (i = 0; i < NTHR; i++)
+    {
+        err = pthread_create(&tid, NULL, thr_fn, (void *)(i * TNUM));
+        if (err != 0)
+            err_exit(err, "can’t create thread");
+    }
+    pthread_barrier_wait(&b);
+    merge();
+    gettimeofday(&end, NULL);
+    /*
+     * Print the sorted list.
+     */
+    startusec = start.tv_sec * 1000000 + start.tv_usec;
+    endusec = end.tv_sec * 1000000 + end.tv_usec;
+    elapsed = (double)(endusec - startusec) / 1000000.0;
+    printf("sort took %.4f seconds\n", elapsed);
+    for (i = 0; i < NUMNUM; i++)
+        printf("%ld\n", snums[i]);
+    exit(0);
+}
+#+end_src
 图11-16 使用屏障
 
 这个例子给出了多个线程只执行一个任务时，使用屏障的简单情况。在更加实际的情况下，工作线程在调用pthread_barrier_wait函数返回后会接着执行其他的活动。
@@ -19871,47 +20568,101 @@ int pthread_barrier_wait(pthread_barrier_t *barrier);
 
 如果只用一个线程去完成800万个数的堆排序，那么与图11-16中的程序相比，我们将能看到图11-16中的程序在性能上有显著提升。在8核处理器系统上，单线程程序对800万个数进行排序需要12.14秒。同样的系统，使用8个并行线程和1个合并结果的线程，相同的800万个数的排序仅需要1.91秒，速度提升了6倍。
 
-11.7 小结
-本章介绍了线程的概念，讨论了现有的创建和销毁线程的POSIX.1原语；此外，还介绍了线程同步问题，讨论了 5 个基本的同步机制（互斥量、读写锁、条件变量、自旋锁以及屏障），了解了如何使用它们来保护共享资源。
+* 线程控制
+** 线程限制
+在2.5.4节中讨论了sysconf函数。Single UNIX Specification定义了与线程操作有关的一些限制，图2-11并没有列出这些限制。与其他的系统限制一样，这些限制也可以通过sysconf函数进行查询。图12-1总结了这些限制。
 
-习题
-11.1 修改图11-4所示的实例代码，正确地在两个线程之间传递结构。
+#+DOWNLOADED: screenshot @ 2024-01-14 10:26:03
+[[file:images/linux笔记/线程控制/2024-01-14_10-26-03_screenshot.png]]
+图12-1 线程限制和sysconf的name参数
 
-11.2 在图11-14所示的实例代码中，需要另外添加什么同步（如果需要的话）可以使得主线程改变与挂起作业关联的线程ID？这会对job_remove函数产生什么影响？
+与 sysconf 报告的其他限制一样，这些限制的使用是为了增强应用程序在不同的操作系统实现之间的可移植性。例如，如果应用程序需要为它管理的每个文件创建4个线程，但是系统却并不允许创建所有这些线程，这时可能就必须限制当前可并发管理的文件数。
 
-11.3 把图11-15中的技术运用到工作线程实例（图11-1和图11-14）中实现工作线程函数。不要忘记更新queue_init 函数对条件变量进行初始化，修改 job_insert 和job_append函数给工作线程发信号。会出现什么样的困难？
+图12-2给出了本书描述的4种操作系统实现中线程限制的值。如果操作系统实现的限制是不确定的，列出的值就是“没有确定的限制”（no limit）。但这并不意味着值是无限制的。
 
-11.4 下面哪个步骤序列是正确的？
+#+DOWNLOADED: screenshot @ 2024-01-14 10:26:47
+[[file:images/linux笔记/线程控制/2024-01-14_10-26-47_screenshot.png]]
+图12-2 线程配置限制的实例
 
-（1）对互斥量加锁（pthread_mutex_lock）。
+注意，虽然某个操作系统实现可能没有提供访问这些限制的方法，但这并不意味着这些限制不存在，这只是意味着操作系统实现没有为使用sysconf访问这些值提供可用的方法。
 
-（2）改变互斥量保护的条件。
+** 线程属性
+pthread 接口允许我们通过设置每个对象关联的不同属性来细调线程和同步对象的行为。通常，管理这些属性的函数都遵循相同的模式。
 
-（3）给等待条件的线程发信号（pthread_cond_broadcast）。
+1. 每个对象与它自己类型的属性对象进行关联（线程与线程属性关联，互斥量与互斥量属性关联，等等）。一个属性对象可以代表多个属性。属性对象对应用程序来说是不透明的。这意味着应用程序并不需要了解有关属性对象内部结构的详细细节，这样可以增强应用程序的可移植性。取而代之的是，需要提供相应的函数来管理这些属性对象。
+2. 有一个初始化函数，把属性设置为默认值。
+3. 还有一个销毁属性对象的函数。如果初始化函数分配了与属性对象关联的资源，销毁函数负责释放这些资源。
+4. 每个属性都有一个从属性对象中获取属性值的函数。由于函数成功时会返回0，失败时会返回错误编号，所以可以通过把属性值存储在函数的某一个参数指定的内存单元中，把属性值返回给调用者。
+5. 每个属性都有一个设置属性值的函数。在这种情况下，属性值作为参数按值传递。
 
-（4）对互斥量解锁（pthread_mutex_unlock）。
+在第11章所有调用pthread_create函数的实例中，传入的参数都是空指针，而不是指向pthread_attr_t结构的指针。可以使用pthread_attr_t结构修改线程默认属性，并把这些属性与创建的线程联系起来。可以使用pthread_attr_init函数初始化pthread_attr_t结构。在调用pthread_attr_init以后，pthread_attr_t结构所包含的就是操作系统实现支持的所有线程属性的默认值。
+#+begin_src c++
+#include <pthread.h>
 
-或者
+int pthread_attr_init(pthread_attr_t *attr);
 
-（1）对互斥量加锁（pthread_mutex_lock）。
+int pthread_attr_destroy(pthread_attr_t *attr);
+#+end_src
+两个函数的返回值：若成功，返回0；否则，返回错误编号
 
-（2）改变互斥量保护的条件。
+如果要反初始化pthread_attr_t结构，可以调用pthread_attr_destroy函数。如果pthread_attr_init的实现对属性对象的内存空间是动态分配的，pthread_attr_destroy就会释放该内存空间。除此之外，pthread_attr_destroy还会用无效的值初始化属性对象，因此，如果该属性对象被误用，将会导致pthread_create函数返回错误码。
 
-（3）对互斥量解锁（pthread_mutex_unlock）。
+图 12-3 总结了 POSIX.1 定义的线程属性。POSIX.1 还为线程执行调度（Thread Execution Scheduling）选项定义了额外的属性，用以支持实时应用，但我们并不打算在这里讨论这些属性。图12-3同时给出了各个操作系统平台对每个线程属性的支持情况。
+#+DOWNLOADED: screenshot @ 2024-01-14 10:30:25
+[[file:images/linux笔记/线程控制/2024-01-14_10-30-25_screenshot.png]]
+图12-3 POSIX.1线程属性
 
-（4）给等待条件的线程发信号（pthread_cond_broadcast）。
+11.5节介绍了分离线程的概念。如果对现有的某个线程的终止状态不感兴趣的话，可以使用pthread_detach函数让操作系统在线程退出时收回它所占用的资源。
 
-11.5 实现屏障需要什么同步原语？给出pthread_barrier_wait函数的一个实现。
+如果在创建线程时就知道不需要了解线程的终止状态，就可以修改 pthread_attr_t 结构中的detachstate线程属性，让线程一开始就处于分离状态。可以使用 pthread_attr_setdetachstate函数把线程属性detachstate设置成以下两个合法值之一：PTHREAD_CREATE_DETACHED，以分离状态启动线程；或者PTHREAD_CREATE_JOINABLE，正常启动线程，应用程序可以获取线程的终止状态。
 
+#+begin_src c++
+#include <pthread.h>
 
-** 互斥量
-** 避免死锁
-** 函数pthread_mutex_timedlock
-** 读写锁
-** 带有超时的读写锁
-** 条件变量
-** 自旋锁
-** 屏障
+int pthread_attr_getdetachstate(const pthread_attr_t *restrict attr,int *detachstate);
+
+int pthread_attr_setdetachstate(pthread_attr_t *attr, int *detachstate);
+#+end_src
+两个函数的返回值：若成功，返回0；否则，返回错误编号
+
+可以调用pthread_attr_getdetachstate函数获取当前的detachstate线程属性。第二个参数所指向的整数要么设置成 PTHREAD_CREATE_DETACHED，要么设置成 PTHREAD_CREATE_JOINABLE，具体要取决于给定pthread_attr_t结构中的属性值。
+
+** 实例
+
+图12-4给出了一个以分离状态创建线程的函数。
+
+#+begin_src c++
+#include "apue.h"
+#include <pthread.h>
+int makethread(void *(*fn)(void *), void *arg)
+{
+    int err;
+    pthread_t tid;
+    pthread_attr_t attr;
+    err = pthread_attr_init(&attr);
+    if (err != 0)
+        return (err);
+    err = pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+    if (err == 0)
+        err = pthread_create(&tid, &attr, fn, arg);
+    pthread_attr_destroy(&attr);
+    return (err);
+}
+#+end_src
+图12-4 以分离状态创建线程
+
+注意，此例忽略了pthread_attr_destroy函数调用的返回值。在这个实例中，我们对线程属性进行了合理的初始化，因此 pthread_attr_destroy 应该不会失败。但是，如果pthread_attr_destroy确实出现了失败的情况，将难以清理：必须销毁刚刚创建的线程，也许这个线程可能已经运行，并且与 pthread_attr_destroy 函数可能是异步
+** 同步属性
+** 互斥量属性
+** 读写锁属性
+** 条件变量属性
+** 屏障属性
+** 重入
+** 线程特定数据
+** 取消选项
+** 线程和信号
+** 线程和fork
+** 线程和I/O
 ** 小结
 * unzip命令
 Linux unzip命令用于解压缩zip文件

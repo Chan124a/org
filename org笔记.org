@@ -21,11 +21,13 @@
 7. M-S-LEFT/RIGHT	将当前子提升/降低一个等级。
 8. M-S-UP/DOWN	        将子树上/下移（和前/后个子树交换）。
 9. C-c C-w              将条目或区域重新归档到其他位置。
-10. C-x n s和C-x n w    可将当前子树放到缓冲区，然后再次。
+10. C-x n s和C-x n w    将缓冲区视图局限到当前子树中/再次放宽视图
 ** Sparse 树
-C-c /
+Org 模式的一个重要的功能是能根据大纲树中选择的信息构造出稀疏的树，这样文档就可以尽可能地折叠，但是选择的信息和它对应的标题会显示出来。试下就知道它是怎样工作的了。
 
-C-c / r
+Org 模式有几个命令可以创建这种树，这些命令都可以通过调度器来使用：
+- C-c /	它会提示再输入一个字符来选择稀疏树的创建命令。
+- C-c / r	触发后，会提示输入匹配串，并且将所有匹配的项显示成稀疏树。所有的匹配项都会高亮显示；按 C-c C-c 取消高亮。
 
 * 文字强调
 You can make words ‘*bold*’, ‘/italic/’, ‘_underlined_’, ‘=verbatim=’ and ‘~code~’, and, if you must, ‘+strike-through+’.
@@ -207,6 +209,9 @@ org-download本身会自动在org文档当前目录下创建一个与文档同�
 截图软件：剪切板中的图片可以是从另外一个地方复制来的，但更多的场景是使用截图软件进行截图，然后粘贴的。我使用的截图软件是faststone，程序很小，但是功能很强大，既可以截图也可以录视频，还可以编辑视频，对于简单的插入便条，字幕之类的处理，特别方便。还可以设置快捷键，截选择框、窗口、滚动条内窗口内容等等，非常方便。
 
 * 待办事项
+Org 模式并不用一个单独的文件来维持 TODO 列表。它是一些笔记的集合体，因为 TODO 列表是在你记录笔记的过程中逐渐形成的。你 Org 模式下可以很容易地将树中的一项标记为一个 TODO 的项。用这种方式，信息内容不会冗余加倍，而且可以显示 TODO 项的上下文环境。
+
+当然，这种处理待办事项的方式会将它们分散于各个笔记文件中。Org 模式提供了一些方法使我们可以把它们看作一个整体来处理。
 ** 使用TODO状态
 当标题以TODO开头时就成为一个TODO项
 #+BEGIN_SRC bash
@@ -252,30 +257,53 @@ org-download本身会自动在org文档当前目录下创建一个与文档同�
 #+TODO: | CANCELED(c)
 #+END_SRC
 当改变这些行中的一行后，光标停留在改变行上，用 C-c C-c 让改变生效。
-** 优先级
-Org模式支持三个优先级别：’A‘、’B‘和’C‘。
+** 进度日志
+当你改变一个 TODO 状态为 DONE 时，或者当你每次改变一个 TODO 项的状态时，Org 都会自动记录时间戳或者作一个记录。这是高度可配置的。可以基于每一个关键字进入设置，并且可以定位到一个文件甚至子树。
 
-’A‘是最高级别，如不指定，’B‘是默认的。
+*完成的项目*
+
+最基本的日志功能是跟踪一个特定项目的完成。这可以这样实现：
+#+begin_src elisp
+  (setq org-log-done 'time)
+#+end_src
+    这时当你将一个项目从一个 TODO（未完成）状态改变为一个完成状态时，标题下面就会插入一行 “CLOSED:[timestamp]”。如果你想和时间戳一起作一个记录，用：
+#+begin_src elisp
+  (setq org-log-done 'note)
+#+end_src
+  这时会提示你输入一个记录（note），并将它保存在标题为“Closing Note”项目之下。
+
+*跟踪TODO状态变化*
+
+    你可能想跟踪 TODO 状态的变化。可以只记录一个时间戳，也可以为变化作一个带时间戳的记录。记录会被插入到标题之后形成列表。当有很多记录之后，你可能希望将记录取出放到抽屉里。通过定制变量 org-log-into-drawer 可以实现这个功能。
+    对于状态记录，Org 可以实现基于每个状态关键字的设置。实现方法是在每个后的括号中指定“！”（记录时间戳）或“@”（作一个记录）。例如：
+#+begin_src org
+  ,#+TODO: TODO(t) WAIT(w@/!) | DONE(d!) CANCELED(c@)
+#+end_src
+
+    将会设置 TODO 关键字和快速访问字母，以及当一个项目设为 DONE 时，会记录时间戳，当状态变为 WAIT 或 CANCELED 时，会作一个记录。这个语法也适用于变量 org-todo-keywords。
+    
+** 优先级
+Org模式支持三个优先级别：A、B和C。
+
+A是最高级别，如不指定，B是默认的。
 
 优先级只在议程中有用。
 
-- =C-c= ,	设置当前标题的优先级。按’‘’‘’‘选择一个级别，或者SPC删除标记（cookie）。
-- =S-UP=
-- =S-Down=	增加/减少当前标题的优先级。
+- =C-c ,=	设置当前标题的优先级。按a,b,c选择一个级别，或者SPC删除标记（cookie）。
+- =S-UP= , =S-Down=	增加/减少当前标题的优先级。
 ** 任务细分
-你可以在标题的任何地方插入‘[/]’或者‘[%]’。
+你可以在标题的任何地方插入[/]或者[%]。
 
 当每个子任务的状态变化时，或者当你在标记上按 C-c C-c时，这些标记状态也会随之更新。
 
-#+BEGIN_SRC org-mode
-#* Organize Party [33%]
-#** TODO Call people [1/2]
-#*** TODO Peter
-#*** DONE Sarah
-#** TODO Buy food
-#** DONE Talk to neighbor
-#+END_SRC
-
+#+begin_src org
+  ,* Organize Party [33%]
+  ,** TODO Call people [1/2]
+  ,*** TODO Peter
+  ,*** DONE Sarah
+  ,** TODO Buy food
+  ,** DONE Talk to neighbor
+#+end_src
 ** 复选框
 当纯文本中的项以‘[]’开头时，就会变成一个复选框。
 
@@ -295,7 +323,203 @@ Org模式支持三个优先级别：’A‘、’B‘和’C‘。
 - =C-c C-c=	触发复选框的状态或者（加上前缀）触发复选框的的存在状态。
 - =M-S-RET=	增加一个带有复选框的项。这只在光标处于纯文本列表
 * 标签
+  要为交叉相关的信息提供标签和上下文，一个不错的方法是给标题分配标签。Org 模式能够广泛地支持标签。
+
+  每一个标题都能包含多个标签，它们位于标题的后面。标签可以包含字母，数字， =‘_’= 和 =‘@’= 。标签的前面和后面都应该有一个冒号，例如，“:work:”。可以指定多个标签，就像“:work:urgent:”。标签默认是粗体，并和标题具有相同的颜色。
+
+** 标签继承
+   标签具有大纲树的继承结构。如果一个标题具有某个标签，它的所有子标题也会继承这个标签。例如，在列表
+#+begin_src org
+  ,* Meeting with the French group     :work:
+  ,** Summary by Frank                 :boss:notes:
+  ,*** TODO Prepare slides for him     :action:
+#+end_src
+
+  中,尽管没有明确标出,最后一个标题会有标签“:work:”，“:boss:”，“:note:”，和“:action”。你也可以设定一个标签让所有的标题都继承，就好像标签在包含整个文件的第零级标题中指定了一样。用下面的方法[fn:8]：
+#+begin_src org
+  ,#+FILETAGS: :Peter:Boss:Secret:
+#+end_src
+
+** 设置标签
+   在标题后可以很容易地输入标签。在冒号之后，M-TAB 可以补全标签。也有一些专门的命令用于输入标签：
+| C-c C-q | 为当前标题输入标签。Org 模式既支持补全，也支持单键接口来设置标签，见下文。回车之后，标签会被插入，并放到第 org-tags-column 列。如果用前缀 C-u，会把当前缓冲区中的所有标签都对齐到那一列，这看起来很酷。 |
+| C-c C-c | 当光标处于标题上时，这个命令同C-c C-q。                                                                                                                                                                 |
+
+   Org 支持基于一个标签列表来插入标签。默认情况这个列表是动态构建的，包含了当前缓冲区中使用过的所有标签。你也可以通过变量 org-tag-alist 在全局设定一个标签的硬列表（hard list）。另外，对于某个特定文件你也可以用下面这几行设置一个默认列表：
+#+begin_src org
+  ,#+TAGS: @work @home @tennisclub
+  ,#+TAGS: laptop car pc sailboat
+#+end_src
+  
+  默认 Org 模式用一个迷你缓冲区补全设施来输入标签。另外，它也实现了一个更快速，称为 /快速标签选择/ （ /fast tag selection/ ）的标签选择方法。这使得你只用按一次键就可以选择或者取消一个标签。为了使它能很好地工作，需要为常用的标签赋唯一的值。你可以在你的“.emacs”文件中通过设置变量 org-tag-alist 作全局设定。例如，如果你需要在不同的文件中经常要给条目添加标签“:@home:”，这时你就可以像这样设置：
+#+begin_src elisp
+  (setq org-tag-alist '(("@work" . ?w) ("@home" . ?h) ("laptop" . ?l)))
+#+end_src
+  
+  如果标签只用于当前正在处理的文件，那么你可以这样设置标签选项行：
+#+begin_src org
+  ,#+TAGS: @work(w) @home(h) @tennisclub(t) laptop(l) pc(p)
+#+end_src
+
+** 标签查找
+   一旦标签体系设置好，就可以用来收集相关联的信息到指定列表中。
+| C-c \   |                                                                                                                         |
+| C-c / m | 用匹配标签搜索的所有标题构造一个稀疏树。带前缀参数C-u时，忽略所有还是TODO行的标题。                                     |
+| C-c a m | 用所有议程文件匹配的标签构造一个全局列表。见第 10.3.3 节。                                                              |
+| C-c a M | 用所有议程文件匹配的标签构造一个全局列表，但只搜索 TODO 项，并强制搜索所有子项（见变量 org-tags-match-listsublevels）。 |
+
+   这些命令都会提示输入字符串，字符串支持基本的逻辑去处。像“+boss+urgent-project1”，是搜索所有的包含标签“boss”和“urgent”但不含“project1”的项；而 “Kathy|Sally”，搜索标签包含“Kathy”或者“Sally”和项。搜索字符串的语法很丰富，支持查找TODO关键字、条目级别和属性。更详细的介绍和例子，见第 10.3.3 节。
+
+*扩展阅读*\\
+   手册第 6 章\\
+   Sacha Chua’s article about tagging in Org-mode
+
+* 属性
+  属性是一些与条目关联的键值对。它们位于一个名为 *PROPERTIES* 的特殊抽屉中。第一个属性都单独一行，键在前（被冒号包围），值在后：
+#+begin_src org
+  ,* CD collection
+  ,** Classic
+  ,*** Goldberg Variations
+  ,    :PROPERTIES:
+  ,    :Title:    Goldberg Variations
+  ,    :Composer: J.S. Bach
+  ,    :Publisher: Deutsche Grammophon
+  ,    :NDisks:   1
+  ,    :END:
+#+end_src
+  
+  通过设置属性 =“:Xyz_ALL:”= ，你可以为属性 =“:Xyz:”= 设置所有合法的值。这个特定的属性是有 /继承性/ 的，即，如果你是在第 1 级别设置的，那么会被应用于整个树。当合法的值设定之后，设置对应的属性就很容易了，并且不容易出现打字错误。用CD唱片集为例，我们可以预定义发行商和盒中的光盘数目：
+#+begin_src org
+  ,* CD collection
+  ,  :PROPERTIES:
+  ,  :NDisks_ALL: 1 2 3 4
+  ,  :Publisher_ALL: "Deutsche Grammophon" Philips EMI
+  ,  :END:
+#+end_src
+
+  也可以在全局设置 org-global-properties ，或者在文件级别设置：
+#+begin_src org
+  ,#+PROPERTY: NDisks_ALL 1 2 3 4
+#+end_src
+
+| C-c C-x p | 设置一个属性。会询问属性名和属性值。 |
+| C-c C-c d | 从当前项中删除一个属性。             |
+  
+  要基于选择的属性创建稀疏树或者特殊列表，跟标签搜索的命令相同（见第6.3节）。搜索字符串的语法在第10.3.3节中详述。
+
+** 扩展阅读
+   手册第7章\\
+   Bastien Guerry’s column view tutorial
+   
 * 日期和时间
+  为了支持工程的计划，TODO 项可以标记上日期和/或时间。带有日期和时间信息的特定格式的字符串在 Org 模式中称为时间戳。
+
+** 时间戳
+   时间戳是一个具有特定格式的日期（可能带有时间和时间段）说明，例如 ~<2005-10-01~ ~Tue>~ ， ~<2003-09-16~ ~Tue~ ~09:39>~ ，或者 ~<2003-09-16~ ~Tue~ ~12:00-12:30>~ 。
+   时间戳可以出现在树条目的标题和正文的任何地方。它能使条目只在特定的日期才出现在议程列表中。（见第 10.3.1 节）我们区分为：
+
+*普通时间戳；事件；约会*
+
+    一个简单的时间戳只是给一个条目加上时间和日期。这跟在纸质的议程上写下约会和事件是一样的。
+#+begin_src org
+  ,* Meet Peter at the movies <2006-11-01 Wed 19:15>
+  ,* Discussion on climate change <2006-11-02 Thu 20:00-22:00>
+#+end_src
+
+*具有时间间隔的时间戳*
+
+    一个时间戳可以包含一个时间间隔，表示事件不只在指定的时间发生，还在每隔一个特定的时间如 N 天（d）、周（w）、月（m）或者年（y）之后重复发生。下面的事件每周二在议程中显示：
+#+begin_src org
+  ,* Pick up Sam at school <2007-05-16 Wed 12:30 +1w>
+#+end_src
+  
+*日记样式的 sexp 条目*
+
+    为了能定义更复杂的时间，Org 模式支持 Emacs 日历/日记包（calendar/diary package）中的日记条目。例如：
+#+begin_src org
+  ,* The nerd meeting on every 2nd Thursday of the month
+  ,  <%%(diary-float t 4 2)>
+#+end_src
+
+*时间/日期段*
+
+    两个时间戳用‘--’连接起来就定义了一个时间段：
+#+begin_src org
+  ,** Meeting in Amsterdam
+  ,   <2004-08-23 Mon>--<2004-08-26 Thu>
+#+end_src
+
+*非激活的时间戳*
+
+    跟普通时间戳一样，但是这里是方括号而不是尖括号。这种时间戳是未激活的，它 /不/ 会让一个条目显示在议程中。
+#+begin_src org
+  ,* Gillian comes late for the fifth time [2006-11-01 Wed]
+#+end_src
+
+** 创建时间戳
+   时间戳要有特定的格式，这样才能被Org模式识别。下面的命令可以用来正确地处理时间戳的格式。
+| C-c .        | 询问日期并输入正确的时间戳。当光标处理一个时间戳之上时，是修改这个时间戳，而不是插入一个新的。如果这个命令连用再次，就会插入一个时间段。加上前缀会附带当前时间。                                                 |
+| C-c !        | 功能同C-c .，但是插入的是一个未激活的时间戳。                                                                                                                                                                    |
+| S-LEFT/RIGHT | 将光标处理的时间戳改变一天。                                                                                                                                                                                     |
+| S-UP/DOWN    | 改变时间戳中光标下的项。光标可以处在年、月、日、时或者分之上。当时间戳包含一个时间段时，如 “15:30-16:30”，修改第一个时间，会自动同时修改第二个时间，以保持时间段长度不变。想修改时间段长度，可以修改第二个时间。 |
+
+当 Org 模式询问时间/日期时，能接收任何包含时间和/或日期的字符串，它能根据当前的时间日期智能地分析字符串，从而得到没有指明的信息。你也可以用弹出的日历中选择日期。想完整地了解时间/日期询问的工作方式，可以参考手册。
+
+** 截止期限和计划安排
+   时间戳前面可以加一些关键字来协助计划安排。
+
+*截止期限*
+
+意义：任务（大多数情况都会是一个TODO项，当然也可以不是）应该完成的日期。
+| C-c C-d | 在标题下面一行插入一个带有“DEADLINE”关键字的时间戳。 | 
+
+在 /截止日期/ ， /任务/ 会列在 /议程/ 中。另外， /今天的议程/ 会在任务到期 orgdeadline-warning-days 天前对即将即将到期以及已经过期的任务给出提醒，直到任务被标记为 DONE。例如：
+#+begin_src org
+  ,*** TODO write article about the Earth for the Guide
+  ,    The editor in charge is [[bbdb:Ford Prefect]]
+  ,    DEADLINE: <2004-02-29 Sun>
+#+end_src
+
+*日程安排*
+
+    意义：你计划在给定的那个日期开始进行那项任务。[fn:9]
+| C-c C-s | 在标题下面插入一个带有“SCHEDULED”关键字的时间戳。   |
+
+    在给定的日期标题会列在议程中。[fn:10]另外，对于过期的日程安排会在编辑为 /今天/ 并给出提醒，直到被标记为 DONE。也就是说，任务会自动推迟日期直到它被完成。
+#+begin_src org
+  ,*** TODO Call Trillian for a date on New Years Eve.
+  ,    SCHEDULED: <2004-12-25 Sat>
+#+end_src
+  
+  有些任务需要一再重复出现。Org 模式在截止期限、计划安排和普通时间戳中用所谓的中继器来管理这种任务。在下面的例子中：
+#+begin_src org
+  ,** TODO Pay the rent
+  ,   DEADLINE: <2005-10-01 Sat +1m>
+#+end_src
+
+  +1m 是一个中继器；上面的意思是任务有一个截止期限 ~<2005-10-01>~ ，并从这个日期开始每月都重复出现。
+
+** 记录工作时间
+   使用 Org 可以记录在一个工程中花在某些特定任务上的时间。
+
+| C-c C-x C-i | 开始当前条目的计时（clock-in）。这会插入一个 CLOCK 关键字和一个时间戳。加上 C-u 前缀，从当前已经计时的任务中选择任务。 |
+| C-c C-x C-o | 停止计时（clock-out）。这会在开始计时的地方插入另一个时间戳。它会直接计算使用时间并插入到时间段的后面如 “=> HH:MM”。   |
+| C-c C-x C-e | 为当前的计时任务更新进度。                                                                                             |
+| C-c C-x C-x | 取消当前的计时。当你误操作打开一个计时时，或者转而去做其他事情时，这个命令就很有用。                                   |
+| C-c C-x C-j | 跳转到包含当前正在运行的计时的任务条目。用 C-uf前缀从当前计时的任务中选择。                                            |
+| C-c C-x C-r | 在当前文件插入一个包含像 Org 表格一样的计时报告的动态块。当光标正处于一个存在的块上时，更新它。                        |
+|             | ~#+BEGIN: clocktable :maxlevel 2 :emphasize nil :scope file~                                                           |
+|             | ~#+END: clocktable~                                                                                                    |
+|             | 如何定制视图，见手册。                                                                                                 |
+| C-c C-c     | 在一个已经存在的计时表格之上时，更新它。 更新动态块。光标需要置于动态块 ~#+BEGIN~ 这行。                               |
+
+   /l/ 键可能会在时间轴（见第 10.3.4 节）和议程（见第 10.3.1 节）中使用来查看一天中处理和关闭了哪些任务。
+
+*扩展阅读*\\
+手册第 8 章\\
+Charles Cave’s Date and Time tutorial\\
+Bernt Hansen’s clocking workflow
+
 * 区块
 Org-mode使用begin…end块来实现很多功能,比如引入源代码.在这些区块的第一行上按TAB键可以折叠/扩展该区块. 
 ** 折叠区块
@@ -1265,3 +1489,5 @@ orgtable-unaligned
 在你的环境上，你可能得对针对自己喜欢的编程字体去试验一下，看配哪个字号的中文字体（以及字号大小）可以 解决这个问题（或者可以试试下面的font.pl）。如果你还有日文、韩文什么的，可以详细地针对各种charset设定 字体（而不是像上面笼统地用 'unicode 来制定），详情请参看 折腾Emacs: 中文字体配置 | Emacs中文网。
 
 [[https://www.cnblogs.com/bamanzi/p/org-mode-tips.html][参考文章]]
+* 参考文章
+[[https://github.com/mospany/emacs.d-for-mac/blob/master/org-mode.org][Org-mode 简明手册]]
