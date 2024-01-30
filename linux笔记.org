@@ -20568,7 +20568,7 @@ int main()
 
 如果只用一个线程去完成800万个数的堆排序，那么与图11-16中的程序相比，我们将能看到图11-16中的程序在性能上有显著提升。在8核处理器系统上，单线程程序对800万个数进行排序需要12.14秒。同样的系统，使用8个并行线程和1个合并结果的线程，相同的800万个数的排序仅需要1.91秒，速度提升了6倍。
 
-* 线程控制
+* UNIX-线程控制
 ** 线程限制
 在2.5.4节中讨论了sysconf函数。Single UNIX Specification定义了与线程操作有关的一些限制，图2-11并没有列出这些限制。与其他的系统限制一样，这些限制也可以通过sysconf函数进行查询。图12-1总结了这些限制。
 
@@ -20625,9 +20625,9 @@ int pthread_attr_setdetachstate(pthread_attr_t *attr, int *detachstate);
 #+end_src
 两个函数的返回值：若成功，返回0；否则，返回错误编号
 
-可以调用pthread_attr_getdetachstate函数获取当前的detachstate线程属性。第二个参数所指向的整数要么设置成 PTHREAD_CREATE_DETACHED，要么设置成 PTHREAD_CREATE_JOINABLE，具体要取决于给定pthread_attr_t结构中的属性值。
+可以调用pthread_attr_getdetachstate函数获取当前的detachstate线程属性。第二个参数是出参,要么设置成 PTHREAD_CREATE_DETACHED，要么设置成 PTHREAD_CREATE_JOINABLE，具体要取决于给定pthread_attr_t结构中的属性值。
 
-** 实例
+*** 实例
 
 图12-4给出了一个以分离状态创建线程的函数。
 
@@ -20651,14 +20651,777 @@ int makethread(void *(*fn)(void *), void *arg)
 #+end_src
 图12-4 以分离状态创建线程
 
-注意，此例忽略了pthread_attr_destroy函数调用的返回值。在这个实例中，我们对线程属性进行了合理的初始化，因此 pthread_attr_destroy 应该不会失败。但是，如果pthread_attr_destroy确实出现了失败的情况，将难以清理：必须销毁刚刚创建的线程，也许这个线程可能已经运行，并且与 pthread_attr_destroy 函数可能是异步
+注意，此例忽略了pthread_attr_destroy函数调用的返回值。在这个实例中，我们对线程属性进行了合理的初始化，因此 pthread_attr_destroy 应该不会失败。但是，如果pthread_attr_destroy确实出现了失败的情况，将难以清理：必须销毁刚刚创建的线程，也许这个线程可能已经运行，并且与 pthread_attr_destroy 函数可能是异步执行的。忽略pthread_attr_destroy 的错误返回可能出现的最坏情况是，如果 pthread_attr_init 已经分配了内存空间，就会有少量的内存泄漏。另一方面，如果 pthread_attr_init 成功地对线程属性进行了初始化，但之后pthread_attr_destroy的清理工作失败，那么将没有任何补救策略，因为线程属性结构对应用程序来说是不透明的，可以对线程属性结构进行清理的唯一接口是pthread_attr_destroy，但它失败了。
+
+对于遵循POSIX标准的操作系统来说，并不一定要支持线程栈属性，但是对于遵循Single UNIX Specification 中 XSI 选项的系统来说，支持线程栈属性就是必需的。可以在编译阶段使用_POSIX_THREAD_ATTR_STACKADDR和_POSIX_THREAD_ATTR_STACKSIZE符号来检查系统是否支持每一个线程栈属性。如果系统定义了这些符号中的一个，就说明它支持相应的线程栈属性。或者，也可以在运行阶段把_SC_THREAD_ATTR_ STACKADDR 和_SC_THREAD_ATTR_STACKSIZE 参数传给sysconf函数，检查运行时系统对线程栈属性的支持情况。
+
+*** 线程栈
+可以使用函数pthread_attr_getstack和pthread_attr_setstack对线程栈属性进行管理。
+
+#+begin_src c++
+
+#include <pthread.h>
+
+int pthread_attr_getstack(const pthread_attr_t *restrict attr,
+void **restrict stackaddr,size_t *restrict stacksize);
+
+int pthread_attr_setstack(pthread_attr_t *attr,
+void *stackaddr, size_t stacksize);
+#+end_src
+两个函数的返回值：若成功，返回0；否则，返回错误编号
+
+对于进程来说，虚地址空间的大小是固定的。因为进程中只有一个栈，所以它的大小通常不是问题。但对于线程来说，同样大小的虚地址空间必须被所有的线程栈共享。如果应用程序使用了许多线程，以致这些线程栈的累计大小超过了可用的虚地址空间，就需要减少默认的线程栈大小。另一方面，如果线程调用的函数分配了大量的自动变量，或者调用的函数涉及许多很深的栈帧（stack frame），那么需要的栈大小可能要比默认的大。
+
+如果线程栈的虚地址空间都用完了，那可以使用malloc或者mmap（见14.8节）来为可替代的栈分配空间，并用pthread_attr_setstack函数来改变新建线程的栈位置。由stackaddr参数指定的地址可以用作线程栈的内存范围中的最低可寻址地址，该地址与处理器结构相应的边界应对齐。当然，这要假设malloc和mmap所用的虚地址范围与线程栈当前使用的虚地址范围不同。
+
+stackaddr线程属性被定义为栈的最低内存地址，但这并不一定是栈的开始位置。对于一个给定的处理器结构来说，如果栈是从高地址向低地址方向增长的，那么stackaddr线程属性将是栈的结尾位置，而不是开始位置。
+
+应用程序也可以通过pthread_attr_getstacksize和pthread_attr_setstacksize函数读取或设置线程属性stacksize。
+#+begin_src c++
+
+#include <pthread.h>
+
+int pthread_attr_getstacksize(const pthread_attr_t *restrict attr,
+size_t *restrict stacksize);
+
+int pthread_attr_setstacksize (pthread_attr_t *attr, size_t stacksize);
+#+end_src
+两个函数的返回值：若成功，返回0；否则，返回错误编号
+
+如果希望改变默认的栈大小，但又不想自己处理线程栈的分配问题，这时使用pthread_attr_setstacksize函数就非常有用。设置stacksize属性时，选择的stacksize不能小于PTHREAD_STACK_MIN。
+
+线程属性guardsize控制着线程栈末尾之后用以避免栈溢出的扩展内存的大小。这个属性默认值是由具体实现来定义的，但常用值是系统页大小。可以把guardsize线程属性设置为0，不允许属性的这种特征行为发生：在这种情况下，不会提供警戒缓冲区。同样，如果修改了线程属性stackaddr，系统就认为我们将自己管理栈，进而使栈警戒缓冲区机制无效，这等同于把guardsize线程属性设置为0。
+
+#+begin_src c++
+
+#include <pthread.h>
+
+iint pthread_attr_getguardsize(const pthread_attr_t *restrict attr,
+size_t *restrict guardsize);
+
+int pthread_attr_setguardsize(pthread_attr_t *attr, size_t guardsize);
+#+end_src
+两个函数的返回值：若成功，返回0；否则，返回错误编号
+
+如果guardsize线程属性被修改了，操作系统可能会把它取为页大小的整数倍。如果线程的栈指针溢出到警戒区域，应用程序就可能通过信号接收到出错信息。
+
+Single UNIX Specification还定义了一些其他的可选线程属性供实时应用程序使用，但在这里不讨论这些属性。
+
+线程还有一些其他的pthread_attr_t结构中没有表示的属性：可撤销状态和可撤销类型。
 ** 同步属性
-** 互斥量属性
-** 读写锁属性
-** 条件变量属性
-** 屏障属性
+就像线程具有属性一样，线程的同步对象也有属性。
+*** 互斥量属性
+互斥量属性是用pthread_mutexattr_t结构表示的。第11章中每次对互斥量进行初始化时，都是通过使用PTHREAD_MUTEX_INITIALIZER常量或者用指向互斥量属性结构的空指针作为参数调用pthread_mutex_init函数，得到互斥量的默认属性。
+
+对于非默认属性，可以用pthread_mutexattr_init初始化pthread_mutexattr_t结构，用pthread_mutexattr_destroy来反初始化。
+
+#+begin_src c++
+
+#include <pthread.h>
+
+int pthread_mutexattr_init(pthread_mutexattr_t *attr);
+
+int pthread_mutexattr_destroy(pthread_mutexattr_t *attr);
+#+end_src
+两个函数的返回值：若成功，返回0；否则，返回错误编号
+
+pthread_mutexattr_init 函数将用默认的互斥量属性初始化 pthread_mutexattr_t结构。值得注意的3个属性是：进程共享属性、健壮属性以及类型属性。POSIX.1中，进程共享属性是可选的。可以通过检查系统中是否定义了_POSIX_THREAD_PROCESS_SHARED 符号来判断这个平台是否支持进程共享这个属性，也可以在运行时把_SC_THREAD_PROCESS_SHARED 参数传给sysconf函数进行检查。虽然这个选项并不是遵循POSIX标准的操作系统必须提供的，但是Single UNIX Specification要求遵循XSI标准的操作系统支持这个选项。
+
+在进程中，多个线程可以访问同一个同步对象。正如在第11章中看到的，这是默认的行为。在这种情况下，进程共享互斥量属性需设置为PTHREAD_PROCESS_PRIVATE。
+
+我们将在第14章和第15章中看到，存在这样的机制：允许相互独立的多个进程把同一个内存数据块映射到它们各自独立的地址空间中。就像多个线程访问共享数据一样，多个进程访问共享数据通常也需要同步。如果进程共享互斥量属性设置为PTHREAD_PROCESS_SHARED，从多个进程彼此之间共享的内存数据块中分配的互斥量就可以用于这些进程的同步。
+
+可以使用pthread_mutexattr_getpshared函数查询pthread_mutexattr_t结构，得到它的进程共享属性，使用pthread_mutexattr_setpshared函数修改进程共享属性。
+
+#+begin_src c++
+
+#include <pthread.h>
+
+int pthread_mutexattr_getpshared(const pthread_mutexattr_t
+*restrict attr,int *restrict pshared);
+
+int pthread_mutexattr_setpshared(pthread_mutexattr_t *attr,
+int pshared);
+#+end_src
+两个函数的返回值：若成功，返回0；否则，返回错误编号
+
+进程共享互斥量属性设置为PTHREAD_PROCESS_PRIVATE时，允许pthread线程库提供更有效的互斥量实现，这在多线程应用程序中是默认的情况。在多个进程共享多个互斥量的情况下， pthread线程库可以限制开销较大的互斥量实现。
+
+互斥量健壮属性与在多个进程间共享的互斥量有关。这意味着，当持有互斥量的进程终止时，需要解决互斥量状态恢复的问题。这种情况发生时，互斥量处于锁定状态，恢复起来很困难。其他阻塞在这个锁的进程将会一直阻塞下去。
+
+可以使用 pthread_mutexattr_getrobust 函数获取健壮的互斥量属性的值。可以调用 pthread_mutexattr_setrobust函数设置健壮的互斥量属性的值。
+#+begin_src c++
+
+#include <pthread.h>
+
+int pthread_mutexattr_getrobust(const pthread_mutexattr_t
+*restrict attr,int *restrict robust);
+
+int pthread_mutexattr_setrobust(pthread_mutexattr_t *attr,
+int robust);
+#+end_src
+两个函数的返回值：若成功，返回0；否则，返回错误编号
+
+健壮属性取值有两种可能的情况。默认值是 PTHREAD_MUTEX_STALLED，这意味着持有互斥量的进程终止时不需要采取特别的动作。这种情况下，使用互斥量后的行为是未定义的，等待该互斥量解锁的应用程序会被有效地“拖住”。另一个取值是PTHREAD_MUTEX_ROBUST。这个值将导致线程调用pthread_mutex_lock获取锁，而该锁被另一个进程持有，但它终止时并没有对该锁进行解锁，此时线程会阻塞，从pthread_mutex_lock返回的值为EOWNERDEAD而不是0。应用程序可以通过这个特殊的返回值获知，若有可能（要保护状态的细节以及如何进行恢复会因不同的应用程序而异），不管它们保护的互斥量状态如何，都需要进行恢复。
+
+使用健壮的互斥量改变了我们使用pthread_mutex_lock的方式，因为现在必须检查3个返回值而不是之前的两个：不需要恢复的成功、需要恢复的成功以及失败。但是，即使不用健壮的互斥量，也可以只检查成功或者失败。
+
+在本书的4个平台中，只有Linux 3.2.0目前支持健壮的线程互斥量。Solaris 10只在它的Solaris线程库中支持健壮的线程互斥量（参阅Solaris手册的mutex_init(3C)获取相关的信息）。但是Solaris 11支持健壮的线程互斥量。
+
+如果应用状态无法恢复，在线程对互斥量解锁以后，该互斥量将处于永久不可用状态。为了避免这样的问题，线程可以调用 pthread_mutex_consistent 函数，指明与该互斥量相关的状态在互斥量解锁之前是一致的。
+
+#+begin_src c++
+
+#include <pthread.h>
+
+int pthread_mutex_consistent(pthread_mutex_t *mutex);
+
+#+end_src
+返回值：若成功，返回0；否则，返回错误编号
+
+如果线程没有先调用 pthread_mutex_consistent 就对互斥量进行了解锁，那么其他试图获取该互斥量的阻塞线程就会得到错误码ENOTRECOVERABLE。如果发生这种情况，互斥量将不再可用。线程通过提前调用pthread_mutex_consistent，能让互斥量正常工作，这样它就可以持续被使用。
+
+类型互斥量属性控制着互斥量的锁定特性。POSIX.1定义了4种类型。
+- PTHREAD_MUTEX_NORMAL 一种标准互斥量类型，不做任何特殊的错误检查或死锁检测。
+- PTHREAD_MUTEX_ERRORCHECK 此互斥量类型提供错误检查。
+- PTHREAD_MUTEX_RECURSIVE 此互斥量类型允许同一线程在互斥量解锁之前对该互斥量进行多次加锁。递归互斥量维护锁的计数，在解锁次数和加锁次数不相同的情况下，不会释放锁。所以，如果对一个递归互斥量加锁两次，然后解锁一次，那么这个互斥量将依然处于加锁状态，对它再次解锁以前不能释放该锁。(递归互斥锁)
+- PTHREAD_MUTEX_DEFAULT 此互斥量类型可以提供默认特性和行为。操作系统在实现它的时候可以把这种类型自由地映射到其他互斥量类型中的一种。例如，Linux 3.2.0把这种类型映射为普通的互斥量类型，而FreeBSD 8.0则把它映射为错误检查互斥量类型。
+
+这4种类型的行为如图12-5所示。“不占用时解锁”这一栏指的是，一个线程对被另一个线程加锁的互斥量进行解锁的情况。“在已解锁时解锁”这一栏指的是，当一个线程对已经解锁的互斥量进行解锁时将会发生什么，这通常是编码错误引起的。
+
+#+DOWNLOADED: screenshot @ 2024-01-27 22:00:11
+[[file:images/linux笔记/UNIX-线程控制/2024-01-27_22-00-11_screenshot.png]]
+图12-5 互斥量类型行为
+
+可以用pthread_mutexattr_gettype函数得到互斥量类型属性，用pthread_mutexattr_settype函数修改互斥量类型属性。
+
+#+begin_src c++
+
+#include <pthread.h>
+
+int pthread_mutexattr_gettype(const pthread_mutexattr_t*restrict attr,int*restrict type);
+
+int pthread_mutexattr_settype(pthread_mutexattr_t *attr, int type);
+#+end_src
+两个函数的返回值: 若成功，返回0；否则，返回错误编号
+
+回忆 11.6.6 节中学过的，互斥量用于保护与条件变量关联的条件。在阻塞线程之前，pthread_cond_wait和pthread_cond_timedwait函数释放与条件相关的互斥量。这就允许其他线程获取互斥量、改变条件、释放互斥量以及给条件变量发信号。既然改变条件时必须占有互斥量，使用递归互斥量就不是一个好主意。如果递归互斥量被多次加锁，然后用在调用pthread_cond_wait函数中，那么条件永远都不会得到满足，因为pthread_cond_wait所做的解锁操作并不能释放互斥量。
+
+如果需要把现有的单线程接口放到多线程环境中，递归互斥量是非常有用的，但由于现有程序兼容性的限制，不能对函数接口进行修改。然而，使用递归锁可能很难处理，因此应该只在没有其他可行方案的时候才使用它们。
+**** 实例
+
+图12-6描述了一种情况，在这种情况中递归互斥量看起来像是在解决并发问题。假设func1和 func2 是函数库中现有的函数，其接口不能改变，因为存在调用这两个接口的应用程序，而且应用程序不能改动。
+
+
+#+DOWNLOADED: screenshot @ 2024-01-27 22:12:05
+[[file:images/linux笔记/UNIX-线程控制/2024-01-27_22-12-05_screenshot.png]]
+
+图12-6 使用递归锁的一种可能情况
+
+为了保持接口跟原来相同，我们把互斥量嵌入到了数据结构中，把这个数据结构的地址（x）作为参数传入。这种方案只有在为此数据结构提供分配函数时才可行，所以应用程序并不知道数据结构的大小（假设我们在其中增加互斥量之后必须扩大该数据结构的大小）。
+
+如果在最早定义数据结构时，预留了足够的可填充字段，允许把某些填充字段替换成互斥量，这种方法也是可行的。不过遗憾的是，大多数程序员并不善于预测未来，所以这并不是普遍可行的实践。
+
+如果func1和func2函数都必须操作这个结构，而且可能会有一个以上的线程同时访问该数据结构，那么 func1 和 func2 必须在操作数据以前对互斥量加锁。如果 func1 必须调用func2，这时如果互斥量不是递归类型的，那么就会出现死锁。如果能在调用 func2 之前释放互斥量，在 func2 返回后重新获取互斥量，那么就可以避免使用递归互斥量，但这也给其他的线程提供了机会，其他的线程可以在 func1 执行期间抓住互斥量的控制，修改这个数据结构。这也许是不可接受的，当然具体的情况要取决于互斥量试图提供什么样的保护。
+
+图12-7显示了这种情况下使用递归互斥量的一种替代方法。通过提供func2函数的私有版本，称之为func2_locked函数，可以保持func1和func2函数接口不变，而且避免使用递归互斥量。要调用 func2_locked 函数，必须占有嵌入在数据结构中的互斥量，这个数据结构的地址是作为参数传入的。func2_locked的函数体包含func2的副本，func2现在只是获取互斥量，调用func2_locked，然后释放互斥量。
+
+
+#+DOWNLOADED: screenshot @ 2024-01-27 22:22:23
+[[file:images/linux笔记/UNIX-线程控制/2024-01-27_22-22-23_screenshot.png]]
+
+图12-7 避免使用递归锁的一种可能情况
+
+如果并不一定要保持库函数接口不变，就可以在每个函数中增加第二个参数表明这个结构是否被调用者锁定。但是，如果可以的话，保持接口不变通常是更好的选择，可以避免实现过程中人为加入的东西对原有系统产生不良影响。
+
+提供加锁和不加锁版本的函数，这样的策略在简单的情况下通常是可行的。在更加复杂的情况下，比如，库需要调用库以外的函数，而且可能会再次回调库中的函数时，就需要依赖递归锁。
+**** 实例
+
+图12-8中的程序解释了有必要使用递归互斥量的另一种情况。这里，有一个“超时”（timeout）函数，它允许安排另一个函数在未来的某个时间运行。假设线程并不是很昂贵的资源，就可以为每个挂起的超时函数创建一个线程。线程在时间未到时将一直等待，时间到了以后再调用请求的函数。
+
+
+#+begin_src c++
+#include "apue.h"
+#include <pthread.h>
+#include <time.h>
+#include <sys/time.h>
+extern int makethread(void *(*)(void *), void *);
+struct to_info
+{
+    void (*to_fn)(void *);   /* function */
+    void *to_arg;            /* argument */
+    struct timespec to_wait; /* time to wait */
+};
+#define SECTONSEC 1000000000 /* seconds to nanoseconds */
+#if !defined(CLOCK_REALTIME) || defined(BSD)
+#define clock_nanosleep(ID, FL, REQ, REM) nanosleep((REQ), (REM))
+#endif
+#ifndef CLOCK_REALTIME
+#define CLOCK_REALTIME 0
+#define USECTONSEC 1000 /* microseconds to nanoseconds */
+void clock_gettime(int id, struct timespec *tsp)
+{
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    tsp->tv_sec = tv.tv_sec;
+    tsp->tv_nsec = tv.tv_usec * USECTONSEC;
+}
+#endif
+void *timeout_helper(void *arg)
+{
+    struct to_info *tip;
+    tip = (struct to_info *)arg;
+    clock_nanosleep(CLOCK_REALTIME, 0, &tip->to_wait, NULL);
+    (*tip->to_fn)(tip->to_arg);
+    free(arg);
+    return (0);
+}
+void timeout(const struct timespec *when, void (*func)(void *), void *arg)
+{
+    struct timespec now;
+    struct to_info *tip;
+    int err;
+    clock_gettime(CLOCK_REALTIME, &now);
+    if ((when->tv_sec > now.tv_sec) ||
+        (when->tv_sec == now.tv_sec && when->tv_nsec > now.tv_nsec))
+    {
+        tip = malloc(sizeof(struct to_info));
+        if (tip != NULL)
+        {
+            tip->to_fn = func;
+            tip->to_arg = arg;
+            tip->to_wait.tv_sec = when->tv_sec - now.tv_sec;
+            if (when->tv_nsec >= now.tv_nsec)
+            {
+                tip->to_wait.tv_nsec = when->tv_nsec - now.tv_nsec;
+            }
+            else
+            {
+                tip->to_wait.tv_sec--;
+                tip->to_wait.tv_nsec = SECTONSEC - now.tv_nsec +
+                                       when->tv_nsec;
+            }
+            err = makethread(timeout_helper, (void *)tip);
+            if (err == 0)
+                return;
+            else
+                free(tip);
+        }
+    }
+    /*
+     * We get here if (a) when <= now, or (b) malloc fails, or
+     * (c) we can’t make a thread, so we just call the function now.
+     */
+    (*func)(arg);
+}
+pthread_mutexattr_t attr;
+pthread_mutex_t mutex;
+void retry(void *arg)
+{
+    pthread_mutex_lock(&mutex);
+    /* perform retry steps ... */
+    pthread_mutex_unlock(&mutex);
+}
+int main(void)
+{
+    int err, condition, arg;
+    struct timespec when;
+    if ((err = pthread_mutexattr_init(&attr)) != 0)
+        err_exit(err, "pthread_mutexattr_init failed");
+    if ((err = pthread_mutexattr_settype(&attr,
+                                         PTHREAD_MUTEX_RECURSIVE)) != 0)
+        err_exit(err, "can’t set recursive type");
+    if ((err = pthread_mutex_init(&mutex, &attr)) != 0)
+        err_exit(err, "can’t create recursive mutex");
+    /* continue processing ... */
+    pthread_mutex_lock(&mutex);
+    /*
+     * Check the condition under the protection of a lock to
+     * make the check and the call to timeout atomic.
+     */
+    if (condition)
+    {
+        /*
+         * Calculate the absolute time when we want to retry.
+         */
+        clock_gettime(CLOCK_REALTIME, &when);
+        when.tv_sec += 10; /* 10 seconds from now */
+        timeout(&when, retry, (void *)((unsigned long)arg));
+    }
+    pthread_mutex_unlock(&mutex);
+    /* continue processing ... */
+    exit(0);
+}
+#+end_src
+图12-8 使用递归互斥量
+
+如果我们不能创建线程，或者安排函数运行的时间已过，这时问题就出现了。在这些情况下，我们只需在当前上下文中调用之前请求运行的函数。因为函数要获取的锁和我们现在占有的锁是同一个，所以除非该锁是递归的，否则就会出现死锁。
+
+在图12-4中我们使用makethread函数以分离状态创建线程。因为传递给timeout函数的func函数参数将在未来运行，所以我们不希望一直空等线程结束。
+
+可以调用sleep等待超时到期，但它提供的时间粒度是秒级的。如果希望等待的时间不是整数秒，就需要用nanosleep或者clock_nanosleep函数，它们两个提供了更高精度的休眠时间。
+
+在未定义CLOCK_REALTIME的系统中，我们根据nanosleep定义clock_nanosleep。然而，FreeBSD 8.0 定义这个符号支持 clock_gettime 和 clock_settime，但并不支持clock_nanosleep。（只有Linux 3.2.0和Solaris 10目前支持clock_nanosleep。）
+
+另外，在未定义CLOCK_REALTIME的系统中，我们提供了我们自己的clock_gettime实现，该实现调用了gettimeofday并把微妙转换成纳秒。
+
+timeout的调用者需要占有互斥量来检查条件，并且把retry函数安排为原子操作。retry函数试图对同一个互斥量进行加锁。除非互斥量是递归的，否则，如果 timeout 函数直接调用retry，会导致死锁。
+*** 读写锁属性
+读写锁与互斥量类似，也是有属性的。可以用 pthread_rwlockattr_init 初始化pthread_rwlockattr_t结构，用pthread_rwlockattr_destroy反初始化该结构。
+#+begin_src c++
+
+#include <pthread.h>
+
+int pthread_rwlockattr_init(pthread_rwlockattr_t *attr);
+
+int pthread_rwlockattr_destroy(pthread_rwlockattr_t *attr);
+#+end_src
+两个函数的返回值：若成功，返回0；否则，返回错误编号
+
+读写锁支持的唯一属性是进程共享属性。它与互斥量的进程共享属性是相同的。就像互斥量的进程共享属性一样，有一对函数用于读取和设置读写锁的进程共享属性。
+#+begin_src c++
+
+  #include <pthread.h>
+
+  int pthread_rwlockattr_getpshared(const pthread_rwlockattr_t *
+  restrict yyaldh2 gg 酒精代谢能力 - Google 搜索
+  attr,int *restrict pshared);
+
+  int pthread_rwlockattr_setpshared(pthread_rwlockattr_t *attr,
+  int pshared);
+#+end_src
+两个函数的返回值：若成功，返回0；否则，返回错误编号
+
+虽然POSIX只定义了一个读写锁属性，但不同平台的实现可以自由地定义额外的、非标准的属性。
+*** 条件变量属性
+Single UNIX Specification目前定义了条件变量的两个属性：进程共享属性和时钟属性。与其他的属性对象一样，有一对函数用于初始化和反初始化条件变量属性。
+#+begin_src c++
+
+#include <pthread.h>
+
+int pthread_condattr_init(pthread_condattr_t *attr);
+
+int pthread_condattr_destroy(pthread_condattr_t *attr);
+#+end_src
+两个函数的返回值：若成功，返回0；否则，返回错误编号
+
+与其他的同步属性一样，条件变量支持进程共享属性。它控制着条件变量是可以被单进程的多个线程使用，还是可以被多进程的线程使用。要获取进程共享属性的当前值，可以用 pthread_condattr_getpshared函数。设置该值可以用pthread_condattr_setpshared函数。
+#+begin_src c++
+
+#include <pthread.h>
+
+int pthread_condattr_getpshared(const pthread_condattr_t *
+restrict attr,int *restrict pshared);
+
+int pthread_condattr_setpshared(pthread_condattr_t *attr,
+int pshared);
+#+end_src
+两个函数的返回值：若成功，返回0；否则，返回错误编号
+
+时钟属性控制计算pthread_cond_timedwait函数的超时参数（tsptr）时采用的是哪个时钟。合法值取自图 6-8 中列出的时钟 ID。可以使用 pthread_condattr_getclock 函数获取可被用于pthread_cond_timedwait 函数的时钟 ID，在使用 pthread_cond_timedwait 函数前需要用pthread_condattr_t对象对条件变量进行初始化。可以用pthread_condattr_setclock函数对时钟ID进行修改。
+#+begin_src c++
+
+#include <pthread.h>
+
+int pthread_condattr_getclock(const pthread_condattr_t *
+restrict attr,clockid_t *restrict clock_id);
+
+int pthread_condattr_setclock(pthread_condattr_t *attr,
+clockid_t clock_id);
+#+end_src
+两个函数的返回值:若成功，返回0；否则，返回错误编号
+
+奇怪的是，Single UNIX Specification并没有为其他有超时等待函数的属性对象定义时钟属性。
+*** 屏障属性
+屏障也有属性。可以使用pthread_barrierattr_init函数对屏障属性对象进行初始化，用pthread_barrierattr_destroy函数对屏障属性对象进行反初始化。
+#+begin_src c++
+
+#include <pthread.h>
+
+int pthread_barrierattr_init(pthread_barrierattr_t *attr);
+
+int pthread_barrierattr_destroy(pthread_barrierattr_t *attr);
+#+end_src
+两个函数的返回值：若成功，返回0；否则，返回错误编号
+
+目前定义的屏障属性只有进程共享属性，它控制着屏障是可以被多进程的线程使用，还是只能被初始化屏障的进程内的多线程使用。与其他属性对象一样，有一个获取属性值的函数（pthread_barrierattr_getpshared）和一个设置属性值的函数（pthread_barrierattr_ setpshared）。
+#+begin_src c++
+
+#include <pthread.h>
+
+int pthread_barrierattr_getpshared(const pthread_barrierattr_t *
+restrict attr,int *restrict pshared);
+
+int pthread_barrierattr_setpshared(pthread_barrierattr_t *attr,
+int pshared);
+#+end_src
+两个函数的返回值：若成功，返回0；否则，返回错误编号
+
+进程共享属性的值可以是 PTHREAD_PROCESS_SHARED（多进程中的多个线程可用），也可以是PTHREAD_PROCESS_PRIVATE（只有初始化屏障的那个进程内的多个线程可用）。
 ** 重入
+线程在遇到重入问题时与信号处理程序是类似的。在这两种情况下，多个控制线程在相同的时间有可能调用相同的函数。
+
+如果一个函数在相同的时间点可以被多个线程安全地调用，就称该函数是线程安全的。在Single UNIX Specification中定义的所有函数中，除了图12-9中列出的函数，其他函数都保证是线程安全的。另外，ctermid和tmpnam函数在参数传入空指针时并不能保证是线程安全的。类似地，如果参数mbstate_t传入的是空指针，也不能保证wcrtomb和wcsrtombs函数是线程安全的。
+
+支持线程安全函数的操作系统实现会在<unistd.h>中定义符号_POSIX_THREAD_SAFE_FUNCTIONS。应用程序也可以在sysconf函数中传入_SC_THREAD_SAFE_FUNCTIONS参数在运行时检查是否支持线程安全函数。在SUSv4之前，要求所有遵循XSI的实现都必须支持线程安全函数，但是在SUSv4中，线程安全函数支持这个需求已经要求具体实现考虑遵循POSIX。
+
+操作系统实现支持线程安全函数这个特性时，对POSIX.1中的一些非线程安全函数，它会提供可替代的线程安全版本。图12-10列出了这些函数的线程安全版本。这些函数的命名方式与它们的非线程安全版本的名字相似，只不过在名字最后加了_r，表明这些版本是可重入的。很多函数并不是线程安全的，因为它们返回的数据存放在静态的内存缓冲区中。通过修改接口，要求调用者自己提供缓冲区可以使函数变为线程安全。
+
+
+#+DOWNLOADED: screenshot @ 2024-01-30 07:29:39
+[[file:images/linux笔记/UNIX-线程控制/2024-01-30_07-29-39_screenshot.png]]
+图12-9 POSIX.1中不能保证线程安全的函数
+
+#+DOWNLOADED: screenshot @ 2024-01-30 07:29:53
+[[file:images/linux笔记/UNIX-线程控制/2024-01-30_07-29-53_screenshot.png]]
+图12-10 替代的线程安全函数
+
+如果一个函数对多个线程来说是可重入的，就说这个函数就是线程安全的。但这并不能说明对信号处理程序来说该函数也是可重入的。如果函数对异步信号处理程序的重入是安全的，那么就可以说函数是异步信号安全的。我们在10.6节中讨论可重入函数时，图10-4中的函数就是异步信号安全函数。
+
+除了图12-10中列出的函数，POSIX.1还提供了以线程安全的方式管理FILE对象的方法。可以使用flockfile和ftrylockfile获取给定FILE对象关联的锁。这个锁是递归的：当你占有这把锁的时候，还是可以再次获取该锁，而且不会导致死锁。虽然这种锁的具体实现并无规定，但要求所有操作 FILE 对象的标准 I/O 例程的动作行为必须看起来就像它们内部调用了flockfile和funlockfile。
+
+#+begin_src c++
+
+#include <stdio.h>
+
+int ftrylockfile(FILE *fp);
+#+end_src
+返回值：若成功，返回0；若不能获取锁，返回非0数值
+#+begin_src c++
+
+void flockfile(FILE *fp);
+
+void funlockfile(FILE *fp);
+#+end_src
+虽然标准的I/O例程可能从它们各自的内部数据结构的角度出发，是以线程安全的方式实现的，但有时把锁开放给应用程序也是非常有用的。这允许应用程序把多个对标准I/O函数的调用组合成原子序列。当然，在处理多个FILE对象时，需要注意潜在的死锁，需要对所有的锁仔细地排序。
+
+如果标准I/O例程都获取它们各自的锁，那么在做一次一个字符的I/O时就会出现严重的性能下降。在这种情况下，需要对每一个字符的读写操作进行获取锁和释放锁的动作。为了避免这种开销，出现了不加锁版本的基于字符的标准I/O例程。
+#+begin_src c++
+
+#include <stdio.h>
+
+int getchar_unlocked(void);
+
+int getc_unlocked(FILE *fp);
+#+end_src
+两个函数的返回值: 若成功，返回下一个字符；若遇到文件尾或者出错，返回EOF
+#+begin_src c++
+
+int putchar_unlocked(int c);
+
+int putc_unlocked(int c, FILE *fp);
+#+end_src
+两个函数的返回值：若成功，返回c；若出错，返回EOF
+
+除非被flockfile（或ftrylockfile）和funlockfile的调用包围，否则尽量不要调用这4个函数，因为它们会导致不可预期的结果（比如，由于多个控制线程非同步访问数据引起的种种问题）。
+
+一旦对FILE对象进行加锁，就可以在释放锁之前对这些函数进行多次调用。这样就可以在多次的数据读写上分摊总的加解锁的开销。
+*** 实例
+
+图12-11显示了getenv（见7.9节）的一个可能实现。这个版本不是可重入的。如果两个线程同时调用这个函数，就会看到不一致的结果，因为所有调用getenv的线程返回的字符串都存储在同一个静态缓冲区中。
+
+#+begin_src c++
+#include <limits.h>
+#include <string.h>
+#define MAXSTRINGSZ 4096
+static char envbuf[MAXSTRINGSZ];
+extern char **environ;
+char *getenv(const char *name)
+{
+    int i, len;
+    len = strlen(name);
+    for (i = 0; environ[i] != NULL; i++)
+    {
+        if ((strncmp(name, environ[i], len) == 0) &&
+            (environ[i][len] == ’=’))
+        {
+            strncpy(envbuf, &environ[i][len + 1], MAXSTRINGSZ - 1);
+            return (envbuf);
+        }
+    }
+    return (NULL);
+}
+#+end_src
+图12-11 getenv的非可重入版本
+
+图12-12给出了getenv的可重入的版本。这个版本叫做getenv_r。它使用pthread_once函数来确保不管多少线程同时竞争调用getenv_r，每个进程只调用thread_init函数一次。12.6节会详细描述pthread_once函数。
+
+#+begin_src c++
+#include <string.h>
+#include <errno.h>
+#include <pthread.h>
+#include <stdlib.h>
+extern char **environ;
+pthread_mutex_t env_mutex;
+static pthread_once_t init_done = PTHREAD_ONCE_INIT;
+static void
+thread_init(void)
+{
+    pthread_mutexattr_t attr;
+    pthread_mutexattr_init(&attr);
+    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+    pthread_mutex_init(&env_mutex, &attr);
+    pthread_mutexattr_destroy(&attr);
+}
+int getenv_r(const char *name, char *buf, int buflen)
+{
+    int i, len, olen;
+    pthread_once(&init_done, thread_init);
+    len = strlen(name);
+    pthread_mutex_lock(&env_mutex);
+    for (i = 0; environ[i] != NULL; i++)
+    {
+        if ((strncmp(name, environ[i], len) == 0) &&
+            (environ[i][len] == ’=’))
+        {
+            olen = strlen(&environ[i][len + 1]);
+            if (olen >= buflen)
+            {
+                pthread_mutex_unlock(&env_mutex);
+                return (ENOSPC);
+            }
+            strcpy(buf, &environ[i][len + 1]);
+            pthread_mutex_unlock(&env_mutex);
+            return (0);
+        }
+    }
+    pthread_mutex_unlock(&env_mutex);
+    return (ENOENT);
+}
+#+end_src
+图12-12 getenv的可重入（线程安全）版本
+
+要使getenv_r可重入，需要改变接口，调用者必须提供它自己的缓冲区，这样每个线程可以使用各自不同的缓冲区避免其他线程的干扰。但是，注意，要想使getenv_r成为线程安全的，这样做还不够，需要在搜索请求的字符时保护环境不被修改。可以使用互斥量，通过getenv_r和putenv函数对环境列表的访问进行串行化。
+
+可以使用读写锁，从而允许对getenv_r进行多次并发访问，但增加的并发性可能并不会在很大程度上改善程序的性能，这里面有两个原因：第一，环境列表通常并不会很长，所以扫描列表时并不需要长时间地占有互斥量；第二，对getenv和putenv的调用也不是频繁发生的，所以改善它们的性能并不会对程序的整体性能产生很大的影响。
+
+即使可以把getenv_r变成线程安全的，这也不意味着它对信号处理程序是可重入的。如果使用的是非递归的互斥量，线程从信号处理程序中调用 getenv_r 就有可能出现死锁。如果信号处理程序在线程执行getenv_r时中断了该线程，这时我们已经占有加锁的env_mutex，这样其他线程试图对这个互斥量的加锁就会被阻塞，最终导致线程进入死锁状态。所以，必须使用递归互斥量阻止其他线程改变我们正需要的数据结构，还要阻止来自信号处理程序的死锁。问题是pthread函数并不保证是异步信号安全的，所以不能把pthread函数用于其他函数，让该函数成为异步信号安全的。
 ** 线程特定数据
+线程特定数据（thread-specific data），也称为线程私有数据（thread-private data），是存储和查询某个特定线程相关数据的一种机制。我们把这种数据称为线程特定数据或线程私有数据的原因是，我们希望每个线程可以访问它自己单独的数据副本，而不需要担心与其他线程的同步访问问题。
+
+线程模型促进了进程中数据和属性的共享，许多人在设计线程模型时会遇到各种麻烦。那么为什么有人想在这样的模型中促进阻止共享的接口呢？这其中有两个原因。
+
+第一，有时候需要维护基于每线程（per-thread）的数据。因为线程ID并不能保证是小而连续的整数，所以就不能简单地分配一个每线程数据数组，用线程ID作为数组的索引。即使线程ID确实是小而连续的整数，我们可能还希望有一些额外的保护，防止某个线程的数据与其他线程的数据相混淆。
+
+采用线程私有数据的第二个原因是，它提供了让基于进程的接口适应多线程环境的机制。一个很明显的实例就是errno。回忆1.7节中对errno 的讨论。以前的接口（线程出现以前）把errno 定义为进程上下文中全局可访问的整数。系统调用和库例程在调用或执行失败时设置errno，把它作为操作失败时的附属结果。为了让线程也能够使用那些原本基于进程的系统调用和库例程，errno被重新定义为线程私有数据。这样，一个线程做了重置errno的操作也不会影响进程中其他线程的errno值。
+
+我们知道一个进程中的所有线程都可以访问这个进程的整个地址空间。除了使用寄存器以外，一个线程没有办法阻止另一个线程访问它的数据。线程特定数据也不例外。虽然底层的实现部分并不能阻止这种访问能力，但管理线程特定数据的函数可以提高线程间的数据独立性，使得线程不太容易访问到其他线程的线程特定数据。
+
+在分配线程特定数据之前，需要创建与该数据关联的键。这个键将用于获取对线程特定数据的访问。使用pthread_key_create创建一个键。
+#+begin_src c++
+
+#include <pthread.h>
+
+int pthread_key_create(pthread_key_t *keyp, void (*destructor)(void *));
+#+end_src
+返回值：若成功，返回0；否则，返回错误编号
+
+创建的键存储在keyp指向的内存单元中，这个键可以被进程中的所有线程使用，但每个线程把这个键与不同的线程特定数据地址进行关联。创建新键时，每个线程的数据地址设为空值。
+
+除了创建键以外，pthread_key_create 可以为该键关联一个可选择的析构函数。当这个线程退出时，如果数据地址已经被置为非空值，那么析构函数就会被调用，它唯一的参数就是该数据地址。如果传入的析构函数为空，就表明没有析构函数与这个键关联。当线程调用pthread_exit或者线程执行返回，正常退出时，析构函数就会被调用。同样，线程取消时，只有在最后的清理处理程序返回之后，析构函数才会被调用。如果线程调用了exit、_exit、_Exit或abort，或者出现其他非正常的退出时，就不会调用析构函数。
+
+线程通常使用malloc为线程特定数据分配内存。析构函数通常释放已分配的内存。如果线程在没有释放内存之前就退出了，那么这块内存就会丢失，即线程所属进程就出现了内存泄漏。
+
+线程可以为线程特定数据分配多个键，每个键都可以有一个析构函数与它关联。每个键的析构函数可以互不相同，当然所有键也可以使用相同的析构函数。每个操作系统实现可以对进程可分配的键的数量进行限制（回忆一下图12-1中的PTHREAD_KEYS_MAX）。
+
+线程退出时，线程特定数据的析构函数将按照操作系统实现中定义的顺序被调用。析构函数可能会调用另一个函数，该函数可能会创建新的线程特定数据，并且把这个数据与当前的键关联起来。当所有的析构函数都调用完成以后，系统会检查是否还有非空的线程特定数据值与键关联，如果有的话，再次调用析构函数。这个过程将会一直重复直到线程所有的键都为空线程特定数据值，或者已经做了PTHREAD_DESTRUCTOR_ITERATIONS（见图12-1）中定义的最大次数的尝试。
+
+对所有的线程，我们都可以通过调用pthread_key_delete来取消键与线程特定数据值之间的关联关系。
+#+begin_src c++
+
+#include <pthread.h>
+
+int pthread_key_delete(pthread_key_t key);
+#+end_src
+返回值：若成功，返回0；否则，返回错误编号
+
+注意，调用pthread_key_delete并不会激活与键关联的析构函数。要释放任何与键关联的线程特定数据值的内存，需要在应用程序中采取额外的步骤。
+
+需要确保分配的键并不会由于在初始化阶段的竞争而发生变动。下面的代码会导致两个线程都调用pthread_key_create。
+#+begin_src c++
+void destructor(void *);
+
+pthread_key_t key;
+
+int init_done = 0;
+
+int threadfunc(void *arg)
+{
+    if (!init_done)
+    {
+        init_done = 1;
+        err = pthread_key_create(&key, destructor);
+    }
+}
+#+end_src
+有些线程可能看到一个键值，而其他的线程看到的可能是另一个不同的键值，这取决于系统是如何调度线程的，解决这种竞争的办法是使用pthread_once。
+#+begin_src c++
+
+#include <pthread.h>
+
+pthread_once_t initflag = PTHREAD_ONCE_INIT;
+
+int pthread_once(pthread_once_t *initflag, void (*initfn)(void));
+#+end_src
+返回值：若成功，返回0；否则，返回错误编号
+
+initflag 必须是一个非本地变量（如全局变量或静态变量），而且必须初始化为 PTHREAD_ONCE_INIT。
+
+如果每个线程都调用pthread_once，系统就能保证初始化例程initfn只被调用一次，即系统首次调用pthread_once时。创建键时避免出现冲突的一个正确方法如下：
+#+begin_src c++
+void destructor(void *);
+
+pthread_key_t key;
+
+pthread_once_t init_done = PTHREAD_ONCE_INIT;
+
+void thread_init(void)
+{
+    err = pthread_key_create(&key, destructor);
+}
+
+int threadfunc(void *arg)
+{
+}
+
+pthread_once(&init_done, thread_init);
+#+end_src
+键一旦创建以后，就可以通过调用pthread_setspecific函数把键和线程特定数据关联起来。可以通过pthread_getspecific函数获得线程特定数据的地址。
+#+begin_src c++
+
+#include <pthread.h>
+
+void *pthread_getspecific(pthread_key_t key);
+#+end_src
+返回值：线程特定数据值；若没有值与该键关联，返回NULL
+
+#+begin_src c++
+
+int pthread_setspecific(pthread_key_t key, const void *value);
+#+end_src
+返回值：若成功，返回0；否则，返回错误编号
+
+如果没有线程特定数据值与键关联，pthread_getspecific将返回一个空指针，我们可以用这个返回值来确定是否需要调用pthread_setspecific。
+*** pthread_once详解和使用
+int pthread_once(pthread_once_t *once_control, void (*init_routine) (void))；
+
+功能：使用初值为PTHREAD_ONCE_INIT的once_control变量保证init_routine()函数在本进程执行序列中仅执行一次。
+
+在多线程编程环境下，尽管pthread_once()调用会出现在多个线程中，init_routine()函数仅执行一次，究竟在哪个线程中执行是不定的，是由内核调度来决定。
+
+Linux Threads使用互斥锁和条件变量保证由pthread_once()指定的函数执行且仅执行一次，而once_control表示是否执行过。
+
+如果once_control的初值不是PTHREAD_ONCE_INIT（Linux Threads定义为0），pthread_once() 的行为就会不正常。
+
+在LinuxThreads中，实际"一次性函数"的执行状态有三种：NEVER(0)、IN_PROGRESS(1)、DONE(2)，如果once初值设为1，则由于所有pthread_once()都必须等待其中一个激发"已执行一次"信号，因此所有pthread_once ()都会陷入永久的等待中；如果设为2，则表示该函数已执行过一次，从而所有pthread_once()都会立即返回0。
+
+具体的一个实例：
+#+begin_src c++
+#include <iostream>
+#include <pthread.h>
+using namespace std;
+
+pthread_once_t once = PTHREAD_ONCE_INIT;
+
+void once_run(void)
+{
+    cout << "once_run in thread " << (unsigned int)pthread_self() << endl;
+}
+
+void *child1(void *arg)
+{
+    pthread_t tid = pthread_self();
+    cout << "thread " << (unsigned int)tid << " enter" << endl;
+    pthread_once(&once, once_run);
+    cout << "thread " << tid << " return" << endl;
+}
+
+void *child2(void *arg)
+{
+    pthread_t tid = pthread_self();
+    cout << "thread " << (unsigned int)tid << " enter" << endl;
+    pthread_once(&once, once_run);
+    cout << "thread " << tid << " return" << endl;
+}
+
+int main(void)
+{
+    pthread_t tid1, tid2;
+    cout << "hello" << endl;
+    pthread_create(&tid1, NULL, child1, NULL);
+    pthread_create(&tid2, NULL, child2, NULL);
+    sleep(10);
+    cout << "main thread exit" << endl;
+    return 0;
+}
+#+end_src
+执行结果：
+#+begin_example
+hello
+thread 3086535584 enter
+once_run in thread 3086535584
+thread 3086535584 return
+thread 3076045728 enter
+thread 3076045728 return
+main thread exit
+#+end_example
+**** 参考文章
+[[https://www.cnblogs.com/qinwanlin/p/pthread_once.html][pthread_once详解和使用 - qinwanlin - 博客园]]
+*** 实例
+
+图12-11给出了getenv的假设实现。接着又给出了一个新的接口，提供的功能相同，不过它是线程安全的（见图12-12）。但是如果不修改应用程序，直接使用新的接口会出现什么问题呢？这种情况下，可以使用线程特定数据来维护每个线程的数据缓冲区副本，用于存放各自的返回字符串，如图12-13所示。
+
+#+begin_src c++
+#include <limits.h>
+#include <string.h>
+#include <pthread.h>
+#include <stdlib.h>
+#define MAXSTRINGSZ 4096
+static pthread_key_t key;
+static pthread_once_t init_done = PTHREAD_ONCE_INIT;
+pthread_mutex_t env_mutex = PTHREAD_MUTEX_INITIALIZER;
+extern char **environ;
+static void thread_init(void)
+{
+    pthread_key_create(&key, free);
+}
+char *getenv(const char *name)
+{
+    int i, len;
+    char *envbuf;
+    pthread_once(&init_done, thread_init);
+    pthread_mutex_lock(&env_mutex);
+    envbuf = (char *)pthread_getspecific(key);
+    if (envbuf == NULL)
+    {
+        envbuf = malloc(MAXSTRINGSZ);
+        if (envbuf == NULL)
+        {
+            pthread_mutex_unlock(&env_mutex);
+            return (NULL);
+        }
+        pthread_setspecific(key, envbuf);
+    }
+    len = strlen(name);
+    for (i = 0; environ[i] != NULL; i++)
+    {
+        if ((strncmp(name, environ[i], len) == 0) &&
+            (environ[i][len] == ’=’))
+        {
+            strncpy(envbuf, &environ[i][len + 1], MAXSTRINGSZ - 1);
+            pthread_mutex_unlock(&env_mutex);
+            return (envbuf);
+        }
+    }
+    pthread_mutex_unlock(&env_mutex);
+    return (NULL);
+}
+#+end_src
+图12-13 线程安全的getenv的兼容版本
+
+我们使用 pthread_once 来确保只为我们将使用的线程特定数据创建一个键。如果pthread_getspecific 返回的是空指针，就需要先分配内存缓冲区，然后再把键与该内存缓冲区关联。否则，如果返回的不是空指针，就使用pthread_getspecific返回的内存缓冲区。对析构函数，使用free来释放之前由malloc分配的内存。只有当线程特定数据值为非空时，析构函数才会被调用。
+
+注意，虽然这个版本的getenv是线程安全的，但它并不是异步信号安全的。对信号处理程序而言，即使使用递归的互斥量，这个版本的 getenv 也不可能是可重入的，因为它调用了malloc，而malloc函数本身并不是异步信号安全的。
 ** 取消选项
 ** 线程和信号
 ** 线程和fork

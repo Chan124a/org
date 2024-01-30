@@ -166,6 +166,46 @@ outline模式可以像org文件一样折叠tex文件的章节.
 设置打开tex文件时自动开启outline: =(add-hook 'LaTeX-mode-hook 'outline-minor-mode)=
 
 设置打开tex文件时自动折叠章节: =(add-hook 'LaTeX-mode-hook 'outline-hide-body)=
+
+*** adding new outline headings
+As an added bonus, you can also customize which outline headers can get folded, and to what levels. I, for example, like to be able to make "fake" section headers to hide away text that doesn't have a true LaTeX header, but logically is kept at the same level of the document. With the following code, you can use:
+
+#+begin_example
+
+%section{a fake section}
+
+Blah blah blah blah blah, LaTeX doesn't recognize me as a section...
+
+\section{a real section}
+
+#+end_example
+Blah blah blah blah blah, LaTeX treats me as a real section
+And you will be able to manipulate the fake section just like any other one, but LaTeX will ignore it when you compile the document:
+
+#+begin_example
+
+;; extra outline headers 
+(setq TeX-outline-extra
+      '(("%chapter" 1)
+        ("%section" 2)
+        ("%subsection" 3)
+        ("%subsubsection" 4)
+        ("%paragraph" 5)))
+
+;; add font locking to the headers
+(font-lock-add-keywords
+ 'latex-mode
+ '(("^%\\(chapter\\|\\(sub\\|subsub\\)?section\\|paragraph\\)"
+    0 'font-lock-keyword-face t)
+   ("^%chapter{\\(.*\\)}"       1 'font-latex-sectioning-1-face t)
+   ("^%section{\\(.*\\)}"       1 'font-latex-sectioning-2-face t)
+   ("^%subsection{\\(.*\\)}"    1 'font-latex-sectioning-3-face t)
+   ("^%subsubsection{\\(.*\\)}" 1 'font-latex-sectioning-4-face t)
+   ("^%paragraph{\\(.*\\)}"     1 'font-latex-sectioning-5-face t)))
+
+#+end_example
+** 参考文章
+[[https://emacs.stackexchange.com/questions/361/how-can-i-hide-display-latex-section-just-like-org-mode-does-with-headlines][How can I hide/display LaTeX section just like org-mode does with headlines?]]
 * latex代码和pdf预览的正向搜索和逆向搜索
 ** 正向搜索
 正向搜索即来latex文件中按 =C-c C-v= 即可跳转到pdf文件中对应的光标位置.

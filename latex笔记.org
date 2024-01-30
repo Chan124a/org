@@ -267,5 +267,119 @@ booktabs 宏包没有提供单独的表格环境，只需要在普通的表格�
 * 图片
 * 中文支持
 \documentclass[UTF-8]{ctexart}
+* 定理环境，引理，定义，自定义 proof 环境
+一般的atex 的定理环境， amsmath 安装包自带，用法为：
+
+\newtheorem {环境名}  {标题} [排序单位]
+
+[排序单位] 一般为 chapter，若带上 chapter 则表示 定理按章节编号。
+
+下列代码放入导言区：
+
+\usepackage{amsmath}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proof}{Proof}[section]
+
+使用时：
+
+\section{theorem}
+\begin{theorem}
+This is a theorem.
+\end{theorem}
+
+\begin{lemma}
+This is a lemma.
+\end{lemma}
+
+\section{Proof}
+\begin{proof}
+This is proof.
+\end{proof}
+
+显示效果：
+
+
+
+#+DOWNLOADED: screenshot @ 2024-01-20 14:39:56
+[[file:images/latex笔记/定理环境，引理，定义，自定义_proof_环境/2024-01-20_14-39-56_screenshot.png]]
+但若要更加精细的定理环境，例如修改编号，修改间距等，则需要安装包 ntheorem
+
+1.  若取消定理类环境的编号，则在定理类环境时，加上星号。
+
+\newtheorem*{lemma}{Lemma}
+\begin{lemma}
+This is a lemma.
+\end{lemma}
+显示效果：
+**  改变排版格式
+
+\theoremheaderfont { 字体命令}    改变标题字体
+
+\theorembodyfont{ 字体命令}   改变定理内正文字体
+
+\theoremindent  左缩进宽度
+ 
+
+\qedsymbol{结束符〉和\qed  如果希望某个定理类表达式换用其他结束符，可以先用命令\qedsymbol 来定义，然后
+
+在该表达式中使用命令\qed 将结束符置于右下角。
+
+\theoremnumbering {计数形式}： 设置序号的计数形式，它的默认值是arabic ，可改为采用alph 、Alph 、rom、Roman 、
+
+greek 、Greek 、chinese 或fnsymbol 计数形式。
+
+\theoremstyle {格式〉 有break等命令。break 让 定理与内容隔开。
+
+举例：
+
+\theorembodyfont{\bfseries\upshape}
+\theoremseparator{:}
+\theoremstyle{break}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proof}{Proof}[section]
+
+
+\section{theorem}
+
+\begin{theorem}[introduction]
+This is a theorem.
+\end{theorem}
+
+\begin{lemma}
+This is a lemma.
+\end{lemma}
+
+\theorembodyfont{\upshape}
+\theorembodyfont{\bf}
+\section{Proof}
+\begin{proof}
+This is proof.
+\end{proof}
+
+显示效果：
+
+#+DOWNLOADED: screenshot @ 2024-01-20 14:40:07
+[[file:images/latex笔记/定理环境，引理，定义，自定义_proof_环境/2024-01-20_14-40-07_screenshot.png]]
+** 自定义proof 环境
+
+这个自定义 proof 比之前的那个更常用。
+
+使用命令： \newenvironment {新环境} {开始定义} {结束定义}
+
+举例：定义证明环境为 proof 斜体，证明以 方框结束。
+
+\newenvironment{proof}{{\noindent\it Proof}\quad}{\hfill $\square$\par}
+
+上面的命令中， \noindent 表示 proof 没有缩进，\it 表示 proof 斜体， \quad 表示 proof 后面空四个空格， \hfill 表示右对齐， \square 表示方框，\par表示结尾空一段
+
+显示效果：
+
+#+DOWNLOADED: screenshot @ 2024-01-20 14:40:24
+[[file:images/latex笔记/定理环境，引理，定义，自定义_proof_环境/2024-01-20_14-40-23_screenshot.png]]
+** 参考文章
+[[https://blog.csdn.net/robert_chen1988/article/details/61204853][latex 定理环境，引理，定义，自定义 proof 环境_latex proof-CSDN博客]]
+
 * 参考文章
 [[https://zhuanlan.zhihu.com/p/64497187][latex系列--2 标题、章节、目录、标签、引用]]
