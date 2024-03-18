@@ -22218,12 +22218,10 @@ pid_t l_pid;　　　　 /* returned with F_GETLK */
 
 注意，POSIX.1 并没有说明在下列情况下将发生什么：一个进程在某个文件的一个区间上设置了一把读锁，第二个进程在试图对同一文件区间加一把写锁时阻塞，然后第三个进程则试图在同一文件区间上得到另一把读锁。如果第三个进程只是因为读区间已有一把读锁，而被允许在该区间放置另一把读锁，那么这种实现就可能会使希望加写锁的进程饿死。因此，当对同一区间加另一把读锁的请求到达时，提出加写锁而阻塞的进程需等待的时间延长了。如果加读锁的请求来得很频繁，使得该文件区间始终存在一把或几把读锁，那么欲加写锁的进程就将等待很长时间。
 
-在设置或释放文件上的一把锁时，系统按要求组合或分裂相邻区。例如，若第 100～199 字节是加锁的区，需解锁
-第 150 字节，则内核将维持两把锁，一把用于第 100～149 字节，另一把用于第151～199字节。图14-4说明了这
-种情况下的字节范围锁。
+在设置或释放文件上的一把锁时，系统按要求组合或分裂相邻区。例如，若第 100～199 字节是加锁的区，需解锁第 150 字节，则内核将维持两把锁，一把用于第 100～149 字节，另一把用于第151～199字节。图14-4说明了这种情况下的字节范围锁。
 
- 
-
+#+DOWNLOADED: screenshot @ 2024-03-18 19:00:44
+[[file:images/linux笔记/UNIX-高级IO/2024-03-18_19-00-44_screenshot.png]]
 图14-4 文件字节范围锁
 
 假定我们又对第150字节加锁，那么系统将会再把3个相邻的加锁区合并成一个区（第100～199字节）。其结果如
@@ -22233,62 +22231,78 @@ pid_t l_pid;　　　　 /* returned with F_GETLK */
 
 为了避免每次分配flock结构，然后又填入各项信息，可以用图14-5所示的程序中的函数lock_reg来处理所有这些细
 节。
-
- 
-
+#+begin_src c++
+#include "apue.h"
+#include <fcntl.h>
+int
+lock_reg(int fd, int cmd, int type, off_t offset, int whence, off_t len)
+{
+struct flock lock;
+lock.l_type = type;/* F_RDLCK, F_WRLCK, F_UNLCK */
+lock.l_start = offset;/* byte offset, relative to l_whence */
+lock.l_whence = whence; /* SEEK_SET, SEEK_CUR, SEEK_END */
+lock.l_len = len;/* #bytes (0 means to EOF) */
+return(fcntl(fd, cmd, &lock));
+}
+#+end_src
 图14-5 加锁或解锁一个文件区域的函数
 
 因为大多数锁调用是加锁或解锁一个文件区域（命令F_GETLK很少使用），故通常使用下列5个宏中的一个，这5
 个宏都定义在apue.h中（见附录B）。
 
 #define read_lock(fd,offset,whence,len) \
-
 lock_reg((fd), F_SETLK, F_RDLCK, (offset), (whence), (len))
 
 #define readw_lock(fd,offset,whence,len) \
-
 lock_reg((fd), F_SETLKW, F_RDLCK, (offset), (whence), (len))
 
 #define write_lock(fd,offset,whence,len) \
-
 lock_reg((fd), F_SETLK, F_WRLCK, (offset), (whence), (len))
 
 #define writew_lock(fd,offset,whence,len) \
-
 lock_reg((fd), F_SETLKW, F_WRLCK, (offset), (whence), (len))
 
 #define un_lock(fd,offset,whence,len) \
-
 lock_reg((fd), F_SETLK, F_UNLCK, (offset), (whence), (len))
 
 我们有目的地用与lseek函数同样的顺序定义了这些宏中的前3个参数。
-
-实例：测试一把锁
+*** 实例：测试一把锁
 
 图14-6中定义了一个函数lock_test，我们将用它测试一把锁。
 
- 
- 
-
+#+begin_src c++
+#include "apue.h"
+#include <fcntl.h>
+pid_t lock_test(int fd, int type, off_t offset, int whence, off_t len)
+{
+    struct flock lock;
+    lock.l_type = type;     /* F_RDLCK or F_WRLCK */
+    lock.l_start = offset;  /* byte offset, relative to l_whence */
+    lock.l_whence = whence; /* SEEK_SET, SEEK_CUR, SEEK_END */
+    lock.l_len = len;       /* #bytes (0 means to EOF) */
+    if (fcntl(fd, F_GETLK, &lock) < 0)
+        err_sys("fcntl error");
+    if (lock.l_type == F_UNLCK)
+        return (0);      /* false, region isn’t locked by another proc */
+    return (lock.l_pid); /* true, return pid of lock owner */
+}
+ #+end_src
 图14-6 测试一个锁条件的函数
 
 如果存在一把锁，它阻塞由参数指定的锁请求，则此函数返回持有这把现有锁的进程的进程ID，否则此函数返回
 0。通常用下面两个宏来调用此函数（它们也定义在apue.h中）。
 
 #define is_read_lockable(fd, offset, whence, len) \
-
 (lock_test((fd), F_RDLCK, (offset), (whence), (len)) == 0)
 
 #define is_write_lockable(fd, offset, whence, len) \
-
 (lock_test((fd), F_WRLCK, (offset), (whence), (len)) == 0)
 
 注意，进程不能使用 lock_test 函数测试它自己是否在文件的某一部分持有一把锁。F_GETLK 命令的定义说明，返
 回信息指示是否有现有的锁阻止调用进程设置它自己的锁。因为F_SETLK和F_SETLKW命令总是替换调用进程现
 有的锁（若已存在），所以调用进程决不会阻塞在自己持有的锁上，于是，F_GETLK命令决不会报告调用进程自
 己持有的锁。
-
-实例：死锁
+*** 实例：死锁
 
 如果两个进程相互等待对方持有并且不释放（锁定）的资源时，则这两个进程就处于死锁状态。如果一个进程已经
 控制了文件中的一个加锁区域，然后它又试图对另一个进程控制的区域加锁，那么它就会休眠，在这种情况下，有
@@ -22298,62 +22312,86 @@ lock_reg((fd), F_SETLK, F_UNLCK, (offset), (whence), (len))
 又试图对对方已经加锁的字节加锁。在该程序中使用了8.9节中介绍的父进程和子进程同步例程（TELL_xxx和
 WAIT_xxx），以便每个进程能够等待另一个进程获得它设置的第一把锁。
 
- 
+#+begin_src c++
+#include "apue.h"
+#include <fcntl.h>
+static void
+lockabyte(const char *name, int fd, off_t offset)
+{
+    if (writew_lock(fd, offset, SEEK_SET, 1) < 0)
+        err_sys("%s: writew_lock error", name);
+    printf("%s: got the lock, byte %lld\n", name, (long long)offset);
+}
+int main(void)
+{
+    int fd;
+    pid_t pid;
+    /*
+     * Create a file and write two bytes to it.
+     */
+    if ((fd = creat("templock", FILE_MODE)) < 0)
+        err_sys("creat error");
+    if (write(fd, "ab", 2) != 2)
+        err_sys("write error");
+    TELL_WAIT();
+    if ((pid = fork()) < 0)
+    {
+        err_sys("fork error");
+    }
+    else if (pid == 0)
+    {
+        /* child */
+        lockabyte("child", fd, 0);
+        TELL_PARENT(getppid());
+        WAIT_PARENT();
+        lockabyte("child", fd, 1);
+    }
+    else
+    {
+        /* parent */
+        lockabyte("parent", fd, 1);
+        TELL_CHILD(pid);
+        WAIT_CHILD();
+        lockabyte("parent", fd, 0);
+    }
+    exit(0);
+}
+#+end_src
  
 
 图14-7 死锁检测实例
 
 运行图14-7中的程序得到：
-
+#+begin_example
 $ ./a.out
-
 parent: got the lock, byte 1
-
 child: got the lock, byte 0
-
 parent: writew_lock error: Resource deadlock avoided
-
 child: got the lock, byte 1
-
-检测到死锁时，内核必须选择一个进程接收出错返回。在本实例中，选择了父进程，但这是一个实现细节。在某些
-系统上，子进程总是接到出错信息，在另一些系统上，父进程总是接到出错信息。在某些系统上，当试图使用多把
-锁时，有时是子进程接到出错信息，有时则是父进程接到出错信息。
-
-3．锁的隐含继承和释放
+#+end_example
+检测到死锁时，内核必须选择一个进程接收出错返回。在本实例中，选择了父进程，但这是一个实现细节。在某些系统上，子进程总是接到出错信息，在另一些系统上，父进程总是接到出错信息。在某些系统上，当试图使用多把锁时，有时是子进程接到出错信息，有时则是父进程接到出错信息。
+*** 3．锁的隐含继承和释放
 
 关于记录锁的自动继承和释放有3条规则。
-
-（1）锁与进程和文件两者相关联。这有两重含义：第一重很明显，当一个进程终止时，它所建立的锁全部释放；
-第二重则不太明显，无论一个描述符何时关闭，该进程通过这一描述符引用的文件上的任何一把锁都会释放（这些
-锁都是该进程设置的）。这就意味着，如果执行下列4步：
-
+（1）锁与进程和文件两者相关联。这有两重含义：第一重很明显，当一个进程终止时，它所建立的锁全部释放；第二重则不太明显，无论一个描述符何时关闭，该进程通过这一描述符引用的文件上的任何一把锁都会释放（这些锁都是该进程设置的）。这就意味着，如果执行下列4步：
+#+begin_example
 fd1 = open(pathname, ...);
-
 read_lock(fd1, ...);
-
 fd2 = dup(fd1);
-
 close(fd2);
-
+#+end_example
 则在close(fd2)后，在fd1上设置的锁被释放。如果将dup替换为open，其效果也一样：
-
+#+begin_example
 fd1 = open(pathname, ...);
-
 read_lock(fd1, ...);
-
 fd2 = open(pathname, ...)
-
 close(fd2);
+#+end_example
 
-（2）由fork产生的子进程不继承父进程所设置的锁。这意味着，若一个进程得到一把锁，然后调用 fork，那么对于
-父进程获得的锁而言，子进程被视为另一个进程。对于通过 fork 从父进程处继承过来的描述符，子进程需要调用
-fcntl 才能获得它自己的锁。这个约束是有道理的，因为锁的作用是阻止多个进程同时写同一个文件。如果子进程通
-过fork继承父进程的锁，则父进程和子进程就可以同时写同一个文件。
+（2）由fork产生的子进程不继承父进程所设置的锁。这意味着，若一个进程得到一把锁，然后调用 fork，那么对于父进程获得的锁而言，子进程被视为另一个进程。对于通过 fork 从父进程处继承过来的描述符，子进程需要调用fcntl 才能获得它自己的锁。这个约束是有道理的，因为锁的作用是阻止多个进程同时写同一个文件。如果子进程通过fork继承父进程的锁，则父进程和子进程就可以同时写同一个文件。
 
-（3）在执行exec后，新程序可以继承原执行程序的锁。但是注意，如果对一个文件描述符设置了执行时关闭标
-志，那么当作为exec的一部分关闭该文件描述符时，将释放相应文件的所有锁。
-
-4．FreeBSD实现
+（3）在执行exec后，新程序可以继承原执行程序的锁。但是注意，如果对一个文件描述符设置了执行时关闭标志，那么当作为exec的一部分关闭该文件描述符时，将释放相应文件的所有锁。
+*** 4．FreeBSD实现
 
 先简要地观察FreeBSD实现中使用的数据结构。这会帮助我们进一步理解记录锁的自动继承和释放的第一条规则：
 锁与进程和文件两者相关联。
