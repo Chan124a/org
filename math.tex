@@ -2,6 +2,7 @@
 
 \usepackage{amsmath}
 \newtheorem{definition}{Definition}[section]
+\newtheorem{axiom}{公理}[section]
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{lemma}{Lemma}
 \newtheorem{proof}{Proof}[section]
@@ -28,10 +29,35 @@
 \pagenumbering{arabic}
 
 % 下面是章节
+
+\section{公理}
+\begin{axiom}
+0 是一个自然数.
+\end{axiom}
+\begin{axiom}
+若n 是自然数, 则n++ 也是自然数.
+\end{axiom}
+\begin{axiom}
+    0不是任何自然数的后继,即对于每个自然数n,都有$n++ \ne 0$
+\end{axiom}
+\begin{axiom}
+不同的自然数必定有不同的后继者;也就是说,若n,m是自然数且$n \ne m$,则$n++\ne m++$.等
+价地说,若n++=m++,则必有n=m.
+\end{axiom}
+\begin{axiom}
+(数学归纳原理) 设$P(n)$是关于自然数的一个性质.假设$P(0)$是真的,并且只要$P(n)$为
+真可以推导出$P(n++)$为真,那么对于每个自然数$n$,$P(n)$都是真的.
+\end{axiom}
 \section{定义}
 
 % 分节
 % \subsection{点积}
+
+\begin{definition}
+  the dot product or inner product of $\mathbf{v}
+=(v_1,v_2)$and$\mathbf{w}=(w_1,w_2)$is the number $\mathbf{v} \cdot \mathbf{w} = v_1w_1+v_2w_2$.
+
+\end{definition}
 \begin{definition}
   the dot product or inner product of $\mathbf{v}
 =(v_1,v_2)$and$\mathbf{w}=(w_1,w_2)$is the number $\mathbf{v} \cdot \mathbf{w} = v_1w_1+v_2w_2$.
