@@ -191,4 +191,57 @@
   即可得$v_1w_1+v_2w_2=0$. $v_1$	
 \end{proof}
 
+
+\newpage
+\section{概率论}
+
+\subsection{公理}
+\subsection{定义}
+\subsection{定理}
+\begin{theorem}
+样本均值的期望等于总体的期望.
+\end{theorem}
+\begin{proof}
+$x_1,x_2,x_3,...,x_n$与总体X是同分布的，所以各样本的期望均为总体期望。
+
+$E(\bar{X})=E(\frac{1}{n}\sum_{i=1}^{n}x_{i})=\frac{1}{n}\sum_{i=1}^{n}E(x_{i})=\frac{1}{n}\cdot n\cdot E(X)=\mu $
+\end{proof}
+
+\begin{theorem}
+  $S^2=\frac{1}{n-1}\sum_{i=1}^n(X_i-\overline{X})^2$是样本方差的无偏估计.
+\end{theorem}
+\begin{proof}
+方差无偏估计的推算:
+
+\begin{aligned}
+\operatorname{E}[S^{2}]& =\mathrm{E}\left[\frac{1}{n}\sum_{i=1}^{n}\left(X_{i}-\overline{X}\right)^{2}\right]=\mathrm{E}\left[\frac{1}{n}\sum_{i=1}^{n}\left((X_{i}-\mu)-(\overline{X}-\mu)\right)^{2}\right] \\
+&=\mathrm{E}\left[\frac{1}{n}\sum_{i=1}^{n}\left((X_{i}-\mu)^{2}-2(\overline{X}-\mu)(X_{i}-\mu)+(\overline{X}-\mu)^{2}\right)\right] \\
+&=\mathrm{E}\left[\frac{1}{n}\sum_{i=1}^{n}(X_{i}-\mu)^{2}-\frac{2}{n}(\overline{X}-\mu)\sum_{i=1}^{n}(X_{i}-\mu)+\frac{1}{n}(\overline{X}-\mu)^{2}\sum_{i=1}^{n}1\right] \\
+&=\mathrm{E}\left[\frac{1}{n}\sum_{i=1}^{n}(X_{i}-\mu)^{2}-\frac{2}{n}(\overline{X}-\mu)\sum_{i=1}^{n}(X_{i}-\mu)+\frac{1}{n}(\overline{X}-\mu)^{2}\cdot n\right] \\
+&=\mathrm{E}\left[\frac{1}{n}\sum_{i=1}^{n}(X_{i}-\mu)^{2}-\frac{2}{n}(\overline{X}-\mu)\sum_{i=1}^{n}(X_{i}-\mu)+(\overline{X}-\mu)^{2}\right] \\
+&=\mathrm{E}\left[\frac1n\sum_{i=1}^n(X_i-\mu)^2-\frac2n(\overline{X}-\mu)\cdot n\cdot(\overline{X}-\mu)+(\overline{X}-\mu)^2\right] \\
+&=\mathrm{E}\left[\frac{1}{n}\sum_{i=1}^{n}(X_{i}-\mu)^{2}-2(\overline{X}-\mu)^{2}+(\overline{X}-\mu)^{2}\right] \\
+&=\operatorname{E}\left[\frac1n\sum_{i=1}^n(X_i-\mu)^2-(\overline{X}-\mu)^2\right] \\
+&=\operatorname{E}\left[\frac1n\sum_{i=1}^n(X_i-\mu)^2\right]-\operatorname{E}\left[(\overline{X}-\mu)^2\right] \\
+&=\sigma^2-\mathrm{E}\Big[(\overline{X}-\mu)^2\Big]
+\end{aligned}
+
+\begin{aligned}
+E(\bar{X}-\mu)^2& =E(\bar{X}-E[\bar{X}])^2=var(\bar{X}) \\
+&=var\left(\frac{\sum_{i=1}^nX_i}n\right) \\
+&=\frac1{n^2}var\left(\sum_{i=1}^nX_i\right) \\
+&=\frac1{n^2}\sum_{i=1}^nvar\left(X_i\right) \\
+&=\frac{n\sigma^2}{n^2} \\
+&=\frac{\sigma^2}n
+\end{aligned}
+
+$E[\frac{1}{n}\sum_{i=1}^n(X_i-\overline{X})^2]=\sigma^2-\frac{1}{n}\sigma^2=\frac{n-1}{n}\sigma^2$
+\end{proof}
+
+即下式是对方差的无偏估计:
+
+$\mathrm{E}\left[\frac{1}{n-1}\sum_{i=1}^{n}\left(X_{i}-\overline{X}\right)^{2}\right]
+=\mathrm{E}\left[\frac{n}{n-1}\frac{1}{n}\sum_{i=1}^{n}\left(X_{i}-\overline{X}\right)^{2}\right]
+=\frac{n}{n-1}\frac{n-1}{n}\sigma^2
+=\sigma^2$
 \end{document}
