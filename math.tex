@@ -155,6 +155,39 @@
 
 \newpage
 \section{微积分}
+\subsection{定理}
+\subsubsection{integrate of $e^{-x^2}$}
+参
+考
+:https://math.stackexchange.com/questions/154968/is-there-really-no-way-to-integrate-e-x2
+
+Let $I=\int_{-\infty}^\infty e^{-x^2} dx$.
+
+Then,
+
+\begin{align}
+I^2 &= \left(\int_{-\infty}^\infty e^{-x^2} dx\right) \times \left(\int_{-\infty}^{\infty} e^{-y^2}dy\right) \\
+&=\int_{-\infty}^\infty\left(\int_{-\infty}^\infty e^{-(x^2+y^2)} dx\right)dy \\
+\end{align}
+Next we change to polar form: $dx\,dy=dA=r\,d\theta\,dr$.
+
+Therefore
+\begin{align}
+I^2 &= \iint e^{-(r^2)}r\,d\theta\,dr \\
+&=\int_0^{2\pi}\left(\int_0^\infty re^{-r^2}dr\right)d\theta \\
+&=2\pi\int_0^\infty re^{-r^2}dr
+\end{align}
+
+Next, let's change variables so that $u=r^2,du=2rdr$. Therefore,
+\begin{align}
+2I^2 &=2\pi\int_{r=0}^\infty 2re^{-r^2}dr \\
+&= 2\pi \int_{u=0}^\infty e^{-u} du \\
+&= 2\pi \left(-e^{-\infty}+e^0\right) \\
+&= 2\pi \left(-0+1\right) \\
+&= 2\pi
+\end{align}
+
+Therefore, $I=\sqrt{\pi}$.
 \subsection{多重积分}
 \subsubsection{定义}
 多重积分（英语：Multiple integral）是定积分的一类，它将定积分扩展到多元函数（多
@@ -192,7 +225,7 @@ x_n\leq\psi_n(x_1,x_2,\ldots,x_{n-1})\}$
 有时可以直接获得积分的结果，而无需任何直接计算。
 
 \paragraph{常数}
-在常函数的情况中，结果很直接：只要将常函数c乘以测度就可以了。如果c = 1，而且是在$R^2$$的子集中积分，则乘积就是区域面积，而在$R^3$中，它就是区域的体积。
+在常函数的情况中，结果很直接：只要将常函数c乘以测度就可以了。如果c = 1，而且是在$R^2$的子集中积分，则乘积就是区域面积，而在$R^3$中，它就是区域的体积。
 
 例如：
 $D = \{ (x,y) \in \mathbb{R}^2 \ : \ 2 \le x \le 4 \ ; \ 3 \le y \le 6 \}</math> and <math>f(x,y) = 2$
@@ -310,106 +343,98 @@ $f(x,y) \rightarrow f(\rho \ \cos \phi,\rho \ \sin \phi )$。
 区域为 $D = \{ x^2 + y^2 \le 9, \ x^2 + y^2 \ge 4, \ y \ge 0 \}$，这是在正y半平面中的圆环（参看示意图）；注意φ表示平面角而ρ从2变化到3。因此变换出来的区域为矩形：$T = \{ 2 \le \rho \le 3, \ 0 \le \phi \le \pi \}$
 
 该变换的雅可比行列式为：
-
-:<math>\frac{\partial (x,y)}{\partial (\rho, \phi)} =
+$\frac{\partial (x,y)}{\partial (\rho, \phi)} =
 \begin{vmatrix}
 \cos \phi & - \rho \sin \phi \\
 \sin \phi & \rho \cos \phi
-\end{vmatrix} = \rho</math>
+\end{vmatrix} = \rho$
 
-这可以通过将''x'' = ρ cos(φ), ''y'' = ρ sin(φ)代入关于ρ的第一行和关于φ的第二行的偏微分中得到，所以微分''dx dy''变换为ρ ''d''ρ ''d''φ.
+这可以通过将x = ρ cos(φ),y = ρ sin(φ)代入关于ρ的第一行和关于φ的第二行的偏微分中得到，所以微分dx dy变换为ρ dρ dφ.
 
 一旦函数和区域的变换完成后，可以定义极坐标中的变量变换公式：
 
-:<math>\iint_D f(x,y) \ \mathrm{d}x\, \mathrm{d}y = \iint_T f(\rho \cos \phi, \rho \sin \phi) \rho \, \mathrm{d} \rho\, \mathrm{d} \phi</math>。
+$\iint_D f(x,y) \ \mathrm{d}x\, \mathrm{d}y = \iint_T f(\rho \cos \phi, \rho \sin \phi) \rho \, \mathrm{d} \rho\, \mathrm{d} \phi$。
 
 注意φ在[0, 2π]区间中有效，而ρ测量长度，因此只能取非负值。
 
 此外，应用变量变换公式的前提是，雅可比行列式的值在变换后的积分变量(如此例中的ρ和φ)组成的有界闭区域(如此例中φ和ρ构成的二维域)上恒不为零。但是在极坐标中当且仅当ρ为零时，才有雅可比行列式为零，故可证明该变量变换公式成立。
 
-
-
-<u>例 (2-e)</u>:
-:函数为<math>f(x,y) = x\,\!</math>区域和例2-d相同。
+例子4,
+函数为f(x,y) = x区域和例2-d相同。
 :从前面对''D''的分析，我们知道ρ的区间为[2,3]，而φ的为[0,π].函数变换为：
 
-::<math>f(x,y) = x \longrightarrow f(\rho,\phi) = \rho \ \cos \phi</math>。
+$f(x,y) = x \longrightarrow f(\rho,\phi) = \rho \ \cos \phi$。
 
-:最后，应用积分公式：
+最后，应用积分公式：
 
-::<math>\iint_D x \, \mathrm{d}x\, \mathrm{d}y = \iint_T \rho \cos \phi \ \rho \, \mathrm{d}\rho\, \mathrm{d}\phi</math>。
+$\iint_D x \, \mathrm{d}x\, \mathrm{d}y = \iint_T \rho \cos \phi \ \rho \, \mathrm{d}\rho\, \mathrm{d}\phi$。
 
 :一旦区间给定，就可以得到
 
-::<math>\int_0^{\pi} \int_2^3 \rho^2 \cos \phi \ \mathrm{d} \rho \ \mathrm{d} \phi = \int_0^{\pi} \cos \phi \ \mathrm{d} \phi \left[ \frac{\rho^3}{3} \right]_2^3 = \left[ \sin \phi \right]_0^{\pi} \ \left(9 - \frac{8}{3} \right) = 0</math>。
-</blockquote>
+$\int_0^{\pi} \int_2^3 \rho^2 \cos \phi \ \mathrm{d} \rho \ \mathrm{d} \phi = \int_0^{\pi} \cos \phi \ \mathrm{d} \phi \left[ \frac{\rho^3}{3} \right]_2^3 = \left[ \sin \phi \right]_0^{\pi} \ \left(9 - \frac{8}{3} \right) = 0$。
 
-==== 柱极坐标 ====
-[[File:Cylindrical Coordinates.svg|thumb|190px|柱极坐标。]]
-'''R'''<sup>3</sup>中，在有圆形底面的定义域上的积分可以通过变换到[[柱极坐标系]]来完成；函数的变换用如下的关系进行：
-<center><math>f(x,y,z) \rightarrow f(\rho \cos \phi, \rho \sin \phi, z)</math> </center>
+\subparagraph{柱极坐标}
+$R^3$中，在有圆形底面的定义域上的积分可以通过变换到[[柱极坐标系]]来完成；函数的变换用如下的关系进行：
+$f(x,y,z) \rightarrow f(\rho \cos \phi, \rho \sin \phi, z)$
 
 区域的变换可以从图形中得到，因为底面的形状可能不同，而高遵循初始区域的形状。
 
-<blockquote>
-<u>例（3-a）</u>: <br />
-:区域为<math>D = \{ x^2 + y^2 \le 9, \ x^2 + y^2 \ge 4, \ 0 \le z \le 5 \}</math>（也即底面为例2-d中的圆环的高度为5的"管道"）；如果采用变换，可以得到区域<math>T = \{ 2 \le \rho \le 3, \ 0 \le \phi \le \pi, \ 0 \le z \le 5 \}</math>（这是一个底面为例2-d中的矩形而高为5的长方体）。
+例子1,
+区域为$D = \{ x^2 + y^2 \le 9, \ x^2 + y^2 \ge 4, \ 0 \le z \le 5 \}$；如果采用变换，可以得到区域$T = \{ 2 \le \rho \le 3, \ 0 \le \phi \le \pi, \ 0 \le z \le 5 \}$（这是一个底面为例2-d中的矩形而高为5的长方体）。
 
-因为''z''分量没有变化，''dx dy dz''和在极坐标中一样变化：变为''ρ dρ dφ dz''。
+因为z分量没有变化，dx dy dz和在极坐标中一样变化：变ρ dρ dφ dz。
 
 最后，变换到柱极坐标的最后公式为：
 
-:<math>\iiint_D f(x,y,z) \, \mathrm{d}x\, \mathrm{d}y\, \mathrm{d}z = \iiint_T f(\rho \cos \phi, \rho \sin \phi, z) \rho \, \mathrm{d}\rho\, \mathrm{d}\phi\, \mathrm{d}z</math>。
+$\iiint_D f(x,y,z) \, \mathrm{d}x\, \mathrm{d}y\, \mathrm{d}z = \iiint_T f(\rho \cos \phi, \rho \sin \phi, z) \rho \, \mathrm{d}\rho\, \mathrm{d}\phi\, \mathrm{d}z$。
 
 这个方法在柱形或者锥形区域的情况较为适用，也适用于容易分辨''z''区间和变换圆形底面和函数的其它情况。
 
-<u>例（3-b）</u>:
-函数为<math>f(x,y,z) = x^2 + y^2 + z\,\!</math>而积分区域为[[圆柱]]: <math>D = \{ x^2 + y^2 \le 9, \ -5 \le z \le 5 \}</math>.
-将''D''变换到柱极坐标如下：
+例子2,
+函数为$f(x,y,z) = x^2 + y^2 + z$而积分区域为圆柱$D = \{ x^2 + y^2 \le 9, \ -5 \le z \le 5 \}$$.
+将D变换到柱极坐标如下：
 
-:<math>T = \{ 0 \le \rho \le 3, \ 0 \le \phi \le 2 \pi, \ -5 \le z \le 5 \}</math>。
+$T = \{ 0 \le \rho \le 3, \ 0 \le \phi \le 2 \pi, \ -5 \le z \le 5 \}$。
 
 函数变为
 
-:<math>f(\rho \cos \phi, \rho \sin \phi, z) = \rho^2 + z</math>
+$f(\rho \cos \phi, \rho \sin \phi, z) = \rho^2 + z$
 
 最有应用积分公式：
 
-:<math>\iiint_D (x^2 + y^2 +z) \, \mathrm{d}x\, \mathrm{d}y\, \mathrm{d}z = \iiint_T ( \rho^2 + z) \rho \, \mathrm{d}\rho\, \mathrm{d}\phi\, \mathrm{d}z;</math>
+$\iiint_D (x^2 + y^2 +z) \, \mathrm{d}x\, \mathrm{d}y\, \mathrm{d}z = \iiint_T ( \rho^2 + z) \rho \, \mathrm{d}\rho\, \mathrm{d}\phi\, \mathrm{d}z$;
 
 推演一下公式，得到
 
-:<math>\int_{-5}^5 \mathrm{d}z \int_0^{2 \pi} \mathrm{d}\phi \int_0^3 ( \rho^3 + \rho z )\, \mathrm{d}\rho = 2 \pi \int_{-5}^5 \left[ \frac{\rho^4}{4} + \frac{\rho^2 z}{2} \right]_0^3 \, \mathrm{d}z = 2 \pi \int_{-5}^5 \left( \frac{81}{4} + \frac{9}{2} z\right)\, \mathrm{d}z = \cdots = 405 \pi.</math></blockquote>
+$\int_{-5}^5 \mathrm{d}z \int_0^{2 \pi} \mathrm{d}\phi \int_0^3 ( \rho^3 + \rho z )\, \mathrm{d}\rho = 2 \pi \int_{-5}^5 \left[ \frac{\rho^4}{4} + \frac{\rho^2 z}{2} \right]_0^3 \, \mathrm{d}z = 2 \pi \int_{-5}^5 \left( \frac{81}{4} + \frac{9}{2} z\right)\, \mathrm{d}z = \cdots = 405 \pi$
 
-==== 球极坐标 ====
-[[File:Spherical Coordinates (Colatitude, Longitude).svg|thumb|190px|球极坐标。【注意某些地区（如北美）角度标识相反】]]
-'''R'''<sup>3</sup>中，有些区域有球形对称性，所以将积分区域的每点用两个角度和一个距离标识较为合适。因此可以采用变换到[[球极坐标系]]；函数变换由如下关系产生：
-<center> <math>f(x,y,z) \longrightarrow f(\rho \cos \theta \sin \phi, \rho \sin \theta \sin \phi, \rho \cos \phi)\,\!</math> </center>
+\subparagraph{球极坐标}
+$R^3$中，有些区域有球形对称性，所以将积分区域的每点用两个角度和一个距离标识较为合适。因此可以采用变换到球极坐标系；函数变换由如下关系产生：
+$f(x,y,z) \longrightarrow f(\rho \cos \theta \sin \phi, \rho \sin \theta \sin \phi, \rho \cos \phi)$
 
-注意''z''轴上的点没有唯一表示，<math>\theta </math>可以在0到2π间变化。
+注意z轴上的点没有唯一表示，$\theta$可以在0到2π间变化。
 
 这个方法最为适用的区域显然是球。
 
-<blockquote>
-<u>例（4-a）</u>: <br />
-:区域为<math>D = x^2 + y^2 + z^2 \le 16</math>（球心在原点半径为4的球）；应用变换后得到：<math>T = \{ 0 \le \rho \le 4, \ 0 \le \phi \le \pi, \ 0 \le \theta \le 2 \pi \}</math>。
+例子1,
+区域为$D = x^2 + y^2 + z^2 \le 16$（球心在原点半径为4的球）；应用变换后得到：$T = \{ 0 \le \rho \le 4, \ 0 \le \phi \le \pi, \ 0 \le \theta \le 2 \pi \}$。
 
-:坐标变换的雅可比行列式为：
+坐标变换的雅可比行列式为：
 
-::<math>\frac{\partial (x,y,z)}{\partial (\rho, \theta, \phi)} =
+$\frac{\partial (x,y,z)}{\partial (\rho, \theta, \phi)} =
 \begin{vmatrix}
 \cos \theta \sin \phi & - \rho \sin \theta \sin \phi & \rho \cos \theta \cos \phi \\
 \sin \theta \sin \phi & \rho \cos \theta \sin \phi & \rho \sin \theta \cos \phi \\
 \cos \phi & 0 & - \rho \sin \phi
 \end{vmatrix} = -\rho^2 \sin \phi</math>
 
-:因此<math> \mathrm{d}x\, \mathrm{d}y\, \mathrm{d}z </math>变换为<math> \rho^2 \sin \phi \, \mathrm{d}\rho\, \mathrm{d}\theta\, \mathrm{d}\phi</math>.
+:因此<math> \mathrm{d}x\, \mathrm{d}y\, \mathrm{d}z </math>变换为<math> \rho^2 \sin \phi \, \mathrm{d}\rho\, \mathrm{d}\theta\, \mathrm{d}\phi$.
 
-:得到最后公式:
+得到最后公式:
 
-::<math>\iiint_D f(x,y,z) \, \mathrm{d}x\, \mathrm{d}y\, \mathrm{d}z = \iiint_T f(\rho \sin \theta \cos \phi, \rho \sin \theta \sin \phi, \rho \cos \theta) \rho^2 \sin \phi \, \mathrm{d}\rho\, \mathrm{d}\theta\, \mathrm{d}\phi</math>。</blockquote>
+$\iiint_D f(x,y,z) \, \mathrm{d}x\, \mathrm{d}y\, \mathrm{d}z = \iiint_T f(\rho \sin \theta \cos \phi, \rho \sin \theta \sin \phi, \rho \cos \theta) \rho^2 \sin \phi \, \mathrm{d}\rho\, \mathrm{d}\theta\, \mathrm{d}\phi$
 
-应当在积分区域为球形对称'''并且'''函数很容易通过基本三角公式简化的时候才使用这个方法。（参看例4-b）；其它情况下，可能使用柱极坐标更为合适（参看例4-c）。
+应当在积分区域为球形对称并且函数很容易通过基本三角公式简化的时候才使用这个方法。（参看例4-b）；其它情况下，可能使用柱极坐标更为合适（参看例4-c）。
 
 :<math>\iiint_T f(a,b,c) \rho^2 \sin \phi \, \mathrm{d}\rho\, \mathrm{d}\theta\, \mathrm{d}\phi</math>。
 
@@ -579,4 +604,5 @@ $\mathrm{E}\left[\frac{1}{n-1}\sum_{i=1}^{n}\left(X_{i}-\overline{X}\right)^{2}\
 =\mathrm{E}\left[\frac{n}{n-1}\frac{1}{n}\sum_{i=1}^{n}\left(X_{i}-\overline{X}\right)^{2}\right]
 =\frac{n}{n-1}\frac{n-1}{n}\sigma^2
 =\sigma^2$
+\subsection{}
 \end{document}
