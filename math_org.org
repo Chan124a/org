@@ -5,104 +5,73 @@
 #+latex_header: \newtheorem{definition}{Definition}[section]
 #+latex_header: \newtheorem{axiom}{公理}[section]
 #+latex_header: \newtheorem{theorem}{Theorem}[section]
+#+latex_header: \usepackage{enumerate}
 
 * 实分析
 ** 公理
-\begin{axiom}
+*** 0 是一个自然数.
 \label{axiom1}
-0 是一个自然数.
-\end{axiom}
-
-\begin{axiom}
+*** 若n 是自然数, 则n++ 也是自然数.
 \label{axiom2}
-若n 是自然数, 则n++ 也是自然数.
-\end{axiom}
+*** 0不是任何自然数的后继,即对于每个自然数n,都有 $n++ \ne 0$
+\label{axiom3}
+*** 不同的自然数必定有不同的后继者
+\label{axiom4}
+也就是说,若n,m是自然数且$n \ne m$,则$n++\ne m++$.等价地说,若n++=m++,则必有n=m.
+*** 数学归纳原理
+\label{axiom5}
+设$P(n)$是关于自然数的一个性质.假设$P(0)$是真的,并且只要$P(n)$为真可以推导出$P(n++)$为真,那么对于每个自然数$n$,$P(n)$都是真的.
 
-\begin{axiom}
-    \label{axiom3}
-    0不是任何自然数的后继,即对于每个自然数n,都有$n++ \ne 0$
-\end{axiom}
-\begin{axiom}
-    \label{axiom4}
-不同的自然数必定有不同的后继者;也就是说,若n,m是自然数且$n \ne m$,则$n++\ne m++$.等
-价地说,若n++=m++,则必有n=m.
-\end{axiom}
-
-\begin{axiom}
-    \label{axiom5}
-(数学归纳原理) 设$P(n)$是关于自然数的一个性质.假设$P(0)$是真的,并且只要$P(n)$为
-真可以推导出$P(n++)$为真,那么对于每个自然数$n$,$P(n)$都是真的.
-\end{axiom}
 ** 定义
+*** 定义1是数0++,2数数(0++)++,3是数((0++)++)++,等等.
 
-\begin{definition}
-定义1是数0++,2数数(0++)++,3是数((0++)++)++,等等.
-\end{definition}
+*** 存在一个数系$N$,称其元素为自然数,公理\ref{axiom1} ~ \ref{axiom5} 对此数系成立.
 
-\begin{definition}
-存在一个数系$N$,称其元素为自然数,公理\ref{axiom1} \~{} \ref{axiom5} 对此数系成立.
-\end{definition}
+*** 自然数的加法
+设m是自然数.我们定义$0+m:=m$.现在归纳假定已定义好如何使m加上n,那么把m加于n++定义为$(n++)+m:=(n+m)++$.
 
-\begin{definition}
-(自然数的加法) 设m是自然数.我们定义$0+m:=m$.现在归纳假定已定义好如何使m加上n,那
-么把m加于n++定义为$(n++)+m:=(n+m)++$.
-\end{definition}
+*** 正自然数
+个自然数叫做正的,当且仅当它不等于0.
 
-\begin{definition}
-(正自然数) 一个自然数叫做正的,当且仅当它不等于0.
-\end{definition}
-
-\begin{definition}
-  (自然数的排序) 设n和m是自然数.我们说n大于等于m,记作$n \geq m$或$m \leq n$,当且
+*** 自然数的排序
+设n和m是自然数.我们说n大于等于m,记作$n \geq m$或$m \leq n$,当且
   仅当对于某自然数a,成立n=m+a.我们说n严格大于m,记作$n>m$或$m<n$,当且仅当$n\geq m
   $并且$n \ne m$.
-\end{definition}
 
-\begin{definition}
-(自然数的乘法) 设m是自然数.我们定义$0 \times  m:=0$.设已定义了如何把n乘到m上,那么归纳地,我们定义把n++乘到m上是(n++) $ \times $ m:=(n $ \times $ m)+m.
-\end{definition}
+*** 自然数的乘法
+设m是自然数.我们定义$0 \times  m:=0$.设已定义了如何把n乘到m上,那么归纳地,我们定义把n++乘到m上是(n++) $ \times $ m:=(n $ \times $ m)+m.
+
 
 ** 定理
 
-\begin{theorem}
-设对于每个自然数n,都有某个函数$f_n:N->N$把自然数映成自然数.设c是一个自然数,那么
-可以对于每个自然数n指定唯一一个自然数$a_n$,使得$a_0=c$且$a_{n++}=f_n(a_n)$.
-\end{theorem}
+*** 设对于每个自然数n,都有某个函数 $f_n:N->N$ 把自然数映成自然数.设c是一个自然数,那么可以对于每个自然数n指定唯一一个自然数 $a_n$ ,使得 $a_0=c$ 且 $a_{n++}=f_n(a_n)$ .
 
-\begin{theorem}
-  对于任何自然数n,$n+0=n$.
-\end{theorem}
 
-\begin{theorem}
-  对于任何自然数n和m,$n+(m++)=(n+m)++$.
-\end{theorem}
+***   对于任何自然数n,$n+0=n$.
 
-\begin{theorem}
-(加法是交换的)  对于任何自然数n和m,n+m=m+n.
-\end{theorem}
+***   对于任何自然数n和m,$n+(m++)=(n+m)++$.
 
-\begin{theorem}
-(加法是结合的)  对于任何自然数a,b,c,$(a+b)+c=a+(b+c)$.
-\end{theorem}
+*** 加法是交换的
+  对于任何自然数n和m,n+m=m+n.
 
-\begin{theorem}
-(消去律)  设a,b,c是自然数,满足a+b=a+c,我们有b=c.
-\end{theorem}
 
-\begin{theorem}
-若a是正的而b是自然数,则a+b是正的.
-\end{theorem}
+*** 加法是结合的
+对于任何自然数a,b,c,$(a+b)+c=a+(b+c)$.
 
-\begin{theorem}
-如果a和b是自然数,满足a+b=0,那么a=0且b=0.
-\end{theorem}
 
-\begin{theorem}
-设a是正数,那么恰存在一个自然数b,使得b++=a.
-\end{theorem}
+*** 消去律
+  设a,b,c是自然数,满足a+b=a+c,我们有b=c.
 
-\begin{theorem}
-  (自然数的序的基本性质) 设a,b,c是自然数.那么
+
+*** 若a是正的而b是自然数,则a+b是正的.
+
+
+*** 如果a和b是自然数,满足a+b=0,那么a=0且b=0.
+
+*** 设a是正数,那么恰存在一个自然数b,使得b++=a.
+
+*** 自然数的序的基本性质
+设a,b,c是自然数.那么
 \begin{enumerate}[(a)]
 \item (序是自反的)$a\geq a$
 \item (序是传递的)若$a \geq b$且$b \geq c$,那么$a \geq c$.
@@ -113,19 +82,18 @@
 \end{enumerate}
 \end{theorem}
 
-\begin{theorem}
-  (自然数的序的三歧性)设a和
+*** 自然数的序的三歧性
+设a和
   b是自然数,那么下述三命题中恰有一个是真的:
   $$a<b,a=b,a>b$$
-\end{theorem}
 
-\begin{theorem}
-(强归纳法原理)设$m_0$是一个自然数,而$P(m)$是一个依赖于任意自然数m的性质.设对于每
-个$m \geq m_0$都有下述蕴含关系:如果$P(m^')$对于一切满足$m_0 \leq m^{'}  < m$的自然
-数$m^'$都成立,那么$P(m
-)$也成立(特别地,这意味着$P(m_0)$成立,因为在$m=m_0$的情况下,假定的条件$P(m^')$是
-空的),那么,我们可以断定$P(m)$对于一切自然数$m \geq m_0$都成立.
-\end{theorem}
+
+*** 强归纳法原理
+设 $m_0$ 是一个自然数,而 $P(m)$ 是一个依赖于任意自然数m的性质.设对于每
+个 $m \geq m_0$ 都有下述蕴含关系:如果 $P(m^')$ 对于一切满足 $m_0 \leq m^{'}  < m$ 的自然
+数 $m^'$ 都成立,那么 $P(m
+)$ 也成立(特别地,这意味着 $P(m_0)$ 成立,因为在 $m=m_0$ 的情况下,假定的条件 $P(m^')$ 是
+空的),那么,我们可以断定 $P(m)$ 对于一切自然数 $m \geq m_0$ 都成立.
 
 * 微积分
 ** 定理
@@ -161,6 +129,92 @@ Next, let's change variables so that $u=r^2,du=2rdr$. Therefore,
 \end{align}
 
 Therefore, $I=\sqrt{\pi}$.
+** 可微
+*** 定义
+In mathematics, a differentiable function of one real variable is a function whose derivative exists at each point in its domain.
+**** Differentiability of real functions of one variable
+
+A function $f:U\to \mathbb {R}$ , defined on an open set $U\subset \mathbb {R}$ , is said to be differentiable at $a\in U$ if the derivative
+$f'(a)=\lim _{h\to 0}{\frac {f(a+h)-f(a)}{h}}$ exists.
+
+This implies that the function is continuous at a.
+
+This function f is said to be differentiable on U if it is differentiable at every point of U. In this case, the derivative of f is thus a function from U into $\mathbb {R}$ .
+
+A continuous function is not necessarily differentiable, but a differentiable function is necessarily continuous (at every point where it is differentiable) as being shown below (in the section Differentiability and continuity). A function is said to be continuously differentiable if its derivative is also a continuous function; there exist functions that are differentiable but not continuously differentiable (an example is given in the section Differentiability classes).
+**** class $C^n$
+
+Similarly to how continuous functions are said to be of class $C^{0}$ ,continuously differentiable functions are sometimes said to be of class $C^{1}$ . A function is of class $C^{2}$ if the first and second derivative of the function both exist and are continuous. More generally, a function is said to be of class $C^{k}$ if the first k derivatives $f^{\prime }(x),f^{\prime \prime }(x),\ldots ,f^{(k)}(x)$ all exist and are continuous. If derivatives $f^{(n)}$ exist for all positive integers n , the function is smooth or equivalently, of class $C^{\infty$ .
+**** Jacobian matrix
+
+Suppose
+$\mathebf{f}:\mathbf{R}^n \to \mathbf{R}^m$
+is a function such that each of its first-order partial derivatives exist on
+$\mathbf{R}^n$ .
+This function takes a point
+$\mathbf{x}\in\mathbf{R}^n$
+as input and produces the vector
+$\mathbf{f\(\mathbf{x}\)}\in\mathbf{R}^m$
+as output. Then the Jacobian matrix of
+$\mathbf{f}$
+is defined to be an m×n matrix, denoted by
+$\mathbf{J}$ , whose (i,j)th entry is
+$\mathbf {J} _{ij}={\frac {\partial f_{i}}{\partial x_{j}}}$
+, or explicitly
+$\mathbf {J} ={\begin{bmatrix}{\dfrac {\partial \mathbf {f} }{\partial x_{1}}}&\cdots &{\dfrac {\partial \mathbf {f} }{\partial x_{n}}}\end{bmatrix}}={\begin{bmatrix}\nabla ^{\mathrm {T} }f_{1}\\\vdots \\\nabla ^{\mathrm {T} }f_{m}\end{bmatrix}}={\begin{bmatrix}{\dfrac {\partial f_{1}}{\partial x_{1}}}&\cdots &{\dfrac {\partial f_{1}}{\partial x_{n}}}\\\vdots &\ddots &\vdots \\{\dfrac {\partial f_{m}}{\partial x_{1}}}&\cdots &{\dfrac {\partial f_{m}}{\partial x_{n}}}\end{bmatrix}}$
+where $\nabla ^{\mathrm {T} }f_{i}$ is the transpose (row vector) of the gradient of the $i$-th component.
+
+The Jacobian matrix, whose entries are functions of $\mathbf{x}$ , is denoted in various ways; common notations include $\mathbf{D}\mathbf{f}$ , $\mathbf{J}\mathbf{f}$ , $\nabla \mathbf{f}$, and $\frac{\partial(f_1,..,f_m)}{\partial(x_1, ..,x_n)}$.
+Some authors define the Jacobian as the transpose of the form given above.
+
+The Jacobian matrix Matrix_(mathematics)#Linear_transformations|represents]] the [[total derivative|differential]] of $\mathbf{f}$  at every point where $\mathbf{f}$  is differentiable. In detail, if $\mathbf{h}$  is a [[displacement vector]] represented by a [[column matrix]], the [[matrix product]] $\mathbf{J'''('''x''') ⋅ '''h}$  is another displacement vector, that is the best linear approximation of the change of $\mathbf{f}$  in a [[neighborhood (mathematics)|neighborhood]] of $\mathbf{x}$ , if $\mathbf{f'''('''x''')}} is [[Differentiable function|differentiable]] at $\mathbf{x}$ .{{efn|Differentiability at $\mathbf{x}$  implies, but is not implied by, the existence of all first-order partial derivatives at $\mathbf{x}$ , and hence is a stronger condition.}} This means that the function that maps $\mathbf{y}$  to $\mathbf{f'''('''x''') + '''J'''('''x''') ⋅ ('''y''' – '''x''')}} is the best [[linear approximation]] of $\mathbf{f'''('''y''')}} for all points $\mathbf{y}$  close to $\mathbf{x}$ . The [[linear map]] $\mathbf{h''' → '''J'''('''x''') ⋅ '''h}$  is known as the ''derivative'' or the [[total derivative|''differential'']] of $\mathbf{f}$  at $\mathbf{x}$ .
+
+When {{math|1=''m'' = ''n''}}, the Jacobian matrix is square, so its [[determinant]] is a well-defined function of $\mathbf{x}$ , known as the '''Jacobian determinant''' of $\mathbf{f}$ . It carries important information about the local behavior of $\mathbf{f}$ . In particular, the function $\mathbf{f}$  has a differentiable [[inverse function]] in a neighborhood of a point $\mathbf{x}$  if and only if the Jacobian determinant is nonzero at $\mathbf{x}$  (see [[Jacobian conjecture]] for a related problem of ''global'' invertibility). The Jacobian determinant also appears when changing the variables in [[multiple integral]]s (see [[Integration_by_substitution#Substitution_for_multiple_variables|substitution rule for multiple variables]]).
+
+When {{math|1=''m'' = 1}}, that is when {{math|''f'' : '''R'''<sup>''n''</sup> → '''R}$  is a [[scalar field|scalar-valued function]], the Jacobian matrix reduces to the [[row vector]] $\nabla^{\mathrm T} f$; this row vector of all first-order partial derivatives of {{math|''f''}} is the transpose of the [[gradient]] of {{math|''f''}}, i.e.
+$ \mathbf{J}_{f} = \nabla^T f $.  Specializing further, when {{math|1=''m'' = ''n'' = 1}}, that is when {{math|''f'' : '''R''' → '''R}$  is a [[scalar field|scalar-valued function]] of a single variable, the Jacobian matrix has a single entry; this entry is the derivative of the function {{math|''f''}}.
+
+These concepts are named after the [[mathematician]] [[Carl Gustav Jacob Jacobi]] (1804–1851).
+
+
+
+
+
+
+The Jacobian matrix, whose entries are functions of x, is denoted in various ways; common notations include $D\mathbf{f}, \mathbf{J}_f, \nabla \mathbf {f}$, and $\frac {\partial (f_{1},..,f_{m})}{\partial (x_{1},..,x_{n})}$ . Some authors define the Jacobian as the transpose of the form given above.
+
+The Jacobian matrix represents the differential of f at every point where f is differentiable. In detail, if h is a displacement vector represented by a column matrix, the matrix product J(x) ⋅ h is another displacement vector, that is the best linear approximation of the change of f in a neighborhood of x, if f(x) is differentiable at x.[a] This means that the function that maps y to f(x) + J(x) ⋅ (y – x) is the best linear approximation of f(y) for all points y close to x. The linear map h → J(x) ⋅ h is known as the derivative or the differential of f at x.
+
+When m = n, the Jacobian matrix is square, so its determinant is a well-defined function of x, known as the Jacobian determinant of f. It carries important information about the local behavior of f. In particular, the function f has a differentiable inverse function in a neighborhood of a point x if and only if the Jacobian determinant is nonzero at x (see Jacobian conjecture for a related problem of global invertibility). The Jacobian determinant also appears when changing the variables in multiple integrals (see substitution rule for multiple variables).
+
+When m = 1, that is when f : Rn → R is a scalar-valued function, the Jacobian matrix reduces to the row vector 
+∇
+T
+𝑓
+{\displaystyle \nabla ^{\mathrm {T} }f}; this row vector of all first-order partial derivatives of f is the transpose of the gradient of f, i.e. 
+𝐽
+𝑓
+=
+∇
+𝑇
+𝑓
+{\displaystyle \mathbf {J} _{f}=\nabla ^{T}f}. Specializing further, when m = n = 1, that is when f : R → R is a scalar-valued function of a single variable, the Jacobian matrix has a single entry; this entry is the derivative of the function f.
+
+These concepts are named after the mathematician Carl Gustav Jacob Jacobi (1804–1851).
+**** Differentiability in higher dimensions
+
+A function of several real variables $\mathbf{f}{:}\mathbf{R}^{m}\to\mathbf{R}^{n}$ is said to be differentiable at a point $\mathbf{x}_0$ if there exists a linear map $\mathbf{J}{:}\mathbf{R}^{m}\to\mathbf{R}^{n}$ such that
+\begin{align}
+\lim\limits_{\mathbf{h}\to\mathbf{0}} \frac{\|\mathbf{f(x_{0}+h)-f(x_{0})-J(h)}\|_{{\mathbf{R}^{n}}}}{\|\mathbf{h}\|_{{\mathbf{R}^{m}}}}=0
+\end{align}
+
+If a function is differentiable at $\mathx0, then all of the partial derivatives exist at $\mathbf{x}_0$ , and the linear map $\mathbf{J}$ is given by the Jacobian matrix, an $\text{n x m}$ matrix in this case. A similar formulation of the higher-dimensional derivative is provided by the fundamental increment lemma found in single-variable calculus.
+
+If all the partial derivatives of a function exist in a neighborhood of a point $\mathbf{x}_0$ and are continuous at the point $\mathbf{x}_0$ , then the function is differentiable at that point $\mathbf{x}_0$ .
+
+However, the existence of the partial derivatives (or even of all the directional derivatives) does not guarantee that a function is differentiable at a point. For example, the function $f{:}\mathbf{R}^{2}\to\mathbf{R}$ defined by $f(x,y)={\begin{cases}x&{\text{if }}y\neq x^{2}\\0&{\text{if }}y=x^{2}\end{cases}}$ is not differentiable at (0, 0), but all of the partial derivatives and directional derivatives exist at this point. For a continuous example, the function $f(x,y)={\begin{cases}y^{3}/(x^{2}+y^{2})&{\text{if }}(x,y)\neq (0,0)\\0&{\text{if }}(x,y)=(0,0)\end{cases}}$ is not differentiable at (0, 0), but again all of the partial derivatives and directional derivatives exist.
+
+
 ** 多重积分
 *** 定义
 多重积分（英语：Multiple integral）是定积分的一类，它将定积分扩展到多元函数（多
@@ -201,7 +255,7 @@ x_n\leq\psi_n(x_1,x_2,\ldots,x_{n-1})\}$
 在常函数的情况中，结果很直接：只要将常函数 c 乘以测度就可以了。如果 c = 1，而且是在$R^2$的子集中积分，则乘积就是区域面积，而在$R^3$中，它就是区域的体积。
 
 例如：
-$D = \{ (x,y) \in \mathbb{R}^2 \ : \ 2 \le x \le 4 \ ; \ 3 \le y \le 6 \}</math> and <math>f(x,y) = 2$
+$D = \{ (x,y) \in \mathbb{R}^2 \ : \ 2 \le x \le 4 \ ; \ 3 \le y \le 6 \}$ and $f(x,y) = 2$
 
 在 D 上积分 f：
 $\int_3^6 \int_2^4 \ 2 \ \mathrm{d}x\, \mathrm{d}y = \mbox{area}(D) \cdot 2 = (2 \cdot 3) \cdot 2 = 12$
@@ -249,9 +303,9 @@ $\iint_D (x+y) \, \mathrm{d}x \, \mathrm{d}y$
 该区域可以沿 x 或者 y 轴分解。要采用公式，必须先找到限制''D''的两个函数和定义区间。
 这个例子中，这两个函数为：
 
-$\alpha (x) = x^2\,\!</math> 和 <math>\beta (x) = 1\,\!$
+$\alpha (x) = x^2\,\!$ 和 $\beta (x) = 1\,\!$
 
-而区间为<math>[a,b] = [0,1]\,\!</math>（这里为了直观起见采用沿 x 轴分解）。
+而区间为$[a,b] = [0,1]\,\!$（这里为了直观起见采用沿 x 轴分解）。
 
 应用简化公式，得到：
 
@@ -399,7 +453,7 @@ $\frac{\partial (x,y,z)}{\partial (\rho, \theta, \phi)} =
 \cos \theta \sin \phi & - \rho \sin \theta \sin \phi & \rho \cos \theta \cos \phi \\
 \sin \theta \sin \phi & \rho \cos \theta \sin \phi & \rho \sin \theta \cos \phi \\
 \cos \phi & 0 & - \rho \sin \phi
-\end{vmatrix} = -\rho^2 \sin \phi</math>
+\end{vmatrix} = -\rho^2 \sin \phi$
 
 :因此<math> \mathrm{d}x\, \mathrm{d}y\, \mathrm{d}z </math>变换为<math> \rho^2 \sin \phi \, \mathrm{d}\rho\, \mathrm{d}\theta\, \mathrm{d}\phi$.
 
@@ -490,24 +544,15 @@ $\iiint_D f(x,y,z) \, \mathrm{d}x\, \mathrm{d}y\, \mathrm{d}z = \iiint_T f(\rho 
 
 ** 公理
 ** 定义
-\begin{definition}
-  the dot product or inner product of $\mathbf{v}
+*** dot product
+the dot product or inner product of $\mathbf{v}
 =(v_1,v_2)$and$\mathbf{w}=(w_1,w_2)$is the number $\mathbf{v} \cdot \mathbf{w} = v_1w_1+v_2w_2$.
-
-\end{definition}
-\begin{definition}
-  the dot product or inner product of $\mathbf{v}
-=(v_1,v_2)$and$\mathbf{w}=(w_1,w_2)$is the number $\mathbf{v} \cdot \mathbf{w} = v_1w_1+v_2w_2$.
-
-\end{definition}
+*** cross product(external product)
+The cross product is defined by the formula: $\mathbf{a} \times \mathbf{b} = \| \mathbf{a} \| \| \mathbf{b} \| \sin(\theta) \, \mathbf{n}$
 
 ** 定理
-\begin{theorem}
-  点积为零表示两个向量垂直.
 
-\end{theorem}
-
-
+*** 点积为零表示两个向量垂直.
 \begin{proof}
   \begin{figure}[H] %H为当前位置，!htb为忽略美学标准，htbp为浮动图形
     \centering %图片居中
@@ -526,18 +571,14 @@ $\iiint_D f(x,y,z) \, \mathrm{d}x\, \mathrm{d}y\, \mathrm{d}z = \iiint_T f(\rho 
 ** 公理
 ** 定义
 ** 定理
-\begin{theorem}
-样本均值的期望等于总体的期望.
-\end{theorem}
+*** 样本均值的期望等于总体的期望.
 \begin{proof}
-$x_1,x_2,x_3,...,x_n$与总体X是同分布的，所以各样本的期望均为总体期望。
+$x_1,x_2,x_3,...,x_n$ 与总体X是同分布的，所以各样本的期望均为总体期望。
 
 $E(\bar{X})=E(\frac{1}{n}\sum_{i=1}^{n}x_{i})=\frac{1}{n}\sum_{i=1}^{n}E(x_{i})=\frac{1}{n}\cdot n\cdot E(X)=\mu $
 \end{proof}
+*** $S^2=\frac{1}{n-1}\sum_{i=1}^n(X_i-\overline{X})^2$ 是样本方差的无偏估计.
 
-\begin{theorem}
-  $S^2=\frac{1}{n-1}\sum_{i=1}^n(X_i-\overline{X})^2$是样本方差的无偏估计.
-\end{theorem}
 \begin{proof}
 方差无偏估计的推算:
 
@@ -573,4 +614,49 @@ $\mathrm{E}\left[\frac{1}{n-1}\sum_{i=1}^{n}\left(X_{i}-\overline{X}\right)^{2}\
 =\frac{n}{n-1}\frac{n-1}{n}\sigma^2
 =\sigma^2$
 
+** 正态分布
 
+*** 推导
+参考:[[https://math.stackexchange.com/questions/384893/how-was-the-normal-distribution-derived][statistics - How was the normal distribution derived? - Mathematics Stack Exchange]]
+
+Theorem: **Two identically distributed independent random variables** follow a distribution, called the *normal distribution,* given that their probability density functions (PDFs) are known to be continuous and differentiable, symmetric about a mean, and decrease towards zero away from the mean. 
+
+Proof: Let $X$ and $Y$ be identically distributed independent random variables with continuous and differentiable PDFs. It is assumed that the PDFs are even functions, for example $f_X(x) = f_X(-x)$, and $f_X(x) \rightarrow 0 \text{ as } x\rightarrow \pm \infty$.  
+
+Their joint PDF, because of their independence, is $f_{XY}(x,y) = f_X(x)f_Y(y)$. Because they are identically distributed and symmetric, only the *norm* or magnitude of the two variables is unique - that is, $x$ and $y$ can be interchanged with no effect on the final probability. They are identically distributed and symmetric, figuratively related to a circle, as opposed to the unequally distributed oval. Therefore, there must exist a function $g(r)$ such that
+$$ f_{XY}(x,y) = g(\sqrt{x^2 + y^2}) $$
+Which, because $g$ is not yet determined, is equivalent to
+$$ f_{XY}(x,y) = g(x^2 + y^2). $$
+
+From the definition of the joint distribution,
+$$ f_X(x)f_Y(y) = g(x^2 + y^2). $$
+Which, for $y=0$, gives
+$$ f_X(x) \propto g(x^2). $$
+Assuming $f_Y(0)$ is a constant. Similar argument gives
+$$ f_Y(y) \propto g(y^2). $$
+These last two results are significant, because substitution shows that the product of $g(x^2)g(y^2)$ is proportional to the sum $g(x^2 + y^2)$:
+$$ g(x^2)g(y^2) \propto g(x^2 + y^2) $$
+And it is known from algebra that the only function to have this property is the exponential function (and the natural logarithm). 
+
+This is to say, $g(r)$ will be some type of exponential, 
+$$ g(r) = Ae^{Br} .$$
+Where $A$ and $B$ are constants yet to be determined. We assume, now, that wherever the expected value is, the probability of error away from this expected value will decrease. That is to say, we expect that the chance of error should be minimum near the expected value, and decrease to zero away from this value. Another way of saying this is that the mean must be the maximum of $g(r)$, and yet another way of saying this is that $g(r)$ must approach $0$ as $r\rightarrow \pm \infty$. In any case, we need the argument to the exponential to be negative. 
+$$ g(r) = Ae^{-Br} $$
+
+Now if we return to our joint PDF, 
+$$ f_{XY}(x,y) = f_X(x)f_Y(y) = g(x^2 + y^2) $$
+Here again, we can investigate the PDF of $f_X(x)$ alone by setting $y=0$,
+$$ f_X(x) \propto g(x^2) = A e^{-Bx^2} $$
+Note that the mean of this distribution is $0$. In order to give a mean of $\mu$, this distribution becomes
+$$ f_X(x) \propto A e^{-B(x-\mu)^2} .$$
+
+The constants are determined from the fact that the integral of the PDF $f_{X}(x)$ must be equal to 1 for the entire domain. That is, the cumulative distribution function (CDF) must approach 1 at the upper limit (probability cannot be >100%). 
+$$ \int_{0}^{\infty} f_{X}(x) dx = 1 $$
+The integral of $e^{-Bx^2}$ is $\sqrt{\frac{\pi}{B}}$, thus
+$$ A \int_0^\infty e^{-Bx^2} dx = A \sqrt{\frac{\pi}{B}} = 1$$
+$$ A = \sqrt{\frac{B}{\pi}} $$
+The constant $B$ is, for convenience, substituted by $\sigma^2 = \frac{1}{2B}$, so that $A = \frac{1}{\sqrt{2\pi\sigma^2}}$ and
+$$ f_X(x) = \frac{1}{\sqrt{2\pi\sigma^2}} e^{-\frac{(x-\mu)^2}{2\sigma^2}} .$$
+Which is, of course, the common form of what is known as the Normal distribution. Note that the proportional symbol became an equals sign, which is necessary from the assumption that $X$ is a random variable, and all random variables have a PDF which integrates to $1$. This proves the theorem.
+
+One will find that $\sigma^2$ is called the variation, and $\sigma$ is the standard deviation. The parameters $\sigma^2$ and $\mu$, that is, the variation and the mean, may be chosen arbitrarily, and uniquely define the distribution. 
