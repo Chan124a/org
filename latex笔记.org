@@ -1,15 +1,15 @@
-* latex的发行版
-** CTEX套装
-CTEX 套装是由中国科学院的吴凌云制作并维护的一个面向中文用户的Windows 系
-统下的发行版。CTEX 套装有基本版和完全版之分，基本版只包含一些基本安装的MiKTEX 系
+* latex 的发行版
+** CTEX 套装
+CTEX 套装是由中国科学院的吴凌云制作并维护的一个面向中文用户的 Windows 系
+统下的发行版。CTEX 套装有基本版和完全版之分，基本版只包含一些基本安装的 MiKTEX 系
 统，实际使用中缺少的宏包会在编译时自动下载安装，或由用户自己选择手工安装；而
-完全版则包含了完整的MiKTEX 所有组件。
+完全版则包含了完整的 MiKTEX 所有组件。
 ** TEX Live
-TEX Live 是由TUG（TEX User Group，TEX 用户组）发布的一个发行版。TEX Live 可
-以在类UNIX/Linux、Mac OS X 和Windows 等不同的操作系统平台下安装使用，并且提
+TEX Live 是由 TUG（TEX User Group，TEX 用户组）发布的一个发行版。TEX Live 可
+以在类 UNIX/Linux、Mac OS X 和 Windows 等不同的操作系统平台下安装使用，并且提
 供相当可靠的工作环境¬。
-* PDF阅读器
-CTEX 套装和TEX Live 都已经预装了DVI 文件和PostScript 文件的阅读器。
+* PDF 阅读器
+CTEX 套装和 TEX Live 都已经预装了 DVI 文件和 PostScript 文件的阅读器。
 * 数学公式
 ** 插入方式
 行内
@@ -245,7 +245,7 @@ booktabs 宏包没有提供单独的表格环境，只需要在普通的表格�
 \usepackage{graphicx}
 
 
-如果要在外面加table，就这么用
+如果要在外面加 table，就这么用
 
 \begin{table}
 
@@ -268,7 +268,7 @@ booktabs 宏包没有提供单独的表格环境，只需要在普通的表格�
 * 中文支持
 \documentclass[UTF-8]{ctexart}
 * 定理环境，引理，定义，自定义 proof 环境
-一般的atex 的定理环境， amsmath 安装包自带，用法为：
+一般的 atex 的定理环境， amsmath 安装包自带，用法为：
 
 \newtheorem {环境名}  {标题} [排序单位]
 
@@ -325,11 +325,11 @@ This is a lemma.
 
 在该表达式中使用命令\qed 将结束符置于右下角。
 
-\theoremnumbering {计数形式}： 设置序号的计数形式，它的默认值是arabic ，可改为采用alph 、Alph 、rom、Roman 、
+\theoremnumbering {计数形式}： 设置序号的计数形式，它的默认值是 arabic ，可改为采用 alph 、Alph 、rom、Roman 、
 
-greek 、Greek 、chinese 或fnsymbol 计数形式。
+greek 、Greek 、chinese 或 fnsymbol 计数形式。
 
-\theoremstyle {格式〉 有break等命令。break 让 定理与内容隔开。
+\theoremstyle {格式〉 有 break 等命令。break 让 定理与内容隔开。
 
 举例：
 
@@ -362,7 +362,7 @@ This is proof.
 
 #+DOWNLOADED: screenshot @ 2024-01-20 14:40:07
 [[file:images/latex笔记/定理环境，引理，定义，自定义_proof_环境/2024-01-20_14-40-07_screenshot.png]]
-** 自定义proof 环境
+** 自定义 proof 环境
 
 这个自定义 proof 比之前的那个更常用。
 
@@ -372,7 +372,7 @@ This is proof.
 
 \newenvironment{proof}{{\noindent\it Proof}\quad}{\hfill $\square$\par}
 
-上面的命令中， \noindent 表示 proof 没有缩进，\it 表示 proof 斜体， \quad 表示 proof 后面空四个空格， \hfill 表示右对齐， \square 表示方框，\par表示结尾空一段
+上面的命令中， \noindent 表示 proof 没有缩进，\it 表示 proof 斜体， \quad 表示 proof 后面空四个空格， \hfill 表示右对齐， \square 表示方框，\par 表示结尾空一段
 
 显示效果：
 
@@ -381,5 +381,21 @@ This is proof.
 ** 参考文章
 [[https://blog.csdn.net/robert_chen1988/article/details/61204853][latex 定理环境，引理，定义，自定义 proof 环境_latex proof-CSDN博客]]
 
+* 章节
+LaTeX 可以对文档中的章节进行组织、编号，以及索引。取决于文档的类型，最多有七种等级的定义章节的命令。
+
+| 等级 | 命令                           |
+|  -1 | \part{part}                   |
+|   0 | \chapter{chapter}             |
+|   1 | \section{section}             |
+|   2 | \subsection{subsection}       |
+|   3 | \subsubsection{subsubsection} |
+|   4 | \paragraph{paragraph}         |
+|   5 | \subparagraph{subparagraph}   |
+
+一般来说，对于大多数文档，\section 是最高的等级。对于某些类型的文档，例如 report、book，或者类似的类型，\chapter 和\part 是最高的等级。
+
+** 参考文章
+[[https://blog.csdn.net/xovee/article/details/117279589][LaTeX 章节 Sections Chapters_latex chapter-CSDN博客]]
 * 参考文章
 [[https://zhuanlan.zhihu.com/p/64497187][latex系列--2 标题、章节、目录、标签、引用]]
