@@ -605,6 +605,7 @@ $\mathrm{E}\left[\frac{1}{n-1}\sum_{i=1}^{n}\left(X_{i}-\overline{X}\right)^{2}\
 =\frac{n}{n-1}\frac{n-1}{n}\sigma^2
 =\sigma^2$
 
+
 ** 正态分布
 
 *** 推导
@@ -651,3 +652,13 @@ $$ f_X(x) = \frac{1}{\sqrt{2\pi\sigma^2}} e^{-\frac{(x-\mu)^2}{2\sigma^2}} .$$
 Which is, of course, the common form of what is known as the Normal distribution. Note that the proportional symbol became an equals sign, which is necessary from the assumption that $X$ is a random variable, and all random variables have a PDF which integrates to $1$. This proves the theorem.
 
 One will find that $\sigma^2$ is called the variation, and $\sigma$ is the standard deviation. The parameters $\sigma^2$ and $\mu$, that is, the variation and the mean, may be chosen arbitrarily, and uniquely define the distribution. 
+
+** t分布,Student's t-distribution
+
+*** 定义
+Student's t distribution has the probability density function (PDF) given by $f(t)={\frac {\ \Gamma \left({\frac {\ \nu +1\ }{2}}\right)\ }{\ {\sqrt {\pi \ \nu \ }}\ \Gamma \left({\frac {\nu }{2}}\right)}}\left(\ 1+{\frac {~t^{2}\ }{\nu }}\ \right)^{-(\nu +1)/2}\ ,$ where $\nu$ is the number of degrees of freedom and $\Gamma$ is the gamma function. This may also be written as $f(t)={\frac {1}{\ {\sqrt {\nu \ }}\ {\mathrm {B} }\left({\frac {\ 1\ }{2}},\ {\frac {\ \nu \ }{2}}\right)\ }}\ \left(\ 1+{\frac {\ t^{2}\ }{\nu }}\ \right)^{-(\nu +1)/2}\ ,$ where $\mathrm{B}$ is the Beta function. In particular for integer valued degrees of freedom $\nu$ we have:
+
+For $\nu >1$ and even, $\ {\frac {\ \Gamma \left({\frac {\ \nu +1\ }{2}}\right)\ }{\ {\sqrt {\pi \ \nu \ }}\ \Gamma \left({\frac {\ \nu \ }{2}}\right)\ }}={\frac {\ (\nu -1)\cdot (\nu -3)\cdots 5\cdot 3\ }{2{\sqrt {\nu \ }}\ (\nu -2)\cdot (\nu -4)\cdots 4\cdot 2\ }}~.$
+
+For $\nu >1$ and odd,
+$$\ {\frac {\ \Gamma \left({\frac {\ \nu +1\ }{2}}\right)\ }{\ {\sqrt {\pi \ \nu \ }}\ \Gamma \left({\frac {\ \nu \ }{2}}\right)}}={\frac {(\nu -1)\cdot (\nu -3)\cdots 4\cdot 2\ }{\ \pi {\sqrt {\nu \ }}\ (\nu -2)\cdot (\nu -4)\cdots 5\cdot 3\ }}~.$$
