@@ -409,7 +409,25 @@ ISO 指的是传感器对于光线的敏感程度.
 - 抽象联想:热烈、积极、喜庆、革命、活力、传统、停止
 
 * 色彩与风格
+alex webb
 
+todd hido
+
+川内伦子
+
+rkrkrk
+
+hamadahideaki
+
+samalive
+
+brahmino
+* 色彩模型与系统
+rgb 叫做加色模型.
+
+红绿蓝叫做色光三原色.
+
+减色模型的三个原色是 CMY,青品(品红)黄 
 * 微单和单反
 微单少了反光板.
 #+DOWNLOADED: screenshot @ 2023-09-25 20:54:41
