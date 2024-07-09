@@ -512,6 +512,25 @@ LAB 中的 L 代表明度，即纯黑到纯白的变化，A代表品红到绿色
 
 如果有较色和色彩管理，则使用 ProPhotoRGB 或 AdobeRGB 修图,SRGB 输出。
 
+色彩管理的目的是让不同的设备能保持相对统一的色彩表现效果。
+
+采样与输入色彩管理->显示与后期色彩管理->输出色彩管理
+
+色彩管理的过程主要分为三个主要步骤,合称 3C:设备校准(Calibration),特性化（Characterizaticon&Profiling) 、色彩转换(Conversion)
+
+
+** 色彩空间
+ProPhoto:接近 RAW 文件色彩空间、ACRILR 工作空间
+
+AdobeRGB:广色域显示器、高端打印机
+
+SRGB:通用显示器、网络浏览与打印机
+
+CMYK:印刷
+
+#+DOWNLOADED: screenshot @ 2024-07-09 12:57:06
+[[file:images/摄影/色彩管理/2024-07-09_12-57-06_screenshot.png]]
+
 * 微单和单反
 微单少了反光板.
 #+DOWNLOADED: screenshot @ 2023-09-25 20:54:41
