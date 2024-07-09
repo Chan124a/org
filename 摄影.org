@@ -519,6 +519,13 @@ LAB 中的 L 代表明度，即纯黑到纯白的变化，A代表品红到绿色
 色彩管理的过程主要分为三个主要步骤,合称 3C:设备校准(Calibration),特性化（Characterizaticon&Profiling) 、色彩转换(Conversion)
 
 
+#+DOWNLOADED: screenshot @ 2024-07-09 12:59:06
+[[file:images/摄影/色彩管理/2024-07-09_12-59-06_screenshot.png]]
+
+
+#+DOWNLOADED: screenshot @ 2024-07-09 21:35:06
+[[file:images/摄影/色彩管理/2024-07-09_21-35-06_screenshot.png]]
+
 ** 色彩空间
 ProPhoto:接近 RAW 文件色彩空间、ACRILR 工作空间
 
@@ -530,6 +537,50 @@ CMYK:印刷
 
 #+DOWNLOADED: screenshot @ 2024-07-09 12:57:06
 [[file:images/摄影/色彩管理/2024-07-09_12-57-06_screenshot.png]]
+
+** 屏幕校色
+主流校色仪厂家:DataColor、X-Rite(购买在千元，淘宝或兰拓租用约几十一次)
+
+校色周期:1-6 个月
+
+推荐设置:光度 2.2,白点 6500K，亮度 120-160
+
+** 图片输出
+输出可以用 TK action.网页输出锐化可以修改为垂直和水平各 2000px,这样在网络上上传时不会压缩得太厉害.
+
+导出时记得嵌入颜色配置文件以及转换为 sRGB
+
+#+DOWNLOADED: screenshot @ 2024-07-09 22:56:53
+[[file:images/摄影/色彩管理/2024-07-09_22-56-53_screenshot.png]]
+
+预览可以设置为 Internet 标准 RGB
+
+* 色相环
+
+** 红绿蓝色相环
+原色:红绿蓝
+间色:原色之间的颜色,如黄,青,品红
+复色:原色和间色之间的颜色,如橙色.
+
+#+DOWNLOADED: screenshot @ 2024-07-09 23:08:05
+[[file:images/摄影/色相环/2024-07-09_23-08-05_screenshot.png]]
+
+** 红黄蓝色相环
+- 同类色:<15°
+- 邻近色:15°-30°
+- 类似色:30°-60°
+- 中差色:60°-120°
+- 对比色:120°-180°
+- 互补色:180°
+
+#+DOWNLOADED: screenshot @ 2024-07-09 23:32:59
+[[file:images/摄影/色相环/2024-07-09_23-32-59_screenshot.png]]
+
+
+* 色立体
+明度轴总共分 11 个档位. 
+#+DOWNLOADED: screenshot @ 2024-07-09 23:12:29
+[[file:images/摄影/色立体/2024-07-09_23-12-29_screenshot.png]]
 
 * 微单和单反
 微单少了反光板.
