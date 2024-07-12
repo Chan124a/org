@@ -576,12 +576,22 @@ CMYK:印刷
 #+DOWNLOADED: screenshot @ 2024-07-09 23:32:59
 [[file:images/摄影/色相环/2024-07-09_23-32-59_screenshot.png]]
 
-
 * 色立体
 明度轴总共分 11 个档位. 
 #+DOWNLOADED: screenshot @ 2024-07-09 23:12:29
 [[file:images/摄影/色立体/2024-07-09_23-12-29_screenshot.png]]
 
+* 色系
+
+** 中性色系
+由黑白灰组成.
+
+明度按亮度值分为 0-255,可分为 11 个分区
+
+#+DOWNLOADED: screenshot @ 2024-07-11 23:59:16
+[[file:images/摄影/色系/2024-07-11_23-59-16_screenshot.png]]
+
+** 有彩色系
 * 微单和单反
 微单少了反光板.
 #+DOWNLOADED: screenshot @ 2023-09-25 20:54:41
