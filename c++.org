@@ -1,15 +1,15 @@
 * auto
 ** 静态类型，动态类型和类型推导
-在编程语言分类中，C/C++C常常被认为是静态类型的语言。而有的编程语言则号称是“动态类型”的，比如python。通常情况下，“静”和“动”的区别是非常直观的。我们看看下面这段简单的python代码：   
+在编程语言分类中，C/C++C 常常被认为是静态类型的语言。而有的编程语言则号称是“动态类型”的，比如 python。通常情况下，“静”和“动”的区别是非常直观的。我们看看下面这段简单的 python 代码：   
 #+BEGIN_SRC python 
 name=‘world\n’
 print 'hello, ' %name
 #+END_SRC
-这段代码中python中的一个hellowworld的实现。这就是编程语言中的“动态类型”,在运行时来进行类型检查，而C++中类型检查是在编译阶段。动态类型语言能做到在运行时决定类型，主要归功于一技术，这技术是类型推导。
+这段代码中 python 中的一个 hellowworld 的实现。这就是编程语言中的“动态类型”,在运行时来进行类型检查，而 C++中类型检查是在编译阶段。动态类型语言能做到在运行时决定类型，主要归功于一技术，这技术是类型推导。
 
-事实上，类型推导也可以用于静态类型语言中。比如上面的python代码中，如果按照C/C++程序员的思考方式，world\n表达式应该可以返回一个临时的字符串，所以即使name没有进行声明，我们也能轻松低推导出name的类型应该是一个字符串类型。在C++11中，这个想法得到了实现。C++11中类型推导的实现之一就是重定义auto关键字，另一个实现是decltype。
+事实上，类型推导也可以用于静态类型语言中。比如上面的 python 代码中，如果按照 C/C++程序员的思考方式，world\n 表达式应该可以返回一个临时的字符串，所以即使 name 没有进行声明，我们也能轻松低推导出 name 的类型应该是一个字符串类型。在 C++11 中，这个想法得到了实现。C++11 中类型推导的实现之一就是重定义 auto 关键字，另一个实现是 decltype。
 
-我们可以使用C++11方式来书写刚才的python的代码
+我们可以使用 C++11 方式来书写刚才的 python 的代码
 #+BEGIN_SRC c++
 #include <iostream>
 using namespace std;
@@ -21,9 +21,9 @@ int main()
 }
 #+END_SRC
 
-这里使用auto关键字来要求编译器对变量name的类型进行了自动推导。这里编译器根据它的初始化表达式的类型，推导出name的类型为char*。事实上，atuo关键字在早期的C/C++标准中有着完全不同的含义。声明时使用auto修饰的变量，按照早期C/C++标准的解释，是具有自动存储期的局部变量。不过那时情况是该关键字几乎无人使用，因为一般函数内没有声明为static的变量总是具有自动存储期的局部变量。auto声明变量的类型必须又编译器在编译时期推导而得。
+这里使用 auto 关键字来要求编译器对变量 name 的类型进行了自动推导。这里编译器根据它的初始化表达式的类型，推导出 name 的类型为 char*。事实上，atuo 关键字在早期的 C/C++标准中有着完全不同的含义。声明时使用 auto 修饰的变量，按照早期 C/C++标准的解释，是具有自动存储期的局部变量。不过那时情况是该关键字几乎无人使用，因为一般函数内没有声明为 static 的变量总是具有自动存储期的局部变量。auto 声明变量的类型必须又编译器在编译时期推导而得。
 
-通过以下例子来了解以下auto类型推导的基本用法
+通过以下例子来了解以下 auto 类型推导的基本用法
 #+BEGIN_SRC c++
 #include <iostream>
 using namespace std;
@@ -41,10 +41,10 @@ int main()
 	 z=x;
 }
 #+END_SRC
-以上变量x被初始化为1，因为字面变量1的类型是const int，所以编译器推导出x的类型应该为int（这里const类型限制符被去掉了，后面会解释）。同理在变量y的定义中，auto类型的y被推导为double类型；而在auto str1的定义中，其类型被推导为struct m。这里的z，使用auto关键字来声明，但是不立即对其进行定义，此时编译器则会报错。这跟通过其他关键字（除去引用类型的关键字）先声明后定义的变量的使用规则是不同的。auto声明的变量必须被初始化，以使编译器能够从其初始化表达式中推导出其类型。这个意义上，auto并非一种类型声明，而是一个类型声明时的“占位符”，编译器在便已是亲会将suto替代为变量实际的类型。
-** auto的优势
+以上变量 x 被初始化为 1，因为字面变量 1 的类型是 const int，所以编译器推导出 x 的类型应该为 int（这里 const 类型限制符被去掉了，后面会解释）。同理在变量 y 的定义中，auto 类型的 y 被推导为 double 类型；而在 auto str1 的定义中，其类型被推导为 struct m。这里的 z，使用 auto 关键字来声明，但是不立即对其进行定义，此时编译器则会报错。这跟通过其他关键字（除去引用类型的关键字）先声明后定义的变量的使用规则是不同的。auto 声明的变量必须被初始化，以使编译器能够从其初始化表达式中推导出其类型。这个意义上，auto 并非一种类型声明，而是一个类型声明时的“占位符”，编译器在便已是亲会将 suto 替代为变量实际的类型。
+** auto 的优势
 *** 简化代码
-1.直观地，auto推导的一个最大的优势在于拥有初始化表达式的复杂类型变量声明时简化代码。由于C++的发展，变量类型变得越来越复杂。但是很多时候，名字空间、模板成为类型的一部分，导致了程序员在使用库的时候如履薄冰。
+1.直观地，auto 推导的一个最大的优势在于拥有初始化表达式的复杂类型变量声明时简化代码。由于 C++的发展，变量类型变得越来越复杂。但是很多时候，名字空间、模板成为类型的一部分，导致了程序员在使用库的时候如履薄冰。
 #+BEGIN_SRC c++
 #include <string>
 #include <vector>
@@ -70,9 +70,9 @@ void loopover(std::vector<std::string>&vs)
  
 }
 #+END_SRC
-使用std::vector<std::string>::iterator来定义i是C++常用的良好的习惯，但是这样长的声明带来了代码可读性的困难，因此引入auto，使代码可读性增加。并且使用STL将会变得更加容易
+使用 std::vector<std::string>::iterator 来定义 i 是 C++常用的良好的习惯，但是这样长的声明带来了代码可读性的困难，因此引入 auto，使代码可读性增加。并且使用 STL 将会变得更加容易
 *** 避免声明类型错误
-可以避免类型声明时的麻烦而且避免类型声明时的错误。事实上，在C/C++中，存在着很多隐式或者是用户自定义类型的转换规则（比如整型与字符型进行加法运算后，表达式返回整型，这是一条隐式规则）。这些规则并非容易记忆，尤其是在用户自定义很多操作符以后，这个时候auto就有用户之地了。看一下例子
+可以避免类型声明时的麻烦而且避免类型声明时的错误。事实上，在 C/C++中，存在着很多隐式或者是用户自定义类型的转换规则（比如整型与字符型进行加法运算后，表达式返回整型，这是一条隐式规则）。这些规则并非容易记忆，尤其是在用户自定义很多操作符以后，这个时候 auto 就有用户之地了。看一下例子
 #+BEGIN_SRC c++
 class PI
 {
@@ -91,9 +91,9 @@ int main()
 	  auto circumference =2*(pi*radius);
 }
 #+END_SRC
-上面定义了一个float类型的变量radius（半径）以及一个自定义类型PI的变量pi,在计算周长的时候，使用auto类型来定义变量circumference。这里PI在于float类型数据相乘时，其返回值为double。而PI得定义可能是在其他的地方（头文件里），main函数的程序可能就不知道PI的作者为了避免数据上溢或者是精度上的降低而返回了double类型的浮点数。因此main函数程序员如果使用float类型声明circumference，就可能会享受不了PI作者细心设计带来的好处。反之，将circumference声明为auto，则毫无问题，因为编译器已经做了最好的选择。
+上面定义了一个 float 类型的变量 radius（半径）以及一个自定义类型 PI 的变量 pi,在计算周长的时候，使用 auto 类型来定义变量 circumference。这里 PI 在于 float 类型数据相乘时，其返回值为 double。而 PI 得定义可能是在其他的地方（头文件里），main 函数的程序可能就不知道 PI 的作者为了避免数据上溢或者是精度上的降低而返回了 double 类型的浮点数。因此 main 函数程序员如果使用 float 类型声明 circumference，就可能会享受不了 PI 作者细心设计带来的好处。反之，将 circumference 声明为 auto，则毫无问题，因为编译器已经做了最好的选择。
 
-但是auto不能解决所有的精度问题。下面例子
+但是 auto 不能解决所有的精度问题。下面例子
 #+BEGIN_SRC c++
 #include <iostream>
 using namespace std;
@@ -107,17 +107,17 @@ int main()
    cout<<"c="<<c<<endl;
 }
 #+END_SRC
-上面代码中，程序员希望通过声明变量c为auto就能解决a+b溢出的问题。而实际上由于a+b返回的依然是unsigned int的值，姑且c的类型依然被推导为unsigned int，auto并不能帮上忙。这个跟动态类型语言中数据自动进行拓展的特性还是不一样的。
+上面代码中，程序员希望通过声明变量 c 为 auto 就能解决 a+b 溢出的问题。而实际上由于 a+b 返回的依然是 unsigned int 的值，姑且 c 的类型依然被推导为 unsigned int，auto 并不能帮上忙。这个跟动态类型语言中数据自动进行拓展的特性还是不一样的。
 *** 支持泛型编程
-在C++中其“自适应”性能够在一定程度上支持泛型的编程。
+在 C++中其“自适应”性能够在一定程度上支持泛型的编程。
 
- 回到上面class PI的例子，这里假设PI的作者改动了PI的定义，比如讲operator*返回值变为long  double，此时，main函数并不需要修改，因为auto会“自适应”新的类型。同理，对于不同平台上的二代马维护，auto也会带来一些“泛型”的好处。这里我们一strlen函数为例，在32位编译环境下，strlen返回的为一个4字节的整型，在64位的编译环境下，strlen会返回一个8字节的整型。即使系统库中<cstring>为其提供了size_t类型来支持多平台间的代码共享支持，但是使用auto关键字我们同样可以达到代码跨平台的效果。
+ 回到上面 class PI 的例子，这里假设 PI 的作者改动了 PI 的定义，比如讲 operator*返回值变为 long  double，此时，main 函数并不需要修改，因为 auto 会“自适应”新的类型。同理，对于不同平台上的二代马维护，auto 也会带来一些“泛型”的好处。这里我们一 strlen 函数为例，在 32 位编译环境下，strlen 返回的为一个 4 字节的整型，在 64 位的编译环境下，strlen 会返回一个 8 字节的整型。即使系统库中<cstring>为其提供了 size_t 类型来支持多平台间的代码共享支持，但是使用 auto 关键字我们同样可以达到代码跨平台的效果。
 
 ~auto var=strlen("hello world")~
 
-由于size_t的适用性范围往往局限于<cstring>中定义的函数，auto的适用范围明显更为广泛。
+由于 size_t 的适用性范围往往局限于<cstring>中定义的函数，auto 的适用范围明显更为广泛。
 
-当auto应用于模板的定义中，其"自适应"性会得到更加充分的体现。我们可以看看以下例子
+当 auto 应用于模板的定义中，其"自适应"性会得到更加充分的体现。我们可以看看以下例子
 #+BEGIN_SRC c++
 template<typename T1,typename T2>
 double Sum(T1&t1,T2&t2)
@@ -135,30 +135,30 @@ int main()
 	auto f=Sum<float,float>(c,d);//s的类型被推导为float
 }
 #+END_SRC
-上面中Sum模板函数接受两个参数。由于T1，T2要在模板实例化时才能确定，所以Sum中将变量s的类型声明为auto的。在函数main中我们将模板实例化时。Sum<int,long>中的s变量会被推导为long类型，而Sum<float,float>中的s变量则会被推导为float。可以看到，auto与模板一起使用时，其“自适应”特性能够加强C++中泛型的能力。
-** auto的使用注意细节
-1. 我们可以使用valatile，pointer（*），reference（&），rvalue reference（&&） 来修饰auto
+上面中 Sum 模板函数接受两个参数。由于 T1，T2 要在模板实例化时才能确定，所以 Sum 中将变量 s 的类型声明为 auto 的。在函数 main 中我们将模板实例化时。Sum<int,long>中的 s 变量会被推导为 long 类型，而 Sum<float,float>中的 s 变量则会被推导为 float。可以看到，auto 与模板一起使用时，其“自适应”特性能够加强 C++中泛型的能力。
+** auto 的使用注意细节
+1. 我们可以使用 valatile，pointer（*），reference（&），rvalue reference（&&） 来修饰 auto
 #+BEGIN_SRC c++
 auto k = 5;
 auto* pK = new auto(k);
 auto** ppK = new auto(&k);
 const auto n = 6;
 #+END_SRC
-2. 用auto声明的变量必须初始化
+2. 用 auto 声明的变量必须初始化
 
 ~auto m; // m should be intialized~
 
-3. auto不能与其他类型组合连用
+3. auto 不能与其他类型组合连用
 
 ~auto int p; // 这是旧auto的做法~
 
-4. 函数和模板参数不能被声明为auto
+4. 函数和模板参数不能被声明为 auto
 #+BEGIN_SRC c++
 void MyFunction(auto parameter){} // no auto as method argument
 template<auto T> // utter nonsense - not allowed
 void Fun(T t){}
 #+END_SRC
-5. 定义在堆上的变量，使用了auto的表达式必须被初始化
+5. 定义在堆上的变量，使用了 auto 的表达式必须被初始化
 #+BEGIN_SRC c++
 int* p = new auto(0); //fine
 int* pp = new auto(); // should be initialized
@@ -166,17 +166,17 @@ auto x = new auto(); // Hmmm ... no intializer
 auto* y = new auto(9); // Fine. Here y is a int*
 auto z = new auto(9); //Fine. Here z is a int* (It is not just an int)
 #+END_SRC
-6. 以为auto是一个占位符，并不是一个他自己的类型，因此不能用于类型转换或其他一些操作，如sizeof和typeid
+6. 以为 auto 是一个占位符，并不是一个他自己的类型，因此不能用于类型转换或其他一些操作，如 sizeof 和 typeid
 #+BEGIN_SRC c++
 int value = 123;
 auto x2 = (auto)value; // no casting using auto
 auto x3 = static_cast<auto>(value); // same as above 
 #+END_SRC
-7. 定义在一个auto序列的变量必须始终推导成同一类型
+7. 定义在一个 auto 序列的变量必须始终推导成同一类型
 #+BEGIN_SRC c++
 auto x1 = 5, x2 = 5.0, x3='r';  // This is too much....we cannot combine like this
 #+END_SRC
-8. auto不能自动推导成CV-qualifiers（constant & volatile qualifiers），除非被声明为引用类型
+8. auto 不能自动推导成 CV-qualifiers（constant & volatile qualifiers），除非被声明为引用类型
 #+BEGIN_SRC c++ 
 const int i = 99;
 auto j = i;       // j is int, rather than const int
@@ -186,7 +186,7 @@ auto& k = i;      // Now k is const int&
 k = 100;          // Error. k is constant
 // Similarly with volatile qualifer
 #+END_SRC
-9. auto会退化成指向数组的指针，除非被声明为引用
+9. auto 会退化成指向数组的指针，除非被声明为引用
 #+BEGIN_SRC c++
 int a[9];
 auto j = a;
@@ -196,7 +196,7 @@ cout<<typeid(k).name()<<endl; // This will print int [9]
 #+END_SRC
 符号 & 表明是一个引用变量，能让接下来的代码能够修改数组的内容，而第一种语法不能。
 ** 遍历
-*** 遍历unordered_map
+*** 遍历 unordered_map
 #+begin_src c++
 unordered_map<char, int> mp;
 for (auto& x : mp) {
@@ -242,7 +242,7 @@ true
 #+BEGIN_SRC c++
 xxx_cast<newType>(data)
 #+END_SRC
-newType 是要转换成的新类型，data 是被转换的数据。例如，老式的C风格的 double 转 int 的写法为：
+newType 是要转换成的新类型，data 是被转换的数据。例如，老式的 C 风格的 double 转 int 的写法为：
 #+BEGIN_SRC c
 double scores = 95.5;
 int n = (int)scores;
@@ -260,7 +260,7 @@ void 指针和具体类型指针之间的转换，例如 ~void *~ 转 ~int *~ �
 有转换构造函数或者类型转换函数的类与其它类型之间的转换，例如 double 转 Complex（调用转换构造函数）、Complex 转 double（调用类型转换函数）。
 
 需要注意的是，static_cast 不能用于无关类型之间的转换，因为这些转换都是有风险的，例如：
-两个具体类型指针之间的转换，例如int *转double *、Student *转int *等。不同类型的数据存储格式不一样，长度也不一样，用 A 类型的指针指向 B 类型的数据后，会按照 A 类型的方式来处理数据：如果是读取操作，可能会得到一堆没有意义的值；如果是写入操作，可能会使 B 类型的数据遭到破坏，当再次以 B 类型的方式读取数据时会得到一堆没有意义的值。
+两个具体类型指针之间的转换，例如 int *转 double *、Student *转 int *等。不同类型的数据存储格式不一样，长度也不一样，用 A 类型的指针指向 B 类型的数据后，会按照 A 类型的方式来处理数据：如果是读取操作，可能会得到一堆没有意义的值；如果是写入操作，可能会使 B 类型的数据遭到破坏，当再次以 B 类型的方式读取数据时会得到一堆没有意义的值。
 int 和指针之间的转换。将一个具体的地址赋值给指针变量是非常危险的，因为该地址上的内存可能没有分配，也可能没有读写权限，恰好是可用内存反而是小概率事件。
 
 static_cast 也不能用来去掉表达式的 const 修饰和 volatile 修饰。换句话说，不能将 const/volatile 类型转换为非 const/volatile 类型。
@@ -373,7 +373,7 @@ int main(){
 
 ** dynamic_cast
 这部分内容我省略没写。
-* C++ STL vector添加元素（push_back()和emplace_back()）详解
+* C++ STL vector 添加元素（push_back()和 emplace_back()）详解
 emplace_back() 和 push_back() 的区别，就在于底层实现的机制不同。push_back() 向容器尾部添加元素时，首先会创建这个元素，然后再将这个元素拷贝或者移动到容器中（如果是拷贝的话，事后会自行销毁先前创建的这个元素）；而 emplace_back() 在实现时，则是直接在容器尾部创建这个元素，省去了拷贝或移动元素的过程。
 * 重载
 重载指的是同一作用域内的几个函数名字相同但形参（形参数量或者形参类型）不同。
@@ -396,8 +396,8 @@ Record lookup(const Phone&);
 Record lookup(const Telno&);
 #+end_src
 
-** const形参的判断方式
-*** 顶层const不影响判断
+** const 形参的判断方式
+*** 顶层 const 不影响判断
 #+begin_src c++
   Record lookup(const Phone);
   Record lookup(Phone);//重复声明
@@ -405,7 +405,7 @@ Record lookup(const Telno&);
   Record lookup(Phone*);
   Record lookup(Phone* const);//重复声明
 #+END_SRC
-*** 底层const影响判断
+*** 底层 const 影响判断
 #+begin_src c++
   Record lookup(Account&);//函数作用于Account的引用
   Record lookup(const Account&);//新函数,作用于常量引用
@@ -413,10 +413,10 @@ Record lookup(const Telno&);
   Record lookup(Account*);//新函数,作用于指向Account的指针
   Record lookup(const Account*);//新函数,作用于指向常量的指针
 #+END_SRC
-由于非常量对象可以转换成const,所以上面4个函数都能作用于非常量对象或者指向非常量对象的指针,此时编译器会优先选用非常量版本的函数.
+由于非常量对象可以转换成 const,所以上面 4 个函数都能作用于非常量对象或者指向非常量对象的指针,此时编译器会优先选用非常量版本的函数.
 ** 隐式转换
 *** 整型提升
-将char、unsigned char、signed char、shot、unsigned short转换为int 或unsigned int。
+将 char、unsigned char、signed char、shot、unsigned short 转换为 int 或 unsigned int。
 *** 整型转换
 可以在任意的两种整数类型中转换。
 ** 重载匹配顺序
@@ -484,9 +484,9 @@ Record lookup(const Telno&);
 #+END_SRC
 ** 操作符重载
 对于内置数据类型的操作符，它预定义的意义不能被修改，也不能为内置数据类型定义其他操作符。
-例如不能定义int operator+(int, int);也不能定义void operator+(int[],int[]).
+例如不能定义 int operator+(int, int);也不能定义 void operator+(int[],int[]).
 ** 实例
-*** 实例1
+*** 实例 1
 #+begin_src c++
 #include <iostream>
 using namespace std;
@@ -505,8 +505,8 @@ myfunc(c); //编译器会报错
 return 0;
 }
 #+END_SRC
-c为short类型，先提升为int类型，由于int可以转换成char和long，又由于类型转换匹配优先级相同，所以编译器不知道要匹配哪一个
-*** 实例2
+c 为 short 类型，先提升为 int 类型，由于 int 可以转换成 char 和 long，又由于类型转换匹配优先级相同，所以编译器不知道要匹配哪一个
+*** 实例 2
 #+begin_src c++
 #include <iostream>
 using namespace std;
@@ -576,10 +576,10 @@ void main()
 #+DOWNLOADED: screenshot @ 2022-12-05 23:01:44
 [[file:images/多态/2022-12-05_23-01-44_screenshot.png]]
 c++编译器在编译的时候，要确定每个对象调用的函数（非虚函数）的地址，这称为早期绑定，
-当我们将Son类的对象son的地址赋给pFather时，c++编译器进行了类型转换，此时c++编译器认为变量pFather保存的就是Father对象的地址，当在main函数中执行pFather->Say(),调用的当然就是Father对象的Say函数
+当我们将 Son 类的对象 son 的地址赋给 pFather 时，c++编译器进行了类型转换，此时 c++编译器认为变量 pFather 保存的就是 Father 对象的地址，当在 main 函数中执行 pFather->Say(),调用的当然就是 Father 对象的 Say 函数
 
-要让编译器采用晚绑定，就要在基类中声明函数时使用virtual关键字，这样的函数我们就称之为虚函数，
-一旦某个函数在基类中声明为virtual，那么在所有的派生类中该函数都是virtual，而不需要再显式地声明为virtual。
+要让编译器采用晚绑定，就要在基类中声明函数时使用 virtual 关键字，这样的函数我们就称之为虚函数，
+一旦某个函数在基类中声明为 virtual，那么在所有的派生类中该函数都是 virtual，而不需要再显式地声明为 virtual。
 
 #+begin_src c++
 #include "stdafx.h"
@@ -624,7 +624,7 @@ void main()
 ** 虚表
 如果一个类中有虚函数，编译器会为每个包含虚函数的类创建一个虚表(即 vtable)，该表是一个一维数组，在这个数组中存放每个虚函数的地址。
 
-编译器另外还为每个对象提供了一个虚表指针(即vptr)，这个指针指向了对象所属类的虚表。
+编译器另外还为每个对象提供了一个虚表指针(即 vptr)，这个指针指向了对象所属类的虚表。
 
 在构造函数中进行虚表的创建和虚表指针的初始化，
 在构造子类对象时，要先调用父类的构造函数，初始化父类对象的虚表指针，该虚表指针指向父类的虚表，
@@ -693,7 +693,7 @@ C++标准规定了在构造函数中调用虚函数时，只会绑定到自己�
 *** 构造函数不能为虚函数
 简言之：构造函数不能是虚函数，因为虚函数是基于对象的，构造函数是用来产生对象的，若构造函数是虚函数，则需要对象来调用，但是此时构造函数没有执行，就没有对象存在，产生矛盾，所以构造函数不能是虚函数。
 **** 从存储空间角度来看
-虚函数的调用需要虚函数表(vptr)指针，而该指针存放在对象的内存空间中，在构造函数中进行初始化工作，即初始化vptr，让它指向正确的虚函数表。
+虚函数的调用需要虚函数表(vptr)指针，而该指针存放在对象的内存空间中，在构造函数中进行初始化工作，即初始化 vptr，让它指向正确的虚函数表。
 所以需要调用构造函数才可以创建或初始化它的值，否则即使开辟了空间，该指针也为随机值；若构造函数声明为虚函数，那么由于对象还未创建，还没有内存空间，更没有虚函数表地址用来调用虚函数——构造函数了。
 
 **** 从多态角度来看
@@ -708,10 +708,10 @@ C++标准规定了在构造函数中调用虚函数时，只会绑定到自己�
 当基类的析构函数为非虚函数时，删除一个基类指针指向的派生类实例时，只清理了派生类从基类继承过来的资源，而派生类自己独有的资源却没有被清理，这显然不是我们希望的。
 
 如果一个类会被其他类继承，那么我们有必要将被继承的类（基类）的析构函数定义成虚函数。这样，释放基类指针指向的派生类实例时，先调用派生类的析构函数，再调用基类的析构函数，清理工作才能全面进行，才不会发生内存泄漏。
-*** delete子类指针
-不管什么时候delete子类指针，都会调用父类析构函数（不管父类析构函数是不是虚函数）。
+*** delete 子类指针
+不管什么时候 delete 子类指针，都会调用父类析构函数（不管父类析构函数是不是虚函数）。
 
-之所以要把父类析构函数定义为虚函数，是因为当父类指针指向子类对象时，delete父类指针可以调用到子类的析构函数（之后会调用父类的析构）。
+之所以要把父类析构函数定义为虚函数，是因为当父类指针指向子类对象时，delete 父类指针可以调用到子类的析构函数（之后会调用父类的析构）。
 ** 参数传递
 *** 引用和值传递
 #+begin_src c++
@@ -774,11 +774,11 @@ int main() {
 Derived::fun(), x = 111
 Derived::fun(), x = 222
 #+end_example
-注意，上面第一行打印的是派生类函数名，但是使用的默认值是基类的111。
+注意，上面第一行打印的是派生类函数名，但是使用的默认值是基类的 111。
 ** 函数声明不同的虚函数是不同的
-如下代码，基类的display方法加了const，这导致派生类实际上有两个不同的虚方法：一个带const，一个不带const。
+如下代码，基类的 display 方法加了 const，这导致派生类实际上有两个不同的虚方法：一个带 const，一个不带 const。
 
-当用基类指针调用子类对象方法时，由于基类的虚函数表只有带const的方法，所以会调用到子类的带const的display方法。
+当用基类指针调用子类对象方法时，由于基类的虚函数表只有带 const 的方法，所以会调用到子类的带 const 的 display 方法。
 #+begin_src c++
 #include <iostream>
 using namespace std;
@@ -811,7 +811,7 @@ Base::display()
 Derived::display()
 #+end_example
 
-如果去掉const,则结果为：
+如果去掉 const,则结果为：
 #+begin_example
 Derived::display()
 Derived::display()
@@ -832,7 +832,7 @@ Derived::display()
     void test();
   }
 #+END_SRC
-则B的test函数以及C的test函数都是虚函数；即使C的test函数访问权限发生变化，也是虚函数。
+则 B 的 test 函数以及 C 的 test 函数都是虚函数；即使 C 的 test 函数访问权限发生变化，也是虚函数。
 #+begin_src c++
   class C:public B{
     private:
@@ -845,9 +845,9 @@ Derived::display()
 [[https://blog.csdn.net/qq_42247231/article/details/105109709][为什么析构函数必须是虚函数？为什么默认的析构函数不是虚函数？]]
 * 多线程
 ** std::async
-异步接口std::async，通过这个接口可以简单的创建线程并通过std::future中获取结果。以往都是自己去封装线程实现自己的async，现在有线程的跨平台接口可以使用就极大的方便了C++多线程编程。
+异步接口 std::async，通过这个接口可以简单的创建线程并通过 std::future 中获取结果。以往都是自己去封装线程实现自己的 async，现在有线程的跨平台接口可以使用就极大的方便了 C++多线程编程。
 
-先看一下std::async的函数原型
+先看一下 std::async 的函数原型
 #+begin_src c++
 //(C++11 起) (C++17 前)
 template< class Function, class... Args>
@@ -860,22 +860,22 @@ std::future<std::result_of_t<std::decay_t<Function>(std::decay_t<Args>...)>>
     async( std::launch policy, Function&& f, Args&&... args );  
 #+END_SRC
 第一个参数是线程的创建策略，有两种策略可供选择：
-- std::launch::async：在调用async就开始创建线程。
-- std::launch::deferred：延迟加载方式创建线程。调用async时不创建线程，直到调用了future的get或者wait时才创建线程。
-默认策略是：std::launch::async | std::launch::deferred也就是两种策略的合集，具体什么意思后面详细再说
+- std::launch::async：在调用 async 就开始创建线程。
+- std::launch::deferred：延迟加载方式创建线程。调用 async 时不创建线程，直到调用了 future 的 get 或者 wait 时才创建线程。
+默认策略是：std::launch::async | std::launch::deferred 也就是两种策略的合集，具体什么意思后面详细再说
 
 第二个参数是线程函数:
-线程函数可接受function, lambda expression, bind expression, or another function object
+线程函数可接受 function, lambda expression, bind expression, or another function object
 
 第三个参数是线程函数的参数:
 不再说明
 
-返回值std::future
+返回值 std::future
 
-std::future是一个模板类，它提供了一种访问异步操作结果的机制。从字面意思上看它表示未来，这个意思就非常贴切，因为她不是立即获取结果但是可以在某个时候以同步的方式来获取结果。我们可以通过查询future的状态来获取异步操作的结构。future_status有三种状态：
+std::future 是一个模板类，它提供了一种访问异步操作结果的机制。从字面意思上看它表示未来，这个意思就非常贴切，因为她不是立即获取结果但是可以在某个时候以同步的方式来获取结果。我们可以通过查询 future 的状态来获取异步操作的结构。future_status 有三种状态：
 - deferred：异步操作还未开始
 - ready：异步操作已经完成
-- timeout：异步操作超时，主要用于std::future<T>.wait_for()
+- timeout：异步操作超时，主要用于 std::future<T>.wait_for()
 
 示例：
 #+begin_src c++
@@ -893,7 +893,7 @@ do {
 } while (status != std::future_status::ready);
 
 #+END_SRC
-std::future获取结果的方式有三种：
+std::future 获取结果的方式有三种：
 - get：等待异步操作结束并返回结果
 - wait：等待异步操作结束，但没有返回值
 - waite_for：超时等待返回结果，上面示例中就是对超时等待的使用展示
@@ -910,14 +910,16 @@ struct ListNode {
 #+END_SRC
 
 如果调用 ~ListNode(5)~ 那么 ~val=5~ ， ~next~ 指针为空指针
+* false sharing,伪共享
+https://www.cnblogs.com/cyfonly/p/5800758.html
 * 函数指针
 函数指针指向的是函数而非对象.
 函数的类型由返回类型和形参类型共同决定,与函数名无关.
-函数指针可以赋值为nullptr或者值为0的整型常量表达式.
+函数指针可以赋值为 nullptr 或者值为 0 的整型常量表达式.
 
 函数 bool lengthCompare(const string &,const string &) 的类型是 bool(const string &,const string &).
 如果想声明一个指向该函数的指针,只需要用指针替换函数名即可: bool (*pf)(const string &,const string &) (未初始化).
-注意 *pf 左右两边的括号必不可少,如果没有括号,那么pf是一个返回值为bool指针的函数.
+注意 *pf 左右两边的括号必不可少,如果没有括号,那么 pf 是一个返回值为 bool 指针的函数.
 
 ** 使用函数指针
 当把函数名作为一个值使用时,该函数自动转换为指针.
@@ -940,9 +942,9 @@ struct ListNode {
   void ff(int *);
   void ff(unsigned int);
 
-  void (*pf1)(unsigned int)=ff; //pf1指向ff(unsigned)
-  void (*pf2)(int)=ff;          //错误:没有任何一个ff与该形参列表匹配
-  double (*pf3)(int*)=ff;       //错误:ff与pf3的返回值不匹配
+  void (*pf1)(unsigned int)=ff; //pf1 指向 ff(unsigned)
+  void (*pf2)(int)=ff;          //错误:没有任何一个 ff 与该形参列表匹配
+  double (*pf3)(int*)=ff;       //错误:ff 与 pf3 的返回值不匹配
 #+END_
 ** 函数指针形参
 和数组类似,虽然不能定义函数类型的形参,但是形参可以是指向函数的指针.
@@ -953,7 +955,7 @@ struct ListNode {
   useBigger(s1,s2,lengthCompare);//可以直接将函数作为实参使用,此时它会自动转换成指针
 #+END_SRC
 
-可以用类型别名和decltype简化使用函数指针的代码
+可以用类型别名和 decltype 简化使用函数指针的代码
 #+begin_src c++
   //Func和Func2是函数类型
   typedef bool Func(const string&,const string&);
@@ -962,34 +964,130 @@ struct ListNode {
 #+END_SRC
 * 互斥锁
 ** pthread_mutex_init()函数
-该函数用于C函数的多线程编程中，互斥锁的初始化。
+该函数用于 C 函数的多线程编程中，互斥锁的初始化。
 #+begin_src c++
 int pthread_mutex_init(pthread_mutex_t *restrict mutex,
                        const pthread_mutexattr_t *restrict attr);
 #+END_SRC
 pthread_mutex_init()函数是以动态方式创建互斥锁的.
 
-参数attr指定了新建互斥锁的属性。如果参数attr为NULL，则使用默认的互斥锁属性，默认属性为快速互斥锁。
+参数 attr 指定了新建互斥锁的属性。如果参数 attr 为 NULL，则使用默认的互斥锁属性，默认属性为快速互斥锁。
 
 pthread_mutexattr_init()函数成功完成之后会返回零，其他任何返回值都表示出现了错误。
 
 函数成功执行后，互斥锁被初始化为锁住态。
 
 *** 互斥锁属性
-互斥锁的属性在创建锁的时候指定，在LinuxThreads实现中仅有一个锁类型属性，不同的锁类型在试图对一个已经被锁定的互斥锁加锁时表现不同。当前（glibc2.2.3,linuxthreads0.9）有四个值可供选择：
+互斥锁的属性在创建锁的时候指定，在 LinuxThreads 实现中仅有一个锁类型属性，不同的锁类型在试图对一个已经被锁定的互斥锁加锁时表现不同。当前（glibc2.2.3,linuxthreads0.9）有四个值可供选择：
 - PTHREAD_MUTEX_TIMED_NP，这是缺省值，也就是普通锁。当一个线程加锁以后，其余请求锁的线程将形成一个等待队列，并在解锁后按优先级获得锁。这种锁策略保证了资源分配的公平性。
-- PTHREAD_MUTEX_RECURSIVE_NP，嵌套锁，允许同一个线程对同一个锁成功获得多次，并通过多次unlock解锁。如果是不同线程请求，则在加锁线程解锁时重新竞争。
-- PTHREAD_MUTEX_ERRORCHECK_NP，检错锁，如果同一个线程请求同一个锁，则返回EDEADLK，否则与PTHREAD_MUTEX_TIMED_NP类型动作相同。这样就保证当不允许多次加锁时不会出现最简单情况下的死锁。
+- PTHREAD_MUTEX_RECURSIVE_NP，嵌套锁，允许同一个线程对同一个锁成功获得多次，并通过多次 unlock 解锁。如果是不同线程请求，则在加锁线程解锁时重新竞争。
+- PTHREAD_MUTEX_ERRORCHECK_NP，检错锁，如果同一个线程请求同一个锁，则返回 EDEADLK，否则与 PTHREAD_MUTEX_TIMED_NP 类型动作相同。这样就保证当不允许多次加锁时不会出现最简单情况下的死锁。
 - PTHREAD_MUTEX_ADAPTIVE_NP，适应锁，动作最简单的锁类型，仅等待解锁后重新竞争。
-* intptr_t、uintptr_t数据类型的解析
+* Hazard Pointer
+
+#+DOWNLOADED: screenshot @ 2024-08-02 22:04:48
+[[file:images/c++/Hazard_Pointer/2024-08-02_22-04-48_screenshot.png]]
+** 解决了什么问题
+在并发编程中，当我们在操作共享的内存对象时，需要考虑到其他线程是否有可能也正在访问同一对象，如果要释放该内存对象时不考虑这个问题，会引发严重的后果（访问悬空指针）。
+
+线程互斥方法是解决这个最简单最直接的方法，访问共享内存时加锁即可保证没有其他线程正在访问同一对象，也就可以安全的释放内存了。但是如果我们正在操作的是一种 lock-free 的数据结构，我们自然不能容忍在这个问题上使用互斥来解决，这样会破坏 lock-free 的特性（不管任何线程失败，其他线程都能继续运行），那么，我们就需要一种同样 lock-free 的方法来解决共享内存对象的回收问题，Hazard Pointer 就是其中一种方法。
+
+除了共享内存的回收问题之外，另一个在 lock-free 编程中不得不提到的就是大名鼎鼎 ABA 问题。依我的理解来看，ABA 问题和内存回收问题是相关的，都是内存的生命周期管理问题。具体来说，内存回收问题解的是共享内存什么时候能安全的回收，而 ABA 问题解的是共享内存什么时候能被安全的重新使用。因此，Hazard Pointer 也可以用来解决 ABA 问题。
+** 和 GC 有什么区别？
+一种你可能最为熟悉的解决内存回收问题的方案是 GC（垃圾回收）。GC 的确可以解决内存回收问题，也可以解决大部分的 ABA 问题（先释放后重用的使用模式），但是却不能解决所有的 ABA 问题。例如两个链表实现的栈，不断在两个栈之间交换节点（弹出到对面），这样做内存并没有被回收，但是却面临重用问题，有 ABA 风险。而 Hazard Pointer 可以结合数据结构解决这一问题。
+** 和智能指针有什么区别？
+智能指针也是用来解决内存回收问题的，其本质是自动引用计数，通过智能指针对象的复制和销毁来维护引用计数。但智能指针和 Hazard Pointer 所解决问题的场景有很大差别：智能指针并不是线程安全的（多线程访问同一智能指针），换句话说，智能指针是一个语法糖（让你写起来很爽，但其实没有解决什么问题）。
+** 基本原理
+首先看看 hazard pointer 使用的数据存储结构。如题图所示，我们需要为每个线程准备一些线程局部的内存，用来存储两部分内容：
+
+pointers:用来存储这个线程当前正在访问的内存对象，正在访问的内存对象不能被任何线程释放
+retire list:被这个线程删除的内存对象，但还没有释放
+既然我们需要安全的释放内存，那么 hazard pointer 的思路也很清晰：
+1. 每个线程都将自己正在访问且不希望被任何线程释放的内存对象存放在线程局部的 pointers 中
+2. 当任何线程删除内存对象后，都需要先把该内存对象放入自己线程局部的 retire list
+3. 当 retire list 中的内存对象数量超过一定限度时，扫描 retire list，找到没有被任何线程使用的内存节点并将其安全的释放
+
+以上三步就构成了 hazard pointer 的全部内容。仔细分析流程会发现 pointers 是单写多读，而 retire list 是单写单读的，这个性质很重要，不然的话我们又需要另一种机制来保护 hazard pointer 了…
+** 怎么用
+hazard pointer 的使用是要结合具体的数据结构的，我们需要分析所要保护的数据结构的每一步操作，找出需要保护的内存对象并使用 hazard pointer 替换普通指针对危险的内存访问进行保护。还是以上次的 lock-free 队列来说，使用了 hazard pointer 后代码变为下面的样子：
+#+begin_src c++
+template <typename T>
+void Queue<T>::enqueue(const T &data)
+{
+  qnode *node = new qnode();
+  node->data = data;
+  node->next = NULL;
+  // qnode *t = NULL;
+  HazardPointer<qnode> t(hazard_mgr_);
+  qnode *next = NULL;
+ 
+  while (true) {
+    if (!t.acquire(&tail_)) {
+      continue;
+    }
+    next = t->next;
+    if (next) {
+      __sync_bool_compare_and_swap(&tail_, t, next);
+      continue;
+    }
+    if (__sync_bool_compare_and_swap(&t->next, NULL, node)) {
+      break;
+    }
+  }
+  __sync_bool_compare_and_swap(&tail_, t, node);
+}
+ 
+template <typename T>
+bool Queue<T>::dequeue(T &data)
+{
+  qnode *t = NULL;
+  // qnode *h = NULL;
+  HazardPointer<qnode> h(hazard_mgr_);
+  // qnode *next = NULL;
+  HazardPointer<qnode> next(hazard_mgr_);
+ 
+  while (true) {
+    if (!h.acquire(&head_)) {
+      continue;
+    }
+    t = tail_;
+    next.acquire(&h->next);
+    asm volatile("" ::: "memory");
+    if (head_ != h) {
+      continue;
+    }
+    if (!next) {
+      return false;
+    }
+    if (h == t) {
+      __sync_bool_compare_and_swap(&tail_, t, next);
+      continue;
+    }
+    data = next->data;
+    if (__sync_bool_compare_and_swap(&head_, h, next)) {
+      break;
+    }
+  }
+ 
+  /* h->next = (qnode *)1; // bad address, It's a trap! */
+  /* delete h; */
+  hazard_mgr_.retireNode(h);
+  return true;
+}
+#+end_src
+
+不要纠结在具体的实现定义上，可以看到的是队列的基本算法是没有改变的，区别在于我们使用 HazardPointer 保护了几个运行中需要持续保护的指针，在队列这个数据结构中，同一线程最多需要保存两个 pointer 就够了。
+
+在获取内存对象地址时，我们使用 HazardPointer::acquire 方法将要保护的内存对象放入到 hazard pointer 中，在删除节点后，我们将内存对象交给 retireNode 方法，由 hazard pointer 负责安全的释放对应内存。
+* intptr_t、uintptr_t 数据类型的解析
 #+begin_src c++
 typedef  intptr_t      ngx_int_t;
 typedef  uintptr_t    ngx_uint_t;
 #+END_SRC
-intptr_t和uintptr_t是什么类型？以前没见过，于是查了一下。
-这两个数据类型是ISO C99定义的，具体代码在linux平台的/usr/include/stdint.h头文件中。
+intptr_t 和 uintptr_t 是什么类型？以前没见过，于是查了一下。
+这两个数据类型是 ISO C99 定义的，具体代码在 linux 平台的/usr/include/stdint.h 头文件中。
 
-该头文件中定义intptr_t和uintptr_t这两个数据类型的代码片段如下：
+该头文件中定义 intptr_t 和 uintptr_t 这两个数据类型的代码片段如下：
 #+begin_src c++
 /* Types for `void *' pointers.  */
 #if __WORDSIZE == 64
@@ -1006,18 +1104,18 @@ typedef int			intptr_t;
 typedef unsigned int		uintptr_t;
 #endif
 #+END_SRC
-在64位的机器上，intptr_t和uintptr_t分别是long int、unsigned long int的别名；在32位的机器上，intptr_t和uintptr_t分别是int、unsigned int的别名。
+在 64 位的机器上，intptr_t 和 uintptr_t 分别是 long int、unsigned long int 的别名；在 32 位的机器上，intptr_t 和 uintptr_t 分别是 int、unsigned int 的别名。
 
-那么为什么要用typedef定义新的别名呢？我想主要是为了提高程序的可移植性（在32位和64位的机器上）。很明显，上述代码会根据宿主机器的位数为intptr_t和uintptr_t适配相应的数据类型。
+那么为什么要用 typedef 定义新的别名呢？我想主要是为了提高程序的可移植性（在 32 位和 64 位的机器上）。很明显，上述代码会根据宿主机器的位数为 intptr_t 和 uintptr_t 适配相应的数据类型。
 另外，如注释所言，定义这两个数据类型别名也是为了“void *”指针。
 
-在C语言中，任何类型的指针都可以转换为void *类型，并且在将它转换回原来的类型时不会丢失信息。
+在 C 语言中，任何类型的指针都可以转换为 void *类型，并且在将它转换回原来的类型时不会丢失信息。
 ** 参考文章
-[[https://blog.csdn.net/cs_zhanyb/article/details/16973379][intptr_t、uintptr_t数据类型的解析]]
+[[https://blog.csdn.net/cs_zhanyb/article/details/16973379][intptr_t、uintptr_t 数据类型的解析]]
 * 继承
 ** 多重继承
-非虚拟继承，B和C的对象分别保留一份A对象的内存空间，n处于不同的内存空间，因此是独立的不会相互影响，n的赋值不会覆盖；
-如果B和C虚拟继承A类的话，A的对象只有一份，B和C对象中只是保存指向A对象的指针，n的赋值会覆盖。
+非虚拟继承，B和 C 的对象分别保留一份 A 对象的内存空间，n处于不同的内存空间，因此是独立的不会相互影响，n的赋值不会覆盖；
+如果 B 和 C 虚拟继承 A 类的话，A的对象只有一份，B和 C 对象中只是保存指向 A 对象的指针，n的赋值会覆盖。
 #+begin_src c++
 #include <iostream>
 using namespace std;
@@ -1161,7 +1259,7 @@ iostream 从 istream 和 ostream 直接继承而来，而 istream 和 ostream �
 此外，如果虚基类的成员只被一条派生路径覆盖，那么仍然可以直接访问这个被覆盖的成员。
 但是如果该成员被两条或多条路径覆盖了，那就不能直接访问了，此时必须指明该成员属于哪个类。
 
-以图2中的菱形继承为例，假设 A 定义了一个名为 x 的成员变量，当我们在 D 中直接访问 x 时，会有三种可能性：
+以图 2 中的菱形继承为例，假设 A 定义了一个名为 x 的成员变量，当我们在 D 中直接访问 x 时，会有三种可能性：
 - 如果 B 和 C 中都没有 x 的定义，那么 x 将被解析为 A 的成员，此时不存在二义性。
 - 如果 B 或 C 其中的一个类定义了 x，也不会有二义性，派生类的 x 比虚基类的 x 优先级更高。
 - 如果 B 和 C 中都定义了 x，那么直接访问 x 将产生二义性问题。
@@ -1170,9 +1268,9 @@ iostream 从 istream 和 ostream 直接继承而来，而 istream 和 ostream �
 因我不提倡在程序中使用多继承，只有在比较简单和不易出现二义性的情况或实在必要时才使用多继承，能用单一继承解决的问题就不要使用多继承
 。也正是由于这个原因，C++ 之后的很多面向对象的编程语言，例如 Java、C#、PHP 等，都不支持多继承。
 ** 访问控制
-public继承不改变父类中的成员的访问权限；
-protected继承时，public和protected访问级别的成员变为protected，private还是private；
-private继承时，父类所有成员变为private。
+public 继承不改变父类中的成员的访问权限；
+protected 继承时，public 和 protected 访问级别的成员变为 protected，private 还是 private；
+private 继承时，父类所有成员变为 private。
 ** 派生类初始化基类对象
 派生类的构造函数必须先调用基类构造函数才能初始化私有成员,如果不显示的调用基类的构造函数，则会调用默认的构造函数
 
@@ -1281,7 +1379,7 @@ int main()
 - 如果一个类没有拷贝构造函数，但是该类声明或继承了虚函数，此时编译器会为该类合成一个拷贝 构造函数；
 - 如果一个类没有拷贝构造函数，但是该类含有虚基类，此时编译器会为该类合成一个拷贝构造函 数；
 
-一般情况下，合成的拷贝构造函数会将其参数的成员（非static成员）逐个拷贝到正在创建的对象中。
+一般情况下，合成的拷贝构造函数会将其参数的成员（非 static 成员）逐个拷贝到正在创建的对象中。
 
 每个成员的拷贝方式由数据类型决定：
 - 类类型：使用其拷贝构造函数进行拷贝
@@ -1422,17 +1520,17 @@ int &ref_a = 5; // 左值引用指向了右值，会编译失败
 #+END_SRC
 引用是变量的别名，由于右值没有地址，没法被修改，所以左值引用无法指向右值。
 
-但是，const左值引用是可以指向右值的：
+但是，const 左值引用是可以指向右值的：
 #+begin_src c++
 const int &ref_a = 5;  // 编译通过
 #+END_SRC
-const左值引用不会修改指向值，因此可以指向右值，这也是为什么要使用const &作为函数参数的原因之一，如std::vector的push_back：
+const 左值引用不会修改指向值，因此可以指向右值，这也是为什么要使用 const &作为函数参数的原因之一，如 std::vector 的 push_back：
 #+begin_src c++
 void push_back (const value_type& val);
 #+END_SRC
-如果没有const，vec.push_back(5)这样的代码就无法编译通过了。
+如果没有 const，vec.push_back(5)这样的代码就无法编译通过了。
 **** 指向左值
-std::move可以让右值引用指向左值
+std::move 可以让右值引用指向左值
 #+begin_src c++
 int a = 5; // a是个左值
 int &ref_a_left = a; // 左值引用指向左值
@@ -1440,9 +1538,9 @@ int &&ref_a_right = std::move(a); // 通过std::move将左值转化为右值，�
 
 cout << a; // 打印结果：5
 #+end_src
-std::move的功能是把左值强制转化为右值，让右值引用可以指向左值,其实现等同于一个类型转换：static_cast<T&&>(lvalue)。
+std::move 的功能是把左值强制转化为右值，让右值引用可以指向左值,其实现等同于一个类型转换：static_cast<T&&>(lvalue)。
 
-同样的，右值引用能指向右值，本质上也是把右值提升为一个左值，并定义一个右值引用通过std::move指向该左值：
+同样的，右值引用能指向右值，本质上也是把右值提升为一个左值，并定义一个右值引用通过 std::move 指向该左值：
 #+begin_src c++
 int &&ref_a = 5;
 ref_a = 6;
@@ -1485,8 +1583,8 @@ int main() {
 右值引用既可以是左值也可以是右值，如果有名称则为左值，否则是右值。
 **** 左右值引用的异同
 1. 从性能上讲，左右值引用没有区别，传参使用左右值引用都可以避免拷贝。
-2. 右值引用可以直接指向右值，也可以通过std::move指向左值；而左值引用只能指向左值(const左值引用也能指向右值)。
-3. 作为函数形参时，右值引用更灵活。虽然const左值引用也可以做到左右值都接受，但它无法修改，有一定局限性。
+2. 右值引用可以直接指向右值，也可以通过 std::move 指向左值；而左值引用只能指向左值(const 左值引用也能指向右值)。
+3. 作为函数形参时，右值引用更灵活。虽然 const 左值引用也可以做到左右值都接受，但它无法修改，有一定局限性。
 #+begin_src c++
   void f(const int& n) {
       n += 1; // 编译失败，const左值引用不能修改指向变量
@@ -1502,13 +1600,13 @@ int main() {
       f2(5);
   }
 #+end_src
-**** 右值引用和std::move的应用场景
+**** 右值引用和 std::move 的应用场景
 **** 参考文章
 [[https://zhuanlan.zhihu.com/p/335994370][一文读懂C++右值引用和std::move]]
-按上文分析，std::move只是类型转换工具，不会对性能有好处；右值引用在作为函数形参时更具灵活性，看上去还是挺鸡肋的。他们有什么实际应用场景吗？
+按上文分析，std::move 只是类型转换工具，不会对性能有好处；右值引用在作为函数形参时更具灵活性，看上去还是挺鸡肋的。他们有什么实际应用场景吗？
 
 3.1 实现移动语义
-在实际场景中，右值引用和std::move被广泛用于在STL和自定义类中实现移动语义，避免拷贝，从而提升程序性能。 在没有右值引用之前，一个简单的数组类通常实现如下，有构造函数、拷贝构造函数、赋值运算符重载、析构函数等。深拷贝/浅拷贝在此不做讲解。
+在实际场景中，右值引用和 std::move 被广泛用于在 STL 和自定义类中实现移动语义，避免拷贝，从而提升程序性能。 在没有右值引用之前，一个简单的数组类通常实现如下，有构造函数、拷贝构造函数、赋值运算符重载、析构函数等。深拷贝/浅拷贝在此不做讲解。
 
 class Array {
 public:
@@ -1566,7 +1664,7 @@ public:
     Array(const Array& temp_array, bool move) {
         data_ = temp_array.data_;
         size_ = temp_array.size_;
-        // 为防止temp_array析构时delete data，提前置空其data_      
+        // 为防止 temp_array 析构时 delete data，提前置空其 data_      
         temp_array.data_ = nullptr;
     }
      
@@ -1579,11 +1677,11 @@ public:
     int *data_;
     int size_;
 };
-这么做有2个问题：
+这么做有 2 个问题：
 
 不优雅，表示移动语义还需要一个额外的参数(或者其他方式)。
-无法实现！temp_array是个const左值引用，无法被修改，所以temp_array.data_ = nullptr;这行会编译不过。当然函数参数可以改成非const：Array(Array& temp_array, bool move){...}，这样也有问题，由于左值引用不能接右值，Array a = Array(Array(), true);这种调用方式就没法用了。
-可以发现左值引用真是用的很不爽，右值引用的出现解决了这个问题，在STL的很多容器中，都实现了以右值引用为参数的移动构造函数和移动赋值重载函数，或者其他函数，最常见的如std::vector的push_back和emplace_back。参数为左值引用意味着拷贝，为右值引用意味着移动。
+无法实现！temp_array 是个 const 左值引用，无法被修改，所以 temp_array.data_ = nullptr;这行会编译不过。当然函数参数可以改成非 const：Array(Array& temp_array, bool move){...}，这样也有问题，由于左值引用不能接右值，Array a = Array(Array(), true);这种调用方式就没法用了。
+可以发现左值引用真是用的很不爽，右值引用的出现解决了这个问题，在 STL 的很多容器中，都实现了以右值引用为参数的移动构造函数和移动赋值重载函数，或者其他函数，最常见的如 std::vector 的 push_back 和 emplace_back。参数为左值引用意味着拷贝，为右值引用意味着移动。
 
 class Array {
 public:
@@ -1593,7 +1691,7 @@ public:
     Array(Array&& temp_array) {
         data_ = temp_array.data_;
         size_ = temp_array.size_;
-        // 为防止temp_array析构时delete data，提前置空其data_      
+        // 为防止 temp_array 析构时 delete data，提前置空其 data_      
         temp_array.data_ = nullptr;
     }
      
@@ -1604,75 +1702,75 @@ public:
 };
 如何使用：
 
-// 例1：Array用法
+// 例 1：Array 用法
 int main(){
     Array a;
  
     // 做一些操作
     .....
      
-    // 左值a，用std::move转化为右值
+    // 左值 a，用 std::move 转化为右值
     Array b(std::move(a));
 }
-3.2 实例：vector::push_back使用std::move提高性能
-// 例2：std::vector和std::string的实际例子
+3.2 实例：vector::push_back 使用 std::move 提高性能
+// 例 2：std::vector 和 std::string 的实际例子
 int main() {
     std::string str1 = "aacasxs";
     std::vector<std::string> vec;
      
     vec.push_back(str1); // 传统方法，copy
-    vec.push_back(std::move(str1)); // 调用移动语义的push_back方法，避免拷贝，str1会失去原有值，变成空字符串
-    vec.emplace_back(std::move(str1)); // emplace_back效果相同，str1会失去原有值
+    vec.push_back(std::move(str1)); // 调用移动语义的 push_back 方法，避免拷贝，str1 会失去原有值，变成空字符串
+    vec.emplace_back(std::move(str1)); // emplace_back 效果相同，str1 会失去原有值
     vec.emplace_back("axcsddcas"); // 当然可以直接接右值
 }
  
-// std::vector方法定义
+// std::vector 方法定义
 void push_back (const value_type& val);
 void push_back (value_type&& val);
  
 void emplace_back (Args&&... args);
-在vector和string这个场景，加个std::move会调用到移动语义函数，避免了深拷贝。
+在 vector 和 string 这个场景，加个 std::move 会调用到移动语义函数，避免了深拷贝。
 
-除非设计不允许移动，STL类大都支持移动语义函数，即可移动的。 另外，编译器会默认在用户自定义的class和struct中生成移动语义函数，但前提是用户没有主动定义该类的拷贝构造等函数(具体规则自行百度哈)。 因此，可移动对象在<需要拷贝且被拷贝者之后不再被需要>的场景，建议使用std::move触发移动语义，提升性能。
+除非设计不允许移动，STL 类大都支持移动语义函数，即可移动的。 另外，编译器会默认在用户自定义的 class 和 struct 中生成移动语义函数，但前提是用户没有主动定义该类的拷贝构造等函数(具体规则自行百度哈)。 因此，可移动对象在<需要拷贝且被拷贝者之后不再被需要>的场景，建议使用 std::move 触发移动语义，提升性能。
 
 moveable_objecta = moveable_objectb; 
 改为： 
 moveable_objecta = std::move(moveable_objectb);
-还有些STL类是move-only的，比如unique_ptr，这种类只有移动构造函数，因此只能移动(转移内部对象所有权，或者叫浅拷贝)，不能拷贝(深拷贝):
+还有些 STL 类是 move-only 的，比如 unique_ptr，这种类只有移动构造函数，因此只能移动(转移内部对象所有权，或者叫浅拷贝)，不能拷贝(深拷贝):
 
 std::unique_ptr<A> ptr_a = std::make_unique<A>();
 
-std::unique_ptr<A> ptr_b = std::move(ptr_a); // unique_ptr只有‘移动赋值重载函数‘，参数是&& ，只能接右值，因此必须用std::move转换类型
+std::unique_ptr<A> ptr_b = std::move(ptr_a); // unique_ptr 只有‘移动赋值重载函数‘，参数是&& ，只能接右值，因此必须用 std::move 转换类型
 
 std::unique_ptr<A> ptr_b = ptr_a; // 编译不通过
-std::move本身只做类型转换，对性能无影响。 我们可以在自己的类中实现移动语义，避免深拷贝，充分利用右值引用和std::move的语言特性。
+std::move 本身只做类型转换，对性能无影响。 我们可以在自己的类中实现移动语义，避免深拷贝，充分利用右值引用和 std::move 的语言特性。
 
 4. 完美转发 std::forward
-和std::move一样，它的兄弟std::forward也充满了迷惑性，虽然名字含义是转发，但他并不会做转发，同样也是做类型转换.
+和 std::move 一样，它的兄弟 std::forward 也充满了迷惑性，虽然名字含义是转发，但他并不会做转发，同样也是做类型转换.
 
-与move相比，forward更强大，move只能转出来右值，forward都可以。
+与 move 相比，forward 更强大，move 只能转出来右值，forward 都可以。
 
-std::forward<T>(u)有两个参数：T与 u。 a. 当T为左值引用类型时，u将被转换为T类型的左值； b. 否则u将被转换为T类型右值。
-举个例子，有main，A，B三个函数，调用关系为：main->A->B，建议先看懂2.3节对左右值引用本身是左值还是右值的讨论再看这里：
+std::forward<T>(u)有两个参数：T与 u。 a. 当 T 为左值引用类型时，u将被转换为 T 类型的左值； b. 否则 u 将被转换为 T 类型右值。
+举个例子，有 main，A，B 三个函数，调用关系为：main->A->B，建议先看懂 2.3 节对左右值引用本身是左值还是右值的讨论再看这里：
 
 void B(int&& ref_r) {
     ref_r = 1;
 }
  
-// A、B的入参是右值引用
-// 有名字的右值引用是左值，因此ref_r是左值
+// A、B 的入参是右值引用
+// 有名字的右值引用是左值，因此 ref_r 是左值
 void A(int&& ref_r) {
-    B(ref_r);  // 错误，B的入参是右值引用，需要接右值，ref_r是左值，编译失败
+    B(ref_r);  // 错误，B的入参是右值引用，需要接右值，ref_r 是左值，编译失败
      
-    B(std::move(ref_r)); // ok，std::move把左值转为右值，编译通过
-    B(std::forward<int>(ref_r));  // ok，std::forward的T是int类型，属于条件b，因此会把ref_r转为右值
+    B(std::move(ref_r)); // ok，std::move 把左值转为右值，编译通过
+    B(std::forward<int>(ref_r));  // ok，std::forward 的 T 是 int 类型，属于条件 b，因此会把 ref_r 转为右值
 }
  
 int main() {
     int a = 5;
     A(std::move(a));
 }
-例2：
+例 2：
 
 void change2(int&& ref_r) {
     ref_r = 1;
@@ -1682,24 +1780,24 @@ void change3(int& ref_l) {
     ref_l = 1;
 }
  
-// change的入参是右值引用
-// 有名字的右值引用是 左值，因此ref_r是左值
+// change 的入参是右值引用
+// 有名字的右值引用是 左值，因此 ref_r 是左值
 void change(int&& ref_r) {
-    change2(ref_r);  // 错误，change2的入参是右值引用，需要接右值，ref_r是左值，编译失败
+    change2(ref_r);  // 错误，change2 的入参是右值引用，需要接右值，ref_r 是左值，编译失败
      
-    change2(std::move(ref_r)); // ok，std::move把左值转为右值，编译通过
-    change2(std::forward<int &&>(ref_r));  // ok，std::forward的T是右值引用类型(int &&)，符合条件b，因此u(ref_r)会被转换为右值，编译通过
+    change2(std::move(ref_r)); // ok，std::move 把左值转为右值，编译通过
+    change2(std::forward<int &&>(ref_r));  // ok，std::forward 的 T 是右值引用类型(int &&)，符合条件 b，因此 u(ref_r)会被转换为右值，编译通过
      
-    change3(ref_r); // ok，change3的入参是左值引用，需要接左值，ref_r是左值，编译通过
-    change3(std::forward<int &>(ref_r)); // ok，std::forward的T是左值引用类型(int &)，符合条件a，因此u(ref_r)会被转换为左值，编译通过
-    // 可见，forward可以把值转换为左值或者右值
+    change3(ref_r); // ok，change3 的入参是左值引用，需要接左值，ref_r 是左值，编译通过
+    change3(std::forward<int &>(ref_r)); // ok，std::forward 的 T 是左值引用类型(int &)，符合条件 a，因此 u(ref_r)会被转换为左值，编译通过
+    // 可见，forward 可以把值转换为左值或者右值
 }
  
 int main() {
     int a = 5;
     change(std::move(a));
 }
-上边的示例在日常编程中基本不会用到，std::forward最主要运于模版编程的参数转发中，想深入了解需要学习万能引用(T &&)和引用折叠(eg:& && → ?)等知识，本文就不详细介绍这些了。
+上边的示例在日常编程中基本不会用到，std::forward 最主要运于模版编程的参数转发中，想深入了解需要学习万能引用(T &&)和引用折叠(eg:& && → ?)等知识，本文就不详细介绍这些了。
 
 *** 参考文章
 [[https://zhuanlan.zhihu.com/p/111792987][关于C++默认拷贝构造函数产生的问题的讨论]]
@@ -1720,16 +1818,16 @@ MyClass tmp{ "hello" };
 myClasses.push_back(tmp);
 myClasses.push_back(tmp);
 #+END_SRC
-在这个例子中，我们创建了一个容器以及一个MyClass对象tmp，我们将tmp对象添加到容器中2次。每次添加时，都会发生一次拷贝操作。最终内存中的数据如图所示：
+在这个例子中，我们创建了一个容器以及一个 MyClass 对象 tmp，我们将 tmp 对象添加到容器中 2 次。每次添加时，都会发生一次拷贝操作。最终内存中的数据如图所示：
 #+DOWNLOADED: screenshot @ 2023-08-23 22:49:51
 [[file:images/c++/拷贝、赋值、销毁/2023-08-23_22-49-51_screenshot.png]]
-现在问题来了，tmp对象在被添加到容器中2次之后，就不需要了，也就是说，它的生命期即将结束。既然tmp对象不再需要了，那么第2次将其添加到容器中的操作是不是就可以不执行拷贝操作了，而是让容器直接取tmp对象的数据继续用。移动语义就是进行这种操作的.
+现在问题来了，tmp 对象在被添加到容器中 2 次之后，就不需要了，也就是说，它的生命期即将结束。既然 tmp 对象不再需要了，那么第 2 次将其添加到容器中的操作是不是就可以不执行拷贝操作了，而是让容器直接取 tmp 对象的数据继续用。移动语义就是进行这种操作的.
 
 所谓移动语义，就像其字面意思一样，即把数据从一个对象中转移到另一个对象中，从而避免拷贝操作所带来的性能损耗。
 
-为了支持移动语义，C++11引入了一种新的引用类型，称为“右值引用”，使用“&&”来声明。而我们最常使用的，使用“&”声明的引用，现在则称为“左值引用”。
+为了支持移动语义，C++11 引入了一种新的引用类型，称为“右值引用”，使用“&&”来声明。而我们最常使用的，使用“&”声明的引用，现在则称为“左值引用”。
 *** 移动构造函数
-移动构造函数是C++11引入的一种新的构造函数，它接收右值引用。
+移动构造函数是 C++11 引入的一种新的构造函数，它接收右值引用。
 #+begin_src c++
 class MyClass
 {
@@ -1762,13 +1860,13 @@ private:
 MyClass A{};
 MyClass B{ std::move(A) };  // 通过移动构造函数创建新对象B
 #+END_SRC
-在移动构造函数中，我们将传入对象A的数据转移给新创建的对象B。同时，还需要关注的重点在于，我们需要把传入对象A的数据清除，不然就会产生多个对象共享同一份数据的问题。被转移数据的对象会处于“有效但未定义（valid but unspecified）”的状态.
+在移动构造函数中，我们将传入对象 A 的数据转移给新创建的对象 B。同时，还需要关注的重点在于，我们需要把传入对象 A 的数据清除，不然就会产生多个对象共享同一份数据的问题。被转移数据的对象会处于“有效但未定义（valid but unspecified）”的状态.
 
-通过移动构造函数创建对象B之后，内存中的布局如图所示：
+通过移动构造函数创建对象 B 之后，内存中的布局如图所示：
 #+DOWNLOADED: screenshot @ 2023-08-23 23:09:39
 [[file:images/c++/拷贝、赋值、销毁/2023-08-23_23-09-39_screenshot.png]]
 *** 移动赋值
-C++11还引入了移动赋值运算符。移动赋值运算符也是接收右值引用，它的实现和移动构造函数基本一致。在移动赋值运算符中，我们也是从传入的对象中转移数据，并将该对象的数据清除：
+C++11 还引入了移动赋值运算符。移动赋值运算符也是接收右值引用，它的实现和移动构造函数基本一致。在移动赋值运算符中，我们也是从传入的对象中转移数据，并将该对象的数据清除：
 #+begin_src c++
 class MyClass
 {
@@ -1814,7 +1912,7 @@ B = std::move(A);  // 使用移动赋值运算符将对象A赋值给对象B
 ** 拷贝语义
 c++中对象中涉及其他对象或指针数据的话,执行拷贝操作可能会是一个很耗时的过程。
 
-我们来看一个例子。假设我们有个类，该类中有一个string类型的成员变量，定义如下：
+我们来看一个例子。假设我们有个类，该类中有一个 string 类型的成员变量，定义如下：
 #+begin_src c++
 class MyClass
 {
@@ -1827,15 +1925,15 @@ private:
 };
 MyClass A{ "hello" };
 #+END_SRC
-当我们新建一个该类的对象A，并传递参数“hello”时，对象A的成员变量str中会存储字符串“hello”。而为了存储字符串，string类型会为其分配内存空间。因此，当前内存中的数据如图所示：
+当我们新建一个该类的对象 A，并传递参数“hello”时，对象 A 的成员变量 str 中会存储字符串“hello”。而为了存储字符串，string 类型会为其分配内存空间。因此，当前内存中的数据如图所示：
 
 #+DOWNLOADED: screenshot @ 2023-08-23 22:47:28
 [[file:images/c++/拷贝、赋值、销毁/2023-08-23_22-47-28_screenshot.png]]
-现在，当我们定义了一个该类的新对象B，且把对象A赋值给对象B时，会发生什么？即，我们执行如下语句：
+现在，当我们定义了一个该类的新对象 B，且把对象 A 赋值给对象 B 时，会发生什么？即，我们执行如下语句：
 #+begin_src c++
 MyClass B = A;
 #+END_SRC
-当拷贝发生时，为了让B对象中的成员变量str也能够存储字符串“hello”，string类型会为其分配内存空间，并将对象A的str中存储的数据复制过来。因此，经过拷贝操作后，此时内存中的数据如图所示：
+当拷贝发生时，为了让 B 对象中的成员变量 str 也能够存储字符串“hello”，string 类型会为其分配内存空间，并将对象 A 的 str 中存储的数据复制过来。因此，经过拷贝操作后，此时内存中的数据如图所示：
 
 #+DOWNLOADED: screenshot @ 2023-08-23 22:48:51
 [[file:images/c++/拷贝、赋值、销毁/2023-08-23_22-48-51_screenshot.png]]
@@ -1845,11 +1943,11 @@ MyClass B = A;
 #+DOWNLOADED: screenshot @ 2023-08-23 23:32:23
 [[file:images/c++/拷贝、赋值、销毁/2023-08-23_23-32-23_screenshot.png]]
 
-在C++11之前，我们拥有4个特殊成员函数，即构造函数、析构函数、拷贝构造函数以及拷贝赋值运算符。从C++11开始，我们多了2个特殊成员函数，即移动构造函数和移动赋值运算符。
+在 C++11 之前，我们拥有 4 个特殊成员函数，即构造函数、析构函数、拷贝构造函数以及拷贝赋值运算符。从 C++11 开始，我们多了 2 个特殊成员函数，即移动构造函数和移动赋值运算符。
 *** deleted functions
 在细说移动构造函数和移动赋值运算符的生成规则之前，我们先要说一说“已删除的函数(deleted functions)”。
 
-在C++11中，可以使用语法=delete；来将函数定义为“已删除”。任何使用“已删除”函数的代码都会产生编译错误：
+在 C++11 中，可以使用语法=delete；来将函数定义为“已删除”。任何使用“已删除”函数的代码都会产生编译错误：
 #+begin_src c++
 class MyClass
 {
@@ -1859,9 +1957,9 @@ public:
 MyClass value;
 value.Test();  // 编译错误：attempting to reference a deleted function
 #+END_SRC
-在之后的介绍中，我们需要关注到的点是在特定情况下，编译器会将移动构造函数和移动赋值运算符定义为deleted。
+在之后的介绍中，我们需要关注到的点是在特定情况下，编译器会将移动构造函数和移动赋值运算符定义为 deleted。
 *** 默认情况
-在C++11之前，如果我们定义一个空类，编译器会自动为我们生成构造函数、析构函数、拷贝构造函数以及拷贝赋值运算符。该特性在移动语义上得以延伸。在C++11之后，如果我们定义一个空类，除了之前的4个特殊成员函数，编译器还会为我们生成移动构造函数和移动赋值运算符：
+在 C++11 之前，如果我们定义一个空类，编译器会自动为我们生成构造函数、析构函数、拷贝构造函数以及拷贝赋值运算符。该特性在移动语义上得以延伸。在 C++11 之后，如果我们定义一个空类，除了之前的 4 个特殊成员函数，编译器还会为我们生成移动构造函数和移动赋值运算符：
 #+begin_src c++
 class MyClass
 {};
@@ -1896,7 +1994,7 @@ public:
 MyClass A{};
 MyClass B{ std::move(A) };  // 执行的是拷贝构造函数来创建对象B
 #+END_SRC
-析构函数有一点值得注意，许多情况下，当一个类需要作为基类时，都需要声明一个virtual析构函数，此时需要特别留意是不是应该手动的为该类定义移动构造函数以及移动赋值运算符。此外，当子类派生时，如果子类没有实现自己的析构函数，那么将不会影响移动构造函数以及移动赋值运算符的自动生成：
+析构函数有一点值得注意，许多情况下，当一个类需要作为基类时，都需要声明一个 virtual 析构函数，此时需要特别留意是不是应该手动的为该类定义移动构造函数以及移动赋值运算符。此外，当子类派生时，如果子类没有实现自己的析构函数，那么将不会影响移动构造函数以及移动赋值运算符的自动生成：
 #+begin_src c++
 class MyBaseClass
 {
@@ -1912,8 +2010,8 @@ MyClass B{ std::move(A) };  // 这里将执行编译器自动生成的移动构�
 *** 参考文章
 [[https://bbs.huaweicloud.com/blogs/375866][一文入魂：再也不用担心我不懂C++移动语义了！]]
 ** noexcept
-*** 为什么需要noexcept
-为了说明为什么需要noexcept，我们还是从一个例子出发。我们定义MyClass类，并且我们先不对MyClass类的移动构造函数使用noexcept：
+*** 为什么需要 noexcept
+为了说明为什么需要 noexcept，我们还是从一个例子出发。我们定义 MyClass 类，并且我们先不对 MyClass 类的移动构造函数使用 noexcept：
 #+begin_src c++
 class MyClass
 {
@@ -1932,23 +2030,23 @@ private:
     std::string str{ "hello" };
 };
 #+END_SRC
-接着，我们创建一个MyClass的对象A，并且将其往classes容器中添加2次：
+接着，我们创建一个 MyClass 的对象 A，并且将其往 classes 容器中添加 2 次：
 #+begin_src c++
 MyClass A{};
 std::vector<MyClass> classes;
 classes.push_back(A);
 classes.push_back(A);
 #+END_SRC
-现在，我们来梳理一下流程。classes容器在定义时默认会申请1个元素的内存空间。当第1次执行classes.push_back(A)；时，对象A会被拷贝到容器第1个元素的位置：
+现在，我们来梳理一下流程。classes 容器在定义时默认会申请 1 个元素的内存空间。当第 1 次执行 classes.push_back(A)；时，对象 A 会被拷贝到容器第 1 个元素的位置：
 
 #+DOWNLOADED: screenshot @ 2023-08-23 23:31:08
 [[file:images/c++/拷贝、赋值、销毁/2023-08-23_23-31-08_screenshot.png]]
-当第2次执行classes.push_back(A)；时，由于classes容器已没有多余的内存空间，因此它需要分配一块新的内存空间。在分配新的内存空间之后，classes容器会做2个操作：将对象A拷贝到容器第2个元素的位置，以及将之前的元素放到新的内存空间中容器第1个元素的位置：
+当第 2 次执行 classes.push_back(A)；时，由于 classes 容器已没有多余的内存空间，因此它需要分配一块新的内存空间。在分配新的内存空间之后，classes 容器会做 2 个操作：将对象 A 拷贝到容器第 2 个元素的位置，以及将之前的元素放到新的内存空间中容器第 1 个元素的位置：
 #+DOWNLOADED: screenshot @ 2023-08-23 23:33:22
 [[file:images/c++/拷贝、赋值、销毁/2023-08-23_23-33-22_screenshot.png]]
-如上图所示那般，老的元素是被拷贝到新的内存空间中的。是的，classes容器确实使用的是拷贝构造函数。那么此时我们会想到，既然classes容器已经不需要之前的内存中的数据了，那么将老数据放到新的内存空间中应该使用移动语义，而非拷贝操作。
+如上图所示那般，老的元素是被拷贝到新的内存空间中的。是的，classes 容器确实使用的是拷贝构造函数。那么此时我们会想到，既然 classes 容器已经不需要之前的内存中的数据了，那么将老数据放到新的内存空间中应该使用移动语义，而非拷贝操作。
 
-那么为什么classes容器没有使用移动语义呢？
+那么为什么 classes 容器没有使用移动语义呢？
 
 此时，我们需要提及一个概念，即“强异常保证（strong exception guarantee）”。所谓强异常保证，即当我们调用一个函数时，如果发生了异常，那么应用程序的状态能够回滚到函数调用之前：
 
@@ -1956,13 +2054,13 @@ classes.push_back(A);
 [[file:images/c++/拷贝、赋值、销毁/2023-08-23_23-33-42_screenshot.png]]
 那么强异常保证和决定使用移动语义或拷贝操作又有什么关系呢？
 
-这是因为容器的push_back函数是具备强异常保证的，也就是说，当push_back函数在执行操作的过程中（由于内存不足需要申请新的内存、将老的元素放到新内存中等），如果发生了异常（内存空间不足无法申请等），push_back函数需要确保应用程序的状态能够回滚到调用它之前。以上面的例子来说，当第2次执行classes.push_back(A)；时，如果发生了异常，应用程序的状态会回滚到第1次执行classes.push_back(A)；之后，即classes容器中只有一个元素。
+这是因为容器的 push_back 函数是具备强异常保证的，也就是说，当 push_back 函数在执行操作的过程中（由于内存不足需要申请新的内存、将老的元素放到新内存中等），如果发生了异常（内存空间不足无法申请等），push_back 函数需要确保应用程序的状态能够回滚到调用它之前。以上面的例子来说，当第 2 次执行 classes.push_back(A)；时，如果发生了异常，应用程序的状态会回滚到第 1 次执行 classes.push_back(A)；之后，即 classes 容器中只有一个元素。
 
-由于我们的移动构造函数没有使用noexcept说明符，也就是我们没有保证移动构造函数不会抛出异常。因此，为了确保强异常保证，就只能使用拷贝构造函数了。那么拷贝构造函数同样没有保证不会抛出异常，为什么就能用呢？这是因为拷贝构造函数执行之后，被拷贝对象的原始数据是不会丢失的。因此，即使发生异常需要回滚，那些已经被拷贝的对象仍然完整且有效。但移动语义就不同了，被移动对象的原始数据是会被清除的，因此如果发生异常，那些已经被移动的对象的数据就没有了，找不回来了，也就无法完成状态回滚了。
-*** 为移动语义使用noexcept说明符
-在了解了以上的规则后，我们就清楚了，要想使用移动构造函数来将老的元素放到新的内存中，我们就需要告知编译器，我们的移动构造函数不会抛出异常，可以放心使用，这就是通过noexcept说明符完成的。
+由于我们的移动构造函数没有使用 noexcept 说明符，也就是我们没有保证移动构造函数不会抛出异常。因此，为了确保强异常保证，就只能使用拷贝构造函数了。那么拷贝构造函数同样没有保证不会抛出异常，为什么就能用呢？这是因为拷贝构造函数执行之后，被拷贝对象的原始数据是不会丢失的。因此，即使发生异常需要回滚，那些已经被拷贝的对象仍然完整且有效。但移动语义就不同了，被移动对象的原始数据是会被清除的，因此如果发生异常，那些已经被移动的对象的数据就没有了，找不回来了，也就无法完成状态回滚了。
+*** 为移动语义使用 noexcept 说明符
+在了解了以上的规则后，我们就清楚了，要想使用移动构造函数来将老的元素放到新的内存中，我们就需要告知编译器，我们的移动构造函数不会抛出异常，可以放心使用，这就是通过 noexcept 说明符完成的。
 
-我们来修改下MyClass类的移动构造函数，为其加上noexcept说明符：
+我们来修改下 MyClass 类的移动构造函数，为其加上 noexcept 说明符：
 #+begin_src c++
 class MyClass
 {
@@ -1985,12 +2083,12 @@ private:
 
 #+DOWNLOADED: screenshot @ 2023-08-23 23:35:08
 [[file:images/c++/拷贝、赋值、销毁/2023-08-23_23-35-08_screenshot.png]]
-关于noexcept说明符，是个庞大的话题，这里我们只是粗略的提及和移动语义有关的部分。值得注意的是，noexcept说明符是我们对于不会抛出异常的保证，如果在执行的过程中有异常被抛出了，应用程序将会直接终止执行。
+关于 noexcept 说明符，是个庞大的话题，这里我们只是粗略的提及和移动语义有关的部分。值得注意的是，noexcept 说明符是我们对于不会抛出异常的保证，如果在执行的过程中有异常被抛出了，应用程序将会直接终止执行。
 ** 使用移动语义时需要注意的其他内容
 *** 编译器生成的移动构造函数和移动赋值运算符
 前文我们提及，在特定情况下，编译器会为我们自动生成移动构造函数和移动赋值运算符。在自动生成的函数中，编译器执行的是逐成员的移动语义。
 
-假设我们的类包含一个int类型和一个std::string类型的成员：
+假设我们的类包含一个 int 类型和一个 std::string 类型的成员：
 #+begin_src c++
 class MyClass
 {
@@ -2026,13 +2124,13 @@ private:
 
 C++在其文档中表明，所有标准库中的对象，当被移动之后，会处于一个“有效但未定义的状态（valid but unspecified state）”。
 
-C++并没有强制的规定限制被移动对象必须处于什么状态，并且当类型需要满足不同用途时它的要求也不一致（例如用于key的类型要求被移动对象仍然能够进行排序），因此我们在实现自己的类型时需要根据具体情况来分析。但通常来说，我们应该尽可能的贴近C++标准库中的类型规范。但不管如何，以下这一点是我们必须考虑的：
+C++并没有强制的规定限制被移动对象必须处于什么状态，并且当类型需要满足不同用途时它的要求也不一致（例如用于 key 的类型要求被移动对象仍然能够进行排序），因此我们在实现自己的类型时需要根据具体情况来分析。但通常来说，我们应该尽可能的贴近 C++标准库中的类型规范。但不管如何，以下这一点是我们必须考虑的：
 
 保证被移动对象能够被正确的析构。
 
 为什么必须保证这一点呢？这是因为被移动对象只是处于一个特殊的状态，对于运行时来说，仍然是有效的，最终也会执行析构函数进行销毁。
 
-例如在之前我们的MyClass类型定义中，当我们执行移动语义后，被移动对象的name指针会被置空。当执行析构函数时，我们就可以简单的通过判空来避免指针的无效释放，这就确保了被移动对象能够正确的析构：
+例如在之前我们的 MyClass 类型定义中，当我们执行移动语义后，被移动对象的 name 指针会被置空。当执行析构函数时，我们就可以简单的通过判空来避免指针的无效释放，这就确保了被移动对象能够正确的析构：
 #+begin_src c++
 class MyClass
 {
@@ -2070,8 +2168,8 @@ private:
    char* name;
 };
 #+END_SRC
-*** 避免非必要的std::move调用
-在C++中，存在称为“NRVO（named return value optimization，命名返回值优化）”的技术，即如果函数返回一个临时对象，则该对象会直接给函数调用方使用，而不会再创建一个新对象。听起来有点晦涩，我们来看一个例子：
+*** 避免非必要的 std::move 调用
+在 C++中，存在称为“NRVO（named return value optimization，命名返回值优化）”的技术，即如果函数返回一个临时对象，则该对象会直接给函数调用方使用，而不会再创建一个新对象。听起来有点晦涩，我们来看一个例子：
 #+begin_src c++
 class MyClass
 {};
@@ -2082,11 +2180,11 @@ MyClass GetTemporary()
 }
 MyClass myClass = GetTemporary();  // 注意这里
 #+END_SRC
-在上面的例子中，GetTemporary函数会创建一个临时的MyClass对象A，接着在函数结束时返回。在没有NRVO的情况下，当执行语句MyClass myClass=GetTemporary()；时，会调用MyClass类的拷贝构造函数，通过对象A来拷贝创建myClass对象。因此，整个流程如图所示：
+在上面的例子中，GetTemporary 函数会创建一个临时的 MyClass 对象 A，接着在函数结束时返回。在没有 NRVO 的情况下，当执行语句 MyClass myClass=GetTemporary()；时，会调用 MyClass 类的拷贝构造函数，通过对象 A 来拷贝创建 myClass 对象。因此，整个流程如图所示：
 
 #+DOWNLOADED: screenshot @ 2023-08-23 23:39:02
 [[file:images/c++/拷贝、赋值、销毁/2023-08-23_23-39-02_screenshot.png]]
-我们可以发现，在创建完myClass对象之后，对象A就被销毁了，这无疑是一种浪费。因此，编译器会启用NRVO，直接让myClass对象使用对象A。这样一来，在整个过程中，我们只有一次创建对象A时构造函数的调用开销，省去了拷贝构造函数以及析构函数的调用开销：
+我们可以发现，在创建完 myClass 对象之后，对象 A 就被销毁了，这无疑是一种浪费。因此，编译器会启用 NRVO，直接让 myClass 对象使用对象 A。这样一来，在整个过程中，我们只有一次创建对象 A 时构造函数的调用开销，省去了拷贝构造函数以及析构函数的调用开销：
 
 * 类
 ** 构造函数
@@ -2115,7 +2213,7 @@ Data(const std::string &s,int n,double p) : bookNo(s),sold(n),revenue(p*n){}
 
 #+DOWNLOADED: screenshot @ 2023-08-23 23:39:17
 [[file:images/c++/lambda表达式/2023-08-23_23-39-17_screenshot.png]]
-为NRVO点赞！
+为 NRVO 点赞！
 
 此时，可能有细心的小伙伴已经发现了，这种返回临时对象的情况不就是移动语义发挥的场景嘛。没错，机智的你是不是会想到如下的修改：
 #+begin_src c++
@@ -2125,9 +2223,9 @@ MyClass GetTemporary()
    return std::move(A);  // 使用移动语义
 }
 #+END_SRC
-这样一来，通过移动语义，即使没有NRVO，也可以避免拷贝操作。乍看上去没啥毛病，但我们忽略了一种情况，那就是返回的对象类型并没有实现移动语义。
+这样一来，通过移动语义，即使没有 NRVO，也可以避免拷贝操作。乍看上去没啥毛病，但我们忽略了一种情况，那就是返回的对象类型并没有实现移动语义。
 
-让我们来分析一下这种情况，我们改写一下MyClass类：
+让我们来分析一下这种情况，我们改写一下 MyClass 类：
 #+begin_src c++
 class MyClass
 {
@@ -2136,14 +2234,14 @@ public:
     {}
 };
 #+END_SRC
-现在，MyClass类型没有实现移动语义，当我们执行语句MyClass myClass=GetTemporary()；时，编译器没有办法调用移动构造函数来创建myClass对象。同时，遗憾的是，由于std::move(A)返回的类型是MyClass&&，与函数的返回类型MyClass不一致，因此编译器也不会使用NRVO。最终，编译器只能调用拷贝构造函数来创建myClass对象。
+现在，MyClass 类型没有实现移动语义，当我们执行语句 MyClass myClass=GetTemporary()；时，编译器没有办法调用移动构造函数来创建 myClass 对象。同时，遗憾的是，由于 std::move(A)返回的类型是 MyClass&&，与函数的返回类型 MyClass 不一致，因此编译器也不会使用 NRVO。最终，编译器只能调用拷贝构造函数来创建 myClass 对象。
 
-因此，当返回局部对象时，我们不用画蛇添足，直接返回对象即可，编译器会优先使用最佳的NRVO，在没有NRVO的情况下，会尝试执行移动构造函数，最后才是开销最大的拷贝构造函数。
+因此，当返回局部对象时，我们不用画蛇添足，直接返回对象即可，编译器会优先使用最佳的 NRVO，在没有 NRVO 的情况下，会尝试执行移动构造函数，最后才是开销最大的拷贝构造函数。
 
 #+DOWNLOADED: screenshot @ 2023-08-23 23:40:54
 [[file:images/c++/类/2023-08-23_23-40-54_screenshot.png]]
 
-* lambda表达式
+* lambda 表达式
 The predicates we pass to an algorithm must have exactly one or two parameters,depending on whether the algorithm takes a unary or binary predicate, respectively.However, sometimes we want to do processing that requires more arguments than the algorithm’s predicate allows.
 
 A lambda expression represents a callable unit of code. It can be thought of as an unnamed, inline function. Like any function, a lambda has a return type, a parameter list, and a function body. Unlike a function, lambdas may be defined inside a function.A lamba expression has the form 
@@ -2157,8 +2255,147 @@ auto f = [] { return 42; };
 cout << f() << endl; // prints 42
 #+END_SRC
 Here, we’ve defined f as a callable object that takes no arguments and returns 42.
-* likely和unlikely
-* new创建类对象与不new区别
+* likely 和 unlikely
+* lock free
+** 无锁队列
+本文介绍无锁队列的一种实现。实现基于 x86 体系结构，Linux 环境。
+*** 初始化
+和大部分无锁数据结构的实现一样，这个无锁队列的实现也是基于链表的，声明如下：
+#+begin_src c++
+#ifndef _QUEUE_H_
+#define _QUEUE_H_
+
+#define CACHE_ALIGN_SIZE 64
+#define CACHE_ALIGNED __attribute__((aligned(CACHE_ALIGN_SIZE)))
+
+template <typename T>
+class Queue
+{
+public:
+  Queue() : head_(NULL), tail_(NULL)
+  {
+    head_ = tail_ = new qnode();
+    head_->next = NULL;
+  }
+
+  virtual ~Queue()
+  {
+    T tmp;
+    while (dequeue(tmp)) {
+    }
+
+    delete head_;
+  }
+
+  void enqueue(const T &data);
+  bool dequeue(T &data);
+private:
+  class qnode
+  {
+  public:
+    T data;
+    qnode *next;
+  };
+
+  qnode * head_ CACHE_ALIGNED;
+  qnode * tail_ CACHE_ALIGNED;
+};
+
+#endif /* _QUEUE_H_ */
+
+#+end_src
+初始化后队列的头尾都指向一个 dummy 节点，并且头尾指针都按照 cache line 对齐，以避免产生 false sharing 问题。
+*** 进队（enqueue）
+进队操作分三步：
+1. 创建新节点
+2. 将当前尾节点的 next 指针指向新节点
+3. 修改尾指针指向新创建的节点
+其中第二步和第三步在常规的队列实现中往往需要借助于锁来保证原子性，如果不使用锁会怎么样？
+
+除了第一步是没有竞争的，第二步和第三步在并发执行的时候都会有竞争（都是对共享变量的 read-modify-write 操作），这要求我们需要使用原子操作来实现这两步。然而仅仅这样也还是不够的，这不能保证第二步和第三步的原子性，因此需要一些特殊的处理，看代码：
+#+begin_src c++
+template <typename T>
+void Queue<T>::enqueue(const T &data)
+{
+  qnode *node = new qnode();
+  node->data = data;
+  node->next = NULL;
+  qnode *t = NULL;
+  qnode *next = NULL;
+
+  while (true) {
+    t = tail_;
+    next = t->next;
+    asm volatile("" ::: "memory");
+    if (tail_ != t) {
+      continue;
+    }
+    if (next) {
+      __sync_bool_compare_and_swap(&tail_, t, next);
+      continue;
+    }
+    if (__sync_bool_compare_and_swap(&t->next, NULL, node)) {
+      break;
+    }
+  }
+  __sync_bool_compare_and_swap(&tail_, t, node);
+}
+
+#+end_src
+
+注意代码 17-20 行，这段逻辑就是处理两个操作不原子的关键所在。当并发执行进队时，通过循环检查并向前推进尾指针来保证拿到最新的尾指针。
+
+另一段有意思的代码是 13-16 行，这一行对变量 t 进行检查，目的在于确认 t 和 next 的值是一致的，但是在这个特定的情景中我理解实际上可以删去而不影响正确性，因为后续的 CAS 操作同样会检查这一条件。
+*** 出队（dequeue）
+出队操作相对入队要简单不少，只要把头指针向后移并拿出数据就可以了。但是在无锁并发的情况下仍有不少细节需要考虑，直接看代码：
+#+begin_src c++
+template <typename T>
+bool Queue<T>::dequeue(T &data)
+{
+  qnode *t = NULL;
+  qnode *h = NULL;
+  qnode *next = NULL;
+
+  while (true) {
+    h = head_;
+    t = tail_;
+    next = h->next;
+    asm volatile("" ::: "memory");
+    if (head_ != h) {
+      continue;
+    }
+    if (!next) {
+      return false;
+    }
+    if (h == t) {
+      __sync_bool_compare_and_swap(&tail_, t, next);
+      continue;
+    }
+    data = next->data;
+    if (__sync_bool_compare_and_swap(&head_, h, next)) {
+      break;
+    }
+  }
+
+  h->next = (qnode *)1; // bad address, It's a trap!
+  /* delete h; */
+  return true;
+}
+
+#+end_src
+
+需要解释的地方不多，只有一个比较有意思的地方，在代码的 12-15 行有一个检查，这个检查和之前提到的一样，是用来保证 h 和 next 变量是一致的。和进队过程中的那个不同的是，这段逻辑不是可有可无的，因为在 23 行对 next 指针的访问发生在 CAS 操作之前，如果访问了已经出队的节点则会导致程序崩溃。
+*** What’s next?
+到这里看上去这个无锁队列已经完成了，并且可以正确的运行。但你一定会发现一个严重的问题：这个队列中的内存从来没有被释放所以在不断的泄露。
+
+没错，这就是无锁数据结构普遍存在的问题，因为没有使用互斥的同步机制，所以很难找到一个安全的释放内存的时机。你可能会认为在完成出队后释放掉内存不就可以了么？但是由于没有使用同步机制，我们无法保证这个已经出队的节点没有被其他并发线程持有，如果此时释放内存，Boom…如果之后这个内存又被重用，那又可能会遇到著名的 ABA 问题。
+
+那这个无锁队列岂不是没用了么？当然不是，只是我们需要一种与之配套的内存生命周期管理机制，比如 Linux 内核中广泛使用的 RCU，又比如我之后会介绍的 Hazard Pointer。
+*** 一点解释
+你可能注意到了我在出队逻辑的 29-30 行写了两行略有些奇怪的代码，这里我来做一些解释。实际上这里本应该执行的操作是释放 h 指向的节点占用的内存，但是我在论文 1 原本算法的基础上做了一点改动，删除了 modify count 的部分（一种常用的避免 ABA 问题的方法），这就导致如果真的执行了内存释放就会产生 ABA 问题。因此我不对内存进行释放，但是修改节点保存的内容为一个非法指针，让内存非法访问的问题暴露出来（比如你可以尝试去掉出队代码 12-15 行的检查，这一段真的非常精妙，值得细细品味）。
+
+我之所以做这样的修改，并不是因为论文中提出的算法不好，恰恰相反，论文中的算法非常精妙，但通用性不足，我只是单纯的为了引出一种更为通用的内存生命周期管理机制：Hazard Pointer。
+* new 创建类对象与不 new 区别
 #+BEGIN_SRC c++
 A a;
 
@@ -2167,10 +2404,10 @@ A * a = new a();
 以上两种方式皆可实现类的实例化,区别在于：
 1. 前者在堆栈中分配内存，后者为动态内存分配，在一般应用中是没有什么区别的，但动态内存分配会使对象的可控性增强。
 2. 前者在栈中分配内存，后者在堆中分配内存
-3. 大程序用new，小程序直接申请
-4. new必须delete删除;不用new的方式，系统会自动回收内存
+3. 大程序用 new，小程序直接申请
+4. new 必须 delete 删除;不用 new 的方式，系统会自动回收内存
 
-* new和delete
+* new 和 delete
 new 和 delete 不是函数，它们都是 C++ 定义的关键字，通过特定的语法可以组成表达式。
 ** operator new 和 operator delete
 这两个其实是 C++ 语言标准库的库函数，原型分别如下：
@@ -2274,9 +2511,9 @@ delete []pAa;
 1. 调用析构函数的次数是从数组对象指针前面的 4 个字节中取出；
 2. 传入 operator delete[] 函数的参数不是数组对象的指针 pAa，而是 pAa 的值减 4。
 ** new/delete 、new []/delete[] 要配对使用
-因为new/delete、new[]/delete[] 的工作原理有差别，所以需要配对使用。
+因为 new/delete、new[]/delete[] 的工作原理有差别，所以需要配对使用。
 
-如果将new[]与delete混用，有可能会出现内存泄漏，下面举个例子进行说明
+如果将 new[]与 delete 混用，有可能会出现内存泄漏，下面举个例子进行说明
 #+begin_src c++
 int *pia = new int[10];
 delete pia;
@@ -2301,23 +2538,23 @@ delete pAa;
 ** 参考文章
 [[https://www.cnblogs.com/hazir/p/new_and_delete.htlm][浅谈 C++ 中的 new/delete 和 new[]/delete[]​]]
 * map
-** map的排序
-*** 按key排序
-實際上map內部所有的資料本來就是按key排序的。分析map結構定義，發現map的按key排序是通過第3個引數（比較函式的函式物件）實現的。
+** map 的排序
+*** 按 key 排序
+實際上 map 內部所有的資料本來就是按 key 排序的。分析 map 結構定義，發現 map 的按 key 排序是通過第 3 個引數（比較函式的函式物件）實現的。
 
-其中，less為其預設的函式物件，所以如果我們不指定引數3，map鍵值對就會按照預設方法進行儲存。當我們希望它能以不同的方式進行排序，就需要重新指定引數3。
+其中，less 為其預設的函式物件，所以如果我們不指定引數 3，map 鍵值對就會按照預設方法進行儲存。當我們希望它能以不同的方式進行排序，就需要重新指定引數 3。
 
-如果只是呼叫C++標準庫自帶的方法，我們只需如下所示，在宣告map物件時指定第3引數即可。
-*** 按value排序
-由于sort只能对序列容器（如vector、list、deque）进行排序，而map虽然也是一个集合容器，但却不是线性存储的（比如红黑树）。
-因此并不能直接用sort对map进行按value排序。
+如果只是呼叫 C++標準庫自帶的方法，我們只需如下所示，在宣告 map 物件時指定第 3 引數即可。
+*** 按 value 排序
+由于 sort 只能对序列容器（如 vector、list、deque）进行排序，而 map 虽然也是一个集合容器，但却不是线性存储的（比如红黑树）。
+因此并不能直接用 sort 对 map 进行按 value 排序。
 
 * optional
 
 ** 例子 
 场景：如果有这样一个函数，通过返回值来判断计算结果是否有效，如果结果有效，才能使用结果 。
 
-例如：计算a、b相除。b有可能为0，所以需要考虑相除结果是否有效。
+例如：计算 a、b 相除。b有可能为 0，所以需要考虑相除结果是否有效。
 #+BEGIN_SRC c++
 bool div_int(int a, int b, int &result) {
     if (b == 0) {
@@ -2337,7 +2574,7 @@ TEST_F(before_optional) {
     ASSERT(!b);
 }
 #+END_SRC
-这样的使用方式很不方便，需要两个变量来描述结果。这种场景下应该使用c++17中的std::optional。我们用std::optional改写上面这个例子：
+这样的使用方式很不方便，需要两个变量来描述结果。这种场景下应该使用 c++17 中的 std::optional。我们用 std::optional 改写上面这个例子：
 #+BEGIN_SRC c++
 //div_int可以通过optional优化：optional中，结果是否有效和结果都保存在其中
 std::optional<int> div_int(int a, int b) {
@@ -2363,31 +2600,31 @@ TEST_F(optional) {
     }
 }
 #+END_SRC
-如果开发项目中没有支持到c++17可以用boost库中的optional。
+如果开发项目中没有支持到 c++17 可以用 boost 库中的 optional。
 * printf("%5s”,“abcdefg ”)
-执行printf( “ %5s ” , “abcdefg ” ) 后，则输出结果为:abcdefg
-- "%5s",表示输出至少5个字符，不够的话，左侧用空格补。
-- %.5s，最多输出5个字符
+执行 printf( “ %5s ” , “abcdefg ” ) 后，则输出结果为:abcdefg
+- "%5s",表示输出至少 5 个字符，不够的话，左侧用空格补。
+- %.5s，最多输出 5 个字符
 
 * 全局构造与析构函数
-我们知道一般的C/C++ 的程序是从main函数开始的，然后在main函数结束后程序结束。但是不然，在main函数开始执行前，已经有其他的指令被执行了。
+我们知道一般的 C/C++ 的程序是从 main 函数开始的，然后在 main 函数结束后程序结束。但是不然，在 main 函数开始执行前，已经有其他的指令被执行了。
 
-为了程序的顺利执行，首先要初始化执行环境，比如堆分配初始化（malloc, free) ，线程子系统等，这里先提一下：C++ 的全局对象构造函数就是在这一时期被执行的。即C++ 的全局对象构造函数在main 函数之前执行，而C++ 全局对象的析构函数在main函数之后被执行。
+为了程序的顺利执行，首先要初始化执行环境，比如堆分配初始化（malloc, free) ，线程子系统等，这里先提一下：C++ 的全局对象构造函数就是在这一时期被执行的。即 C++ 的全局对象构造函数在 main 函数之前执行，而 C++ 全局对象的析构函数在 main 函数之后被执行。
 
-linux 系统中，一般程序的入口是“ _start ", 这个函数是Linux系统库(Glibc)的一部分。当我们的程序与Glibc库链接在一起形成最终的可执行文件以后，这个函数就是程序的初始化部分的入口，程序的初始化部分完成一系列初始化过程以后，就会调用main函数来执行程序的主体。在main函数执行完成以后，返回到初始化部分，会进行一系列清理工作，然后结束进程。
+linux 系统中，一般程序的入口是“ _start ", 这个函数是 Linux 系统库(Glibc)的一部分。当我们的程序与 Glibc 库链接在一起形成最终的可执行文件以后，这个函数就是程序的初始化部分的入口，程序的初始化部分完成一系列初始化过程以后，就会调用 main 函数来执行程序的主体。在 main 函数执行完成以后，返回到初始化部分，会进行一系列清理工作，然后结束进程。
 
-对于有些场合，程序的一些特性的操作必须在main函数之前执行，还有一些操作必须在Mian函数之后执行，这里再提一下C++ .因为最具代表性的就是C++ 的全局对象的构造与析构函数。因此ELF（linux里一种文件格式)文件定义了两种段涉及到了这种信息。
+对于有些场合，程序的一些特性的操作必须在 main 函数之前执行，还有一些操作必须在 Mian 函数之后执行，这里再提一下 C++ .因为最具代表性的就是 C++ 的全局对象的构造与析构函数。因此 ELF（linux 里一种文件格式)文件定义了两种段涉及到了这种信息。
 
-§ .init  该段里边保存的是可执行命令，它构成了进程的初始化代码。因此，当一个程序开始运行时，在main函数被调用前Glibc的初始化部分安排执行这个段中的代码。
+§ .init  该段里边保存的是可执行命令，它构成了进程的初始化代码。因此，当一个程序开始运行时，在 main 函数被调用前 Glibc 的初始化部分安排执行这个段中的代码。
 
-§ .fini  该段保存着进程终止代码指令。因此，当一个程序的main函数正常退出时，Glibc会安排执行这个段中的代码。
+§ .fini  该段保存着进程终止代码指令。因此，当一个程序的 main 函数正常退出时，Glibc 会安排执行这个段中的代码。
 
-因此，这两个段.init 和 .fini的存在有着特别的目的，如果一个函数放到了.init 段，在main函数执行前，系统就会执行它。同理，假如一个函数放到了.fini段，在main函数返回后函数就会被执行。利用这两个特征，C++ 的全局构造函数和析构函数就是这样来的。
+因此，这两个段.init 和 .fini 的存在有着特别的目的，如果一个函数放到了.init 段，在 main 函数执行前，系统就会执行它。同理，假如一个函数放到了.fini 段，在 main 函数返回后函数就会被执行。利用这两个特征，C++ 的全局构造函数和析构函数就是这样来的。
 
 ** 参考文章
 [[https://www.cnblogs.com/dormant/p/5065665.html][C++ 的全局构造与析构函数]]
 * sort
-C++ STL 标准库中的 sort() 函数，本质就是一个模板函数。该函数专门用来对容器或普通数组中指定范围内的元素进行排序，排序规则默认以元素值的大小做升序排序，除此之外我们也可以选择标准库提供的其它排序规则（比如std::greater降序排序规则），甚至还可以自定义排序规则。
+C++ STL 标准库中的 sort() 函数，本质就是一个模板函数。该函数专门用来对容器或普通数组中指定范围内的元素进行排序，排序规则默认以元素值的大小做升序排序，除此之外我们也可以选择标准库提供的其它排序规则（比如 std::greater 降序排序规则），甚至还可以自定义排序规则。
 
 值得一提的是，sort() 函数位于头文件中，因此在使用该函数前，程序中应包含如下语句：
 #+BEGIN_SRC c++
@@ -2469,10 +2706,10 @@ int main(){
 0 1 2 3 4 5 6 8 9 10
 */
 #+END_SRC
-** 对map进行排序
-C++ STL中的map默认以key排序的。
+** 对 map 进行排序
+C++ STL 中的 map 默认以 key 排序的。
 
-如果想对value进行排序，可以将map的key和value以pair的形式装到vector中，对vector进行排序。
+如果想对 value 进行排序，可以将 map 的 key 和 value 以 pair 的形式装到 vector 中，对 vector 进行排序。
 #+begin_src c++
 int main()
 {
@@ -2500,7 +2737,7 @@ int main()
 #+DOWNLOADED: screenshot @ 2022-08-21 11:11:46
 [[file:images/c++/sort/2022-08-21_11-11-46_screenshot.png]]
 
-** 二维vector排序
+** 二维 vector 排序
 *** 自定义排序函数
 #+begin_src c++
 static bool cmp(const vector<int>& a,const vector<int>& b){
@@ -2523,17 +2760,17 @@ string test2 = "内容"; //使用=
 
 string test3("内容");   //使用引用字符数组作为参数传给构造函数
 
-string test4(test2); //用一个string初始化另一而string
+string test4(test2); //用一个 string 初始化另一而 string
 
-string test5(test2,pos,num); //从test2中的第pos个位置开始，拷贝个数为num个字符
+string test5(test2,pos,num); //从 test2 中的第 pos 个位置开始，拷贝个数为 num 个字符
 
 string test6 = test2 + "内容" + test3 //混合初始化
 
-string test7 = test2.substr(pos,num); //从test2中的第pos个位置开始，拷贝个数为num个字符
+string test7 = test2.substr(pos,num); //从 test2 中的第 pos 个位置开始，拷贝个数为 num 个字符
 
-string test8 = test2.substr(); //参数列表为空则会拷贝test2的整个对象（复制test2的简便方法）
+string test8 = test2.substr(); //参数列表为空则会拷贝 test2 的整个对象（复制 test2 的简便方法）
 
-string test9(num,ch); //拷贝num个字符型ch到test9
+string test9(num,ch); //拷贝 num 个字符型 ch 到 test9
 
 ** c_str()
 c_str() gives you a pointer to a temporary.
@@ -2574,8 +2811,8 @@ R
 #+end_example>
 *** 参考文章
 [[https://stackoverflow.com/questions/27627413/why-does-calling-c-str-on-a-function-that-returns-a-string-not-work][Why does calling c_str() on a function that returns a string not work?]]
-* string_view使用介绍
-C++中与字符串有两种风格，分别是C风格的字符串、std::string字符串。C风格的字符串性能更高，但是也不方便操作使用。如下示例：
+* string_view 使用介绍
+C++中与字符串有两种风格，分别是 C 风格的字符串、std::string 字符串。C风格的字符串性能更高，但是也不方便操作使用。如下示例：
 #+BEGIN_SRC c++
 #include <iostream>
 #include <string>
@@ -2594,7 +2831,7 @@ int main()
 }
 #+END_SRC
 
-C++17中我们可以使用std::string_view来获取一个字符串的视图，字符串视图并不真正的创建或者拷贝字符串，而只是拥有一个字符串的查看功能。std::string_view比std::string的性能要高很多，因为每个std::string都独自拥有一份字符串的拷贝，而std::string_view只是记录了自己对应的字符串的指针和偏移位置。当我们在只是查看字符串的函数中可以直接使用std::string_view来代替std::string。
+C++17 中我们可以使用 std::string_view 来获取一个字符串的视图，字符串视图并不真正的创建或者拷贝字符串，而只是拥有一个字符串的查看功能。std::string_view 比 std::string 的性能要高很多，因为每个 std::string 都独自拥有一份字符串的拷贝，而 std::string_view 只是记录了自己对应的字符串的指针和偏移位置。当我们在只是查看字符串的函数中可以直接使用 std::string_view 来代替 std::string。
 #+BEGIN_SRC c++
 #include <iostream>
 #include <string>
@@ -2616,45 +2853,45 @@ int main()
 #+END_SRC
 输出
 * static_assert
-c++引入了static_assert关键字，用来实现编译期间的断言，叫静态断言。
+c++引入了 static_assert 关键字，用来实现编译期间的断言，叫静态断言。
 
 语法：static_assert（常量表达式，要提示的字符串）；
 
-如果第一个参数常量表达式的值为false，会产生一条编译错误，错误位置就是该static_assert语句所在行，第二个参数就是错误提示字符串。
+如果第一个参数常量表达式的值为 false，会产生一条编译错误，错误位置就是该 static_assert 语句所在行，第二个参数就是错误提示字符串。
 
 然后通过调用 abort 来终止程序运行。
 * std::tuple 和 std::tie 的用法简介
-tuple即元组，可以理解为pair的扩展，可以用来将不同类型的元素存放在一起，常用于函数的多返回值。
+tuple 即元组，可以理解为 pair 的扩展，可以用来将不同类型的元素存放在一起，常用于函数的多返回值。
 
 ** 定义与初始化
-tuple可以使用初始化列表进行赋值。
+tuple 可以使用初始化列表进行赋值。
 
 tuple<int,double,string> t3 = {1, 2.0, "3"};
 
 ** 访问
-可以使用get<常量表达式>(tuple_name)来访问或修改tuple的元素（返回引用）
+可以使用 get<常量表达式>(tuple_name)来访问或修改 tuple 的元素（返回引用）
 #+begin_src c++
 get<0>(t3) = 4;
 cout << get<1>(t3) << endl;
 #+end_src
-会输出2
+会输出 2
 
 ** 批量赋值
-std::tie会将变量的引用整合成一个tuple，从而实现批量赋值。
+std::tie 会将变量的引用整合成一个 tuple，从而实现批量赋值。
 #+begin_src c++
 int i; double d; string s;
 tie(i, d, s) = t3;
 
 cout << i << " " << d << " " << s << endl;
 #+end_src
-会输出4 2 3
+会输出 4 2 3
 
-还可以使用std::ignore忽略某些tuple中的某些返回值，如
+还可以使用 std::ignore 忽略某些 tuple 中的某些返回值，如
 
 tie(i, ignore, s) = t3;
 
 ** 其它
-需要注意的是，tie无法直接从初始化列表获得值，比如下面第5行会编译错误。
+需要注意的是，tie 无法直接从初始化列表获得值，比如下面第 5 行会编译错误。
 #+begin_src c++
 int i; double d; string s;
 tuple<int,double,string> t3 = {1, 2.0, "3"};
@@ -2666,14 +2903,14 @@ tie(i, d, s) = {1, 2.0, "3"};
 ** 参考文章
 [[https://blog.csdn.net/m0_37809890/article/details/89367406][std::tuple 和 std::tie 的用法简介]]
 * std::forward
-std::forward通常是用于完美转发的，它会将输入的参数原封不动地传递到下一个函数中，
+std::forward 通常是用于完美转发的，它会将输入的参数原封不动地传递到下一个函数中，
 这个“原封不动”指的是，如果输入的参数是左值，那么传递给下一个函数的参数的也是左值；
 如果输入的参数是右值，那么传递给下一个函数的参数的也是右值。
 
 ** 参考文章
 [[https://zhuanlan.zhihu.com/p/92486775][浅谈std::forward]]
 * std::optional
-在需要多个返回值的时候，可以下面用的pair形式，将返回值定义成结构体：
+在需要多个返回值的时候，可以下面用的 pair 形式，将返回值定义成结构体：
 #+begin_src C++
 #include <iostream>
 
@@ -2779,15 +3016,15 @@ cout << ret.value_or(defaultVal).out1 << endl;
 使用 std::optional 带来的好处：
 - 省去了运行状态的 bool 值的声明，让代码更简洁，更注重返回值本身的语意
 - 不用担心额外的动态内存分配
-* std::ref和std::cref
+* std::ref 和 std::cref
 std::ref 用于包装按引用传递的值。
-std::cref 用于包装按const引用传递的值。
+std::cref 用于包装按 const 引用传递的值。
 
 C++11 中引入 std::ref 用于取某个变量的引用，这个引入是为了解决一些传参问题。
 
 函数式编程（如 std::bind）在使用时，是对参数直接拷贝，而不是引用。下面通过例子说明
 
-示例1：
+示例 1：
 #+begin_src c++
 void f(int& n1, int& n2, const int& n3)
 {
@@ -2819,7 +3056,7 @@ After function: 10 12 12
 上述代码在执行 std::bind 后，在函数 f() 中 n1 的值仍然是 1，n2 和 n3 改成了修改的值，说明 std::bind 使用的是参数的拷贝而不是引用，因此必须显示利用 std::ref 来进行引用绑定。
 具体为什么 std::bind 不使用引用，可能确实有一些需求，使得 C++11 的设计者认为默认应该采用拷贝，如果使用者有需求，加上 std::ref 即可。
 
-示例2：
+示例 2：
 #+begin_src c++
 void threadFunc(std::string &str, int a)
 {
@@ -2854,35 +3091,35 @@ a = 9
 
 要设置 span 的大小，可以在编译时通过将大小指定为模板参数，也可以在运行时指定 dynamic_extent.
 * STL
-** STL版本介绍
+** STL 版本介绍
 *** HP STL。
-HP STL是Alexandar Stepanov在惠普Palo Alto实验室工作时，与Meng Lee合作完成的。
-其他版本的C++ STL，一般是以HP STL为蓝本实现出来的。
-HP STL是C++ STL的第一个实现版本，而且开放源代码。
+HP STL 是 Alexandar Stepanov 在惠普 Palo Alto 实验室工作时，与 Meng Lee 合作完成的。
+其他版本的 C++ STL，一般是以 HP STL 为蓝本实现出来的。
+HP STL 是 C++ STL 的第一个实现版本，而且开放源代码。
 *** SGI STL
-由Silicon Graphics Computer Systems公司参照HP STL实现，主要设计者仍然是STL之父Alexandar Stepanov。
-被Linux的C++编译器GCC所采用。
-SGI STL是开源软件，源码可读性甚高。
+由 Silicon Graphics Computer Systems 公司参照 HP STL 实现，主要设计者仍然是 STL 之父 Alexandar Stepanov。
+被 Linux 的 C++编译器 GCC 所采用。
+SGI STL 是开源软件，源码可读性甚高。
 *** STL Port
-为了使SGI STL的基本代码都适用于VC++和C++ Builder等多种编译器，俄国人Boris Fomitchev建立了一个free项目来开发STLPort。
-跨平台适用于VC++、C++ Builder、GCC等。  可以与BOOST配合使用，实现跨平台代码。
-STL Port是开放源码的。
+为了使 SGI STL 的基本代码都适用于 VC++和 C++ Builder 等多种编译器，俄国人 Boris Fomitchev 建立了一个 free 项目来开发 STLPort。
+跨平台适用于 VC++、C++ Builder、GCC 等。  可以与 BOOST 配合使用，实现跨平台代码。
+STL Port 是开放源码的。
 *** P.J.Plauger STL
-由P.J.Plauger参照HP STL实现出来的。
-被Visual C++编译器所采用。
+由 P.J.Plauger 参照 HP STL 实现出来的。
+被 Visual C++编译器所采用。
 不是开源的。
 *** Rouge Wave STL
-由Rouge Wave公司参照HP STL实现，用于Borland C++编译器中，这个版本的STL也不是开源的。
-用于Borland C++编译器中。
+由 Rouge Wave 公司参照 HP STL 实现，用于 Borland C++编译器中，这个版本的 STL 也不是开源的。
+用于 Borland C++编译器中。
 不是开源的。
 ** 六大组件
-STl提供六大组件,彼此可以组合套用:
-1. 容器(containers):各种数据结构，如vector，list，deque，set，map,用来存放数据
-2. 算法（algorithms) :各种常用算法如sort，search，copy，erase。从实现的角度来看，STL算法是一种function template。
-3. 迭代器（ iterators):扮演容器与算法之间的胶合剂，是所谓的“泛型指针”，共有五种类型，以及其它衍生变化。从实现的角度来看，迭代器是一种将operator*, operator->， operator++, operator--等指针相关操作予以重载的 class template。所有STL容器都附带有自己专属的迭代器。原生指针(nativepointer)也是一种迭代器。
-4、仿函数( functors) :行为类似函数，可作为算法的某种策略( policy)，仿函数就是使一个类的使用看上去像一个函数。其实现就是类中实现一个operator()，这个类就有了类似函数的行为，就是一个仿函数类了。从实现的角度来看,仿函数是一种重载了operator()的class或class template。一般函数指针可视为狭义的仿函数。
-5. 配接器( adapters) :一种用来修饰容器( containers）或仿函数（ functors)或迭代器(iterators）接口的东西。例如，STL提供的queue和stack，虽然看似容器，其实只能算是一种容器配接器，因为它们的底部完全借助deque，所有操作都由底层的deque供应。改变functor接口者，称为function adapter;改变container接口者,称为container adapter:改变iterator接口者，称为iterator adapter。
-6.配置器（ allocators) :负责空间配置与管理。从实现的角度来看，配置器是一个实现了动态空间配置、空间管理、空间释放的class template。
+STl 提供六大组件,彼此可以组合套用:
+1. 容器(containers):各种数据结构，如 vector，list，deque，set，map,用来存放数据
+2. 算法（algorithms) :各种常用算法如 sort，search，copy，erase。从实现的角度来看，STL 算法是一种 function template。
+3. 迭代器（ iterators):扮演容器与算法之间的胶合剂，是所谓的“泛型指针”，共有五种类型，以及其它衍生变化。从实现的角度来看，迭代器是一种将 operator*, operator->， operator++, operator--等指针相关操作予以重载的 class template。所有 STL 容器都附带有自己专属的迭代器。原生指针(nativepointer)也是一种迭代器。
+4、仿函数( functors) :行为类似函数，可作为算法的某种策略( policy)，仿函数就是使一个类的使用看上去像一个函数。其实现就是类中实现一个 operator()，这个类就有了类似函数的行为，就是一个仿函数类了。从实现的角度来看,仿函数是一种重载了 operator()的 class 或 class template。一般函数指针可视为狭义的仿函数。
+5. 配接器( adapters) :一种用来修饰容器( containers）或仿函数（ functors)或迭代器(iterators）接口的东西。例如，STL 提供的 queue 和 stack，虽然看似容器，其实只能算是一种容器配接器，因为它们的底部完全借助 deque，所有操作都由底层的 deque 供应。改变 functor 接口者，称为 function adapter;改变 container 接口者,称为 container adapter:改变 iterator 接口者，称为 iterator adapter。
+6.配置器（ allocators) :负责空间配置与管理。从实现的角度来看，配置器是一个实现了动态空间配置、空间管理、空间释放的 class template。
 #+DOWNLOADED: screenshot @ 2023-07-31 23:17:55
 [[file:images/c++/STL/2023-07-31_23-17-55_screenshot.png]]
 
@@ -2892,8 +3129,8 @@ STl提供六大组件,彼此可以组合套用:
 临时对象的产生(例如拷贝操作)往往降低效率,但有时可以用来简化程序.
 
 刻意制造临时对象的方法是，在型别名称之后直接加一对小括号，并可指定初值，
-例如 shape(3,5）或int(8)，其意义相当于调用相应的constructor且不指定对象名称。
-STL最常将此技巧应用于仿函数（ functor）与算法的搭配上，例如:
+例如 shape(3,5）或 int(8)，其意义相当于调用相应的 constructor 且不指定对象名称。
+STL 最常将此技巧应用于仿函数（ functor）与算法的搭配上，例如:
 
 #+begin_src c++
 // file: 1config-temporary-object.cpp 
@@ -2924,16 +3161,16 @@ int main() {
     for_each(iv.begin(), iv.end(), print<int>());
 }
 #+END_SRC
-最后一行便是产生“function template具现体”print<int>的一个临时对象。
-这个对象将被传人for_each()之中起作用。当for_each()结束时，这个临时对象也就结束了它的生命。
+最后一行便是产生“function template 具现体”print<int>的一个临时对象。
+这个对象将被传人 for_each()之中起作用。当 for_each()结束时，这个临时对象也就结束了它的生命。
 
 ** function call 操作符（operator())
 函数调用操作(C++语法中的左右小括号）也可以被重载。
 
-许多STL算法都提供了两个版本，一个用于一般状况（例如排序时以递增方式排列),一个用于特殊状况(例如排序时由使用者指定以何种特殊关系进行排列)。
+许多 STL 算法都提供了两个版本，一个用于一般状况（例如排序时以递增方式排列),一个用于特殊状况(例如排序时由使用者指定以何种特殊关系进行排列)。
 
 在特殊情况下，需要用户指定某个条件或某个策略，而条件或策略的背后由一整组操作构成，便需要某种特殊的东西来代表这“一整组操作”。
-代表“一整组操作”的，当然是函数。过去C语言时代，欲将函数当做参数传递，唯有通过函数指针（(pointer to function，或称function pointer）才能达成，例如:
+代表“一整组操作”的，当然是函数。过去 C 语言时代，欲将函数当做参数传递，唯有通过函数指针（(pointer to function，或称 function pointer）才能达成，例如:
 #+begin_src c++
 // file: 1qsort.cpp
 
@@ -2979,11 +3216,11 @@ int fcmp(const void* elem1, const void* elem2) {
 #+END_SRC
 但是函数指针有缺点,最重要的是它无法持有自己的状态(所谓局部状态, localstates)，也无法达到组件技术中的可适配性（adaptability)——--也就是无法再将某些修饰条件加诸于其上而改变其状态。
 
-为此，STL算法的特殊版本所接受的所谓“条件”或“策略”或“一整组操作”，都以仿函数形式呈现。
+为此，STL 算法的特殊版本所接受的所谓“条件”或“策略”或“一整组操作”，都以仿函数形式呈现。
 所谓仿函数(functor）就是使用起来像函数一样的东西。
-如果你针对某个class进行operator()重载，它就成为一个仿函数。至于要成为一个可配接的仿函数，还需要做一些额外的努力.
+如果你针对某个 class 进行 operator()重载，它就成为一个仿函数。至于要成为一个可配接的仿函数，还需要做一些额外的努力.
 
-下面是一个将operator()重载的例子:
+下面是一个将 operator()重载的例子:
 #+begin_src c++
 // file: 1functor.cpp
 
@@ -3022,13 +3259,13 @@ int main() {
     cout << minus<int>()(3, 5) << endl;
 }
 #+END_SRC
-上述的 plus<T>和minus<T>已经非常接近STL的实现了，唯一的差别在于它缺乏“可配接能力”。
+上述的 plus<T>和 minus<T>已经非常接近 STL 的实现了，唯一的差别在于它缺乏“可配接能力”。
 
 ** 空间配置器
 空间配置器(allocator)可以配置内存\\磁盘或其它辅助存储介质.
 
 *** 空间配置器的标准接口
-根据STL的规范，以下是allocator的必要接口
+根据 STL 的规范，以下是 allocator 的必要接口
 #+begin_example
 allocator:: value_type
 
@@ -3040,7 +3277,7 @@ allocator::const_referenceal1ocator : :size_type
 
 allocator::difference_type
 
-allocator::rebind :一个嵌套的(nested) class template。 class rebind<U>拥有唯-一成员other，那是一个typedef，代表allocator<U>
+allocator::rebind :一个嵌套的(nested) class template。 class rebind<U>拥有唯-一成员 other，那是一个 typedef，代表 allocator<U>
 
 allocator::allocator ( ) :default constructor
 
@@ -3050,24 +3287,24 @@ template cclass Usallocator : :allocator ( const allocator<U>&) :泛化的 copy 
 
 allocator::-allocator ( ) :default constructor
 
-pointer allocator::address (reference x) const :返回某个对象的地址。算式a.address (x〉等同于&x
+pointer allocator::address (reference x) const :返回某个对象的地址。算式 a.address (x〉等同于&x
 
-const_pointer allocator::address (const_reference x) const :返回某个const对象的地址。算式a.address(x〉等同于&x
+const_pointer allocator::address (const_reference x) const :返回某个 const 对象的地址。算式 a.address(x〉等同于&x
 
-pointer allocator::allocate(size_type n, cosnt void* = 0) :配置空间，足以存储n个r对象。第二参数是个提示。实现上可能会利用它来增进区域性(locality)，或完全忽略之
+pointer allocator::allocate(size_type n, cosnt void* = 0) :配置空间，足以存储 n 个 r 对象。第二参数是个提示。实现上可能会利用它来增进区域性(locality)，或完全忽略之
 
 void allocator::deallocate(pointer p, size_type n) :归还先前配置的空间
 
 size_type allocator::max_size ( ) const :返回可成功配置的最大量
 
-void allocator::construct (pointer p, const T& ) :等同于new (const void* ) p)T(x)
+void allocator::construct (pointer p, const T& ) :等同于 new (const void* ) p)T(x)
 
-void allocator::destroy(pointer p) :等同于p->~T ()
+void allocator::destroy(pointer p) :等同于 p->~T ()
 
 #+end_example>
 
 *** 设计一个简单的空间配置器，JJ:allocator
-根据前述的标准接口，我们可以自行完成一个功能简单、接口不怎么齐全的allocator 如下:
+根据前述的标准接口，我们可以自行完成一个功能简单、接口不怎么齐全的 allocator 如下:
 #+begin_src c++
 // file: 2jjalloc.h
 
@@ -3174,8 +3411,8 @@ namespace JJ {
 
 #+END_SRC
 
-*** 具备次配置力(sub-allocation)的SGI空间配置器
-SGI STL的配置器与众不同，也与标准规范不同，其名称是 a1loc而非a1locator，而且不接受任何参数。换句话说，如果你要在程序中明白采用SGI 配置器，则不能采用标准写法:
+*** 具备次配置力(sub-allocation)的 SGI 空间配置器
+SGI STL 的配置器与众不同，也与标准规范不同，其名称是 a1loc 而非 a1locator，而且不接受任何参数。换句话说，如果你要在程序中明白采用 SGI 配置器，则不能采用标准写法:
 #+begin_src c++
 vector<int, std::allocator<int> > iv; // in vc or CB
 #+END_SRC
@@ -3183,61 +3420,61 @@ vector<int, std::allocator<int> > iv; // in vc or CB
 #+begin_src c++
 vector<int , std: :a1loc> iv ; // in ccc
 #+END_SRC
-SGI STL allocator未能符合标准规格，这个事实通常不会给我们带来困扰，因为通常我们使用缺省的空间配置器，很少需要自行指定配置器名称，而SGI STL 的每一个容器都已经指定其缺省的空间配置器为a1loc。例如下面的vector声明:
+SGI STL allocator 未能符合标准规格，这个事实通常不会给我们带来困扰，因为通常我们使用缺省的空间配置器，很少需要自行指定配置器名称，而 SGI STL 的每一个容器都已经指定其缺省的空间配置器为 a1loc。例如下面的 vector 声明:
 #+begin_src c++
 template <class T, class A1lod alloc> //缺省使用alloc为配置器
 class vector i ... };
 #+END_SRC
 
-**** SGI标准的空间配置器，std::allocator
-虽然SGI 也定义有一个符合部分标准、名为allocator 的配置器，但SGI自己从未用过它，也不建议我们使用。主要原因是效率不佳，只把C++的::operator new和::operator delete做一层薄薄的包装而已。
+**** SGI 标准的空间配置器，std::allocator
+虽然 SGI 也定义有一个符合部分标准、名为 allocator 的配置器，但 SGI 自己从未用过它，也不建议我们使用。主要原因是效率不佳，只把 C++的::operator new 和::operator delete 做一层薄薄的包装而已。
 
 **** std:alloc
 ***** 对象构造和对象析构
---般而言，我们所习惯的C++内存配置操作和释放操作是这样的:
+--般而言，我们所习惯的 C++内存配置操作和释放操作是这样的:
 #+begin_src c++
 class Foo { ... };
 Foo*pf = new Foo ; //配置内存，然后构造对象
 delete pf ; //将对象析构,然后释放内存
 #+END_SRC
-这其中的new算式内含两阶段操作:
+这其中的 new 算式内含两阶段操作:
 (1)调用::operator new 配置内存;
-(2)调用Foo::Foo()构造对象内容。
+(2)调用 Foo::Foo()构造对象内容。
 
-delete算式也内含两阶段操作:
-(1)调用Foo::~Foo(）将对象析构;
-(2）调用::operator delete释放内存。
+delete 算式也内含两阶段操作:
+(1)调用 Foo::~Foo(）将对象析构;
+(2）调用::operator delete 释放内存。
 
-STL allocator将这两阶段操作区分开来。
-内存配置操作由alloc:allocate()负责，
-内存释放操作由alloc::dealloate()负责;
+STL allocator 将这两阶段操作区分开来。
+内存配置操作由 alloc:allocate()负责，
+内存释放操作由 alloc::dealloate()负责;
 对象构造操作由::construct()负责，
 对象析构操作由::destroy()负责。
 
-STL标准规格告诉我们，配置器定义于<memory>之中，SGI <menory>内含以下两个文件:
+STL 标准规格告诉我们，配置器定义于<memory>之中，SGI <menory>内含以下两个文件:
 #+begin_src c++
 #include <stl_alloc.h>  //负责内存空间的配置与释放
 #include <stl_construct.h>  //负责对象内容的构造与析构
 #+END_SRC
 内存空间的配置/释放与对象内容的构造/析构，分别着落在这两个文件身上。
-其中<st1_construct.h>定义有两个基本函数:构造用的construct()和析构用的destroy ()。
+其中<st1_construct.h>定义有两个基本函数:构造用的 construct()和析构用的 destroy ()。
 
 #+DOWNLOADED: screenshot @ 2023-08-03 23:16:19
 [[file:images/c++/STL/2023-08-03_23-16-19_screenshot.png]]
 ***** 空间的配置和释放
 对象构造前的空间配置和对象析构后的空间释放，由<stl_alloc.h>负责，SGI 对此的设计哲学如下:
-- 向system heap要求空间。
+- 向 system heap 要求空间。
 - 考虑多线程（( multi-threads）状态。
 - 考虑内存不足时的应变措施。
 - 考虑过多“小型区块”可能造成的内存碎片(fragment)问题。
 
 C++的内存配置基本操作是::operator new()，内存释放基本操作是::operator delete()。
-这两个全局函数相当于C的malloc()和free(〉函数。
+这两个全局函数相当于 C 的 malloc()和 free(〉函数。
 
-考虑到小型区块所可能造成的内存破碎问题，SGI设计了双层级配置器，
-第一级配置器直接使用malloc()和 free()，
-第二级配置器则视情况采用不同的策略:当配置区块超过128 bytes时，视之为“足够大”，便调用第一级配置器;当配置区块小于128 bytes 时，视之为“过小”，采用复杂的 memory pool整理方式，而不再求助于第一级配置器。
-整个设计究竟只开放第一级配置器，或是同时开放第二级配置器，取决于__USE_MALLOC是否被定义(我们可以轻易测试出来，SGI STL并未定义__USE_MALLOC)
+考虑到小型区块所可能造成的内存破碎问题，SGI 设计了双层级配置器，
+第一级配置器直接使用 malloc()和 free()，
+第二级配置器则视情况采用不同的策略:当配置区块超过 128 bytes 时，视之为“足够大”，便调用第一级配置器;当配置区块小于 128 bytes 时，视之为“过小”，采用复杂的 memory pool 整理方式，而不再求助于第一级配置器。
+整个设计究竟只开放第一级配置器，或是同时开放第二级配置器，取决于__USE_MALLOC 是否被定义(我们可以轻易测试出来，SGI STL 并未定义__USE_MALLOC)
 #+begin_src c++
 # ifdef __USE_MALLOC
 ...
@@ -3250,10 +3487,10 @@ typedef __default_alloc_template<__NODE_ALLOCATOR_THREADS，0> alloc;
 #endif /* ! __USE__MALLOC */
 
 #+END_SRC
-其中_malloc_alloc_template就是第一级配置器，__default_alloc_template就是第二级配置器。
-提醒:alloc 并不接受任何template型别参数。
+其中_malloc_alloc_template 就是第一级配置器，__default_alloc_template 就是第二级配置器。
+提醒:alloc 并不接受任何 template 型别参数。
 
-无论alloc被定义为第一级或第二级配置器，SGI 还为它再包装一个接口如下，使配置器的接口能够符合STL规格:
+无论 alloc 被定义为第一级或第二级配置器，SGI 还为它再包装一个接口如下，使配置器的接口能够符合 STL 规格:
 #+begin_src c++
 template <class T, class Alloc>
 class simple_alloc
@@ -3278,7 +3515,7 @@ public:
     }
 };
 #+END_SRC
-其内部四个成员函数其实都是单纯的转调用，调用传递给配置器（可能是第一级也可能是第二级）的成员函数。这个接口使配置器的配置单位从bytes转为个别元素的大小(sizeof(T) ) .SGI STL容器全都使用这个simple_alloc接口、例如:
+其内部四个成员函数其实都是单纯的转调用，调用传递给配置器（可能是第一级也可能是第二级）的成员函数。这个接口使配置器的配置单位从 bytes 转为个别元素的大小(sizeof(T) ) .SGI STL 容器全都使用这个 simple_alloc 接口、例如:
 #+begin_src c++
 template <class T, class Alloc = alloc> // 預設使用 alloc 為配置器
 class vector
@@ -3294,7 +3531,7 @@ protected:
     ...
 };
 #+END_SRC
-一、.二级配置器的关系，接口包装，及实际运用方式，可于图2-2略见端倪。
+一、.二级配置器的关系，接口包装，及实际运用方式，可于图 2-2 略见端倪。
 
 #+DOWNLOADED: screenshot @ 2023-08-04 22:55:05
 [[file:images/c++/STL/2023-08-04_22-55-05_screenshot.png]]
@@ -3407,29 +3644,29 @@ void* __malloc_alloc_template<__inst>::_S_oom_realloc(void* __p, size_t __n)
 // 直接将inst参数设置为0
 typedef __malloc_alloc_template<0> malloc_alloc;
 #+END_SRC
-第一级配置器以malloc() , free() , realloc()等C函数执行实际的内存配置、释放、重配置操作，并实现出类似C++ new-handler的机制。
-是的，它不能直接运用C++ new-handler机制，因为它并非使用::operator new来配置内存.
-所谓C++ new handler机制是，你可以要求系统在内存配置需求无法被满足时，调用一个你所指定的函数。换句话说，一旦 ::operator new无法完成任务，在丢出std:bad_alloc异常状态之前，会先调用由客端指定的处理例程。该处理例程通常即被称为new-handler。new-handler 解决内存不足的做法有特定的模式，请参考《Effective C++》2e条款7。
+第一级配置器以 malloc() , free() , realloc()等 C 函数执行实际的内存配置、释放、重配置操作，并实现出类似 C++ new-handler 的机制。
+是的，它不能直接运用 C++ new-handler 机制，因为它并非使用::operator new 来配置内存.
+所谓 C++ new handler 机制是，你可以要求系统在内存配置需求无法被满足时，调用一个你所指定的函数。换句话说，一旦 ::operator new 无法完成任务，在丢出 std:bad_alloc 异常状态之前，会先调用由客端指定的处理例程。该处理例程通常即被称为 new-handler。new-handler 解决内存不足的做法有特定的模式，请参考《Effective C++》2e 条款 7。
 
-注意，SGI以malloc而非 : :operator new来配置内存（我所能够想象的一个原因是历史因素，另一个原因是C+并未提供相应于realloc()的内存配置操作），因此，SGI 不能直接使用C++的 set_new_handler()，必须仿真--个类似的 set_mailoc_handler()。
+注意，SGI 以 malloc 而非 : :operator new 来配置内存（我所能够想象的一个原因是历史因素，另一个原因是 C+并未提供相应于 realloc()的内存配置操作），因此，SGI 不能直接使用 C++的 set_new_handler()，必须仿真--个类似的 set_mailoc_handler()。
 
-请注意，SGI 第一级配置器的allocate()和realloc()都是在调用malloc()和 realloc()不成功后,改调用oom_malloc()和 oom_realloc() 。
-后两者都有内循环，不断调用“内存不足处理例程”，期望在某次调用之后，获得足够的内存而圆满完成任务。但如果“内存不足处理例程”并未被客端设定，oom_malloc()和 oom_realloc(〉便老实不客气地调用__THROw_BAD_ALLOC，丢出bad_alloc异常信息，或利用exit(1)硬生生中止程序。
+请注意，SGI 第一级配置器的 allocate()和 realloc()都是在调用 malloc()和 realloc()不成功后,改调用 oom_malloc()和 oom_realloc() 。
+后两者都有内循环，不断调用“内存不足处理例程”，期望在某次调用之后，获得足够的内存而圆满完成任务。但如果“内存不足处理例程”并未被客端设定，oom_malloc()和 oom_realloc(〉便老实不客气地调用__THROw_BAD_ALLOC，丢出 bad_alloc 异常信息，或利用 exit(1)硬生生中止程序。
 
-记住，设计“内存不足处理例程”是客端的责任，设定“内存不足处理例程”也是客端的责任。再一次提醒你，“内存不足处理例程”解决问题的做法有着特定的模式，请参考[Meyers98]条款7。
-***** 第二级配置器__default_alloc_tem plate剖析
+记住，设计“内存不足处理例程”是客端的责任，设定“内存不足处理例程”也是客端的责任。再一次提醒你，“内存不足处理例程”解决问题的做法有着特定的模式，请参考[Meyers98]条款 7。
+***** 第二级配置器__default_alloc_tem plate 剖析
 
 ** 迭代器
 迭代器( iterators）是一种抽象的设计概念，现实程序语言中并没有直接对应于这个概念的实物。
-《Design Patterns》一书提供有23个设计模式( design patterns)的完整描述，其中iterator模式定义如下:
+《Design Patterns》一书提供有 23 个设计模式( design patterns)的完整描述，其中 iterator 模式定义如下:
 提供一种方法，使之能够依序巡访某个聚合物（容器）所含的各个元素，而又无需暴露该聚合物的内部表述方式。
 
-*** 迭代器设计思维——STL关键所在
-不论是泛型思维或STL的实际运用，迭代器（ iterators）都扮演着重要的角色。
-STL的中心思想在于:将数据容器( containers）和算法（ algorithms）分开，彼此独立设计，最后再以一帖胶着剂将它们撮合在一起。
-容器和算法的泛型化，从技术角度来看并不困难，C++的class templates和 function templates可分别达成目标。如何设计出两者之间的良好胶着剂，才是大难题。
+*** 迭代器设计思维——STL 关键所在
+不论是泛型思维或 STL 的实际运用，迭代器（ iterators）都扮演着重要的角色。
+STL 的中心思想在于:将数据容器( containers）和算法（ algorithms）分开，彼此独立设计，最后再以一帖胶着剂将它们撮合在一起。
+容器和算法的泛型化，从技术角度来看并不困难，C++的 class templates 和 function templates 可分别达成目标。如何设计出两者之间的良好胶着剂，才是大难题。
 
-以下是容器、算法、迭代器（ iterator，扮演粘胶角色）的合作展示。以算法find()为例，它接受两个迭代器和一个“搜寻目标”:
+以下是容器、算法、迭代器（ iterator，扮演粘胶角色）的合作展示。以算法 find()为例，它接受两个迭代器和一个“搜寻目标”:
 #+begin_src c++
 template <class _InputIter, class _Predicate>
 inline _InputIter find_if(_InputIter __first, _InputIter __last,
@@ -3481,12 +3718,12 @@ int main() {
 #+END_SRC
 
 *** 迭代器( iterator)是一种智能指针
-迭代器是一种行为类似指针的对象,而指针的各种行为中最常见也最重要的便是内容提领(dereference）和成员访问( member access)，因此，迭代器最重要的编程工作就是对operator*和operator->进行重载（overloading）工作。
+迭代器是一种行为类似指针的对象,而指针的各种行为中最常见也最重要的便是内容提领(dereference）和成员访问( member access)，因此，迭代器最重要的编程工作就是对 operator*和 operator->进行重载（overloading）工作。
 
-关于这一点，C++标准程序库有一个auto_ptr可供我们参考。
+关于这一点，C++标准程序库有一个 auto_ptr 可供我们参考。
 这是一个用来包装原生指针（native pointer)的对象.
 
-现在我们来为list（链表）设计一个迭代器1。假设list及其节点的结构如下:
+现在我们来为 list（链表）设计一个迭代器 1。假设 list 及其节点的结构如下:
 #+begin_src c++
 template <typename T>
 class List {
@@ -3531,9 +3768,9 @@ private:
 };
 #+END_SRC
 首先,我们需要为它设计一个仃类似指针的外衣，也就是一个迭代器。
-当我们提领(dereference)这一迭代器时，专回的应该是个Listrtem对象:
-当我们递增该迭代器时，它应该指向下一个istrtem对象。
-为了让该迭代器适用于任何型态的节点，而不只限于Listitem,戈们可以将它设计为一个class template:
+当我们提领(dereference)这一迭代器时，专回的应该是个 Listrtem 对象:
+当我们递增该迭代器时，它应该指向下一个 istrtem 对象。
+为了让该迭代器适用于任何型态的节点，而不只限于 Listitem,戈们可以将它设计为一个 class template:
 #+begin_src c++
 // file: 3mylist-iter.h
 
@@ -3579,7 +3816,7 @@ struct ListIter {
     }
 };
 #+END_SRC
-现在可以将List和find()借由ListIter粘合起来:
+现在可以将 List 和 find()借由 ListIter 粘合起来:
 #+begin_src c++
 // file: 3mylist-iter-test.cpp
 #include "3_2_algorithm.h"
@@ -3621,104 +3858,104 @@ int main() {
         cout << "found. " << iter->value() << endl;
 }
 #+END_SRC
-注意，由于find ()函数内以*iter != value来检查元素值是否吻合，本例之中value 的型别是 int，iter 的型别是Listrtem<int>，两者之间并可供使用的 operator !=，所以我必须另外写一个全局的operator!=重载函娄并以int和 ListItem<int>作为它的两个参数型别.
+注意，由于 find ()函数内以*iter != value 来检查元素值是否吻合，本例之中 value 的型别是 int，iter 的型别是 Listrtem<int>，两者之间并可供使用的 operator !=，所以我必须另外写一个全局的 operator!=重载函娄并以 int 和 ListItem<int>作为它的两个参数型别.
 
-为了完成一个针对 List而设计的迭代器，我们无可避免曝露了太多 List细节：
-在 main()为了制作 begin和 end两个迭代器，我们曝露了 ListItem；
-在 ListIter class 为了达成 operator++的目的，我们曝露了 ListItem的操作函式 next()。
+为了完成一个针对 List 而设计的迭代器，我们无可避免曝露了太多 List 细节：
+在 main()为了制作 begin 和 end 两个迭代器，我们曝露了 ListItem；
+在 ListIter class 为了达成 operator++的目的，我们曝露了 ListItem 的操作函式 next()。
 如果不是为了迭代器，ListItem 原本应该完全隐藏起来不曝光的。
 换句话说，要设计出 ListIter，首先必须对 List 的细节有非常丰富的了解。
-既然这无可避免，干脆就把迭代器的开发工作交给 List的设计者好了，
+既然这无可避免，干脆就把迭代器的开发工作交给 List 的设计者好了，
 如此一来所有细节反而得以封装起来不被使用者看到。
 这正是为什么每一种  STL  容器都提供有专属迭代器的缘故。
 
 *** 迭代器相应型别( associated types )
-上述的 ListIter提供了一个迭代器雏形。如果将思想拉得更高远-一些，我们便会发现，在算法中运用迭代器时，很可能会用到其相应型别( associated type) .
+上述的 ListIter 提供了一个迭代器雏形。如果将思想拉得更高远-一些，我们便会发现，在算法中运用迭代器时，很可能会用到其相应型别( associated type) .
 什么是相应型别?迭代器所指之物的型别便是其一。
 
-假设算法中有必要声明一个变量,以“迭代器所指对象的型别”为型别,如何是好?毕竟C++只支持sizeof(),并未支持typeof().
-即便动用RTTI 性质中的 typeid()，获得的也只是型别名称，不能拿来做变量声明之用。
-解决办法是:利用function template的参数推导( argument deducation)机制。例如:
+假设算法中有必要声明一个变量,以“迭代器所指对象的型别”为型别,如何是好?毕竟 C++只支持 sizeof(),并未支持 typeof().
+即便动用 RTTI 性质中的 typeid()，获得的也只是型别名称，不能拿来做变量声明之用。
+解决办法是:利用 function template 的参数推导( argument deducation)机制。例如:
 
 
 #+DOWNLOADED: screenshot @ 2023-08-05 16:08:25
 [[file:images/c++/STL/2023-08-05_16-08-25_screenshot.png]]
-我们以func()为对外接口，却把实际操作全部置于func_impl()之中。
-由于func_impl()是一个function template,一旦被调用,编译器会自动进行template参数推导。
-于是导出型别T，顺利解决了问题。
+我们以 func()为对外接口，却把实际操作全部置于 func_impl()之中。
+由于 func_impl()是一个 function template,一旦被调用,编译器会自动进行 template 参数推导。
+于是导出型别 T，顺利解决了问题。
 迭代器相应型别( associated types）不只是“迭代器所指对象的型别”一种而已。
-根据经验，最常用的相应型别有五种，然而并非任何情况下任何一种都可利用上述的template参数推导机制来取得.我们需要更全面的解法。
+根据经验，最常用的相应型别有五种，然而并非任何情况下任何一种都可利用上述的 template 参数推导机制来取得.我们需要更全面的解法。
 
-*** Traits 编程技法——STL源代码门钥
-迭代器所指对象的型别，称为该迭代器的value type。上述的参数型别推导技巧虽然可用于value type，却非全面可用:万一 value type必须用于函数的传回值，就束手无策了，毕竟函数的“template参数推导机制”推而导之的只是参数，无法推导函数的回返值型别。
+*** Traits 编程技法——STL 源代码门钥
+迭代器所指对象的型别，称为该迭代器的 value type。上述的参数型别推导技巧虽然可用于 value type，却非全面可用:万一 value type 必须用于函数的传回值，就束手无策了，毕竟函数的“template 参数推导机制”推而导之的只是参数，无法推导函数的回返值型别。
 我们需要其它方法。声明内嵌型别似乎是个好主意，像这样:
 
 #+DOWNLOADED: screenshot @ 2023-08-05 16:20:30
 [[file:images/c++/STL/2023-08-05_16-20-30_screenshot.png]]
-注意，func()的回返型别必须加上关键词typename，因为T是一个template参数，在它被编译器具现化之前，编译器对T一无所知，
-换句话说，编译器此时并不知道MyIter<T>::value_type 代表的是一个型别或是一个member function或是一个data member。
-关键词typename 的用意在于告诉编译器这是一个型别，如此才能顺利通过编译。
+注意，func()的回返型别必须加上关键词 typename，因为 T 是一个 template 参数，在它被编译器具现化之前，编译器对 T 一无所知，
+换句话说，编译器此时并不知道 MyIter<T>::value_type 代表的是一个型别或是一个 member function 或是一个 data member。
+关键词 typename 的用意在于告诉编译器这是一个型别，如此才能顺利通过编译。
 
 看起来不错。但是有个隐晦的陷阱:并不是所有迭代器都是 class type。原生指针就不是!如果不是 class type，就无法为它定义内嵌型别。
-但STL(以及整个泛型思维）绝对必须接受原生指针作为一种迭代器，所以上面这样还不够。
+但 STL(以及整个泛型思维）绝对必须接受原生指针作为一种迭代器，所以上面这样还不够。
 
 有没有办法可以让上述的一般化概念针对特定情况（例如针对原生指针）做特殊化处理呢?
-是的,template partial specialization可以做到。
+是的,template partial specialization 可以做到。
 
 **** Partial Specialization（偏特化)的意义
-大致的意义是:如果class template拥有一个以上的template参数，我们可以针对其中某个（或数个，但非全部)template参数进行特化工作。
-换句话说，我们可以在泛化设计中提供一个特化版本（也就是将泛化版本中的某些template 参数赋予明确的指定）。
+大致的意义是:如果 class template 拥有一个以上的 template 参数，我们可以针对其中某个（或数个，但非全部)template 参数进行特化工作。
+换句话说，我们可以在泛化设计中提供一个特化版本（也就是将泛化版本中的某些 template 参数赋予明确的指定）。
 
-假设有一个class template 如下:
+假设有一个 class template 如下:
 #+begin_src c++
 template<typename U, typename V, typename T>
 class c { ... };
 #+END_SRC
 partial 
-specialization的字面意义容易误导我们以为，所谓“偏特化版”一定是对template参数U或V或T(或某种组合)指定某个参数值.
+specialization 的字面意义容易误导我们以为，所谓“偏特化版”一定是对 template 参数 U 或 V 或 T(或某种组合)指定某个参数值.
 
-其实不然,[Austern99]对于partial specialization的意义说得十分得体:“所谓partial specialization的意思是提供另一份template定义式，而其本身仍为templatized”。
-《泛型思维》一书对partial specialization的定义是:“针对（任何) template参数更进一步的条件限制所设计出来的一个特化版本”。
-由此，面对以下这么一个class template:
+其实不然,[Austern99]对于 partial specialization 的意义说得十分得体:“所谓 partial specialization 的意思是提供另一份 template 定义式，而其本身仍为 templatized”。
+《泛型思维》一书对 partial specialization 的定义是:“针对（任何) template 参数更进一步的条件限制所设计出来的一个特化版本”。
+由此，面对以下这么一个 class template:
 #+begin_src c++
 template<typename T>
 class c { ... };//这个泛化版本允许（接受)T为任何型别
 #+END_SRC
-我们便很容易接受它有一个形式如下的partial specialization:
+我们便很容易接受它有一个形式如下的 partial specialization:
 #+begin_src c++
 template<typename T>
 class C<T*> { ... }; //这个特化版本仅适用于“T为原生指针”的情况
                      //T为原生指针”便是“T为任何型别”的-个更进一-步的条件限制
 #+END_SRC
 有了这项利器，我们便可以解决前述“内嵌型别”未能解决的问题。
-先前的问题是，原生指针并非class，因此无法为它们定义内嵌型别。现在，我们可以针对“迭代器之template参数为指针”者，设计特化版的迭代器。
+先前的问题是，原生指针并非 class，因此无法为它们定义内嵌型别。现在，我们可以针对“迭代器之 template 参数为指针”者，设计特化版的迭代器。
 
-下面这个class template专门用来“萃取”迭代器的特性，而 value type正是迭代器的特性之一:
+下面这个 class template 专门用来“萃取”迭代器的特性，而 value type 正是迭代器的特性之一:
 #+begin_src c++
 template <class I>
 struct iterator_traits { //traits 意为“特性”
   typedef typename I::value_type value_type;
 };
 #+END_SRC
-这个所谓的 traits，其意义是，如果I定义有自己的 value type，那么通过这个tralts 的作用，萃取出来的value_type就是I::value_type。
-换句话说，如果I定义有自己的value type，先前那个func()可以改写成这样:
+这个所谓的 traits，其意义是，如果 I 定义有自己的 value type，那么通过这个 tralts 的作用，萃取出来的 value_type 就是 I::value_type。
+换句话说，如果 I 定义有自己的 value type，先前那个 func()可以改写成这样:
 #+begin_src c++
 template <class I>
 typename iterator_traitsc<I>::value type // 这一整行是函数回返型别
 func(I ite)
 { return *ite; }
 #+END_SRC
-但这除了多一层间接性，又带来什么好处呢?好处是traits 可以拥有特化版本。现在，我们令iterator..traites拥有一个partial specializations 如下:
+但这除了多一层间接性，又带来什么好处呢?好处是 traits 可以拥有特化版本。现在，我们令 iterator..traites 拥有一个 partial specializations 如下:
 template <class T>
-struct iterator_traits<T*> { l/偏特化版--迭代器是个原生指针typedef  value..type;
+struct iterator_traits<T*> { l/偏特化版--迭代器是个原生指针 typedef  value..type;
 } ;
-于是,原生指针int*︰虽然不是一种class type,亦可通过traits 取其valuetype。这就解决了先前的问题。
+于是,原生指针 int*︰虽然不是一种 class type,亦可通过 traits 取其 valuetype。这就解决了先前的问题。
 但是请注意，针对“指向常数对象的指针( pointer-to-const) ”，下面这个式子得到什么结果:
 iterator_traits<const int* > : : value_type
-获得的是 const int 而非int。这是我们期望的吗?我们希望利用这种机制来声明一个暂时变量，使其型别与迭代器的 value type 相同，而现在，声明一-个无法赋值（因const 之故）的暂时变量，没什么用!因此，如果迭代器是个pointer-to-const,我们应该设法令其value type为一个non-const型别.没问题，只要另外设计一个特化版本，就能解决这个问题:
+获得的是 const int 而非 int。这是我们期望的吗?我们希望利用这种机制来声明一个暂时变量，使其型别与迭代器的 value type 相同，而现在，声明一-个无法赋值（因 const 之故）的暂时变量，没什么用!因此，如果迭代器是个 pointer-to-const,我们应该设法令其 value type 为一个 non-const 型别.没问题，只要另外设计一个特化版本，就能解决这个问题:
 
-* struct和class的区别
-struct的默认访问级别为public，而class的默认访问级别是private。
+* struct 和 class 的区别
+struct 的默认访问级别为 public，而 class 的默认访问级别是 private。
 * 数组
 
 
@@ -3740,16 +3977,16 @@ struct的默认访问级别为public，而class的默认访问级别是private�
   print(&i);//正确,&i的类型是int*
   print(j);//正确,j转换为int*并指向j[0].数组的大小对函数的调用并没有影响
 #+END_SRC
-上面三个函数的唯一形参都是const int*类型.
-当编译器处理对print函数的调用时,只检查传入的参数是否是const int*类型.
+上面三个函数的唯一形参都是 const int*类型.
+当编译器处理对 print 函数的调用时,只检查传入的参数是否是 const int*类型.
 
 *** 管理数组形参大小的常用技术
 **** 使用标记指定数组长度
 这种方法要求数组本身包含一个结束标记.
 
-典型例子是C语言风格字符串.
-C风格字符串在最后一个字符后面跟着一个空字符.
-函数在处理C风格字符串时遇到空字符停止.
+典型例子是 C 语言风格字符串.
+C 风格字符串在最后一个字符后面跟着一个空字符.
+函数在处理 C 风格字符串时遇到空字符停止.
 **** 使用标准库规范
 这种方式指的是调用函数时同时传递数组首元素和尾后元素的指针.
 #+begin_src c++
@@ -3781,7 +4018,7 @@ C风格字符串在最后一个字符后面跟着一个空字符.
 多用组合,少用继承.
 
 为了交互对象之间的松耦合设计而努力.
-松耦合的设计将对象之间的互相依赖降到最低,让我们能够建立有弹性的OO系统应对变化.
+松耦合的设计将对象之间的互相依赖降到最低,让我们能够建立有弹性的 OO 系统应对变化.
 
 类应该对扩展开放,对修改关闭.
 
@@ -4269,7 +4506,7 @@ public interface Color {
    void fill();
 }
 #+end_src
-步骤4
+步骤 4
 创建实现接口的实体类。
 
 Red.java
@@ -4518,18 +4755,18 @@ Inside Blue::fill() method.
 状态模式将状态封装成独立的类,并将状态委托到当前状态的对象.
 
 Contest(上下文)是一个类,它可以拥有一些内部状态.
-State接口定义了一个所有具体状态的共同接口,任何状态都实现这个相同的接口.这样一来,状态之间可以互相替换.
+State 接口定义了一个所有具体状态的共同接口,任何状态都实现这个相同的接口.这样一来,状态之间可以互相替换.
 #+DOWNLOADED: screenshot @ 2023-05-29 23:21:43
 [[file:images/c++/设计模式/2023-05-29_23-21-43_screenshot.png]]
 
-* STL容器底层数据结构总结
+* STL 容器底层数据结构总结
 ** vector
-vector是我们用到最多的数据结构，其底层数据结构是数组，由于数组的特点，vector也具有以下特性：
+vector 是我们用到最多的数据结构，其底层数据结构是数组，由于数组的特点，vector 也具有以下特性：
 1、O(1)时间的快速访问；
-2、顺序存储，所以插入到非尾结点位置所需时间复杂度为O(n)，删除也一样；
+2、顺序存储，所以插入到非尾结点位置所需时间复杂度为 O(n)，删除也一样；
 3、扩容规则：
-当我们新建一个vector的时候，会首先分配给他一片连续的内存空间，如std::vector<int> vec，当通过push_back向其中增加元素时，如果初始分配空间已满，就会引起vector扩容，其扩容规则在gcc下以2倍方式完成：
-首先重新申请一个2倍大的内存空间；
+当我们新建一个 vector 的时候，会首先分配给他一片连续的内存空间，如 std::vector<int> vec，当通过 push_back 向其中增加元素时，如果初始分配空间已满，就会引起 vector 扩容，其扩容规则在 gcc 下以 2 倍方式完成：
+首先重新申请一个 2 倍大的内存空间；
 然后将原空间的内容拷贝过来；
 最后将原空间内容进行释放，将内存交还给操作系统；
 
@@ -4581,38 +4818,38 @@ int main()
 #+DOWNLOADED: file:E:/org/图片/Snipaste_2021-04-11_10-52-03.png @ 2021-04-11 10:54:14
 [[file:STL容器底层数据结构总结/2021-04-11_10-54-14_Snipaste_2021-04-11_10-52-03.png]]
 
-从输出结果中的三个红色箭头可以看出vector的扩容规则。
+从输出结果中的三个红色箭头可以看出 vector 的扩容规则。
 
 4、注意事项：
-根据vector的插入和删除特性，以及扩容规则，我们在使用vector的时候要注意，在插入位置和删除位置之后的所有迭代器和指针引用都会失效，同理，扩容之后的所有迭代器指针和引用也都会失效。
+根据 vector 的插入和删除特性，以及扩容规则，我们在使用 vector 的时候要注意，在插入位置和删除位置之后的所有迭代器和指针引用都会失效，同理，扩容之后的所有迭代器指针和引用也都会失效。
 ** map & multimap & unordered_map & unordered_multimap
-*** map与multimap底层数据结构
-map与multimap是STL中的关联容器、提供一对一key-value的数据处理能力； map与multimap的区别在于，multimap允许关键字重复，而map不允许重复。
+*** map 与 multimap 底层数据结构
+map 与 multimap 是 STL 中的关联容器、提供一对一 key-value 的数据处理能力； map 与 multimap 的区别在于，multimap 允许关键字重复，而 map 不允许重复。
 
-这两个关联容器的底层数据结构均为红黑树,根据红黑树的原理，map与multimap可以实现O(lgn)的查找，插入和删除。
-*** unordered_map 与unordered_multimap底层数据结构
-unordered_map与unordered_multimap 对比map与multimap两种map在于map与multimap中的两个容器实现了以key为序排列，也就是说map与multimap为有序的。
+这两个关联容器的底层数据结构均为红黑树,根据红黑树的原理，map 与 multimap 可以实现 O(lgn)的查找，插入和删除。
+*** unordered_map 与 unordered_multimap 底层数据结构
+unordered_map 与 unordered_multimap 对比 map 与 multimap 两种 map 在于 map 与 multimap 中的两个容器实现了以 key 为序排列，也就是说 map 与 multimap 为有序的。
 
-而unordered_map与unordered_multimap中key为无序排列，其底层实现为hash table，因此其查找时间复杂度理论上达到了O(n)，之所以说理论上是因为在理想无碰撞的情况下，而真实情况未必如此。
+而 unordered_map 与 unordered_multimap 中 key 为无序排列，其底层实现为 hash table，因此其查找时间复杂度理论上达到了 O(n)，之所以说理论上是因为在理想无碰撞的情况下，而真实情况未必如此。
 ** set & multiset & unordered_set & unordered_multiset
-以上四种容器也都是关联容器，set系与map系的区别在于map中存储的是<key-value>，而set可以理解为关键字即值，即只保存关键字的容器。
-*** set & multiset底层数据结构
-set与multiset有序存储元素，这两种容器的底层实现与map一样都是红黑树，所以能实现O(lgn)的查找，插入，删除操作。
+以上四种容器也都是关联容器，set 系与 map 系的区别在于 map 中存储的是<key-value>，而 set 可以理解为关键字即值，即只保存关键字的容器。
+*** set & multiset 底层数据结构
+set 与 multiset 有序存储元素，这两种容器的底层实现与 map 一样都是红黑树，所以能实现 O(lgn)的查找，插入，删除操作。
 
-set与multiset的区别在于是否允许重复；
+set 与 multiset 的区别在于是否允许重复；
 *** unordered_set & unordered_multiset
-与unordered_map & unordered_multimap相同，其底层实现为hash table；
+与 unordered_map & unordered_multimap 相同，其底层实现为 hash table；
 ** priority_queue
 priority_queue
-优先级队列相当于一个有权值的单向队列queue，在这个队列中，所有元素是按照优先级排列的。
+优先级队列相当于一个有权值的单向队列 queue，在这个队列中，所有元素是按照优先级排列的。
 
-priority_queue根据堆的处理规则来调整元素之间的位置，根据堆的特性，优先级队列实现了取出最大最小元素时间复杂度为O(1),对于插入和删除，其最坏情况为O(lgn)。
+priority_queue 根据堆的处理规则来调整元素之间的位置，根据堆的特性，优先级队列实现了取出最大最小元素时间复杂度为 O(1),对于插入和删除，其最坏情况为 O(lgn)。
 ** list
-list的底层数据结构为双向链表，特点是支持快速的增删。 
-* STL容器迭代器失效情况分析、总结
+list 的底层数据结构为双向链表，特点是支持快速的增删。 
+* STL 容器迭代器失效情况分析、总结
 [[https://ivanzz1001.github.io/records/post/cplusplus/2018/03/14/cpluscplus_stl_iterator#31-%25E4%25BD%25BF%25E7%2594%25A8%25E8%25BF%25AD%25E4%25BB%25A3%25E5%2599%25A8%25E9%2581%258D%25E5%258E%2586%25E4%25B8%258D%25E5%2590%258C%25E7%259A%2584%25E5%25AE%25B9%25E5%2599%25A8][参考文献]]
 ** 迭代器失效
-当使用一个容器的insert或者erase函数通过迭代器插入或删除元素可能会导致迭代器失效，因此我们为了避免危险，应该获取insert或者erase返回的迭代器，以便用重新获取的新的有效的迭代器进行正确的操作：
+当使用一个容器的 insert 或者 erase 函数通过迭代器插入或删除元素可能会导致迭代器失效，因此我们为了避免危险，应该获取 insert 或者 erase 返回的迭代器，以便用重新获取的新的有效的迭代器进行正确的操作：
 #+BEGIN_SRC c++
 iter = vec.insert(iter);
 
@@ -4622,9 +4859,9 @@ iter = vec.erase(iter);
 - 由于插入元素，使得容器元素整体迁移导致存放原容器元素的空间不再有效，从而使得指向原空间的迭代器失效；
 - 由于删除元素，使得某些元素次序发生变化导致原本指向某元素的迭代器不再指向期望指向的元素。
 
-*** vector迭代器失效
-- 当插入(push_back)一个元素后，end操作返回的迭代器肯定失效；
-- 当插入(push_back)一个元素后，如果vector的capacity发生了改变，则需要重新加载整个容器，此时first和end操作返回的迭代器都会失效；
+*** vector 迭代器失效
+- 当插入(push_back)一个元素后，end 操作返回的迭代器肯定失效；
+- 当插入(push_back)一个元素后，如果 vector 的 capacity 发生了改变，则需要重新加载整个容器，此时 first 和 end 操作返回的迭代器都会失效；
 - 当进行删除操作(erase,pop_back)后，指向删除点的迭代器全部失效，指向删除点后面的元素的迭代器也将全部失效；
 
 参看如下示例：
@@ -4668,20 +4905,20 @@ next iter: 400
 100  400  500 
 #+END_EXAMPLE
 
-*** list迭代器失效
-- 插入操作(insert)和接合操作(splice)不会造成原有的list迭代器失效，这在vector中是不成立的，因为vector的插入操作可能造成记忆体重新配置，导致所有的迭代器全部失效；
-- list的删除操作(erase)也只有指向被删元素的那个迭代器失效，其他迭代器不受影响。（list目前只发现这一种失效情况）
-*** deque迭代器失效
-- 在deque容器首部或者尾部插入元素，不会使得任何迭代器失效；
-注： 通过vs2012测试，不管前端插入还是后端插入，都会使迭代器失效
-- 在deque容器的首部或者尾部删除元素，只会使指向被删元素的迭代器失效；
-- 在deque容器的任何其他位置进行插入或删除操作都将使指向该容器元素的所有迭代器失效；
-*** set和map迭代器失效
-与list相同，当对其进行insert或者erase操作时，操作之前的所有迭代器，在操作完成之后都依然有效，但被删除元素的迭代器失效。
+*** list 迭代器失效
+- 插入操作(insert)和接合操作(splice)不会造成原有的 list 迭代器失效，这在 vector 中是不成立的，因为 vector 的插入操作可能造成记忆体重新配置，导致所有的迭代器全部失效；
+- list 的删除操作(erase)也只有指向被删元素的那个迭代器失效，其他迭代器不受影响。（list 目前只发现这一种失效情况）
+*** deque 迭代器失效
+- 在 deque 容器首部或者尾部插入元素，不会使得任何迭代器失效；
+注： 通过 vs2012 测试，不管前端插入还是后端插入，都会使迭代器失效
+- 在 deque 容器的首部或者尾部删除元素，只会使指向被删元素的迭代器失效；
+- 在 deque 容器的任何其他位置进行插入或删除操作都将使指向该容器元素的所有迭代器失效；
+*** set 和 map 迭代器失效
+与 list 相同，当对其进行 insert 或者 erase 操作时，操作之前的所有迭代器，在操作完成之后都依然有效，但被删除元素的迭代器失效。
 ** C++标准模板库(STL)迭代器的原理及实现
-迭代器(iterator)是一种抽象的设计理念，通过迭代器可以在不了解容器内部原理的情况下遍历容器。除此之外，STL中迭代器一个最重要的作用就是作为容器(vector、list等)与STL算法的粘结剂，只要容器提供迭代器的接口，同一套算法代码可以利用在完全不同的容器中，这是抽象思想的经典应用。
+迭代器(iterator)是一种抽象的设计理念，通过迭代器可以在不了解容器内部原理的情况下遍历容器。除此之外，STL 中迭代器一个最重要的作用就是作为容器(vector、list 等)与 STL 算法的粘结剂，只要容器提供迭代器的接口，同一套算法代码可以利用在完全不同的容器中，这是抽象思想的经典应用。
 *** 使用迭代器遍历不同的容器
-如下所示的代码演示了迭代器是如何将容器和算法结合在一起的，其中使用了3种不同的容器，.begin()和.end()方法返回一个指向容器第一个元素和一个指向容器最后一个元素后面一个位置的迭代器，也就是说begin()和end()返回的迭代器是一个前闭后开的，一般用[begin, end) 表示。对于不同的容器，我们都使用同一个accumulate()函数，原因就在于acccumulate()函数的实现无需考虑容器的种类，只需要容器传入的begin()和end()迭代器能够完成标准迭代器的要求即可。
+如下所示的代码演示了迭代器是如何将容器和算法结合在一起的，其中使用了 3 种不同的容器，.begin()和.end()方法返回一个指向容器第一个元素和一个指向容器最后一个元素后面一个位置的迭代器，也就是说 begin()和 end()返回的迭代器是一个前闭后开的，一般用[begin, end) 表示。对于不同的容器，我们都使用同一个 accumulate()函数，原因就在于 acccumulate()函数的实现无需考虑容器的种类，只需要容器传入的 begin()和 end()迭代器能够完成标准迭代器的要求即可。
 #+BEGIN_SRC c++
 std::vector<int> vec{1,2,3};
 std::list<int> lst{4,5,6};
@@ -4692,7 +4929,7 @@ std::cout<<std::accumulate(lst.begin(), lst.end(), 0) << std::endl;
 std::cout<<std::accumulate(deq.begin(), deq.end(), 0) << std::endl;
 #+END_SRC
 *** 迭代器的实现
-迭代器的作用就是提供一个遍历容器内部所有元素的接口，因此迭代器的内部必须保存一个与容器相关联的指针，然后重载各种运算操作来方便遍历，其中最重要的就是* 运算符和-> 运算符，以及++、--等可能需要的运算符重载。实际上这和C++标准库的智能指针(smart pointer)很像，智能指针也是将一个指针封装，然后通过引用计数或是其他方法完成自动释放内存的功能，为了达到和原有指针一样的功能，也需要对*、->等运算符进行重载。下面参照智能指针实现一个简单vector迭代器，其中几个typedef暂时不用管，我们后面会提到。vecIter主要作用就是包裹一个指针，不同容器内部数据结构不相同，因此迭代器操作符重载的实现也会不同。比如++操作符。对于线性分配内存的数组来说，直接对指针执行++操作即可； 但是如果容器是List就需要采用元素内部的方法，比如ptr->next()之类的方法访问下一个元素。因此，STL容器都实现了自己的专属迭代器。
+迭代器的作用就是提供一个遍历容器内部所有元素的接口，因此迭代器的内部必须保存一个与容器相关联的指针，然后重载各种运算操作来方便遍历，其中最重要的就是* 运算符和-> 运算符，以及++、--等可能需要的运算符重载。实际上这和 C++标准库的智能指针(smart pointer)很像，智能指针也是将一个指针封装，然后通过引用计数或是其他方法完成自动释放内存的功能，为了达到和原有指针一样的功能，也需要对*、->等运算符进行重载。下面参照智能指针实现一个简单 vector 迭代器，其中几个 typedef 暂时不用管，我们后面会提到。vecIter 主要作用就是包裹一个指针，不同容器内部数据结构不相同，因此迭代器操作符重载的实现也会不同。比如++操作符。对于线性分配内存的数组来说，直接对指针执行++操作即可； 但是如果容器是 List 就需要采用元素内部的方法，比如 ptr->next()之类的方法访问下一个元素。因此，STL 容器都实现了自己的专属迭代器。
 
 下面我们给出一个普通数组的迭代器的实现(array_iterator.cpp)：
 #+BEGIN_SRC c++
@@ -4761,19 +4998,19 @@ int main(int argc, char *argv[])
 10
 #+END_EXAMPLE
 *** 迭代器的相应型别
-我们都知道type_traits可以萃取出类型的型别，根据不同的型别可以执行不同的处理流程。那么对于迭代器来说，是否有针对不同特性迭代器的优化方法呢？ 答案是肯定的。拿一个STL算法库中的distance()函数来说，distance函数接受两个迭代器参数，然后计算两者之间的距离。显然，对于不同的迭代器计算效率差别很大。比如对于vector容器来说，由于内存是连续分配的，因此指针直接相减即可获得两者的距离；而list容器是链表结构，内存一般都不是连续分配，因此只能通过一级一级调用next()或者其他函数，每调用一次再判断迭代器是否相等来计算距离。vector迭代器计算distance的效率为O(1)，而list则为O(n)，n为距离的大小。
+我们都知道 type_traits 可以萃取出类型的型别，根据不同的型别可以执行不同的处理流程。那么对于迭代器来说，是否有针对不同特性迭代器的优化方法呢？ 答案是肯定的。拿一个 STL 算法库中的 distance()函数来说，distance 函数接受两个迭代器参数，然后计算两者之间的距离。显然，对于不同的迭代器计算效率差别很大。比如对于 vector 容器来说，由于内存是连续分配的，因此指针直接相减即可获得两者的距离；而 list 容器是链表结构，内存一般都不是连续分配，因此只能通过一级一级调用 next()或者其他函数，每调用一次再判断迭代器是否相等来计算距离。vector 迭代器计算 distance 的效率为 O(1)，而 list 则为 O(n)，n为距离的大小。
 
-因此，根据迭代器不同的特性，将迭代器分为5类：
+因此，根据迭代器不同的特性，将迭代器分为 5 类：
 - Input Iterator: 这种迭代器所指的对象为只读的
 - Output Iterator: 所指的对象只能进行写入操作
-- Forward Iterator: 该类迭代器可以在一个正确的区间中进行读写操作，它拥有Input Iterator的所有特性，和Output Iterator的部分特性，以及单步向前迭代元素的能力
-- Bidirectional Iterator: 该类迭代器是在Forward Iterator的基础上提供了单步向后迭代元素的能力，从而使得可以双向移动
-- Random Access Iterator： 前4种迭代器只提供部分指针算术能力（前3种支持++运算符，后一种还支持--运算符)，而本迭代器则支持所有指针的算术运算，包括p+n、p-n、p[n]、p1-p2、p1<p2
+- Forward Iterator: 该类迭代器可以在一个正确的区间中进行读写操作，它拥有 Input Iterator 的所有特性，和 Output Iterator 的部分特性，以及单步向前迭代元素的能力
+- Bidirectional Iterator: 该类迭代器是在 Forward Iterator 的基础上提供了单步向后迭代元素的能力，从而使得可以双向移动
+- Random Access Iterator： 前 4 种迭代器只提供部分指针算术能力（前 3 种支持++运算符，后一种还支持--运算符)，而本迭代器则支持所有指针的算术运算，包括 p+n、p-n、p[n]、p1-p2、p1<p2
 
-上述5种迭代器的继承关系如下图所示：
+上述 5 种迭代器的继承关系如下图所示：
 #+DOWNLOADED: file:E:/org/图片/Snipaste_2021-04-11_14-30-22.png @ 2021-04-11 14:30:26
 [[file:STL容器迭代器失效情况分析、总结/2021-04-11_14-30-26_Snipaste_2021-04-11_14-30-22.png]]
-了解了迭代器的类型，我们就能解释vector的迭代器和list迭代器的区别了。显然，vector迭代器具有所有指针算术运算能力，而list由于是双向链表，因此只有双向读写不能随机访问元素。故vector的迭代器种类为Random Access Iterator，而list的迭代器种类为Bidirectional Iterator。我们只需要根据不同的迭代器种类，利用traits编程技巧萃取出迭代器型别，然后由C++重载机制就能够对不同型别的迭代器采用不同的处理流程了。为此，对于每个迭代器都必须定义型别iterator_category，也就是上文代码中的typedef std:forward_iterator_tag iterator_category，实际上可以直接继承STL中定义的iterator模板，模板后三个参数都有默认值，因此继承时只需要指定前两个模板参数即可。如下所示，STL定义了5个空类型作为迭代器的标签：
+了解了迭代器的类型，我们就能解释 vector 的迭代器和 list 迭代器的区别了。显然，vector 迭代器具有所有指针算术运算能力，而 list 由于是双向链表，因此只有双向读写不能随机访问元素。故 vector 的迭代器种类为 Random Access Iterator，而 list 的迭代器种类为 Bidirectional Iterator。我们只需要根据不同的迭代器种类，利用 traits 编程技巧萃取出迭代器型别，然后由 C++重载机制就能够对不同型别的迭代器采用不同的处理流程了。为此，对于每个迭代器都必须定义型别 iterator_category，也就是上文代码中的 typedef std:forward_iterator_tag iterator_category，实际上可以直接继承 STL 中定义的 iterator 模板，模板后三个参数都有默认值，因此继承时只需要指定前两个模板参数即可。如下所示，STL 定义了 5 个空类型作为迭代器的标签：
 #+BEGIN_SRC c++
 template<class Category,class T,class Distance = ptrdiff_t,class Pointer=T*,class Reference=T&>
 class iterator{
@@ -4790,8 +5027,8 @@ struct forward_iterator_tag:public input_iterator_tag{};
 struct bidirectional_iterator_tag:public forward_iterator_tag{};
 struct random_access_iterator_tag:public bidirectional_iterator_tag{};
 #+END_SRC
-*** 利用迭代器种类更有效的实现distance函数
-回到distance函数，有了前面的基础，我们可以根据不同迭代器种类实现distance函数（distance.cpp)：
+*** 利用迭代器种类更有效的实现 distance 函数
+回到 distance 函数，有了前面的基础，我们可以根据不同迭代器种类实现 distance 函数（distance.cpp)：
 #+BEGIN_SRC c++
 #include <iostream>
 #include <vector>
@@ -4888,7 +5125,7 @@ vec distance:4
 lst distance:4
 c-array distance:4
 #+END_EXAMPLE
-上面通过STL定义的iterator_traits模板可以萃取不同种类的迭代器特性，iterator_traits还对指针和常量指针有特化版本，因此也可以萃取原生指针的特性。具体实现如下：
+上面通过 STL 定义的 iterator_traits 模板可以萃取不同种类的迭代器特性，iterator_traits 还对指针和常量指针有特化版本，因此也可以萃取原生指针的特性。具体实现如下：
 #+BEGIN_SRC c++
 template <class _Tp, class _Distance> struct input_iterator {
   typedef input_iterator_tag iterator_category;
@@ -4960,19 +5197,19 @@ struct iterator_traits<const _Tp*> {
 #+END_SRC
 
 *** 3.5 小结
-STL使用迭代器算法和容器结合，利用迭代器型别可以针对不同迭代器编写更加高效的算法，这一点很重要的思想就是： 利用C++重载机制和参数推导机制将运行期决议问题提前到编译期决议，也就是说，我们不需要在运行时判断迭代器的类型，而是在编译期就已经决定。这很符合C++模板编程的理念。在后续STL学习中，我们会实现自己的各种容器，也必须实现各种各样的迭代器，因此迭代器的学习还远没有停止。
-** C++中模板使用时候typename和class的区别
-在C++ Template中很多地方都用到了typename与class这两个关键字，而且好像可以替换，是不是这两个关键字完全一样呢？ 相信学习C++的人对class这个关键字都非常明白，class用于定义类，在C++中引入模板后，最初定义模板的方法为：
+STL 使用迭代器算法和容器结合，利用迭代器型别可以针对不同迭代器编写更加高效的算法，这一点很重要的思想就是： 利用 C++重载机制和参数推导机制将运行期决议问题提前到编译期决议，也就是说，我们不需要在运行时判断迭代器的类型，而是在编译期就已经决定。这很符合 C++模板编程的理念。在后续 STL 学习中，我们会实现自己的各种容器，也必须实现各种各样的迭代器，因此迭代器的学习还远没有停止。
+** C++中模板使用时候 typename 和 class 的区别
+在 C++ Template 中很多地方都用到了 typename 与 class 这两个关键字，而且好像可以替换，是不是这两个关键字完全一样呢？ 相信学习 C++的人对 class 这个关键字都非常明白，class 用于定义类，在 C++中引入模板后，最初定义模板的方法为：
 #+BEGIN_EXAMPLE
 template<class T>....
 #+END_EXAMPLE
-在这里class关键字表明T是一个类型，后来为了避免class在这两个地方的使用可能给人带来混淆，所以引入typename这个关键字，它的作用同class一样表明后面的符号为一个类型，这样在定义模板的时候就可以使用下面的方式了：
+在这里 class 关键字表明 T 是一个类型，后来为了避免 class 在这两个地方的使用可能给人带来混淆，所以引入 typename 这个关键字，它的作用同 class 一样表明后面的符号为一个类型，这样在定义模板的时候就可以使用下面的方式了：
 #+BEGIN_EXAMPLE
 template<typename T>...
 #+END_EXAMPLE
-在模板定义语法中关键字class与typename的作用完全一样。
+在模板定义语法中关键字 class 与 typename 的作用完全一样。
 
-typename难道仅仅在模板定义中起作用吗？ 其实不是这样，typename另外一个作用为： 使用嵌套依赖类型(nested depended name), 如下所示
+typename 难道仅仅在模板定义中起作用吗？ 其实不是这样，typename 另外一个作用为： 使用嵌套依赖类型(nested depended name), 如下所示
 #+BEGIN_SRC c++
 class MyArray{
 public:
@@ -4986,11 +5223,11 @@ void MyMethod(T myarr){
 	LengthType length = myarr.GetLength();
 }
 #+END_SRC
-这个时候typename的作用就是告诉C++编译器，typename后面的字符串为一个类型名称，而不是成员函数或者成员变量。这个时候如果前面没有typename，编译器没有任何办法知道T::LengthType是一个类型还是一个成员名称(静态数据成员或者静态函数），所以编译不能够通过。
-* set自定义去重和排序函数
-** 方法一：使用std::set内置的less比较函数（直接定义内置类型的set对象）
+这个时候 typename 的作用就是告诉 C++编译器，typename 后面的字符串为一个类型名称，而不是成员函数或者成员变量。这个时候如果前面没有 typename，编译器没有任何办法知道 T::LengthType 是一个类型还是一个成员名称(静态数据成员或者静态函数），所以编译不能够通过。
+* set 自定义去重和排序函数
+** 方法一：使用 std::set 内置的 less 比较函数（直接定义内置类型的 set 对象）
 
-这种方法适用于：1）比较int、char等内置类型。2）只能针对某一个内置类型去重和排序：如果想通过id（int）去重，并通过hot(int)排序，该种方法就束手无策了。代码如下：
+这种方法适用于：1）比较 int、char 等内置类型。2）只能针对某一个内置类型去重和排序：如果想通过 id（int）去重，并通过 hot(int)排序，该种方法就束手无策了。代码如下：
 #+BEGIN_SRC c++
 #include <iostream>
 #include <set>
@@ -5018,21 +5255,21 @@ output：
 
 ** 方法二：自定义类（结构体）比较函数
 
-前文提到：直接定义内置类型的set对象，即使用std::set内置的默认的less比较函数，可能不能满足我们的实际需求。例如：现在有一批结构体对象，需要将其插入set集合，并按照id去重，按照热度hot进行排序。这个时候，就需要重新自定义比较函数了。有两种方法可以自定义比较函数：
+前文提到：直接定义内置类型的 set 对象，即使用 std::set 内置的默认的 less 比较函数，可能不能满足我们的实际需求。例如：现在有一批结构体对象，需要将其插入 set 集合，并按照 id 去重，按照热度 hot 进行排序。这个时候，就需要重新自定义比较函数了。有两种方法可以自定义比较函数：
 *** 重载<操作符
-甚么要重载<运算符呢？能不能重载"<="或者">="运算符？答案是不可以。几乎所有的方法或容器都需要排序来满足数学意义上的标准严格弱序化，否则这些方法或容器的行为将不可预知。假设f(x,y)是一个比较函数。 如果该函数满足如下条件则它是严格弱序化的。
+甚么要重载<运算符呢？能不能重载"<="或者">="运算符？答案是不可以。几乎所有的方法或容器都需要排序来满足数学意义上的标准严格弱序化，否则这些方法或容器的行为将不可预知。假设 f(x,y)是一个比较函数。 如果该函数满足如下条件则它是严格弱序化的。
 1. f(x,x) = false; 
 2. if f(x,y) then !f(y,x)
 3. if f(x,y) and f(y,z) then f(x,z)
 4. if !f(x,y)&&!f(y,x) then x==y; if x==y and y==z then x==z;
 
-看上去有点晕乎，不过不用担心，只要你的比较方法能够满足对相等元素永远返回false（记住一个准则：永远让比较函数对相同元素返回false），那你的方法就满足要求了。
+看上去有点晕乎，不过不用担心，只要你的比较方法能够满足对相等元素永远返回 false（记住一个准则：永远让比较函数对相同元素返回 false），那你的方法就满足要求了。
 
-其实，set容器在判定已有元素a和新插入元素b是否相等时，是这么做的：
-1. 将a作为左操作数，b作为有操作数，调用比较函数，并返回比较值  
-2. 将b作为左操作数，a作为有操作数，再调用一次比较函数，并返回比较值。如果1、2两步的返回值都是false，则认为a、b是相等的，则b不会被插入set容器中；
+其实，set 容器在判定已有元素 a 和新插入元素 b 是否相等时，是这么做的：
+1. 将 a 作为左操作数，b作为有操作数，调用比较函数，并返回比较值  
+2. 将 b 作为左操作数，a作为有操作数，再调用一次比较函数，并返回比较值。如果 1、2 两步的返回值都是 false，则认为 a、b 是相等的，则 b 不会被插入 set 容器中；
 
-如果1、2两步的返回值都是true，则可能发生未知行为，因此，记住一个准则：永远让比较函数对相同元素返回false。
+如果 1、2 两步的返回值都是 true，则可能发生未知行为，因此，记住一个准则：永远让比较函数对相同元素返回 false。
 #+BEGIN_SRC c++
 #include <iostream>
 #include <set>
@@ -5172,26 +5409,26 @@ id：10，hot ： 100
 end
 #+END_EXAMPLE
 * SFML
-SFML 是多媒体库，它为PC的各个组件提供简单的界面，用来简化游戏和多媒体应用程序的开发。 主要由五个模块组成，分别是：系统，窗口，图形，音频和网络。
+SFML 是多媒体库，它为 PC 的各个组件提供简单的界面，用来简化游戏和多媒体应用程序的开发。 主要由五个模块组成，分别是：系统，窗口，图形，音频和网络。
 
-SFML 是跨平台的，通过 SFML，你的应用程序可以在最常见的操作系统上进行编译和运行：Windows，Linux，macOS以及Android和iOS。
+SFML 是跨平台的，通过 SFML，你的应用程序可以在最常见的操作系统上进行编译和运行：Windows，Linux，macOS 以及 Android 和 iOS。
 
 SFML 支持多种语言，具体可以在官网查看支持的语言。
 * std
 ** 介绍
-std::是个名称空间标识符，C++标准库中的函数或者对象都是在命名空间std中定义的，所以我们要使用标准库中的函数或者对象都要用std来限定。
+std::是个名称空间标识符，C++标准库中的函数或者对象都是在命名空间 std 中定义的，所以我们要使用标准库中的函数或者对象都要用 std 来限定。
 
-至于为什么将cout放到名字空间std中，是因为象cout这样的对象在实际操作中或许会有好多个，比如说你自己也可能会不小心定义一个对象叫cout，那么这两个cout对象就会产生冲突。
+至于为什么将 cout 放到名字空间 std 中，是因为象 cout 这样的对象在实际操作中或许会有好多个，比如说你自己也可能会不小心定义一个对象叫 cout，那么这两个 cout 对象就会产生冲突。
 
 
-一般来说，std都是要调用C++标准库时使用。比如：使用标准库文件iostream时，要写上std;使用非标准库文件iostream.h，不用写。如图引入非标准库iostream.h时，省去了std::
+一般来说，std 都是要调用 C++标准库时使用。比如：使用标准库文件 iostream 时，要写上 std;使用非标准库文件 iostream.h，不用写。如图引入非标准库 iostream.h 时，省去了 std::
 #+BEGIN_SRC c++
 #include <iostream.h>
 #+END_SRC
 
 当然使用标准库时，也是可以省略的，不过需要进行处理
 
-1. 分别将cout和endl释放出来
+1. 分别将 cout 和 endl 释放出来
 #+BEGIN_SRC c++
 #include <iostream>
 using std::cout;
@@ -5200,38 +5437,38 @@ using std::endl;
 
 2. 将命名空间释放出来
 
-注：using namespace std 告诉编辑器我们将要使用名字空间std中的函数或者对象，所以cout和endl前面不用注明他们是std这个名字空间中的cout和endl
+注：using namespace std 告诉编辑器我们将要使用名字空间 std 中的函数或者对象，所以 cout 和 endl 前面不用注明他们是 std 这个名字空间中的 cout 和 endl
 #+BEGIN_SRC c++
 #include <iostream>
 using namespace std;
 #+END_SRC
 
 ** accumulate
-accumulate定义在#include<numeric>中，作用有两个，一个是累加求和，另一个是自定义类型数据的处理
+accumulate 定义在#include<numeric>中，作用有两个，一个是累加求和，另一个是自定义类型数据的处理
 
 1. 累加求和
 ~int sum = accumulate(vec.begin() , vec.end() , 42);~
 
-accumulate带有三个形参：头两个形参指定要累加的元素范围，第三个形参则是累加的初值。
+accumulate 带有三个形参：头两个形参指定要累加的元素范围，第三个形参则是累加的初值。
 
-accumulate函数将它的一个内部变量设置为指定的初始值，然后在此初值上累加输入范围内所有元素的值。accumulate算法返回累加的结果，其返回类型就是其第三个实参的类型。
+accumulate 函数将它的一个内部变量设置为指定的初始值，然后在此初值上累加输入范围内所有元素的值。accumulate 算法返回累加的结果，其返回类型就是其第三个实参的类型。
 
-可以使用accumulate把string型的vector容器中的元素连接起来：
+可以使用 accumulate 把 string 型的 vector 容器中的元素连接起来：
 
 ~string sum = accumulate(v.begin() , v.end() , string(" "));~
 
-这个函数调用的效果是：从空字符串开始，把vec里的每个元素连接成一个字符串。
+这个函数调用的效果是：从空字符串开始，把 vec 里的每个元素连接成一个字符串。
 
 2. 自定义数据类型的处理
 
-C++ STL中有一个通用的数值类型计算函数— accumulate(),可以用来直接计算数组或者容器中C++内置数据类型，例如：
+C++ STL 中有一个通用的数值类型计算函数— accumulate(),可以用来直接计算数组或者容器中 C++内置数据类型，例如：
 #+BEGIN_SRC c++
 #include <numeric>  
 int arr[]={10,20,30,40,50};  
 vector<int> va(&arr[0],&arr[5]);  
 int sum=accumulate(va.begin(),va.end(),0);  //sum = 150  
 #+END_SRC
-但是对于自定义数据类型，我们就需要自己动手写一个回调函数来实现自定义数据的处理，然后让它作为accumulate()的第四个参数，accumulate()的原型为
+但是对于自定义数据类型，我们就需要自己动手写一个回调函数来实现自定义数据的处理，然后让它作为 accumulate()的第四个参数，accumulate()的原型为
 #+BEGIN_SRC c++
 template<class _InIt, class _Ty,  class _Fn2> 
 inline _Ty _Accumulate(_InIt _First, _InIt _Last, _Ty _Val, _Fn2 _Func)  
@@ -5280,9 +5517,9 @@ std::cout << (std::all_of(std::begin(ages), std::end(ages),[good_age] (int age) 
 #+END_SRC
 这个 lambda 表达式会将 ages 中的元素和 good_age 的值作比较，good_age 的值为 100。所有的元素都小于 100，所以 all_of() 会返回 true，而且输出消息会正确报告没有记录的百岁老人。
 ** bind
-std::bind的头文件是 <functional>，它是一个函数适配器，接受一个可调用对象（callable object），生成一个新的可调用对象来“适应”原对象的参数列表。
+std::bind 的头文件是 <functional>，它是一个函数适配器，接受一个可调用对象（callable object），生成一个新的可调用对象来“适应”原对象的参数列表。
 *** 函数原型
-std::bind函数有两种函数原型，定义如下：
+std::bind 函数有两种函数原型，定义如下：
 #+begin_src c++
 template< class F, class... Args >
 /*unspecified*/ bind( F&& f, Args&&... args );
@@ -5290,26 +5527,26 @@ template< class F, class... Args >
 template< class R, class F, class... Args >
 /*unspecified*/ bind( F&& f, Args&&... args );
 #+END_SRC
-std::bind返回一个基于f的函数对象，其参数被绑定到args上。
-f的参数要么被绑定到值，要么被绑定到placeholders（占位符，如_1, _2, ..., _n）。
+std::bind 返回一个基于 f 的函数对象，其参数被绑定到 args 上。
+f 的参数要么被绑定到值，要么被绑定到 placeholders（占位符，如_1, _2, ..., _n）。
 
-std::bind将可调用对象与其参数一起进行绑定，绑定后的结果可以使用std::function保存。
+std::bind 将可调用对象与其参数一起进行绑定，绑定后的结果可以使用 std::function 保存。
 
-std::bind主要有以下两个作用：
+std::bind 主要有以下两个作用：
 - 将可调用对象和其参数绑定成一个仿函数；
 - 只绑定部分参数，减少可调用对象传入的参数。
-*** std::bind绑定普通函数
+*** std::bind 绑定普通函数
 #+begin_src c++
 double callableFunc (double x, double y) {return x/y;}
 auto NewCallable = std::bind (callableFunc, std::placeholders::_1,2);
 std::cout << NewCallable (10) << '\n';
 #+END_SRC
-bind的第一个参数是函数名，普通函数做实参时，会隐式转换成函数指针。因此std::bind(callableFunc,_1,2)等价于std::bind (&callableFunc,_1,2)；
+bind 的第一个参数是函数名，普通函数做实参时，会隐式转换成函数指针。因此 std::bind(callableFunc,_1,2)等价于 std::bind (&callableFunc,_1,2)；
 
-_1表示占位符，位于<functional>中，std::placeholders::_1；
+_1 表示占位符，位于<functional>中，std::placeholders::_1；
 
-第一个参数被占位符占用，表示这个参数以调用时传入的参数为准，在这里调用NewCallable时，给它传入了10，其实就想到于调用callableFunc(10,2);
-*** std::bind绑定一个成员函数
+第一个参数被占位符占用，表示这个参数以调用时传入的参数为准，在这里调用 NewCallable 时，给它传入了 10，其实就想到于调用 callableFunc(10,2);
+*** std::bind 绑定一个成员函数
 #+begin_src c++
 class Base
 {
@@ -5329,13 +5566,13 @@ int main()
 }
 
 #+END_SRC
-bind绑定类成员函数时，第一个参数表示对象的成员函数的指针，第二个参数表示对象的地址。
+bind 绑定类成员函数时，第一个参数表示对象的成员函数的指针，第二个参数表示对象的地址。
 
-必须显式地指定&Base::diplay_sum，因为编译器不会将对象的成员函数隐式转换成函数指针，所以必须在Base::display_sum前添加&；
+必须显式地指定&Base::diplay_sum，因为编译器不会将对象的成员函数隐式转换成函数指针，所以必须在 Base::display_sum 前添加&；
 
 使用对象成员函数的指针时，必须要知道该指针属于哪个对象，因此第二个参数为对象的地址 &base；
 *** 绑定一个引用参数
-默认情况下，bind的那些不是占位符的参数被拷贝到bind返回的可调用对象中。但是，与lambda类似，有时对有些绑定的参数希望以引用的方式传递，或是要绑定参数的类型无法拷贝。
+默认情况下，bind 的那些不是占位符的参数被拷贝到 bind 返回的可调用对象中。但是，与 lambda 类似，有时对有些绑定的参数希望以引用的方式传递，或是要绑定参数的类型无法拷贝。
 #+begin_src c++
 #include <iostream>
 #include <functional>
@@ -5403,16 +5640,16 @@ Output:
 
 #+END_EXAMPLE
 ** transform
-transform函数的作用是：将某操作应用于指定范围的每个元素。transform函数有两个重载版本：
+transform 函数的作用是：将某操作应用于指定范围的每个元素。transform 函数有两个重载版本：
 
-transform(first,last,result,op);//first是容器的首迭代器，last为容器的末迭代器，result为存放结果的容器，op为要进行操作的一元函数对象或sturct、class。
+transform(first,last,result,op);//first 是容器的首迭代器，last 为容器的末迭代器，result 为存放结果的容器，op 为要进行操作的一元函数对象或 sturct、class。
 
-transform(first1,last1,first2,result,binary_op);//first1是第一个容器的首迭代 器，last1为第一个容器的末迭代器，first2为第二个容器的首迭代器，result为存放结果的容器，binary_op为要进行操作的二元函数 对象或sturct、class。
+transform(first1,last1,first2,result,binary_op);//first1 是第一个容器的首迭代 器，last1 为第一个容器的末迭代器，first2 为第二个容器的首迭代器，result 为存放结果的容器，binary_op 为要进行操作的二元函数 对象或 sturct、class。
 
 注意：第二个重载版本必须要保证两个容器的元素个数相等才行，否则会抛出异常
 *** 例子
-看一个例子：利用transform函数将一个给定的字符串中的小写字母改写成大写字母，并将结果保存在一个叫second的数组里，原字符串内容不变。
-我们只需要使用transform的第一个重载函数，当然我们也可以使用for_each函数来完成再copy几次就行了，现在来看一下代码：
+看一个例子：利用 transform 函数将一个给定的字符串中的小写字母改写成大写字母，并将结果保存在一个叫 second 的数组里，原字符串内容不变。
+我们只需要使用 transform 的第一个重载函数，当然我们也可以使用 for_each 函数来完成再 copy 几次就行了，现在来看一下代码：
 #+BEGIN_SRC c++
 #include <iostream>
 #include <algorithm>
@@ -5436,9 +5673,9 @@ int main()
 }
 #+END_SRC
 
-再看一个例子：给你两个vector向量（元素个数相等），请你利用transform函数将两个vector的每个元素相乘，并输出相乘的结果。
+再看一个例子：给你两个 vector 向量（元素个数相等），请你利用 transform 函数将两个 vector 的每个元素相乘，并输出相乘的结果。
 代码：
-foreach的用法
+foreach 的用法
 #+BEGIN_SRC c++
 #include <iostream>
 #include <algorithm>
@@ -5474,7 +5711,7 @@ int main()
 ** 定义类型
 
 * typeid
-typeid可以返回数据类型。
+typeid 可以返回数据类型。
 
 语法
 #+begin_src cpp
@@ -5568,33 +5805,33 @@ ti3 is of type c
 ** 初始化
 vector<int> ilist1;
 
-默认初始化，vector为空， size为0，表明容器中没有元素，而且 capacity 也返回 0，意味着还没有分配内存空间。这种初始化方式适用于元素个数未知，需要在程序中动态添加的情况。
+默认初始化，vector 为空， size 为 0，表明容器中没有元素，而且 capacity 也返回 0，意味着还没有分配内存空间。这种初始化方式适用于元素个数未知，需要在程序中动态添加的情况。
 
 vector<int> ilist2(ilist);
 
 vector<int> ilist2  = ilist; 
 
-两种方式等价 ，ilist2 初始化为ilist 的拷贝，ilist必须与ilist2 类型相同，也就是同为int的vector类型，ilist2将具有和ilist相同的容量和元素
+两种方式等价 ，ilist2 初始化为 ilist 的拷贝，ilist 必须与 ilist2 类型相同，也就是同为 int 的 vector 类型，ilist2 将具有和 ilist 相同的容量和元素
 
 vector<int> ilist = {1,2,3.0,4,5,6,7};
 
 vector<int> ilist {1,2,3.0,4,5,6,7};
 
-ilist 初始化为列表中元素的拷贝，列表中元素必须与ilist的元素类型相容，本例中必须是与整数类型相容的类型，整形会直接拷贝，其他类型会进行类型转换。
+ilist 初始化为列表中元素的拷贝，列表中元素必须与 ilist 的元素类型相容，本例中必须是与整数类型相容的类型，整形会直接拷贝，其他类型会进行类型转换。
 
 vector<int> ilist3(ilist.begin()+2,ilist.end()-1);
 
-ilist3初始化为两个迭代器指定范围中元素的拷贝，范围中的元素类型必须与ilist3 的元素类型相容，在本例中ilist3被初始化为{3,4,5,6}。注意：由于只要求范围中的元素类型与待初始化的容器的元素类型相容，因此迭代器来自不同的容器是可能的，例如，用一个double的list的范围来初始化ilist3是可行的。另外由于构造函数只是读取范围中的元素进行拷贝，因此使用普通迭代器还是const迭代器来指出范围并没有区别。这种初始化方法特别适合于获取一个序列的子序列。
+ilist3 初始化为两个迭代器指定范围中元素的拷贝，范围中的元素类型必须与 ilist3 的元素类型相容，在本例中 ilist3 被初始化为{3,4,5,6}。注意：由于只要求范围中的元素类型与待初始化的容器的元素类型相容，因此迭代器来自不同的容器是可能的，例如，用一个 double 的 list 的范围来初始化 ilist3 是可行的。另外由于构造函数只是读取范围中的元素进行拷贝，因此使用普通迭代器还是 const 迭代器来指出范围并没有区别。这种初始化方法特别适合于获取一个序列的子序列。
 
 vector<int> ilist4(7);
 
-默认值初始化，ilist4中将包含7个元素，每个元素进行缺省的值初始化，对于int，也就是被赋值为0，因此ilist4被初始化为包含7个0。当程序运行初期元素大致数量可预知，而元素的值需要动态获取的时候，可采用这种初始化方式。
+默认值初始化，ilist4 中将包含 7 个元素，每个元素进行缺省的值初始化，对于 int，也就是被赋值为 0，因此 ilist4 被初始化为包含 7 个 0。当程序运行初期元素大致数量可预知，而元素的值需要动态获取的时候，可采用这种初始化方式。
 
 vector<int> ilist5(7,3);
 
-指定值初始化，ilist5被初始化为包含7个值为3的int
+指定值初始化，ilist5 被初始化为包含 7 个值为 3 的 int
 * volatile
-** 为什么要用volatile？
+** 为什么要用 volatile？
 volatile 关键字是一种类型修饰符，用它声明的类型变量表示可以被某些编译器未知的因素更改。比如：操作系统、硬件或者其它线程等。遇到这个关键字声明的变量，编译器对访问该变量的代码就不再进行优化，从而可以提供对特殊地址的稳定访问。
 
 声明时语法：volatile int vInt;
@@ -5605,7 +5842,7 @@ volatile int i=10;
 int a = i;
 int b = i; 
 #+END_SRC
-volatile 指出 i 是随时可能发生变化的，每次使用它的时候必须从 i的地址中读取，因而编译器生成的汇编代码会重新从i的地址读取数据放在 b 中。而优化做法是，由于编译器发现两次从 i读数据的代码之间的代码没有对 i 进行过操作，它会自动把上次读的数据放在 b 中。而不是重新从 i 里面读。这样以来，如果 i是一个寄存器变量或者表示一个端口数据就容易出错，所以说 volatile 可以保证对特殊地址的稳定访问。
+volatile 指出 i 是随时可能发生变化的，每次使用它的时候必须从 i 的地址中读取，因而编译器生成的汇编代码会重新从 i 的地址读取数据放在 b 中。而优化做法是，由于编译器发现两次从 i 读数据的代码之间的代码没有对 i 进行过操作，它会自动把上次读的数据放在 b 中。而不是重新从 i 里面读。这样以来，如果 i 是一个寄存器变量或者表示一个端口数据就容易出错，所以说 volatile 可以保证对特殊地址的稳定访问。
 
 下面通过插入汇编代码，测试有无 volatile 关键字，对程序最终代码的影响：
 #+begin_src c++
@@ -5663,10 +5900,10 @@ void main()
 i = 10
 i = 32
 #+END_SRC
-这说明这个 volatile 关键字发挥了它的作用。其实不只是“内嵌汇编操纵栈”这种方式属于编译无法识别的变量改变，另外更多的可能是多线程并发访问共享变量时，一个线程改变了变量的值，怎样让改变后的值对其它线程 visible。一般说来，volatile用在如下的几个地方：
-1. 中断服务程序中修改的供其它程序检测的变量需要加volatile；
-2. 多任务环境下各任务间共享的标志应该加volatile；
-3. 存储器映射的硬件寄存器通常也要加volatile说明，因为每次对它的读写都可能由不同意义；
+这说明这个 volatile 关键字发挥了它的作用。其实不只是“内嵌汇编操纵栈”这种方式属于编译无法识别的变量改变，另外更多的可能是多线程并发访问共享变量时，一个线程改变了变量的值，怎样让改变后的值对其它线程 visible。一般说来，volatile 用在如下的几个地方：
+1. 中断服务程序中修改的供其它程序检测的变量需要加 volatile；
+2. 多任务环境下各任务间共享的标志应该加 volatile；
+3. 存储器映射的硬件寄存器通常也要加 volatile 说明，因为每次对它的读写都可能由不同意义；
 
 ** 参考文章
 [[https://zhuanlan.zhihu.com/p/62060524][C/C++ 中的 volatile-知乎]]
@@ -5687,11 +5924,11 @@ return s1.size() < s2.size();
 sort(words.begin(), words.end(), isShorter);
 #+END_SRC
 * workFlow
-通过工厂类WFTaskFactory创建不同类型的task.
-在创建task时会将回调函数作为入参.
-而回调函数自己的入参是task本身.
+通过工厂类 WFTaskFactory 创建不同类型的 task.
+在创建 task 时会将回调函数作为入参.
+而回调函数自己的入参是 task 本身.
 
-工厂方法只会创建两种类型的对象:ComplexHttpTask和ComplexHttpProxyTask.
+工厂方法只会创建两种类型的对象:ComplexHttpTask 和 ComplexHttpProxyTask.
 
 * 友元
 友元可以是一个函数，该函数被称为友元函数；友元也可以是一个类，该类被称为友元类，在这种情况下，整个类及其所有成员都是友元。
@@ -5746,9 +5983,9 @@ int main()
 #+END_SRC
 这个程序只是为了展示友元的用法，所以 main 函数什么也不做。
 
-第 3 行声明了 CCar 类，CCar 类的定义在后面。之所以要提前声明，是因为 CDriver 类的定义中用到了 CCar 类型（第7行），而此时 CCar 类还没有定义，编译会报错。
+第 3 行声明了 CCar 类，CCar 类的定义在后面。之所以要提前声明，是因为 CDriver 类的定义中用到了 CCar 类型（第 7 行），而此时 CCar 类还没有定义，编译会报错。
 
-不要第 3 行，而把 CCar 类的定义写在 CDriver 类的前面，是解决不了这个问题的，因为 CCar 类中也用到了 CDriver 类型（第14行），
+不要第 3 行，而把 CCar 类的定义写在 CDriver 类的前面，是解决不了这个问题的，因为 CCar 类中也用到了 CDriver 类型（第 14 行），
 把 CCar 类的定义写在前面会导致第 14 行的 CDriver 因没有定义而报错。C++ 为此提供的解决办法是：可以简单地将一个类的名字提前声明，写法如下：
 
 class  类名;
@@ -5797,7 +6034,7 @@ int main()
 *** 基类中的友元函数行为
 C++中, 友元是不会继承的。如果基类有一个友元函数，则此函数不会成为子类的友元函数。
 
-例如下面程序会编译失败，因为函数show()是基类A的友元函数，但无法访问子类B的私有数据。
+例如下面程序会编译失败，因为函数 show()是基类 A 的友元函数，但无法访问子类 B 的私有数据。
 #+begin_src c++
 #include <iostream>
 using namespace std;
@@ -5831,15 +6068,15 @@ int main() {
 
 #+END_SRC
 
-编译失败。第2行cout中，无法打印b.y。
+编译失败。第 2 行 cout 中，无法打印 b.y。
 编译提示(visual studio 2015)：
 error C2248: “B::y”: 无法访问 private 成员(在“B”类中声明)
 
-如果注释掉第2行cout，则编译通过，运行结果为：
+如果注释掉第 2 行 cout，则编译通过，运行结果为：
 The default value of A::x = 222
 *** 子类中的友元函数的行为
-反之，如果在子类中定义了一个友元函数，则它可以访问基类中的public以及protected数据。
-因为子类B是公有继承A的，A中的public以及protected数据可以被B的对象访问。
+反之，如果在子类中定义了一个友元函数，则它可以访问基类中的 public 以及 protected 数据。
+因为子类 B 是公有继承 A 的，A中的 public 以及 protected 数据可以被 B 的对象访问。
 
 如下面例子所示：
 #+begin_src c++
@@ -5944,11 +6181,11 @@ int main()
 }
 #+END_SRC
 * 内存泄露
-new 和 delete 是 C++ 用于管理堆内存的两个运算符，对应于C语言中的 malloc 和 free，但是 malloc 和 free 是函数，而new 和 delete 是运算符。除此之外，new 在申请内存的同时，还会调用对象的构造函数，而 malloc 只会申请内存；同样，delete 在释放内存之前，会调用对象的析构函数，而 free 只会释放内存。
+new 和 delete 是 C++ 用于管理堆内存的两个运算符，对应于 C 语言中的 malloc 和 free，但是 malloc 和 free 是函数，而 new 和 delete 是运算符。除此之外，new 在申请内存的同时，还会调用对象的构造函数，而 malloc 只会申请内存；同样，delete 在释放内存之前，会调用对象的析构函数，而 free 只会释放内存。
 
-new运算符申请内存：将调用相应的 operator new(size_t) 函数动态分配内存，在分配到的动态内存块上 初始化 相应类型的对象（构造函数）并返回其首地址。如果调用构造函数初始化对象时抛出异常，则自动调用 operator delete(void*, void*) 函数释放已经分配到的内存。
+new 运算符申请内存：将调用相应的 operator new(size_t) 函数动态分配内存，在分配到的动态内存块上 初始化 相应类型的对象（构造函数）并返回其首地址。如果调用构造函数初始化对象时抛出异常，则自动调用 operator delete(void*, void*) 函数释放已经分配到的内存。
 
-delete运算符释放内存：调用相应类型的析构函数，处理类内部可能涉及的资源释放，调用相应的 operator delete(void *) 函数。
+delete 运算符释放内存：调用相应类型的析构函数，处理类内部可能涉及的资源释放，调用相应的 operator delete(void *) 函数。
 ** 内存是如何泄露的
 在 C++ 程序中，主要涉及到的内存就是“栈”和“堆”
 
@@ -6078,7 +6315,7 @@ pprof --base=profile.0001.heap /usr/bin/xxx profile.0100.heap --text
 * 命名空间
 ** 内联命名空间
 
-C++11中引入了内联命名空间（inline namespace），它的特点就是不需要使用using语句就可以直接在外层命名空间使用该命名空间内部的内容，而且无需使用命名空间前缀。先看代码：
+C++11 中引入了内联命名空间（inline namespace），它的特点就是不需要使用 using 语句就可以直接在外层命名空间使用该命名空间内部的内容，而且无需使用命名空间前缀。先看代码：
 #+begin_src c++
   inline namespacs inline_namespace1{
     class Inline1{
@@ -6094,9 +6331,9 @@ C++11中引入了内联命名空间（inline namespace），它的特点就是�
     };
   }
 #+END_SRC
-内联命名空间的声明方法就是在原来的声明语法前面增加inline关键字。除此之外上面代码还有以下特点：
-- 两处声明的命名空间同名，它们同属一个命名空间。这是C++命名空间从来就有的特性。
-- 第一次声明命名空间时使用了inline关键字，这叫显式内联；第二次没有使用inline关键字，但是由于第一次已经声明了inline，这里声明的还是内联命名空间。这种情况成为隐式内联。
+内联命名空间的声明方法就是在原来的声明语法前面增加 inline 关键字。除此之外上面代码还有以下特点：
+- 两处声明的命名空间同名，它们同属一个命名空间。这是 C++命名空间从来就有的特性。
+- 第一次声明命名空间时使用了 inline 关键字，这叫显式内联；第二次没有使用 inline 关键字，但是由于第一次已经声明了 inline，这里声明的还是内联命名空间。这种情况成为隐式内联。
 
 内联命名空间声明之后，就可以在外层命名空间不适用前缀而直接使用它们了。
 #+begin_src c++
@@ -6132,9 +6369,9 @@ void test_inline_namespace(){
 	in2.dv=2;
 }
 #+END_SRC
-上述代码中test_inline_namespace处在linline_namespace1的外层，所以可以直接使用Inline1和Inline2。test_inline_namespace2处在更外层，这时也只是需要使用外层命名空间inline_test前缀即可。
+上述代码中 test_inline_namespace 处在 linline_namespace1 的外层，所以可以直接使用 Inline1 和 Inline2。test_inline_namespace2 处在更外层，这时也只是需要使用外层命名空间 inline_test 前缀即可。
 
-看起来inline_namespace就像不存在一样。
+看起来 inline_namespace 就像不存在一样。
 ** 匿名命名空间
 当定义一个命名空间时，可以忽略这个命名空间的名称：
 #+begin_src c++
@@ -6145,7 +6382,7 @@ void test_inline_namespace(){
  }
 #+END_SRC
 
-编译器在内部会为这个命名空间生成一个唯一的名字，而且还会为这个匿名的命名空间生成一条using指令。所以上面的代码在效果上等同于：
+编译器在内部会为这个命名空间生成一个唯一的名字，而且还会为这个匿名的命名空间生成一条 using 指令。所以上面的代码在效果上等同于：
 #+begin_src c++
 namespace __UNIQUE_NAME_ {
     char c;
@@ -6154,15 +6391,15 @@ namespace __UNIQUE_NAME_ {
 }
 using namespace __UNIQUE_NAME_;
 #+END_SRC
-在匿名命名空间中声明的名称也将被编译器转换，与编译器为这个匿名命名空间生成的唯一内部名称(即这里的__UNIQUE_NAME_)绑定在一起。还有一点很重要，就是这些名称具有internal链接属性，这和声明为static的全局名称的链接属性是相同的，即名称的作用域被限制在当前文件中，无法通过在另外的文件中使用extern声明来进行链接。如果不提倡使用全局static声明一个名称拥有internal链接属性，则匿名命名空间可以作为一种更好的达到相同效果的方法。
+在匿名命名空间中声明的名称也将被编译器转换，与编译器为这个匿名命名空间生成的唯一内部名称(即这里的__UNIQUE_NAME_)绑定在一起。还有一点很重要，就是这些名称具有 internal 链接属性，这和声明为 static 的全局名称的链接属性是相同的，即名称的作用域被限制在当前文件中，无法通过在另外的文件中使用 extern 声明来进行链接。如果不提倡使用全局 static 声明一个名称拥有 internal 链接属性，则匿名命名空间可以作为一种更好的达到相同效果的方法。
 
-注意:命名空间都是具有external 连接属性的,只是匿名的命名空间产生的__UNIQUE_NAME__在别的文件中无法得到,这个唯一的名字是不可见的.
+注意:命名空间都是具有 external 连接属性的,只是匿名的命名空间产生的__UNIQUE_NAME__在别的文件中无法得到,这个唯一的名字是不可见的.
 
-C++ 新的标准中提倡使用匿名命名空间,而不推荐使用static,因为static用在不同的地方,涵义不同,容易造成混淆.另外,static不能修饰class。
+C++ 新的标准中提倡使用匿名命名空间,而不推荐使用 static,因为 static 用在不同的地方,涵义不同,容易造成混淆.另外,static 不能修饰 class。
 
-注意:命名空间都是具有external 连接属性的,只是匿名的命名空间产生的__UNIQUE_NAME__在别的文件中无法得到,这个唯一的名字是不可见的.
+注意:命名空间都是具有 external 连接属性的,只是匿名的命名空间产生的__UNIQUE_NAME__在别的文件中无法得到,这个唯一的名字是不可见的.
 
-C++ 新的标准中提倡使用匿名命名空间,而不推荐使用static,因为static用在不同的地方,涵义不同,容易造成混淆.另外,static不能修饰class。
+C++ 新的标准中提倡使用匿名命名空间,而不推荐使用 static,因为 static 用在不同的地方,涵义不同,容易造成混淆.另外,static 不能修饰 class。
 ** 参考文章
 [[https://blog.csdn.net/craftsman1970/article/details/82872497][C++11新特性(79)-内联命名空间(inline namespace)]]
 [[https://www.cnblogs.com/youxin/p/4308364.html][C++匿名命名空间]]
@@ -6228,7 +6465,7 @@ private:
 
 * 结构化绑定声明
 结构化绑定声明，是指在一次声明中同时引入多个变量，同时绑定初始化表达式的各个子对象的语法形式。
-结构化绑定声明使用auto来声明多个变量，所有变量都必须用中括号括起来。
+结构化绑定声明使用 auto 来声明多个变量，所有变量都必须用中括号括起来。
 #+begin_example
 cv-auto+引用 [变量1, 变量2, ... 变量n ] = 初始化表达式;
 cv-auto+引用 [变量1, 变量2, ... 变量n ] (初始化表达式);
@@ -6241,11 +6478,11 @@ cv-auto+引用 [变量1, 变量2, ... 变量n ] {初始化表达式};
 
 结构化绑定中的初始化表达式有三种类型：
 1. 数组类型，此时变量所绑定的是数组的各个元素。
-2. pair tuple等支持 tuple_size<E> 的类型，此时变量所绑定的是 get<0>(e)，get<1>(e)，get<2>(e)…
-这里E是指类型，e是指对象。
+2. pair tuple 等支持 tuple_size<E> 的类型，此时变量所绑定的是 get<0>(e)，get<1>(e)，get<2>(e)…
+这里 E 是指类型，e是指对象。
 3. 带有 public 成员的结构类型，此时变量所绑定的是结构对象的各个 public 成员。
 
-C++17代码
+C++17 代码
 #+begin_src c++ 
 #include <iostream>
 #include <utility>
@@ -6295,13 +6532,13 @@ int main()
 }
 #+end_src
 代码说明
-代码第25行采用结构化绑定声明了 int 类型的 a 和 string 类型的 b，分别绑定了初始化表达式中 pair 对象的 first 和 second。
-代码第29行采用结构化绑定声明了迭代类型的 iter 和 bool 类型的 success，分别绑定了初始化表达式中 pair 对象的 first 和 second。
-代码第33行采用结构化绑定声明了 const int& 类型的 m 和 n，分别绑定了初始化表达式中 arr 数组的两个元素。
-代码第37行采用结构化绑定声明了 int& 类型的 x 和 y，分别绑定了初始化表达式中 s 对象的两个数据成员 a 和 b。
-代码第41行采用结构化绑定声明了 string&& 类型的 k 和 int 类型的 v，分别绑定了初始化表达式中 pair 对象的 first 和 second。
+代码第 25 行采用结构化绑定声明了 int 类型的 a 和 string 类型的 b，分别绑定了初始化表达式中 pair 对象的 first 和 second。
+代码第 29 行采用结构化绑定声明了迭代类型的 iter 和 bool 类型的 success，分别绑定了初始化表达式中 pair 对象的 first 和 second。
+代码第 33 行采用结构化绑定声明了 const int& 类型的 m 和 n，分别绑定了初始化表达式中 arr 数组的两个元素。
+代码第 37 行采用结构化绑定声明了 int& 类型的 x 和 y，分别绑定了初始化表达式中 s 对象的两个数据成员 a 和 b。
+代码第 41 行采用结构化绑定声明了 string&& 类型的 k 和 int 类型的 v，分别绑定了初始化表达式中 pair 对象的 first 和 second。
 
-C++14等价代码
+C++14 等价代码
 #+begin_src c++ 
 #include <iostream>
 #include <utility>
@@ -6413,17 +6650,17 @@ int main()
 
 #+DOWNLOADED: screenshot @ 2022-12-25 20:20:11
 [[file:images/指针/2022-12-25_20-20-11_screenshot.png]]
-由于str1和str2是数组名，表示数组首元素的地址，而他们在初始化时开辟的是不同的内存块，所以地址不同；而str3 和 str4是指针，指向的是首字符的地址，但作为字符串常量，它的地址是不变的，所以这两个字符指针所存放的地址是相同的。
+由于 str1 和 str2 是数组名，表示数组首元素的地址，而他们在初始化时开辟的是不同的内存块，所以地址不同；而 str3 和 str4 是指针，指向的是首字符的地址，但作为字符串常量，它的地址是不变的，所以这两个字符指针所存放的地址是相同的。
 ** 指针数组和数组指针
-指针数组是存放指针的数组。如int *arr[3] ,其中 [3] 的优先级高，确定它为一个数组，数组名为arr，类型为 int * 。
+指针数组是存放指针的数组。如 int *arr[3] ,其中 [3] 的优先级高，确定它为一个数组，数组名为 arr，类型为 int * 。
 
-数组指针是指向数组的指针。如int (*p)[3], (*p)的优先级最高，确定它为一个指针，而指针指向的 [3] 是一个数组，数组类型为 int。
+数组指针是指向数组的指针。如 int (*p)[3], (*p)的优先级最高，确定它为一个指针，而指针指向的 [3] 是一个数组，数组类型为 int。
 
 刚开始我们可能不太好分清楚指针数组和数组指针，他们的名字很相似，不免会使人混乱。那么如何分清指针数组与数组指针呢？答案就是优先级。我们可以将其拆分开来，最先定义优先级高的，一般判断出最高的优先级时，我们就能初步判定出它到底是数组还是指针，由此便可得出它的类型。
 
 &数组名和数组名的区分 int arr[10]
 
-我们都知道数组名表示数组首元素的地址，这在前面的字符数组中也提到过。例如 arr 表示 arr[10] 这个数组的首元素地址，即arr[1] 的地址。但当我们用 %p 去分别打印 arr 和 &arr 的地址时，会发现他们两个的地址是一样的。但他们的实际意义是相同的吗？我们可以通过下面一段代码来验证。
+我们都知道数组名表示数组首元素的地址，这在前面的字符数组中也提到过。例如 arr 表示 arr[10] 这个数组的首元素地址，即 arr[1] 的地址。但当我们用 %p 去分别打印 arr 和 &arr 的地址时，会发现他们两个的地址是一样的。但他们的实际意义是相同的吗？我们可以通过下面一段代码来验证。
 #+begin_src C
 #include <stdio.h>
 int main()
@@ -6441,27 +6678,27 @@ int main()
 
 #+DOWNLOADED: screenshot @ 2022-12-25 20:21:17
 [[file:images/指针/2022-12-25_20-21-17_screenshot.png]]
-我们可以看到，当他们各自 +1 以后的结果不同，可知实际意义也有所不同。arr 与 arr+1 的差值为4，是一个int类型的大小，也就是跳过了一个元素。&arr 则表示的是数组的地址。数组的地址 +1 ，跳了整个数组的大小，而该数组有10个元素，每个元素都是int类型，所以 &arr+1 相对于 &arr 的差值刚好为40。由此可知，&arr 的类型为数组指针，他可以等同于 *int (p)[10] 。
+我们可以看到，当他们各自 +1 以后的结果不同，可知实际意义也有所不同。arr 与 arr+1 的差值为 4，是一个 int 类型的大小，也就是跳过了一个元素。&arr 则表示的是数组的地址。数组的地址 +1 ，跳了整个数组的大小，而该数组有 10 个元素，每个元素都是 int 类型，所以 &arr+1 相对于 &arr 的差值刚好为 40。由此可知，&arr 的类型为数组指针，他可以等同于 *int (p)[10] 。
 
 ** 函数指针
 函数指针是能够指向函数的指针，例如 void (*Fun) ()。Fun 先和 * 结合，确定 Fun 为指针，而指针指向的是一个函数，指向的函数无参数，返回值类型为 void 。函数在调用时需要开辟栈帧，这时就会开辟出新的地址，而函数名就代表函数地址，函数指针则存储函数的地址。
 
-在《c陷阱与缺陷》中，有这样两个代码：
+在《c 陷阱与缺陷》中，有这样两个代码：
 #+begin_src c
 (*(void (*)())0)();
 #+end_src
-这个代码看上去确实给人一种很混乱的感觉，毕竟有这么多的括号在内，但只要找到它的优先级，还是很好理解的。我们可以看到，其中中间的(void (*)())作为一部分整体是在0的前面，也就是对0进行一个类型的转换，将0强转为一个地址，(*)的优先级最高，表明它是一个指针，而指针指向的是一个函数()，函数的返回值为void。所以它转换后的地址的类型就是“指向返回值为void的函数的指针”。而整体就是调用0地址处的函数。
+这个代码看上去确实给人一种很混乱的感觉，毕竟有这么多的括号在内，但只要找到它的优先级，还是很好理解的。我们可以看到，其中中间的(void (*)())作为一部分整体是在 0 的前面，也就是对 0 进行一个类型的转换，将 0 强转为一个地址，(*)的优先级最高，表明它是一个指针，而指针指向的是一个函数()，函数的返回值为 void。所以它转换后的地址的类型就是“指向返回值为 void 的函数的指针”。而整体就是调用 0 地址处的函数。
 
 再来看另外一个代码：
 #+begin_src c
 void (*signal(int , void(*)(int)))(int);
 #+end_src
-同样是一段看上去比较复杂的代码,首先signal先与后面小括号结合，说明它是一个函数，它的参数是signal后面括号内的int和 void(*)(int)。而除了signal函数的其他部分表示的是函数的返回值，void(*) (int)，是一个函数指针。所以这个代码实际上就表示的是一个signal函数，函数的参数为 (int , void(*)(int)),函数的返回值是一个函数指针void(*) (int)。当然这个函数有简化的方式：
+同样是一段看上去比较复杂的代码,首先 signal 先与后面小括号结合，说明它是一个函数，它的参数是 signal 后面括号内的 int 和 void(*)(int)。而除了 signal 函数的其他部分表示的是函数的返回值，void(*) (int)，是一个函数指针。所以这个代码实际上就表示的是一个 signal 函数，函数的参数为 (int , void(*)(int)),函数的返回值是一个函数指针 void(*) (int)。当然这个函数有简化的方式：
 #+begin_src c
 typedef void(*pfun_t)(int);
 pfun_t signal(int , pfun_t);
 #+end_src
-第一个语句通过 typedef 将 pfun_t 定义为函数指针的类型，而第二个语句就十分明了，signal函数的参数为int 和 pfun_t，返回值为 pfun_t。
+第一个语句通过 typedef 将 pfun_t 定义为函数指针的类型，而第二个语句就十分明了，signal 函数的参数为 int 和 pfun_t，返回值为 pfun_t。
 ** 函数指针数组
 我们知道了函数指针是指向函数的指针，那函数指针数组也就是存放函数指针的数组。
 例如 int (*parr[10])()。首先它必须是一个数组，所以要先和中括号结合，拆分开来就是 parr[10]，它的优先级最高确定它是一个数组。其次是 * ，表明指针，而指向的内容就是后面的函数 () ，数组类型为 int 。
@@ -6518,25 +6755,25 @@ int main()
 ** 指向函数指针数组的指针
 在理解了函数指针数组之后，那么指向函数指针数组的指针也不难掌握。首先它是一个指针，指针指向一个数组，数组中的元素是函数指针。其实只要将每一层由内到外逐层分析理解，就不难分辨。
 
-例如上文的函数指针数组int (*parr[10])(),那么 我们再增加一个指向该数组的指针，也就是
+例如上文的函数指针数组 int (*parr[10])(),那么 我们再增加一个指向该数组的指针，也就是
 #+begin_src c
 int (*(*parr)[10])()这是一个指向存放十个函数指针元素数组的指针。
 #+end_src
 ** 二重指针
-char**是二重指针，bai也就是指向指针变量的指针。 而char*是一维指针，即指向zhi字符变量的指针。
+char**是二重指针，bai 也就是指向指针变量的指针。 而 char*是一维指针，即指向 zhi 字符变量的指针。
 
-其区别在于，指向地址dao所存储的值不同。
+其区别在于，指向地址 dao 所存储的值不同。
 
-对于char **p1, *p1的类型为char*型，而**p1的类型才是char型。
+对于 char **p1, *p1 的类型为 char*型，而**p1 的类型才是 char 型。
 
-对于char*类指针p2，*p2就是char 型。
+对于 char*类指针 p2，*p2 就是 char 型。
 ** .和->的区别
-编译器会将p->member变成访问p+offset_member这个内存地址的变量
+编译器会将 p->member 变成访问 p+offset_member 这个内存地址的变量
 
-编译器会将s.member变成访问&s+offset_member这个内存地址的变量
+编译器会将 s.member 变成访问&s+offset_member 这个内存地址的变量
 ** 智能指针
 智能指针用于自动释放内存.
-*** shared_ptr类
+*** shared_ptr 类
 Defined in header <memory>
 #+begin_src c++
 template< class T > class shared_ptr;
@@ -6560,10 +6797,10 @@ if (p1 && p1->empty())
 [[file:images/c++/指针/2023-07-31_21-46-32_screenshot.png]]
 
 *** shared_ptr
-shared_ptr允许多个指针指向同一个对象
-**** make_shared函数
-make_shared在动态内存中分配一个对象并初始化它,返回指向此对象的shared_ptr.
-调用make_chared<T>时传递的参数必须跟T的某个构造函数相匹配.
+shared_ptr 允许多个指针指向同一个对象
+**** make_shared 函数
+make_shared 在动态内存中分配一个对象并初始化它,返回指向此对象的 shared_ptr.
+调用 make_chared<T>时传递的参数必须跟 T 的某个构造函数相匹配.
 #+begin_src c++
 // 指向一个值为42的int的shared_ptr
 shared_ptr<int> p3 = make_shared<int>(42);
@@ -6572,33 +6809,33 @@ shared_ptr<string> p4 = make_shared<string>(10, '9');
 // p5指向一个值初始化的int,即值为0
 shared_ptr<int> p5 = make_shared<int>();
 #+END_SRC
-**** shared_ptr的拷贝与赋值
-每个shared_ptr都有一个引用计数,用来记录有多少个shared_ptr指向相同的对象.
-shared_ptr的析构函数会递减引用计数,一旦引用计数变为0,就会自动释放管理的对象并释放内存.
+**** shared_ptr 的拷贝与赋值
+每个 shared_ptr 都有一个引用计数,用来记录有多少个 shared_ptr 指向相同的对象.
+shared_ptr 的析构函数会递减引用计数,一旦引用计数变为 0,就会自动释放管理的对象并释放内存.
 
-拷贝一个shared_ptr,引用计数都会增加:
-- 用一个shared_ptr初始化另一个shared_ptr
-- 将shared_ptr作为参数传递给一个函数
+拷贝一个 shared_ptr,引用计数都会增加:
+- 用一个 shared_ptr 初始化另一个 shared_ptr
+- 将 shared_ptr 作为参数传递给一个函数
 - 作为函数的返回值
 
 引用计数减少的情况:
-- 给shared_ptr赋一个新值
-- shared_ptr被销毁(例如一个局部的shared_ptr离开其作用域)
+- 给 shared_ptr 赋一个新值
+- shared_ptr 被销毁(例如一个局部的 shared_ptr 离开其作用域)
 *** unique_ptr
-unique_ptr独占所指向的对象.
+unique_ptr 独占所指向的对象.
 *** week_ptr
-week_ptr是一种弱引用,指向shared_ptr指向的对象.
+week_ptr 是一种弱引用,指向 shared_ptr 指向的对象.
 
 ** 参考文章
 [[https://blog.csdn.net/weixin_44058932/article/details/90767275][C语言中不同类型指针的区别]]
 * 转换
 ** 算术转换
 *** 整型提升
-bool\char\signed char\unsigned char\short\unsigned short等类型:
-- 如果可以存在int里,则转换成int(例如bool转成0或1)
-- 如果不能存在int里,则转换成unsigned int
+bool\char\signed char\unsigned char\short\unsigned short 等类型:
+- 如果可以存在 int 里,则转换成 int(例如 bool 转成 0 或 1)
+- 如果不能存在 int 里,则转换成 unsigned int
 
-较大的char类型(wchar_t\char16_t\char32_t)提升成int\unsigned int\long\unsigned long\long long\unsigned long long中最小的一种类型,前提是要能容纳原类型所有可能的值.
+较大的 char 类型(wchar_t\char16_t\char32_t)提升成 int\unsigned int\long\unsigned long\long long\unsigned long long 中最小的一种类型,前提是要能容纳原类型所有可能的值.
 
 **** 从汇编层面理解
 从一个简单的例子开始：
@@ -6625,8 +6862,8 @@ movl    -4(%rbp), %eax
 popq    %rbp
 ret                         # return value 0 from eax
 #+END_SRC
-如果你的GAS语法不熟悉，可以查看X86 Assembly/GAS Syntax。
-GAS语法指令通常以“b”, “s”, “w”, “l”, “q” 和“t” 为后缀，以区分操作数在大小。
+如果你的 GAS 语法不熟悉，可以查看 X86 Assembly/GAS Syntax。
+GAS 语法指令通常以“b”, “s”, “w”, “l”, “q” 和“t” 为后缀，以区分操作数在大小。
 #+begin_src c++
 b = byte (8 bit)
 s = short (16 bit integer) or single (32-bit floating point)
@@ -6636,21 +6873,21 @@ q = quad (64 bit)
 t = 10 bytes (80-bit floating point)
 
 #+END_SRC
-GAS语法中的mov是把参数从左边移到右边。例如： movl {% endmath_inline %}0, -4(%rbp)的意思是把 0x00000000 移到地址 -4(%rbp)处。
+GAS 语法中的 mov 是把参数从左边移到右边。例如： movl {% endmath_inline %}0, -4(%rbp)的意思是把 0x00000000 移到地址 -4(%rbp)处。
 
-指令 movzbl 表示把一个byte变成long并将空位零填充 。movzbl -5(%rbp), %eax 把 0xff 移到寄存器 %eax 上，并把空位补0。寄存器 %eax 的值变成了 0x000000ff。
+指令 movzbl 表示把一个 byte 变成 long 并将空位零填充 。movzbl -5(%rbp), %eax 把 0xff 移到寄存器 %eax 上，并把空位补 0。寄存器 %eax 的值变成了 0x000000ff。
 
-指令 movsbl 表示把一个byte变成long并将空位符号填充。movsbl -6(%rbp), %ecx 把 0xff 移到寄存器 %eax ，然后把空位补成有符号的数值，这使得寄存器 %ecx 值变为 0xffffffff。最后， addl %eax, %ecx 执行加法操作， movl %ecx, -12(%rbp) 把结果存到栈上。
+指令 movsbl 表示把一个 byte 变成 long 并将空位符号填充。movsbl -6(%rbp), %ecx 把 0xff 移到寄存器 %eax ，然后把空位补成有符号的数值，这使得寄存器 %ecx 值变为 0xffffffff。最后， addl %eax, %ecx 执行加法操作， movl %ecx, -12(%rbp) 把结果存到栈上。
 
-现在，你可以把整型提升理解为把C语言类型直接映射到机器指令的一种机制了。所有算术操作的操作数被转成有符号或无符号int后，都会被当作一个小的int的计算。你可以这么想：尽管short和char只占一两个字节，当它们在进行算术运算时，都是当作int的。这种转成int规则被称为整型提升。
+现在，你可以把整型提升理解为把 C 语言类型直接映射到机器指令的一种机制了。所有算术操作的操作数被转成有符号或无符号 int 后，都会被当作一个小的 int 的计算。你可以这么想：尽管 short 和 char 只占一两个字节，当它们在进行算术运算时，都是当作 int 的。这种转成 int 规则被称为整型提升。
 
 总结:
-通常情况下，在对int类型的数值作运算时，CPU的运算速度是最快的。在x86上，32位算术运算的速度比16位算术运算的速度快一倍。C语言是一个注重效率的语言，所以它会作整型提升，使得程序的运行速度尽可能地快。因此，你必须记住整型提升规则，以免发生一些整型溢出的问题。
+通常情况下，在对 int 类型的数值作运算时，CPU 的运算速度是最快的。在 x86 上，32 位算术运算的速度比 16 位算术运算的速度快一倍。C语言是一个注重效率的语言，所以它会作整型提升，使得程序的运行速度尽可能地快。因此，你必须记住整型提升规则，以免发生一些整型溢出的问题。
 **** 参考文章
 [[https://windmissing.github.io/cpp_notes/grammar/2015-08-25-Integer-Promotion.html][c语言进阶：整型提升]]
 
 *** 浮点类型提升
-float将会提升到double类型再进行运算
+float 将会提升到 double 类型再进行运算
 
 *** 无符号类型的运算对象
 如果某个运算符左右两边的运算对象类型不一致,那么这些运算对象将转换成同一种类型.
@@ -6669,45 +6906,45 @@ float将会提升到double类型再进行运算
 ** 显式转换
 *** 命名的强制类型转换
 格式:cast-name<type>(expression);
-如果type是引用类型,则结果是左值.
+如果 type 是引用类型,则结果是左值.
 
-cast-name是static_cast\dynamic_cast\const_cast和reinterpret_cast中的一种.
+cast-name 是 static_cast\dynamic_cast\const_cast 和 reinterpret_cast 中的一种.
 **** const_cast
-const_cast 用来移除变量的 const 或volatile限定符.
-const_cast只能改变运算对象的底层const.
+const_cast 用来移除变量的 const 或 volatile 限定符.
+const_cast 只能改变运算对象的底层 const.
 
 #+begin_src c++
   const char *pc;
   char *p=const_cast<char*>(pc);//正确,但是通过p写值是未定义的行为
 #+END_SRC
-如果对象本身不时一个常量,使用强制类型转换获得写权限是合法的行为.但是如果对象是一个常量,再使用const_cast执行写操作就会产生未定义的后果.
+如果对象本身不时一个常量,使用强制类型转换获得写权限是合法的行为.但是如果对象是一个常量,再使用 const_cast 执行写操作就会产生未定义的后果.
 * gtest
 ** assertion
-在gtest中，是通过断言（assertion）来判断代码实现的功能是否符合预期。断言的结果分为success、non-fatal failture和fatal failture。
+在 gtest 中，是通过断言（assertion）来判断代码实现的功能是否符合预期。断言的结果分为 success、non-fatal failture 和 fatal failture。
 
-根据断言失败的种类，gtest提供了两种断言函数：
+根据断言失败的种类，gtest 提供了两种断言函数：
 - success：即断言成功，程序的行为符合预期，程序继续向下允许。
-- non-fatal failure：即断言失败，但是程序没有直接crash，而是继续向下运行。
+- non-fatal failure：即断言失败，但是程序没有直接 crash，而是继续向下运行。
 
-gtest提供了宏函数EXPECT_XXX(expected, actual)：如果condition(expected, actual)返回false，则EXPECT_XXX产生的就是non-fatal failure错误，并显示相关错误。
-- fatal failure：断言失败，程序直接crash，后续的测试案例不会被运行。
+gtest 提供了宏函数 EXPECT_XXX(expected, actual)：如果 condition(expected, actual)返回 false，则 EXPECT_XXX 产生的就是 non-fatal failure 错误，并显示相关错误。
+- fatal failure：断言失败，程序直接 crash，后续的测试案例不会被运行。
 
-gtest提供了宏函数ASSERT_XXX(expected, actual)。
+gtest 提供了宏函数 ASSERT_XXX(expected, actual)。
 
-在写单元测试时，更加倾向于使用EXPECT_XXX，因为ASSERT_XXX是直接crash退出的，可能会导致一些内存、文件资源没有释放，因此可能会引入一些bug。
+在写单元测试时，更加倾向于使用 EXPECT_XXX，因为 ASSERT_XXX 是直接 crash 退出的，可能会导致一些内存、文件资源没有释放，因此可能会引入一些 bug。
 
-具体的EXPECT_XXX、ASSERT_XXX函数及其判断条件，如下两个表。
+具体的 EXPECT_XXX、ASSERT_XXX 函数及其判断条件，如下两个表。
 #+DOWNLOADED: screenshot @ 2022-08-23 22:35:24
 [[file:images/c++/gtest/2022-08-23_22-35-24_screenshot.png]]
 ** 参考文章
 [[https://zhuanlan.zhihu.com/p/369466622][手把手教你使用gtest写单元测试]]
-* leetcode笔记
+* leetcode 笔记
 ** 优先队列
- 1046题
+ 1046 题
 
  priority_queue<Type, Container, Functional>
 
- Type 就是数据类型，Container 就是容器类型（Container必须是用数组实现的容器，比如vector,deque等等，但不能用 list。STL里面默认用的是vector），Functional 就是比较的方式。
+ Type 就是数据类型，Container 就是容器类型（Container 必须是用数组实现的容器，比如 vector,deque 等等，但不能用 list。STL 里面默认用的是 vector），Functional 就是比较的方式。
 
 当需要用自定义的数据类型时才需要传入这三个参数，使用基本数据类型时，只需要传入数据类型，默认是大顶堆
  #+BEGIN_SRC c++
@@ -6720,14 +6957,14 @@ gtest提供了宏函数ASSERT_XXX(expected, actual)。
  //greater和less是std实现的两个仿函数（就是使一个类的使用看上去像一个函数。其实现就是类中实现一个operator()，这个类就有了类似函数的行为，就是一个仿函数类了）
  #+END_SRC
 *** 自定义比较函数
-***** 方式一：struct重载运算符()
-通过struct重载()操作符，定义了一个函数对象
+***** 方式一：struct 重载运算符()
+通过 struct 重载()操作符，定义了一个函数对象
 #+DOWNLOADED: screenshot @ 2022-11-10 22:37:33
 [[file:images/c++/leetcode笔记/2022-11-10_22-37-33_screenshot.png]]
 这是属于传入 函数对象 的方式
-***** 方式二：class重载运算符()
-通过class重载()操作符，定义了一个函数对象
-注意要加public
+***** 方式二：class 重载运算符()
+通过 class 重载()操作符，定义了一个函数对象
+注意要加 public
 
 #+DOWNLOADED: screenshot @ 2022-11-10 22:37:46
 [[file:images/c++/leetcode笔记/2022-11-10_22-37-46_screenshot.png]]
@@ -6737,28 +6974,28 @@ gtest提供了宏函数ASSERT_XXX(expected, actual)。
 #+DOWNLOADED: screenshot @ 2022-11-10 22:37:54
 [[file:images/c++/leetcode笔记/2022-11-10_22-37-54_screenshot.png]]
 decltype()是用于获得函数指针的 类型的。在模板中也要传入它们的类型。
-decltype()要传入的是一个对象的地址，因此需要对cmp加取值符，&cmp为对象的地址
+decltype()要传入的是一个对象的地址，因此需要对 cmp 加取值符，&cmp 为对象的地址
 在这里插入图片描述
-因此可以由函数地址cmp 转为函数指针 类型 decltype(&cmp)
+因此可以由函数地址 cmp 转为函数指针 类型 decltype(&cmp)
 #+DOWNLOADED: screenshot @ 2022-11-10 22:38:05
 [[file:images/c++/leetcode笔记/2022-11-10_22-38-05_screenshot.png]]
 写法一：
 #+DOWNLOADED: screenshot @ 2022-11-10 22:38:15
 [[file:images/c++/leetcode笔记/2022-11-10_22-38-15_screenshot.png]]
 写法二：
-如果作为类成员函数，一定要声明static
+如果作为类成员函数，一定要声明 static
 #+DOWNLOADED: screenshot @ 2022-11-10 22:38:24
 [[file:images/c++/leetcode笔记/2022-11-10_22-38-24_screenshot.png]]
 这是属于传入 函数指针的方式。
-***** 方式四：lambda表达式
+***** 方式四：lambda 表达式
 #+DOWNLOADED: screenshot @ 2022-11-10 22:38:32
 [[file:images/c++/leetcode笔记/2022-11-10_22-38-32_screenshot.png]]
 这是属于传入 函数指针的方式。
-***** 方式五：function包装lambda表达式
+***** 方式五：function 包装 lambda 表达式
 要加入头文件#include<functional>
 
-由于function对lambda函数进行了包装 ,cmp本身就是一个对象地址。（function对象）
-直接decltype(cmp)获得函数指针 的类型。
+由于 function 对 lambda 函数进行了包装 ,cmp 本身就是一个对象地址。（function 对象）
+直接 decltype(cmp)获得函数指针 的类型。
 #+DOWNLOADED: screenshot @ 2022-11-10 22:38:41
 [[file:images/c++/leetcode笔记/2022-11-10_22-38-41_screenshot.png]]
 这是属于传入 函数指针的方式。
@@ -6782,12 +7019,12 @@ decltype()要传入的是一个对象的地址，因此需要对cmp加取值符�
  vector<vector<vector<int>>> dp(2, vector<vector<int>>(3, vector<int>(4, 5)));
  #+END_SRC
 ** multiset
- set和multiset会根据特定的排序准则，自动将元素进行排序。不同的是后者允许元素重复而前者不允许。
+ set 和 multiset 会根据特定的排序准则，自动将元素进行排序。不同的是后者允许元素重复而前者不允许。
  #+BEGIN_SRC c++
  #include <set>
  multiset<int> st;
  #+END_SRC
- 和所有关联式容器类似，通常使用平衡二叉树完成。事实上，set和multiset通常以红黑树实作而成。
+ 和所有关联式容器类似，通常使用平衡二叉树完成。事实上，set 和 multiset 通常以红黑树实作而成。
 
  自动排序的优点是使得搜寻元素时具有良好的性能，具有对数时间复杂度。但是造成的一个缺点就是：
  - 不能直接改变元素值。因为这样会打乱原有的顺序。
@@ -6797,7 +7034,7 @@ decltype()要传入的是一个对象的地址，因此需要对cmp加取值符�
 ** 快速排序
  记得要从右边开始循环
 
- 下面这种快速选择的算法也是可以参考的(第215题)：
+ 下面这种快速选择的算法也是可以参考的(第 215 题)：
  #+BEGIN_SRC c++
  int search(vector<int>& nums, int left, int right) {
          int x = rand() % (right - left + 1) + left; //随机化选择
@@ -6825,8 +7062,8 @@ decltype()要传入的是一个对象的地址，因此需要对cmp加取值符�
  #+BEGIN_SRC c++
  long long z = static_cast<long long>(nums[right]);
  #+END_SRC
-** KMP算法
- 第28题
+** KMP 算法
+ 第 28 题
  #+BEGIN_SRC c++
  class Solution {
  public:
@@ -6876,7 +7113,7 @@ decltype()要传入的是一个对象的地址，因此需要对cmp加取值符�
  //]
  #+END_SRC
 ** C++ vector 的 begin()、end()、front()、back() 区别
- 一、begin函数
+ 一、begin 函数
 
  函数原型:
 
@@ -6886,11 +7123,11 @@ decltype()要传入的是一个对象的地址，因此需要对cmp加取值符�
 
  功能：
 
- 返回一个当前vector容器中起始元素的迭代器。
+ 返回一个当前 vector 容器中起始元素的迭代器。
 
  
 
- 二、end函数
+ 二、end 函数
 
  函数原型：
 
@@ -6900,11 +7137,11 @@ decltype()要传入的是一个对象的地址，因此需要对cmp加取值符�
 
  功能：
 
- 返回一个当前vector容器中末尾元素的迭代器。
+ 返回一个当前 vector 容器中末尾元素的迭代器。
 
  
 
- 三、front函数
+ 三、front 函数
 
  函数原型：
 
@@ -6914,11 +7151,11 @@ decltype()要传入的是一个对象的地址，因此需要对cmp加取值符�
 
  功能：
 
- 返回当前vector容器中起始元素的引用。
+ 返回当前 vector 容器中起始元素的引用。
 
  
 
- 四、back函数
+ 四、back 函数
 
  函数原型：
 
@@ -6928,9 +7165,9 @@ decltype()要传入的是一个对象的地址，因此需要对cmp加取值符�
 
  功能：
 
- 返回当前vector容器中末尾元素的引用。
+ 返回当前 vector 容器中末尾元素的引用。
 
- leetcode 第56题
+ leetcode 第 56 题
  #+BEGIN_SRC c++
  class Solution {
  public:
@@ -6954,16 +7191,16 @@ decltype()要传入的是一个对象的地址，因此需要对cmp加取值符�
 ** 形参传值和传引用运行速度的差异
  C++在做递归回溯算法相关题目时，递归函数形参传值和传引用运行速度有很大的差异。
 
- 这是我第79题dfs函数的声明，主要区别是visited和word，一个是传值，一个是传引用。前者执行超时，后者在本题是32ms.
+ 这是我第 79 题 dfs 函数的声明，主要区别是 visited 和 word，一个是传值，一个是传引用。前者执行超时，后者在本题是 32ms.
 
- 个人理解为传值时每次递归调用都要在内存中新建立一个vector 来保存visit传入的值，但是传引用直接在visited原始位置操作，不需要进行新建变量与赋值，节省了代码运行的空间与时间开销。
+ 个人理解为传值时每次递归调用都要在内存中新建立一个 vector 来保存 visit 传入的值，但是传引用直接在 visited 原始位置操作，不需要进行新建变量与赋值，节省了代码运行的空间与时间开销。
  #+BEGIN_SRC c++
  void dfs(vector<vector<char>>& board,vector<vector<int>>visited,int x,int y,int n,string word,bool& flag)
  void dfs(vector<vector<char>>& board,vector<vector<int>>& visited,int x,int y,int n
  #+END_SRC
 
-** map的迭代器用法
- 第90题
+** map 的迭代器用法
+ 第 90 题
  #+BEGIN_SRC c++
  class Solution {
  public:
@@ -6993,7 +7230,7 @@ decltype()要传入的是一个对象的地址，因此需要对cmp加取值符�
 *** 字符串连接
   string res = ""
   可以用 res+="V" 表示字符串 "V"
-*** 关于insert和erase的用法
+*** 关于 insert 和 erase 的用法
  #+BEGIN_SRC c++
  class Solution {
  public:
@@ -7035,14 +7272,14 @@ decltype()要传入的是一个对象的地址，因此需要对cmp加取值符�
  };
  #+END_SRC
 ** 用迭代实现二叉树中序遍历
- 第94题
+ 第 94 题
 
  核心思想:
  - 使用颜色标记节点的状态，新节点为白色，已访问的节点为灰色。
  - 如果遇到的节点为白色，则将其标记为灰色，然后将其右子节点、自身、左子节点依次入栈。
  - 如果遇到的节点为灰色，则将节点的值输出。
 
- python版本:
+ python 版本:
  #+BEGIN_SRC python
  class Solution:
      def inorderTraversal(self, root: TreeNode) -> List[int]:
@@ -7089,7 +7326,7 @@ decltype()要传入的是一个对象的地址，因此需要对cmp加取值符�
  };
  #+END_SRC
 ** 函数返回指针
- 第116题
+ 第 116 题
  #+BEGIN_SRC c++
  class Solution {
  public:
@@ -7109,38 +7346,38 @@ decltype()要传入的是一个对象的地址，因此需要对cmp加取值符�
      }
  };
  #+END_SRC
-** 如何把一个整数转化为string
-*** string转int的方式
- 采用最原始的string, 然后按照十进制的特点进行算术运算得到int，但是这种方式太麻烦，这里不介绍了。
+** 如何把一个整数转化为 string
+*** string 转 int 的方式
+ 采用最原始的 string, 然后按照十进制的特点进行算术运算得到 int，但是这种方式太麻烦，这里不介绍了。
 
- 采用标准库中atoi函数。
+ 采用标准库中 atoi 函数。
 
  string s = "12"; 
  int a = atoi(s.c_str()); 
- 对于其他类型也都有相应的标准库函数，比如浮点型atof(),long型atol()等等。
+ 对于其他类型也都有相应的标准库函数，比如浮点型 atof(),long 型 atol()等等。
 
- 采用sstream头文件中定义的字符串流对象来实现转换。
+ 采用 sstream 头文件中定义的字符串流对象来实现转换。
 
  istringstream is("12"); //构造输入字符串流，流的内容初始化为“12”的字符串 
  int i; 
- is >> i; //从is流中读入一个int整数存入i中
+ is >> i; //从 is 流中读入一个 int 整数存入 i 中
 
-*** int转string的方式
- 采用标准库中的to_string函数。
+*** int 转 string 的方式
+ 采用标准库中的 to_string 函数。
 
  int i = 12; 
  cout << std::to_string(i) << endl; 
- 不需要包含任何头文件，应该是在utility中，但无需包含，直接使用，还定义任何其他内置类型转为string的重载函数，很方便。
+ 不需要包含任何头文件，应该是在 utility 中，但无需包含，直接使用，还定义任何其他内置类型转为 string 的重载函数，很方便。
 
- 采用sstream中定义的字符串流对象来实现。
+ 采用 sstream 中定义的字符串流对象来实现。
 
  ostringstream os; //构造一个输出字符串流，流内容为空 
  int i = 12; 
- os << i; //向输出字符串流中输出int整数i的内容 
- cout << os.str() << endl; //利用字符串流的str函数获取流中的内容 
- 字符串流对象的str函数对于istringstream和ostringstream都适用，都可以获取流中的内容。
+ os << i; //向输出字符串流中输出 int 整数 i 的内容 
+ cout << os.str() << endl; //利用字符串流的 str 函数获取流中的内容 
+ 字符串流对象的 str 函数对于 istringstream 和 ostringstream 都适用，都可以获取流中的内容。
 
-** c++ 将一个char 转化为string
+** c++ 将一个 char 转化为 string
  #+BEGIN_SRC c++
  const char c = 'a';
  //1.使用 string 的构造函数
@@ -7219,10 +7456,10 @@ decltype()要传入的是一个对象的地址，因此需要对cmp加取值符�
 	 }
  };  
  #+END_SRC
- 这种解法在n=701(zy)时输出的结果为AZY，是错误的。
-** 谓词、lambda表达式
+ 这种解法在 n=701(zy)时输出的结果为 AZY，是错误的。
+** 谓词、lambda 表达式
 
- 第179题
+ 第 179 题
 
  给定一组非负整数 nums，重新排列它们每位数字的顺序使之组成一个最大的整数。
 
@@ -7274,7 +7511,7 @@ decltype()要传入的是一个对象的地址，因此需要对cmp加取值符�
  };
  #+END_SRC
 ** 桶排序
- 第220题
+ 第 220 题
 
  在整数数组 nums 中，是否存在两个下标 i 和 j，使得 nums [i] 和 nums [j] 的差的绝对值小于等于 t ，且满足 i 和 j 的差的绝对值也小于等于 ķ 。
 
@@ -7337,7 +7574,7 @@ decltype()要传入的是一个对象的地址，因此需要对cmp加取值符�
  };
  #+END_SRC
 
-** 由vector创建set
+** 由 vector 创建 set
  217. 存在重复元素
 
  #+BEGIN_EXAMPLE
@@ -7380,8 +7617,8 @@ decltype()要传入的是一个对象的地址，因此需要对cmp加取值符�
  - 任何数和其自身做异或运算，结果是 0 .
  - 异或运算满足交换律和结合律.
 
-** stol用法
- std::stol()：此函数将参数提供的字符串转换为long long。它解析str并将其内容解释为指定基数的整数，并将其作为long long类型的值返回。
+** stol 用法
+ std::stol()：此函数将参数提供的字符串转换为 long long。它解析 str 并将其内容解释为指定基数的整数，并将其作为 long long 类型的值返回。
 
  Convert string to long long
 
@@ -7430,11 +7667,11 @@ decltype()要传入的是一个对象的地址，因此需要对cmp加取值符�
   0xffff interpreted as 65535
   020 interpreted as 16
  #+END_EXAMPLE
-** 一个包含所有c++的头文件的头文件
+** 一个包含所有 c++的头文件的头文件
 
- #include<bits/stdc++.h>包含了目前c++所包含的所有头文件
+ #include<bits/stdc++.h>包含了目前 c++所包含的所有头文件
 ** pair
- 337题 打家劫舍III
+ 337 题 打家劫舍 III
 
  在上次打劫完一条街道之后和一圈房屋后，小偷又发现了一个新的可行窃的地区。这个地区只有一个入口，我们称之为“根”。 除了“根”之外，每栋房子有且只有一个“父“房子与之相连。一番侦察之后，聪明的小偷意识到“这个地方的所有房屋的排列类似于一棵二叉树”。 如果两个直接相连的房子在同一天晚上被打劫，房屋将自动报警。
 
