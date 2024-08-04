@@ -996,7 +996,122 @@ pthread_mutexattr_init()函数成功完成之后会返回零，其他任何返�
 ** 和 GC 有什么区别？
 一种你可能最为熟悉的解决内存回收问题的方案是 GC（垃圾回收）。GC 的确可以解决内存回收问题，也可以解决大部分的 ABA 问题（先释放后重用的使用模式），但是却不能解决所有的 ABA 问题。例如两个链表实现的栈，不断在两个栈之间交换节点（弹出到对面），这样做内存并没有被回收，但是却面临重用问题，有 ABA 风险。而 Hazard Pointer 可以结合数据结构解决这一问题。
 ** 和智能指针有什么区别？
-智能指针也是用来解决内存回收问题的，其本质是自动引用计数，通过智能指针对象的复制和销毁来维护引用计数。但智能指针和 Hazard Pointer 所解决问题的场景有很大差别：智能指针并不是线程安全的（多线程访问同一智能指针），换句话说，智能指针是一个语法糖（让你写起来很爽，但其实没有解决什么问题）。
+智能指针也是用来解决内存回收问题的，其本质是自动引用计数，通过智能指针对象的复制和销毁来维护引用计数。但智能指针和 Hazard Pointer 所解决问题的场景有很大差别：智能指针并不是线程安全的（多线程访问同一智能指针）.
+
+shared_ptr 使用引用计数，每一个 shared_ptr 的拷贝都指向相同的内存。每使用他一次，内部的引用计数加 1，每析构一次，内部的引用计数减 1，减为 0 时，删除所指向的堆内存。shared_ptr 内部的引用计数是安全的，但是对象的读取需要加锁。
+
+C++ shared_ptr 是线程安全的吗？
+2023-11-22
+1,014
+阅读 5 分钟
+专栏： 
+C++系列
+shared_ptr 的线程安全问题
+导读：C++面试中有时会有这样一个问题，shared_ptr 是线程安全的吗？对此问题，我们需要从三个并发场景进行考虑，拷贝 shared_ptr 的安全性、对 shared_ptr 赋值的安全性和读写 shared_ptr 指向内存区域的安全性。
+
+对于以上问题，首先给出以下结论：
+
+如果多个线程同时拷贝同一个 shared_ptr 对象，不会有问题，因为 shared_ptr 的引用计数是线程安全的。 如果多个线程同时修改同一个 shared_ptr 对象，不是线程安全的。 如果多个线程同时读写 shared_ptr 指向的内存对象，不是线程安全的。 下面通过简单程序实验证明：
+
+1. 引用计数更新，线程安全
+这里我们讨论对 shared_ptr 进行拷贝的情况，由于此操作读写的是引用计数，而引用计数的更新是原子操作，因此这种情况是线程安全的。下面这个例子，两个线程同时对同一个 shared_ptr 进行拷贝，引用计数的值总是 20001。
+
+std::shared_ptr<int> p = std::make_shared<int>(0);
+constexpr int N = 10000;
+std::vector<std::shared_ptr<int>> sp_arr1(N);
+std::vector<std::shared_ptr<int>> sp_arr2(N);
+
+void increment_count(std::vector<std::shared_ptr<int>>& sp_arr) {
+    for (int i = 0; i < N; i++) {
+        sp_arr[i] = p;
+    }
+}
+
+std::thread t1(increment_count, std::ref(sp_arr1));
+std::thread t2(increment_count, std::ref(sp_arr2));
+t1.join();
+t2.join();
+std::cout<< p.use_count() << std::endl; // always 20001
+2. 同时读写内存区域，线程不安全
+下面这个例子，两个线程同时对同一个 shared_ptr 指向内存的值进行自增操作，最终的结果不是我们期望的 20000。因此同时修改 shared_ptr 指向的内存区域不是线程安全的。
+
+
+std::shared_ptr<int> p = std::make_shared<int>(0);
+void modify_memory() {
+    for (int i = 0; i < 10000; i++) {
+        (*p)++;
+    }
+}
+
+std::thread t1(modify_memory);
+std::thread t2(modify_memory);
+t1.join();
+t2.join();
+std::cout << "Final value of p: " << *p << std::endl; // possible result: 16171, not 20000
+3. 直接修改 shared_ptr 对象本身的指向，线程不安全。
+下面这个程序示例，两个线程同时修改同一个 shared_ptr 对象的指向，程序发生了异常终止。
+
+
+std::shared_ptr<int> sp = std::make_shared<int>(1);
+auto modify_sp_self = [&sp]() {
+    for (int i = 0; i < 1000000; ++i) {
+        sp = std::make_shared<int>(i);
+    }
+};
+
+std::vector<std::thread> threads;
+for (int i = 0; i < 10; ++i) {
+    threads.emplace_back(modify_sp_self);
+}
+for (auto& t : threads) {
+    t.join();
+}
+报错为：
+
+pure virtual method called
+terminate called without an active exception
+用 gdb 查看函数调用栈，发现是在调用 std::shared_ptr<int>::~shared_ptr()时出错，
+
+(gdb) bt
+#0  __GI_raise (sig=sig@entry=6) at ../sysdeps/unix/sysv/linux/raise.c:50
+#1  0x00007ffff7bc7859 in __GI_abort () at abort.c:79
+#2  0x00007ffff7e73911 in ?? () from /lib/x86_64-linux-gnu/libstdc++.so.6
+#3  0x00007ffff7e7f38c in ?? () from /lib/x86_64-linux-gnu/libstdc++.so.6
+#4  0x00007ffff7e7f3f7 in std::terminate() () from /lib/x86_64-linux-gnu/libstdc++.so.6
+#5  0x00007ffff7e80155 in __cxa_pure_virtual () from /lib/x86_64-linux-gnu/libstdc++.so.6
+#6  0x00005555555576c2 in std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)2>::_M_release() ()
+#7  0x00005555555572fd in std::__shared_count<(__gnu_cxx::_Lock_policy)2>::~__shared_count() ()
+#8  0x0000555555557136 in std::__shared_ptr<int, (__gnu_cxx::_Lock_policy)2>::~__shared_ptr() ()
+#9  0x000055555555781c in std::__shared_ptr<int, (__gnu_cxx::_Lock_policy)2>::operator=(std::__shared_ptr<int, (__gnu_cxx::_Lock_policy)2>&&) ()
+#10 0x00005555555573d0 in std::shared_ptr<int>::operator=(std::shared_ptr<int>&&) ()
+#11 0x000055555555639f in main::{lambda()#1}::operator()() const ()
+... 
+其原因为：在并发修改的情况下，对正在析构的对象再次调用析构函数，导致了未定义的行为，从而发生了此异常。
+
+对程序加锁后，程序可正常运行:
+
+std::shared_ptr<int> sp = std::make_shared<int>(1);
+std::mutex m;
+auto modify = [&sp]() {
+    // make the program thread safe
+    std::lock_guard<std::mutex> lock(m);
+    for (int i = 0; i < 1000000; ++i) {
+        sp = std::make_shared<int>(i);
+    }
+};
+
+std::vector<std::thread> threads;
+for (int i = 0; i < 10; ++i) {
+    threads.emplace_back(modify);
+}
+for (auto& t : threads) {
+    t.join();
+}
+std::cout << *sp << std::endl;  // running as expected, result: 999999
+总结
+shared_ptr 未对指向的对象内存区域有线程安全保护，因此并发读写对应内存区域是不安全的。
+由于赋值操作涉及原内存释放、修改指针指向等多个修改操作，其过程不是原子操作，因此对 shared_ptr 进行并发赋值不是线程安全的。
+对 shared_ptr 进行并发拷贝，对数据指针和控制块指针仅进行读取并复制，然后对引用计数进行递增，而引用计数增加是原子操作。因此是线程安全的。
 ** 基本原理
 首先看看 hazard pointer 使用的数据存储结构。如题图所示，我们需要为每个线程准备一些线程局部的内存，用来存储两部分内容：
 
@@ -1079,6 +1194,60 @@ bool Queue<T>::dequeue(T &data)
 不要纠结在具体的实现定义上，可以看到的是队列的基本算法是没有改变的，区别在于我们使用 HazardPointer 保护了几个运行中需要持续保护的指针，在队列这个数据结构中，同一线程最多需要保存两个 pointer 就够了。
 
 在获取内存对象地址时，我们使用 HazardPointer::acquire 方法将要保护的内存对象放入到 hazard pointer 中，在删除节点后，我们将内存对象交给 retireNode 方法，由 hazard pointer 负责安全的释放对应内存。
+** 主流的安全内存回收方法对比
+Folly 的 Hazard Pointer 实现中有一段注释，详细描述了 C++ 里几种主流的安全内存回收方法，列表如下：
+
+|                        | 优点                        | 缺点                   | 场景              |
+|------------------------+----------------------------+-----------------------+------------------|
+| Locking                | 易用                        | 读高开销 / 抢占式 / 死锁 | 非性能敏感         |
+| Reference Couting      | 自动回收 / 线程无关 / 免于死锁 | 读高开销 / 抢占式        | 需要自动回收       |
+| Read-copy-update (RCU) | 简单 / 高速 / 可拓展          | 对阻塞敏感              | 性能敏感           |
+| Hazard Pointer         | 高速 / 可拓展 / 阻塞场景可用   | 性能依赖 TLS            | 性能敏感 / 读多写少 |
+
+C++ 标准库中提供了锁和引用计数方案。锁的缺点很明显，无论是哪种锁，在读的时候都会产生较大的开销。引用计数则相对好一些，但每次读取都需要修改引用计数，高并发场景下这样的原子操作也会成为性能瓶颈，毕竟原子加对应的 CPU 指令 lock add 也可以看成是微型锁。
+
+Linux 内核中提供了 RCU 方法，笔者目前对此还没有太多的了解。
+
+Hazard Pointer 适用于需要高性能读、读多写少的场景。其代码实现可参考 Folly 中的 HazPtr。
+*** 引用计数的缺点
+首先回忆下引用计数的做法：
+#+begin_src 
+#include <atomic>
+#include <memory>
+
+template <class T>
+class ReferenceCount {
+ public:
+  ReferenceCount(std::unique_ptr<T> ptr) : ptr_(std::move(ptr)), cnt_(1) {}
+
+  T *Ptr() const { return ptr_.get(); }
+
+  ReferenceCount *Ref() {
+    ++cnt_;
+    return this;
+  }
+
+  void Deref() {
+    if (--cnt_ == 0) {
+      delete this;
+    }
+  }
+
+ private:
+  std::unique_ptr<T> ptr_;
+  std::atomic_uint32_t cnt_;
+};
+
+#+end_src
+仔细观察可以发现：
+- 每一次的读取操作对应引用计数中增加的数值 1；
+- 当所有的读取操作都完成时引用计数归 0，此时内存可以安全回收。
+
+总结起来，当对象正在使用时，就不能回收内存。每一个“正在使用”都需要对应一个标记，引用计数使用的标记是计数数值一，对应的原子操作性能问题就成为它无法摆脱的原罪。而 Hazard Pointer 使用的标记更为轻巧，一般通过在链表中标记该对象的指针实现，回收时如果发现链表中有对应的指针就不进行内存回收，将标记的复杂度转移到回收部分，也就更适合读多写少的场景。
+** 参考文章
+[[https://m.tsingfun.com/it/cpp/hazard_pointer.html][C++ Lock-free Hazard Pointer（冒险指针）]]
+[[http://blog.kongfy.com/2017/02/hazard-pointer/][Hazard Pointer]]
+[[https://juejin.cn/post/7303739610055491636][C++ shared_ptr 是线程安全的吗？]]
 * intptr_t、uintptr_t 数据类型的解析
 #+begin_src c++
 typedef  intptr_t      ngx_int_t;
