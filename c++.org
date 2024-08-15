@@ -3029,15 +3029,132 @@ c++引入了 static_assert 关键字，用来实现编译期间的断言，叫�
 如果第一个参数常量表达式的值为 false，会产生一条编译错误，错误位置就是该 static_assert 语句所在行，第二个参数就是错误提示字符串。
 
 然后通过调用 abort 来终止程序运行。
-* std::tuple 和 std::tie 的用法简介
+* std
+** std::atomic
+*** std::atomic<T>::exchange
+#+begin_src c++
+T exchange( T desired, std::memory_order order =
+                           std::memory_order_seq_cst ) noexcept; (1)	(since C++11)
+T exchange( T desired, std::memory_order order =
+                           std::memory_order_seq_cst ) volatile noexcept; (2)	(since C++11)
+#+end_src
+Atomically replaces the underlying value with desired (a read-modify-write operation). Memory is affected according to the value of order.
+
+It is deprecated if std::atomic<T>::is_always_lock_free is false and overload (2) participates in overload resolution. (since C++20)
+
+exchage 用于交换,返回的值是旧值.
+**** Parameters
+desired	-	value to assign
+order	-	memory order constraints to enforce
+**** Return value
+The value of the atomic variable before the call.
+**** Example
+#+begin_src c++
+#include <algorithm>
+#include <atomic>
+#include <cstddef>
+#include <iostream>
+#include <syncstream>
+#include <thread>
+#include <vector>
+ 
+int main()
+{
+    constexpr int thread_count{5};
+    constexpr int sum{5};
+ 
+    std::atomic<int> atom{0};
+    std::atomic<int> counter{0};
+ 
+    auto increment_to_sum = [&](const int id)
+    {
+        for (int next = 0; next < sum;)
+        {
+            // each thread is writing a value from its own knowledge
+            const int current = atom.exchange(next);
+            counter++;
+            // sync writing to prevent from interrupting by other threads
+            std::osyncstream(std::cout)
+                << "Thread #" << id << " (id=" << std::this_thread::get_id()
+                << ") wrote " << next << " replacing the old value "
+                << current << ".\n";
+            next = std::max(current, next) + 1;
+        }
+    };
+ 
+    std::vector<std::thread> v;
+    for (std::size_t i = 0; i < thread_count; ++i)
+        v.emplace_back(increment_to_sum, i);
+ 
+    for (auto& tr : v)
+        tr.join();
+ 
+    std::cout << thread_count << " threads take "
+              << counter << " times in total to "
+              << "increment 0 to " << sum << ".\n";
+}
+#+end_src
+Possible output:
+#+begin_example
+Thread #1 (id=139722332333824) wrote 0 replacing the old value 0.
+Thread #2 (id=139722323941120) wrote 0 replacing the old value 0.
+Thread #1 (id=139722332333824) wrote 1 replacing the old value 0.
+Thread #1 (id=139722332333824) wrote 2 replacing the old value 1.
+Thread #1 (id=139722332333824) wrote 3 replacing the old value 2.
+Thread #1 (id=139722332333824) wrote 4 replacing the old value 3.
+Thread #0 (id=139722340726528) wrote 0 replacing the old value 0.
+Thread #3 (id=139722315548416) wrote 0 replacing the old value 0.
+Thread #3 (id=139722315548416) wrote 1 replacing the old value 4.
+Thread #0 (id=139722340726528) wrote 1 replacing the old value 1.
+Thread #4 (id=139722307155712) wrote 0 replacing the old value 1.
+Thread #4 (id=139722307155712) wrote 2 replacing the old value 2.
+Thread #4 (id=139722307155712) wrote 3 replacing the old value 2.
+Thread #4 (id=139722307155712) wrote 4 replacing the old value 3.
+Thread #2 (id=139722323941120) wrote 1 replacing the old value 0.
+Thread #0 (id=139722340726528) wrote 2 replacing the old value 1.
+Thread #2 (id=139722323941120) wrote 2 replacing the old value 4.
+Thread #0 (id=139722340726528) wrote 3 replacing the old value 2.
+Thread #0 (id=139722340726528) wrote 4 replacing the old value 3.
+5 threads take 19 times in total to increment 0 to 5.
+#+end_example
+*** 基本数据类型的特化
+对于大部分内建类型，C++11 提供了一些特化：
+#+begin_example
+std::atomic_bool std::atomic<bool>
+std::atomic_char std::atomic<char>
+std::atomic_schar std::atomic<signed char>
+std::atomic_uchar std::atomic<unsigned char>
+std::atomic_short std::atomic<short>
+std::atomic_ushort std::atomic<unsigned short>
+std::atomic_int std::atomic<int>
+std::atomic_uint std::atomic<unsigned int>
+std::atomic_long std::atomic<long>
+······
+//更多类型见：http://en.cppreference.com/w/cpp/atomic/atomic
+#+end_example
+
+实际上这些特化就是相当于取了一个别名，本质上是同样的定义。而对于整形的特化而言，会有一些特殊的成员函数，例如原子加 fetch_add、原子减 fetch_sub、原子与 fetch_and、原子或 fetch_or 等。常见操作符++、--、+=、&= 等也有对应的重载版本。
+*** is_lock_free
+atomic 有一个成员函数 is_lock_free 可以告诉我们指定类型的原子量是使用了原子 CPU 指令实现了原子操作，还是依然使用的加锁的方式来实现原子操作。
+
+#+begin_example
+The standard does not specify if atomic objects are lock-free. On a platform that doesn't provide lock-free atomic operations for a type T, atomic<T> objects may be implemented using a mutex, which wouldn't be lock-free. In that case, any containers using these objects in their implementation would not be lock-free either.
+
+The standard does provide a way to check if an atomic<T> variable is lock-free: you can use var.is_lock_free() or atomic_is_lock_free(&var). These functions are guaranteed to always return the same value for the same type T on a given program execution. For basic types such as int, There are also macros provided (e.g. ATOMIC_INT_LOCK_FREE) which specify if lock-free atomic access to that type is available.
+#+end_example
+*** 参考文章
+[[https://en.cppreference.com/w/cpp/atomic/atomic/exchange][cppreference.com]]
+[[https://stackoverflow.com/questions/10106936/are-atomic-variables-lock-free][Are atomic variables lock-free? [duplicate]​]]
+[[https://stackoverflow.com/questions/12275214/what-does-the-is-lock-free-property-of-stdatomic-mean][What does the is_lock_free property of std::atomic mean?]]
+** std::tuple 和 std::tie 的用法简介
 tuple 即元组，可以理解为 pair 的扩展，可以用来将不同类型的元素存放在一起，常用于函数的多返回值。
 
-** 定义与初始化
+*** 定义与初始化
 tuple 可以使用初始化列表进行赋值。
 
 tuple<int,double,string> t3 = {1, 2.0, "3"};
 
-** 访问
+*** 访问
 可以使用 get<常量表达式>(tuple_name)来访问或修改 tuple 的元素（返回引用）
 #+begin_src c++
 get<0>(t3) = 4;
@@ -3045,7 +3162,7 @@ cout << get<1>(t3) << endl;
 #+end_src
 会输出 2
 
-** 批量赋值
+*** 批量赋值
 std::tie 会将变量的引用整合成一个 tuple，从而实现批量赋值。
 #+begin_src c++
 int i; double d; string s;
@@ -3059,7 +3176,7 @@ cout << i << " " << d << " " << s << endl;
 
 tie(i, ignore, s) = t3;
 
-** 其它
+*** 其它
 需要注意的是，tie 无法直接从初始化列表获得值，比如下面第 5 行会编译错误。
 #+begin_src c++
 int i; double d; string s;
@@ -3069,16 +3186,16 @@ t3 = {1, 2.0, "3"};
 tie(i, d, s) = {1, 2.0, "3"};
 #+end_src
 
-** 参考文章
+*** 参考文章
 [[https://blog.csdn.net/m0_37809890/article/details/89367406][std::tuple 和 std::tie 的用法简介]]
-* std::forward
+** std::forward
 std::forward 通常是用于完美转发的，它会将输入的参数原封不动地传递到下一个函数中，
 这个“原封不动”指的是，如果输入的参数是左值，那么传递给下一个函数的参数的也是左值；
 如果输入的参数是右值，那么传递给下一个函数的参数的也是右值。
 
-** 参考文章
+*** 参考文章
 [[https://zhuanlan.zhihu.com/p/92486775][浅谈std::forward]]
-* std::optional
+** std::optional
 在需要多个返回值的时候，可以下面用的 pair 形式，将返回值定义成结构体：
 #+begin_src C++
 #include <iostream>
@@ -3185,7 +3302,7 @@ cout << ret.value_or(defaultVal).out1 << endl;
 使用 std::optional 带来的好处：
 - 省去了运行状态的 bool 值的声明，让代码更简洁，更注重返回值本身的语意
 - 不用担心额外的动态内存分配
-* std::ref 和 std::cref
+** std::ref 和 std::cref
 std::ref 用于包装按引用传递的值。
 std::cref 用于包装按 const 引用传递的值。
 
@@ -3253,12 +3370,13 @@ str = change by threadFunc
 a = 9
 #+end_example
 可以看到，和 std::bind 类似，多线程的 std::thread 也是必须显式通过 std::ref 来绑定引用进行传参，否则，形参的引用声明是无效的。
-* std::span
+** std::span
 提供连续对象序列的轻量级视图。 span 提供了一种安全的方法来对在内存中背靠背排列的对象进行迭代和索引。 例如存储在内置数组中的对象 std::array 或 std::vector。
 
 如果你通常使用指针和索引访问一系列背靠背对象，则 span 是一种更安全、轻量级的替代方案。
 
 要设置 span 的大小，可以在编译时通过将大小指定为模板参数，也可以在运行时指定 dynamic_extent.
+
 * STL
 ** STL 版本介绍
 *** HP STL。
