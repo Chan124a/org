@@ -1,6 +1,8 @@
 \documentclass[UTF-8]{ctexart}
 
 \usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[hidelinks]{hyperref}
 \usepackage{enumerate}
 \newtheorem{definition}{Definition}[section]
 \newtheorem{axiom}{公理}[section]
@@ -132,7 +134,7 @@
 \begin{enumerate}[(a)]
 \item (序是自反的)$a\geq a$
 \item (序是传递的)若$a \geq b$且$b \geq c$,那么$a \geq c$.
-\item (序是反对称的)若$a \geq b$且$b \geq a$,那么$a \eq b$.
+\item (序是反对称的)若$a \geq b$且 $b \geq a$,那么 $a = b$.
 \item (加法保序)$a \geq b$当且仅当$a+c \geq b+c$
 \item $a < b $当且仅当$a++ \leq b$
 \item $a < b $当且仅当对于某正数d,$b=a+d$
@@ -146,11 +148,8 @@
 \end{theorem}
 
 \begin{theorem}
-(强归纳法原理)设$m_0$是一个自然数,而$P(m)$是一个依赖于任意自然数m的性质.设对于每
-个$m \geq m_0$都有下述蕴含关系:如果$P(m^')$对于一切满足$m_0 \leq m^{'}  < m$的自然
-数$m^'$都成立,那么$P(m
-)$也成立(特别地,这意味着$P(m_0)$成立,因为在$m=m_0$的情况下,假定的条件$P(m^')$是
-空的),那么,我们可以断定$P(m)$对于一切自然数$m \geq m_0$都成立.
+(强归纳法原理)设 $m_0$ 是一个自然数,而$P(m)$是一个依赖于任意自然数m的性质.设对于每个 $m \geq m_0$ 都有下述蕴含关系:如果$P(m^{'})$对于一切满足$m_0 \leq m^{'}  < m$的自然数$m^{'}$都成立,那么$P(m)$也成立(特别地,这意味着$P(m_0)$成立,因为在$m=m_0$的情况下,假定的条件$P(m^{'})$是空的),那么,我们可以断定$P(m)$对于一切自然数$m \geq m_0$都成立.
+
 \end{theorem}
 
 \newpage
@@ -299,7 +298,7 @@ T是一个可以投影到xy平面的体，它夹在α(x,y)和β(x,y)两个函数
 
 $\iiint_T f(x,y,z) \ \mathrm{d}x\, \mathrm{d}y\, \mathrm{d}z = \iint_D \mathrm{d}x\, \mathrm{d}y \int_{\alpha (x,y)}^{\beta (x,y)} f(x,y,z) \, \mathrm{d}z$
 
-（此定义和其它$R^3$$中的分解类似）。
+（此定义和其它$R^3$中的分解类似）。
 
 \subparagraph{变量替换}
 积分的极限常常不易交换（区域无法分解或者公式很复杂），这时可以采用变量替换来重写积分，令区域更加简易，从而可以用更简单的公式表达。为此，函数必须变换到新坐标系下。
@@ -330,7 +329,7 @@ $f(x,y) \rightarrow f(\rho \ \cos \phi,\rho \ \sin \phi )$。
 
 例子2,
 函数为$f(x,y) = x^2 + y^2$
-应用该变换到得$f(\rho, \phi) = \rho^2 (\cos^2 \phi + \sin^2 \phi) = \rho^2\$
+应用该变换到得$f(\rho, \phi) = \rho^2 (\cos^2 \phi + \sin^2 \phi) = \rho^2$
 
 这里使用了勾股定理（在简化操作时很有用）。
 
@@ -391,7 +390,7 @@ $\iiint_D f(x,y,z) \, \mathrm{d}x\, \mathrm{d}y\, \mathrm{d}z = \iiint_T f(\rho 
 这个方法在柱形或者锥形区域的情况较为适用，也适用于容易分辨''z''区间和变换圆形底面和函数的其它情况。
 
 例子2,
-函数为$f(x,y,z) = x^2 + y^2 + z$而积分区域为圆柱$D = \{ x^2 + y^2 \le 9, \ -5 \le z \le 5 \}$$.
+函数为$f(x,y,z) = x^2 + y^2 + z$而积分区域为圆柱$D = \{ x^2 + y^2 \le 9, \ -5 \le z \le 5 \}$.
 将D变换到柱极坐标如下：
 
 $T = \{ 0 \le \rho \le 3, \ 0 \le \phi \le 2 \pi, \ -5 \le z \le 5 \}$。
@@ -416,102 +415,6 @@ $f(x,y,z) \longrightarrow f(\rho \cos \theta \sin \phi, \rho \sin \theta \sin \p
 
 这个方法最为适用的区域显然是球。
 
-例子1,
-区域为$D = x^2 + y^2 + z^2 \le 16$（球心在原点半径为4的球）；应用变换后得到：$T = \{ 0 \le \rho \le 4, \ 0 \le \phi \le \pi, \ 0 \le \theta \le 2 \pi \}$。
-
-坐标变换的雅可比行列式为：
-
-$\frac{\partial (x,y,z)}{\partial (\rho, \theta, \phi)} =
-\begin{vmatrix}
-\cos \theta \sin \phi & - \rho \sin \theta \sin \phi & \rho \cos \theta \cos \phi \\
-\sin \theta \sin \phi & \rho \cos \theta \sin \phi & \rho \sin \theta \cos \phi \\
-\cos \phi & 0 & - \rho \sin \phi
-\end{vmatrix} = -\rho^2 \sin \phi</math>
-
-:因此<math> \mathrm{d}x\, \mathrm{d}y\, \mathrm{d}z </math>变换为<math> \rho^2 \sin \phi \, \mathrm{d}\rho\, \mathrm{d}\theta\, \mathrm{d}\phi$.
-
-得到最后公式:
-
-$\iiint_D f(x,y,z) \, \mathrm{d}x\, \mathrm{d}y\, \mathrm{d}z = \iiint_T f(\rho \sin \theta \cos \phi, \rho \sin \theta \sin \phi, \rho \cos \theta) \rho^2 \sin \phi \, \mathrm{d}\rho\, \mathrm{d}\theta\, \mathrm{d}\phi$
-
-应当在积分区域为球形对称并且函数很容易通过基本三角公式简化的时候才使用这个方法。（参看例4-b）；其它情况下，可能使用柱极坐标更为合适（参看例4-c）。
-
-:<math>\iiint_T f(a,b,c) \rho^2 \sin \phi \, \mathrm{d}\rho\, \mathrm{d}\theta\, \mathrm{d}\phi</math>。
-
-注意从雅可比行列式来的<math>\rho^2</math>和<math>\sin \phi</math>因子。
-
-注意下面例子中，φ和θ的作用反过来了。
-
-<blockquote>
-<u>例（4-b）</u>:<br />
-:''D''和例4-a相同，而<math>f(x,y,z) = x^2 + y^2 + z^2\,\!</math>是被积函数。
-
-:很容易变换为：
-
-::<math>f(\rho \sin \theta \cos \phi, \rho \sin \theta \sin \phi, \rho \cos \theta) = \rho^2,</math>，
-
-:而从''D''到''T''的变换是已知的：
-
-::<math>(0 \le \rho \le 4, \ 0 \le \phi \le 2 \pi, \ 0 \le \theta \le \pi)</math>。
-
-:应用积分公式：
-
-::<math>\iiint_D (x^2 + y^2 +z^2) \, \mathrm{d}x\, \mathrm{d}y\, \mathrm{d}z = \iiint_T \rho^2 \ \rho^2 \sin \theta \, \mathrm{d}\rho\, \mathrm{d}\theta\, \mathrm{d}\phi,</math>
-
-:并展开：
-
-::<math>\iiint_T \rho^4 \sin \theta \, \mathrm{d}\rho\, \mathrm{d}\theta\, \mathrm{d}\phi = \int_0^{\pi} \sin \theta \,\mathrm{d}\theta \int_0^4 \rho^4 \mathrm{d} \rho \int_0^{2 \pi} \mathrm{d}\phi = 2 \pi \int_0^{\pi} \sin \theta \left[ \frac{\rho^5}{5} \right]_0^4 \, \mathrm{d} \theta</math>
-
-::<math>= 2 \pi \left[ \frac{\rho^5}{5} \right]_0^4 \left[- \cos \theta \right]_0^{\pi} = 4 \pi \cdot \frac{1024}{5} = \frac{4096 \pi}{5}</math>。
-
-<u>例（4-c）</u>:
-:区域''D''是球心在原点半径为''3a''的球（<math>D = x^2 + y^2 + z^2 \le 9a^2 \,\!</math>）而<math>f(x,y,z) = x^2 + y^2\,\!</math>是被积函数。
-
-:看起来采用球极坐标变换较为合适，但是事实上，限定新区域''T''的变量很明显应该是：
-
-::<math>0 \le \rho \le 3a, \ 0 \le \phi \le 2 \pi, \ 0 \le \theta \le \pi</math>。
-
-:但是采用这个变换就有
-
-::<math>f(x,y,z) = x^2 + y^2 \longrightarrow \rho^2 \sin^2 \theta \cos^2 \phi + \rho^2 \sin^2 \theta \sin^2 \phi = \rho^2 \sin^2 \theta</math>.
-
-:应用积分公式得到：
-
-::<math>\iiint_T \rho^2 \sin^2 \theta \rho^2 \sin \theta \, \mathrm{d}\rho\, \mathrm{d}\theta\, \mathrm{d}\phi = \iiint_T \rho^4 \sin^3 \theta \, \mathrm{d}\rho\, \mathrm{d}\theta\, \mathrm{d}\phi</math>
-
-:这很难求解。而如果采用柱极坐标，新的''T''区间为：
-
-::<math>0 \le \rho \le 3a, \ 0 \le \phi \le 2 \pi, \ - \sqrt{9a^2 - \rho^2} \le z \le \sqrt{9a^2 - \rho^2};</math>
-
-:''z''区间可以通过将球切成两个半球并求解从''D''的公式来的[[不等式]]得到（然后直接变换''x<sup>2</sup> + y<sup>2</sup>''到''ρ<sup>2</sup>''）。新函数就是''ρ<sup>2</sup>''.采用积分公式
-
-::<math>\iiint_T \rho^2 \rho \ \mathrm{d} \rho \mathrm{d} \phi \mathrm{d}z</math>.
-
-:得到
-
-::<math>\int_0^{2 \pi} \mathrm{d}\phi \int_0^{3a} \rho^3 \mathrm{d}\rho \int_{- \sqrt{9a^2 - \rho^2} }^{\sqrt{9 a^2 - \rho^2} }\, \mathrm{d}z = 2 \pi \int_0^{3a} 2 \rho^3 \sqrt{9 a^2 - \rho^2} \, \mathrm{d}\rho</math>。
-
-:然后应用变换
-
-::<math>9 a^2 - \rho^2 = t\,\! \longrightarrow \mathrm{d}t = -2 \rho\, \mathrm{d}\rho \longrightarrow \mathrm{d}\rho = \frac{\mathrm{d} t}{- 2 \rho}\,\!</math>
-
-:(新区间变为<math>0, 3a \longrightarrow 9 a^2, 0</math>)。得到
-
-::<math>- 2 \pi \int_{9 a^2}^{0} \rho^2 \sqrt{t}\, \mathrm{d}t</math>
-
-:因为<math>\rho^2 = 9 a^2 - t\,\!</math>，所以
-
-::<math>-2 \pi \int_{9 a^2}^0 (9 a^2 - t) \sqrt{t}\, \mathrm{d}t,</math>
-
-:将积分限反过来，然后分配括号中的项，很容易将积分分解为可以直接积分的两部分：
-
-::<math>2 \pi \left[ \int_0^{9 a^2} 9 a^2 \sqrt{t} \, \mathrm{d}t - \int_0^{9 a^2} t \sqrt{t} \, \mathrm{d}t\right] = 2 \pi \left[9 a^2 \frac{2}{3} t^{ \frac{3}{2} } - \frac{2}{5} t^{ \frac{5}{2}} \right]_0^{9 a^2}</math>
-
-::<math>= 2 \cdot 27 \pi a^5 \left ( 6 - \frac{18}{5} \right ) = \frac{648 \pi}{5} a^5.</math>
-
-:由于采用柱极坐标，很容易就将这个三重积分变换为简单的单变量积分。</blockquote>
-
-参看[[柱极和球极坐标下的∇]]中讨论的不同的体积元。
 
 
 \section{线性代数}
@@ -573,6 +476,7 @@ $E(\bar{X})=E(\frac{1}{n}\sum_{i=1}^{n}x_{i})=\frac{1}{n}\sum_{i=1}^{n}E(x_{i})=
 \begin{proof}
 方差无偏估计的推算:
 
+\begin{math}
 \begin{aligned}
 \operatorname{E}[S^{2}]& =\mathrm{E}\left[\frac{1}{n}\sum_{i=1}^{n}\left(X_{i}-\overline{X}\right)^{2}\right]=\mathrm{E}\left[\frac{1}{n}\sum_{i=1}^{n}\left((X_{i}-\mu)-(\overline{X}-\mu)\right)^{2}\right] \\
 &=\mathrm{E}\left[\frac{1}{n}\sum_{i=1}^{n}\left((X_{i}-\mu)^{2}-2(\overline{X}-\mu)(X_{i}-\mu)+(\overline{X}-\mu)^{2}\right)\right] \\
@@ -585,7 +489,8 @@ $E(\bar{X})=E(\frac{1}{n}\sum_{i=1}^{n}x_{i})=\frac{1}{n}\sum_{i=1}^{n}E(x_{i})=
 &=\operatorname{E}\left[\frac1n\sum_{i=1}^n(X_i-\mu)^2\right]-\operatorname{E}\left[(\overline{X}-\mu)^2\right] \\
 &=\sigma^2-\mathrm{E}\Big[(\overline{X}-\mu)^2\Big]
 \end{aligned}
-
+\end{math}
+\begin{math}
 \begin{aligned}
 E(\bar{X}-\mu)^2& =E(\bar{X}-E[\bar{X}])^2=var(\bar{X}) \\
 &=var\left(\frac{\sum_{i=1}^nX_i}n\right) \\
@@ -594,7 +499,7 @@ E(\bar{X}-\mu)^2& =E(\bar{X}-E[\bar{X}])^2=var(\bar{X}) \\
 &=\frac{n\sigma^2}{n^2} \\
 &=\frac{\sigma^2}n
 \end{aligned}
-
+\end{math}
 $E[\frac{1}{n}\sum_{i=1}^n(X_i-\overline{X})^2]=\sigma^2-\frac{1}{n}\sigma^2=\frac{n-1}{n}\sigma^2$
 \end{proof}
 

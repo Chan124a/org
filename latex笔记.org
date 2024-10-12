@@ -490,5 +490,47 @@ LaTeX 可以对文档中的章节进行组织、编号，以及索引。取决�
 
 ** 参考文章
 [[https://blog.csdn.net/xovee/article/details/117279589][LaTeX 章节 Sections Chapters_latex chapter-CSDN博客]]
+
+* 目录
+如果要添加目录，则需要在（希望）目录出现的地方使用命令\tableofcontents；如果想要为目录添加超链接实现跳转功能，则需要使用\usepackage{hyperref}命令，但是这时目录上会有红色方框，如果要去除红色方框，则需要给 hyperref 命令添加相应的参数，因此需要使用\usepackage[hidelinks]{hyperref}命令。以下贴一段代码：
+#+begin_example
+\documentclass{article}
+\usepackage{ctex}
+\usepackage{hyperref}
+\title{中国行政区划}
+\author{乔峰}
+\date{2019年11月13日}
+\begin{document}
+	\maketitle
+	
+	\tableofcontents
+	
+	\section{直辖市}
+	\subsection{北京市}
+	
+	\subsection{上海市}
+	
+	\subsection{天津市}
+	
+	\subsection{重庆市}
+	
+	\section{其它省}
+	\subsection{青海省}
+	
+	\subsection{山东省}
+	
+	\subsection{河南省}
+	
+	\subsection{河北省}
+	
+	\subsection{广东省}
+	
+	
+\end{document}
+#+end_example
+
+#+DOWNLOADED: screenshot @ 2024-10-12 12:53:18
+[[file:images/latex笔记/目录/2024-10-12_12-53-18_screenshot.png]]
+
 * 参考文章
 [[https://zhuanlan.zhihu.com/p/64497187][latex系列--2 标题、章节、目录、标签、引用]]
