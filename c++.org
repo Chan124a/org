@@ -901,6 +901,23 @@ d
 ** DONE 你好，C++的并发世界
 CLOSED: [2024-10-12 周六 13:02]
 ** 线程管理
+*** 线程启动
+#+begin_src c++
+      void do_some_work();
+
+
+      std::thread my_thread(do_some_work);
+
+    int main()
+  integer
+  
+
+
+
+
+
+#+end_src
+
 ** 线程间共享数据
 ** 同步并发操作
 ** C++内存模型和原子类型操作
