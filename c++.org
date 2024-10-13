@@ -1032,7 +1032,7 @@ t1=std::move(t3); // 6 赋值操作将使程序崩溃
 #+end_src
 当显式使用 std::move() 创建 t2 后②，t1 的所有权就转移给了 t2。之后，t1 和执行线程已经没有关联了；执行 some_function 的函数现在与 t2 关联。
 
-The move support in std::thread means that ownership can readily be transferred out of a function, as shown in the following listing.
+The move support in std::thread means that ownership can readily be transferred out of a function, as shown in the following listing.Likewise, if ownership should be transferred into a function, it can accept an instance of std::thread by value as one of the parameters, as shown here:
 #+begin_src c++
 std::thread g()
 {
@@ -1040,7 +1040,117 @@ void some_other_function(int);
 std::thread t(some_other_function,42);
 return t;
 }
+
+void f(std::thread t);
+void g()
+{
+void some_function();
+f(std::thread(some_function));
+std::thread t(some_function);
+f(std::move(t));
+}
 #+end_src
+
+std::thread 支持移动的好处是可以创建 thread_guard 类的实例(定义见 清单 2.3)，并且拥有其线程的所有权。
+This avoids any unpleasant consequences should the thread_guard object outlive the thread it was referencing, and it also means that no one else can join or detach the thread once ownership has been transferred into the object.
+
+#+begin_src c++
+class scoped_thread
+{
+std::thread t;
+public:
+explicit scoped_thread(std::thread t_): // 1
+t(std::move(t_))
+{
+if(!t.joinable()) // 2
+throw std::logic_error(“No thread”);
+}
+~scoped_thread()
+{
+t.join(); // 3
+}
+scoped_thread(scoped_thread const&)=delete;
+scoped_thread& operator=(scoped_thread const&)=delete;
+};
+struct func; // 定义在清单2.1中
+void f()
+{
+int some_local_state;
+scoped_thread t(std::thread(func(some_local_state))); // 4
+do_something_in_current_thread();
+} // 5
+#+end_src
+
+The move support in std::thread also allows for containers of std::thread objects,if those containers are move-aware (like the updated std::vector<>). This meansthat you can write code like that in the following listing, which spawns a number of threads and then waits for them to finish.
+#+begin_src c++
+void do_work(unsigned id);
+void f()
+{
+std::vector<std::thread> threads;
+for(unsigned i=0;i<20;++i)
+{
+threads.emplace_back(do_work,i);
+}
+for(auto& entry: threads)
+entry.join();
+}
+#+end_src
+*** Choosing the number of threads at runtime
+One feature of the C++ Standard Library that helps here is std::thread::hardware_concurrency(). This function returns an indication of the number of threads that can truly run concurrently for a given execution of a program. On a multicore system it might be the number of CPU cores, for example. This is only a hint, and the function might return 0 if this information isn’t available, but it can be a useful guide for splitting a task among threads.
+
+#+begin_src c++
+template<typename Iterator,typename T>
+struct accumulate_block
+{
+void operator()(Iterator first,Iterator last,T& result)
+{
+result=std::accumulate(first,last,result);
+}
+};
+template<typename Iterator,typename T>
+T parallel_accumulate(Iterator first,Iterator last,T init)
+{
+unsigned long const length=std::distance(first,last);
+if(!length) // 1
+return init;
+unsigned long const min_per_thread=25;
+unsigned long const max_threads=
+(length+min_per_thread-1)/min_per_thread; // 2
+unsigned long const hardware_threads=
+std::thread::hardware_concurrency();
+unsigned long const num_threads= // 3
+std::min(hardware_threads != 0 ? hardware_threads : 2, max_threads);
+unsigned long const block_size=length/num_threads; // 4
+std::vector<T> results(num_threads);
+std::vector<std::thread> threads(num_threads-1); // 5
+Iterator block_start=first;
+for(unsigned long i=0; i < (num_threads-1); ++i)
+{
+Iterator block_end=block_start;
+std::advance(block_end,block_size); // 6
+threads[i]=std::thread( // 7
+accumulate_block<Iterator,T>(),
+block_start,block_end,std::ref(results[i]));
+block_start=block_end; // 8
+}
+accumulate_block<Iterator,T>()(
+block_start,last,results[num_threads-1]); // 9
+std::for_each(threads.begin(),threads.end(),
+std::mem_fn(&std::thread::join)); // 10
+return std::accumulate(results.begin(),results.end(),init); // 11
+}
+#+end_src
+*** Identifying threads
+Thread identifiers are of type std::thread::id and can be retrieved in two ways.
+
+First, the identifier for a thread can be obtained from its associated std::thread object by calling the get_id() member function. If the std::thread object doesn’t have an associated thread of execution, the call to get_id() returns a default-constructed std::thread::id object, which indicates “not any thread.”
+Alternatively, the identifier for the current thread can be obtained by calling std::this_thread:: get_id(),which is also defined in the <thread> header.
+
+Objects of type std::thread::id can be freely copied and compared; they wouldn’t be of much use as identifiers otherwise. If two objects of type std::thread::id are equal, they represent the same thread, or both are holding the “not any thread” value.
+If two objects aren’t equal, they represent different threads, or one represents a thread and the other is holding the “not any thread” value.
+
+std::thread::id 可以当做容器的键值，做排序，或做其他方式的比较。按默认顺序比较不同值的 std::thread::id ，所以这个行为可预见的：当 a<b ， b<c 时，得 a<c ，等等。标准库也提供 std::hash<std::thread::id> 容器，所以 std::thread::id 也可以作为无序容器的键值。
+
 ** 线程间共享数据
 ** 同步并发操作
 ** C++内存模型和原子类型操作
