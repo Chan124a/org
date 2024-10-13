@@ -1031,6 +1031,16 @@ t3=std::move(t2); // 5
 t1=std::move(t3); // 6 赋值操作将使程序崩溃
 #+end_src
 当显式使用 std::move() 创建 t2 后②，t1 的所有权就转移给了 t2。之后，t1 和执行线程已经没有关联了；执行 some_function 的函数现在与 t2 关联。
+
+The move support in std::thread means that ownership can readily be transferred out of a function, as shown in the following listing.
+#+begin_src c++
+std::thread g()
+{
+void some_other_function(int);
+std::thread t(some_other_function,42);
+return t;
+}
+#+end_src
 ** 线程间共享数据
 ** 同步并发操作
 ** C++内存模型和原子类型操作
