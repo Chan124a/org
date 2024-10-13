@@ -13,15 +13,15 @@
 5. C-c C-u	回到上层标题
 ** 结构编辑
 1. M-RET 插入一个同级标题。如果光标在文本列表中，创建一个新的项。如果处于一行的中间，这一行会被分开，后面的一部分成为新的标题。
-2. C-RET 与M-RET类似，但如果处于一行的中间，不会把后面的内容作为标题
+2. C-RET 与 M-RET 类似，但如果处于一行的中间，不会把后面的内容作为标题
 3. M-S-RET              插入一个和当前标题同级的 TODO 项
-4. C-S-RET              与M-S-RET类似
+4. C-S-RET              与 M-S-RET 类似
 5. TAB（新的空的条目中）	如果新的条目中还没有文字，TAB 可以调整级别。
 6. M-LEFT/RIGHT	        将当前的标题提升/降低一个等级。
 7. M-S-LEFT/RIGHT	将当前子提升/降低一个等级。
 8. M-S-UP/DOWN	        将子树上/下移（和前/后个子树交换）。
 9. C-c C-w              将条目或区域重新归档到其他位置。
-10. C-x n s和C-x n w    将缓冲区视图局限到当前子树中/再次放宽视图
+10. C-x n s 和 C-x n w    将缓冲区视图局限到当前子树中/再次放宽视图
 ** Sparse 树
 Org 模式的一个重要的功能是能根据大纲树中选择的信息构造出稀疏的树，这样文档就可以尽可能地折叠，但是选择的信息和它对应的标题会显示出来。试下就知道它是怎样工作的了。
 
@@ -41,7 +41,7 @@ You can make words ‘*bold*’, ‘/italic/’, ‘_underlined_’, ‘=verbati
 * 列表
 无序列表项以 -、+或者*开头。
 
-有序列表项以1.、1)或者开头。
+有序列表项以 1.、1)或者开头。
 
 描述列表用::将项和描述分开。
 
@@ -58,7 +58,7 @@ You can make words ‘*bold*’, ‘/italic/’, ‘_underlined_’, ‘=verbati
 
 在 Org-mode 中重置有序列表序号可以直接使用 M-<RET> 。
 * 脚注
-脚注就是以脚注定义符号开头的一段话，脚注定义符号是将脚注名称放在一个方括号里形成的，要求放在第0列，不能有缩进。而引用就是在正文中将脚注名称用方括号括起来。例如：
+脚注就是以脚注定义符号开头的一段话，脚注定义符号是将脚注名称放在一个方括号里形成的，要求放在第 0 列，不能有缩进。而引用就是在正文中将脚注名称用方括号括起来。例如：
 
 The Org homepage[fn:1] now looks a lot better than it used to.
 ...
@@ -66,7 +66,7 @@ The Org homepage[fn:1] now looks a lot better than it used to.
 
 注脚命令：
 - =C-c C-x f=  当光标位于注脚引用处,该命令会跳转到注脚定义处. 若光标处于注脚定义处,跳转到(第一个)引用处.否则,创建一个新的注脚.
-- =C-c C-c= 当光标位于注脚引用处时,跳转到注脚定义处. 若光标处于注脚定义处,则跳转回注脚引用处. 若在标注位置上用带前置参数的方式调用该命令,则弹出一个与C-c C-x f一样的菜单.
+- =C-c C-c= 当光标位于注脚引用处时,跳转到注脚定义处. 若光标处于注脚定义处,则跳转回注脚引用处. 若在标注位置上用带前置参数的方式调用该命令,则弹出一个与 C-c C-x f 一样的菜单.
 - =C-c C-o= 不知道是啥
 * 表格
 - =C-c C-c=	调整表格，不移动光标
@@ -89,7 +89,7 @@ The Org homepage[fn:1] now looks a lot better than it used to.
 |Name|Phone|Age|
 |-
 #+END_SRC
-然后按TAB，或者输入|Name|Phone|Age|后按C-c RET
+然后按 TAB，或者输入|Name|Phone|Age|后按 C-c RET
 
 C-c | 将活动区域（选中区域）转换成一个表。
 
@@ -98,18 +98,18 @@ C-c | 将活动区域（选中区域）转换成一个表。
 如果第一行都有逗号，就分逗号划分内容；
 
 否则就用空白符来划分区域。如果当前没有活动区域就会建立一个空的 Org 表格。
-*** 快捷键C-c -
+*** 快捷键 C-c -
 #+BEGIN_SRC org
 |Name|Phone|Age|
 #+END_SRC
-然后按下C-c -即可自动创建表格
-*** 快捷键C-c |
-快速创建指定大小的表格。使用这个快捷键后，会提示输入创建的表格的大小，默认是5x2也就是5列2行的，且其中一行是 header.
+然后按下 C-c -即可自动创建表格
+*** 快捷键 C-c |
+快速创建指定大小的表格。使用这个快捷键后，会提示输入创建的表格的大小，默认是 5x2 也就是 5 列 2 行的，且其中一行是 header.
 *** 由选中内容创建表格
-可将buffer 上已有的数据格式化成表格，比如如果是以逗号(,)分隔的 CSV 格式的数据，可以将其拷贝到当前在编辑的 Org mode 文档中，选中，然后使用 "C-c |" 这个快捷键，就能将其转换成表格形式.
+可将 buffer 上已有的数据格式化成表格，比如如果是以逗号(,)分隔的 CSV 格式的数据，可以将其拷贝到当前在编辑的 Org mode 文档中，选中，然后使用 "C-c |" 这个快捷键，就能将其转换成表格形式.
 *** org-table-import
 Org mode 提供了 "org-table-import" 这个命令来将外部文件导入到 Org mode 文档中并用它来创建表格，
-与之对应的，命令 "org-table-export" 则能将Org mode 文档中的表格导出成文件。
+与之对应的，命令 "org-table-export" 则能将 Org mode 文档中的表格导出成文件。
 文件格式可以是 CSV 的，也可以是以制表符(TAB)或空白字符作为分隔符的。
 ** 表格公式
 Org mode 中的表格的另外一个强大之处，在于它支持公式。
@@ -126,7 +126,7 @@ Org mode 中的表格的另外一个强大之处，在于它支持公式。
 上面这个公式表示将第四列的值设为第二列的值与第三列的值的乘积。
 在编辑好公式并保存后，将光标移动到公式所在行然后使用 "C-c C-c"，就可以应用公式到表格中。
 
-在Org mode的表格公式中，用 "@" 来表示行，用 "$" 来表示列，最简单的，"@3$2" 表示的是第三行第二列的位置。
+在 Org mode 的表格公式中，用 "@" 来表示行，用 "$" 来表示列，最简单的，"@3$2" 表示的是第三行第二列的位置。
 使用快捷键 "C-c }" 可以开启表格的横纵坐标显示——若要关闭的话也是用它。如果是用 "C-c '" 来进行公式编辑，在输入表格位置时，会看到表格上对应的位置会在当时高亮，所以建议用这种方式进行编辑。
 
 如果只给一个坐标，则另一个坐标会被设为"当前行"或者"当前列"，这在批量处理表格内容时会有用。
@@ -141,7 +141,7 @@ $1..$3
 
 在公式中，可以用 "@#" 表示当前行的行号，用 "$#" 表示当前列的列号，在一些稍复杂点的公式里会有用。
 
-此外，还可以定义常量、变量，或者给某个单元格命名，然后引用它们。假设其名字为 "name"，那么 "$name" 就可以引用它了。常量的定义可以通过 "org-table-formula-constants" 来进行，这样定义的常量是全局的；如果要定义局部的常量，可以在org文件中添加诸如这样的行:
+此外，还可以定义常量、变量，或者给某个单元格命名，然后引用它们。假设其名字为 "name"，那么 "$name" 就可以引用它了。常量的定义可以通过 "org-table-formula-constants" 来进行，这样定义的常量是全局的；如果要定义局部的常量，可以在 org 文件中添加诸如这样的行:
 
 #+CONSTANTS: pi=3.14 eps=2.4e-6
 还可以在当前表格引用其他表格的域，这需要其他表格被命名为某个名字，如"FOO"，我们要在另一个表格中使用其第三行第四列的域，将其值赋给当前表格的第五行第二列，则可以这样写:
@@ -198,22 +198,22 @@ file:~/xx.org/::#my-custom-id               查找自定义 id 的项
 
 ** 关于插入图片的方法
 1. 使用系统自带方法
-2. org-download插件
-org-download本身会自动在org文档当前目录下创建一个与文档同名的文件夹来保存图片，然后支持多种途径的图片插入，插入之后会复制或者下载一张图片到图片文件夹下面：
-- 用url把图片插入，然后自动下载；
+2. org-download 插件
+org-download 本身会自动在 org 文档当前目录下创建一个与文档同名的文件夹来保存图片，然后支持多种途径的图片插入，插入之后会复制或者下载一张图片到图片文件夹下面：
+- 用 url 把图片插入，然后自动下载；
 - 复制图片文件路径，然后插入；
 - 拖拽图片插入。
 
-但是，org-download不会把剪切板中的图片自动保存一个图片文件，然后插入。所以，必须要借助于外部程序。可以使用任意一个带命令行参数的图片保存器将剪切板中的图片进行保存。有人写了一个csharp的程序，很小很小就可以做到了。我这里直接使用ImageMagick ，因为这个软件实在是太强大了，而且是免费的。路径我们可以根据自己的安装路径来进行配置，然后，先调用里面的convert.exe把剪切板里面的图片保存到一个临时目录下面。我这里是 d:/temp/ ，这个可以根据自己的需要来设置。然后，定义了一个快捷键 C-S-Y ，比原来的粘贴键多了一个shift，就可以粘贴图片了。
+但是，org-download 不会把剪切板中的图片自动保存一个图片文件，然后插入。所以，必须要借助于外部程序。可以使用任意一个带命令行参数的图片保存器将剪切板中的图片进行保存。有人写了一个 csharp 的程序，很小很小就可以做到了。我这里直接使用 ImageMagick ，因为这个软件实在是太强大了，而且是免费的。路径我们可以根据自己的安装路径来进行配置，然后，先调用里面的 convert.exe 把剪切板里面的图片保存到一个临时目录下面。我这里是 d:/temp/ ，这个可以根据自己的需要来设置。然后，定义了一个快捷键 C-S-Y ，比原来的粘贴键多了一个 shift，就可以粘贴图片了。
 
-截图软件：剪切板中的图片可以是从另外一个地方复制来的，但更多的场景是使用截图软件进行截图，然后粘贴的。我使用的截图软件是faststone，程序很小，但是功能很强大，既可以截图也可以录视频，还可以编辑视频，对于简单的插入便条，字幕之类的处理，特别方便。还可以设置快捷键，截选择框、窗口、滚动条内窗口内容等等，非常方便。
+截图软件：剪切板中的图片可以是从另外一个地方复制来的，但更多的场景是使用截图软件进行截图，然后粘贴的。我使用的截图软件是 faststone，程序很小，但是功能很强大，既可以截图也可以录视频，还可以编辑视频，对于简单的插入便条，字幕之类的处理，特别方便。还可以设置快捷键，截选择框、窗口、滚动条内窗口内容等等，非常方便。
 
 * 待办事项
 Org 模式并不用一个单独的文件来维持 TODO 列表。它是一些笔记的集合体，因为 TODO 列表是在你记录笔记的过程中逐渐形成的。你 Org 模式下可以很容易地将树中的一项标记为一个 TODO 的项。用这种方式，信息内容不会冗余加倍，而且可以显示 TODO 项的上下文环境。
 
 当然，这种处理待办事项的方式会将它们分散于各个笔记文件中。Org 模式提供了一些方法使我们可以把它们看作一个整体来处理。
-** 使用TODO状态
-当标题以TODO开头时就成为一个TODO项
+** 使用 TODO 状态
+当标题以 TODO 开头时就成为一个 TODO 项
 #+BEGIN_SRC bash
 #*** TODO 标题
 #+END_SRC
@@ -248,7 +248,7 @@ Org 模式并不用一个单独的文件来维持 TODO 列表。它是一些笔�
 
 关键字应该各不相同，这样对于一个选项 Org 才知道该用哪个状态序列（集合）。
 
-例子中也给出了快速使用一个关键字的方法，就是在关键字后面括号中给出快捷字母——当用 C-c C-t时，会询问，让你输入一个字母。
+例子中也给出了快速使用一个关键字的方法，就是在关键字后面括号中给出快捷字母——当用 C-c C-t 时，会询问，让你输入一个字母。
 
 要定义只在一个文件中有效的 TODO 关键字，可以在文件中任意地方给出下面的文本：
 #+BEGIN_SRC emacs-lisp
@@ -272,7 +272,7 @@ Org 模式并不用一个单独的文件来维持 TODO 列表。它是一些笔�
 #+end_src
   这时会提示你输入一个记录（note），并将它保存在标题为“Closing Note”项目之下。
 
-*跟踪TODO状态变化*
+*跟踪 TODO 状态变化*
 
     你可能想跟踪 TODO 状态的变化。可以只记录一个时间戳，也可以为变化作一个带时间戳的记录。记录会被插入到标题之后形成列表。当有很多记录之后，你可能希望将记录取出放到抽屉里。通过定制变量 org-log-into-drawer 可以实现这个功能。
     对于状态记录，Org 可以实现基于每个状态关键字的设置。实现方法是在每个后的括号中指定“！”（记录时间戳）或“@”（作一个记录）。例如：
@@ -283,18 +283,18 @@ Org 模式并不用一个单独的文件来维持 TODO 列表。它是一些笔�
     将会设置 TODO 关键字和快速访问字母，以及当一个项目设为 DONE 时，会记录时间戳，当状态变为 WAIT 或 CANCELED 时，会作一个记录。这个语法也适用于变量 org-todo-keywords。
     
 ** 优先级
-Org模式支持三个优先级别：A、B和C。
+Org 模式支持三个优先级别：A、B和 C。
 
-A是最高级别，如不指定，B是默认的。
+A 是最高级别，如不指定，B是默认的。
 
 优先级只在议程中有用。
 
-- =C-c ,=	设置当前标题的优先级。按a,b,c选择一个级别，或者SPC删除标记（cookie）。
+- =C-c ,=	设置当前标题的优先级。按 a,b,c 选择一个级别，或者 SPC 删除标记（cookie）。
 - =S-UP= , =S-Down=	增加/减少当前标题的优先级。
 ** 任务细分
 你可以在标题的任何地方插入[/]或者[%]。
 
-当每个子任务的状态变化时，或者当你在标记上按 C-c C-c时，这些标记状态也会随之更新。
+当每个子任务的状态变化时，或者当你在标记上按 C-c C-c 时，这些标记状态也会随之更新。
 
 #+begin_src org
   ,* Organize Party [33%]
@@ -343,7 +343,7 @@ A是最高级别，如不指定，B是默认的。
 ** 设置标签
    在标题后可以很容易地输入标签。在冒号之后，M-TAB 可以补全标签。也有一些专门的命令用于输入标签：
 | C-c C-q | 为当前标题输入标签。Org 模式既支持补全，也支持单键接口来设置标签，见下文。回车之后，标签会被插入，并放到第 org-tags-column 列。如果用前缀 C-u，会把当前缓冲区中的所有标签都对齐到那一列，这看起来很酷。 |
-| C-c C-c | 当光标处于标题上时，这个命令同C-c C-q。                                                                                                                                                                 |
+| C-c C-c | 当光标处于标题上时，这个命令同 C-c C-q。                                                                                                                                                                 |
 
    Org 支持基于一个标签列表来插入标签。默认情况这个列表是动态构建的，包含了当前缓冲区中使用过的所有标签。你也可以通过变量 org-tag-alist 在全局设定一个标签的硬列表（hard list）。另外，对于某个特定文件你也可以用下面这几行设置一个默认列表：
 #+begin_src org
@@ -364,11 +364,11 @@ A是最高级别，如不指定，B是默认的。
 ** 标签查找
    一旦标签体系设置好，就可以用来收集相关联的信息到指定列表中。
 | C-c \   |                                                                                                                         |
-| C-c / m | 用匹配标签搜索的所有标题构造一个稀疏树。带前缀参数C-u时，忽略所有还是TODO行的标题。                                     |
+| C-c / m | 用匹配标签搜索的所有标题构造一个稀疏树。带前缀参数 C-u 时，忽略所有还是 TODO 行的标题。                                     |
 | C-c a m | 用所有议程文件匹配的标签构造一个全局列表。见第 10.3.3 节。                                                              |
 | C-c a M | 用所有议程文件匹配的标签构造一个全局列表，但只搜索 TODO 项，并强制搜索所有子项（见变量 org-tags-match-listsublevels）。 |
 
-   这些命令都会提示输入字符串，字符串支持基本的逻辑去处。像“+boss+urgent-project1”，是搜索所有的包含标签“boss”和“urgent”但不含“project1”的项；而 “Kathy|Sally”，搜索标签包含“Kathy”或者“Sally”和项。搜索字符串的语法很丰富，支持查找TODO关键字、条目级别和属性。更详细的介绍和例子，见第 10.3.3 节。
+   这些命令都会提示输入字符串，字符串支持基本的逻辑去处。像“+boss+urgent-project1”，是搜索所有的包含标签“boss”和“urgent”但不含“project1”的项；而 “Kathy|Sally”，搜索标签包含“Kathy”或者“Sally”和项。搜索字符串的语法很丰富，支持查找 TODO 关键字、条目级别和属性。更详细的介绍和例子，见第 10.3.3 节。
 
 *扩展阅读*\\
    手册第 6 章\\
@@ -388,7 +388,7 @@ A是最高级别，如不指定，B是默认的。
   ,    :END:
 #+end_src
   
-  通过设置属性 =“:Xyz_ALL:”= ，你可以为属性 =“:Xyz:”= 设置所有合法的值。这个特定的属性是有 /继承性/ 的，即，如果你是在第 1 级别设置的，那么会被应用于整个树。当合法的值设定之后，设置对应的属性就很容易了，并且不容易出现打字错误。用CD唱片集为例，我们可以预定义发行商和盒中的光盘数目：
+  通过设置属性 =“:Xyz_ALL:”= ，你可以为属性 =“:Xyz:”= 设置所有合法的值。这个特定的属性是有 /继承性/ 的，即，如果你是在第 1 级别设置的，那么会被应用于整个树。当合法的值设定之后，设置对应的属性就很容易了，并且不容易出现打字错误。用 CD 唱片集为例，我们可以预定义发行商和盒中的光盘数目：
 #+begin_src org
   ,* CD collection
   ,  :PROPERTIES:
@@ -405,10 +405,10 @@ A是最高级别，如不指定，B是默认的。
 | C-c C-x p | 设置一个属性。会询问属性名和属性值。 |
 | C-c C-c d | 从当前项中删除一个属性。             |
   
-  要基于选择的属性创建稀疏树或者特殊列表，跟标签搜索的命令相同（见第6.3节）。搜索字符串的语法在第10.3.3节中详述。
+  要基于选择的属性创建稀疏树或者特殊列表，跟标签搜索的命令相同（见第 6.3 节）。搜索字符串的语法在第 10.3.3 节中详述。
 
 ** 扩展阅读
-   手册第7章\\
+   手册第 7 章\\
    Bastien Guerry’s column view tutorial
    
 * 日期和时间
@@ -457,9 +457,9 @@ A是最高级别，如不指定，B是默认的。
 #+end_src
 
 ** 创建时间戳
-   时间戳要有特定的格式，这样才能被Org模式识别。下面的命令可以用来正确地处理时间戳的格式。
+   时间戳要有特定的格式，这样才能被 Org 模式识别。下面的命令可以用来正确地处理时间戳的格式。
 | C-c .        | 询问日期并输入正确的时间戳。当光标处理一个时间戳之上时，是修改这个时间戳，而不是插入一个新的。如果这个命令连用再次，就会插入一个时间段。加上前缀会附带当前时间。                                                 |
-| C-c !        | 功能同C-c .，但是插入的是一个未激活的时间戳。                                                                                                                                                                    |
+| C-c !        | 功能同 C-c .，但是插入的是一个未激活的时间戳。                                                                                                                                                                    |
 | S-LEFT/RIGHT | 将光标处理的时间戳改变一天。                                                                                                                                                                                     |
 | S-UP/DOWN    | 改变时间戳中光标下的项。光标可以处在年、月、日、时或者分之上。当时间戳包含一个时间段时，如 “15:30-16:30”，修改第一个时间，会自动同时修改第二个时间，以保持时间段长度不变。想修改时间段长度，可以修改第二个时间。 |
 
@@ -470,7 +470,7 @@ A是最高级别，如不指定，B是默认的。
 
 *截止期限*
 
-意义：任务（大多数情况都会是一个TODO项，当然也可以不是）应该完成的日期。
+意义：任务（大多数情况都会是一个 TODO 项，当然也可以不是）应该完成的日期。
 | C-c C-d | 在标题下面一行插入一个带有“DEADLINE”关键字的时间戳。 | 
 
 在 /截止日期/ ， /任务/ 会列在 /议程/ 中。另外， /今天的议程/ 会在任务到期 orgdeadline-warning-days 天前对即将即将到期以及已经过期的任务给出提醒，直到任务被标记为 DONE。例如：
@@ -506,7 +506,7 @@ A是最高级别，如不指定，B是默认的。
 | C-c C-x C-o | 停止计时（clock-out）。这会在开始计时的地方插入另一个时间戳。它会直接计算使用时间并插入到时间段的后面如 “=> HH:MM”。   |
 | C-c C-x C-e | 为当前的计时任务更新进度。                                                                                             |
 | C-c C-x C-x | 取消当前的计时。当你误操作打开一个计时时，或者转而去做其他事情时，这个命令就很有用。                                   |
-| C-c C-x C-j | 跳转到包含当前正在运行的计时的任务条目。用 C-uf前缀从当前计时的任务中选择。                                            |
+| C-c C-x C-j | 跳转到包含当前正在运行的计时的任务条目。用 C-uf 前缀从当前计时的任务中选择。                                            |
 | C-c C-x C-r | 在当前文件插入一个包含像 Org 表格一样的计时报告的动态块。当光标正处于一个存在的块上时，更新它。                        |
 |             | ~#+BEGIN: clocktable :maxlevel 2 :emphasize nil :scope file~                                                           |
 |             | ~#+END: clocktable~                                                                                                    |
@@ -521,7 +521,7 @@ Charles Cave’s Date and Time tutorial\\
 Bernt Hansen’s clocking workflow
 
 * 区块
-Org-mode使用begin…end块来实现很多功能,比如引入源代码.在这些区块的第一行上按TAB键可以折叠/扩展该区块. 
+Org-mode 使用 begin…end 块来实现很多功能,比如引入源代码.在这些区块的第一行上按 TAB 键可以折叠/扩展该区块. 
 ** 折叠区块
 你也可以在设置在启动时自动折叠所有的块,方法是配置变量’org-hide-block-startup’或者在每个文件加上
 #+STARTUP: hideblocks
@@ -544,46 +544,46 @@ Org-mode使用begin…end块来实现很多功能,比如引入源代码.在这�
 
 + ~<switchers>~ 也是可选的,它控制了代码块的导出方式
 
-+ ~<header arguments>~ 也是可选的,它控制了代码块的执行,导出与抽取的各方面的行为. ~<header arguments>~ 还可以通过buffer或subtree的属性来控制
++ ~<header arguments>~ 也是可选的,它控制了代码块的执行,导出与抽取的各方面的行为. ~<header arguments>~ 还可以通过 buffer 或 subtree 的属性来控制
 
 + ~<body>~ 为代码块的具体内容
 
 ** 编辑代码块
-使用 =C-c '= 来编辑当前的代码块. 它会新开一个编辑buffer,进入<language>的major mode,并插入代码块的原内容.
-在该编辑buffer中按 =C-x C-s= 会将编辑buffer中的内容写回原代码块. 
+使用 =C-c '= 来编辑当前的代码块. 它会新开一个编辑 buffer,进入<language>的 major mode,并插入代码块的原内容.
+在该编辑 buffer 中按 =C-x C-s= 会将编辑 buffer 中的内容写回原代码块. 
 若编辑完后,想退出编辑窗口,再按一次 ~C-c '~ 即可.
 *** 设置自动保存
-你可以通过设置 =org-edit-src-auto-save-idle-delay= 的值来设置空闲多少秒后自动保存buffer内容. 或者通过设置 =org-edit-src-turn-on-auto-save= 来让进入代码块后自动开启 =auto-save-mode=
-*** 设置进入buffer后的行为
-在按 =C-c '= 进入编辑buffer后,会自动激活 =org-src-mode=. 同时,还可以通过以下变量来设置编辑buffer的其他行为(更多配置项请参见配置组 =org-edit-structure=)
+你可以通过设置 =org-edit-src-auto-save-idle-delay= 的值来设置空闲多少秒后自动保存 buffer 内容. 或者通过设置 =org-edit-src-turn-on-auto-save= 来让进入代码块后自动开启 =auto-save-mode=
+*** 设置进入 buffer 后的行为
+在按 =C-c '= 进入编辑 buffer 后,会自动激活 =org-src-mode=. 同时,还可以通过以下变量来设置编辑 buffer 的其他行为(更多配置项请参见配置组 =org-edit-structure=)
 
 + org-src-lang-modes
 
-  若 =<lang>-mode= 存在,则默认编辑buffer会进入该major-mode. 但通过设置该变量可以映射任意的 =<lang>= 为其他的major-mode
+  若 =<lang>-mode= 存在,则默认编辑 buffer 会进入该 major-mode. 但通过设置该变量可以映射任意的 =<lang>= 为其他的 major-mode
 
 + org-src-window-setup
 
-  该变量控制了当创建编辑buffer后,各window怎么排列
+  该变量控制了当创建编辑 buffer 后,各 window 怎么排列
 
 + org-src-preserve-indentation
 
-  该变量控制了是否保持代码块中的空格为空格,而不转换为TAB.
+  该变量控制了是否保持代码块中的空格为空格,而不转换为 TAB.
 
-  默认为nil,表示将代码块中的空格转换为TAB. 当代码块中的代码为类似python这种对空格缩进很严格的语言时,最好设置为t
+  默认为 nil,表示将代码块中的空格转换为 TAB. 当代码块中的代码为类似 python 这种对空格缩进很严格的语言时,最好设置为 t
 
 + org-src-ask-before-returnning-to-edit-buffer
 
-  当已经存在编辑buffer的情况下,再次按下 ~C-c '~,该变量控制是否弹出提示.
+  当已经存在编辑 buffer 的情况下,再次按下 ~C-c '~,该变量控制是否弹出提示.
 
 + org-src-fontify-natively
 
-  在 =org= buffer中,也高亮显示代码块中的代码.
+  在 =org= buffer 中,也高亮显示代码块中的代码.
 ** 导出代码块及其结果
-~:exports~ 这一header argument控制了导出org文件时是否导出代码块及其执行结果
+~:exports~ 这一 header argument 控制了导出 org 文件时是否导出代码块及其执行结果
 
 + :exports code
 
-  大多数语言的默认设置(ditta是个例外). 表示只导出代码块的内容
+  大多数语言的默认设置(ditta 是个例外). 表示只导出代码块的内容
 
 + :exports results  
   
@@ -598,19 +598,19 @@ Org-mode使用begin…end块来实现很多功能,比如引入源代码.在这�
   代码块及其计算结果都不会被导出
 
 
-~org-export-babel-evaluate~ 变量可以控制在导出org时,哪些代码块可以被执行
+~org-export-babel-evaluate~ 变量可以控制在导出 org 时,哪些代码块可以被执行
 
 + nil :: 所有代码块都不会执行,这在包含有不安全的代码块时特别有用
-+ inline-only :: 只有inline 代码块会被执行. 非inline代码块需要人手工执行,这一特性常用于避免在导出时执行过于消耗资源的代码
++ inline-only :: 只有 inline 代码块会被执行. 非 inline 代码块需要人手工执行,这一特性常用于避免在导出时执行过于消耗资源的代码
 ** 执行代码块
 执行的结果与代码块之间会有一行间隔文本,该间隔默认为 ~#+RESULTS~ (该值由 ~org-babel-results-keyword~ 的值决定). 
-若代码块的Header argument开启了cache,则间隔行文本还可能有一个cache标识符
+若代码块的 Header argument 开启了 cache,则间隔行文本还可能有一个 cache 标识符
 
 默认只有 =emacs-lisp= 的代码块能够被执行,但是可以通过设置 ~org-babel-load-languages~ 的值来决定哪些语言的代码块能够被执行.
 
 最简单的执行代码块的办法就是把光标定位到代码块中,然后按下 ~C-c C-c~ 
 
-若为代码块命名了,则可以在org buffer或org table的任意地方执行该代码块. 但前提是该代码块位于当前org buffer或 ~Library of Babel~ 中. 
+若为代码块命名了,则可以在 org buffer 或 org table 的任意地方执行该代码块. 但前提是该代码块位于当前 org buffer 或 ~Library of Babel~ 中. 
 
 执行指定名称代码块的方法为使用单独的 ~#+CALL:~ 行或它的嵌入式语法
 
@@ -632,7 +632,7 @@ Org-mode使用begin…end块来实现很多功能,比如引入源代码.在这�
 
 + <arguments>
 
-  传递给代码块的参数,该参数会覆盖代码块header argument中的参数值. 下面是一个例子
+  传递给代码块的参数,该参数会覆盖代码块 header argument 中的参数值. 下面是一个例子
   #+BEGIN_SRC org
     ,#+CALL: double(n=4)
   #+END_SRC
@@ -643,22 +643,22 @@ Org-mode使用begin…end块来实现很多功能,比如引入源代码.在这�
 
 + <end header arguments>
 
-  这些参数作用于"calling instance"而并不会影响到指定代码块的执行. 这些参数影响的是执行结果如何插入到org buffer中以及 =call line= 语句本身export时的参数. 
+  这些参数作用于"calling instance"而并不会影响到指定代码块的执行. 这些参数影响的是执行结果如何插入到 org buffer 中以及 =call line= 语句本身 export 时的参数. 
 
   例如: ~[:results html]~ 会在插入执行结果时,用 ~BEGIN_HTML:~ 块包裹起来.
 
 *** Library of Babel
-存放在 =Library of Babel= 中的代码块可以被任意org文件调用. 
+存放在 =Library of Babel= 中的代码块可以被任意 org 文件调用. 
 
 The central repository of code blocks in the “Library of Babel” is housed in an Org mode file located in the ‘contrib’ directory of Org mode.
 
 要想将某个代码块加入到 =Library of Babel= 中,只需要调用函数 ~org-babel-lob-ingest~ 即可,该函数的快捷键为 ~C-c C-v i~
 ** header arguments
-*** 设置header arguments
-一般来说header arguments作用域越大的优先级越低
-+ 设置全系统的header arguments
+*** 设置 header arguments
+一般来说 header arguments 作用域越大的优先级越低
++ 设置全系统的 header arguments
   
-  设置 ~org-babel-default-header-args~ 变量可以设置全系统的header arguments. 它的默认值为
+  设置 ~org-babel-default-header-args~ 变量可以设置全系统的 header arguments. 它的默认值为
   #+BEGIN_SRC emacs-lisp
     ((:session . "none")
      (:results . "replace")
@@ -669,13 +669,13 @@ The central repository of code blocks in the “Library of Babel” is housed in
      (:tangle . "no"))
   #+END_SRC
 
-+ 为某种语言设置header arguments
++ 为某种语言设置 header arguments
   
-  通过设置变量 ~org-babel-default-header-args:<lang>~ 的变量值可以为特定语言设置默认header arguments. 这里<lang>替换为代码块的语言名称
+  通过设置变量 ~org-babel-default-header-args:<lang>~ 的变量值可以为特定语言设置默认 header arguments. 这里<lang>替换为代码块的语言名称
 
-+ 为heading设置header arguments
++ 为 heading 设置 header arguments
   
-  通过设置heading名为 ~header-args~ 和 ~header-args:<lang>~ 属性,可以为某个heading下的所有代码块设置header arguments. 
+  通过设置 heading 名为 ~header-args~ 和 ~header-args:<lang>~ 属性,可以为某个 heading 下的所有代码块设置 header arguments. 
 
   这种情况下,无论 ~org-use-property-inheritance~ 的值是什么, 这些属性一定是基础的.
 
@@ -691,9 +691,9 @@ The central repository of code blocks in the “Library of Babel” is housed in
     :END:      
   #+END_SRC
 
-+ 为某代码块设置header arguments
++ 为某代码块设置 header arguments
   
-  为独立的代码块设置自己的header arguments是最普遍也是最灵活的方式. 方法是在 ~#+BEGIN_SRC~ 行后列上一系列的header arguments及其值即可. 例如
+  为独立的代码块设置自己的 header arguments 是最普遍也是最灵活的方式. 方法是在 ~#+BEGIN_SRC~ 行后列上一系列的 header arguments 及其值即可. 例如
   #+BEGIN_SRC org
       ,#+NAME: factorial
       ,#+BEGIN_SRC haskell :results silent :exports code :var n=0
@@ -702,12 +702,12 @@ The central repository of code blocks in the “Library of Babel” is housed in
       ,#+END_SRC
   #+END_SRC
   
-  当然也可以为嵌入式代码块设置header arguments. 例如
+  当然也可以为嵌入式代码块设置 header arguments. 例如
   #+BEGIN_SRC org
       src_haskell[:exports both]{fac 5}
   #+END_SRC
   
-  代码块的header aguments还可以分拆到多个 ~#+HEADER:~ 或 ~#+HEADERS:~ 行中,这些行放在 ~#+BEGIN_SRC~ 之前 ~#+NAME:~ 之后. 例如
+  代码块的 header aguments 还可以分拆到多个 ~#+HEADER:~ 或 ~#+HEADERS:~ 行中,这些行放在 ~#+BEGIN_SRC~ 之前 ~#+NAME:~ 之后. 例如
   #+BEGIN_SRC org
       ,#+HEADERS: :var data1=1
       ,#+BEGIN_SRC emacs-lisp :var data2=2
@@ -730,21 +730,21 @@ The central repository of code blocks in the “Library of Babel” is housed in
 
   #+END_SRC
 
-+ 设置调用代码块时的header arguments
++ 设置调用代码块时的 header arguments
   
   请参见 `执行代码块' 这一节
-*** header arguments说明
+*** header arguments 说明
 **** var
   ~:var~ 参数用于传递参数給代码块. 传递参数給代码块的具体方式,依各个语言的不同而改变,具体需要阅读特定语言的文档.
 
   当为代码块设置 ~:var~ 参数时,总是需要为它设置一个默认值
 
-  参数的值可以是字面量,引用甚至是Emacs Lisp代码. 其中引用可以是带有 ~#+NAME:~, ~#+RESULTS:~ 说明的table或list. ~#+BEGIN_EXAMPLE~ 块,其他代码块以及其他代码块的运行结果.
+  参数的值可以是字面量,引用甚至是 Emacs Lisp 代码. 其中引用可以是带有 ~#+NAME:~, ~#+RESULTS:~ 说明的 table 或 list. ~#+BEGIN_EXAMPLE~ 块,其他代码块以及其他代码块的运行结果.
   *需要注意的是,让引用另外的代码块时,被引用的代码块会被执行,除非被引用的代码块已经被缓存了运行结果*
 
   ~:var~ 的格式为 ~:var name=assign~ 其中 ~assign~ 可以是
 
-- table的引用
+- table 的引用
 
     #+BEGIN_SRC org
       ,#+NAME: example-table
@@ -762,7 +762,7 @@ The central repository of code blocks in the “Library of Babel” is housed in
       : 4
     #+END_SRC
 
-  - list的引用
+  - list 的引用
 
     #+BEGIN_SRC org
       ,#+NAME: example-list
@@ -810,7 +810,7 @@ The central repository of code blocks in the “Library of Babel” is housed in
       : 4
     #+END_SRC
 
-  - example块
+  - example 块
 
     #+BEGIN_SRC org
       ,#+NAME: literal-example
@@ -832,9 +832,9 @@ The central repository of code blocks in the “Library of Babel” is housed in
 
   - 可索引的变量值
 
-    可以通过索引来切取变量的部分值. 索引从0开始,且支持负数,表示从后往前算.
+    可以通过索引来切取变量的部分值. 索引从 0 开始,且支持负数,表示从后往前算.
 
-    org支持嵌套索引,其意义类似于多重数组的索引,方法是在索引与索引之间用`,'分隔
+    org 支持嵌套索引,其意义类似于多重数组的索引,方法是在索引与索引之间用`,'分隔
     #+BEGIN_SRC org
       ,#+NAME: example-table
       | 1 | a |
@@ -866,7 +866,7 @@ The central repository of code blocks in the “Library of Babel” is housed in
 
     #+END_SRC
     
-    org还支持切片操作,方法是在两个索引之间使用`:'分隔
+    org 还支持切片操作,方法是在两个索引之间使用`:'分隔
     #+BEGIN_SRC org
       ,#+NAME: example-table
       | 1 | a |
@@ -902,16 +902,16 @@ The central repository of code blocks in the “Library of Babel” is housed in
 
     #+END_SRC
 
-  - Emacs lisp代码
+  - Emacs lisp 代码
 
-    若变量的值是以 `(',`[',`''或``' 开头的,则它被认为是Emacs lisp代码,其代码的运行返回值才会作为变量真正的值. 例如:
+    若变量的值是以 `(',`[',`''或``' 开头的,则它被认为是 Emacs lisp 代码,其代码的运行返回值才会作为变量真正的值. 例如:
     #+BEGIN_SRC org
       ,#+BEGIN_SRC sh :var filename=(buffer-file-name) :exports both
          wc -w $filename
       ,#+END_SRC
     #+END_SRC
     
-    需要注意的是,若是从table或list中读取到的值是以 `(',`[',`'',``'开头的, *也不会被认为是elisp代码*
+    需要注意的是,若是从 table 或 list 中读取到的值是以 `(',`[',`'',``'开头的, *也不会被认为是 elisp 代码*
     #+BEGIN_SRC org
       ,#+NAME: table
        | (a b c) |
@@ -931,57 +931,57 @@ The central repository of code blocks in the “Library of Babel” is housed in
 
 + collection: specify how the results should be collected from the code block
     
-  - value :: 默认值,表示result为代码块中最后一个语句的返回值，代码块的内容会被包含在一个函数中,然后执行该函数. 因此对于像Python这样的语言来说,若最后语句不是return,则一定返回None
-  - output :: result为代码块输出到STDOUT中的结果，返回的是解释器的输出结果.
+  - value :: 默认值,表示 result 为代码块中最后一个语句的返回值，代码块的内容会被包含在一个函数中,然后执行该函数. 因此对于像 Python 这样的语言来说,若最后语句不是 return,则一定返回 None
+  - output :: result 为代码块输出到 STDOUT 中的结果，返回的是解释器的输出结果.
 
 + type:  specify what type of result the code block will return—which has implications for how they will be processed before insertion into the Org mode buffer
 
-  默认情况下,result会以table或scalar的形式插入到org buffer中
+  默认情况下,result 会以 table 或 scalar 的形式插入到 org buffer 中
 
-  - table/vector :: result一定以table的形式插入到org buffer中. 即使result的值是一个单值,也会被转换为一个单行单列的表格.
+  - table/vector :: result 一定以 table 的形式插入到 org buffer 中. 即使 result 的值是一个单值,也会被转换为一个单行单列的表格.
 
-  - list :: result会以org list的形式插入到org buffer中. 即使result的值是一个单值,也会转换为一个只有一个元素的list
+  - list :: result 会以 org list 的形式插入到 org buffer 中. 即使 result 的值是一个单值,也会转换为一个只有一个元素的 list
 
-  - scalar/verbatim :: 直接插入result的字面量,不做任何转换
+  - scalar/verbatim :: 直接插入 result 的字面量,不做任何转换
 
-  - file :: result的值被认为是一个指向file的路径. result的值会被转换为一个file link再插入到org buffer中
+  - file :: result 的值被认为是一个指向 file 的路径. result 的值会被转换为一个 file link 再插入到 org buffer 中
 
 + format:  specify what type of result the code block will return—which has implications for how they will be inserted into the Org mode buffer
 
-  - raw :: result的值被看成是raw org mode code,会被不做任何转换地插入org buffer中. 若result的值看起来是一个org table,则还会被自动排列整齐.
+  - raw :: result 的值被看成是 raw org mode code,会被不做任何转换地插入 org buffer 中. 若 result 的值看起来是一个 org table,则还会被自动排列整齐.
 
-  - org :: result的值会被包裹进 ~BEGIN_SRC org~ 代码块中(但默认情况下,result的值不会被逗号转义)
+  - org :: result 的值会被包裹进 ~BEGIN_SRC org~ 代码块中(但默认情况下,result 的值不会被逗号转义)
 
-  - html :: result的值被认为是一段html代码,因此会被包裹进 ~BEGIN_HTML~ 块中
+  - html :: result 的值被认为是一段 html 代码,因此会被包裹进 ~BEGIN_HTML~ 块中
 
-  - latex :: result的值被认为是一段latex代码,因此会被包裹进 ~BEGIN_LaTex~ 块中
+  - latex :: result 的值被认为是一段 latex 代码,因此会被包裹进 ~BEGIN_LaTex~ 块中
 
-  - code :: result的值被认为是一段可解析的代码,因此会被包裹进代码块中.
+  - code :: result 的值被认为是一段可解析的代码,因此会被包裹进代码块中.
 
-  - pp :: result的值被认为是一段可解析的代码,但在包裹进代码块之前会进行格式美化操作(converted to pretty-printed code). 目前只支持Python与Ruby
+  - pp :: result 的值被认为是一段可解析的代码,但在包裹进代码块之前会进行格式美化操作(converted to pretty-printed code). 目前只支持 Python 与 Ruby
 
-  - drawer :: result的值会被包裹进一个 ~RESULTS~ drawer中
+  - drawer :: result 的值会被包裹进一个 ~RESULTS~ drawer 中
 
 + handing: specify how the results of evaluating the code block should be handled.
 
-  - silent :: result会显示在minbuffer中,而不会插入到org buffer中
+  - silent :: result 会显示在 minbuffer 中,而不会插入到 org buffer 中
 
-  - replace :: 默认值. 之前插入的的result会被删除,然后插入新的result结果
+  - replace :: 默认值. 之前插入的的 result 会被删除,然后插入新的 result 结果
 
-  - append :: 新的result会插入到之前result的后面
+  - append :: 新的 result 会插入到之前 result 的后面
 
-  - prepend :: 新的result会插入到之前result的前面.
+  - prepend :: 新的 result 会插入到之前 result 的前面.
     
 **** file
 
-~:file~ 参数用于指定将代码块的result保存到哪个文件中. 常与 ~:results file~ 配合使用
+~:file~ 参数用于指定将代码块的 result 保存到哪个文件中. 常与 ~:results file~ 配合使用
 
-代码块执行后,会插入一条 =\[[file:]\]= 的链接到org buffer中.
+代码块执行后,会插入一条 =\[[file:]\]= 的链接到 org buffer 中.
 
 ~:file~ 的参数值可以有两种格式:
 
 + 一个表示文件路径的字符串
-+ 一个由连个字符串组成的list. 其中第一个字符串为保存的文件路径,第二个字符串为链接的描述
++ 一个由连个字符串组成的 list. 其中第一个字符串为保存的文件路径,第二个字符串为链接的描述
 
 **** file-desc
 
@@ -989,20 +989,20 @@ The central repository of code blocks in the “Library of Babel” is housed in
 
 **** dir
 
-~:dir~ 参数指定了代码块执行的工作目录. 同时它也常常与 ~:file~ 参数联用用于指明输出文件的相对路径. 默认情况下为org buffer的当前目录. 例如:
+~:dir~ 参数指定了代码块执行的工作目录. 同时它也常常与 ~:file~ 参数联用用于指明输出文件的相对路径. 默认情况下为 org buffer 的当前目录. 例如:
 #+BEGIN_SRC org
   ,#+BEGIN_SRC R :file myplot.png :dir ~/Work
      matplot(matrix(rnorm(100), 10), type="l")
   ,#+END_SRC
 #+END_SRC
 
-~:dir~ 甚至还支持tramp格式的远程路径,这表示代码块是在远程机器上执行的. 例如
+~:dir~ 甚至还支持 tramp 格式的远程路径,这表示代码块是在远程机器上执行的. 例如
 #+BEGIN_SRC org
   ,#+BEGIN_SRC R :file plot.png :dir /dand@yakuba.princeton.edu:
   plot(1:10, main=system("hostname", intern=TRUE))
   ,#+END_SRC
 #+END_SRC
-上面这段代码,会在org buffer中插入这么一条链接 
+上面这段代码,会在 org buffer 中插入这么一条链接 
 #+BEGIN_SRC org
   [[file:/scp:dand@yakuba.princeton.edu:/home/dand/plot.png][plot.png]]
 #+END_SRC
@@ -1011,49 +1011,49 @@ The central repository of code blocks in the “Library of Babel” is housed in
 
 **** exports
 
-~:exports~ 参数指定了当将org file导出为HTML或LaTex时,是否包含代码块或其result
+~:exports~ 参数指定了当将 org file 导出为 HTML 或 LaTex 时,是否包含代码块或其 result
 
 + code :: 默认值,包含代码块的内容
-+ results :: 包含代码块的results
-+ both :: 包含代码块及其results
++ results :: 包含代码块的 results
++ both :: 包含代码块及其 results
 + none :: 都不包括
 
 **** tangle
 
-~:tangle~ tangle是一个 bool 值的参数,取值为 =yes,no,filename= ,其作用是将所有源代码导出到一个文件。
+~:tangle~ tangle 是一个 bool 值的参数,取值为 =yes,no,filename= ,其作用是将所有源代码导出到一个文件。
 
 + no :: 默认值,表示不抽取出该代码块中的代码
-+ yes :: 抽取出代码块中的代码,存放的文件命为将该org文件后的 =.org= 替换为代码块语言后缀后的名称
-+ filename :: 抽取出代码块中的代码,存放在filename中
++ yes :: 抽取出代码块中的代码,存放的文件命为将该 org 文件后的 =.org= 替换为代码块语言后缀后的名称
++ filename :: 抽取出代码块中的代码,存放在 filename 中
 
 **** mkdirp
 
-~:mkdirp~ 用于决定当tangled file中的目录不存在时,是否创建该目录
+~:mkdirp~ 用于决定当 tangled file 中的目录不存在时,是否创建该目录
 
 + yes :: 主动创建不存在的目录
 + no :: 不自动创建不存在的目录
 
 **** comments
 
-默认情况下tangle的过程只会把源代码的内容插入到外部文件中. 使用 ~:comments~ 参数可以让代码在tangle的过程中插入额外的注释信息
+默认情况下 tangle 的过程只会把源代码的内容插入到外部文件中. 使用 ~:comments~ 参数可以让代码在 tangle 的过程中插入额外的注释信息
 
 + no :: 默认情况,表示不插入额外的注释
-+ link :: 插入额外的注释,一遍从源代码中能够链接回原org文件
++ link :: 插入额外的注释,一遍从源代码中能够链接回原 org 文件
 + yes :: 与 =link= 一样,只是为了向后兼容
-+ org :: 将一部分org文件中的内容作为注释插入源文件中.The text is picked from the leading context of the tangled code and is limited by the nearest headline or source block as the case may be
++ org :: 将一部分 org 文件中的内容作为注释插入源文件中.The text is picked from the leading context of the tangled code and is limited by the nearest headline or source block as the case may be
 + both :: link + org
-+ noweb :: 开启link,同时 wraps expanded noweb references in the code block body in link comments.
++ noweb :: 开启 link,同时 wraps expanded noweb references in the code block body in link comments.
 
 **** padline
 
-~:padline~ 参数决定了tangle时,是否在各个代码块之间使用空行间隔
+~:padline~ 参数决定了 tangle 时,是否在各个代码块之间使用空行间隔
 
 + yes :: 在各代码块之间使用空行间隔
 + no :: 代码块之间不使用空行间隔
 
 **** no-expand
 
-默认情况下,代码块中的代码需要先经过 ~org-babel-expand-src-block~ 的扩展后再tangle到源文件中. 这一过程涉及到替换 ~:var~ 中定义的参数与 ~noweb~ 引用
+默认情况下,代码块中的代码需要先经过 ~org-babel-expand-src-block~ 的扩展后再 tangle 到源文件中. 这一过程涉及到替换 ~:var~ 中定义的参数与 ~noweb~ 引用
 
 ~:no-expand~ 则会禁止这项操作
 
@@ -1063,18 +1063,18 @@ The central repository of code blocks in the “Library of Babel” is housed in
 
 默认情况下,进程运行代码块后会自动退出
 
-传递給 ~:session~ 的字符串会作为session的名称.
+传递給 ~:session~ 的字符串会作为 session 的名称.
 
 **** noweb
 
-~:noweb~ 参数控制了在执行,tangle和export代码块时,如何展开noweb引用
+~:noweb~ 参数控制了在执行,tangle 和 export 代码块时,如何展开 noweb 引用
 
-+ no :: 默认值,并不展开noweb引用
-+ yes :: 在evaluated,tangled和exported前,展开noweb引用
-+ tangle :: 只有tangle前,才展开noweb引用
-+ no-export :: tangle或evalute前才展开noweb引用
-+ strip-export :: evalute或tangle前才会展开noweb引用,且 *export* 前会把noweb引用删除
-+ eval :: 只有在evaluate前才展开noweb引用
++ no :: 默认值,并不展开 noweb 引用
++ yes :: 在 evaluated,tangled 和 exported 前,展开 noweb 引用
++ tangle :: 只有 tangle 前,才展开 noweb 引用
++ no-export :: tangle 或 evalute 前才展开 noweb 引用
++ strip-export :: evalute 或 tangle 前才会展开 noweb 引用,且 *export* 前会把 noweb 引用删除
++ eval :: 只有在 evaluate 前才展开 noweb 引用
 
 **** noweb-ref
 
@@ -1112,7 +1112,7 @@ The central repository of code blocks in the “Library of Babel” is housed in
     |awk '{print $2}'
         #+END_SRC
 #+END_SRC
-当tangle最上面那个代码块时,实际的内容整合了"the mount point of the fullest disk" headline下的所有代码块的内容
+当 tangle 最上面那个代码块时,实际的内容整合了"the mount point of the fullest disk" headline 下的所有代码块的内容
 
 **** noweb-sep
 
@@ -1120,10 +1120,10 @@ The central repository of code blocks in the “Library of Babel” is housed in
 
 **** cache
 
-~:cache~ 参数决定了是否缓存代码块的执行结果. *但当对带有:session参数的代码块无效*
+~:cache~ 参数决定了是否缓存代码块的执行结果. *但当对带有:session 参数的代码块无效*
 
 + no :: 默认,不对代码块的执行结果进行缓存
-+ yes :: 对代码块的结果进行缓存.org会将代码块的内容做一个SHA1哈希计算,并在计算前做一次比较,若代码块并未改变则直接使用该缓存值.
++ yes :: 对代码块的结果进行缓存.org 会将代码块的内容做一个 SHA1 哈希计算,并在计算前做一次比较,若代码块并未改变则直接使用该缓存值.
 
 下面是一个例子:
 #+BEGIN_SRC org
@@ -1153,10 +1153,10 @@ By default, when ‘:sep’ is not specified output tables are tab delimited.
 
 **** hlines
 
-~:hline~ 参数决定了当使用一个table作为输入时,是否去掉table中的hline. 默认为no,因为table总的hline会被转换为 =hline= symbol. 而这常常是一种干扰.
+~:hline~ 参数决定了当使用一个 table 作为输入时,是否去掉 table 中的 hline. 默认为 no,因为 table 总的 hline 会被转换为 =hline= symbol. 而这常常是一种干扰.
 
-+ no :: 去除input table中的横线
-+ yes :: 保留input table总的横线
++ no :: 去除 input table 中的横线
++ yes :: 保留 input table 总的横线
 
 下面是一个例子
 #+BEGIN_SRC org
@@ -1193,11 +1193,11 @@ By default, when ‘:sep’ is not specified output tables are tab delimited.
 
 **** colnames
 
-~:colnames~ 参数决定了当使用一个table作为输入时,是否将第一行的值看成是列名而去除.
+~:colnames~ 参数决定了当使用一个 table 作为输入时,是否将第一行的值看成是列名而去除.
 
-+ nil :: 默认值. 当第二行是一个hline时,则认为第一行为列名去除掉.
++ nil :: 默认值. 当第二行是一个 hline 时,则认为第一行为列名去除掉.
 + no :: 第一行不是列名,不要去除
-+ yes :: 第一行作为列名去掉,然后 *再按照nil来处理*
++ yes :: 第一行作为列名去掉,然后 *再按照 nil 来处理*
 
 #+BEGIN_SRC org
   ,#+NAME: less-cols
@@ -1217,11 +1217,11 @@ By default, when ‘:sep’ is not specified output tables are tab delimited.
 
 #+END_SRC
   
-请注意, *去除列名的动作发生在使用index切片之前*
+请注意, *去除列名的动作发生在使用 index 切片之前*
 
 **** rownames
 
-~:rownames~ 参数决定了当使用一个table作为输入时,是否将第一列的值看成是行名而去除. 默认为no
+~:rownames~ 参数决定了当使用一个 table 作为输入时,是否将第一列的值看成是行名而去除. 默认为 no
 
 + no :: 第一列不是行名
 + yes :: 第一列是行名
@@ -1241,17 +1241,17 @@ By default, when ‘:sep’ is not specified output tables are tab delimited.
   | two | 16 | 17 | 18 | 19 | 20 |
 #+END_SRC
   
-请注意, *去除行名的动作发生在使用index切片之前*
+请注意, *去除行名的动作发生在使用 index 切片之前*
 
 **** shebang
 
-~:shebang~ 参数设置shebang行,它在tangling时会将值插入到tangled file中的第一行去,并将其标识为可执行的.
+~:shebang~ 参数设置 shebang 行,它在 tangling 时会将值插入到 tangled file 中的第一行去,并将其标识为可执行的.
 
 **** tangle-mode
 
-~:tangle-mode~ 参数设置tangled file的权限模式. 它的值会被传递给函数 ~set-file-modes~. 它的值会覆盖 ~:shebang~ 的效果
+~:tangle-mode~ 参数设置 tangled file 的权限模式. 它的值会被传递给函数 ~set-file-modes~. 它的值会覆盖 ~:shebang~ 的效果
 
-当多个代码块tangling到同一个file,而各代码块的 ~:tangle-mode~ 不相同的话,其结果是未知的.
+当多个代码块 tangling 到同一个 file,而各代码块的 ~:tangle-mode~ 不相同的话,其结果是未知的.
 
 **** eval
 
@@ -1259,8 +1259,8 @@ By default, when ‘:sep’ is not specified output tables are tab delimited.
 
 + never/no :: 任何条件下都不能执行
 + query :: 询问是否执行
-+ never-export/no-export :: 在export时不能执行,但可以手工执行
-+ query-export :: export时询问是否执行
++ never-export/no-export :: 在 export 时不能执行,但可以手工执行
++ query-export :: export 时询问是否执行
 
 **** wrap
 
@@ -1272,7 +1272,7 @@ By default, when ‘:sep’ is not specified output tables are tab delimited.
 
 **** post
 
-~:post~ 参数用于决定了得到代码块的result后,该result要传递到哪个代码块中作进一步的处理. 这时,result的值临时绑定到 =*this*= 变量中. 例如
+~:post~ 参数用于决定了得到代码块的 result 后,该 result 要传递到哪个代码块中作进一步的处理. 这时,result 的值临时绑定到 =*this*= 变量中. 例如
 #+BEGIN_SRC org
   ,#+name: attr_wrap
   ,#+begin_src sh :var data="" :var width="\\textwidth" :results output
@@ -1305,18 +1305,18 @@ By default, when ‘:sep’ is not specified output tables are tab delimited.
 ~:epilogue~ 参数决定了在执行代码块中的代码之后,作什么清理操作
 
 ** 处理代码块的运行结果
-~:session~ 与 ~:results~ 为 =value= 还是 =output= 共同决定了results的结果
+~:session~ 与 ~:results~ 为 =value= 还是 =output= 共同决定了 results 的结果
 
 |                 | Non-session      | session          |
 |-----------------+------------------+------------------|
 | :results value  | 最后语句的返回值 | 最后语句的返回值 |
-| :results output | STDOUT的输出     | 解释器的输出结果 |
+| :results output | STDOUT 的输出     | 解释器的输出结果 |
 
-*当 =:results value= 时,无论是否开启 =:session= ,results都会尽可能的以table的方式展示出来*
+*当 =:results value= 时,无论是否开启 =:session= ,results 都会尽可能的以 table 的方式展示出来*
 
-*当 =:results value= 时,代码块的内容会被包含在一个函数中,然后执行该函数. 因此对于像Python这样的语言来说,若最后语句不是return,则一定返回None*
+*当 =:results value= 时,代码块的内容会被包含在一个函数中,然后执行该函数. 因此对于像 Python 这样的语言来说,若最后语句不是 return,则一定返回 None*
 
-*注意 =:results output= 在session与non-session时的不同*
+*注意 =:results output= 在 session 与 non-session 时的不同*
 #+BEGIN_SRC org
   ,#+BEGIN_SRC python :results output
    print "hello"
@@ -1349,7 +1349,7 @@ By default, when ‘:sep’ is not specified output tables are tab delimited.
 | ‘M-<down>’ | ‘org-babel-switch-to-session’     |
 
 * 引用
-在Org Mode中引用文字非常简单，按如下方式写即可：
+在 Org Mode 中引用文字非常简单，按如下方式写即可：
 #+BEGIN_SRC 
 #+BEGIN_QUOTE
 引用的文字
@@ -1358,19 +1358,19 @@ By default, when ‘:sep’ is not specified output tables are tab delimited.
 
 * Capture(捕获) - Refile(整理) - Archive(归档)
 ** Capture
-*** 设置capture的记录保存位置和快捷键
+*** 设置 capture 的记录保存位置和快捷键
 #+BEGIN_SRC elisp
 (setq org-default-notes-file (concat org-directory "/notes.org"))
 (define-key global-map "\C-cc" 'org-capture)
 #+END_SRC
 * 快速输入 #+BEGIN_SRC … #+END_SRC
-用org-mode写文章的的时候，经常需要引用代码片段或者程序输出，这就需要输入 #+BEGIN_SRC ... #+END_SRC 或者 #+BEGIN_EXAMPLE ... #+END_EXAMPLE 。输入的次数多了，就会想办法自动化，要么是用宏，要么是手工写 elisp函数，要么是借助 yasnippets 或者 skeleton 框架来写代码片段（比如 Emacs中文网 就发过一篇 《GNU Emacs Org-mode 写作的几个快捷方式》 ，那是借助 skeleton 来实现的）。
+用 org-mode 写文章的的时候，经常需要引用代码片段或者程序输出，这就需要输入 #+BEGIN_SRC ... #+END_SRC 或者 #+BEGIN_EXAMPLE ... #+END_EXAMPLE 。输入的次数多了，就会想办法自动化，要么是用宏，要么是手工写 elisp 函数，要么是借助 yasnippets 或者 skeleton 框架来写代码片段（比如 Emacs 中文网 就发过一篇 《GNU Emacs Org-mode 写作的几个快捷方式》 ，那是借助 skeleton 来实现的）。
 
-但其实，org-mode已经内置了快速输入的方法: 输入 <s 再按TAB键 ，就会自动展开为 #+BEGIN_SRC ... #+END_SRC 。类似地，输入 <e 再按TAB键，就会自动展开为 #+BEGIN_EXAMPLE ... #+END_EXAMPLE 。
+但其实，org-mode 已经内置了快速输入的方法: 输入 <s 再按 TAB 键 ，就会自动展开为 #+BEGIN_SRC ... #+END_SRC 。类似地，输入 <e 再按 TAB 键，就会自动展开为 #+BEGIN_EXAMPLE ... #+END_EXAMPLE 。
 * 导出
 =C-c C-e= 导出命令
 ** 生成目录表
-如果想在导出成HTML时在文档前面生成一个章节目录表（Table of Contents），那么可以在文件头部的 OPTIONS 里面添加 toc:t 参数
+如果想在导出成 HTML 时在文档前面生成一个章节目录表（Table of Contents），那么可以在文件头部的 OPTIONS 里面添加 toc:t 参数
 #+BEGIN_SRC emacs-lisp
 #+OPTIONS: toc:t  ^:nil author:nil num:2
 #+END_SRC
@@ -1384,7 +1384,7 @@ By default, when ‘:sep’ is not specified output tables are tab delimited.
 #+OPTIONS: toc:2  ^:nil author:nil num:2
 #+END_SRC
 ** 为每个分节的标题添加标号
-导出成HTML时，如果不自定义css（这个高级话题留待下次再说），那么h1, h2, h3各个级别的标题只会字体大小有 点不同，不会呈现不同颜色，不会有缩进，于是阅读起来各节之间的关系就搞不清楚了。可以设置 org-export-with-section-numbers 让导出时为各章节的标题添加 1.2.3 这样的
+导出成 HTML 时，如果不自定义 css（这个高级话题留待下次再说），那么 h1, h2, h3 各个级别的标题只会字体大小有 点不同，不会呈现不同颜色，不会有缩进，于是阅读起来各节之间的关系就搞不清楚了。可以设置 org-export-with-section-numbers 让导出时为各章节的标题添加 1.2.3 这样的
 
 比如:
 #+BEGIN_SRC 
@@ -1432,9 +1432,9 @@ some text here
 *low level*
 #+END_SRC
 ** 禁用下划线转义
-org-mode的文档在导出到html时,有一个问题就是abc_def 会变成类似于latex的下标形式.类似的 10^24 会变成上标形式.
+org-mode 的文档在导出到 html 时,有一个问题就是 abc_def 会变成类似于 latex 的下标形式.类似的 10^24 会变成上标形式.
 
-关闭这个功能的方法是在org文件头部的 =OPTIONS= 里面添加 =^:nil:=
+关闭这个功能的方法是在 org 文件头部的 =OPTIONS= 里面添加 =^:nil:=
 #+BEGIN_SRC 
 #+OPTIONS: ^:nil
 #+END_SRC
@@ -1443,7 +1443,7 @@ org-mode的文档在导出到html时,有一个问题就是abc_def 会变成类�
 (setq-default org-use-sub-superscripts nil)
 #+END_SRC
 ** 让不同级别的标题采用不同大小的字体
-定制一下 org-level-1, org-level-2 等face的 height 属性就可以了（不过如果你用了其它theme的话， 要在加载这些theme之后再执行一遍下面这些配置，或者你把它们放在 org-mode-hook 中去执行）:
+定制一下 org-level-1, org-level-2 等 face 的 height 属性就可以了（不过如果你用了其它 theme 的话， 要在加载这些 theme 之后再执行一遍下面这些配置，或者你把它们放在 org-mode-hook 中去执行）:
 #+BEGIN_SRC emacs-lisp
 (set-face-attribute 'org-level-1 nil :height 1.6 :bold t)
 (set-face-attribute 'org-level-2 nil :height 1.4 :bold t)
@@ -1467,28 +1467,32 @@ org-mode的文档在导出到html时,有一个问题就是abc_def 会变成类�
 
 (add-hook 'org-mode-hook 'org-mode-my-init)
 ** 中英文字体混排时的表格对齐问题
-org-mode的表格功能还是比较酷的，用起来相当方便（比较大的缺点是不支持跨列或者跨行合并单元格，甚至简单 一点，表格的某一行实际两行来存放内容（就是类似html编辑器里面那种单元格自动折行的显示方式）也不行）。
+org-mode 的表格功能还是比较酷的，用起来相当方便（比较大的缺点是不支持跨列或者跨行合并单元格，甚至简单 一点，表格的某一行实际两行来存放内容（就是类似 html 编辑器里面那种单元格自动折行的显示方式）也不行）。
 
 对于中文用户来说，最容易碰到的一个问题是一旦表格中同时有中英文的话，表格会无法对齐，中文比较少的时候 还好，只会有一点点错位，但当中文比较多时，这个表格就乱成一团，没法看了。
 
 orgtable-unaligned
 
-(本图非本人制作，摘自: 让中英混杂的orgmode table对齐）
+(本图非本人制作，摘自: 让中英混杂的 orgmode table 对齐）
 
 这个问题困扰了很多人，大家也 折腾了各种方法。
 
-首先是有人留意到，其实不仅仅是org-mode里面有问题，emacs本身在中英文混排时一个中文字符就跟两个英文字符 不是同样宽度的，除非有时碰巧了（比如当初我在Ubuntu下用Ubuntu Mono作为emacs默认字体时）。所以最开始我 一直在尝试各种字体，看哪种可以解决这个问题——但一直没有满意的方案，在一个机器上试验出来的结果在另外一 个系统上却不好使。最后发现是搞错了方向。
+首先是有人留意到，其实不仅仅是 org-mode 里面有问题，emacs 本身在中英文混排时一个中文字符就跟两个英文字符 不是同样宽度的，除非有时碰巧了（比如当初我在 Ubuntu 下用 Ubuntu Mono 作为 emacs 默认字体时）。所以最开始我 一直在尝试各种字体，看哪种可以解决这个问题——但一直没有满意的方案，在一个机器上试验出来的结果在另外一 个系统上却不好使。最后发现是搞错了方向。
 
-对于大部分的编辑器而言，我们只能选择一种字体（比如写代码常用的DejaVu Sans Mono, Inconsolata, Consolas），但这个字体中可能仅包含英文字符（或者也包含了其它拉丁字符），但大部分情况下不包含CJK字符， 对这种情况下对CJK字符的显示都是由系统来处理的，编辑器自己一般都不管。
+对于大部分的编辑器而言，我们只能选择一种字体（比如写代码常用的 DejaVu Sans Mono, Inconsolata, Consolas），但这个字体中可能仅包含英文字符（或者也包含了其它拉丁字符），但大部分情况下不包含 CJK 字符， 对这种情况下对 CJK 字符的显示都是由系统来处理的，编辑器自己一般都不管。
 
-不过Emacs毕竟是神的编辑器啊，它可以做到对不同体系的字符指定具体的字体，所以解决这个问题的办法是: 针 对中英文指定不同大小的字体，英文用小字，中文用大字 （别问我为什么，我是没去仔细研究。下面有一堆链接， 有兴趣的自己去看吧）。
+不过 Emacs 毕竟是神的编辑器啊，它可以做到对不同体系的字符指定具体的字体，所以解决这个问题的办法是: 针 对中英文指定不同大小的字体，英文用小字，中文用大字 （别问我为什么，我是没去仔细研究。下面有一堆链接， 有兴趣的自己去看吧）。
 
 (set-default-font "DejaVu Sans Mono 10")
 (set-fontset-font "fontset-default" 'unicode"WenQuanYi Bitmap Song 12") ;;for linux
 (set-fontset-font "fontset-default" 'unicode "宋体 12") ;; for windows
-在你的环境上，你可能得对针对自己喜欢的编程字体去试验一下，看配哪个字号的中文字体（以及字号大小）可以 解决这个问题（或者可以试试下面的font.pl）。如果你还有日文、韩文什么的，可以详细地针对各种charset设定 字体（而不是像上面笼统地用 'unicode 来制定），详情请参看 折腾Emacs: 中文字体配置 | Emacs中文网。
+在你的环境上，你可能得对针对自己喜欢的编程字体去试验一下，看配哪个字号的中文字体（以及字号大小）可以 解决这个问题（或者可以试试下面的 font.pl）。如果你还有日文、韩文什么的，可以详细地针对各种 charset 设定 字体（而不是像上面笼统地用 'unicode 来制定），详情请参看 折腾 Emacs: 中文字体配置 | Emacs 中文网。
 
 [[https://www.cnblogs.com/bamanzi/p/org-mode-tips.html][参考文章]]
+* 关闭自动缩进
+(electric-indent-mode -1)
+
+[[https://emacs.stackexchange.com/questions/64886/indentation-in-org-mode-source-block-with-return][Indentation in Org Mode Source Block with Return]]
 * 参考文章
 [[https://github.com/mospany/emacs.d-for-mac/blob/master/org-mode.org][Org-mode 简明手册]]
 [[https://www.zmonster.me/2016/06/03/org-mode-table.html][强大的 Org mode(3): 表格的基本操作及公式、绘图]]

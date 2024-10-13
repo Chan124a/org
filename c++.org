@@ -903,21 +903,134 @@ CLOSED: [2024-10-12 周六 13:02]
 ** 线程管理
 *** 线程启动
 #+begin_src c++
-      void do_some_work();
+#include <thread.h>
+void do_some_work();
+std::thread my_thread(do_some_work);
 
+//std::thread 可以用可调用（callable）类型构造
+class background_task
+{
+public:
+    void operator()() const
+    {
+        do_something();
+        do_something_else();
+    }
+};
+background_task f;
+std::thread my_thread(f);
 
-      std::thread my_thread(do_some_work);
+//使用在前面命名函数对象的方式，或使用多组括号1，或使用新统一的初始化语法2,或lambda表达式，可以避免编译器将对象定义解析为函数声明,如下所示：
+std::thread my_thread((background_task())); // 1
+std::thread my_thread{background_task()}; // 2
+std::thread my_thread([]{//3
+    do_something();
+    do_something_else();
+});
+#+end_src
+*** 等待线程完成
+如果需要等待线程，相关的 std::tread 实例需要使用 join()。
 
-    int main()
-  integer
-  
+调用 join()的行为，还清理了线程相关的存储部分，这样 std::thread 对象将不再与已经完成的线程有任何关联。这意味着，只能对一个线程使用一次 join();一旦已经使用过 join()， std::thread 对象就不能再次加入了，当对其使用 joinable()时，将返回否（false）。
 
-
-
+避免应用被抛出的异常所终止，就需要作出一个决定。通常，当倾向于在无异常的情况下使用 join()时，需要在异常处理过程中调用 join()，从而避免生命周期的问题。
+#+begin_src c++
+class thread_guard
+{
+std::thread& t;
+public:
+explicit thread_guard(std::thread& t_):
+t(t_)
+{}
+~thread_guard()
+{
+if(t.joinable()) // 1
+{
+t.join(); // 2
+}
+}
+thread_guard(thread_guard const&)=delete; // 3
+thread_guard& operator=(thread_guard const&)=delete;
+};
+struct func; // 定义在清单2.1中
+void f()
+{
+int some_local_state=0;
+func my_func(some_local_state);
+std::thread t(my_func);
+thread_guard g(t);
+do_something_in_current_thread();
+}
+#+end_src
+*** 后台运行线程
+#+begin_src c++
+void edit_document(std::string const& filename)
+{
+open_document_and_display_gui(filename);
+while(!done_editing())
+{
+user_command cmd=get_user_input();
+if(cmd.type==open_new_document)
+{
+std::string const new_name=get_filename_from_user();
+std::thread t(edit_document,new_name); // 1
+t.detach(); // 2
+}
+else
+{
+process_user_input(cmd);
+}
+}
+}
+#+end_src
+如果用户选择打开一个新文档，为了让迅速打开文档，需要启动一个新线程去打开新文档①，并分离线程②。这个例子也展示了传参启动线程的方法：不仅可以向 std::thread 构造函数①传递函数名，还可以传递函数所需的参数(实参)。
+*** 向线程函数传递参数
+#+begin_src c++
+void f(int i, std::string const& s);
+std::thread t(f, 3, "hello");
 
 
 #+end_src
+代码创建了一个调用 f(3, "hello")的线程。注意，函数 f 需要一个 std::string 对象作为第二个参数，但这里使用的是字符串的字面值，也就是 char const * 类型。之后，在线程的上下文中完成字面值向 std::string 对象的转化。
 
+需要特别要注意，当指向动态变量的指针作为参数传递给线程的情况，函数会收到一个入参拷贝的引用,而不是入参的引用,
+使用 std::bind ，就可以解决这个问题，使用 std::ref 将参数转换成引用的形式。
+#+begin_src c++
+std::thread t(update_data_for_widget,w,std::ref(data));
+#+end_src
+在这之后，update_data_for_widget 就会接收到一个 data 变量的引用，而非一个 data 变量拷贝的引用。
+
+可以传递一个成员函数指针作为线程函数，并提供一个合适的对象指针作为第一个参数：
+#+begin_src c++
+class X
+{
+public:
+void do_lengthy_work(int);
+};
+X my_x;
+int num(0);
+std::thread t(&X::do_lengthy_work, &my_x, num);//1
+#+end_src
+这段代码中，新线程将 my_x.do_lengthy_work()作为线程函数；my_x 的地址①作为指针对象提供给函数。也可以为成员函数提供参数： std::thread 构造函数的第三个参数就是成员函数的第一个参数，以此类推.
+*** Transferring ownership of a thread
+Several of the classes in the C++ Standard Library exhibit the same ownershipsemantics as std::unique_ptr, and std::thread is one of them.
+Though std::thread instances don’t own a dynamic object in the same way as std::unique_ptr does, they do own a resource: each instance is responsible for managing a thread of execution.
+Thisownership can be transferred between instances, because instances of std::thread are movable, even though they aren’t copyable.
+This ensures that only one object is associated with a particular thread of execution at any one time while allowing programmers the option of transferring that ownership between objects.
+
+The example shows the creation of two threads of execution and the transfer of ownership of those
+threads among three std::thread instances, t1, t2, and t3:
+#+begin_src c++
+void some_function();
+void some_other_function();
+std::thread t1(some_function); // 1
+std::thread t2=std::move(t1); // 2
+t1=std::thread(some_other_function); // 3
+std::thread t3; // 4
+t3=std::move(t2); // 5
+t1=std::move(t3); // 6 赋值操作将使程序崩溃
+#+end_src
+当显式使用 std::move() 创建 t2 后②，t1 的所有权就转移给了 t2。之后，t1 和执行线程已经没有关联了；执行 some_function 的函数现在与 t2 关联。
 ** 线程间共享数据
 ** 同步并发操作
 ** C++内存模型和原子类型操作
