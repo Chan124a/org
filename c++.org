@@ -1152,6 +1152,24 @@ If two objects aren’t equal, they represent different threads, or one represen
 std::thread::id 可以当做容器的键值，做排序，或做其他方式的比较。按默认顺序比较不同值的 std::thread::id ，所以这个行为可预见的：当 a<b ， b<c 时，得 a<c ，等等。标准库也提供 std::hash<std::thread::id> 容器，所以 std::thread::id 也可以作为无序容器的键值。
 
 ** 线程间共享数据
+
+*** Race conditions
+The C++ Standard also defines the term data race to mean the specific type of race condition that arises because of concurrent modification to a single object (see section 5.1.2 for details); data races cause the dreaded undefined behavior.
+
+*** Avoiding problematic race conditions
+There are several ways to deal with problematic race conditions. The simplest option is to wrap your data structure with a protection mechanism to ensure that only the thread performing a modification can see the intermediate states where the invariants are broken. From the point of view of other threads accessing that data structure, such modifications either haven’t started or have completed. 
+
+Another option is to modify the design of your data structure and its invariants so that modifications are done as a series of indivisible changes, each of which preserves the invariants. This is generally referred to as lock-free programming and is difficult to get right. 
+
+Another way of dealing with race conditions is to handle the updates to the data structure as a transaction, just as updates to a database are done within a transaction.The required series of data modifications and reads is stored in a transaction log and then committed in a single step. If the commit can’t proceed because the data structure has been modified by another thread, the transaction is restarted. This is termed software transactional memory (STM), and it’s an active research area at the time of writing.
+
+*** Protecting shared data with mutexes
+当访问共享数据前，使用互斥量将相关数据锁住，再当访问结束后，再将数据解锁。线程库需要保证，当一个线程使用特定互斥量锁住共享数据时，其他的线程想要访问锁住的数据，都必须等到之前那个线程对数据进行解锁后，才能进行访问。这就保证了所有线程能看到共享数据，而不破坏不变量。
+
+*** C++中使用互斥量
+C++中通过实例化 std::mutex 创建互斥量，通过调用成员函数 lock()进行上锁，unlock()进行解锁。
+
+C++标准库为互斥量提供了一个 RAII 语法的模板类 std::lack_guard ，其会在构造的时候提供已锁的互斥量，并在析构的时候进行解锁，从而保证了一个已锁的互斥量总是会被正确的解锁。
 ** 同步并发操作
 ** C++内存模型和原子类型操作
 ** 基于锁的并发数据结构设计
