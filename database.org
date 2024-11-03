@@ -103,128 +103,128 @@ Slave 升 级为 Master 节点，但此时的 Master 中没有锁数据。
 ** 参考文章
 [[https://zhuanlan.zhihu.com/p/42056183][分布式锁看这篇就够了——知乎]]
 [[https://www.infoq.cn/article/dvaaj71f4fbqsxmgvdce][浅析 Redis 分布式锁解决方案]]
-* Paxos算法
-** Paxos算法背景
-Paxos算法是Lamport宗师提出的一种基于消息传递的分布式一致性算法，使其获得2013年图灵奖。
+* Paxos 算法
+** Paxos 算法背景
+Paxos 算法是 Lamport 宗师提出的一种基于消息传递的分布式一致性算法，使其获得 2013 年图灵奖。
 
-自Paxos问世以来就持续垄断了分布式一致性算法，Paxos这个名词几乎等同于分布式一致性。Google的很多大型分布式系统都采用了Paxos算法来解决分布式一致性问题，如Chubby、Megastore以及Spanner等。开源的ZooKeeper，以及MySQL 5.7推出的用来取代传统的主从复制的MySQL Group Replication等纷纷采用Paxos算法解决分布式一致性问题。
+自 Paxos 问世以来就持续垄断了分布式一致性算法，Paxos 这个名词几乎等同于分布式一致性。Google 的很多大型分布式系统都采用了 Paxos 算法来解决分布式一致性问题，如 Chubby、Megastore 以及 Spanner 等。开源的 ZooKeeper，以及 MySQL 5.7 推出的用来取代传统的主从复制的 MySQL Group Replication 等纷纷采用 Paxos 算法解决分布式一致性问题。
 ** 问题产生的背景
-在常见的分布式系统中，总会发生诸如机器宕机或网络异常（包括消息的延迟、丢失、重复、乱序，还有网络分区）等情况。Paxos算法需要解决的问题就是如何在一个可能发生上述异常的分布式系统中，快速且正确地在集群内部对某个数据的值达成一致，并且保证不论发生以上任何异常，都不会破坏整个系统的一致性。
+在常见的分布式系统中，总会发生诸如机器宕机或网络异常（包括消息的延迟、丢失、重复、乱序，还有网络分区）等情况。Paxos 算法需要解决的问题就是如何在一个可能发生上述异常的分布式系统中，快速且正确地在集群内部对某个数据的值达成一致，并且保证不论发生以上任何异常，都不会破坏整个系统的一致性。
 
 注：这里某个数据的值并不只是狭义上的某个数，它可以是一条日志，也可以是一条命令（command）。根据应用场景不同，某个数据的值有不同的含义。
 
-** Paxos算法相关概念
-Paxos算法解决的问题正是分布式一致性问题，即一个分布式系统中的各个进程如何就某个值（决议）达成一致。
+** Paxos 算法相关概念
+Paxos 算法解决的问题正是分布式一致性问题，即一个分布式系统中的各个进程如何就某个值（决议）达成一致。
 
-Paxos算法运行在允许宕机故障的异步系统中，不要求可靠的消息传递，可容忍消息丢失、延迟、乱序以及重复。它利用大多数 (Majority) 机制保证了2F+1的容错能力，即2F+1个节点的系统最多允许F个节点同时出现故障。
+Paxos 算法运行在允许宕机故障的异步系统中，不要求可靠的消息传递，可容忍消息丢失、延迟、乱序以及重复。它利用大多数 (Majority) 机制保证了 2F+1 的容错能力，即 2F+1 个节点的系统最多允许 F 个节点同时出现故障。
 
-一个或多个提议进程 (Proposer) 可以发起提案 (Proposal)，Paxos算法使所有提案中的某一个提案，在所有进程中达成一致。系统中的多数派同时认可该提案，即达成了一致。最多只针对一个确定的提案达成一致。
+一个或多个提议进程 (Proposer) 可以发起提案 (Proposal)，Paxos 算法使所有提案中的某一个提案，在所有进程中达成一致。系统中的多数派同时认可该提案，即达成了一致。最多只针对一个确定的提案达成一致。
 
-Paxos将系统中的角色分为提议者 (Proposer)，决策者 (Acceptor)，和最终决策学习者 (Learner):
-- Proposer: 提出提案 (Proposal)。Proposal信息包括提案编号 (Proposal ID) 和提议的值 (Value)。
-- Acceptor：参与决策，回应Proposers的提案。收到Proposal后可以接受提案，若Proposal获得多数Acceptors的接受，则称该Proposal被批准。
-- Learner：不参与决策，从Proposers/Acceptors学习最新达成一致的提案（Value）。
+Paxos 将系统中的角色分为提议者 (Proposer)，决策者 (Acceptor)，和最终决策学习者 (Learner):
+- Proposer: 提出提案 (Proposal)。Proposal 信息包括提案编号 (Proposal ID) 和提议的值 (Value)。
+- Acceptor：参与决策，回应 Proposers 的提案。收到 Proposal 后可以接受提案，若 Proposal 获得多数 Acceptors 的接受，则称该 Proposal 被批准。
+- Learner：不参与决策，从 Proposers/Acceptors 学习最新达成一致的提案（Value）。
 
-Proposer可以提出（propose）提案；Acceptor可以接受（accept）提案；如果某个提案被选定（chosen），那么该提案里的value就被选定了。在具体的实现中，一个进程可能同时充当多种角色。比如一个进程可能既是Proposer又是Acceptor又是Learner。
+Proposer 可以提出（propose）提案；Acceptor 可以接受（accept）提案；如果某个提案被选定（chosen），那么该提案里的 value 就被选定了。在具体的实现中，一个进程可能同时充当多种角色。比如一个进程可能既是 Proposer 又是 Acceptor 又是 Learner。
 
 
-在多副本状态机中，每个副本同时具有Proposer、Acceptor、Learner三种角色。
+在多副本状态机中，每个副本同时具有 Proposer、Acceptor、Learner 三种角色。
 
 #+DOWNLOADED: screenshot @ 2022-10-16 10:11:31
 [[file:images/database/Paxos算法/2022-10-16_10-11-31_screenshot.png]]
 
 ** 推导过程
-*** 最简单的方案：只有一个Acceptor
-假设只有一个Acceptor（可以有多个Proposer），只要Acceptor接受它收到的第一个提案，则该提案被选定，该提案里的value就是被选定的value。这样就保证只有一个value会被选定。
+*** 最简单的方案：只有一个 Acceptor
+假设只有一个 Acceptor（可以有多个 Proposer），只要 Acceptor 接受它收到的第一个提案，则该提案被选定，该提案里的 value 就是被选定的 value。这样就保证只有一个 value 会被选定。
 
-但是，如果这个唯一的Acceptor宕机了，那么整个系统就无法工作了！
+但是，如果这个唯一的 Acceptor 宕机了，那么整个系统就无法工作了！
 
-因此，必须要有多个Acceptor！
-*** 多个Acceptor
-多个Acceptor的情况如下图。
+因此，必须要有多个 Acceptor！
+*** 多个 Acceptor
+多个 Acceptor 的情况如下图。
 #+DOWNLOADED: screenshot @ 2022-10-16 10:48:45
 [[file:images/database/Paxos算法/2022-10-16_10-48-45_screenshot.png]]
-如果我们希望即使只有一个Proposer提出了一个value，该value也最终被选定。
+如果我们希望即使只有一个 Proposer 提出了一个 value，该 value 也最终被选定。
 
 那么，就得到下面的约束：
-P1：一个Acceptor必须接受它收到的第一个提案。
+P1：一个 Acceptor 必须接受它收到的第一个提案。
 
-但是，这又会引出另一个问题：如果每个Proposer分别提出不同的value，发给不同的Acceptor。根据P1，Acceptor分别接受自己收到的value，就导致不同的value被选定。
+但是，这又会引出另一个问题：如果每个 Proposer 分别提出不同的 value，发给不同的 Acceptor。根据 P1，Acceptor 分别接受自己收到的 value，就导致不同的 value 被选定。
 
 #+DOWNLOADED: screenshot @ 2022-10-16 10:59:40
 [[file:images/database/Paxos算法/2022-10-16_10-59-40_screenshot.png]]
 
-刚刚是因为"一个提案只要被一个Acceptor接受，则该提案的value就被选定了"才导致了出现上面不一致的问题。
-因此，我们需要加一个规定：一个提案被选定需要被半数以上的Acceptor接受
+刚刚是因为"一个提案只要被一个 Acceptor 接受，则该提案的 value 就被选定了"才导致了出现上面不一致的问题。
+因此，我们需要加一个规定：一个提案被选定需要被半数以上的 Acceptor 接受
 
-这个规定又暗示了：『一个Acceptor必须能够接受不止一个提案！』不然可能导致最终没有value被选定。比如上图的情况。v1、v2、v3都没有被选定，因为它们都只被一个Acceptor的接受。
+这个规定又暗示了：『一个 Acceptor 必须能够接受不止一个提案！』不然可能导致最终没有 value 被选定。比如上图的情况。v1、v2、v3 都没有被选定，因为它们都只被一个 Acceptor 的接受。
 
 为了能够区分不同的提案，必须给每个提案加上一个提案编号，表示提案被提出的顺序。
 
-只要满足了P2a，就能满足P2。
+只要满足了 P2a，就能满足 P2。
 
-但是，考虑如下的情况：假设总的有5个Acceptor。Proposer2提出[M1,V1]的提案，Acceptor25（半数以上）均接受了该提案，于是对于Acceptor25和Proposer2来讲，它们都认为V1被选定。Acceptor1刚刚从宕机状态恢复过来（之前Acceptor1没有收到过任何提案），此时Proposer1向Acceptor1发送了[M2,V2]的提案（V2≠V1且M2>M1），对于Acceptor1来讲，这是它收到的第一个提案。根据P1（一个Acceptor必须接受它收到的第一个提案。）,Acceptor1必须接受该提案！同时Acceptor1认为V2被选定。这就出现了两个问题：
-- Acceptor1认为V2被选定，Acceptor2~5和Proposer2认为V1被选定。出现了不一致。
-- V1被选定了，但是编号更高的被Acceptor1接受的提案[M2,V2]的value为V2，且V2≠V1。这就跟P2a（如果某个value为v的提案被选定了，那么每个编号更高的被Acceptor接受的提案的value必须也是v）矛盾了。
+但是，考虑如下的情况：假设总的有 5 个 Acceptor。Proposer2 提出[M1,V1]的提案，Acceptor25（半数以上）均接受了该提案，于是对于 Acceptor25 和 Proposer2 来讲，它们都认为 V1 被选定。Acceptor1 刚刚从宕机状态恢复过来（之前 Acceptor1 没有收到过任何提案），此时 Proposer1 向 Acceptor1 发送了[M2,V2]的提案（V2≠V1 且 M2>M1），对于 Acceptor1 来讲，这是它收到的第一个提案。根据 P1（一个 Acceptor 必须接受它收到的第一个提案。）,Acceptor1 必须接受该提案！同时 Acceptor1 认为 V2 被选定。这就出现了两个问题：
+- Acceptor1 认为 V2 被选定，Acceptor2~5 和 Proposer2 认为 V1 被选定。出现了不一致。
+- V1 被选定了，但是编号更高的被 Acceptor1 接受的提案[M2,V2]的 value 为 V2，且 V2≠V1。这就跟 P2a（如果某个 value 为 v 的提案被选定了，那么每个编号更高的被 Acceptor 接受的提案的 value 必须也是 v）矛盾了。
 
-所以我们要对P2a约束进行强化！
+所以我们要对 P2a 约束进行强化！
 
-P2a是对Acceptor接受的提案约束，但其实提案是Proposer提出来的，所有我们可以对Proposer提出的提案进行约束。得到P2b：
-P2b：如果某个value为v的提案被选定了，那么之后任何Proposer提出的编号更高的提案的value必须也是v。
+P2a 是对 Acceptor 接受的提案约束，但其实提案是 Proposer 提出来的，所有我们可以对 Proposer 提出的提案进行约束。得到 P2b：
+P2b：如果某个 value 为 v 的提案被选定了，那么之后任何 Proposer 提出的编号更高的提案的 value 必须也是 v。
 
-由P2b可以推出P2a进而推出P2。
+由 P2b 可以推出 P2a 进而推出 P2。
 
-那么，如何确保在某个value为v的提案被选定后，Proposer提出的编号更高的提案的value都是v呢？
+那么，如何确保在某个 value 为 v 的提案被选定后，Proposer 提出的编号更高的提案的 value 都是 v 呢？
 
-只要满足P2c即可：
-P2c：对于任意的N和V，如果提案[N, V]被提出，那么存在一个半数以上的Acceptor组成的集合S，满足以下两个条件中的任意一个：
-- S中每个Acceptor都没有接受过编号小于N的提案。
-- S中Acceptor接受过的最大编号的提案的value为V。
-*** Proposer生成提案
-为了满足P2b，这里有个比较重要的思想：Proposer生成提案之前，应该先去『学习』已经被选定或者可能被选定的value，然后以该value作为自己提出的提案的value。
+只要满足 P2c 即可：
+P2c：对于任意的 N 和 V，如果提案[N, V]被提出，那么存在一个半数以上的 Acceptor 组成的集合 S，满足以下两个条件中的任意一个：
+- S 中每个 Acceptor 都没有接受过编号小于 N 的提案。
+- S 中 Acceptor 接受过的最大编号的提案的 value 为 V。
+*** Proposer 生成提案
+为了满足 P2b，这里有个比较重要的思想：Proposer 生成提案之前，应该先去『学习』已经被选定或者可能被选定的 value，然后以该 value 作为自己提出的提案的 value。
 
-如果没有value被选定，Proposer才可以自己决定value的值。这样才能达成一致。这个学习的阶段是通过一个『Prepare请求』实现的。
+如果没有 value 被选定，Proposer 才可以自己决定 value 的值。这样才能达成一致。这个学习的阶段是通过一个『Prepare 请求』实现的。
 
 于是我们得到了如下的提案生成算法：
-1. Proposer选择一个新的提案编号N，然后向某个Acceptor集合（半数以上）发送请求，要求该集合中的每个Acceptor做出如下响应（response）。
-(a) 向Proposer承诺保证不再接受任何编号小于N的提案。
-(b) 如果Acceptor已经接受过提案，那么就向Proposer响应已经接受过的编号小于N的最大编号的提案。
+1. Proposer 选择一个新的提案编号 N，然后向某个 Acceptor 集合（半数以上）发送请求，要求该集合中的每个 Acceptor 做出如下响应（response）。
+(a) 向 Proposer 承诺保证不再接受任何编号小于 N 的提案。
+(b) 如果 Acceptor 已经接受过提案，那么就向 Proposer 响应已经接受过的编号小于 N 的最大编号的提案。
 
-我们将该请求称为编号为N的Prepare请求。
+我们将该请求称为编号为 N 的 Prepare 请求。
 
-2. 如果Proposer收到了半数以上的Acceptor的响应，那么它就可以生成编号为N，Value为V的提案[N,V]。这里的V是所有的响应中编号最大的提案的Value。如果所有的响应中都没有提案，那 么此时V就可以由Proposer自己选择。
-生成提案后，Proposer将该提案发送给半数以上的Acceptor集合，并期望这些Acceptor能接受该提案。我们称该请求为Accept请求。（注意：此时接受Accept请求的Acceptor集合不一定是之前响应Prepare请求的Acceptor集合）
-*** Acceptor接受提案
-Acceptor可以忽略任何请求（包括Prepare请求和Accept请求）而不用担心破坏算法的安全性。因此，我们这里要讨论的是什么时候Acceptor可以响应一个请求。
+2. 如果 Proposer 收到了半数以上的 Acceptor 的响应，那么它就可以生成编号为 N，Value 为 V 的提案[N,V]。这里的 V 是所有的响应中编号最大的提案的 Value。如果所有的响应中都没有提案，那 么此时 V 就可以由 Proposer 自己选择。
+生成提案后，Proposer 将该提案发送给半数以上的 Acceptor 集合，并期望这些 Acceptor 能接受该提案。我们称该请求为 Accept 请求。（注意：此时接受 Accept 请求的 Acceptor 集合不一定是之前响应 Prepare 请求的 Acceptor 集合）
+*** Acceptor 接受提案
+Acceptor 可以忽略任何请求（包括 Prepare 请求和 Accept 请求）而不用担心破坏算法的安全性。因此，我们这里要讨论的是什么时候 Acceptor 可以响应一个请求。
 
-我们对Acceptor接受提案给出如下约束：
-P1a：一个Acceptor只要尚未响应过任何编号大于N的Prepare请求，那么他就可以接受这个编号为N的提案。
+我们对 Acceptor 接受提案给出如下约束：
+P1a：一个 Acceptor 只要尚未响应过任何编号大于 N 的 Prepare 请求，那么他就可以接受这个编号为 N 的提案。
 
-如果Acceptor收到一个编号为N的Prepare请求，在此之前它已经响应过编号大于N的Prepare请求。根据P1a，该Acceptor不可能接受编号为N的提案。因此，该Acceptor可以忽略编号为N的Prepare请求。当然，也可以回复一个error，让Proposer尽早知道自己的提案不会被接受。
+如果 Acceptor 收到一个编号为 N 的 Prepare 请求，在此之前它已经响应过编号大于 N 的 Prepare 请求。根据 P1a，该 Acceptor 不可能接受编号为 N 的提案。因此，该 Acceptor 可以忽略编号为 N 的 Prepare 请求。当然，也可以回复一个 error，让 Proposer 尽早知道自己的提案不会被接受。
 
-因此，一个Acceptor只需记住：1. 已接受的编号最大的提案 2. 已响应的请求的最大编号。
-** Paxos算法描述
-经过上面的推导，我们总结下Paxos算法的流程。
+因此，一个 Acceptor 只需记住：1. 已接受的编号最大的提案 2. 已响应的请求的最大编号。
+** Paxos 算法描述
+经过上面的推导，我们总结下 Paxos 算法的流程。
 
-Paxos算法分为两个阶段。具体如下：
+Paxos 算法分为两个阶段。具体如下：
 
 阶段一：
 
-(a) Proposer选择一个提案编号N，然后向半数以上的Acceptor发送编号为N的Prepare请求。
+(a) Proposer 选择一个提案编号 N，然后向半数以上的 Acceptor 发送编号为 N 的 Prepare 请求。
 
-(b) 如果一个Acceptor收到一个编号为N的Prepare请求，且N大于该Acceptor已经响应过的所有Prepare请求的编号，那么它就会将它已经接受过的编号最大的提案（如果有的话）作为响应反馈给Proposer，同时该Acceptor承诺不再接受任何编号小于N的提案。
+(b) 如果一个 Acceptor 收到一个编号为 N 的 Prepare 请求，且 N 大于该 Acceptor 已经响应过的所有 Prepare 请求的编号，那么它就会将它已经接受过的编号最大的提案（如果有的话）作为响应反馈给 Proposer，同时该 Acceptor 承诺不再接受任何编号小于 N 的提案。
 
 阶段二：
 
-(a) 如果Proposer收到半数以上Acceptor对其发出的编号为N的Prepare请求的响应，那么它就会发送一个针对[N,V]提案的Accept请求给半数以上的Acceptor。注意：V就是收到的响应中编号最大的提案的value，如果响应中不包含任何提案，那么V就由Proposer自己决定。
+(a) 如果 Proposer 收到半数以上 Acceptor 对其发出的编号为 N 的 Prepare 请求的响应，那么它就会发送一个针对[N,V]提案的 Accept 请求给半数以上的 Acceptor。注意：V就是收到的响应中编号最大的提案的 value，如果响应中不包含任何提案，那么 V 就由 Proposer 自己决定。
 
-(b) 如果Acceptor收到一个针对编号为N的提案的Accept请求，只要该Acceptor没有对编号大于N的Prepare请求做出过响应，它就接受该提案。
+(b) 如果 Acceptor 收到一个针对编号为 N 的提案的 Accept 请求，只要该 Acceptor 没有对编号大于 N 的 Prepare 请求做出过响应，它就接受该提案。
 
 #+DOWNLOADED: screenshot @ 2022-10-16 14:35:42
 [[file:images/database/Paxos算法/2022-10-16_14-35-42_screenshot.png]]
-该图第二阶段的Acceptor应该为N>=ResN才接受提案。
-** Learner学习被选定的value
-Learner学习（获取）被选定的value有如下三种方案：
+该图第二阶段的 Acceptor 应该为 N>=ResN 才接受提案。
+** Learner 学习被选定的 value
+Learner 学习（获取）被选定的 value 有如下三种方案：
 
 #+DOWNLOADED: screenshot @ 2022-10-16 14:44:46
 [[file:images/database/Paxos算法/2022-10-16_14-44-46_screenshot.png]]
@@ -232,66 +232,66 @@ Learner学习（获取）被选定的value有如下三种方案：
 ** 实例
 #+DOWNLOADED: screenshot @ 2022-10-16 10:34:23
 [[file:images/database/Paxos算法/2022-10-16_10-34-23_screenshot.png]]
-图中P代表Prepare阶段，A代表Accept阶段。3.1代表Proposal ID为3.1，其中3为时间戳，1为Server ID。X和Y代表提议Value。
+图中 P 代表 Prepare 阶段，A代表 Accept 阶段。3.1 代表 Proposal ID 为 3.1，其中 3 为时间戳，1为 Server ID。X 和 Y 代表提议 Value。
 
-实例1中P 3.1达成多数派，其Value(X)被Accept，然后P 4.5学习到Value(X)，并Accept。
+实例 1 中 P 3.1 达成多数派，其 Value(X)被 Accept，然后 P 4.5 学习到 Value(X)，并 Accept。
 #+DOWNLOADED: screenshot @ 2022-10-16 10:34:33
 [[file:images/database/Paxos算法/2022-10-16_10-34-33_screenshot.png]]
-实例2中P 3.1没有被多数派Accept（只有S3 Accept），但是被P 4.5学习到，P 4.5将自己的Value由Y替换为X，Accept（X）。
+实例 2 中 P 3.1 没有被多数派 Accept（只有 S3 Accept），但是被 P 4.5 学习到，P 4.5 将自己的 Value 由 Y 替换为 X，Accept（X）。
 #+DOWNLOADED: screenshot @ 2022-10-16 10:34:43
 [[file:images/database/Paxos算法/2022-10-16_10-34-43_screenshot.png]]
-实例3中P 3.1没有被多数派Accept（只有S1 Accept），同时也没有被P 4.5学习到。由于P 4.5 Propose的所有应答，均未返回Value，则P 4.5可以Accept自己的Value (Y)。后续P 3.1的Accept (X) 会失败，已经Accept的S1，会被覆盖。
+实例 3 中 P 3.1 没有被多数派 Accept（只有 S1 Accept），同时也没有被 P 4.5 学习到。由于 P 4.5 Propose 的所有应答，均未返回 Value，则 P 4.5 可以 Accept 自己的 Value (Y)。后续 P 3.1 的 Accept (X) 会失败，已经 Accept 的 S1，会被覆盖。
 
-Paxos算法可能形成活锁而永远不会结束，如下图实例所示：
+Paxos 算法可能形成活锁而永远不会结束，如下图实例所示：
 #+DOWNLOADED: screenshot @ 2022-10-16 10:34:51
 [[file:images/database/Paxos算法/2022-10-16_10-34-51_screenshot.png]]
-回顾两个承诺之一，Acceptor不再应答Proposal ID小于等于当前请求的Prepare请求。意味着需要应答Proposal ID大于当前请求的Prepare请求。
+回顾两个承诺之一，Acceptor 不再应答 Proposal ID 小于等于当前请求的 Prepare 请求。意味着需要应答 Proposal ID 大于当前请求的 Prepare 请求。
 
-两个Proposers交替Prepare成功，而Accept失败，形成活锁（Livelock）
+两个 Proposers 交替 Prepare 成功，而 Accept 失败，形成活锁（Livelock）
 
 ** 参考文章
 [[https://zhuanlan.zhihu.com/p/31780743][Paxos算法详解]]
 [[https://www.cnblogs.com/linbingdong/p/6253479.html][分布式系列文章——Paxos算法原理与推导]]
 * 高可用
-高可用HA（High Availability）是分布式系统架构设计中必须考虑的因素之一，它通常是指，通过设计减少系统不能提供服务的时间。
+高可用 HA（High Availability）是分布式系统架构设计中必须考虑的因素之一，它通常是指，通过设计减少系统不能提供服务的时间。
 
-假设系统一直能够提供服务，我们说系统的可用性是100%。
+假设系统一直能够提供服务，我们说系统的可用性是 100%。
 
-如果系统每运行100个时间单位，会有1个时间单位无法提供服务，我们说系统的可用性是99%。
+如果系统每运行 100 个时间单位，会有 1 个时间单位无法提供服务，我们说系统的可用性是 99%。
 
-很多公司的高可用目标是4个9，也就是99.99%，这就意味着，系统的年停机时间为8.76个小时。
+很多公司的高可用目标是 4 个 9，也就是 99.99%，这就意味着，系统的年停机时间为 8.76 个小时。
 
-百度的搜索首页，是业内公认高可用保障非常出色的系统，甚至人们会通过http://www.baidu.com 能不能访问来判断“网络的连通性”，百度高可用的服务让人留下啦“网络通畅，百度就能访问”，“百度打不开，应该是网络连不上”的印象，这其实是对百度HA最高的褒奖。
+百度的搜索首页，是业内公认高可用保障非常出色的系统，甚至人们会通过http://www.baidu.com 能不能访问来判断“网络的连通性”，百度高可用的服务让人留下啦“网络通畅，百度就能访问”，“百度打不开，应该是网络连不上”的印象，这其实是对百度 HA 最高的褒奖。
 
 ** 参考文章
 [[https://zhuanlan.zhihu.com/p/43723276][什么是高可用]]
-* Quorum算法
+* Quorum 算法
 Quorum 机制，是一种分布式系统中常用的，用来保证数据冗余和最终一致性的投票算法，其主要数学思想来源于鸽巢原理。
 
-** 基于Quorum投票的冗余控制算法
+** 基于 Quorum 投票的冗余控制算法
 在有冗余数据的分布式存储系统当中，冗余数据对象会在不同的机器之间存放多份拷贝。但是同一时刻一个数据对象的多份拷贝只能用于读或者用于写。
 
 该算法可以保证同一份数据对象的多份拷贝不会被超过两个访问对象读写。
 
-算法来源于[Gifford, 1979][3][1]。 分布式系统中的每一份数据拷贝对象都被赋予一票。每一个读操作获得的票数必须大于最小读票数（read quorum）（Vr），每个写操作获得的票数必须大于最小写票数（write quorum）(Vw）才能读或者写。如果系统有V票（意味着一个数据对象有V份冗余拷贝），那么最小读写票数(quorum)应满足如下限制：
+算法来源于[Gifford, 1979][3][1]。 分布式系统中的每一份数据拷贝对象都被赋予一票。每一个读操作获得的票数必须大于最小读票数（read quorum）（Vr），每个写操作获得的票数必须大于最小写票数（write quorum）(Vw）才能读或者写。如果系统有 V 票（意味着一个数据对象有 V 份冗余拷贝），那么最小读写票数(quorum)应满足如下限制：
 #+BEGIN_EXAMPLE
 Vr + Vw > V
 Vw > V/2
 #+END_EXAMPLE
-第一条规则保证了一个数据不会被同时读写。当一个写操作请求过来的时候，它必须要获得Vw个冗余拷贝的许可。而剩下的数量是V-Vw 不够Vr，因此不能再有读请求过来了。同理，当读请求已经获得了Vr个冗余拷贝的许可时，写请求就无法获得许可了。
+第一条规则保证了一个数据不会被同时读写。当一个写操作请求过来的时候，它必须要获得 Vw 个冗余拷贝的许可。而剩下的数量是 V-Vw 不够 Vr，因此不能再有读请求过来了。同理，当读请求已经获得了 Vr 个冗余拷贝的许可时，写请求就无法获得许可了。
 
 第二条规则保证了数据的串行化修改。一份数据的冗余拷贝不可能同时被两个写请求修改。
 ** 算法的好处
-在分布式系统中，冗余数据是保证可靠性的手段，因此冗余数据的一致性维护就非常重要。一般而言，一个写操作必须要对所有的冗余数据都更新完成了，才能称为成功结束。比如一份数据在5台设备上有冗余，因为不知道读数据会落在哪一台设备上，那么一次写操作，必须5台设备都更新完成，写操作才能返回。
+在分布式系统中，冗余数据是保证可靠性的手段，因此冗余数据的一致性维护就非常重要。一般而言，一个写操作必须要对所有的冗余数据都更新完成了，才能称为成功结束。比如一份数据在 5 台设备上有冗余，因为不知道读数据会落在哪一台设备上，那么一次写操作，必须 5 台设备都更新完成，写操作才能返回。
 
-对于写操作比较频繁的系统，这个操作的瓶颈非常大。Quorum算法可以让写操作只要写完3台就返回。剩下的由系统内部缓慢同步完成。而读操作，则需要也至少读3台，才能保证至少可以读到一个最新的数据。
+对于写操作比较频繁的系统，这个操作的瓶颈非常大。Quorum 算法可以让写操作只要写完 3 台就返回。剩下的由系统内部缓慢同步完成。而读操作，则需要也至少读 3 台，才能保证至少可以读到一个最新的数据。
 
-Quorum的读写最小票数可以用来做为系统在读、写性能方面的一个可调节参数。写票数Vw越大，则读票数Vr越小，这时候系统读的开销就小。反之则写的开销就小。
+Quorum 的读写最小票数可以用来做为系统在读、写性能方面的一个可调节参数。写票数 Vw 越大，则读票数 Vr 越小，这时候系统读的开销就小。反之则写的开销就小。
 
 ** 参考文章
 [[https://zh.m.wikipedia.org/zh-hans/Quorum_(%25E5%2588%2586%25E5%25B8%2583%25E5%25BC%258F%25E7%25B3%25BB%25E7%25BB%259F)][Quorum (分布式系统)——维基百科]]
-* RPC协议
-RPC是一种远程过程调用的协议，使用这种协议向另一台计算机上的程序请求服务，可以基于HTTP协议实现，也可以直接在TCP协议上实现。
+* RPC 协议
+RPC 是一种远程过程调用的协议，使用这种协议向另一台计算机上的程序请求服务，可以基于 HTTP 协议实现，也可以直接在 TCP 协议上实现。
 
 ** RPC 架构
 一个完整的 RPC 架构里面包含了四个核心的组件。
@@ -302,7 +302,7 @@ RPC是一种远程过程调用的协议，使用这种协议向另一台计算�
 - Client Stub：客户端存根，存放服务端的地址消息，再将客户端的请求参数打包成网络消息，然后通过网络远程发送给服务方。
 - Server Stub：服务端存根，接收客户端发送过来的消息，将消息解包，并调用本地的方法。
 
-Stub可以理解为存根
+Stub 可以理解为存根
 #+DOWNLOADED: screenshot @ 2022-10-16 15:21:25
 [[file:images/database/RPC协议/2022-10-16_15-21-25_screenshot.png]]
 
@@ -326,20 +326,20 @@ Dubbo 是阿里集团开源的一个极为出名的 RPC 框架，在很多互联
 
 同样的远程接口是基于 Java Interface，并且依托于 Spring 框架方便开发。可以方便的打包成单一文件，独立进程运行，和现在的微服务概念一致。
 
-** RPC协议与HTTP协议的区别
-1、RPC是一种API，HTTP是一种无状态的网络协议。RPC可以基于HTTP协议实现，也可以直接在TCP协议上实现。
+** RPC 协议与 HTTP 协议的区别
+1、RPC 是一种 API，HTTP 是一种无状态的网络协议。RPC 可以基于 HTTP 协议实现，也可以直接在 TCP 协议上实现。
 
-2、RPC主要是用在大型网站里面，因为大型网站里面系统繁多，业务线复杂，而且效率优势非常重要的一块，这个时候RPC的优势就比较明显了。
+2、RPC 主要是用在大型网站里面，因为大型网站里面系统繁多，业务线复杂，而且效率优势非常重要的一块，这个时候 RPC 的优势就比较明显了。
 
-HTTP主要是用在中小型企业里面，业务线没那么繁多的情况下。
+HTTP 主要是用在中小型企业里面，业务线没那么繁多的情况下。
 
-3、HTTP开发方便简单、直接。开发一个完善的RPC框架难度比较大。
+3、HTTP 开发方便简单、直接。开发一个完善的 RPC 框架难度比较大。
 
-4、HTTP发明的初衷是为了传送超文本的资源，协议设计的比较复杂，参数传递的方式效率也不高。开源的RPC框架针对远程调用协议上的效率会比HTTP快很多。
+4、HTTP 发明的初衷是为了传送超文本的资源，协议设计的比较复杂，参数传递的方式效率也不高。开源的 RPC 框架针对远程调用协议上的效率会比 HTTP 快很多。
 
-5、HTTP需要事先通知，修改Nginx/HAProxy配置。RPC能做到自动通知，不影响上游。
+5、HTTP 需要事先通知，修改 Nginx/HAProxy 配置。RPC 能做到自动通知，不影响上游。
 
-6、HTTP大部分是通过Json来实现的，字节大小和序列化耗时都比Thrift要更消耗性能。RPC，可以基于Thrift实现高效的二进制传输。
+6、HTTP 大部分是通过 Json 来实现的，字节大小和序列化耗时都比 Thrift 要更消耗性能。RPC，可以基于 Thrift 实现高效的二进制传输。
 ** 参考文章
 [[https://cloud.tencent.com/developer/article/1753834][有了 HTTP 协议，为什么还要 RPC 协议，两者有什么区别？]]
 [[https://zhuanlan.zhihu.com/p/306704889][什么是RPC协议？RPC协议与HTTP协议的区别]]
@@ -348,85 +348,85 @@ HTTP主要是用在中小型企业里面，业务线没那么繁多的情况下�
 
 异步调用就是客户端不等待调用执行完成返回结果，不过依然可以通过回调函数等接收到返回结果的通知。如果客户端并不关心结果，则可以变成一个单向的调用。
 
-* Chubby分布式锁
+* Chubby 分布式锁
 ** 简介
-Chubby系统提供粗粒度的分布式锁服务，Chubby的使用者不需要关注复杂的同步协议，而是通过已经封装好的客户端直接调用Chubby的锁服务，就可以保证数据操作的一致性。
+Chubby 系统提供粗粒度的分布式锁服务，Chubby 的使用者不需要关注复杂的同步协议，而是通过已经封装好的客户端直接调用 Chubby 的锁服务，就可以保证数据操作的一致性。
 
-Chubby本质上是一个分布式文件系统，存储大量小文件。每个文件就代表一个锁，并且可以保存一些应用层面的小规模数据。用户通过打开、关闭、读取文件来获取共享锁或者独占锁；并通过反向通知机制，向用户发送更新信息。
+Chubby 本质上是一个分布式文件系统，存储大量小文件。每个文件就代表一个锁，并且可以保存一些应用层面的小规模数据。用户通过打开、关闭、读取文件来获取共享锁或者独占锁；并通过反向通知机制，向用户发送更新信息。
 
-Chubby具有广泛的应用场景，例如：
-- GFS选主服务器；
-- BigTable中的表锁；
+Chubby 具有广泛的应用场景，例如：
+- GFS 选主服务器；
+- BigTable 中的表锁；
 
-Chubby系统代码共13700多行，其中ice自动生成6400行，手动编写约8000行。
+Chubby 系统代码共 13700 多行，其中 ice 自动生成 6400 行，手动编写约 8000 行。
 ** 设计目标
-Chubby系统设计的目标基于以下几点：
+Chubby 系统设计的目标基于以下几点：
 - 粗粒度的锁服务；
 - 高可用、高可靠；
 - 可直接存储服务信息，而无需另建服务；
 - 高扩展性；
 
 在实现时，使用了以下特性：
-- 缓存机制：客户端缓存，避免频繁访问master；
+- 缓存机制：客户端缓存，避免频繁访问 master；
 - 通知机制：服务器会及时通知客户端服务变化；
 
 ** 整体架构
-Chubby架构并不复杂，如上图分为两个重要组件：
-- Chubby库：客户端通过调用Chubby库，申请锁服务，并获取相关信息，同时通过租约保持与服务器的连接；
-- Chubby服务器组：一个服务器组一般由五台服务器组成（至少3台），其中一台master，服务维护与客户端的所有通信；其他服务器不断和主服务器通信，获取用户操作。
+Chubby 架构并不复杂，如上图分为两个重要组件：
+- Chubby 库：客户端通过调用 Chubby 库，申请锁服务，并获取相关信息，同时通过租约保持与服务器的连接；
+- Chubby 服务器组：一个服务器组一般由五台服务器组成（至少 3 台），其中一台 master，服务维护与客户端的所有通信；其他服务器不断和主服务器通信，获取用户操作。
 ** 文件系统
-Chubby文件系统类似于简单的unix文件系统，但它不支持文件移动操作与硬连接。文件系统由许多Node组成，每个Node代表一个文件，或者一个目录。文件系统使用Berkeley DB来保存每个Node的数据。文件系统提供的API很少：创建文件系统、文件操作、目录操作等简易操作。
-** 基于ICE的Chubby通信机制
-一种基于ICE的RPC异步机制，核心就是异步，部分组件负责发送，部分组件负责接收。
-** 客户端与master的通信
+Chubby 文件系统类似于简单的 unix 文件系统，但它不支持文件移动操作与硬连接。文件系统由许多 Node 组成，每个 Node 代表一个文件，或者一个目录。文件系统使用 Berkeley DB 来保存每个 Node 的数据。文件系统提供的 API 很少：创建文件系统、文件操作、目录操作等简易操作。
+** 基于 ICE 的 Chubby 通信机制
+一种基于 ICE 的 RPC 异步机制，核心就是异步，部分组件负责发送，部分组件负责接收。
+** 客户端与 master 的通信
 - 长连接保持连接，连接有效期内，客户端句柄、锁服务、缓存数据均一直有效；
-- 定时双向keep alive；
+- 定时双向 keep alive；
 - 出错回调是客户端与服务器通信的重点。
 
 下面将说明正常、客户端租约过期、主服务器租约过期、主服务器出错等情况。
 
 *** 正常情况
-keep alive是周期性发送的一种消息，它有两方面功能：延长租约有效期，携带事件信息告诉客户端更新。正常情况下，租约会由keep alive一直不断延长。
+keep alive 是周期性发送的一种消息，它有两方面功能：延长租约有效期，携带事件信息告诉客户端更新。正常情况下，租约会由 keep alive 一直不断延长。
 
-潜在回调事件包括：文件内容修改、子节点增删改、master出错等。
+潜在回调事件包括：文件内容修改、子节点增删改、master 出错等。
 
 *** 客户端租约过期
-客户端没有收到master的keep alive，租约随之过期，将会进入一个“危险状态”。由于此时不能确定master是否已经终止，客户端必须主动让cache失效，同时，进入一个寻找新的master的阶段。
+客户端没有收到 master 的 keep alive，租约随之过期，将会进入一个“危险状态”。由于此时不能确定 master 是否已经终止，客户端必须主动让 cache 失效，同时，进入一个寻找新的 master 的阶段。
 
-这个阶段中，客户端会轮询Chubby Cell中非master的其他服务器节点，当客户端收到一个肯定的答复时，他会向新的master发送keep alive信息，告之自己处于“危险状态”，并和新的master建立session，然后把cache中的handler发送给master刷新。
+这个阶段中，客户端会轮询 Chubby Cell 中非 master 的其他服务器节点，当客户端收到一个肯定的答复时，他会向新的 master 发送 keep alive 信息，告之自己处于“危险状态”，并和新的 master 建立 session，然后把 cache 中的 handler 发送给 master 刷新。
 
-一段时间后，例如45s，新的session仍然不能建立，客户端立马认为session失效，将其终止。当然这段时间内，不能更改cache信息，以求保证数据的一致性。
+一段时间后，例如 45s，新的 session 仍然不能建立，客户端立马认为 session 失效，将其终止。当然这段时间内，不能更改 cache 信息，以求保证数据的一致性。
 
-*** master租约过期
-master一段时间没有收到客户端的keep alive，则其进入一段等待期，此期间内仍没有响应，则master认为客户端失效。失效后，master会把客户端获得的锁，机器打开的临时文件清理掉，并通知各副本，以保持一致性。
+*** master 租约过期
+master 一段时间没有收到客户端的 keep alive，则其进入一段等待期，此期间内仍没有响应，则 master 认为客户端失效。失效后，master 会把客户端获得的锁，机器打开的临时文件清理掉，并通知各副本，以保持一致性。
 
 *** 主服务器出错
-master出错，需要内部进行重新选举，各副本只响应客户端的读取命令，而忽略其他命令。新上任的master会进行以下几步操作：
-1. 选择新的编号，不再接受旧master的消息；
-2. 只处理master位置相关消息，不处理session相关消息；
-3. 等待处理“危险状态”的客户端keep alive；
-4. 响应客户端的keep alive，建立新的session，同时拒绝其他session相关操作；同事向客户端返回keep alive，警告客户端master fail-over，客户端必须更新handle和lock；
-5. 等待客户端的session确认keep alive，或者让session过期；
+master 出错，需要内部进行重新选举，各副本只响应客户端的读取命令，而忽略其他命令。新上任的 master 会进行以下几步操作：
+1. 选择新的编号，不再接受旧 master 的消息；
+2. 只处理 master 位置相关消息，不处理 session 相关消息；
+3. 等待处理“危险状态”的客户端 keep alive；
+4. 响应客户端的 keep alive，建立新的 session，同时拒绝其他 session 相关操作；同事向客户端返回 keep alive，警告客户端 master fail-over，客户端必须更新 handle 和 lock；
+5. 等待客户端的 session 确认 keep alive，或者让 session 过期；
 6. 再次响应客户端所有操作；
-7. 一段时间后，检查是否有临时文件，以及是否存在一些lock没有handle；如果临时文件或者lock没有对应的handle，则清除临时文件，释放lock，当然这些操作都需要保持数据的一致性。
+7. 一段时间后，检查是否有临时文件，以及是否存在一些 lock 没有 handle；如果临时文件或者 lock 没有对应的 handle，则清除临时文件，释放 lock，当然这些操作都需要保持数据的一致性。
 ** 服务器间的一致性操作
-这块考虑的问题是：当master收到客户端请求时（主要是写），如何将操作同步，以保证数据的一致性。
+这块考虑的问题是：当 master 收到客户端请求时（主要是写），如何将操作同步，以保证数据的一致性。
 *** 节点数目
-一般来说，服务器节点数为5，如果临时有节点被拿走，可预期不久的将来就会加进来。
+一般来说，服务器节点数为 5，如果临时有节点被拿走，可预期不久的将来就会加进来。
 *** 关于复制
-服务器接受客户端请求时，master会将请求复制到所有成员，并在消息中添加最新被提交的请求序号。member收到这个请求后，获取master处被提交的请求序号，然后执行这个序列之前的所有请求，并把其记录到内存的日志里。如果请求没有被master接受，就不能执行。
+服务器接受客户端请求时，master 会将请求复制到所有成员，并在消息中添加最新被提交的请求序号。member 收到这个请求后，获取 master 处被提交的请求序号，然后执行这个序列之前的所有请求，并把其记录到内存的日志里。如果请求没有被 master 接受，就不能执行。
 
-各member会向master发送消息，master收到>=3个以上的消息，才能够进行确认，发送commit给各member，执行请求，并返回客户端。
+各 member 会向 master 发送消息，master 收到>=3 个以上的消息，才能够进行确认，发送 commit 给各 member，执行请求，并返回客户端。
 
-如果某个member出现暂时的故障，没有收到部分消息也无碍，在收到来自master的新请求后，主动从master处获得已执行的，自己却还没有完成的日志，并进行执行。
+如果某个 member 出现暂时的故障，没有收到部分消息也无碍，在收到来自 master 的新请求后，主动从 master 处获得已执行的，自己却还没有完成的日志，并进行执行。
 
-最终，所有成员都会获得一致性的数据，并且，在系统正常工作状态中，至少有3个服务器保持一致并且是最新的数据状态。
-** Chubby使用例子
+最终，所有成员都会获得一致性的数据，并且，在系统正常工作状态中，至少有 3 个服务器保持一致并且是最新的数据状态。
+** Chubby 使用例子
 
-*** 选master
-1. 每个server都试图创建/打开同一个文件，并在该文件中记录自己的服务信息，任何时刻都只有一个服务器能够获得该文件的控制权；
-2. 首先创建该文件的server成为主，并写入自己的信息；
-3. 后续打开该文件的server成为从，并读取主的信息；
+*** 选 master
+1. 每个 server 都试图创建/打开同一个文件，并在该文件中记录自己的服务信息，任何时刻都只有一个服务器能够获得该文件的控制权；
+2. 首先创建该文件的 server 成为主，并写入自己的信息；
+3. 后续打开该文件的 server 成为从，并读取主的信息；
 
 *** 进程监控
 1. 各个进程都把自己的状态写入指定目录下的临时文件里；
@@ -437,35 +437,35 @@ master出错，需要内部进行重新选举，各副本只响应客户端的�
 [[https://cloud.tencent.com/developer/article/1048629][这才是真正的分布式锁]]
 * etcd
 ** 简介
-etcd是CoreOS团队于2013年6月发起的开源项目，它的目标是构建一个高可用的分布式键值(key-value)数据库。
+etcd 是 CoreOS 团队于 2013 年 6 月发起的开源项目，它的目标是构建一个高可用的分布式键值(key-value)数据库。
 
-etcd内部采用raft协议作为一致性算法，etcd基于Go语言实现。
+etcd 内部采用 raft 协议作为一致性算法，etcd 基于 Go 语言实现。
 
-etcd作为服务发现系统，有以下的特点：
-- 简单：安装配置简单，而且提供了HTTP API进行交互，使用也很简单
-- 安全：支持SSL证书验证
-- 快速：根据官方提供的benchmark数据，单实例支持每秒2k+读操作
-- 可靠：采用raft算法，实现分布式系统数据的可用性和一致性
+etcd 作为服务发现系统，有以下的特点：
+- 简单：安装配置简单，而且提供了 HTTP API 进行交互，使用也很简单
+- 安全：支持 SSL 证书验证
+- 快速：根据官方提供的 benchmark 数据，单实例支持每秒 2k+读操作
+- 可靠：采用 raft 算法，实现分布式系统数据的可用性和一致性
 
-etcd项目地址：https://github.com/coreos/etcd/
-** etcd安装
-etcd在生产环境中一般推荐集群方式部署。
+etcd 项目地址：https://github.com/coreos/etcd/
+** etcd 安装
+etcd 在生产环境中一般推荐集群方式部署。
 *** 单点安装
-etcd目前默认使用2379端口提供HTTP API服务，2380端口和peer通信(这两个端口已经被IANA官方预留给etcd)；在之前的版本中可能会分别使用4001和7001，在使用的过程中需要注意这个区别。
+etcd 目前默认使用 2379 端口提供 HTTP API 服务，2380 端口和 peer 通信(这两个端口已经被 IANA 官方预留给 etcd)；在之前的版本中可能会分别使用 4001 和 7001，在使用的过程中需要注意这个区别。
 
-因为etcd是go语言编写的，安装只需要下载对应的二进制文件，并放到合适的路径就行。
+因为 etcd 是 go 语言编写的，安装只需要下载对应的二进制文件，并放到合适的路径就行。
 
 下载软件包
 #+begin_src bash
 $ wget https://github.com/coreos/etcd/releases/download/v3.1.5/etcd-v3.1.5-linux-amd64.tar.gz
 $ tar xzvf etcd-v3.1.5-linux-amd64.tar.gz
 $ mv etcd-v3.1.5-linux-amd64 /opt/etcd
-#+END_SRC解
+#+END_SRC 解
 
-解压后是一些文档和两个二进制文件etcd和etcdctl。
-etcd是server端，etcdctl是客户端。
-**** 启动etcd服务
-如果在测试环境，启动一个单节点的etcd服务，只需要运行etcd命令就行。
+解压后是一些文档和两个二进制文件 etcd 和 etcdctl。
+etcd 是 server 端，etcdctl 是客户端。
+**** 启动 etcd 服务
+如果在测试环境，启动一个单节点的 etcd 服务，只需要运行 etcd 命令就行。
 #+begin_src bash
 $ ./etcd
 2017-04-10 11:46:44.772465 I | etcdmain: etcd Version: 3.1.5
@@ -505,27 +505,27 @@ $ ./etcd
 2017-04-10 11:46:45.087195 I | etcdserver/api: enabled capabilities for version 3.1
 #+END_SRC
 从上面的输出中，我们可以看到很多信息。以下是几个比较重要的信息：
-- name表示节点名称，默认为default。
-- data-dir 保存日志和快照的目录，默认为当前工作目录default.etcd/目录下。
+- name 表示节点名称，默认为 default。
+- data-dir 保存日志和快照的目录，默认为当前工作目录 default.etcd/目录下。
 - 在http://localhost:2380和集群中其他节点通信。
-- 在http://localhost:2379提供HTTP API服务，供客户端交互。
-- heartbeat为100ms，该参数的作用是leader多久发送一次心跳到
-- followers，默认值是100ms。
-- election为1000ms，该参数的作用是重新投票的超时时间，如果follow在该+ 时间间隔没有收到心跳包，会触发重新投票，默认为1000ms。
-- snapshot count为10000，该参数的作用是指定有多少事务被提交时，触发+ 截取快照保存到磁盘。
-- 集群和每个节点都会生成一个uuid。
-- 启动的时候会运行raft，选举出leader。
+- 在http://localhost:2379提供HTTP API 服务，供客户端交互。
+- heartbeat 为 100ms，该参数的作用是 leader 多久发送一次心跳到
+- followers，默认值是 100ms。
+- election 为 1000ms，该参数的作用是重新投票的超时时间，如果 follow 在该+ 时间间隔没有收到心跳包，会触发重新投票，默认为 1000ms。
+- snapshot count 为 10000，该参数的作用是指定有多少事务被提交时，触发+ 截取快照保存到磁盘。
+- 集群和每个节点都会生成一个 uuid。
+- 启动的时候会运行 raft，选举出 leader。
 
-上面的方法只是简单的启动一个etcd服务，但要长期运行的话，还是做成一个服务好一些。
-**** 创建systemd服务
-下面将以systemd为例，介绍如何建立一个etcd服务。
-***** 设定etcd配置文件
+上面的方法只是简单的启动一个 etcd 服务，但要长期运行的话，还是做成一个服务好一些。
+**** 创建 systemd 服务
+下面将以 systemd 为例，介绍如何建立一个 etcd 服务。
+***** 设定 etcd 配置文件
 建立相关目录
 #+begin_src bash
 $ mkdir -p /var/lib/etcd/
 $ mkdir -p /opt/etcd/config/
 #+END_SRC
-***** 创建etcd配置文件
+***** 创建 etcd 配置文件
 #+begin_src bash
 $ cat <<EOF | sudo tee /opt/etcd/config/etcd.conf
 #节点名称
@@ -534,7 +534,7 @@ ETCD_NAME=$(hostname -s)
 ETCD_DATA_DIR=/var/lib/etcd
 EOF
 #+END_SRC
-***** 创建systemd配置文件
+***** 创建 systemd 配置文件
 #+begin_src bash
 $ cat <<EOF | sudo tee /etc/systemd/system/etcd.service
 
@@ -556,34 +556,34 @@ LimitNOFILE=40000
 WantedBy=multi-user.target
 EOF
 #+END_SRC
-***** 启动etcd
+***** 启动 etcd
 #+begin_src bash
 $ systemctl daemon-reload && systemctl enable etcd && systemctl start etcd
 #+END_SRC
 
-** etcd基本使用
-etcdctl是一个命令行客户端，可直接跟etcd服务交互，而无需基于 HTTP API方式。
+** etcd 基本使用
+etcdctl 是一个命令行客户端，可直接跟 etcd 服务交互，而无需基于 HTTP API 方式。
 
-etcd项目二进制发行包中已经包含了etcdctl工具。
+etcd 项目二进制发行包中已经包含了 etcdctl 工具。
 
 常用命令选项:
-- --debug 输出CURL命令，显示执行命令的时候发起的请求
+- --debug 输出 CURL 命令，显示执行命令的时候发起的请求
 - --no-sync 发出请求之前不同步集群信息
-- --output, -o 'simple' 输出内容的格式(simple 为原始信息，json 为进行json格式解码，易读性好一些)
+- --output, -o 'simple' 输出内容的格式(simple 为原始信息，json 为进行 json 格式解码，易读性好一些)
 - --peers, -C 指定集群中的同伴信息，用逗号隔开(默认为: "127.0.0.1:4001")
-- --cert-file HTTPS下客户端使用的SSL证书文件
-- --key-file HTTPS下客户端使用的SSL密钥文件
-- --ca-file 服务端使用HTTPS时，使用CA文件进行验证
+- --cert-file HTTPS 下客户端使用的 SSL 证书文件
+- --key-file HTTPS 下客户端使用的 SSL 密钥文件
+- --ca-file 服务端使用 HTTPS 时，使用 CA 文件进行验证
 - --help, -h 显示帮助命令信息
 - --version, -v 打印版本信息
 
-etcdctl支持的命令大体上分为数据库操作和非数据库操作两类。
+etcdctl 支持的命令大体上分为数据库操作和非数据库操作两类。
 *** 数据库操作
-数据库操作围绕对键值和目录的CRUD完整生命周期的管理。
+数据库操作围绕对键值和目录的 CRUD 完整生命周期的管理。
 
-etcd在键的组织上采用了层次化的空间结构(类似于文件系统中目录的概念)，用户指定的键可以为单独的名字，如:testkey，此时实际上放在根目录/下面，也可以为指定目录结构，如/cluster1/node2/testkey，则将创建相应的目录结构。
+etcd 在键的组织上采用了层次化的空间结构(类似于文件系统中目录的概念)，用户指定的键可以为单独的名字，如:testkey，此时实际上放在根目录/下面，也可以为指定目录结构，如/cluster1/node2/testkey，则将创建相应的目录结构。
 
-注：CRUD即Create,Read,Update,Delete是符合REST风格的一套API操作。
+注：CRUD 即 Create,Read,Update,Delete 是符合 REST 风格的一套 API 操作。
 **** set
 指定某个键的值。例如:
 #+begin_src bash
@@ -591,8 +591,8 @@ $ etcdctl set /testdir/testkey "Hello world"
 Hello world
 #+END_SRC
 支持的选项包括：
-- --ttl '0' 该键值的超时时间(单位为秒)，不配置(默认为0)则永不超时
-- --swap-with-value value 若该键现在的值是value，则进行设置操作
+- --ttl '0' 该键值的超时时间(单位为秒)，不配置(默认为 0)则永不超时
+- --swap-with-value value 若该键现在的值是 value，则进行设置操作
 - --swap-with-index '0'   若该键现在的索引值是指定索引，则进行设置操作
 **** get
 获取指定键的值。例如：
@@ -637,7 +637,7 @@ Error:  100: Key not found (/testdir/testkey) [7]
 - --dir 如果键是个空目录或者键值对则删除
 - --recursive 删除目录和所有子键
 - --with-value  检查现有的值是否匹配
-- --with-index '0'检查现有的index是否匹配
+- --with-index '0'检查现有的 index 是否匹配
 **** mk
 如果给定的键不存在，则创建一个新的键值。例如:
 #+begin_src bash
@@ -662,21 +662,21 @@ $ etcdctl mkdir testdir2
 Error:  105: Key already exists (/testdir2) [9]
 #+END_SRC
 支持的选项为：
-- --ttl '0' 超时时间(单位为秒)，不配置(默认为0)则永不超时。
+- --ttl '0' 超时时间(单位为秒)，不配置(默认为 0)则永不超时。
 **** setdir
-创建一个键目录。如果目录不存在就创建，如果目录存在更新目录TTL。
+创建一个键目录。如果目录不存在就创建，如果目录存在更新目录 TTL。
 #+begin_src bash
 $ etcdctl setdir testdir3
 #+END_SRC
 支持的选项为:
-- --ttl '0' 超时时间(单位为秒)，不配置(默认为0)则永不超时。
+- --ttl '0' 超时时间(单位为秒)，不配置(默认为 0)则永不超时。
 **** updatedir
 更新一个已经存在的目录。
 #+begin_src bash
 $ etcdctl updatedir testdir2
 #+END_SRC
 支持的选项为:
-- --ttl '0' 超时时间(单位为秒)，不配置(默认为0)则永不超时。
+- --ttl '0' 超时时间(单位为秒)，不配置(默认为 0)则永不超时。
 **** rmdir
 删除一个空目录，或者键值对。
 #+begin_src bash
@@ -713,17 +713,17 @@ $ etcdctl ls dir
 
 *** 非数据库操作
 **** backup
-备份etcd的数据。
+备份 etcd 的数据。
 #+begin_src bash
 $ etcdctl backup --data-dir /var/lib/etcd  --backup-dir /home/etcd_backup
 #+END_SRC
 支持的选项包括:
-- --data-dir  etcd的数据目录
+- --data-dir  etcd 的数据目录
 - --backup-dir 备份到指定路径
 **** watch
 监测一个键值的变化，一旦键值发生更新，就会输出最新的值并退出。
 
-例如:用户更新testkey键值为Hello watch。
+例如:用户更新 testkey 键值为 Hello watch。
 #+begin_src bash
 $ etcdctl get /testdir/testkey
 Hello world
@@ -733,13 +733,13 @@ $ etcdctl watch testdir/testkey
 Hello watch
 #+END_SRC
 支持的选项包括:
-- --forever  一直监测直到用户按CTRL+C退出
-- --after-index '0' 在指定index之前一直监测
+- --forever  一直监测直到用户按 CTRL+C 退出
+- --after-index '0' 在指定 index 之前一直监测
 - --recursive 返回所有的键值和子键值
 **** exec-watch
 监测一个键值的变化，一旦键值发生更新，就执行给定命令。
 
-例如：用户更新testkey键值。
+例如：用户更新 testkey 键值。
 #+begin_src bash
 $ etcdctl exec-watch testdir/testkey -- sh -c 'ls'
 config  Documentation  etcd  etcdctl  README-etcdctl.md  README.md  READMEv2-etcdctl.md
@@ -748,7 +748,7 @@ config  Documentation  etcd  etcdctl  README-etcdctl.md  README.md  READMEv2-etc
 - --after-index '0' 在指定 index 之前一直监测
 - --recursive 返回所有的键值和子键值
 **** member
-通过list、add、remove命令列出、添加、删除etcd实例到etcd集群中。
+通过 list、add、remove 命令列出、添加、删除 etcd 实例到 etcd 集群中。
 
 查看集群中存在的节点
 #+begin_src bash
@@ -767,57 +767,57 @@ Added member named etcd3 with ID 8e9e05c52164694d to cluster
 #+END_SRC
 ** 参考文章
 [[https://www.jianshu.com/p/f68028682192][Etcd 使用入门]]
-* Raft协议
-** Raft算法概述
-不同于Paxos算法直接从分布式一致性问题出发推导出来，Raft算法则是从多副本状态机的角度提出，用于管理多副本状态机的日志复制。Raft实现了和Paxos相同的功能，它将一致性分解为多个子问题：Leader选举（Leader election）、日志同步（Log replication）、安全性（Safety）、日志压缩（Log compaction）、成员变更（Membership change）等。同时，Raft算法使用了更强的假设来减少了需要考虑的状态，使之变的易于理解和实现。
+* Raft 协议
+** Raft 算法概述
+不同于 Paxos 算法直接从分布式一致性问题出发推导出来，Raft 算法则是从多副本状态机的角度提出，用于管理多副本状态机的日志复制。Raft 实现了和 Paxos 相同的功能，它将一致性分解为多个子问题：Leader 选举（Leader election）、日志同步（Log replication）、安全性（Safety）、日志压缩（Log compaction）、成员变更（Membership change）等。同时，Raft 算法使用了更强的假设来减少了需要考虑的状态，使之变的易于理解和实现。
 
-Raft将系统中的角色分为领导者（Leader）、跟从者（Follower）和候选人（Candidate）：
-- Leader：接受客户端请求，并向Follower同步请求日志，当日志同步到大多数节点上后告诉Follower提交日志。
-- Follower：接受并持久化Leader同步的日志，在Leader告之日志可以提交之后，提交日志。
-- Candidate：Leader选举过程中的临时角色。
+Raft 将系统中的角色分为领导者（Leader）、跟从者（Follower）和候选人（Candidate）：
+- Leader：接受客户端请求，并向 Follower 同步请求日志，当日志同步到大多数节点上后告诉 Follower 提交日志。
+- Follower：接受并持久化 Leader 同步的日志，在 Leader 告之日志可以提交之后，提交日志。
+- Candidate：Leader 选举过程中的临时角色。
 
   #+DOWNLOADED: screenshot @ 2024-03-22 23:08:42
   [[file:images/database/Raft协议/2024-03-22_23-08-42_screenshot.png]]
 
-Raft要求系统在任意时刻最多只有一个Leader，正常工作期间只有Leader和Followers。
+Raft 要求系统在任意时刻最多只有一个 Leader，正常工作期间只有 Leader 和 Followers。
 
-Raft算法角色状态转换如下：
+Raft 算法角色状态转换如下：
 #+DOWNLOADED: screenshot @ 2024-03-22 23:09:20
 [[file:images/database/Raft协议/2024-03-22_23-09-20_screenshot.png]]
-Follower只响应其他服务器的请求。如果Follower超时没有收到Leader的消息，它会成为一个Candidate并且开始一次Leader选举。收到大多数服务器投票的Candidate会成为新的Leader。Leader在宕机之前会一直保持Leader的状态。
-** Leader选举
-Raft 使用心跳（heartbeat）触发Leader选举。当服务器启动时，初始化为Follower。Leader向所有Followers周期性发送heartbeat。如果Follower在选举超时时间内没有收到Leader的heartbeat，就会等待一段随机的时间后发起一次Leader选举。
+Follower 只响应其他服务器的请求。如果 Follower 超时没有收到 Leader 的消息，它会成为一个 Candidate 并且开始一次 Leader 选举。收到大多数服务器投票的 Candidate 会成为新的 Leader。Leader 在宕机之前会一直保持 Leader 的状态。
+** Leader 选举
+Raft 使用心跳（heartbeat）触发 Leader 选举。当服务器启动时，初始化为 Follower。Leader 向所有 Followers 周期性发送 heartbeat。如果 Follower 在选举超时时间内没有收到 Leader 的 heartbeat，就会等待一段随机的时间后发起一次 Leader 选举。
 
-Follower将其当前term加一然后转换为Candidate。它首先给自己投票并且给集群中的其他服务器发送 RequestVote RPC （RPC细节参见八、Raft算法总结）。结果有以下三种情况：
-- 赢得了多数的选票，成功选举为Leader；
-- 收到了Leader的消息，表示有其它服务器已经抢先当选了Leader；
-- 没有服务器赢得多数的选票，Leader选举失败，等待选举时间超时后发起下一次选举。
+Follower 将其当前 term 加一然后转换为 Candidate。它首先给自己投票并且给集群中的其他服务器发送 RequestVote RPC （RPC 细节参见八、Raft 算法总结）。结果有以下三种情况：
+- 赢得了多数的选票，成功选举为 Leader；
+- 收到了 Leader 的消息，表示有其它服务器已经抢先当选了 Leader；
+- 没有服务器赢得多数的选票，Leader 选举失败，等待选举时间超时后发起下一次选举。
 
   #+DOWNLOADED: screenshot @ 2024-03-22 23:11:30
   [[file:images/database/Raft协议/2024-03-22_23-11-30_screenshot.png]]
-选举出Leader后，Leader通过定期向所有Followers发送心跳信息维持其统治。若Follower一段时间未收到Leader的心跳则认为Leader可能已经挂了，再次发起Leader选举过程。
+选举出 Leader 后，Leader 通过定期向所有 Followers 发送心跳信息维持其统治。若 Follower 一段时间未收到 Leader 的心跳则认为 Leader 可能已经挂了，再次发起 Leader 选举过程。
 
-Raft保证选举出的Leader上一定具有最新的已提交的日志，这一点将在四、安全性中说明。
+Raft 保证选举出的 Leader 上一定具有最新的已提交的日志，这一点将在四、安全性中说明。
 ** 日志同步
-Leader选出后，就开始接收客户端的请求。Leader把请求作为日志条目（Log entries）加入到它的日志中，然后并行的向其他服务器发起 AppendEntries RPC （RPC细节参见八、Raft算法总结）复制日志条目。当这条日志被复制到大多数服务器上，Leader将这条日志应用到它的状态机并向客户端返回执行结果。
+Leader 选出后，就开始接收客户端的请求。Leader 把请求作为日志条目（Log entries）加入到它的日志中，然后并行的向其他服务器发起 AppendEntries RPC （RPC 细节参见八、Raft 算法总结）复制日志条目。当这条日志被复制到大多数服务器上，Leader 将这条日志应用到它的状态机并向客户端返回执行结果。
 #+DOWNLOADED: screenshot @ 2024-03-22 23:12:10
 [[file:images/database/Raft协议/2024-03-22_23-12-10_screenshot.png]]
-某些Followers可能没有成功的复制日志，Leader会无限的重试 AppendEntries RPC直到所有的Followers最终存储了所有的日志条目。
+某些 Followers 可能没有成功的复制日志，Leader 会无限的重试 AppendEntries RPC 直到所有的 Followers 最终存储了所有的日志条目。
 
 日志由有序编号（log index）的日志条目组成。每个日志条目包含它被创建时的任期号（term），和用于状态机执行的命令。如果一个日志条目被复制到大多数服务器上，就被认为可以提交（commit）了。
 
 
 #+DOWNLOADED: screenshot @ 2024-03-25 22:23:43
 [[file:images/database/Raft协议/2024-03-25_22-23-43_screenshot.png]]
-Raft日志同步保证如下两点：
+Raft 日志同步保证如下两点：
 - 如果不同日志中的两个条目有着相同的索引和任期号，则它们所存储的命令是相同的。
 - 如果不同日志中的两个条目有着相同的索引和任期号，则它们之前的所有条目都是完全一样的。
 
-第一条特性源于Leader在一个term内在给定的一个log index最多创建一条日志条目，同时该条目在日志中的位置也从来不会改变。
+第一条特性源于 Leader 在一个 term 内在给定的一个 log index 最多创建一条日志条目，同时该条目在日志中的位置也从来不会改变。
 
-第二条特性源于 AppendEntries 的一个简单的一致性检查。当发送一个 AppendEntries RPC 时，Leader会把新日志条目紧接着之前的条目的log index和term都包含在里面。如果Follower没有在它的日志中找到log index和term都相同的日志，它就会拒绝新的日志条目。
+第二条特性源于 AppendEntries 的一个简单的一致性检查。当发送一个 AppendEntries RPC 时，Leader 会把新日志条目紧接着之前的条目的 log index 和 term 都包含在里面。如果 Follower 没有在它的日志中找到 log index 和 term 都相同的日志，它就会拒绝新的日志条目。
 
-一般情况下，Leader和Followers的日志保持一致，因此 AppendEntries 一致性检查通常不会失败。然而，Leader崩溃可能会导致日志不一致：旧的Leader可能没有完全复制完日志中的所有条目。
+一般情况下，Leader 和 Followers 的日志保持一致，因此 AppendEntries 一致性检查通常不会失败。然而，Leader 崩溃可能会导致日志不一致：旧的 Leader 可能没有完全复制完日志中的所有条目。
 * 拜占庭将军问题
 拜占庭将军问题（Byzantine Generals Problem），是由莱斯利·兰波特在其同名论文[1]中提出的分布式对等网络通信容错问题。
 
@@ -827,7 +827,7 @@ Raft日志同步保证如下两点：
 
 一组拜占庭将军分别各率领一支军队共同围困一座城市。为了简化问题，将各支军队的行动策略限定为进攻或撤离两种。因为部分军队进攻部分军队撤离可能会造成灾难性后果，因此各位将军必须通过投票来达成一致策略，即所有军队一起进攻或所有军队一起撤离。因为各位将军分处城市不同方向，他们只能通过信使互相联系。在投票过程中每位将军都将自己投票给进攻还是撤退的信息通过信使分别通知其他所有将军，这样一来每位将军根据自己的投票和其他所有将军送来的信息就可以知道共同的投票结果而决定行动策略。
 
-系统的问题在于，可能将军中出现叛徒，他们不仅可能向较为糟糕的策略投票，还可能选择性地发送投票信息。假设有9位将军投票，其中1名叛徒。8名忠诚的将军中出现了4人投进攻，4人投撤离的情况。这时候叛徒可能故意给4名投进攻的将领送信表示投票进攻，而给4名投撤离的将领送信表示投撤离。这样一来在4名投进攻的将领看来，投票结果是5人投进攻，从而发起进攻；而在4名投撤离的将军看来则是5人投撤离。这样各支军队的一致协同就遭到了破坏。
+系统的问题在于，可能将军中出现叛徒，他们不仅可能向较为糟糕的策略投票，还可能选择性地发送投票信息。假设有 9 位将军投票，其中 1 名叛徒。8名忠诚的将军中出现了 4 人投进攻，4人投撤离的情况。这时候叛徒可能故意给 4 名投进攻的将领送信表示投票进攻，而给 4 名投撤离的将领送信表示投撤离。这样一来在 4 名投进攻的将领看来，投票结果是 5 人投进攻，从而发起进攻；而在 4 名投撤离的将军看来则是 5 人投撤离。这样各支军队的一致协同就遭到了破坏。
 
 由于将军之间需要通过信使通讯，叛变将军可能通过伪造信件来以其他将军的身份发送假投票。而即使在保证所有将军忠诚的情况下，也不能排除信使被敌人截杀，甚至被敌人间谍替换等情况。因此很难通过保证人员可靠性及通讯可靠性来解决问题。
 
@@ -835,9 +835,9 @@ Raft日志同步保证如下两点：
 
 上述的故事映射到计算机系统里，将军便成了计算机，而信差就是通信系统。虽然上述的问题涉及了电子化的决策支持与信息安全，却没办法单纯的用密码学与数字签名来解决。因为电路错误仍可能影响整个加密过程，这不是密码学与数字签名算法在解决的问题。因此计算机就有可能将错误的结果提交去，亦可能导致错误的决策。
 
-事实上, 对于三个将军中存在一个叛徒的场景, 想要总能达到一致的行动方案是不可能的. 详细的证明可参看Leslie Lamport的论文. 此外, 论文中给出了一个更加普适的结论: 如果存在m个叛将, 那么至少需要3m+1个将军, 才能最终达到一致的行动方案.
+事实上, 对于三个将军中存在一个叛徒的场景, 想要总能达到一致的行动方案是不可能的. 详细的证明可参看 Leslie Lamport 的论文. 此外, 论文中给出了一个更加普适的结论: 如果存在 m 个叛将, 那么至少需要 3m+1 个将军, 才能最终达到一致的行动方案.
 ** 解决方案
-Leslie Lamport在论文中给出了两种拜占庭将军问题的解决方案, 即口信消息型解决方案(A solution with oral message)和签名消息型解决方案(A solution with signed message).
+Leslie Lamport 在论文中给出了两种拜占庭将军问题的解决方案, 即口信消息型解决方案(A solution with oral message)和签名消息型解决方案(A solution with signed message).
 
 口信消息型解决方案
 首先, 对于口信消息(Oral message)的定义如下:
@@ -845,13 +845,129 @@ Leslie Lamport在论文中给出了两种拜占庭将军问题的解决方案, �
 A1. 任何已经发送的消息都将被正确传达;
 A2. 消息的接收者知道是谁发送了消息;
 A3. 消息的缺席可以被检测.
-基于口信消息的定义, 我们可以知道, 口信消息不能被篡改但是可以被伪造. 基于对图3场景的推导, 我们知道存在一个叛将时, 必须再增加3个忠将才能达到最终的行动一致. 为加深理解, 我们将利用3个忠将1个叛将的场景对口信消息型解决方案进行推导. 在口信消息型解决方案中, 首先发送消息的将军称为指挥官, 其余将军称为副官. 对于3忠1叛的场景需要进行两轮作战信息协商, 如果没有收到作战信息那么默认撤退. 图4是指挥官为忠将的场景, 在第一轮作战信息协商中, 指挥官向3位副官发送了进攻的消息; 在第二轮中, 三位副官再次进行作战信息协商, 由于General A, B为忠将, 因此他们根据指挥官的消息向另外两位副官发送了进攻的消息, 而General C为叛将, 为了扰乱作战计划, 他向另外两位副官发送了撤退的消息. 最终Commanding General, General A和B达成了一致的进攻计划, 可以取得胜利.
+基于口信消息的定义, 我们可以知道, 口信消息不能被篡改但是可以被伪造. 基于对图 3 场景的推导, 我们知道存在一个叛将时, 必须再增加 3 个忠将才能达到最终的行动一致. 为加深理解, 我们将利用 3 个忠将 1 个叛将的场景对口信消息型解决方案进行推导. 在口信消息型解决方案中, 首先发送消息的将军称为指挥官, 其余将军称为副官. 对于 3 忠 1 叛的场景需要进行两轮作战信息协商, 如果没有收到作战信息那么默认撤退. 图 4 是指挥官为忠将的场景, 在第一轮作战信息协商中, 指挥官向 3 位副官发送了进攻的消息; 在第二轮中, 三位副官再次进行作战信息协商, 由于 General A, B 为忠将, 因此他们根据指挥官的消息向另外两位副官发送了进攻的消息, 而 General C 为叛将, 为了扰乱作战计划, 他向另外两位副官发送了撤退的消息. 最终 Commanding General, General A 和 B 达成了一致的进攻计划, 可以取得胜利.
 
 
-此外，1980年代还有其他用来达到拜占庭容错的架构被提出，如：FTMP[6]、MMFCS[7] 与 SIFT。[8]
+此外，1980 年代还有其他用来达到拜占庭容错的架构被提出，如：FTMP[6]、MMFCS[7] 与 SIFT。[8]
 ** 实用拜占庭容错
-1999年，卡斯托（Miguel Castro）与利斯科夫（Barbara Liskov）提出了实用拜占庭容错（PBFT）算法[9]。该算法能提供高性能的运算，使得系统可以每秒处理成千的请求，比起旧式系统快了一些。
+1999 年，卡斯托（Miguel Castro）与利斯科夫（Barbara Liskov）提出了实用拜占庭容错（PBFT）算法[9]。该算法能提供高性能的运算，使得系统可以每秒处理成千的请求，比起旧式系统快了一些。
 
-而在PBFT之后，许多用于拜占庭容错（BFT）的通信协议也被提出来改善其通信的强健性与效率。比如Q/U[10]、HQ[11]、Zyzzyva[12]与ABsTRACTs[13] ...，用来提升效率。而Aardvark[14]与RBFT[15]是用来加强强健性。另外，Adapt[16]则使用原有的BFT协议做调适，以强化其效率与强健性。BFT协议更可以借由加入可任务的单元，以减少发出副本的次数。比如：A2M-PBFT-EA[17]与MinBFT。[18]
+而在 PBFT 之后，许多用于拜占庭容错（BFT）的通信协议也被提出来改善其通信的强健性与效率。比如 Q/U[10]、HQ[11]、Zyzzyva[12]与 ABsTRACTs[13] ...，用来提升效率。而 Aardvark[14]与 RBFT[15]是用来加强强健性。另外，Adapt[16]则使用原有的 BFT 协议做调适，以强化其效率与强健性。BFT 协议更可以借由加入可任务的单元，以减少发出副本的次数。比如：A2M-PBFT-EA[17]与 MinBFT。[18]
 ** 参考文章
 [[https://zh.wikipedia.org/wiki/拜占庭将军问题][拜占庭将军问题]]
+* sql
+** Database Storage
+*** Disk Manager 简介
+传统的 DBMS 架构都属于 disk-oriented architecture，即假设数据主要存储在非易失的磁盘（non-volatile disk）上。于是 DBMS 中一般都有磁盘管理模块（disk manager），它主要负责数据在非易失与易失（volatile）的存储器之间的移动。
+
+这里需要理解两点：
+1. 为什么需要将数据在不同的存储器之间移动？
+2.  为什么要自己来做数据移动的管理，而非利用 OS 自带的磁盘管理模块？
+**** 计算机存储体系
+
+#+DOWNLOADED: screenshot @ 2024-11-02 23:21:55
+[[file:images/database/sql/2024-11-02_23-21-55_screenshot.png]]
+
+#+DOWNLOADED: screenshot @ 2024-11-02 23:22:05
+[[file:images/database/sql/2024-11-02_23-22-05_screenshot.png]]
+
+磁盘管理模块的存在就是为了同时获得易失性存储器的性能和非易失性存储器的容量，让 DBMS 的数据看起来像在内存中一样。
+**** 为什么不使用 OS 自带的磁盘管理模块
+OS 为开发者提供了如 mmap 这样的系统调用，使开发者能够依赖 OS 自动管理数据在内外存之间的移动，那么 DBMS 为什么要重复造这样的轮子？主要原因在于，OS 的磁盘管理模块并没有、也不可能会有 DBMS 中的领域知识，因此 DBMS 比 OS 拥有更多、更充分的知识来决定数据移动的时机和数量，具体包括：
+1. 将 dirty pages 按正确地顺序写到磁盘
+2. 根据具体情况预获取数据
+3. 定制化缓存置换（buffer replacement）策略
+
+
+#+DOWNLOADED: screenshot @ 2024-11-02 23:25:03
+[[file:images/database/sql/2024-11-02_23-25-03_screenshot.png]]
+ 
+
+
+#+DOWNLOADED: screenshot @ 2024-11-02 23:27:55
+[[file:images/database/sql/2024-11-02_23-27-55_screenshot.png]]
+*** File Storage
+DBMS 通常将自己的所有数据作为一个或多个文件存储在磁盘中，而 OS 只当它们是普通文件，并不知道如何解读这些文件。虽然 DBMS 自己造了磁盘管理模块，但 DBMS 一般不会自己造文件系统，主要原因如下：
+1. 通过 DIY 文件系统获得的性能提升在 10% - 15% 之间
+2. 使用 DIY 文件系统将使得 DBMS 的可移植性大大下降
+
+综合考虑，这不值得。
+*** Database Pages
+OS 的文件系统通常将文件切分成 pages 进行管理，DBMS 也不例外。通常 page 是固定大小的一块数据，每个 page 内部可能存储着 tuples、meta-data、indexes 以及 logs 等等，大多数 DBMS 不会把不同类型数据存储在同一个 page 上。每个 page 带着一个唯一的 id，DBMS 使用一个 indirection layer 将 page id 与数据实际存储的物理位置关联起来。
+
+注意：有几个不同的 page 概念需要分清楚
+- Hardware Page：通常大小为 4KB,无法保证原子性写入.
+- OS Page: 通常大小为 4KB
+- Database Page：(1-16KB)
+
+#+DOWNLOADED: screenshot @ 2024-11-03 10:58:19
+[[file:images/database/sql/2024-11-03_10-58-19_screenshot.png]]
+
+不同 DBMS 管理 pages 的方式不同，主要分为以下几种：
+- Heap File Organization
+- Tree File Organization
+- Sequential/Sorted File Organization
+- Hashing File Organization
+
+*** Heap File Organization
+heap file 指的是一个无序的 pages 集合，pages 管理模块需要记录哪些 pages 已经被使用，而哪些 pages 尚未被使用.
+
+
+#+DOWNLOADED: screenshot @ 2024-11-03 11:10:04
+[[file:images/database/sql/2024-11-03_11-10-04_screenshot.png]]
+
+
+那么具体如何来记录和管理呢？主要有以下两种方法 Linked List 和 Page Directory。
+**** Linked List
+pages 管理模块维护一个 header page，后者维护两个 page 列表：
+- free page list
+- data page list
+
+如下图所示：
+
+#+DOWNLOADED: screenshot @ 2024-11-03 11:05:40
+[[file:images/database/sql/2024-11-03_11-05-40_screenshot.png]]
+**** Page Directory
+pages 管理模块维护着一些特殊的 pages（directory pages），它们负责记录 data pages 的使用情况，DBMS 需要保证 directory pages 与 data pages 同步。
+
+#+DOWNLOADED: screenshot @ 2024-11-03 11:12:41
+[[file:images/database/sql/2024-11-03_11-12-41_screenshot.png]]
+*** Page Layout
+每个 page 被分为两个部分：header 和 data，如下图所示：
+
+#+DOWNLOADED: screenshot @ 2024-11-03 11:22:37
+[[file:images/database/sql/2024-11-03_11-22-37_screenshot.png]]
+header 中通常包含以下信息：
+- Page Size
+- Checksum
+- DBMS Version
+- Transaction Visibility
+- Compression Information
+*** Data Layout
+data 中记录着真正存储的数据，数据记录的形式主要有三种：
+- Tuple-oriented：记录数据本身
+- Log-structured：记录数据的操作日志
+- Index-organized storage
+**** Tuple-oriented
+Strawman Idea:
+在 header 中记录 tuple 的个数，然后不断的往下 append 即可，如下图所示：
+
+#+DOWNLOADED: screenshot @ 2024-11-03 11:30:06
+[[file:images/database/sql/2024-11-03_11-30-06_screenshot.png]]
+这种方法有明显的两个缺点：
+- 一旦出现删除操作，每次插入就需要遍历一遍，寻找空位，否则就会出现空间浪费
+- 无法处理变长的数据记录（tuple）
+
+为了解决这两个问题，就产生了 slotted pages。
+**** Slotted Pages
+
+如下图所示，header 中的 slot array 记录每个 slot 的信息，如大小、位移等
+
+#+DOWNLOADED: screenshot @ 2024-11-03 11:33:22
+[[file:images/database/sql/2024-11-03_11-33-22_screenshot.png]]
+
+- 新增记录时：在 slot array 中新增一条记录，记录着改记录的入口地址。slot array 与 data 从 page 的两端向中间生长，二者相遇时，就认为这个 page 已经满了
+- 删除记录时：假设删除 tuple #3，可以将 slot array 中的第三条记录删除，并将 tuple #4 及其以后的数据都都向下移动，填补 tuple #3 的空位。而这些细节对于 page 的使用者来说是透明的
+- 处理定长和变长 tuple 数据都游刃有余
+
+目前大部分 DBMS 都采用这种结构的 pages。
