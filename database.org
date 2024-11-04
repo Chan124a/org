@@ -971,3 +971,8 @@ Strawman Idea:
 - 处理定长和变长 tuple 数据都游刃有余
 
 目前大部分 DBMS 都采用这种结构的 pages。
+
+
+#+DOWNLOADED: screenshot @ 2024-11-03 11:55:53
+[[file:images/database/sql/2024-11-03_11-55-53_screenshot.png]]
+
