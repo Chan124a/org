@@ -742,6 +742,10 @@ SRGB:通用显示器、网络浏览与打印机
 
 CMYK:印刷
 
+NTSC
+
+DCI-P3
+
 #+DOWNLOADED: screenshot @ 2024-07-09 12:57:06
 [[file:images/摄影/色彩管理/2024-07-09_12-57-06_screenshot.png]]
 
@@ -761,6 +765,14 @@ CMYK:印刷
 [[file:images/摄影/色彩管理/2024-07-09_22-56-53_screenshot.png]]
 
 预览可以设置为 Internet 标准 RGB
+
+** 色准
+ΔE 越小表示色彩偏离越小.
+
+校色仪可用于降低ΔE.
+
+#+DOWNLOADED: screenshot @ 2024-11-05 21:26:19
+[[file:images/摄影/色彩管理/2024-11-05_21-26-19_screenshot.png]]
 
 * 色相环
 
