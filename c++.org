@@ -2997,58 +2997,8 @@ delete pAa;
 由于 sort 只能对序列容器（如 vector、list、deque）进行排序，而 map 虽然也是一个集合容器，但却不是线性存储的（比如红黑树）。
 因此并不能直接用 sort 对 map 进行按 value 排序。
 
-* optional
 
-** 例子 
-场景：如果有这样一个函数，通过返回值来判断计算结果是否有效，如果结果有效，才能使用结果 。
-
-例如：计算 a、b 相除。b有可能为 0，所以需要考虑相除结果是否有效。
-#+BEGIN_SRC c++
-bool div_int(int a, int b, int &result) {
-    if (b == 0) {
-        return false;
-    }
-    result = a / b;
-    return true;
-}
-
-TEST_F(before_optional) {
-    int result = 0; // 接收结果
-    auto ret = div_int(2, 1, result);
-    ASSERT(ret);
-    ASSERT_EQ(2, result); // 如果返回值为true, 结果才有效
-
-    auto b = div_int(2, 0, result);
-    ASSERT(!b);
-}
-#+END_SRC
-这样的使用方式很不方便，需要两个变量来描述结果。这种场景下应该使用 c++17 中的 std::optional。我们用 std::optional 改写上面这个例子：
-#+BEGIN_SRC c++
-//div_int可以通过optional优化：optional中，结果是否有效和结果都保存在其中
-std::optional<int> div_int(int a, int b) {
-    if (b != 0) {
-        return std::make_optional<int>(a / b);
-    }
-    return {};
-}
-
-TEST_F(optional) {
-    auto ret = div_int(2, 1);
-    ASSERT(ret);
-    ASSERT_EQ(2, ret.value()); // 如果ret为true, 直接从ret中获取结果
-
-    auto ret2 = div_int(2, 0);
-    ASSERT(!ret2); // 结果无效
-
-    // 如果ret2为false，获取访问value将会 抛出异常
-    try {
-        ret2.value();
-    } catch (std::exception e) {
-        std::cout << e.what() << std::endl;
-    }
-}
-#+END_SRC
-如果开发项目中没有支持到 c++17 可以用 boost 库中的 optional。
+*
 * printf("%5s”,“abcdefg ”)
 执行 printf( “ %5s ” , “abcdefg ” ) 后，则输出结果为:abcdefg
 - "%5s",表示输出至少 5 个字符，不够的话，左侧用空格补。
@@ -3475,112 +3425,377 @@ std::forward 通常是用于完美转发的，它会将输入的参数原封不�
 *** 参考文章
 [[https://zhuanlan.zhihu.com/p/92486775][浅谈std::forward]]
 ** std::optional
-在需要多个返回值的时候，可以下面用的 pair 形式，将返回值定义成结构体：
-#+begin_src C++
-#include <iostream>
+*** 引言
+编程中，我们经常会需要表示或处理一个“可能为空”的变量，可能是一个为包含任何元素的容器，可能是一个类型的指针没有指向任何有效的对象实例，再或者是一个对象没有被赋予有效的值。通常处理这类问题意味着写更多的代码来处理这些“特殊”情况，很容易导致代码变得冗余，可读性变差或者容易出错。比如，我们很容易想到的如下三种方法：
+1. 使用特殊值标记，如-1， infinity 或者 nullptr。这种方法几乎是最常用的方法，在调用一个对象之前，需要先将其与特殊值进行比较保证其有效性。但是这种方法可能比较脆弱，因为在有些 corner case 下，这些“特殊值”可能也有意义。
+2. 如果函数可能出错导致返回结果是无效值，我们会引入 boolean 或者 error code 作为函数返回值来表示结果是否有意义。但是这种方法会使函数接口变得隐晦，因为接口的使用者可能并不会检查函数返回值而直接使用结果。
+3. 抛出异常。这样我们就必须引入 try-catch 代码块来处理这些异常，使得代码变得冗余，可读性变差。
 
-using namespace std;
-
-struct Out {
-    string out1 { "" };
-    string out2 { "" };
-};
-
-pair<bool, Out> func(const string& in) {
-    Out o;
-    if (in.size() == 0)
-        return { false, o };
-    o.out1 = "hello";
-    o.out2 = "world";
-    return { true, o };
-}
-
-int main() {
-    if (auto [status, o] = func("hi"); status) {
-        cout << o.out1 << endl;
-        cout << o.out2 << endl;
-    }
-    return 0;
-}
-#+end_src
-
-From cppreference -std::optional
-#+begin_example
-The class template std::optional manages an optional contained value, i.e. a value that may or may not be present.
-A common use case for optional is the return value of a function that may fail. As opposed to other approaches, such as std::pair<T,bool>, optional handles expensive-to-construct objects well and is more readable, as the intent is expressed explicitly.
-类模板 std::optional 管理一个可选的容纳值，即可以存在也可以不存在的值。
-一种常见的 optional 使用情况是一个可能失败的函数的返回值。与其他手段，如 std::pair<T,bool> 相比， optional 良好地处理构造开销高昂的对象，并更加可读，因为它显式表达意图。
-#+end_example
-std::optional 是在 C++ 17 中引入到标准库中的，C++ 17 之前的版本可以通过 boost::optional 实现几乎相同的功能。
-
-我们来看一下使用 std::optional 来实现上面那段代码的样子
+C++17 中的 std::optional<T>为解决这类问题提供了简单的解决方案。optional<T>可以看作是 T 类型变脸与一个布尔值的打包（wrapper class）。 其中的布尔值用来表示 T 是否为“空”。
 #+begin_src c++
-#include <iostream>
-#include <optional>
-
-using namespace std;
-
-struct Out {
-    string out1 { "" };
-    string out2 { "" };
+template <typename T>
+class optional
+{
+	bool _initialized;
+	std::aligned_storage_t<sizeof(T), alignof(T)> _storage;
+public: 
+// operations 
 };
-
-optional<Out> func(const string& in) {
-    Out o;
-    if (in.size() == 0)
-        return nullopt;
-    o.out1 = "hello";
-    o.out2 = "world";
-    return { o };
-}
-
-int main() {
-    if (auto ret = func("hi"); ret.has_value()) {
-        cout << ret->out1 << endl;
-        cout << ret->out2 << endl;
-    }
-    return 0;
-}
 #+end_src
-这段代码中我们看到了部分 std::optional 的用法，std::nullopt 是 C++ 17 中提供的没有值的 optional 的表达形式，等同于 { } 。
-
-创建一个 optional 的方法：
+*** 快速上手
+使用 std::optional 我们可以写出如下的代码：
 #+begin_src c++
-// 空 optiolal
-optional<int> oEmpty;
-optional<float> oFloat = nullopt;
 
-optional<int> oInt(10);
-optional oIntDeduced(10);  // type deduction
-
-// make_optional
-auto oDouble = std::make_optional(3.0);
-auto oComplex = make_optional<complex<double>>(3.0, 4.0);
-
-// in_place
-optional<complex<double>> o7{in_place, 3.0, 4.0};
-
-// initializer list
-optional<vector<int>> oVec(in_place, {1, 2, 3});
-
-// 拷贝赋值
-auto oIntCopy = oInt;
-访问 optional 对象中数据的方法：
-
-// 跟迭代器的使用类似，访问没有 value 的 optional 的行为是未定义的
-cout << (*ret).out1 << endl; 
-cout << ret->out1 << endl;
-
-// 当没有 value 时调用该方法将 throws std::bad_optional_access 异常
-cout << ret.value().out1 << endl;
-
-// 当没有 value 调用该方法时将使用传入的默认值
-Out defaultVal;
-cout << ret.value_or(defaultVal).out1 << endl;
+std::optional<std::string> tItem::findShortName()
+{
+	if (hasShortName)
+	{
+		return mShortName;
+	}
+	return std::nullopt;
+}
+// 使用
+std::optional<std::string> shortName = item->findShortName();
+if (shortName)
+{
+	PRITNT(*shortName);
+}
 #+end_src
-使用 std::optional 带来的好处：
-- 省去了运行状态的 bool 值的声明，让代码更简洁，更注重返回值本身的语意
-- 不用担心额外的动态内存分配
+在上面的例子中，我们定义了函数 findShortName 返回一个包含字符串类型的 optional 对象。如果商品（tItem）有缩写名称，则返回缩写，否则将返回 nullopt 表示缩写名称为空。optional 类型可以隐式转换为 boolean 类型来表示当前是否有有效值，同时 optional 支持操作符*来进行取值。从这个例子中我们可以看出来，用 optional 作为函数返回值可以更好地解决引言中的问题，函数更简洁同时接口含义也更明确。
+
+3. 创建 std::optional 的方式
+初始化为空
+直接用有效值初始化
+使用 std::make_optional 构造
+使用 std::in_place 构造
+使用其它 optional 对象构造（拷贝，移动）
+如以下代码所示：
+
+//初始化为空
+std::optional<int> emptyInt;
+std::optional<double> emptyDouble = std::nullopt;
+//直接用有效值初始化
+std::optional<int> intOpt{10};
+std::optional intOptDeduced{10.0}; // auto deduced
+//使用 make_optional
+auto doubleOpt = std::make_optional(10.0);
+auto complexOpt = std::make_optional<std::complex<double>>(3.0, 4.0);
+//使用 in_place
+std::optional<std::complex<double>> complexOpt{std::in_place, 3.0, 4.0};
+std::optional<std::vector<itn>> vectorOpt{std::in_place, {1, 2, 3}};
+//使用其它 optional 对象构造
+auto optCopied = vectorOpt;
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+3.1 使用 in_place / make_optional 进行构造
+std::optional 的其中一个构造函数接受 U&&（U为可转换为 optional 底层类型的类型）作为参数进行构造。
+
+template <typename U>
+constexpr optional(U&& value);
+1
+2
+因此对于可以转换为 optional 底层类型的类型，我们可以将其直接传入 optional 构造函数，从而节省了一次临时对象的构造和拷贝。
+
+std::optional<std::string> strOpt {"hello world"};
+1
+那为何我们还需要 in_place / make_optional 来对 optional 对象进行“原地”构造呢？主要是考虑到如下 3 种情形：
+
+optional 存储的对象需要使用默认构造函数进行构造
+optional 内部存储对象不支持拷贝和移动（non-copyable，non-movable）
+提高构造函数有多个参数的类型对象的构造效率
+3.1.1 使用默认构造函数
+如果我们有这样一个类，它提供一个默认构造函数如下：
+
+class tSampleClass
+{
+public:
+	tSampleClass() : mInt(100)
+	{
+	}
+};
+1
+2
+3
+4
+5
+6
+7
+如果我们想用默认函数构造的 tSampleClass 对象构造 optional，代码应该怎么写呢？
+你可能会想到如下写法：
+
+std::optional<tSampleClass> sample;
+std::optional<tSampleClass> sample{};
+1
+2
+但是这两种方法得到的结果都只是空的 optional 对象，而不是包含默认构造值的对象。
+你还可以这么写：
+
+std::optional<tSampleClass> sample{tSampleClass()};
+1
+这种方法是可以工作的，我们将得到包含默认 tSampleClass 对象的 optional 对象。但是在上面的代码中，将先构造出一个 tSampleClass 的临时对象，然后调用 move 函数将这个临时对象“移动”到 optional 存储的对象中，带来了额外的开销。在这种情况下，我们就可以使用 std::in_place_t / std::make_optional 来“原地”构造 optional 底层存储的对象。
+
+std::optional<tSampleClass> opt{std::in_place};
+auto opt = std::make_optional<tSampleClass>();
+1
+2
+此时 opt 存储的 tSampleClass 是被“原地”构造出来的，不会引入额外的 copy 或者 move。
+
+3.1.2 non-copyable/movable 类型
+假如我们的 tSampleClass 类型不支持移动和拷贝：
+
+class tSampleClass
+{
+public:
+	tSampleClass() : mInt(100)
+	{
+	}
+	tSampleClass(const tSampleClass &) = delete;
+	tSampleClass & operator= (const tSampleClass &) = delete;
+	tSampleClass(tSampleClass &&) = delete;
+	tSampleClass & operator= (tSampleClass &&) = delete;
+};
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+在上面的例子中我们看到，如果使用一个临时的对象来初始化 optional，那么会调用移动或者拷贝构造函数。显而易见，对于上述移动和拷贝构造函数被禁用的类型（如：std::mutex），我们就只能使用 std::in_palce 来初始化 optional 了。
+
+3.1.3 多个构造函数参数
+当构造函数有个多个参数时，也推荐使用原地构造的方法来提高效率。optional 提供如下构造函数来处理多参数原地构造的情况：
+
+template <typename... tArgs>
+constexpr explicit optional(std::in_place_t, tArgs&&... args);
+
+template <typename U, typename.. tArgs>
+constexpr explicit optional(std::in_place_t, std::initializer_list<U> list, tArgs&&... args);
+1
+2
+3
+4
+5
+若我们需要够造一个多参数 optional，代码可以写成如下形式：
+
+std::optional<std::complex<double>> complexOpt(std::in_place, 3.0, 4.0); //第一个构造函数
+
+std::optional<std::vector<int>> vectOpt(std::in_place, {1, 2, 3}); //第二个构造函数
+
+auto complexOpt = std::make_optional<std::complex<double>>(3.0, 4.0);
+auto vectOpt = std::make_optional<std::vector<int>>({1, 2, 3});
+1
+2
+3
+4
+5
+6
+4. optional 对象作为函数返回值
+如果用 optional 对象作为函数返回值，那么我们将很容易地解决引言中所述的问题。如果函数失败，则返回 std::nullopt 表示没有有效返回值，否则就直接返回计算值。这样代码将更将简介，可靠。
+
+std::optional<int> findStudent(const std::map<std::string, int> & students, const std::string & name)
+{
+	if (students.find(name) == students.end())
+	{
+		return std::nullopt;
+	}
+	return students[name];
+}
+
+//使用
+auto studentId = findStudent(students, "Bob");
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+C++17 引入了 guaranteed copy illision，上例中的 optional 对象在调用处构造。
+说到函数返回值，有一个有趣的问题值得讨论，先来看如下代码：
+
+std::optional<std::string> createString()
+{
+	std::string result{"Hello world!"};
+	return {result}; //产生拷贝
+	// return result; //只产生 move
+}
+1
+2
+3
+4
+5
+6
+根据 C++标准，在函数体内部的临时变量作为函数返回值时，临时变量将被 move 到目标变量中，而不是被 copy 过去。但是当我们用{}将变量名括起来时，临时变量将强制被 copy 而不是被 move。对于 non-copyable 的类型，如 std::unique_ptr，见如下例子：
+
+std::unique_ptr<double> nonCopyableReturn()
+{
+	std::unique_ptr<double> p = nullptr;
+	return {p}; //强制产生拷贝，将产生编译错误，因为 unique_ptr 为 non-copyable 类型
+	// return p; //move 语义，unique_ptr 可以 move，编译通过。
+}
+1
+2
+3
+4
+5
+6
+5. optional 的其他操作
+5.1 访问存储值
+// operator* 和 operator->
+// operator* 返回内部存储对象的引用，operator->返回指向内部存储对象的指针
+// 如果没有有效值，则行为未定义
+std::optional<std::string> opt{"abc"};
+std::cout << "content is " << *opt << ", size is " << opt->size() << std::endl;
+
+// value()
+// 返回内部存储对象的值，当 optional 为空时抛出 std::bad_optional_access 异常
+try
+{
+	std::cout << "content is " << opt.value() << std::endl;
+}
+catch(const std::bad_optional_access & e)
+{
+	std::cout << e.what() << std::endl;
+}
+
+// value_or(defaultValue)
+// optional 有有效值时返回有效值，否则返回默认值
+std::optional<int> optInt(100);
+std::cout << "value is " << optInt.value_or(10) << std::endl;
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+5.2 修改存储值以及存储对象的生命周期
+对于一个已经存在的 optional 对象，通过调用 emplace, reset, swap, operator=，可以将其中存储的值修改掉。如果调用 operator=或者 reset 将 optional 对象赋值为 nullopt，若之前的 optional 存储有有效值，则存储类型的析构函数将被调用。除此之外，每次 optional 内部存储对象被重置，之前对象的析构函数都会被调用。
+
+class tStudent
+{
+public:
+	explicit tStudent(std::string str)
+	: m_name(str)
+	{}
+	~tStudent() = default;
+}；
+// 构造空的 optional
+std::optional<tStudent> optStudent;
+// 构造名字为“Bob”的 tStudent 对象存储在 optional 对象中
+optStudent.emplace("Bob");
+// 相当于
+// optStudent = tStudent{"Bob"};
+// "Bob"对象析构，构造"Steve"
+optStudent.emplace("Steve")
+// "Steve"对象析构
+optStudent.reset();
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+5.3 比较大小
+对于定义了<，>，==操作符的类型，保存他们的 optional 对象也可以比较大小。如 optional<int>之间比较大小和直接比较 int 数值的大小是一样的。比较特殊的是 std::nullopt，在比较大小时，它总小于存储有效值的 optional 对象。
+
+std::optional<int> int1(1);
+std::optional<int> int2(10);
+std::optional<int> int3;
+
+std::cout << std::boolalpha;
+std::cout << (int1 < int2) << std::endl; // true
+std::cout << (int2 > int1) << std::endl; // true
+std::cout << (int3 == std::nullopt) << std::endl; // true
+std::cout << (int3 < int1) << std::endl; // true
+1
+2
+3
+4
+5
+6
+7
+8
+9
+6. 内存
+使用 optional 包装原始类型意味着需要存储原始类型的空间和额外的 boolean flag，因此 optional 对象将占有更多的内存空间。此外，optional 对象的内存排列须遵循与内部对象一致的内存对齐准则。
+
+template <typename T>
+class optional
+{
+	bool _initialized;
+	std::aligned_storage_t<sizeof(T), alignof(T)> _storage;
+public: 
+// operations 
+};
+1
+2
+3
+4
+5
+6
+7
+8
+假如 sizeof(double) = 8，sizeof(int) = 4，则：
+std::optional<double> optDouble; // sizeof(optDouble) = 16
+std::optional<int> optInt; // sizeof(optInt) = 8
+
+总结
+std::optional 用来包装可以为空的类型
+std::optional 或者为空，或者包含一个有效值
+使用 operator *，operator->，value()或者 value_or()来访问有效值
+std::optional 可以音质转换为布尔类型，因此我们可以很方便地检查有效值是否存在
+
+
+
+
 ** std::ref 和 std::cref
 std::ref 用于包装按引用传递的值。
 std::cref 用于包装按 const 引用传递的值。
@@ -3655,6 +3870,7 @@ a = 9
 如果你通常使用指针和索引访问一系列背靠背对象，则 span 是一种更安全、轻量级的替代方案。
 
 要设置 span 的大小，可以在编译时通过将大小指定为模板参数，也可以在运行时指定 dynamic_extent.
+
 
 * STL
 ** STL 版本介绍
