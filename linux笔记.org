@@ -2462,10 +2462,125 @@ cmake -DCMAKE_INSTALL_PREFIX=/usr    在 cmake 的时候指定 CMAKE_INSTALL_PRE
 - 目录名不以/结尾：这个目录将被安装为目标路径下的
 - 目录名以/结尾：将这个目录中的内容安装到目标路径
 ** cmake 命令选项
+*** -G：指定生成器。
+生成器是一个特定于构建系统的工具，用于将 CMake 生成的 Makefile 或项目文件转换为实际的可执行文件、静态库或动态库。不同的构建系统有不同的生成器，每个生成器都可以将 CMake 生成的文件转换为适用于特定构建系统的文件。
+例如，Unix Makefile 生成器生成适用于 Unix/Linux 系统的 Makefile 文件，Ninja 生成器生成适用于 Ninja 构建系统的项目文件，Visual Studio 生成器生成适用于 Visual Studio IDE 的项目文件，等等。
+生成器通过读取 CMake 生成的文件并将其转换为构建系统可以使用的文件来执行其工作。例如，Unix Makefile 生成器将 CMake 生成的 Makefile 文件转换为实际的可执行文件、静态库或动态库。
+总之，生成器是一个特定于构建系统的工具，用于将 CMake 生成的 Makefile 或项目文件转换为实际的可执行文件、静态库或动态库。不同的构建系统有不同的生成器，每个生成器都可以将 CMake 生成的文件转换为适用于特定构建系统的文件。
+使用该参数可以指定使用的生成器，例如 Unix Makefiles、Ninja、Visual Studio 等。
 
-#+DOWNLOADED: file:E:/org/图片/Snipaste_2021-05-01_15-36-45.png @ 2021-05-01 15:36:52
-[[file:cmake/2021-05-01_15-36-52_Snipaste_2021-05-01_15-36-45.png]]
+在 CMake 中，-G 参数用于指定生成器，即用于生成特定构建系统的 Makefiles 或项目文件。不同的构建系统有不同的生成器可以选择，例如 Unix Makefiles、Ninja、Visual Studio 等。
 
+下面是一些常用的-G 参数：
+**** -G "Unix Makefiles"：生成适用于 Unix/Linux 系统的 Makefile 文件。
+例如：
+
+cmake -G "Unix Makefiles" ..
+**** -G Ninja：生成适用于 Ninja 构建系统的项目文件。
+例如：
+
+cmake -G Ninja ..
+**** -G “Visual Studio 16”：生成适用于 Visual Studio 2019 的项目文件。
+例如：
+
+cmake -G "Visual Studio 16" ..
+**** -G “Xcode”：生成适用于 Xcode IDE 的项目文件。
+例如：
+
+cmake -G "Xcode" ..
+**** -G “CodeBlocks - Unix Makefiles”：生成适用于 Code::Blocks IDE 的 Makefile 文件。
+例如：
+
+cmake -G "CodeBlocks - Unix Makefiles" ..
+*** -D：定义 CMake 变量。
+-D 参数可以用于在 CMake 中定义变量并将其传递给 CMakeLists.txt 文件，这些变量可以用于控制构建过程中的行为。具体而言，-D 参数可以用于：
+
+定义变量并设置其值，例如：-DVAR_NAME=VALUE。
+
+定义布尔类型的变量，其值为 ON，例如：-DVAR_NAME。
+
+定义路径类型的变量，例如：-DVAR_NAME:PATH=/path/to/dir。
+
+定义配置变量（缓存变量），例如：-DVAR_NAME:STRING=VALUE。
+
+这些变量可以在 CMakeLists.txt 文件中使用，并在构建过程中控制 Makefile 的生成行为。
+
+**** -DCMAKE_BUILD_TYPE：指定构建类型。使用该参数可以指定构建类型，例如 Debug、Release 等。
+**** -DCMAKE_C_COMPILER：指定 C 编译器。使用该参数可以指定使用的 C 编译器，例如 gcc、clang 等。
+**** -DCMAKE_CXX_COMPILER：指定 C++编译器。使用该参数可以指定使用的 C++编译器，例如 g++、clang++等。
+**** -DCMAKE_TOOLCHAIN_FILE：指定交叉编译工具链。使用该参数可以指定交叉编译工具链，例如 Android NDK、iOS SDK 等。
+**** -DCMAKE_SYSTEM_NAME：指定目标系统名称。使用该参数可以指定目标系统的名称，例如 Linux、Windows、Android、iOS 等。
+**** -DCMAKE_INSTALL_RPATH：指定运行时动态链接库搜索路径。使用该参数可以指定运行时动态链接库搜索路径，使得程序在运行时可以找到所需的动态链接库。
+**** -DCMAKE_C_FLAGS：指定 C 编译器选项。使用该参数可以指定 C 编译器的选项，例如-O0、-O2 等。
+**** -DCMAKE_CXX_FLAGS：指定 C++编译器选项。使用该参数可以指定 C++编译器的选项，例如-std=c++11、-stdlib=libc++等。
+**** -DBUILD_SHARED_LIBS：指定是否构建共享库。使用该参数可以指定是否构建共享库，如果指定为 ON，则生成共享库，否则生成静态库。
+**** -DCMAKE_VERBOSE_MAKEFILE：指定生成 Makefile 时是否显示详细信息。使用该参数可以指定是否显示详细的构建信息。
+**** -DCMAKE_MODULE_PATH：指定 CMake 模块路径。使用该参数可以指定 CMake 的模块路径，以便 CMake 可以找到所需的模块。
+**** -DCMAKE_EXPORT_COMPILE_COMMANDS：指定是否导出编译命令。使用该参数可以指定是否导出编译命令，以便其他工具可以使用编译命令。
+**** -DCMAKE_PREFIX_PATH：指定第三方库安装路径。使用该参数可以指定第三方库的安装路径，以便 CMake 可以找到所需的库文件。
+**** -DCMAKE_INSTALL_PREFIX：指定安装目录。使用该参数可以指定安装目录，使得在执行 make install 命令时，生成的可执行文件、库文件、头文件等可以被安装到指定的目录下。
+*** -H 定义 home 目录也就是主 CMakeLists.txt 所在目录
+*** -B：指定构建目录。
+在 CMake 中，-B 参数用于指定生成的构建目录，即将 CMake 生成的 Makefile 或项目文件保存到指定的目录中。这个目录可以是相对路径或绝对路径。
+例如：
+cmake -B build ..
+这将生成一个名为 build 的构建目录，并将生成的 Makefile 或项目文件保存到该目录中。
+您也可以使用绝对路径来指定构建目录，例如：
+cmake -B /path/to/build ..
+这将生成一个名为 build 的构建目录，并将生成的 Makefile 或项目文件保存到/path/to/build 目录中。
+总之，-B 参数用于指定生成的构建目录，即将 CMake 生成的 Makefile 或项目文件保存到指定的目录中。这使得我们可以将源码和构建过程分开，以便更好地管理项目。
+*** -E：调用 CMake 内置命令。
+在 CMake 中，-E 参数用于执行一些与构建无关的命令，例如创建目录、复制文件、压缩文件等。这些命令不会生成 Makefile 或项目文件，而是在构建之外执行。
+这使得我们可以在构建过程之外执行一些必要的操作，例如在构建之前创建目录，或在构建之后删除临时文件。
+
+下面是一些常用的-E 参数：
+**** -E make_directory
+创建一个目录。
+例如：
+cmake -E make_directory build
+这将在当前目录下创建一个名为 build 的目录。
+**** -E copy ：将一个文件从源路径复制到目标路径。
+例如：
+
+cmake -E copy data.txt build/data.txt
+这将将 data.txt 文件从当前目录复制到 build 目录中。
+**** -E tar [ ...]：压缩指定的文件为 tar 格式的归档文件。
+例如：
+
+cmake -E tar myarchive.tar file1.txt file2.txt
+这将创建一个名为 myarchive.tar 的 tar 归档文件，其中包含 file1.txt 和 file2.txt。
+**** -E remove_directory
+：递归删除一个目录。
+例如：
+
+cmake -E remove_directory build
+这将递归删除 build 目录及其所有子目录和文件。
+*** --build
+简单说一下 cmake 项目构建过程:
+1. 首先，使用命令行:‘cmake <source tree>’,比如：cmake .. ,在你的构建目录(外部构建方式)下生成了项目文件 project files,
+        官方文档中又叫 build tree/binary tree，这其中就包括，比如:Makefile，还有一些其他相关文件/目录/子目录;
+2. 其次，自然是对生成好的项目(project files)进行编译构建，使用到的就是你说的'cmake --build .'
+3. 最后，--build 后面的那个‘.’,指的是生成好的 build tree 的路径.
+
+  一般来说，如果你明确知道，你的系统中使用的是哪种构建器(build generator), 比如：Unix Makefiles,
+你完全可以直接使用 make 进行项目构建.
+  对于这种--build 的形式，多用于自动化脚本之中，或者 IDE 环境下.
+
+注：
+   <source tree>指的是源文件+顶层 CMakeLists 所在的路径，cmake ..假设了路径在上一层.
+
+作者：雨落惊风
+链接：https://www.zhihu.com/question/63537567/answer/1723782096
+来源：知乎
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+
+
+通过 cmake ./cmake .. 命令创建 Makefile 文件后，一般使用 make 命令编译文件。这里的 cmake --build .就与 make 一样的效果。另外，还有 cmake --build . --target xxx 这个命令。如果 xxx 用 help 替换，可以看到 xxx 可以替换若干选项。例如 cmake --build . --target all/ cmake --build . --target clean 等
+
+作者：Ummeow
+链接：https://www.zhihu.com/question/63537567/answer/1605472759
+来源：知乎
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
 ** message
 向终端输出用户自定义的信息
 
@@ -2632,6 +2747,8 @@ For more check out these [[https://github.com/amjadmajid/Makefile][tutorials]]
 注意外部构建的两个变量
 1. <projectname>_BINARY_DIR，编译路径 也就是 /root/cmake/bulid
 2. <projectname>_SOURCE_DIR，还是工程路径
+** 参考文章
+[[https://blog.csdn.net/qq_21438461/article/details/129797348][Cmake 命令行参数：探索 Cmake 的设置和配置选项]]
 * compdb
 可以用于生成带头文件的 compile_commands.json
 
@@ -24546,7 +24663,7 @@ name mangling 可以通过 extern "C"解决。C++有个特定的关键字用来�
 * 未分类
 如何在 QEMU 中使用 gdb：
 
-修改自己 home 目录下的 .gdbinit 文件，允许 gdb 在xv6-labs-2020这个目录启动的时候，加载该文件夹下的 .gdbinit 文件。
+修改自己 home 目录下的 .gdbinit 文件，允许 gdb 在 xv6-labs-2020 这个目录启动的时候，加载该文件夹下的 .gdbinit 文件。
 #+begin_src bash
 echo "add-auto-load-safe-path $(pwd)/.gdbinit " >> ~/.gdbinit
 #+END_SRC
