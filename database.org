@@ -946,6 +946,7 @@ header 中通常包含以下信息：
 *** Data Layout
 data 中记录着真正存储的数据，数据记录的形式主要有三种：
 - Tuple-oriented：记录数据本身
+- Slotted Pages
 - Log-structured：记录数据的操作日志
 - Index-organized storage
 **** Tuple-oriented
@@ -975,4 +976,47 @@ Strawman Idea:
 
 #+DOWNLOADED: screenshot @ 2024-11-03 11:55:53
 [[file:images/database/sql/2024-11-03_11-55-53_screenshot.png]]
+**** Log Structured
+log-structured 只存储日志记录，如下图所示：
 
+#+DOWNLOADED: screenshot @ 2024-11-25 23:27:21
+[[file:images/database/sql/2024-11-25_23-27-21_screenshot.png]]
+每次记录新的操作日志即可，增删改的操作都很快，但有得必有失，在查询场景下，就需要遍历 page 信息来生成数据才能返回查询结果。为了加快查询效率，通常会对操作日志在记录 id 上建立索引，如下图所示：
+
+#+DOWNLOADED: screenshot @ 2024-11-25 23:27:45
+[[file:images/database/sql/2024-11-25_23-27-45_screenshot.png]]
+
+#+DOWNLOADED: screenshot @ 2024-11-26 22:35:28
+[[file:images/database/sql/2024-11-26_22-35-28_screenshot.png]]
+
+
+当然，定期压缩日志也是不可或缺的
+
+#+DOWNLOADED: screenshot @ 2024-11-25 23:27:59
+[[file:images/database/sql/2024-11-25_23-27-59_screenshot.png]]
+
+
+#+DOWNLOADED: screenshot @ 2024-11-26 23:03:29
+[[file:images/database/sql/2024-11-26_23-03-29_screenshot.png]]
+**** Index-organized-storage
+
+#+DOWNLOADED: screenshot @ 2024-11-26 23:13:45
+[[file:images/database/sql/2024-11-26_23-13-45_screenshot.png]]
+*** Tuple Layout
+上节讨论了 page 的 layout 可以分成 header 与 data 两部分，而 data 部分又分为 tuple-oriented 和 log structured 两种，那么在 tuple-oriented 的 layout 中，DMBS 如何存储 tuple 本身呢？
+
+由于 tuple 本身还有别的元信息，如：
+- Visibility Info (concurrency control)：即 tuple 粒度的权限和并发控制
+- Bit Map for NULL values
+
+因此不难猜到，tuple 中还可以分为 header 和 data 两部分，如下图所示：
+
+#+DOWNLOADED: screenshot @ 2024-11-26 23:26:24
+[[file:images/database/sql/2024-11-26_23-26-24_screenshot.png]]
+#+DOWNLOADED: screenshot @ 2024-11-26 23:28:44
+[[file:images/database/sql/2024-11-26_23-28-44_screenshot.png]]
+
+通常 DBMS 会按照你在建表时候指定的顺序（并不绝对）来存储 tuple 的 attribute data，如下图所示：
+
+#+DOWNLOADED: screenshot @ 2024-11-26 23:26:37
+[[file:images/database/sql/2024-11-26_23-26-37_screenshot.png]]
