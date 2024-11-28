@@ -1013,6 +1013,7 @@ log-structured 只存储日志记录，如下图所示：
 
 #+DOWNLOADED: screenshot @ 2024-11-26 23:26:24
 [[file:images/database/sql/2024-11-26_23-26-24_screenshot.png]]
+
 #+DOWNLOADED: screenshot @ 2024-11-26 23:28:44
 [[file:images/database/sql/2024-11-26_23-28-44_screenshot.png]]
 
