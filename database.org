@@ -1021,3 +1021,17 @@ log-structured 只存储日志记录，如下图所示：
 
 #+DOWNLOADED: screenshot @ 2024-11-26 23:26:37
 [[file:images/database/sql/2024-11-26_23-26-37_screenshot.png]]
+
+有时候，为了提高操作性能，DBMS 会在存储层面上将有关联的表的数据预先 join 起来，称作 denormalize，如下图所示：
+
+#+DOWNLOADED: screenshot @ 2024-12-10 22:13:37
+[[file:images/database/sql/2024-12-10_22-13-37_screenshot.png]]
+
+#+DOWNLOADED: screenshot @ 2024-12-10 22:13:45
+[[file:images/database/sql/2024-12-10_22-13-45_screenshot.png]]
+
+如果表 bar 与表 foo 经常需要被 join 起来，那么二者可以在存储阶段就预先 join 到一起，这么做当然有利有弊：
+- 利：减少 I/O
+- 弊：更新操作复杂化
+
+在 DBMS 层面上，由于它需要跟踪每一个 tuple，因此通常会给每个 tuple 赋予一个唯一的标识符（record identifier），通常这个标识符由 page_id + offset/slot 组成，有时候也会包含文件信息。这属于 DBMS 实现的细节，虽然它是唯一的，但 DBMS 可能随时修改它，因此 DBMS 上层的应用不应该依赖于它去实现自己的功能。
