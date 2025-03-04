@@ -1035,3 +1035,5 @@ log-structured 只存储日志记录，如下图所示：
 - 弊：更新操作复杂化
 
 在 DBMS 层面上，由于它需要跟踪每一个 tuple，因此通常会给每个 tuple 赋予一个唯一的标识符（record identifier），通常这个标识符由 page_id + offset/slot 组成，有时候也会包含文件信息。这属于 DBMS 实现的细节，虽然它是唯一的，但 DBMS 可能随时修改它，因此 DBMS 上层的应用不应该依赖于它去实现自己的功能。
+* DeepSeek 3FS
+** 协程
