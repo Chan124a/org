@@ -1036,4 +1036,74 @@ log-structured 只存储日志记录，如下图所示：
 
 在 DBMS 层面上，由于它需要跟踪每一个 tuple，因此通常会给每个 tuple 赋予一个唯一的标识符（record identifier），通常这个标识符由 page_id + offset/slot 组成，有时候也会包含文件信息。这属于 DBMS 实现的细节，虽然它是唯一的，但 DBMS 可能随时修改它，因此 DBMS 上层的应用不应该依赖于它去实现自己的功能。
 * DeepSeek 3FS
-** 协程
+** 协程基本思想
+现代网络和存储硬件基本已经全面拥抱了事件驱动或者完成事件驱动的异步编程范式。3FS 源码中最突出的一个特点便是大量使用了 C++ 20 提供的 coroutines 语言特性，使得程序能充分发挥异步性能的同时避免了大量的回调函数导致代码结构松散的问题。
+
+在介绍 C++ 20 协程之前，我们先看看经典的异步编程是如何实现的。首先，异步编程最原始的 API 通常以回调的方式提供，总结起来为以下的伪代码：
+#+begin_src c++
+class device {
+    // 1. 提交 IO 任务
+    error_code device::submit_io(io_request *req, function<(io_request *, io_result)> callback) {
+        device_raw_io *raw_io;
+        raw_io->ctx = new io_context(req, callback);
+        raw_io->buf = req->buf;
+        raw_io->opcode = from_req_op(req->op);
+        driver_submit_io(device_ptr, raw_io);
+    }
+
+    // 2. 等待事件发生
+    error_code device::wait_event();
+
+    // 3. 读取事件/完成队列
+    error_code poll_events(vector<event> &events);
+
+    void loop() {
+        while (wait_event());
+        vector<event> events;
+        poll_events(events);
+        for (auto &event : events) {
+            // 处理事件，调用回调
+            // 回调中可能再次发起 IO 操作
+            io_context *ctx = (io_context*)event.data;
+            io_result res = io_result(event.status);
+            ctx->callback(ctx->req, res);
+        }
+    }
+};
+
+// 事件循环
+jthread io_thread([]() {
+    io_device->loop();
+});
+
+jthread net_thread([]() {
+    net_device->loop();
+});
+
+// 例如，读取磁盘上的数据，发送到网络上
+void demo() {
+    io_request *io_req, *net_req;
+    io_req->buf = new buffer[1024];
+    io_req->len = 1024;
+    io_req->fd = 123;
+    io_req->op = READ;
+
+    io_device->submit_io(req, [](io_request *io_req, io_result) {
+       memcpy(net_req->buf, io_req->buf, 1024);
+       net_req->peer = 456;
+       net_req->op = SEND;
+       net_device->submit_io(req, [](io_request *net_req, io_result res) {
+           if (!res.ok()) handle_error();
+           print("ok");
+       })
+    });
+}
+
+#+end_src
+可以看到，如果一次请求处理涉及到多次异步操作，那么将会出现回调套回调的情况，并且使得生命周期变得非常难以管理。更不用说在 lambda 函数实现之前，需要手动分配上下文内存保存变量状态了。
+
+为了解决异步编程回调地狱的问题，工程师提出了协程的解决方案，协程分为有栈协程和无栈协程两种。在 C++ 20 之前，工业界早已通过有栈协程实现了异步操作代码的同步化编写。有栈协程的基本实现原理是通过汇编指令或 ucontext 库切换栈指针的方式，将函数的栈从栈内存切换到堆内存中的空间，使得协程发生切换时状态得以保留。开发者只需要像写同步代码一样调用 read 和 write 等函数，由协程库通过动态库或者静态库 Hook 的方式劫持这些系统调用，并在其中实现有栈协程的调度。这里有一些细节问题，例如切换栈的开销，以及协程栈空间分配浪费的问题；同时有时候开发者会意识不到协程的切换点，或者在写异步代码导致调用了线程级别的同步锁或者阻塞的系统调用，导致线程 Hang 死。
+
+为了解决有栈协程的问题，C++ 20 实现了无栈协程方案，引入了 co_await 以及 co_return 等关键词，由开发者自己显式地指定异步操作的切换点。具体的 coroutine 细节网上资料已经有很多，这里提供一些简化版的代码示例和讲解来帮助快速入门。
+
+使用无栈协程，上面的代码可以改造成：
